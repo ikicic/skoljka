@@ -1,0 +1,10 @@
+# This stores local settings and data, so we don't want it in our repos
+local/
+
+# These files are either temporary, or backups, so we don't want them either
+*.pyc
+*.bak
+*~
+*.swp
+*.exe
+
