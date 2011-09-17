@@ -4,7 +4,7 @@ from django.template.loader import render_to_string
 class MathContent(models.Model):
     pass
 
-class TextContent(MathContent):
+class MathContentText(MathContent):
     text = models.TextField();
 
     def __unicode__(self):
@@ -14,4 +14,4 @@ class TextContent(MathContent):
             return self.text
 
     def render(self):
-        return render_to_string('textcontent.html', {'text': self.text})
+        return render_to_string('mathcontenttext.html', {'text': self.text})

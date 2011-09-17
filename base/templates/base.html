@@ -21,14 +21,12 @@
         <h4>Menu</h4>
         <a href="/">Početna</a><br />
         <br>
-        <!-- samo primjeri, mozda ce smanjiti muke oko git conflict-ova -->
         {% if user.is_authenticated %}
             <a href="/logout/">Odjava</a><br />
         {% else %}
             <a href="/login/">Prijava</a><br />
         {% endif %}
-        <a href="/memberlist/">Članovi</a><br />
-        <a href="/tasklist/">Lista zadataka</a><br />
+        <a href="/task/">Lista zadataka</a><br />
         <br>
     </td>
     <td id="maincontent">
