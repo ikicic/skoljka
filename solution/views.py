@@ -12,21 +12,22 @@ from django.contrib.auth.models import User
 from solution.models import Solution
 
 
-class submitForm(forms.Form):
+class SubmitForm(forms.Form):
     content = forms.CharField(min_length=1, max_length=2000, widget=forms.Textarea)
 
 @login_required
 def submit(request, task_id):
     task = get_object_or_404(Task, pk=task_id)
     if request.method == 'POST':
-        form = submitForm(request.POST)
+        form = SubmitForm(request.POST)
         if form.is_valid():
             content = MathContentText( text=form.cleaned_data['content'] )
+            content.save()
             x = Solution( task=task, author=request.user, content=content )
             x.save()
             return HttpResponseRedirect("/solution/%d/" % ( x.id, ))
     else:
-        form = submitForm()
+        form = SubmitForm()
         
     return render_to_response('solution_submit.html', {
         'form': form,
@@ -35,12 +36,13 @@ def submit(request, task_id):
         context_instance=RequestContext(request),
     )
     
-def solution_list(request, task_id=None, user_id=None):
+def solutionList(request, task_id=None, user_id=None):
+    # TODO(ikicic) probaj bez .all()
     L = Solution.objects.all()
-    if task_id != None:
+    if task_id is not None:
         task = get_object_or_404(Task, pk=task_id)
         L.filter(task=task)
-    if user_id != None:
+    if user_id is not None:
         user = get_object_or_404(User, pk=user_id)
         L.filter(author=user)
         

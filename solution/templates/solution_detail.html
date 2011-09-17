@@ -12,7 +12,11 @@ Zadatak:<br />
 <a href="/task/{{ solution.task_id }}/">{{ solution.task.name }}</a><br />
 
 <div id="solutioncontent">
-    {{ solution.content }}
+    Ovdje se zove solution.content: <br />
+    [{{ solution.content }}]
+    <br />
+    Ovdje se zove solution.content.render: <br />
+    [{{ solution.content.render }}]
 </div>
 
 {% endblock content %}
