@@ -35,3 +35,12 @@ a:active {
     background-color: #EEE;
     padding: 10px;
 }
+
+
+table th {
+    background-color: #CCC;
+}
+table td {
+    background-color: #DDD;
+    padding: 0px 2px;
+}

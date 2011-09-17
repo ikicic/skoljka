@@ -117,7 +117,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.normpath(os.path.join(PROJECT_ROOT, 'templates'))
+    os.path.normpath(os.path.join(PROJECT_ROOT, 'templates')),
 )
 
 INSTALLED_APPS = (
@@ -127,6 +127,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.messages',
     'django.contrib.sessions',
+    'task', #stavljam ovdje da rijesim konflikt - ikicic
     'django.contrib.sites',
     'django.contrib.staticfiles',
     'debug_toolbar',

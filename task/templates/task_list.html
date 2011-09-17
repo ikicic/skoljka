@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Lista zadataka{% endblock %}
+
+{% block content %}
+
+{% if new_task_added %}
+    Zadatak uspješno dodan!<br><br>
+{% endif %}
+
+<a href="/task/new/">Stvori novi zadatak</a><br><br>
+
+{% if task_list %}
+    <table width="100%">
+    <tr>
+        <th colspan="2">Task List</th>
+    </tr>
+    <tr>
+        <th width="50">#</th>
+        <th>Name</th>
+    </tr>
+    {% for task in task_list %}
+    <tr>
+        <td style="text-align:center;">{{ task.id }}</td>
+        <td><a href="/task/{{ task.id }}/">{{ task.name }}</td>
+    </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>No tasks are available.</p>
+{% endif %}
+
+
+{% endblock content %}
