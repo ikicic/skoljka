@@ -5,10 +5,6 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Example:
-    # (r'^testproject/', include('testproject.foo.urls')),
-    
-    (r'^task/', include('task.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
@@ -23,6 +19,9 @@ urlpatterns = patterns('',
 
     # Delegate unqualified URL requests to app home
     (r'^$', include('base.urls')),
+    (r'^task/', include('task.urls')),
 
+    # Using existing views
     (r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
+    (r'^logout/$', 'django.contrib.auth.views.logout'),
 )
