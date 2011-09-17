@@ -19,6 +19,7 @@ urlpatterns = patterns('',
 
     # Delegate unqualified URL requests to app home
     (r'^$', include('base.urls')),
+
     (r'^task/', include('task.urls')),
 
     # Using existing views

@@ -16,7 +16,6 @@ DEBUG_TOOLBAR_ROOT = os.path.normpath(
 sys.path.append(LIB_ROOT)
 sys.path.append(DEBUG_TOOLBAR_ROOT)
 
-# Django settings for skoljka project.
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -127,7 +126,6 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.messages',
     'django.contrib.sessions',
-    'task', #stavljam ovdje da rijesim konflikt - ikicic
     'django.contrib.sites',
     'django.contrib.staticfiles',
     'debug_toolbar',
@@ -135,6 +133,7 @@ INSTALLED_APPS = (
     'sentry.client',
     'base',
     'mathcontent',
+    'task',
 )
 
 # See http://docs.djangoproject.com/en/dev/topics/logging for
