@@ -21,7 +21,9 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
+    # Add yourself here
     ('Bruno Rahle', 'brahle@gmail.com'),
+    ('Goran Zuzic', 'zuza777@gmail.com'),
 )
 
 MANAGERS = ADMINS
