@@ -8,7 +8,7 @@ function assert {
 }
 
 echo "Installing packages..."
-sudo apt-get install python2.7 python-setuptools wget git-core xclip
+sudo apt-get install python2.7 python-setuptools wget git-core xclip ssh-keygen
 assert $?
 
 echo "Downloading django..."
