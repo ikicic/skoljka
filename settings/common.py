@@ -134,7 +134,6 @@ INSTALLED_APPS = (
     'sentry',
     'sentry.client',
     'base',
-    'users',
     'mathcontent',
 )
 
