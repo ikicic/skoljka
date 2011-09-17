@@ -2,7 +2,8 @@ from django.db import models
 from django.template.loader import render_to_string
 
 class MathContent(models.Model):
-    pass
+    def render(self):
+        self.MathContentText.render();
 
 class MathContentText(MathContent):
     text = models.TextField();
