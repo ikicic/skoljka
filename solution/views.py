@@ -35,7 +35,13 @@ def submit(request, task_id):
         },
         context_instance=RequestContext(request),
     )
-    
+
+
+
+# Outputs list of solution related to
+#   specific task if task_id is defined
+#   specific user if user_id is defined
+# If some ID is not defined, skips that condition.
 def solutionList(request, task_id=None, user_id=None):
     # TODO(ikicic) probaj bez .all()
     L = Solution.objects.all()
