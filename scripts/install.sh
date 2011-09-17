@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# This script pulls all the packages needed for this project for
+# a Debian based system. You can run it from any path.
+
 function assert {
     if [[ $1 -ne 0 ]]
     then
@@ -8,7 +12,7 @@ function assert {
 }
 
 echo "Installing packages..."
-sudo apt-get install python2.7 python-setuptools wget git-core xclip ssh-keygen
+sudo apt-get install python2.7 python-setuptools wget git-core xclip openssh-client
 assert $?
 
 echo "Downloading django..."
