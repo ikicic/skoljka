@@ -21,7 +21,7 @@
         <td style="text-align:center;">{{ solution.id }}</td>
         <td><a href="/task/{{ solution.task.id }}/">{{ solution.task.name }}</a></td>
         <td>{{ solution.author }}</td>
-        <td>{{ solution.content.mathcontenttext }}</td>
+        <td>{{ solution.content.render }}</td>
     </tr>
     {% endfor %}
     </table>
