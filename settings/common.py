@@ -24,6 +24,7 @@ ADMINS = (
     # Add yourself here
     ('Bruno Rahle', 'brahle@gmail.com'),
     ('Goran Zuzic', 'zuza777@gmail.com'),
+    ('Ivica Kicic', 'ivicakicic@gmail.com'),
 )
 
 MANAGERS = ADMINS
