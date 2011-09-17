@@ -15,4 +15,10 @@ urlpatterns = patterns('',
     (r'^admin/', include(admin.site.urls)),
     
     (r'^sentry/', include('sentry.web.urls')),
+
+    # For serving static files
+    (r'static/(?P<path>.*)$', 'django.views.static.serve'),
+
+    # Delegate unqualified URL requests to app home
+    (r'^$', include('base.urls')),
 )
