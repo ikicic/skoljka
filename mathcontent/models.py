@@ -3,7 +3,7 @@ from django.template.loader import render_to_string
 
 class MathContent(models.Model):
     def render(self):
-        self.MathContentText.render();
+        return self.mathcontenttext.render();
 
 class MathContentText(MathContent):
     text = models.TextField();
