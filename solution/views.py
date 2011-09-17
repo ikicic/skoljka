@@ -45,7 +45,7 @@ def solution_list(request, task_id=None, user_id=None):
         L.filter(author=user)
         
     return render_to_response( 'solution_list.html', {
-        'solution_list': Solution.objects.filter(task=task, author=user).order_by('-id'), 
+        'solution_list': L.order_by('-id'), 
         'task': task,
         'user': user,
     })
