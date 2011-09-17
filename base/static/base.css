@@ -1,3 +1,41 @@
 h1 {
     background: red;
 }
+
+a {
+	text-decoration: none;
+	font-weight: bold;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 12px;	
+}
+a:link, a:visited {
+	color:#4444AA;
+}
+a:hover {
+	color:#6666FF;
+}
+a:active {
+	color:#8888FF;
+}
+
+
+#header {
+    text-align: center;
+    font-size: 35px;
+    background-color: #EEE;
+}
+
+#leftmenu {
+    vertical-align: top;
+    background-color: #EEE;
+    padding: 8px;
+}
+#leftmenu h4 {
+    font-family: sans-serif;
+}
+
+#maincontent {
+    vertical-align: top;
+    background-color: #EEE;
+    padding: 10px;
+}

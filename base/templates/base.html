@@ -1,10 +1,39 @@
 <!-- FIXME: DOCTYPE? -->
 
 <html>
-  <head>
-    <link href="/static/base.css" rel="stylesheet" type="text/css" />
-  </head>
+    <head>
+        <link href="/static/base.css" rel="stylesheet" type="text/css" />
+        <title>{% block title %}Skoljka - bok!{% endblock %}</title>
+    </head>
 <body>
-  <h1> It works </h1>
+
+{% comment %}Ovo sam ovako napravio, pa neka netko to promijeni - ikicic {% endcomment %}
+<center>
+<table width="960" cellspacing="5">
+<tr>
+    <td colspan="2" id="header">
+        Skoljka
+    </td>
+</tr>
+<tr>
+    <td id="leftmenu" width="200">
+        <br>
+        <h4>Menu</h4>
+        <a href="/">Pocetna</a><br>
+        <br>
+        <a href="/memberlist/">Clanovi</a><br>
+        <a href="/tasklist/">Lista zadataka</a><br>
+        <br>
+    </td>
+    <td id="maincontent">
+    {% block content %}
+        Bok!<br><br><br>
+    {% endblock content %}
+    </td>
+</tr>
+</table>
+</center>
+
+
 </body>
 </html>
