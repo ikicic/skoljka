@@ -13,16 +13,18 @@
 {% if task_list %}
     <table width="100%">
     <tr>
-        <th colspan="2">Task List</th>
+        <th colspan="3">Task List</th>
     </tr>
     <tr>
         <th width="50">#</th>
-        <th>Name</th>
+        <th>Ime</th>
+        <th>Autor</th>
     </tr>
     {% for task in task_list %}
     <tr>
         <td style="text-align:center;">{{ task.id }}</td>
-        <td><a href="/task/{{ task.id }}/">{{ task.name }}</td>
+        <td><a href="/task/{{ task.id }}/">{{ task.name }}</a></td>
+        <td>{{ task.author }}</td>
     </tr>
     {% endfor %}
     </table>

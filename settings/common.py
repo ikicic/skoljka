@@ -177,6 +177,8 @@ LOGGING = {
 
 INTERNAL_IPS = ('127.0.0.1',)
 
+# Where the loging happens
+LOGIN_URL = '/login/'
 
 # Where is a user redirected after a successful log in
 LOGIN_REDIRECT_URL = '/'
