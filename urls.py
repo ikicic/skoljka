@@ -22,5 +22,5 @@ urlpatterns = patterns('',
     # Delegate unqualified URL requests to app home
     (r'^$', include('base.urls')),
 
-    (r'^login/$', include('users.urls')),
+    (r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
 )

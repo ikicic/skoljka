@@ -178,6 +178,9 @@ LOGGING = {
 INTERNAL_IPS = ('127.0.0.1',)
 
 
+# Where is a user redirected after a successful log in
+LOGIN_REDIRECT_URL = '/'
+
 
 try:
     SECRET_KEY = open(SECRET_FILE).read().strip()
