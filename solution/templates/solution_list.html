@@ -5,7 +5,7 @@
 {% block content %}
     
 
-{% if task_list %}
+{% if solution_list %}
     <table width="100%">
     <tr>
         <th colspan="4">Lista rješenja</th>
@@ -21,7 +21,7 @@
         <td style="text-align:center;">{{ solution.id }}</td>
         <td><a href="/task/{{ solution.task.id }}/">{{ solution.task.name }}</a></td>
         <td>{{ solution.author }}</td>
-        <td>{{ solution.content }}</td>
+        <td>{{ solution.content.mathcontenttext }}</td>
     </tr>
     {% endfor %}
     </table>

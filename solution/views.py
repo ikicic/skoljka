@@ -39,6 +39,9 @@ def submit(request, task_id):
 def solutionList(request, task_id=None, user_id=None):
     # TODO(ikicic) probaj bez .all()
     L = Solution.objects.all()
+    task = None
+    user = None
+    
     if task_id is not None:
         task = get_object_or_404(Task, pk=task_id)
         L.filter(task=task)

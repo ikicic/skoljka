@@ -5,18 +5,13 @@
 {% block content %}
 
 Korisnik:<br />
-{{ solution.author }}<br />
-<br />
+{{ solution.author }}<br /><br />
 
 Zadatak:<br />
-<a href="/task/{{ solution.task_id }}/">{{ solution.task.name }}</a><br />
+<a href="/task/{{ solution.task_id }}/">{{ solution.task.name }}</a><br /><br />
 
 <div id="solutioncontent">
-    Ovdje se zove solution.content: <br />
-    [{{ solution.content }}]
-    <br />
-    Ovdje se zove solution.content.render: <br />
-    [{{ solution.content.render }}]
+    {{ solution.content.render }}
 </div>
 
 {% endblock content %}
