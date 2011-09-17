@@ -21,4 +21,6 @@ urlpatterns = patterns('',
 
     # Delegate unqualified URL requests to app home
     (r'^$', include('base.urls')),
+
+    (r'^login/$', include('users.urls')),
 )

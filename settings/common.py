@@ -133,6 +133,7 @@ INSTALLED_APPS = (
     'sentry',
     'sentry.client',
     'base',
+    'users',
 )
 
 # See http://docs.djangoproject.com/en/dev/topics/logging for
