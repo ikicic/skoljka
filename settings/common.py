@@ -134,6 +134,7 @@ INSTALLED_APPS = (
     'sentry.client',
     'base',
     'users',
+    'mathcontent',
 )
 
 # See http://docs.djangoproject.com/en/dev/topics/logging for
