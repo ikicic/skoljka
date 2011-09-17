@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Pošalji rješenje{% endblock %}
+
+{% block content %}
+
+Zadatak: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br />
+
+<form action="/task/{{ task.id }}/submit/" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit" />
+</form>
+
+{% endblock content %}

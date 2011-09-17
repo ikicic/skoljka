@@ -21,6 +21,7 @@ urlpatterns = patterns('',
     (r'^$', include('base.urls')),
 
     (r'^task/', include('task.urls')),
+    (r'^', include('solution.urls')), # namjerno nije r'^solution/'
 
     # Using existing views
     (r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),

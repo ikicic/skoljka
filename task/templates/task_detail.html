@@ -13,5 +13,11 @@
     {{ task.content }}
 </div>
 
+{% if user.is_authenticated %}
+    <br />
+    <a href="/task/{{ task.id }}/submit/">Pošalji rješenje</a><br />
+    <br />
+{% endif %}
+
 
 {% endblock content %}

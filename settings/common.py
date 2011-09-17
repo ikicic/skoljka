@@ -134,6 +134,7 @@ INSTALLED_APPS = (
     'base',
     'mathcontent',
     'task',
+    'solution',
 )
 
 # See http://docs.djangoproject.com/en/dev/topics/logging for

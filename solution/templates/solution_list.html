@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Lista rješenja{% endblock %}
+
+{% block content %}
+    
+
+{% if task_list %}
+    <table width="100%">
+    <tr>
+        <th colspan="4">Lista rješenja</th>
+    </tr>
+    <tr>
+        <th width="50">#</th>
+        <th>Zadatak</th>
+        <th>Korisnik</th>
+        <th>Rješenje</th>
+    </tr>
+    {% for solution in solution_list %}
+    <tr>
+        <td style="text-align:center;">{{ solution.id }}</td>
+        <td><a href="/task/{{ solution.task.id }}/">{{ solution.task.name }}</a></td>
+        <td>{{ solution.author }}</td>
+        <td>{{ solution.content }}</td>
+    </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>No solutions are available.</p>
+{% endif %}
+
+
+{% endblock content %}
