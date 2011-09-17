@@ -23,7 +23,6 @@ def submit(request, task_id):
         if form.is_valid():
             content = MathContentText( text=form.cleaned_data['content'] )
             x = Solution( task=task, author=request.user, content=content )
-            print 'x je [', x.content.text, ']'
             x.save()
             return HttpResponseRedirect("/solution/%d/" % ( x.id, ))
     else:
@@ -36,9 +35,15 @@ def submit(request, task_id):
         context_instance=RequestContext(request),
     )
     
-def solution_task_user(request, task_id, user_id):
-    task = get_object_or_404(Task, pk=task_id)
-    user = get_object_or_404(User, pk=user_id)
+def solution_list(request, task_id=None, user_id=None):
+    L = Solution.objects.all()
+    if task_id != None:
+        task = get_object_or_404(Task, pk=task_id)
+        L.filter(task=task)
+    if user_id != None:
+        user = get_object_or_404(User, pk=user_id)
+        L.filter(author=user)
+        
     return render_to_response( 'solution_list.html', {
         'solution_list': Solution.objects.filter(task=task, author=user).order_by('-id'), 
         'task': task,
