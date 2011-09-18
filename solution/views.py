@@ -1,5 +1,3 @@
-# Create your views here.
-
 from django import forms
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
@@ -10,7 +8,6 @@ from task.models import Task
 from mathcontent.models import MathContentText
 from django.contrib.auth.models import User
 from solution.models import Solution
-
 
 class SubmitForm(forms.Form):
     content = forms.CharField(min_length=1, max_length=2000, widget=forms.Textarea)

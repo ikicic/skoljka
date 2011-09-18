@@ -4,30 +4,26 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from task.models import Task
-
-class newForm(forms.Form):
-    name = forms.CharField(min_length=1, max_length=200)
-    content = forms.CharField(widget=forms.Textarea)
+from models import *
+from forms import *
 
 @login_required
 def new(request):
-    no_form = True
     if request.method == 'POST':
-        form = newForm(request.POST)
-        if form.is_valid():
-            name = form.cleaned_data['name']
-            content = form.cleaned_data['content']
-            user = request.user
-            x = Task(name=name, content=content, author=user)
-            x.save()
+        form_list = TaskModelFormList(request.POST)
+        if form_list.is_valid():
+            (task, math_content) = form_list.save(commit=False)
+
+            math_content.save()
+            task.author = request.user
+            task.content = math_content
+            task.save()
+            
             return HttpResponseRedirect('/task/new/finish/')
-    else:
-        form = newForm()
     
-    return render_to_response('task_new.html', {
-        'form': form,
-        },
-        context_instance=RequestContext(request),
-    )
+    return render_to_response(
+               'task_new.html', 
+               {'forms': TaskModelFormList(),},
+               context_instance=RequestContext(request),
+           )
     

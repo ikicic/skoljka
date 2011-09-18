@@ -6,7 +6,9 @@ class MathContentTextForm(ModelForm):
     class Meta:
         model = MathContentText
 
-# TODO(gzuzic): This will be substantially changed
+# NOTE(gzuzic): This will be substantially changed
 #               when other content types are added
 # Use this one instead
 MathContentForm = MathContentTextForm
+
+

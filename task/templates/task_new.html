@@ -6,7 +6,9 @@
 
 <form action="/task/new/" method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    {% for form in forms %}
+        {{ form.as_p }}
+    {% endfor %} 
     <input type="submit" value="Submit" />
 </form>
 
