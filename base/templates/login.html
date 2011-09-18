@@ -3,6 +3,9 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
+{% if user.is_authenticated %}
+    Vec ste prijavljeni!
+{% else %}
 {% comment %}FIXME(brahle): action to use url function{% endcomment %}
 <form action="/login/" method="post">
     {% csrf_token %}
@@ -10,5 +13,6 @@
     <input type="submit" value="login" />
     <input type="hidden" name="next" value="{{ next }}" />
 </form>
+{% endif %}
 {% endblock  %}
 
