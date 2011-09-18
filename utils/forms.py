@@ -43,5 +43,5 @@ def modelformlist_factory(*args):
         TaskModelFormList = modelformlist_factory(Task1Form, AuthorForm);
     """
     CloneModelFormList = copy.copy(ModelFormList)
-    CloneModelFormList.FORMs = args
+    CloneModelFormList.FORMS = args
     return CloneModelFormList
