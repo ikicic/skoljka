@@ -1,16 +1,13 @@
-from django import forms
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 from task.models import Task
 from mathcontent.models import MathContentText
-from django.contrib.auth.models import User
 from solution.models import Solution
-
-class SubmitForm(forms.Form):
-    content = forms.CharField(min_length=1, max_length=2000, widget=forms.Textarea)
+from solution.forms import SubmitForm
 
 @login_required
 def submit(request, task_id):
@@ -22,7 +19,7 @@ def submit(request, task_id):
             content.save()
             x = Solution( task=task, author=request.user, content=content )
             x.save()
-            return HttpResponseRedirect("/solution/%d/" % ( x.id, ))
+            return HttpResponseRedirect("/solution/%d/" % (x.id,))
     else:
         form = SubmitForm()
         
@@ -40,7 +37,7 @@ def submit(request, task_id):
 #   specific user if user_id is defined
 # If some ID is not defined, skips that condition.
 def solutionList(request, task_id=None, user_id=None):
-    # TODO(ikicic) probaj bez .all()
+    # TODO(ikicic) try without .all()
     L = Solution.objects.all()
     task = None
     user = None
