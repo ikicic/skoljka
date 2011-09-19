@@ -8,37 +8,35 @@
 <body>
 
 {% comment %}Ovo sam ovako napravio, pa neka netko to promijeni - ikicic {% endcomment %}
-<center>
-<table width="960" cellspacing="5">
-<tr>
-    <td colspan="2" id="header">
+
+<div id="pagecontainer">
+    <div id="header">
         Školjka
-    </td>
-</tr>
-<tr>
-    <td id="leftmenu" width="200">
-        <br>
-        <h4>Menu</h4>
-        <a href="/">Početna</a><br />
-        <br>
-        {% if user.is_authenticated %}
-            <a href="/logout/">Odjava</a><br />
-        {% else %}
-            <a href="/login/">Prijava</a><br />
-            <a href="/register/">Registracija</a><br />
-        {% endif %}
-        <a href="/task/">Lista zadataka</a><br />
-        <a href="/solution/">Lista rješenja</a><br />
-        <br>
-    </td>
-    <td id="maincontent">
-    {% block content %}
-        Bok!<br><br><br>
-    {% endblock content %}
-    </td>
-</tr>
-</table>
-</center>
+    </div>
+
+    <div id="maincontainer">
+        <div id="leftmenu">
+            <h4>Menu</h4>
+            <a href="/">Početna</a><br />
+            <br />
+            {% if user.is_authenticated %}
+                <a href="/logout/">Odjava</a><br />
+            {% else %}
+                <a href="/login/">Prijava</a><br />
+                <a href="/register/">Registracija</a><br />
+            {% endif %}
+            <a href="/task/">Lista zadataka</a><br />
+            <a href="/solution/">Lista rješenja</a><br />
+            <br />
+        </div>
+
+        <div id="maincontent">
+        {% block content %}
+            Bok!<br><br><br>
+        {% endblock content %}
+        </div>
+    </div>
+</div>
 
 
 </body>

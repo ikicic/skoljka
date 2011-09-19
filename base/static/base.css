@@ -14,28 +14,46 @@ a:active {
 	color:#8888FF;
 }
 
+#pagecontainer {
+    width: 960px;
+    margin: 0 auto;
+}
+
+#header, #leftmenu, #content, #footer {
+    background-color: #EEE;
+}
+#header, #footer {
+    text-align: center;
+}
 
 #header {
-    text-align: center;
     font-size: 35px;
-    background-color: #EEE;
+    margin-bottom: 5px;
+}
+
+#maincontainer {
+    clear: both;
+    overflow: hidden;
 }
 
 #leftmenu {
     vertical-align: top;
-    background-color: #EEE;
     padding: 8px;
+    width: 200px;
+    float: left;
+    clear: left;
+    margin-right: 5px;
 }
 #leftmenu h4 {
     font-family: sans-serif;
 }
 
 #maincontent {
+    overflow: hidden;
     vertical-align: top;
     background-color: #EEE;
     padding: 10px;
 }
-
 
 table th {
     background-color: #CCC;
