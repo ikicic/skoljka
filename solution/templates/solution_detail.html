@@ -13,7 +13,7 @@ Zadatak:<br />
 <a href="/task/{{ solution.task_id }}/">{{ solution.task.name }}</a><br /><br />
 
 <div id="solutioncontent">
-    {{ solution.content.render }}
+    {{ solution.content.render|safe }}
 </div>
 
 {% endblock content %}

@@ -1,5 +1,6 @@
 from django.db import models
 from django.template.loader import render_to_string
+from django.conf import settings
 from model_utils.managers import InheritanceManager
 
 # KOKAN
@@ -14,30 +15,36 @@ tex_preamble = r'''
 \begin{document}
 '''
 
-imgpath = 'media/image/math/'
+imgpath = 'mathcontent/static/math/'
+imgurlpath = 'static/math/'
 lformat = "$%s$ \n \\newpage \n"
 cformat = "\\[\n%s \n\\] \n \\newpage \n"
 # KOKAN
 
 # KOKAN
+# TODO: enable client-side caching
 def generatepng(eq, format):
-    eqHash = hashlib.md5(eq).hexdigest()
+    eqHash = hashlib.md5(eq+format).hexdigest()
     
-    # TODO: if image already exists, don't render again, just return hash
     # TODO: what if two eqs have equal hashes? very small probability, but...
     
-    cwd = os.getcwd()
-    os.chdir(os.path.abspath(imgpath))
-    f = open(eqHash + '.tex', 'w')
+    filename = os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'mathcontent/static/math/' + eqHash))
+
+    if os.path.exists( filename + '.png' ):
+        return eqHash
+    
+
+    f = open( filename + '.tex', 'w')
     f.write(tex_preamble)
     f.write(format % eq)
     f.write('\end{document}')
     f.close()
     
     # TODO: handle errors
-    os.system('latex %s' % eqHash)
+    # TODO: disable logs
+    os.system('latex -output-directory=%s %s.tex' % (os.path.dirname(filename), filename) )
     # TODO: handle errors and test quality
-    cmd = "dvipng -T tight -x 1200 -z 9 -bg transparent -o %s.png %s" % (eqHash, eqHash)
+    cmd = "dvipng -bg Transparent --gamma 1.5 -D 120 -T tight --strict -o %s.png %s" % (filename, filename)
     os.system(cmd)
     
     # os.remove(eqHash + '.tex')
@@ -45,7 +52,6 @@ def generatepng(eq, format):
     # os.remove(eqHash + '.aux')
     # os.remove(eqHash + '.dvi')
     
-    os.chdir(cwd)
     return eqHash
 # KOKAN
 
@@ -82,11 +88,13 @@ class MathContentText(MathContent):
         
         for eq in lmaths:
             eqHash = generatepng(eq, lformat)
-            html = html.replace(("[lmath]%s[/lmath]" % eq), "<span class=\"eq\"><img src=\"{{ MEDIA_URL }}%s%s.png\" alt=\"%s\"/></span>" % (imgpath, eqHash, eqHash))
+            # TODO: espace chars for eq
+            html = html.replace(("[lmath]%s[/lmath]" % eq), "<span class=\"eq\"><img src=\"/%s%s.png\" alt=\"%s\"/></span>" % (imgurlpath, eqHash, eq))
         
         for eq in cmaths:
-            eqHash = generatepng(eq, cformat)
-            html = html.replace(("[cmath]%s[/cmath]" % eq), "<div class=\"eq\"><img src=\"{{ MEDIA_URL }}%s%s.png\" alt=\"%s\"/></div>" % (imgpath, eqHash, eqHash))
+            eqHash = generatepng('\displaystyle' + eq, cformat)
+            # TODO: espace chars for eq
+            html = html.replace(("[cmath]%s[/cmath]" % eq), "<div class=\"eq\"><img src=\"/%s%s.png\" alt=\"%s\"/></div>" % (imgurlpath, eqHash, eq))
         
         return html
         # return render_to_string('mathcontenttext.html', {'text': html})
