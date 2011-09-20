@@ -92,7 +92,7 @@ class MathContentText(MathContent):
             html = html.replace(("[lmath]%s[/lmath]" % eq), "<span class=\"eq\"><img src=\"/%s%s.png\" alt=\"%s\"/></span>" % (imgurlpath, eqHash, eq))
         
         for eq in cmaths:
-            eqHash = generatepng('\displaystyle' + eq, cformat)
+            eqHash = generatepng(eq, cformat)
             # TODO: espace chars for eq
             html = html.replace(("[cmath]%s[/cmath]" % eq), "<div class=\"eq\"><img src=\"/%s%s.png\" alt=\"%s\"/></div>" % (imgurlpath, eqHash, eq))
         
