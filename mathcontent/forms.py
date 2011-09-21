@@ -1,4 +1,4 @@
-from models import MathContentText
+from mathcontent.models import MathContentText
 from django.forms import ModelForm
 
 # Don't use this unless you know what you're doing

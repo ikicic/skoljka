@@ -4,8 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from models import *
-from forms import *
+from task.models import *
+from task.forms import *
 
 @login_required
 def new(request):
