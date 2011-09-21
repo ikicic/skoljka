@@ -90,7 +90,10 @@ SECRET_KEY = '*+2=z1qx9+zm6bxuz+i&f(y*6xs9v2=alaeap3glfceof_--nm'
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
+
+# this searches for files in <app>/templates
     'django.template.loaders.app_directories.Loader',
+
 #     'django.template.loaders.eggs.Loader',
 )
 
@@ -108,7 +111,10 @@ ROOT_URLCONF = SITE_NAME.lower() + '.urls'
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
+
+# this searches for static files in <appname>/static
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+
     #'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
