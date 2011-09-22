@@ -20,10 +20,11 @@ import re
 import utils.xss
 from mathcontent.latex import generate_png
 
-lformat = "$%s$ \n \\newpage \n"
-cformat = "\\[\n%s \n\\] \n \\newpage \n"
-imgpath = 'mathcontent/static/math/'
-imgurlpath = 'static/math/'
+inline_format = "$%s$ \n \\newpage \n"
+block_format = "\\[\n%s \n\\] \n \\newpage \n"
+# TODO(gzuzic): is this used at all?
+img_path = 'mathcontent/static/math/'
+img_url_path = 'static/math/'
 
 class MathContentText(MathContent):
     text = models.TextField();
@@ -32,22 +33,25 @@ class MathContentText(MathContent):
         return self.text
     
     def render(self): # XSS danger!!! Be careful
-
-        # TODO(gzuzic): This should probably get optimised for speed?
-        lRe = re.compile('\[lmath\](.*?)\[/lmath\]', re.DOTALL)
-        cRe = re.compile('\[cmath\](.*?)\[/cmath\]', re.DOTALL)
         html = utils.xss.escape(self.text)
-        lmaths = lRe.findall(html)
-        cmaths = cRe.findall(html)
 
-        for eq in lmaths:
-            eqHash = generate_png(utils.xss.unescape(eq), lformat)
-            # TODO: espace chars for eq
-            html = html.replace(("[lmath]%s[/lmath]" % eq), "<span class=\"eq\"><img src=\"/%s%s.png\" alt=\"%s\"/></span>" % (imgurlpath, eqHash, eq))
-        
-        for eq in cmaths:
-            eqHash = generate_png(utils.xss.unescape(eq), cformat)
-            # TODO: espace chars for eq
-            html = html.replace(("[cmath]%s[/cmath]" % eq), "<div class=\"eq\"><img src=\"/%s%s.png\" alt=\"%s\"/></div>" % (imgurlpath, eqHash, eq))        
+        blk_re = re.compile(r'\$\$(.*?)\$\$', re.DOTALL)
+        blk_maths = blk_re.findall(html)
 
-        return html
+        # TODO(gzuzic): 114 character line?! C'mon :) We should shrink that to ~80
+        for eq in blk_maths:
+            eq_hash = generate_png(utils.xss.unescape(eq), block_format)
+            new = "<div class=\"latex\"><img src=\"/%s%s.png\" alt=\"%s\"/></div>" % (img_url_path, eq_hash, eq)
+            html = html.replace("$$%s$$" % eq, new)
+
+        inl_re = re.compile('\$(.*?)\$', re.DOTALL)
+        inl_maths = inl_re.findall(html)
+
+        for eq in inl_maths:
+            eq_hash = generate_png(utils.xss.unescape(eq), inline_format)
+            new = "<span class=\"latex\"><img src=\"/%s%s.png\" alt=\"%s\"/></span>" % (img_url_path, eq_hash, eq)
+            html = html.replace("$%s$" % eq, new)
+
+        # Html files don't support newlines in the standard way.
+        # This is for added user ability to format text
+        return html.replace("\r\n", "<br>")

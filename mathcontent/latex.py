@@ -10,18 +10,13 @@ tex_preamble = r'''
 \begin{document}
 '''
 
-
 # TODO: enable client-side caching
 def generate_png(eq, format):
-    eqHash = hashlib.md5(eq+format).hexdigest()
-    
-    # TODO: what if two eqs have equal hashes? very small probability, but...
-    
-    filename = os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'mathcontent/static/math/' + eqHash))
+    eq_hash = hashlib.md5(eq+format).hexdigest()
+    filename = os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'mathcontent/static/math/' + eq_hash))
 
     if os.path.exists(filename + '.png'):
-        return eqHash
-    
+        return eq_hash    
 
     f = open(filename + '.tex', 'w')
     f.write(tex_preamble)
@@ -36,9 +31,9 @@ def generate_png(eq, format):
     cmd = "dvipng -bg Transparent --gamma 1.5 -D 120 -T tight --strict -o %s.png %s" % (filename, filename)
     os.system(cmd)
     
-    # os.remove(eqHash + '.tex')
-    # os.remove(eqHash + '.log')
-    # os.remove(eqHash + '.aux')
-    # os.remove(eqHash + '.dvi')
+    # os.remove(eq_hash + '.tex')
+    # os.remove(eq_hash + '.log')
+    # os.remove(eq_hash + '.aux')
+    # os.remove(eq_hash + '.dvi')
     
-    return eqHash
+    return eq_hash
