@@ -19,6 +19,9 @@ def new(request):
             task.content = math_content
             task.save()
             
+            # Required for django-taggit:
+            form_list.save_m2m()
+            
             return HttpResponseRedirect('/task/new/finish/')
     
     return render_to_response(

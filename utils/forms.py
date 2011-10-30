@@ -33,6 +33,9 @@ class ModelFormList(object):
             # to the caller to handle
             raise NotImplementedError("Generic ModelFormList shouldn't commit to db")
         return [ form.save(commit=commit) for form in self.forms ]
+        
+    def save_m2m(self):
+        return [ form.save_m2m() for form in self.forms ]
 
 def modelformlist_factory(*args):
     """

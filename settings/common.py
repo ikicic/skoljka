@@ -137,9 +137,12 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'sentry',
     'sentry.client',
+    'taggit',
+    
     'base',
     'mathcontent',
     'task',
+    'search',
     'solution',
 )
 

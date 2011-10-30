@@ -1,0 +1,23 @@
+{% if tasks %}
+    <table width="100%">
+    <tr>
+        <th colspan="4">Lista zadataka</th>
+    </tr>
+    <tr>
+        <th width="50">#</th>
+        <th>Ime</th>
+        <th>Tagovi</th>
+        <th>Autor</th>
+    </tr>
+    {% for task in tasks %}
+    <tr>
+        <td style="text-align:center;">{{ task.id }}</td>
+        <td><a href="/task/{{ task.id }}/">{{ task.name }}</a></td>
+        <td>{{ task.tag_list|safe }}</td>
+        <td>{{ task.author }}</td>
+    </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    {% if empty_message %}{{ empty_message }}{% endif %}
+{% endif %}

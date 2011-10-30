@@ -7,16 +7,22 @@
 <a href="javascript: history.go(-1)">« Vrati se</a>
 
 <h2>{{ task.name }}</h2>
+<div style="float:right;">
+    [{% for tag in task.tags.all %}
+        <a href="/search/{{ tag.name }}/" class="tag">{{ tag.name }}</a>{% if not forloop.last %} | {% endif %}
+    {% endfor %}]
+</div>
 <h3>{{ task.author }}</h3>
+
+
+
 <br />
 <div id="task_content">
     {{ task.content.render|safe }}
 </div>
 
-{% if user.is_authenticated %}
-    <br />
-    <a href="/task/{{ task.id }}/submit/">Pošalji rješenje</a><br />
-    <br />
-{% endif %}
+<br />
+<a href="/task/{{ task.id }}/submit/">Pošalji rješenje</a><br />
+<br />
 
 {% endblock content %}

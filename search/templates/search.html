@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Pretrazivanje: {{ tag_string }}{% endblock %}
+
+
+{% block content %}
+
+<h2>Pretraživanje</h2>
+<form action="/search/" method="get">
+    Tagovi:<br/>
+    <input type="text" name="q"><br />
+    <input type="submit" value="Pretraži" />
+</form>
+
+
+{% if tags %}
+    <ul>
+    {% for tag in tags %}
+        <li><a href="/search/{{ tag }}/">{{ tag }}</a></li>
+    {% endfor %}
+    </ul>
+
+    {% include "inc_task_list_table.html" with tasks=tasks empty_message="Ne postoji zadatak s navedenim tagovima" only %}
+{% endif %}
+
+{% endblock content %}

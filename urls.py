@@ -21,6 +21,7 @@ urlpatterns = patterns('',
 
     (r'^task/', include('task.urls')),
     (r'^', include('solution.urls')), # namjerno nije r'^solution/'
+    (r'^search/', include('search.urls')),
 
     (r'^sentry/', include('sentry.web.urls')),
 

@@ -10,27 +10,6 @@
 
 <a href="/task/new/">Stvori novi zadatak</a><br><br>
 
-{% if task_list %}
-    <table width="100%">
-    <tr>
-        <th colspan="3">Task List</th>
-    </tr>
-    <tr>
-        <th width="50">#</th>
-        <th>Ime</th>
-        <th>Autor</th>
-    </tr>
-    {% for task in task_list %}
-    <tr>
-        <td style="text-align:center;">{{ task.id }}</td>
-        <td><a href="/task/{{ task.id }}/">{{ task.name }}</a></td>
-        <td>{{ task.author }}</td>
-    </tr>
-    {% endfor %}
-    </table>
-{% else %}
-    <p>No tasks are available.</p>
-{% endif %}
-
+{% include "inc_task_list_table.html" with tasks=task_list only %}
 
 {% endblock content %}

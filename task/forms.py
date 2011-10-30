@@ -8,6 +8,6 @@ from utils.forms import modelformlist_factory
 class TaskPartForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = [ 'name' ]
+        fields = [ 'name', 'tags' ]
 
 TaskModelFormList = modelformlist_factory(TaskPartForm, MathContentForm)
