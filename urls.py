@@ -19,6 +19,7 @@ urlpatterns = patterns('',
     # Watch out: base urls can only handle empty strings
     (r'^$', include('base.urls')),
 
+    (r'^folder/', include('folder.urls')),
     (r'^task/', include('task.urls')),
     (r'^', include('solution.urls')), # namjerno nije r'^solution/'
     (r'^search/', include('search.urls')),

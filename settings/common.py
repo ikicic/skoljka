@@ -140,6 +140,7 @@ INSTALLED_APPS = (
     'taggit',
     
     'base',
+    'folder',
     'mathcontent',
     'task',
     'search',

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Arhiva{% endblock %}
+
+{% block content %}
+
+<a href="javascript: history.go(-1)">« Vrati se</a><br /><br />
+
+{{ data.path_html|safe }}<br />
+<div style="float:right;">{{ data.tag_list_html|safe }}</div>
+<br />
+
+
+<ul>
+{% for x in data.child %}
+    <li><a href="/folder/{{ data.path }}{{ x.slug }}/">{{ x.name }}</a> {{ x.tag_list_html|safe }}</li>
+{% endfor %}
+</ul>
+
+
+
+{% include 'inc_task_list_table.html' with tasks=data.tasks empty_message="Nema zadataka." only %}
+
+{% endblock content %}
