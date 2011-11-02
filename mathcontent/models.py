@@ -1,21 +1,5 @@
 from django.db import models
 
-# This one requires django-model-utils to be installed (pip can help)
-from model_utils.managers import InheritanceManager
-
-# TODO(gzuzic): measure the number of SQL queries made and whether
-#               can it be improved
-class MathContent(models.Model):
-    objects = InheritanceManager();
-    
-    def __unicode__(self):
-        """Polymorphically call a deriving class member __unicode__()"""
-        return MathContent.objects.select_subclasses().get(id=self.id).__unicode__()
-    
-    def render(self):
-        """Polymorphically call a deriving class member render()"""
-        return MathContent.objects.select_subclasses().get(id=self.id).render()
-
 import re
 import utils.xss
 from mathcontent.latex import generate_png
@@ -26,11 +10,19 @@ block_format = "\\[\n%s \n\\] \n \\newpage \n"
 img_path = 'mathcontent/static/math/'
 img_url_path = 'static/math/'
 
-class MathContentText(MathContent):
+
+class MathContent(models.Model):
     text = models.TextField();
+    
+    class Admin:
+        pass
     
     def __unicode__(self):
         return self.text
+        
+        
+    def short(self, length=50):
+        return self.text[:length] + "..." if len(self.text) > length else self.text
     
     def render(self): # XSS danger!!! Be careful
         html = utils.xss.escape(self.text)

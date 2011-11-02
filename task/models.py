@@ -9,5 +9,8 @@ class Task(models.Model):
     author = models.ForeignKey(User)
     tags = TaggableManager()
 
+    def __unicode__(self):
+        return self.name
+    
     def tag_list(self):
         return " | ".join( [ "<a href=\"/search/%s/\">%s</a>" % (tag.name, tag.name) for tag in self.tags.order_by('name') ] )

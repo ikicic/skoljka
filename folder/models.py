@@ -65,12 +65,12 @@ class FolderCollection(Folder):
     def parseChild(child):
         T = listStrip(child.split('/'), removeEmpty=False)
         if len(T) == 1:
-            data = [T[0], T[0], slugify(T[0])]
+            data = [T[0], tagListToHTML(T[0]), T[0], slugify(T[0])]
         elif len(T) == 2:
-            data = [T[0], T[1], slugify(T[0])]
+            data = [T[0], tagListToHTML(T[1]), T[1], slugify(T[0])]
         else:
-            data = [T[0], T[1], slugify(T[2])]
-        return dict(zip( ['name', 'tags', 'slug'], data ))
+            data = [T[0], tagListToHTML(T[1]), T[1], slugify(T[2])]
+        return dict(zip( ['name', 'tag_list_html', 'tags', 'slug'], data ))
         
     
     #TODO(ikicic): uljepsati i pojasniti kod

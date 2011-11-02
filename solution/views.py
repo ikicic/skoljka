@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
@@ -8,21 +8,34 @@ from task.models import Task
 from solution.models import Solution
 from mathcontent.forms import MathContentForm
 
+
+#TODO: dogovoriti se oko imena ove funkcije, pa i template-a
+#TODO(ikicic): sto ako forma nije valid?
 @login_required
-def submit(request, task_id):
-    task = get_object_or_404(Task, pk=task_id)
+def submit(request, task_id=None, solution_id=None):
+    if solution_id:
+        solution = get_object_or_404(Solution, pk=solution_id)
+        task = solution.task
+        math_content = solution.content
+    elif task_id:
+        task = get_object_or_404(Task, pk=task_id)
+        solution = Solution(task=task, author=request.user)
+        math_content = None
+    else:
+        raise Http404()
+    
     if request.method == 'POST':
-        form = MathContentForm(request.POST)
-        if form.is_valid():
-            content = form.save()
-            solution = Solution(task=task, author=request.user, content=content)
+        math_content_form = MathContentForm(request.POST, instance=math_content)
+        if math_content_form.is_valid():
+            math_content = math_content_form.save()
+            solution.content = math_content
             solution.save()
             return HttpResponseRedirect("/solution/%d/" % (solution.id,))
-    else:
-        form = MathContentForm()        
+        
     return render_to_response('solution_submit.html', {
-        'form': form,
+        'form': MathContentForm(instance=math_content),
         'task': task,
+        'action_url': request.path,
         },
         context_instance=RequestContext(request),
     )
@@ -40,12 +53,14 @@ def solutionList(request, task_id=None, user_id=None):
     
     if task_id is not None:
         task = get_object_or_404(Task, pk=task_id)
-        L.filter(task=task)
+        L = L.filter(task=task)
     if user_id is not None:
         user = get_object_or_404(User, pk=user_id)
-        L.filter(author=user)
+        L = L.filter(author=user)
 
     return render_to_response('solution_list.html', {
-            'solution_list': L.order_by('-id'),
+            'solutions': L.order_by('-id'),
             'task': task,
-        },  context_instance=RequestContext(request),)
+            'user': user,
+        },  context_instance=RequestContext(request),
+    )

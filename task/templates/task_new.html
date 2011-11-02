@@ -1,10 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Novi zadatak{% endblock %}
+{% block title %}
+    {% if edit %}
+        Editiranje zadatka {{ edit }}
+    {% else %}
+        Novi zadatak
+    {% endif %}
+{% endblock %}
+
 
 {% block content %}
 
-<form action="/task/new/" method="post">
+<form action="{{ action_url }}" method="post">
     {% csrf_token %}
     {% for form in forms %}
         {{ form.as_p }}

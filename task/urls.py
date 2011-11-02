@@ -16,6 +16,7 @@ urlpatterns = patterns('',
             template_name='task_detail.html')),
 
     (r'^new/$', 'task.views.new'),
+    (r'^(?P<task_id>\d+)/edit/$', 'task.views.new'),
     (r'^new/finish/$',
         TemplateView.as_view(template_name='task_new_finish.html')),
 )

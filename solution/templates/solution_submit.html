@@ -6,7 +6,7 @@
 
 Zadatak: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br />
 
-<form action="/task/{{ task.id }}/submit/" method="post">
+<form action="{{ action_url }}" method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="Submit" />

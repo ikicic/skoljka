@@ -3,31 +3,18 @@
 {% block title %}Lista rješenja{% endblock %}
 
 {% block content %}
-    
 
-{% if solution_list %}
-    <table width="100%">
-    <tr>
-        <th colspan="4">Lista rješenja</th>
-    </tr>
-    <tr>
-        <th width="50">#</th>
-        <th>Zadatak</th>
-        <th>Korisnik</th>
-        <th>Rješenje</th>
-    </tr>
-    {% for solution in solution_list %}
-    <tr>
-        <td style="text-align:center;"><a href="/solution/{{ solution.id }}/">{{ solution.id }}</a></td>
-        <td><a href="/task/{{ solution.task.id }}/">{{ solution.task.name }}</a></td>
-        <td>{{ solution.author }}</td>
-        <td>{{ solution.content }}</td>
-    </tr>
-    {% endfor %}
-    </table>
-{% else %}
-    <p>No solutions are available.</p>
+<br />
+{% if task %}
+    Rješenja vezana uz zadatak: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br />
 {% endif %}
+{% if user %}
+    asdf
+{% endif %}
+
+<br />  
+
+{% include "inc_solution_list.html" with solutions=solutions empty_message="Nema poslanih rješenja za ovaj zadatak." only %}
 
 
 {% endblock content %}
