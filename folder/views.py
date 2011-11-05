@@ -16,8 +16,7 @@ def folderView(request, path=u''):
 
     data['path'] = path + '/' if path else ''    
         
-    return render_to_response('folder_detail.html', {
-            'data' : data
-        },
+    return render_to_response('folder_detail.html', 
+            data,
         context_instance=RequestContext(request),
     )

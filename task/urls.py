@@ -3,11 +3,7 @@ from django.views.generic import DetailView, ListView, TemplateView
 from task.models import Task
 
 urlpatterns = patterns('',
-    (r'^$',
-        ListView.as_view(
-            queryset=Task.objects.all(),
-            context_object_name='task_list',
-            template_name='task_list.html')),
+    (r'^$', 'task.views.list'),
 
 # TODO(gzuzic): optimize db access by select_related (should cut 2 db queries)
     (r'^(?P<pk>\d+)/$',

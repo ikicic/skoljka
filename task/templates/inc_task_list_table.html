@@ -1,20 +1,30 @@
 {% if tasks %}
     <table width="100%">
     <tr>
-        <th colspan="4">Lista zadataka</th>
+        <th colspan="5">Lista zadataka</th>
     </tr>
     <tr>
         <th width="50">#</th>
         <th>Ime</th>
         <th>Tagovi</th>
         <th>Autor</th>
+        <th>Broj rj.</th>
     </tr>
     {% for task in tasks %}
+    {% if task.id in submitted_tasks %}
+    <tr class="task_submitted">
+    {% else %}
     <tr>
+    {% endif %}
         <td style="text-align:center;">{{ task.id }}</td>
         <td><a href="/task/{{ task.id }}/">{{ task.name }}</a></td>
         <td>{{ task.tag_list|safe }}</td>
         <td>{{ task.author }}</td>
+        {% if task.solved_count > 0 %}
+            <td><a href="/solution/task/{{ task.id }}/">{{ task.solved_count }}</a></td>
+        {% else %}
+            <td>0</td>
+        {% endif %}
     </tr>
     {% endfor %}
     </table>

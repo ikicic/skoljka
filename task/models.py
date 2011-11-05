@@ -7,7 +7,9 @@ class Task(models.Model):
     name = models.CharField(max_length=200)
     content = models.OneToOneField(MathContent)
     author = models.ForeignKey(User)
-    tags = TaggableManager()
+    tags = TaggableManager(blank=True)
+    
+    solved_count = models.IntegerField()
 
     def __unicode__(self):
         return self.name

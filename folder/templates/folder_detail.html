@@ -2,23 +2,27 @@
 
 {% block title %}Arhiva{% endblock %}
 
+{% if menu_folder_tree %}
+    {% block menu_folder_container %}{{ menu_folder_tree|safe }}{% endblock %}
+{% endif %}
+
 {% block content %}
 
 <a href="javascript: history.go(-1)">« Vrati se</a><br /><br />
 
-{{ data.path_html|safe }}<br />
-<div style="float:right;">{{ data.tag_list_html|safe }}</div>
+{{ path_html|safe }}<br />
+<div style="float:right;">{{ tag_list_html|safe }}</div>
 <br />
 
 
 <ul>
-{% for x in data.child %}
-    <li><a href="/folder/{{ data.path }}{{ x.slug }}/">{{ x.name }}</a> {{ x.tag_list_html|safe }}</li>
+{% for x in child %}
+    <li><a href="/folder/{{ path }}{{ x.slug }}/">{{ x.name }}</a> {{ x.tag_list_html|safe }}</li>
 {% endfor %}
 </ul>
 
 
 
-{% include 'inc_task_list_table.html' with tasks=data.tasks empty_message="Nema zadataka." only %}
+{% include 'inc_task_list_table.html' with tasks=tasks empty_message="Nema zadataka." only %}
 
 {% endblock content %}

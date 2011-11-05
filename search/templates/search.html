@@ -5,6 +5,8 @@
 
 {% block content %}
 
+<a href="javascript: history.go(-1)">« Vrati se</a><br />
+
 <h2>Pretraživanje</h2>
 <form action="/search/" method="get">
     Tagovi:<br/>
@@ -20,7 +22,7 @@
     {% endfor %}
     </ul>
 
-    {% include "inc_task_list_table.html" with tasks=tasks empty_message="Ne postoji zadatak s navedenim tagovima" only %}
+    {% include "inc_task_list_table.html" with empty_message="Ne postoji zadatak s navedenim tagovima" %}
 {% endif %}
 
 {% endblock content %}

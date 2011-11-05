@@ -33,7 +33,9 @@ class Folder(models.Model):
             'tag_list_html': tagListToHTML( self.tag_filter ),
             'child': [ { 'name': x.name, 'tag_list_html': x.tag_list_html, 'slug': x.slug } for x in self.child.all() ],
             'tasks': searchTasks(tags=self.tag_filter),
-            'path_html': Folder._path_part_to_html(self.name, path)
+            'path_html': Folder._path_part_to_html(self.name, path),
+#TODO(ikicic): folder tree
+#            'menu_folder_tree': ' &raquo; <a href="/folder%s/">%s</a><br />' % (path, self.name),
         }
         
     #SPEED: optimizirati?

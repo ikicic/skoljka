@@ -66,3 +66,7 @@ table td {
     background-color: #DDD;
     padding: 0px 2px;
 }
+
+tr.task_submitted td {
+    background-color: #8F8
+}

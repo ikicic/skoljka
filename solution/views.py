@@ -30,6 +30,8 @@ def submit(request, task_id=None, solution_id=None):
             math_content = math_content_form.save()
             solution.content = math_content
             solution.save()
+            task.solved_count = Solution.objects.values("author__id").filter(task=task).distinct().count()
+            task.save()
             return HttpResponseRedirect("/solution/%d/" % (solution.id,))
         
     return render_to_response('solution_submit.html', {
@@ -64,3 +66,8 @@ def solutionList(request, task_id=None, user_id=None):
             'user': user,
         },  context_instance=RequestContext(request),
     )
+
+def get_user_solved_tasks(user):
+    if not user.is_authenticated():
+        return None
+    return Solution.objects.values_list("task__id", flat=True).filter(author=user).distinct()
