@@ -8,7 +8,7 @@
         <th>Ime</th>
         <th>Tagovi</th>
         <th>Autor</th>
-        <th>Broj rj.</th>
+        <th>Rj.</th>
     </tr>
     {% for task in tasks %}
     {% if task.id in submitted_tasks %}
@@ -19,7 +19,7 @@
         <td style="text-align:center;">{{ task.id }}</td>
         <td><a href="/task/{{ task.id }}/">{{ task.name }}</a></td>
         <td>{{ task.tag_list|safe }}</td>
-        <td><a href="/profiles/{{ task.author.id }}/">{{ task.author }}</a></td>
+        <td><a href="/profile/{{ task.author.id }}/">{{ task.author }}</a></td>
         {% if task.solved_count > 0 %}
             <td><a href="/solution/task/{{ task.id }}/">{{ task.solved_count }}</a></td>
         {% else %}

@@ -5,12 +5,13 @@ from solution.models import Solution
 
 urlpatterns = patterns('',
     (r'^task/(?P<task_id>\d+)/submit/$', 'solution.views.submit'),
-    (r'^solution/$', 'solution.views.solutionList' ),
+    (r'^solution/$', 'solution.views.solution_list' ),
     (r'^solution/(?P<pk>\d+)/$',
         DetailView.as_view(
             model=Solution,
             template_name='solution_detail.html')),
     (r'^solution/(?P<solution_id>\d+)/edit/$', 'solution.views.submit'),
-    (r'^solution/task/(?P<task_id>\d+)/$', 'solution.views.solutionList'),
-    (r'^solution/task/(?P<task_id>\d+)/user/(?P<user_id>\d+)/$', 'solution.views.solutionList')
+    (r'^solution/task/(?P<task_id>\d+)/$', 'solution.views.solution_list'),
+    (r'^solution/user/(?P<user_id>\d+)/$', 'solution.views.solution_list'),
+    (r'^solution/task/(?P<task_id>\d+)/user/(?P<user_id>\d+)/$', 'solution.views.solution_list'),
 )

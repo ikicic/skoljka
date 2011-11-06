@@ -47,24 +47,24 @@ def submit(request, task_id=None, solution_id=None):
 #   specific task if task_id is defined
 #   specific user if user_id is defined
 # If some ID is not defined, skips that condition.
-def solutionList(request, task_id=None, user_id=None):
+def solution_list(request, task_id=None, user_id=None):
     # TODO(ikicic) research .objects vs .objects.all()
     L = Solution.objects.all()
     task = None
-    user = None
+    author = None   # 'user' is template reserved word
     
     if task_id is not None:
         task = get_object_or_404(Task, pk=task_id)
         L = L.filter(task=task)
     if user_id is not None:
-        user = get_object_or_404(User, pk=user_id)
-        L = L.filter(author=user)
+        author = get_object_or_404(User, pk=user_id)
+        L = L.filter(author=author)
     L = L.select_related('author', 'content', 'task')
 
     return render_to_response('solution_list.html', {
             'solutions': L.order_by('-id'),
             'task': task,
-            'user': user,
+            'author': author,
         },  context_instance=RequestContext(request),
     )
 
