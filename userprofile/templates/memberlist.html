@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Memberlist{% endblock %}
+
+{% block content %}
+
+Ovo je trenutacno samo debug.<br /><br />
+
+<table width="100%">
+<tr>
+    <th>#</th>
+    <th>Username</th>
+    <th>First name</th>
+    <th>Last name</th>
+    <th>Email</th>
+    <th>Quote</th>
+</tr>
+{% for x in user_list %}
+<tr>
+    <td>{{ x.id }}
+    <td><a href="/profile/{{ x.id }}/">{{ x.username }}</a></td>
+    <td>{{ x.first_name }}</td>
+    <td>{{ x.last_name }}</td>
+    <td>-- email --</td>
+    <td>{{ x.profile.quote }}</td>
+</tr>
+{% empty %}
+<tr><td colspan="6">Nema registriranih korisnika</td></tr>
+{% endfor %}
+</table>
+
+{% endblock  %}
+

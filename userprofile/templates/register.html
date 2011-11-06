@@ -4,13 +4,21 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-    Vec ste prijavljeni!
+Vec ste prijavljeni!
 {% else %}
-    <form action="/register/" method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
+
+<form action="/register/" method="post">
+    <table>
+    {% csrf_token %}
+    {% for form in forms %}
+        {{ form.as_table }}
+    {% endfor %}
+    <tr><td colspan="2">
         <input type="submit" value="Register" />
         <input type="hidden" name="next" value="{{ next }}"/>
-    </form>
+    </td></tr>
+    </table>
+</form>
+
 {% endif %}
 {% endblock %}

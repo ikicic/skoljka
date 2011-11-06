@@ -10,11 +10,15 @@ def folderView(request, path=u''):
     folder = get_object_or_404(Folder, parent__isnull=True)
     
     P = filter( None, path.split('/') )
-    data = folder.get_template_data_from_path( P, u'' )
+    data = folder.get_template_data_from_path( P, u'', 0 )
     if not data:
         raise Http404
 
-    data['path'] = path + '/' if path else ''    
+    data['path'] = path + '/' if path else ''
+    
+    print "Depth: ", data['depth']
+    for child in data['child']:
+        data['menu_folder_tree'] += Folder._html_tree_node(child['name'], '/' + data['path'] + child['slug'], data['depth'] + 1)
         
     return render_to_response('folder_detail.html', 
             data,

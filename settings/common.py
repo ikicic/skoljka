@@ -145,6 +145,7 @@ INSTALLED_APPS = (
     'task',
     'search',
     'solution',
+    'userprofile',
 )
 
 # See http://docs.djangoproject.com/en/dev/topics/logging for

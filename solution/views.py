@@ -59,6 +59,7 @@ def solutionList(request, task_id=None, user_id=None):
     if user_id is not None:
         user = get_object_or_404(User, pk=user_id)
         L = L.filter(author=user)
+    L = L.select_related('author', 'content', 'task')
 
     return render_to_response('solution_list.html', {
             'solutions': L.order_by('-id'),

@@ -15,19 +15,14 @@ urlpatterns = patterns('',
     # For serving static files
     (r'static/(?P<path>.*)$', 'django.views.static.serve'),
 
-    # Delegate unqualified URL requests to app home
-    # Watch out: base urls can only handle empty strings
-    (r'^$', include('base.urls')),
+    (r'^', include('base.urls')),
 
     (r'^folder/', include('folder.urls')),
     (r'^task/', include('task.urls')),
+    (r'^', include('userprofile.urls')), # namjerno nije r'^profile/'
     (r'^', include('solution.urls')), # namjerno nije r'^solution/'
     (r'^search/', include('search.urls')),
 
     (r'^sentry/', include('sentry.web.urls')),
 
-    # Using existing views
-    (r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
-    (r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
-    (r'^register/$', 'base.views.register'),
 )

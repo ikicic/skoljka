@@ -21,40 +21,49 @@ class Folder(models.Model):
 
     @staticmethod
     def _path_part_to_html(name, path):
-        return "<a href=\"/folder%s/\">%s</a>" % (path, name)
+        return u'<a href="/folder%s/">%s</a>' % (path, name)
+    @staticmethod
+    def _html_tree_node(name, path, depth):
+        return u'<div style="padding-left:%dpx">&raquo; <a href="/folder%s/">%s</a></div>\n' % ((depth - 1) * 10, path, name)
         
     def tag_list_html(self):
         return tagListToHTML( self.tag_filter )
+        
 
     #SPEED: optimizirati queryje ovdje?
-    def get_template_data(self,path):
+    def get_template_data(self,path,depth):
         return {
             'name': self.name,
             'tag_list_html': tagListToHTML( self.tag_filter ),
             'child': [ { 'name': x.name, 'tag_list_html': x.tag_list_html, 'slug': x.slug } for x in self.child.all() ],
             'tasks': searchTasks(tags=self.tag_filter),
             'path_html': Folder._path_part_to_html(self.name, path),
-#TODO(ikicic): folder tree
-#            'menu_folder_tree': ' &raquo; <a href="/folder%s/">%s</a><br />' % (path, self.name),
+            'menu_folder_tree': Folder._html_tree_node(self.name, path, depth) if self.parent else u'',
+            'depth': 0,
         }
         
     #SPEED: optimizirati?
     #TODO: listu zamijeniti necim primjerenijim za parametar P
-    def _get_template_data_from_path(self,P,path):
+    def _get_template_data_from_path(self,P,path,depth):
         if not P:
-            return self.get_template_data(path)
+            return self.get_template_data(path,depth)
         for x in self.child.all():
             if x.slug == P[0]:
-                T = x.get_template_data_from_path(P[1:], path + '/' + x.slug)
+                T = x.get_template_data_from_path(P[1:], path + '/' + x.slug, depth+1)
                 if not T:
                     return None
+                    
+                T['depth'] += 1
                 T['path_html'] = Folder._path_part_to_html(self.name, path) + " &raquo; " + T['path_html']
+                if self.parent is not None:
+                    T['menu_folder_tree'] = Folder._html_tree_node(self.name, path, depth) + T['menu_folder_tree']
+                    
                 return T
         return None
     
-    def get_template_data_from_path(self,P,path):
+    def get_template_data_from_path(self,P,path,depth):
         """Polymorphically call a deriving class member function"""
-        return Folder.objects.select_subclasses().get(id=self.id)._get_template_data_from_path(P,path)
+        return Folder.objects.select_subclasses().get(id=self.id)._get_template_data_from_path(P,path,depth)
     
 
    
@@ -77,7 +86,7 @@ class FolderCollection(Folder):
     
     #TODO(ikicic): uljepsati i pojasniti kod
     #TODO(ikicic): replace list with something faster for P
-    def _get_template_data_from_path(self,P,path):
+    def _get_template_data_from_path(self,P,path,depth):
 
         # groups divided by char @
         any = False
@@ -85,12 +94,16 @@ class FolderCollection(Folder):
         output_children = []
         output_full_tags = u''
         output_path_html = u''
+        output_tree = []
+        output_depth = depth
         for G in listStrip(self.structure.split('@')):
             full_tags = self.tag_filter
             path_html = Folder._path_part_to_html( self.name, path )
             P = PP[:]
             
-            useless_group=False
+            useless_group = False
+            current_depth = depth
+            tree = []
             for L in listStrip(G.split('|')):
                 children = listStrip(L.split(';'))
                 
@@ -104,9 +117,13 @@ class FolderCollection(Folder):
                     if C['slug'] == P[0]:
                         full_tags += "," + C['tags']
                         path += '/' + C['slug']
-                        path_html += " &raquo; " + Folder._path_part_to_html( C['name'], path )
+                        path_html += " &raquo; " + Folder._path_part_to_html(C['name'], path)
+                        current_depth += 1
+                        tree.append(Folder._html_tree_node(C['name'], path, current_depth))
+                        
                         found = True
                         break
+
                 if not found:
                     useless_group=True
                     break
@@ -120,7 +137,12 @@ class FolderCollection(Folder):
                 output_children.extend( children )
                 output_path_html = path_html
                 output_full_tags = full_tags
-                
+                output_tree.extend(tree)
+                output_depth = current_depth - 2
+              
+
+        output_tree.insert(0, Folder._html_tree_node(self.name, path, depth))
+
         if not any:
             return None
         return {
@@ -128,5 +150,7 @@ class FolderCollection(Folder):
             'tag_list_html': tagListToHTML( output_full_tags ),
             'child': [ FolderCollection.parseChild( x ) for x in output_children ],
             'tasks': searchTasks(tags=output_full_tags),
-            'path_html': output_path_html
+            'path_html': output_path_html,
+            'menu_folder_tree': u''.join(output_tree),
+            'depth': output_depth,
         }

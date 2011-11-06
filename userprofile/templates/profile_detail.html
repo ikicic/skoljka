@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Profil {{ profile.username }}{% endblock %}
+
+{% block content %}
+
+<a href="javascript: history.go(-1)">« Vrati se</a><br />
+<br />
+
+<table width="40%" style="text-align:center;">
+<tr><th>Username:</th><td>{{ profile.username }}</td></tr>
+<tr><th>First name:</th><td>{{ profile.first_name }}</td></tr>
+<tr><th>Last Name:</th><td>{{ profile.last_name }}</td></tr>
+<tr><th>Email:</th><td>-- email --</td></tr>
+<tr><th>Quote:</th><td>{{ profile.profile.quote }}</td></tr>
+</table>
+
+
+{% endblock %}
