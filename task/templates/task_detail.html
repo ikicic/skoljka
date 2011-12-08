@@ -1,31 +1,36 @@
 {% extends "base.html" %}
 
+{% load post_tags %}
+
 {% block title %}Pregled zadatka{% endblock %}
 
 {% block content %}
 
 <a href="javascript: history.go(-1)">« Vrati se</a>
 
-<h2>{{ task.name }}</h2>
-<div style="float:right;text-align:right;">
+<br /><br />
+<div style="text-align:center;font-size:24px;">{{ task.name }}</div>
+<div style="text-align:right;">
+    Author: {{ task.author|userlink }}<br />
     [{% for tag in task.tags.all %}
         <a href="/search/{{ tag.name }}/" class="tag">{{ tag.name }}</a>{% if not forloop.last %} | {% endif %}
     {% endfor %}]
     <br />
     <a href="/task/{{ task.pk }}/edit/">edit</a>
 </div>
-<h3>{{ task.author }}</h3>
-
-
 
 <br />
 <div id="task_content">
     {{ task.content.render|safe }}
 </div>
 
-<br />
+<br /><br /><br />
 <a href="/task/{{ task.id }}/submit/">Pošalji rješenje</a><br />
 <a href="/solution/task/{{ task.id }}/">Pregledaj poslana rješenja</a><br />
 <br />
+<br />
+<br />
+
+{% show_posts_small task %}
 
 {% endblock content %}

@@ -1,6 +1,8 @@
-from django.contrib.auth.models import User
 from django.db import models
+from django.contrib.auth.models import User
+
 from mathcontent.models import MathContent
+from post.generic import PostGenericRelation
 from taggit.managers import TaggableManager
 
 class Task(models.Model):
@@ -8,8 +10,8 @@ class Task(models.Model):
     content = models.OneToOneField(MathContent)
     author = models.ForeignKey(User)
     tags = TaggableManager(blank=True)
-    
-    solved_count = models.IntegerField()
+    solved_count = models.IntegerField(default=0)
+    posts = PostGenericRelation()    
 
     def __unicode__(self):
         return self.name

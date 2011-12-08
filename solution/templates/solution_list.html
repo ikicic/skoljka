@@ -11,7 +11,7 @@
     Rješenja vezana uz zadatak: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br />
 {% endif %}
 {% if author %}
-    Korisnik: <a href="/profile/{{ author.id }}/">{{ author }}</a><br />
+    Korisnik: {{ author|userlink }}<br />
 {% endif %}
 
 <br />  

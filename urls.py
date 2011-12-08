@@ -19,6 +19,7 @@ urlpatterns = patterns('',
 
     (r'^folder/', include('folder.urls')),
     (r'^task/', include('task.urls')),
+    (r'^', include('post.urls')), # namjerno nije r'^post/'
     (r'^', include('userprofile.urls')), # namjerno nije r'^profile/'
     (r'^', include('solution.urls')), # namjerno nije r'^solution/'
     (r'^search/', include('search.urls')),

@@ -1,9 +1,10 @@
 {% if solutions %}
     <table width="100%">
     <tr>
-        <th colspan="4">Lista rješenja</th>
+        <th colspan="5">Lista rješenja</th>
     </tr>
     <tr>
+        <th>.</th>
         <th width="50">#</th>
         <th>Zadatak</th>
         <th>Korisnik</th>
@@ -11,9 +12,10 @@
     </tr>
     {% for s in solutions %}
     <tr>
-        <td style="text-align:center;"><a href="/solution/{{ s.id }}/">{{ s.id }}</a></td>
+        <td style="text-align:center;"><a href="/solution/{{ s.id }}/">Otvori</a></td>
+        <td style="text-align:center;">{{ s.id }}</td>
         <td><a href="/task/{{ s.task.id }}/">{{ s.task.name }}</a></td>
-        <td><a href="/profile/{{ s.author.id }}/">{{ s.author }}</a></td>
+        <td>{{ s.author|userlink }}</a></td>
         <td>{{ s.content.short }}</td>
     </tr>
     {% endfor %}

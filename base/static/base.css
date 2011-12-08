@@ -2,7 +2,8 @@ a {
 	text-decoration: none;
 	font-weight: bold;
 	font-family: Verdana, Arial, sans-serif;
-	font-size: 12px;	
+	font-size: 12px;
+	font-style: normal;
 }
 a:link, a:visited {
 	color:#4444AA;
@@ -69,4 +70,18 @@ table td {
 
 tr.task_submitted td {
     background-color: #8F8
+}
+#task_content {
+    padding: 10px;
+}
+
+.post_list_small {
+    padding: 10px;
+}
+.post_list_small .post {
+    padding: 5px;
+}
+
+.post_list_small .post_info, .post_list_small .post_last_edit_info {
+    font-style: italic;
 }

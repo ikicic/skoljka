@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load post_tags %}
+
 {% block title %}Pregled rješenja{% endblock %}
 
 {% block content %}
@@ -7,7 +9,7 @@
 <a href="javascript: history.go(-1)">« Vrati se</a><br />
 
 Korisnik:<br />
-{{ solution.author }}<br /><br />
+{{ solution.author|userlink }}<br /><br />
 
 <div style="float:right;text-align:right;">
     <a href="/solution/{{ solution.pk }}/edit/">Edit</a><br />
@@ -17,8 +19,11 @@ Korisnik:<br />
 Zadatak:<br />
 <a href="/task/{{ solution.task_id }}/">{{ solution.task.name }}</a><br /><br />
 
-<div id="solutioncontent">
+<div id="solution_content">
     {{ solution.content.render|safe }}
 </div>
+
+<br /><br /><br />
+{% show_posts_small solution %}
 
 {% endblock content %}

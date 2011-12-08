@@ -1,10 +1,8 @@
-# Create your views here.
 from django import forms
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
-from django.db.models import Count
 
 from task.models import Task
 from task.forms import TaskPartForm
@@ -34,6 +32,7 @@ def new(request, task_id=None):
             
             if not edit:
                 task.author = request.user
+
             task.content = math_content
             task.save()
             

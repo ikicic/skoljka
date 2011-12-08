@@ -5,7 +5,6 @@ from task.models import Task
 urlpatterns = patterns('',
     (r'^$', 'task.views.list'),
 
-# TODO(gzuzic): optimize db access by select_related (should cut 2 db queries)
     (r'^(?P<pk>\d+)/$',
         DetailView.as_view(
             model=Task,

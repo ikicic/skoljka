@@ -87,6 +87,7 @@ class FolderCollection(Folder):
     #TODO(ikicic): uljepsati i pojasniti kod
     #TODO(ikicic): replace list with something faster for P
     def _get_template_data_from_path(self,P,path,depth):
+        base_path = path;
 
         # groups divided by char @
         any = False
@@ -141,7 +142,7 @@ class FolderCollection(Folder):
                 output_depth = current_depth - 2
               
 
-        output_tree.insert(0, Folder._html_tree_node(self.name, path, depth))
+        output_tree.insert(0, Folder._html_tree_node(self.name, base_path, depth))
 
         if not any:
             return None

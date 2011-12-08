@@ -28,6 +28,7 @@ def submit(request, task_id=None, solution_id=None):
         math_content_form = MathContentForm(request.POST, instance=math_content)
         if math_content_form.is_valid():
             math_content = math_content_form.save()
+            
             solution.content = math_content
             solution.save()
             task.solved_count = Solution.objects.values("author__id").filter(task=task).distinct().count()
