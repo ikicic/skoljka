@@ -156,6 +156,7 @@ INSTALLED_APPS = (
     'task',
     'search',
     'solution',
+    'usergroup',
     'userprofile',
 )
 

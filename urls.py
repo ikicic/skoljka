@@ -18,11 +18,12 @@ urlpatterns = patterns('',
     (r'^', include('base.urls')),
 
     (r'^folder/', include('folder.urls')),
+    (r'^usergroup/', include('usergroup.urls')),
+    (r'^search/', include('search.urls')),
     (r'^task/', include('task.urls')),
     (r'^', include('post.urls')), # namjerno nije r'^post/'
     (r'^', include('userprofile.urls')), # namjerno nije r'^profile/'
     (r'^', include('solution.urls')), # namjerno nije r'^solution/'
-    (r'^search/', include('search.urls')),
 
     (r'^sentry/', include('sentry.web.urls')),
 

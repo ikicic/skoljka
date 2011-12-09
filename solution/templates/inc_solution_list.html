@@ -1,19 +1,21 @@
 {% if solutions %}
-    <table width="100%">
+    <table width="100%" style="text-align:center;">
     <tr>
-        <th colspan="5">Lista rješenja</th>
+        <th colspan="6">Lista rješenja</th>
     </tr>
     <tr>
-        <th>.</th>
-        <th width="50">#</th>
+        <th>&nbsp;</th>
+        <th width="30">#</th>
+        <th>Vrijeme</th>
         <th>Zadatak</th>
         <th>Korisnik</th>
         <th>Rješenje</th>
     </tr>
     {% for s in solutions %}
     <tr>
-        <td style="text-align:center;"><a href="/solution/{{ s.id }}/">Otvori</a></td>
-        <td style="text-align:center;">{{ s.id }}</td>
+        <td><a href="/solution/{{ s.id }}/">Otvori</a></td>
+        <td>{{ s.id }}</td>
+        <td>{{ s.date_created|date:"E j, Y <\b\r>H:i"|safe }}</td>
         <td><a href="/task/{{ s.task.id }}/">{{ s.task.name }}</a></td>
         <td>{{ s.author|userlink }}</a></td>
         <td>{{ s.content.short }}</td>

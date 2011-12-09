@@ -18,4 +18,9 @@
 
 <a href="/solution/user/{{ profile.id }}/">Poslana rješenja</a><br />
 
+<br /><br />
+Grupe:
+{% for group in profile.groups.all %}
+    {{ group.data }} |
+{% endfor %}
 {% endblock %}

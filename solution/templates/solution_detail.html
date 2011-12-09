@@ -12,6 +12,7 @@ Korisnik:<br />
 {{ solution.author|userlink }}<br /><br />
 
 <div style="float:right;text-align:right;">
+    {{ solution.date_created }}<br />
     <a href="/solution/{{ solution.pk }}/edit/">Edit</a><br />
 </div>
 
@@ -19,6 +20,7 @@ Korisnik:<br />
 Zadatak:<br />
 <a href="/task/{{ solution.task_id }}/">{{ solution.task.name }}</a><br /><br />
 
+<br />
 <div id="solution_content">
     {{ solution.content.render|safe }}
 </div>

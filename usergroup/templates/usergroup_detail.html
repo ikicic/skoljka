@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Grupa {{ group.name }}{% endblock %}
+
+{% block content %}
+
+<div style="text-align:center;font-size:24px;">{{ group.name }}</div>
+<br /><br />
+Info: {{ group.data.description.render|safe }}<br />
+Autor: {{ group.data.author|userlink }}<br />
+Stvoreno: {{ group.data.date_created }}<br />
+Broj članova: {{ group.data.member_count }}<br />
+<br />
+Korisnici: 
+{% for x in group.data.get_users %}
+    {{ x|userlink }}
+{% empty %}
+    <i>Prazno</i>
+{% endfor %}
+
+
+<br /><br />
+Dodaj nove članove:
+<form action="/usergroup/{{ group.pk }}/" method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Dodaj">
+</form>
+{% endblock %}

@@ -9,5 +9,6 @@ class Solution(models.Model):
     task = models.ForeignKey(Task)
     author = models.ForeignKey(User)
     content = models.OneToOneField(MathContent)
+    date_created = models.DateTimeField(auto_now_add=True)
     posts = PostGenericRelation()
     

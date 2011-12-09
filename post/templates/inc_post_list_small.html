@@ -1,5 +1,5 @@
 <div class="post_list_small">
-{% for post in container.posts.select_related %}
+{% for post in posts %}
     <div class="post">
         <span class="post_info">{{ post.author|userlink }} u {{ post.date_created }}</span><br />
         {{ post.content.render|safe }}

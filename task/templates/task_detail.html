@@ -11,7 +11,8 @@
 <br /><br />
 <div style="text-align:center;font-size:24px;">{{ task.name }}</div>
 <div style="text-align:right;">
-    Author: {{ task.author|userlink }}<br />
+    Dodao: {{ task.author|userlink }}<br />
+    {{ task.date_created|date:"E j, Y" }}<br />
     [{% for tag in task.tags.all %}
         <a href="/search/{{ tag.name }}/" class="tag">{{ tag.name }}</a>{% if not forloop.last %} | {% endif %}
     {% endfor %}]

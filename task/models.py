@@ -9,9 +9,11 @@ class Task(models.Model):
     name = models.CharField(max_length=200)
     content = models.OneToOneField(MathContent)
     author = models.ForeignKey(User)
+    date_created = models.DateTimeField(auto_now_add=True)
+    posts = PostGenericRelation()
     tags = TaggableManager(blank=True)
+
     solved_count = models.IntegerField(default=0)
-    posts = PostGenericRelation()    
 
     def __unicode__(self):
         return self.name
