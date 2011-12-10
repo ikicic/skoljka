@@ -8,9 +8,9 @@
 
 <div style="text-align:center;font-size:24px;">Outbox</div>
 
-<br />
-<a href="/pm/">Inbox</a><br />
-<a href="/pm/new/">Pošalji novu poruku</a><br /><br />
+<br>
+<a href="/pm/">Inbox</a><br>
+<a href="/pm/new/">Pošalji novu poruku</a><br><br>
 
 {% for m in pm %}
 <div class="pm">
@@ -18,12 +18,12 @@
     {% for r in m.recipients.all %}
         {{ r.content_object|recipientlink }}
     {% endfor %}
-    <br />
-    <b>{{ m.subject }}</b><br /><br />
+    <br>
+    <b>{{ m.subject }}</b><br><br>
     {{ m.content.render|safe }}
 </div>
 {% empty %}
-<br /><center><i>Nema poruka</i></center><br />
+<br><center><i>Nema poruka</i></center><br>
 {% endfor %}
 
 {% endblock %}

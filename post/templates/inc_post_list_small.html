@@ -1,10 +1,10 @@
 <div class="post_list_small">
 {% for post in posts %}
     <div class="post">
-        <span class="post_info">{{ post.author|userlink }} u {{ post.date_created }}</span><br />
+        <span class="post_info">{{ post.author|userlink }} u {{ post.date_created }}</span><br>
         {{ post.content.render|safe }}
         {% if post.date_created != post.last_edit_time %}
-            <br /><br />
+            <br><br>
             <span class="post_last_edit_info">
                 Zadnja promjena: {{ post.last_edit_by|userlink }} u {{ post.last_edit_time }}
             </span>

@@ -4,7 +4,7 @@
 
 {% block content %}
 
-Zadatak: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br />
+Zadatak: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br>
 
 <form action="{{ action_url }}" method="post">
     {% csrf_token %}

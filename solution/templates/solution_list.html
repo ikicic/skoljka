@@ -4,17 +4,17 @@
 
 {% block content %}
 
-<a href="javascript: history.go(-1)">« Vrati se</a><br />
+<a href="javascript: history.go(-1)">« Vrati se</a><br>
 
-<br />
+<br>
 {% if task %}
-    Rješenja vezana uz zadatak: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br />
+    Rješenja vezana uz zadatak: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br>
 {% endif %}
 {% if author %}
-    Korisnik: {{ author|userlink }}<br />
+    Korisnik: {{ author|userlink }}<br>
 {% endif %}
 
-<br />  
+<br>  
 
 {% include "inc_solution_list.html" with solutions=solutions empty_message="Nema poslanih rješenja za ovaj zadatak." only %}
 

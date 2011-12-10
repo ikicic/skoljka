@@ -3,7 +3,7 @@
 {% block title %}Edit Post{% endblock %}
 
 {% block content %}
-Edit Post:<br />
+Edit Post:<br>
 
 <form action="/post/{{ post.pk }}/edit/" method="post">
     {% csrf_token %}

@@ -8,29 +8,29 @@
 
 <a href="javascript: history.go(-1)">« Vrati se</a>
 
-<br /><br />
+<br><br>
 <div style="text-align:center;font-size:24px;">{{ task.name }}</div>
 <div style="text-align:right;">
-    Dodao: {{ task.author|userlink }}<br />
-    {{ task.date_created|date:"E j, Y" }}<br />
+    Dodao: {{ task.author|userlink }}<br>
+    {{ task.date_created|date:"E j, Y" }}<br>
     [{% for tag in task.tags.all %}
         <a href="/search/{{ tag.name }}/" class="tag">{{ tag.name }}</a>{% if not forloop.last %} | {% endif %}
     {% endfor %}]
-    <br />
+    <br>
     <a href="/task/{{ task.pk }}/edit/">edit</a>
 </div>
 
-<br />
+<br>
 <div id="task_content">
     {{ task.content.render|safe }}
 </div>
 
-<br /><br /><br />
-<a href="/task/{{ task.id }}/submit/">Pošalji rješenje</a><br />
-<a href="/solution/task/{{ task.id }}/">Pregledaj poslana rješenja</a><br />
-<br />
-<br />
-<br />
+<br><br><br>
+<a href="/task/{{ task.id }}/submit/">Pošalji rješenje</a><br>
+<a href="/solution/task/{{ task.id }}/">Pregledaj poslana rješenja</a><br>
+<br>
+<br>
+<br>
 
 {% show_posts_small task %}
 

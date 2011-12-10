@@ -5,12 +5,12 @@
 {% block content %}
 
 <div style="text-align:center;font-size:24px;">{{ group.name }}</div>
-<br /><br />
-Info: {{ group.data.description.render|safe }}<br />
-Autor: {{ group.data.author|userlink }}<br />
-Stvoreno: {{ group.data.date_created }}<br />
-Broj članova: {{ group.data.member_count }}<br />
-<br />
+<br><br>
+Info: {{ group.data.description.render|safe }}<br>
+Autor: {{ group.data.author|userlink }}<br>
+Stvoreno: {{ group.data.date_created }}<br>
+Broj članova: {{ group.data.member_count }}<br>
+<br>
 Korisnici: 
 {% for x in group.data.get_users %}
     {{ x|userlink }}
@@ -18,9 +18,9 @@ Korisnici:
     <i>Prazno</i>
 {% endfor %}
 
-<br /><br /><br /><br />
+<br><br><br><br>
 <a href="/pm/new/{{ group.name }}/">Pošalji poruku</a>
-<br /><br />
+<br><br>
 Dodaj nove članove:
 <form action="/usergroup/{{ group.pk }}/" method="POST">
     {% csrf_token %}

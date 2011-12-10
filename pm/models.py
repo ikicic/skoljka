@@ -29,4 +29,3 @@ class MessageRecipient(models.Model):
     message = models.ForeignKey(MessageContent, related_name='recipients')
     
     objects = MessageManager()
-    
