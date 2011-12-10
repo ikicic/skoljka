@@ -14,7 +14,7 @@ class UserGroup(models.Model):
     member_count = models.IntegerField(default=0)
     
     def __unicode__(self):
-        return mark_safe(u'<a href="/usergroup/%d/">%s</a>' % (self.pk, self.group.name))
+        return mark_safe(u'[<a href="/usergroup/%d/">%s</a>]' % (self.pk, self.group.name))
     
     def get_users(self):
         return User.objects.filter(groups__pk=self.group.pk)

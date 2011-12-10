@@ -85,3 +85,9 @@ tr.task_submitted td {
 .post_list_small .post_info, .post_list_small .post_last_edit_info {
     font-style: italic;
 }
+
+.pm {
+    background-color: #DDD;
+    margin: 8px;
+    padding: 8px;
+}

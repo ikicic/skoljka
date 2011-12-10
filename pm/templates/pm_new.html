@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Inbox{% endblock %}
+
+{% block content %}
+
+<form action="/pm/new/" method="POST">
+{% csrf_token %}
+{% for form in forms %}
+    {{ form.as_p }}
+{% endfor %}
+<input type="submit" value="Pošalji">
+</form>
+
+
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% load pm_tags %}
+
+{% block title %}Inbox{% endblock %}
+
+{% block content %}
+
+<div style="text-align:center;font-size:24px;">Inbox</div>
+
+<br />
+<a href="/pm/outbox/">Outbox</a><br />
+<a href="/pm/new/">Pošalji novu poruku</a><br /><br />
+
+{% for m in pm %}
+<div class="pm">
+    {% if m.message.author == user %}
+        Tvoja poruka
+    {% else %}
+        Poruka od {{ m.message.author|userlink }}
+    {% endif %}
+    za
+    {% for r in m.message.recipients.all %}
+        {{ r.content_object|recipientlink }}
+    {% endfor %}
+    {{ m.message.date_created }}<br />
+    <b>{{ m.message.subject }}</b><br />
+    <br />
+    {{ m.message.content.render|safe }}
+</div>
+{% empty %}
+<center><i>Nema poruka</i></center><br />
+{% endfor %}
+
+{% endblock %}

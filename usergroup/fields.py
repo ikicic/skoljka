@@ -3,7 +3,7 @@ from django.contrib.auth.models import User, Group
 from django.core.exceptions import ObjectDoesNotExist
 
 class UserEntryField(forms.CharField):
-    widget = forms.Textarea()
+    widget = forms.Textarea(attrs={'rows':3})
     
 #TODO: optimizirati
     def clean(self, value):
@@ -23,7 +23,7 @@ class UserEntryField(forms.CharField):
 
 
 class UserAndGroupEntryField(forms.CharField):
-    widget = forms.Textarea()
+    widget = forms.Textarea(attrs={'rows':3})
     
 #TODO: optimizirati
     def clean(self, value):
@@ -43,4 +43,4 @@ class UserAndGroupEntryField(forms.CharField):
         if not_found:
             raise forms.ValidationError(u'Nepostojeći korisnici ili grupe: %s' % ' '.join(not_found))
         
-        return (users, groups)
+        return users + groups

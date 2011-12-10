@@ -15,7 +15,7 @@
     <tr>
         <td><a href="/solution/{{ s.id }}/">Otvori</a></td>
         <td>{{ s.id }}</td>
-        <td>{{ s.date_created|date:"E j, Y <\b\r>H:i"|safe }}</td>
+        <td>{{ s.date_created|timesince }} ago</td>
         <td><a href="/task/{{ s.task.id }}/">{{ s.task.name }}</a></td>
         <td>{{ s.author|userlink }}</a></td>
         <td>{{ s.content.short }}</td>

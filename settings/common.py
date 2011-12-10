@@ -152,6 +152,7 @@ INSTALLED_APPS = (
     'base',
     'folder',
     'mathcontent',
+    'pm',
     'post',
     'task',
     'search',
