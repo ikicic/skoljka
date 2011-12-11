@@ -5,6 +5,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 from pagination.paginator import InfinitePaginator
+from taggit.utils import parse_tags
 
 from task.models import Task
 from task.forms import TaskForm, TaskAdvancedForm
