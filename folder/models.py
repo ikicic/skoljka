@@ -4,7 +4,7 @@ from taggit.managers import TaggableManager
 
 from model_utils.managers import InheritanceManager
 
-from search.utils import searchTasks
+from search.utils import search_tasks
 from utils.tags import tagListToHTML
 from utils.string_operations import listStrip
 
@@ -36,7 +36,7 @@ class Folder(models.Model):
             'name': self.name,
             'tag_list_html': tagListToHTML( self.tag_filter ),
             'child': [ { 'name': x.name, 'tag_list_html': x.tag_list_html, 'slug': x.slug } for x in self.child.all() ],
-            'tasks': searchTasks(tags=self.tag_filter),
+            'tasks': search_tasks(tags=self.tag_filter),
             'path_html': Folder._path_part_to_html(self.name, path),
             'menu_folder_tree': Folder._html_tree_node(self.name, path, depth) if self.parent else u'',
             'depth': 0,
@@ -150,7 +150,7 @@ class FolderCollection(Folder):
             'name': self.name,
             'tag_list_html': tagListToHTML( output_full_tags ),
             'child': [ FolderCollection.parseChild( x ) for x in output_children ],
-            'tasks': searchTasks(tags=output_full_tags),
+            'tasks': search_tasks(tags=output_full_tags),
             'path_html': output_path_html,
             'menu_folder_tree': u''.join(output_tree),
             'depth': output_depth,

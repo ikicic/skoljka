@@ -3,9 +3,8 @@ from django.template import RequestContext
 from django.http import Http404
 
 from folder.models import Folder
-from search.utils import searchTasks
 
-def folderView(request, path=u''):
+def view(request, path=u''):
     # moze li se hardkodirati dobivanje root-a?
     folder = get_object_or_404(Folder, parent__isnull=True)
     
@@ -16,11 +15,11 @@ def folderView(request, path=u''):
 
     data['path'] = path + '/' if path else ''
     
-    print "Depth: ", data['depth']
     for child in data['child']:
         data['menu_folder_tree'] += Folder._html_tree_node(child['name'], '/' + data['path'] + child['slug'], data['depth'] + 1)
-        
+
+    data['tasks'] = data['tasks'].select_related('author')
+    
     return render_to_response('folder_detail.html', 
             data,
-        context_instance=RequestContext(request),
-    )
+        context_instance=RequestContext(request))

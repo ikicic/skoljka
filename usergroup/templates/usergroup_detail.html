@@ -6,6 +6,7 @@
 
 <div style="text-align:center;font-size:24px;">{{ group.name }}</div>
 <br><br>
+<a href="/pm/group/{{ group.id }}/">Inbox</a><br><br>
 Info: {{ group.data.description.render|safe }}<br>
 Autor: {{ group.data.author|userlink }}<br>
 Stvoreno: {{ group.data.date_created }}<br>

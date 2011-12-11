@@ -55,3 +55,13 @@ def outbox(request):
     return render_to_response('pm_outbox.html', {
             'pm': pm
         }, context_instance=RequestContext(request))
+
+
+@login_required
+def group_inbox(request, group_id=None):
+    group = get_object_or_404(Group, pk=group_id)
+    pm = MessageRecipient.objects.inbox(group).order_by('-id')
+    return render_to_response('pm_inbox.html', {
+            'pm': pm,
+            'group': group,
+        }, context_instance=RequestContext(request))

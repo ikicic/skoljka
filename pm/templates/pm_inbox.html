@@ -6,11 +6,21 @@
 
 {% block content %}
 
-<div style="text-align:center;font-size:24px;">Inbox</div>
+<div style="text-align:center;font-size:24px;">
+{% if group %}
+    [{{ group.name }}] inbox
+{% else %}
+    Inbox
+{% endif %}
+</div>
 
 <br>
+{% if group %}
+<a href="/pm/new/{{ group.name }}/">Pošalji novu poruku na grupu</a><br><br>
+{% else %}
 <a href="/pm/outbox/">Outbox</a><br>
 <a href="/pm/new/">Pošalji novu poruku</a><br><br>
+{% endif %}
 
 {% for m in pm %}
 <div class="pm">

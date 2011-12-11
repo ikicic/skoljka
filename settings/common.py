@@ -115,6 +115,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'sentry.client.middleware.Sentry404CatchMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'pagination.middleware.PaginationMiddleware',
 )
 
 ROOT_URLCONF = SITE_NAME.lower() + '.urls'
@@ -145,6 +146,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.staticfiles',
     'debug_toolbar',
+    'pagination',
     'sentry',
     'sentry.client',
     'taggit',

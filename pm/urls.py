@@ -6,4 +6,5 @@ urlpatterns = patterns('',
     (r'^outbox/$', 'pm.views.outbox'),
     (r'^new/$', 'pm.views.new'),
     (r'^new/(?P<rec>[^/]+)/$', 'pm.views.new'),
+    (r'^group/(?P<group_id>\d+)/$', 'pm.views.group_inbox'),
 )
