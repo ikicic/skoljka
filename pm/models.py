@@ -5,8 +5,11 @@ from django.contrib.contenttypes.models import ContentType
 
 from mathcontent.forms import MathContent
 
-#TODO: optimizirati
+# TODO: moze li se messaging implementirati preko user/group permission sistema?
+
+# TODO: implementirati ovo pametnije (vidi permissions)
 class MessageManager(models.Manager):
+    # FIXME: vraca duplikate, a .distinct() ne pomaze (vjerojatno bi se popravilo pametnijom implementacijom)
     def inbox(self, object):
         content_type = ContentType.objects.get_for_model(object)
         result = self.filter(object_id=object.id, content_type=content_type)

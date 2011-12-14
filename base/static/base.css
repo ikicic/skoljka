@@ -69,9 +69,12 @@ table td {
 }
 
 tr.task_submitted td {
-    background-color: #8F8
+    background-color: #8F8;
 }
-#task_content {
+tr.task_hidden td, tr.group_hidden td {
+    background-color: #BBB;
+}
+.task_content {
     padding: 10px;
 }
 
@@ -95,4 +98,10 @@ tr.task_submitted td {
 pre {
     display: inline;
     background-color: #DDD;
+}
+
+img.latex_center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }

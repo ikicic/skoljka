@@ -5,10 +5,8 @@ from task.models import Task
 urlpatterns = patterns('',
     (r'^$', 'task.views.task_list'),
 
-    (r'^(?P<pk>\d+)/$',
-        DetailView.as_view(
-            model=Task,
-            template_name='task_detail.html')),
+    (r'^(?P<id>\d+)/$', 'task.views.detail'),
+    (r'^(?P<ids>[0-9,]+)/$', 'task.views.detail_multiple'),
 
     (r'^new/$', 'task.views.new'),
     (r'^new/advanced/$', 'task.views.advanced_new'),

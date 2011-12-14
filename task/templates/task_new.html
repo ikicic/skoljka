@@ -18,7 +18,7 @@ Zadatke razdvajajte oznakom <pre>@@@@@</pre>.<br>
 Ukoliko želite navesti broj zadatka u imenu ili tagovima, napišite <pre>[[#]]</pre>.<br>
 Npr. Ime: <pre>IMO 2011</pre>, Tagovi: <pre>IMO, 2011, IMO</pre>.<br><br>
 {% else %}
-<a href="/task/new/advanced/">Napredno</a><br><br>
+{% if perms.task.add_advanced %}<a href="/task/new/advanced/">Napredno</a><br><br>{% endif %}
 {% endif %}
 
 <form action="{{ action_url }}" method="post">

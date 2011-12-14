@@ -13,16 +13,18 @@
 <div style="text-align:right;">
     Dodao: {{ task.author|userlink }}<br>
     {{ task.date_created|date:"E j, Y" }}<br>
-    [{% for tag in task.tags.all %}
-        <a href="/search/{{ tag.name }}/" class="tag">{{ tag.name }}</a>{% if not forloop.last %} | {% endif %}
-    {% endfor %}]
-    <br>
-    <a href="/task/{{ task.pk }}/edit/">edit</a>
+    {% if task.tags.all %}
+        [{% for tag in task.tags.all %}
+            <a href="/search/{{ tag.name }}/" class="tag">{{ tag.name }}</a>{% if not forloop.last %} | {% endif %}
+        {% endfor %}]<br>
+    {% endif %}
+    {% if can_edit %}<a href="/task/{{ task.pk }}/edit/">Edit</a><br>{% endif %}
+    {% if can_edit_permissions %}<a href="/permissions/edit/{{ content_type.id }}/{{ task.id }}/">Edit Permissions</a><br>{% endif %}
 </div>
 
 <br>
-<div id="task_content">
-    {{ task.content.render|safe }}
+<div class="task_content">
+    {{ task.content.render }}
 </div>
 
 <br><br><br>

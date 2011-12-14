@@ -31,9 +31,9 @@ def generate_png(eq, format):
     cmd = "dvipng -bg Transparent --gamma 1.5 -D 120 -T tight --strict -o %s.png %s" % (filename, filename)
     os.system(cmd)
     
-    # os.remove(eq_hash + '.tex')
-    # os.remove(eq_hash + '.log')
-    # os.remove(eq_hash + '.aux')
-    # os.remove(eq_hash + '.dvi')
+    os.remove(filename + '.tex')
+    os.remove(filename + '.log')
+    os.remove(filename + '.aux')
+    os.remove(filename + '.dvi')
     
     return eq_hash

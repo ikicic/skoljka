@@ -4,7 +4,8 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-    Vec ste prijavljeni!
+    Već ste prijavljeni!<br>
+    Vjerojatno ste preusmjereni ovdje zato što nemate privilegije za traženo.
 {% else %}
 {% comment %}FIXME(brahle): action to use url function{% endcomment %}
 <form action="/login/" method="post">

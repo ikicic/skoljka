@@ -8,17 +8,13 @@ def view(request, path=u''):
     # moze li se hardkodirati dobivanje root-a?
     folder = get_object_or_404(Folder, parent__isnull=True)
     
-    P = filter( None, path.split('/') )
-    data = folder.get_template_data_from_path( P, u'', 0 )
+    P = filter(None, path.split('/'))
+    data = folder.get_template_data_from_path(P, u'', 0, request.user)
     if not data:
         raise Http404
 
     data['path'] = path + '/' if path else ''
-    
-    for child in data['child']:
-        data['menu_folder_tree'] += Folder._html_tree_node(child['name'], '/' + data['path'] + child['slug'], data['depth'] + 1)
-
-    data['tasks'] = data['tasks'].select_related('author')
+    data['tasks'] = data['tasks'].filter(hidden=False).select_related('author')
     
     return render_to_response('folder_detail.html', 
             data,

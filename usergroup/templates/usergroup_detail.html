@@ -6,7 +6,7 @@
 
 <div style="text-align:center;font-size:24px;">{{ group.name }}</div>
 <br><br>
-<a href="/pm/group/{{ group.id }}/">Inbox</a><br><br>
+{% if is_member %}<a href="/pm/group/{{ group.id }}/">Inbox</a><br><br>{% endif %}
 Info: {{ group.data.description.render|safe }}<br>
 Autor: {{ group.data.author|userlink }}<br>
 Stvoreno: {{ group.data.date_created }}<br>
@@ -22,10 +22,12 @@ Korisnici:
 <br><br><br><br>
 <a href="/pm/new/{{ group.name }}/">Pošalji poruku</a>
 <br><br>
+{% if can_add_members %}
 Dodaj nove članove:
 <form action="/usergroup/{{ group.pk }}/" method="POST">
     {% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="Dodaj">
 </form>
+{% endif %}
 {% endblock %}

@@ -154,6 +154,7 @@ INSTALLED_APPS = (
     'base',
     'folder',
     'mathcontent',
+    'permissions',
     'pm',
     'post',
     'task',

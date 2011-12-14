@@ -1,5 +1,6 @@
 from django import forms
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.contenttypes.models import ContentType
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -10,24 +11,27 @@ from taggit.utils import parse_tags
 from task.models import Task
 from task.forms import TaskForm, TaskAdvancedForm
 
+from permissions.constants import ALL, EDIT, VIEW, EDIT_PERMISSIONS
+from permissions.utils import get_permissions_for_object_by_id
 from solution.models import Solution
 from solution.views import get_user_solved_tasks
 from mathcontent.forms import MathContentForm
 from mathcontent.models import MathContent
 
+# TODO: maknuti debug s vremenom
 def _advanced_new_parse(s, dictionary):
     print 'primio', s
     s = s % dictionary
     print 'vracam', s
     return s
 
-#TODO(ikicic): error za zadatke bez teksta: @@@ (prazno) @@@
-@login_required
-def advanced_new(request):
-    # dok permissions ne radi
-    if request.user.username != 'ikicic':
-        raise Http404
 
+# TODO: promijeniti nacin na koji se Task i MathContent generiraju.
+# vrijednosti koje ne ovise o samom formatu se direktno trebaju
+# postaviti na vrijednosti iz forme
+
+@permission_required('task.add_advanced')
+def advanced_new(request):
     if request.method == 'POST':
         task_form = TaskAdvancedForm(request.POST)
         math_content_form = MathContentForm(request.POST)
@@ -65,6 +69,8 @@ def advanced_new(request):
                 task.name = _advanced_new_parse(task_template.name, dictionary)
                 task.author = request.user
                 task.content = math_content
+# TODO: automatizirati .hidden: (vidi TODO na vrhu funkcije)
+                task.hidden = task_template.hidden
                 task.save()
 
                 task.tags.set(*parse_tags(_advanced_new_parse(task_form.cleaned_data['_tags'], dictionary)))
@@ -121,10 +127,42 @@ def new(request, task_id=None):
         )
         
 def task_list(request):
-    tasks = Task.objects.select_related()
+    tasks = Task.objects.for_user(request.user, VIEW).select_related().distinct()
         
     return render_to_response( 'task_list.html', {
                 'tasks' : tasks,
                 'submitted_tasks' : get_user_solved_tasks(request.user),
             }, context_instance=RequestContext(request),
         )
+
+def detail(request, id):
+    task = get_object_or_404(Task, id=id)
+    content_type = ContentType.objects.get_for_model(Task)
+
+    if task.author == request.user:
+        perm = ALL
+    else:
+        perm = get_permissions_for_object_by_id(request.user, task.id, content_type)
+
+    # TODO: nekakav drugi signal
+    if VIEW not in perm:
+        raise Http404
+        
+    # TODO: DRY content_type
+    return render_to_response('task_detail.html', {
+            'task': task,
+            'can_edit': EDIT in perm,
+            'can_edit_permissions': EDIT_PERMISSIONS in perm,
+            'content_type': content_type,
+        }, context_instance=RequestContext(request))
+        
+def detail_multiple(request, ids):
+    ids = [int(x) for x in ids.split(',')]
+    if not ids or 0 in ids:
+        raise Http404
+        
+    tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=ids).select_related('content')
+    return render_to_response('task_detail_multiple.html', {
+                'tasks': tasks,
+                'id_list': ', '.join([str(x) for x in ids]),
+            }, context_instance=RequestContext(request))

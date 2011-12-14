@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Zadaci {{ id_list }}{% endblock %}
+
+{% block content %}
+
+{% for task in tasks %}
+<div class="task_content">
+    {{ forloop.counter }}. {{ task.content.render }}<br><br><br>
+</div>
+{% endfor %}
+
+{% endblock %}

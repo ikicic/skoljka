@@ -18,6 +18,7 @@ urlpatterns = patterns('',
     (r'^', include('base.urls')),
 
     (r'^folder/', include('folder.urls')),
+    (r'^permissions/', include('permissions.urls')),
     (r'^pm/', include('pm.urls')),
     (r'^search/', include('search.urls')),
     (r'^task/', include('task.urls')),

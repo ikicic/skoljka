@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.safestring import mark_safe
 
 import re
 import utils.xss
@@ -10,6 +11,8 @@ block_format = "\\[\n%s \n\\] \n \\newpage \n"
 img_path = 'mathcontent/static/math/'
 img_url_path = 'static/math/'
 
+# TODO: napraviti MathContentField koji ce se sam spremiti
+# pri spremanju forme, ako je to uopce moguce
 
 class MathContent(models.Model):
     text = models.TextField();
@@ -30,10 +33,9 @@ class MathContent(models.Model):
         blk_re = re.compile(r'\$\$(.*?)\$\$', re.DOTALL)
         blk_maths = blk_re.findall(html)
 
-        # TODO(gzuzic): 114 character line?! C'mon :) We should shrink that to ~80
         for eq in blk_maths:
             eq_hash = generate_png(utils.xss.unescape(eq), block_format)
-            new = "<div class=\"latex\"><img src=\"/%s%s.png\" alt=\"%s\"/></div>" % (img_url_path, eq_hash, eq)
+            new = '<img src="/%s%s.png" alt="%s" class="latex_center">' % (img_url_path, eq_hash, eq)
             html = html.replace("$$%s$$" % eq, new)
 
         inl_re = re.compile('\$(.*?)\$', re.DOTALL)
@@ -41,9 +43,9 @@ class MathContent(models.Model):
 
         for eq in inl_maths:
             eq_hash = generate_png(utils.xss.unescape(eq), inline_format)
-            new = "<span class=\"latex\"><img src=\"/%s%s.png\" alt=\"%s\"/></span>" % (img_url_path, eq_hash, eq)
+            new = '<img src="/%s%s.png" alt="%s" class="latex">' % (img_url_path, eq_hash, eq)
             html = html.replace("$%s$" % eq, new)
 
         # Html files don't support newlines in the standard way.
         # This is for added user ability to format text
-        return html.replace("\r\n", "<br>")
+        return mark_safe(html.replace("\r\n", "<br>"))

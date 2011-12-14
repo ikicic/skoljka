@@ -4,6 +4,7 @@
 {% autopaginate tasks %}
 
 {% if tasks %}
+    {{ tasks|multiple_task_link }}<br>
     <table width="100%">
     <tr>
         <th colspan="5">Lista zadataka</th>
@@ -19,12 +20,14 @@
     {% for task in tasks|cache_task_tags %}
     {% if task.id in submitted_tasks %}
     <tr class="task_submitted">
+    {% else %}{% if task.hidden %}
+    <tr class="task_hidden">
     {% else %}
     <tr>
-    {% endif %}
+    {% endif %}{% endif %}
         <td style="text-align:center;">{{ task.id }}</td>
         <td><a href="/task/{{ task.id }}/">{{ task.name }}</a></td>
-        <td>{{ task.tag_list }}</td>
+        <td>{% if plus_exclude %}{{ task|tag_list:plus_exclude }}{% else %}{{ task|tag_list }}{% endif %}</td>
         <td>{{ task.author|userlink }}</td>
         {% if task.solved_count > 0 %}
             <td><a href="/solution/task/{{ task.id }}/">{{ task.solved_count }}</a></td>

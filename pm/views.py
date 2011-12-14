@@ -5,9 +5,9 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
+from mathcontent.forms import MathContentForm
 from pm.models import MessageRecipient, MessageContent
 from pm.forms import NewMessageForm
-from mathcontent.forms import MathContentForm
 
 #TODO: optimizirati
 @login_required
@@ -42,7 +42,7 @@ def new(request, rec=None):
 #TODO: optimizirati
 @login_required
 def inbox(request):
-    pm = MessageRecipient.objects.inbox(request.user).order_by('-id')
+    pm = MessageRecipient.objects.inbox(request.user).select_related().order_by('-id')
     return render_to_response('pm_inbox.html', {
             'pm': pm,
         }, context_instance=RequestContext(request))
@@ -60,6 +60,9 @@ def outbox(request):
 @login_required
 def group_inbox(request, group_id=None):
     group = get_object_or_404(Group, pk=group_id)
+    if request.user != group.data.author and not request.user.groups.filter(id=group_id).exists():
+        raise Http404
+
     pm = MessageRecipient.objects.inbox(group).order_by('-id')
     return render_to_response('pm_inbox.html', {
             'pm': pm,

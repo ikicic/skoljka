@@ -1,7 +1,7 @@
 # useful string operations
 
-def listStrip(L, removeEmpty=True):
+def list_strip(L, remove_empty=True):
     T = [x.strip() for x in L]
-    if removeEmpty:
-        T = filter(None, T)
+    if remove_empty:
+        return filter(None, T)
     return T

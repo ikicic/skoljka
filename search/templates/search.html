@@ -10,7 +10,7 @@
 <h2>Pretraživanje</h2>
 <form action="/search/" method="get">
     Tagovi:<br/>
-    <input type="text" name="q"><br>
+    {{ form.as_p }}
     <input type="submit" value="Pretraži" />
 </form>
 
@@ -22,7 +22,7 @@
     {% endfor %}
     </ul>
 
-    {% include "inc_task_list_table.html" with empty_message="Ne postoji zadatak s navedenim tagovima" %}
+    {% include "inc_task_list_table.html" with plus_exclude=tags empty_message="Ne postoji zadatak s navedenim tagovima" %}
 {% endif %}
 
 {% endblock content %}

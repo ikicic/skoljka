@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<a href="javascript: history.go(-1)">« Vrati se</a><br><br>
+
+Edit EDIT permission:<br><br>
+<a href="">Resetiraj formu</a><br>
+<form action="" method="POST">
+{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" value="Submit">
+</form>
+
+{{ message }}
+
+{% endblock %}

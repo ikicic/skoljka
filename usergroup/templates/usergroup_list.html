@@ -11,7 +11,11 @@
         <th>Broj korisnika</th>
     </tr>
 {% for g in groups %}
+    {% if g.data.hidden %}
+    <tr class="group_hidden">
+    {% else %}
     <tr>
+    {% endif %}
         <td>{{ g.pk }}</td>
         <td>{{ g.data }}</td>
         <td>{{ g.data.member_count }}</td>

@@ -22,7 +22,7 @@ class UserEntryField(forms.CharField):
         return found
 
 
-class UserAndGroupEntryField(forms.CharField):
+class SeperatedUserAndGroupEntryField(forms.CharField):
     widget = forms.Textarea(attrs={'rows':3})
     
 #TODO: optimizirati
@@ -43,4 +43,9 @@ class UserAndGroupEntryField(forms.CharField):
         if not_found:
             raise forms.ValidationError(u'Nepostojeći korisnici ili grupe: %s' % ' '.join(not_found))
         
-        return users + groups
+        return (users, groups)
+
+class UserAndGroupEntryField(SeperatedUserAndGroupEntryField):
+    def clean(self, value):
+        result = super(UserAndGroupEntryField, self).clean(value)
+        return result[0] + result[1]
