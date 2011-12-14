@@ -139,7 +139,7 @@ def detail(request, id):
     task = get_object_or_404(Task, id=id)
     content_type = ContentType.objects.get_for_model(Task)
 
-    if task.author == request.user:
+    if not task.hidden or task.author == request.user:
         perm = ALL
     else:
         perm = get_permissions_for_object_by_id(request.user, task.id, content_type)
