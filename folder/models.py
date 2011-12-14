@@ -54,8 +54,8 @@ class Folder(models.Model):
         return {
             'name': self.name,
             'tag_list_html': tag_list_to_html(self.tag_filter),
-            'child': [{'name': x.name, 'tag_list_html': x.tag_list_html, 'slug': x.slug} for x in Folder.objects.for_user(user, VIEW).filter(parent=self)],
-            'tasks': search_tasks(tags=self.tag_filter),
+            'child': [{'name': x.name, 'tag_list_html': x.tag_list_html, 'slug': x.slug} for x in Folder.objects.for_user(user, VIEW).filter(parent=self).distinct()],
+            'tasks': search_tasks(tags=self.tag_filter, user=user, show_hidden=True),
             'path_html': Folder._path_part_to_html(self.name, path),
             'menu_folder_tree': '', #Folder._html_tree_node(self.name, path, depth) if self.parent else u'',
         }
@@ -74,7 +74,7 @@ class Folder(models.Model):
         menu_folder_tree = ''
         T = None
 
-        for x in Folder.objects.for_user(user, VIEW).filter(parent=self):
+        for x in Folder.objects.for_user(user, VIEW).filter(parent=self).distinct():
             menu_folder_tree += Folder._html_tree_node(x.name, '%s/%s' % (path, x.slug), depth + 1)
             if x.slug == P[0]:
                 T = x.get_template_data_from_path(P[1:], '%s/%s' % (path, x.slug), depth + 1, user)
@@ -119,8 +119,7 @@ class FolderCollection(Folder):
     #TODO: optimizirati! (mozda i serializirati za sql)
     #TODO: menu_folder_tree pretvoriti u u''.join(), a ne +=
     def _get_template_data_from_path(self, P, path, depth, user):
-        # FolderCollection zanemaruje user parametar, tu provjeru obavlja
-        # parent folder. Nije moguce postavljati posebna prava za pojedine
+        # Nije moguce postavljati posebna prava za pojedine
         # subfoldere FolderCollection-a.
     
         structure = []
@@ -173,7 +172,7 @@ class FolderCollection(Folder):
             'name': self.name,
             'tag_list_html': tag_list_to_html( output_full_tags ),
             'child': output_children,
-            'tasks': search_tasks(tags=output_full_tags),
+            'tasks': search_tasks(tags=output_full_tags, user=user, show_hidden=True),
             'path_html': output_path_html,
             'menu_folder_tree': u''.join(tree),
         }

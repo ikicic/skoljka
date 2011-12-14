@@ -11,18 +11,17 @@ from taggit.managers import TaggableManager
 
 # TODO: rename "author" to "added_by" (or add another column "added_by")
 
-# TODO: treba li ovaj super() ili se moze self.filter?
 class TaskPermissionManager(models.Manager):
     def for_user(self, user, permission_type):
         if user is not None and user.is_authenticated():
             # yeah, right...
-            return super(TaskPermissionManager, self).get_query_set().filter(
+            return self.filter(
                   Q(hidden=False)
                 | Q(author=user)
                 | Q(user_permissions__user=user, user_permissions__permission_type=permission_type)
                 | Q(group_permissions__group__user=user, group_permissions__permission_type=permission_type))
         else:
-            return super(TaskPermissionManager, self).get_query_set().filter(hidden=False)
+            return self.filter(hidden=False)
 
 
 class Task(models.Model):

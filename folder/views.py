@@ -14,7 +14,7 @@ def view(request, path=u''):
         raise Http404
 
     data['path'] = path + '/' if path else ''
-    data['tasks'] = data['tasks'].filter(hidden=False).select_related('author')
+    data['tasks'] = data['tasks'].select_related('author')
     
     return render_to_response('folder_detail.html', 
             data,

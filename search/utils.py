@@ -12,14 +12,18 @@ def split_tags(tags):
     return filter(None, [x.strip() for x in tags])
 
 def search_tasks(tags=[], none_if_blank=True, user=None, show_hidden=False):
+    print tags
+    print none_if_blank
+    print user
+    print show_hidden
     tags = split_tags(tags)
     if none_if_blank and not tags:
         return Task.objects.none()
 
     if show_hidden:
-        tasks = Task.objects.for_user(user, VIEW).all()
+        tasks = Task.objects.for_user(user, VIEW)
     else:
-        tasks = Task.objects.filter(hidden=False).all()
+        tasks = Task.objects.filter(hidden=False)
         
     for tag in tags:
         tasks = tasks.filter(tags__name__iexact=tag)

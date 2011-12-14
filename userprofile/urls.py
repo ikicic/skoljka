@@ -10,6 +10,7 @@ urlpatterns = patterns('',
         template_name="memberlist.html",
     )),
 
+# TODO: vide se skrivene grupe
     (r'^profile/(?P<pk>\d+)/', DetailView.as_view(
         queryset=User.objects.select_related('profile'),
         context_object_name='profile',                # 'user' cannot be used
