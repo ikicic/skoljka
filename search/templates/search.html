@@ -18,7 +18,7 @@
 {% if tags %}
     <ul>
     {% for tag in tags %}
-        <li><a href="/search/{{ tag }}/">{{ tag }}</a></li>
+        <li><a href="/search/?q={{ tag }}">{{ tag }}</a></li>
     {% endfor %}
     </ul>
 

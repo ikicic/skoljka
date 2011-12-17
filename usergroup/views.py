@@ -70,7 +70,13 @@ def list(request):
             usergroup.author = request.user
             usergroup.save()
 
-# DEBUG: ovo je samo debug
+# TODO: napraviti drugi ALL, samo za zadatke
+            author_group = Group.objects.get(name=request.user.username)
+            for perm in ALL:
+                author_perm = PerObjectGroupPermission(content_object=group, group=author_group, permission_type=perm)
+                author_perm.save()
+
+# TODO: maknuti ADD_MEMBERS s vremenom
             for perm in [VIEW, ADD_MEMBERS]:
                 self_perm = PerObjectGroupPermission(content_object=group, group=group, permission_type=perm)
                 self_perm.save()

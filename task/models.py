@@ -5,7 +5,8 @@ from django.contrib.contenttypes import generic
 from django.utils.safestring import mark_safe
 
 from mathcontent.models import MathContent
-from permissions.models import PerObjectGroupPermission, PerObjectUserPermission
+from permissions.models import PerObjectGroupPermission
+#from permissions.models import PerObjectUserPermission
 from post.generic import PostGenericRelation
 from taggit.managers import TaggableManager
 
@@ -18,7 +19,7 @@ class TaskPermissionManager(models.Manager):
             return self.filter(
                   Q(hidden=False)
                 | Q(author=user)
-                | Q(user_permissions__user=user, user_permissions__permission_type=permission_type)
+#                | Q(user_permissions__user=user, user_permissions__permission_type=permission_type)
                 | Q(group_permissions__group__user=user, group_permissions__permission_type=permission_type))
         else:
             return self.filter(hidden=False)
@@ -31,7 +32,7 @@ class Task(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     hidden = models.BooleanField(default=False)
     
-    user_permissions = generic.GenericRelation(PerObjectUserPermission)
+#    user_permissions = generic.GenericRelation(PerObjectUserPermission)
     group_permissions = generic.GenericRelation(PerObjectGroupPermission)
     posts = PostGenericRelation()
     tags = TaggableManager(blank=True)

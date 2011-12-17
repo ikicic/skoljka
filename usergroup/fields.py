@@ -21,6 +21,25 @@ class UserEntryField(forms.CharField):
             
         return found
 
+class GroupEntryField(forms.CharField):
+    widget = forms.Textarea(attrs={'rows':3})
+    
+#TODO: optimizirati
+    def clean(self, value):
+        list = [x.strip() for x in value.split(',')]
+        not_found = []
+        found = []
+        for x in list:
+            try:
+                found.append(Group.objects.get(name__iexact=x))
+            except ObjectDoesNotExist:
+                not_found.append(x)
+    
+        if not_found:
+            raise forms.ValidationError(u'Nepostojeće grupe / korisnici: %s' % ' '.join(not_found))
+            
+        return found
+
 
 class SeperatedUserAndGroupEntryField(forms.CharField):
     widget = forms.Textarea(attrs={'rows':3})

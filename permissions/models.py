@@ -13,6 +13,7 @@ from django.contrib.contenttypes.models import ContentType
 # Time bi se maknuo jedan JOIN u upitima, a i prepolovili bi se svi kodovi
 # vezani uz permission-e. (tako i tako grupe i korisnic moraju imati
 # medjusobno razlicita imena)
+# TODO: nakon sto sve proradi, izbrisati zakomentirani kod vezan uz ovo
 
 class PerObjectGroupPermission(models.Model):
     object_id = models.PositiveIntegerField()
@@ -22,21 +23,24 @@ class PerObjectGroupPermission(models.Model):
 
 # better not to take foreignkey to Permission    
     permission_type = models.IntegerField()
+    
+    def __unicode__(self):
+        return u'Permission %d for group %d for object %d::%d' % (self.permission_type, self.group_id, self.content_type_id, self.object_id)
 
 # TODO: treba li ovo? (unique provjeru treba napraviti u formi/fieldu, vidi permissions.edit)
     class Meta:
         unique_together = (('object_id', 'content_type', 'group', 'permission_type'),)
     
     
-class PerObjectUserPermission(models.Model):
-    object_id = models.PositiveIntegerField()
-    content_type = models.ForeignKey(ContentType)
-    content_object = generic.GenericForeignKey()
-    user = models.ForeignKey(User)
+#class PerObjectUserPermission(models.Model):
+#    object_id = models.PositiveIntegerField()
+#    content_type = models.ForeignKey(ContentType)
+#    content_object = generic.GenericForeignKey()
+#    user = models.ForeignKey(User)
 
 # better not to take foreignkey to Permission    
-    permission_type = models.IntegerField()
+#    permission_type = models.IntegerField()
 
 # TODO: treba li ovo? (unique provjeru treba napraviti u formi/fieldu, vidi permissions.edit)
-    class Meta:
-        unique_together = (('object_id', 'content_type', 'user', 'permission_type'),)
+#    class Meta:
+#        unique_together = (('object_id', 'content_type', 'user', 'permission_type'),)

@@ -15,7 +15,7 @@
     {{ task.date_created|date:"E j, Y" }}<br>
     {% if task.tags.all %}
         [{% for tag in task.tags.all %}
-            <a href="/search/{{ tag.name }}/" class="tag">{{ tag.name }}</a>{% if not forloop.last %} | {% endif %}
+            <a href="/search/?q={{ tag.name }}" class="tag">{{ tag.name }}</a>{% if not forloop.last %} | {% endif %}
         {% endfor %}]<br>
     {% endif %}
     {% if can_edit %}<a href="/task/{{ task.pk }}/edit/">Edit</a><br>{% endif %}

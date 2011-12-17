@@ -7,7 +7,8 @@ from model_utils.managers import InheritanceManager
 from taggit.managers import TaggableManager
 
 from permissions.constants import VIEW
-from permissions.models import PerObjectGroupPermission, PerObjectUserPermission
+from permissions.models import PerObjectGroupPermission
+#from permissions.models import PerObjectUserPermission
 from search.utils import search_tasks
 from utils.tags import tag_list_to_html
 from utils.string_operations import list_strip
@@ -18,7 +19,7 @@ class FolderManager(InheritanceManager):
         if user is not None and user.is_authenticated():
             return super(FolderManager, self).get_query_set().filter(
                   Q(hidden=False)
-                | Q(user_permissions__user=user, user_permissions__permission_type=permission_type)
+#                | Q(user_permissions__user=user, user_permissions__permission_type=permission_type)
                 | Q(group_permissions__group__user=user, group_permissions__permission_type=permission_type))
         else:
             return super(FolderManager, self).get_query_set().filter(hidden=False)
@@ -31,7 +32,7 @@ class Folder(models.Model):
     tag_filter = models.CharField(max_length=256, blank=True)
 
     hidden = models.BooleanField(default=False)
-    user_permissions = generic.GenericRelation(PerObjectUserPermission)
+#    user_permissions = generic.GenericRelation(PerObjectUserPermission)
     group_permissions = generic.GenericRelation(PerObjectGroupPermission)
     objects = FolderManager();
 

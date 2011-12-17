@@ -4,7 +4,8 @@ from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes import generic
 from django.utils.safestring import mark_safe
 
-from permissions.models import PerObjectGroupPermission, PerObjectUserPermission
+from permissions.models import PerObjectGroupPermission
+#from permissions.models import PerObjectUserPermission
 from mathcontent.models import MathContent
 
 # TODO: for_user DRY!!
@@ -19,7 +20,7 @@ class GroupPermissionManager(models.Manager):
             return self.filter(
                   Q(data__hidden=False)
                 | Q(data__author=user)
-                | Q(user_permissions__user=user, user_permissions__permission_type=permission_type)
+#                | Q(user_permissions__user=user, user_permissions__permission_type=permission_type)
                 | Q(group_permissions__group__user=user, group_permissions__permission_type=permission_type)).distinct()
         else:
             return self.filter(data__hidden=False)
@@ -44,14 +45,14 @@ class UserGroup(models.Model):
     member_count = models.IntegerField(default=0)
     
     def __unicode__(self):
-        return mark_safe(u'[<a href="/usergroup/%d/">%s</a>]' % (self.pk, self.group.name))
+        return mark_safe(u'[<a href="/usergroup/%d/">%s</a>]' % (self.group_id, self.group.name))
     
     def get_users(self):
         return User.objects.filter(groups__pk=self.group.pk)
 
 
 # ovo nije preporuceno, ali nemam kako drugacije napraviti (ikicic)
-Group.add_to_class('user_permissions', generic.GenericRelation(PerObjectUserPermission))
+#Group.add_to_class('user_permissions', generic.GenericRelation(PerObjectUserPermission))
 
 # iako ovo izgleda jako cudno (grupna prava za grupe), zapravo je jako korisno
 # grupa ima sama sebi dodijeljena neka prava (npr. VIEW)
