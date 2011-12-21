@@ -115,6 +115,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'sentry.client.middleware.Sentry404CatchMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'django_sorting.middleware.SortingMiddleware',
     'pagination.middleware.PaginationMiddleware',
 )
 
@@ -136,6 +137,8 @@ TEMPLATE_DIRS = (
     os.path.normpath(os.path.join(PROJECT_ROOT, 'templates')),
 )
 
+AUTH_PROFILE_MODULE = 'userprofile.UserProfile'
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.admin',
@@ -146,6 +149,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.staticfiles',
     'debug_toolbar',
+    'django_sorting',
     'pagination',
     'sentry',
     'sentry.client',

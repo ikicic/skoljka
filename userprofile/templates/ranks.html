@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Face{% endblock %}
+
+{% block content %}
+
+<table width="100%" style="text-align: center;">
+<tr>
+    <th>#</th>
+    <th>Korisnik</th>
+    <th>Broj riješenih zadataka</th>
+</tr>
+{% for x in users %}
+<tr>
+    <td>{{ forloop.counter }}</td>
+    <td>{{ x|userlink }}</td>
+    <td><a href="/solution/user/{{ x.id }}/">{{ x.profile.solved_count }}</a></td>
+</tr>
+{% endfor %}
+</table>
+
+{% endblock  %}
+

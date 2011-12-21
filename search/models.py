@@ -3,9 +3,12 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 
+from taggit.managers import TaggableManager
+
 class SearchCache(models.Model):
-    tags = models.CharField(max_length=100, unique=True)
-    
+    tag_string = models.CharField(max_length=100, unique=True)
+    tags = TaggableManager()
+
 
 class SearchCacheElement(models.Model):
     object_id = models.PositiveIntegerField()

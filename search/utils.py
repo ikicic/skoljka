@@ -19,16 +19,28 @@ def split_tags(tags):
     return filter(None, [x.strip() for x in tags])
 
 
+# TODO: optimize!
+# old_tags and new_tags are list of strings, not objects!
+def update_search_cache(object, old_tags, new_tags):
+    diff = set(new_tags) ^ set(old_tags)
+    if not diff:
+        return
+
+    # this will delete SearchCacheElement rows as well
+    SearchCache.objects.filter(tags__name__in=diff).delete()
+    
+    
+    
 # recursive
 # tags SHOULD be sorted (in order to do this efficiently)
 def search_and_cache_tasks(tags, task_content_type):
     tag_string = u','.join(tags)
     try:
-        cache = SearchCache.objects.get(tags=tag_string)
-        return cache
+        return SearchCache.objects.get(tag_string=tag_string)
     except:
-        cache = SearchCache(tags=tag_string)
+        cache = SearchCache(tag_string=tag_string)
         cache.save()
+        cache.tags.set(*tags)
         
 # TODO: change to case-insensitive
 
@@ -37,9 +49,9 @@ def search_and_cache_tasks(tags, task_content_type):
         recursion = search_and_cache_tasks(tags[:-1], task_content_type)
         ids = SearchCacheElement.objects.filter(cache=recursion, content_type=task_content_type).values_list('object_id', flat=True)
         cached_tasks = cached_tasks.filter(id__in=ids)
-    else:
-        tag_object = Tag.objects.filter(name=tags[0])
-        cached_tasks = cached_tasks.filter(tags=tag_object)
+
+    tag_object = Tag.objects.filter(name=tags[-1])
+    cached_tasks = cached_tasks.filter(tags=tag_object)
 
 #    for task in cached_tasks:
 #        element = SearchCacheElement(content_object=task, cache=cache)
@@ -74,4 +86,4 @@ def search_tasks(tags=[], none_if_blank=True, user=None, show_hidden=False):
     
     ids = SearchCacheElement.objects.filter(cache=cache, content_type=task_content_type).values_list('object_id', flat=True)
     
-    return tasks.filter(id__in=ids)
+    return tasks.filter(id__in=ids).distinct()

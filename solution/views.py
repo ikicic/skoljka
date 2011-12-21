@@ -31,8 +31,13 @@ def submit(request, task_id=None, solution_id=None):
             
             solution.content = math_content
             solution.save()
-            task.solved_count = Solution.objects.values("author__id").filter(task=task).distinct().count()
+            
+            task.solved_count = Solution.objects.values("author_id").filter(task=task).distinct().count()
             task.save()
+            profile = request.user.get_profile()
+            profile.solved_count = Solution.objects.values('task_id').filter(author=request.user).distinct().count()
+            profile.save()
+            
             return HttpResponseRedirect("/solution/%d/" % (solution.id,))
         
     return render_to_response('solution_submit.html', {

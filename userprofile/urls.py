@@ -9,8 +9,13 @@ urlpatterns = patterns('',
         context_object_name="user_list",
         template_name="memberlist.html",
     )),
+    
+    (r'^ranks/$', ListView.as_view(
+        queryset=User.objects.select_related('profile').order_by('-profile__solved_count'),
+        context_object_name='users',
+        template_name='ranks.html')),
 
-# TODO: vide se skrivene grupe
+# FIXME: vide se skrivene grupe
     (r'^profile/(?P<pk>\d+)/', DetailView.as_view(
         queryset=User.objects.select_related('profile'),
         context_object_name='profile',                # 'user' cannot be used

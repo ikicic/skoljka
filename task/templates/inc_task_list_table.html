@@ -1,6 +1,9 @@
 {% load pagination_tags %}
+{% load sorting_tags %}
+
 {% load task_tags %}
 
+{% autosort tasks %}
 {% autopaginate tasks %}
 
 {% if tasks %}
@@ -10,13 +13,13 @@
         <th colspan="5">Lista zadataka</th>
     </tr>
     <tr>
-        <th width="50">#</th>
+        <th width="50">{% anchor id # %}</th>
         <th>Ime</th>
         <th>Tagovi</th>
         <th>Autor</th>
-        <th>Rj.</th>
+        <th>{% anchor solved_count Rj. %}</th>
     </tr>
-    
+
     {% for task in tasks|cache_task_tags %}
     {% if task.id in submitted_tasks %}
     <tr class="task_submitted">

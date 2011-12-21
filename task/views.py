@@ -13,6 +13,7 @@ from task.forms import TaskForm, TaskAdvancedForm
 
 from permissions.constants import ALL, EDIT, VIEW, EDIT_PERMISSIONS
 from permissions.utils import get_permissions_for_object_by_id
+from search.utils import update_search_cache
 from solution.models import Solution
 from solution.views import get_user_solved_tasks
 from mathcontent.forms import MathContentForm
@@ -73,7 +74,9 @@ def advanced_new(request):
                 task.hidden = task_template.hidden
                 task.save()
 
-                task.tags.set(*parse_tags(_advanced_new_parse(task_form.cleaned_data['_tags'], dictionary)))
+                tags = parse_tags(_advanced_new_parse(task_form.cleaned_data['_tags'], dictionary))
+                task.tags.set(*tags)
+                update_search_cache(task, [], tags)
                 
             return HttpResponseRedirect('/task/new/finish/')
     else:
@@ -93,9 +96,11 @@ def new(request, task_id=None):
     if task_id:
         task = get_object_or_404(Task, pk=task_id)
         math_content = task.content
+        old_tags = list(task.tags.values_list('name', flat=True))
         edit = True
     else:
         task = math_content = None
+        old_tags = []
         edit = False
         
     if request.method == 'POST':
@@ -114,6 +119,7 @@ def new(request, task_id=None):
             
             # Required for django-taggit:
             task_form.save_m2m()
+            update_search_cache(task, old_tags, task.tags.values_list('name', flat=True))
             
             return HttpResponseRedirect('/task/new/finish/')
     else:
@@ -127,7 +133,7 @@ def new(request, task_id=None):
         )
         
 def task_list(request):
-    tasks = Task.objects.for_user(request.user, VIEW).select_related().distinct()
+    tasks = Task.objects.for_user(request.user, VIEW).select_related('author').distinct()
         
     return render_to_response( 'task_list.html', {
                 'tasks' : tasks,
