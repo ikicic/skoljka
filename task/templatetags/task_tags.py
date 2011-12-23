@@ -44,4 +44,4 @@ def tag_list(task, plus_exclude=None):
     
 @register.filter
 def multiple_task_link(tasks):
-    return mark_safe(u'<a href="/task/%s/">Prikaži tekstove zadataka odjednom</a>' % ','.join([str(x.id) for x in tasks]))
+    return mark_safe(u'<a href="/task/multiple/%s/">Prikaži tekstove zadataka odjednom</a>' % ','.join([str(x.id) for x in tasks]))

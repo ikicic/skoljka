@@ -167,7 +167,7 @@ def detail_multiple(request, ids):
     if not ids or 0 in ids:
         raise Http404
         
-    tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=ids).select_related('content')
+    tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=ids).select_related('content').distinct()
     return render_to_response('task_detail_multiple.html', {
                 'tasks': tasks,
                 'id_list': ', '.join([str(x) for x in ids]),

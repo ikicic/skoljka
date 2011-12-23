@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /search/
+Disallow: /task/new/
+Disallow: /task/multiple/
+Disallow: /task/edit/
+Disallow: /permissions/
