@@ -10,6 +10,11 @@
 
 <br><br>
 <div style="text-align:center;font-size:24px;">{{ task.name }}</div>
+<div style="float:left;">
+    <br>
+    <a href="/task/export/latex/{{ task.id }}/"><img src="/static/images/tex16.png" alt="LaTeX" title="Export to LaTeX"></a>
+    <a href="/task/export/pdf/{{ task.id }}/"><img src="/static/images/pdf16.png" alt="PDF" title="Export to PDF"></a>
+</div>
 <div style="text-align:right;">
     Dodao: {{ task.author|userlink }}<br>
     {{ task.date_created|date:"E j, Y" }}<br>

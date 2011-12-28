@@ -1,6 +1,44 @@
 from django.conf import settings
 import os, sys, hashlib
 
+export_header = r'''
+\documentclass[12pt,a4paper,oneside,final]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[croatian]{babel}
+\usepackage[centertags,intlimits,namelimits,sumlimits]{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{enumitem}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\renewcommand{\ge}{\geqslant}
+\renewcommand{\geq}{\geqslant}
+\renewcommand{\le}{\leqslant}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\angle}{\sphericalangle}
+
+\DeclareMathOperator{\tg}{tg}
+\DeclareMathOperator{\ctg}{ctg}
+
+
+\begin{document}
+'''
+
+# use %(title)s to get task title, and %(content)s to get problem statement
+export_task = u'''
+    %(title)s
+    
+    %(content)s
+'''
+
+export_footer = r'''
+\end{document}
+'''
+
 tex_preamble = r'''
 \documentclass{article}
 \usepackage{amsmath}

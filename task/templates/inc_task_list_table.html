@@ -29,7 +29,7 @@
     <tr>
     {% endif %}{% endif %}
         <td style="text-align:center;">{{ task.id }}</td>
-        <td><a href="/task/{{ task.id }}/">{{ task.name }}</a></td>
+        <td><a href="/task/{{ task.id }}/" class="title">{{ task.name }}</a></td>
         <td>{% if plus_exclude %}{{ task|tag_list:plus_exclude }}{% else %}{{ task|tag_list }}{% endif %}</td>
         <td>{{ task.author|userlink }}</td>
         {% if task.solved_count > 0 %}

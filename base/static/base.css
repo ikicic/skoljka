@@ -5,13 +5,19 @@ a {
 	font-size: 12px;
 	font-style: normal;
 }
+a.title, a.text {
+    font-weight: normal;
+}
 a:link, a:visited {
 	color:#4444AA;
 }
-a:hover {
+a.text:link, a.text:visited{
+    color: #000000;
+}
+a:hover, a.text:hover {
 	color:#6666FF;
 }
-a:active {
+a:active, a.text:active {
 	color:#8888FF;
 }
 

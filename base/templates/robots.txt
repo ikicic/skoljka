@@ -3,4 +3,5 @@ Disallow: /search/
 Disallow: /task/new/
 Disallow: /task/multiple/
 Disallow: /task/edit/
+Disallow: /task/export/
 Disallow: /permissions/

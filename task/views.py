@@ -1,7 +1,8 @@
 from django import forms
+from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
@@ -17,7 +18,10 @@ from search.utils import update_search_cache
 from solution.models import Solution
 from solution.views import get_user_solved_tasks
 from mathcontent.forms import MathContentForm
+from mathcontent.latex import export_header, export_task, export_footer
 from mathcontent.models import MathContent
+
+import os, sys
 
 # TODO: maknuti debug s vremenom
 def _advanced_new_parse(s, dictionary):
@@ -162,13 +166,48 @@ def detail(request, id):
             'content_type': content_type,
         }, context_instance=RequestContext(request))
         
+
+# TODO: not allowed message        
 def detail_multiple(request, ids):
     ids = [int(x) for x in ids.split(',')]
     if not ids or 0 in ids:
         raise Http404
         
     tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=ids).select_related('content').distinct()
+    id_list = [str(x) for x in ids]
     return render_to_response('task_detail_multiple.html', {
                 'tasks': tasks,
-                'id_list': ', '.join([str(x) for x in ids]),
+                'id_list': ', '.join(id_list),
+                'id_list_ns': ','.join(id_list),
             }, context_instance=RequestContext(request))
+
+def _export_to_latex(request, ids):
+    ids = [int(x) for x in ids.split(',')]
+    if not ids or 0 in ids:
+        raise Http404
+        
+    tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=ids).select_related('content').distinct()
+    content = u''.join((export_task % {'title': x.name, 'content': x.content.text} for x in tasks))
+    return export_header + content + export_footer
+    
+
+# TODO: not allowed message
+def export_to_latex(request, ids):
+    return HttpResponse(content=_export_to_latex(request, ids), content_type='application/x-latex')
+
+def export_to_pdf(request, ids):
+    filename = os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'task/static/pdf/task' + ids))
+    print 'filename: ', filename
+    if not os.path.exists(filename + '.pdf'):
+        f = open(filename + '.tex', 'w')
+        f.write(_export_to_latex(request, ids))
+        f.close()
+        
+        os.system('latex -output-directory=%s -interaction=batchmode %s.tex' % (os.path.dirname(filename), filename))
+        os.system('dvipdfm -o %s %s' % (filename + '.pdf', filename))
+        # os.remove(filename + '.tex')
+        # os.remove(filename + '.log')
+        # os.remove(filename + '.aux')
+        # os.remove(filename + '.dvi')
+        
+    return HttpResponseRedirect('/static/pdf/task%s.pdf' % ids)
