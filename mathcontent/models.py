@@ -27,6 +27,7 @@ class MathContent(models.Model):
     def short(self, length=50):
         return self.text[:length] + "..." if len(self.text) > length else self.text
     
+    # TODO: podrska za $, tj. \$ u tekstu zadatka
     def render(self): # XSS danger!!! Be careful
         html = utils.xss.escape(self.text)
 
@@ -49,3 +50,54 @@ class MathContent(models.Model):
         # Html files don't support newlines in the standard way.
         # This is for added user ability to format text
         return mark_safe(html.replace("\r\n", "<br>"))
+
+    # TODO: performace test
+    def convert_to_latex(self):
+        # replaces # % ^ & _ { } ~ \
+        # with \# \% \textasciicircum{} \& \_ \{ \} \~{} \textbackslash{}
+        # keeps \$ as \$, because $ is a special char anyway
+
+        esc = {'#': '\\#'
+            , '%': '\\%'
+            , '^': '\\textasciicircum{}'
+            , '&': '\\&'
+            , '_': '\\_'
+            , '{': '\\{'
+            , '}': '\\}'
+            , '~': '\\~{}'
+            , '\\': '\\textbackslash{}'}
+        out = []
+        
+        s = self.text
+        n = len(s)
+        i = 0
+        while i < n:
+            if s[i] == '\\':
+                if i + 1 < n:
+                    out.append(s[i:i+2])
+                # else: report error
+                i += 2
+            elif s[i] == '$':
+                # copy string between $ $ or $$ $$
+                while i < n and s[i] == '$':
+                    out.append('$')
+                    i += 1
+                while i < n:
+                    if s[i] == '\\':
+                        if i + 1 < n:
+                            out.append(s[i:i+2])
+                        # else: report error
+                        i += 2;
+                    elif s[i] == '$':
+                        break;
+                    else:
+                        out.append(s[i])
+                        i += 1
+                while i < n and s[i] == '$':
+                    out.append('$')
+                    i += 1                        
+            else:
+                out.append(esc.get(s[i],s[i]))
+                i += 1
+
+        return u''.join(out)

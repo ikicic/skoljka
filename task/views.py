@@ -21,7 +21,7 @@ from mathcontent.forms import MathContentForm
 from mathcontent.latex import export_header, export_task, export_footer
 from mathcontent.models import MathContent
 
-import os, sys
+import os, sys, codecs
 
 # TODO: maknuti debug s vremenom
 def _advanced_new_parse(s, dictionary):
@@ -125,7 +125,10 @@ def new(request, task_id=None):
             task_form.save_m2m()
             update_search_cache(task, old_tags, task.tags.values_list('name', flat=True))
             
-            return HttpResponseRedirect('/task/new/finish/')
+            if edit:
+                os.remove(os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'task/static/pdf/task%d.pdf' % task.id)))
+            
+            return HttpResponseRedirect('/task/%d/' % task.id if edit else '/task/new/finish/')
     else:
         task_form = TaskForm(instance=task)
         math_content_form = MathContentForm(instance=math_content)
@@ -187,19 +190,19 @@ def _export_to_latex(request, ids):
         raise Http404
         
     tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=ids).select_related('content').distinct()
-    content = u''.join((export_task % {'title': x.name, 'content': x.content.text} for x in tasks))
+    content = u''.join([export_task % {'title': x.name, 'content': x.content.convert_to_latex()} for x in tasks])
     return export_header + content + export_footer
     
 
 # TODO: not allowed message
 def export_to_latex(request, ids):
-    return HttpResponse(content=_export_to_latex(request, ids), content_type='application/x-latex')
+    return HttpResponse(content=_export_to_latex(request, ids))
 
 def export_to_pdf(request, ids):
     filename = os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'task/static/pdf/task' + ids))
     print 'filename: ', filename
     if not os.path.exists(filename + '.pdf'):
-        f = open(filename + '.tex', 'w')
+        f = codecs.open(filename + '.tex', 'w', encoding='utf-8')
         f.write(_export_to_latex(request, ids))
         f.close()
         
