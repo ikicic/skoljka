@@ -126,7 +126,9 @@ def new(request, task_id=None):
             update_search_cache(task, old_tags, task.tags.values_list('name', flat=True))
             
             if edit:
-                os.remove(os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'task/static/pdf/task%d.pdf' % task.id)))
+                filename = os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'task/static/pdf/task%d.pdf' % task.id))
+                if os.path.exists(filename):
+                    os.remove()
             
             return HttpResponseRedirect('/task/%d/' % task.id if edit else '/task/new/finish/')
     else:
@@ -196,7 +198,7 @@ def _export_to_latex(request, ids):
 
 # TODO: not allowed message
 def export_to_latex(request, ids):
-    return HttpResponse(content=_export_to_latex(request, ids))
+    return HttpResponse(content=_export_to_latex(request, ids), content_type='application/x-latex')
 
 def export_to_pdf(request, ids):
     filename = os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'task/static/pdf/task' + ids))
