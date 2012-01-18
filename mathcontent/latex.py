@@ -4,6 +4,8 @@ import os, sys, hashlib
 export_header = r'''
 \documentclass[12pt,a4paper,oneside,final]{article}
 
+\usepackage[margin=2cm]{geometry}
+
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[croatian]{babel}
@@ -11,6 +13,21 @@ export_header = r'''
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{enumitem}
+
+\usepackage{fancyhdr}
+\fancypagestyle{empty}{
+    \fancyhf{}
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
+}
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyfoot[R]{\footnotesize\bf\thepage}
+    \fancyfoot[L]{\footnotesize\bf OVDJE NPR.\ IME ZADATKA}
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0.5pt}
+    \renewcommand{\footrule}{\vskip-\footrulewidth \hrule width\headwidth height\footrulewidth}
+}
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt}
@@ -24,14 +41,15 @@ export_header = r'''
 \DeclareMathOperator{\tg}{tg}
 \DeclareMathOperator{\ctg}{ctg}
 
+\pagestyle{plain}
+
 
 \begin{document}
 '''
 
 # use %(title)s to get task title, and %(content)s to get problem statement
 export_task = u'''
-    %(title)s
-    
+    \section*{%(title)s}
     %(content)s
 '''
 
