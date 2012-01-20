@@ -35,7 +35,8 @@ class MathContent(models.Model):
         blk_maths = blk_re.findall(html)
 
         for eq in blk_maths:
-            eq_hash = generate_png(utils.xss.unescape(eq), block_format)
+            # TODO: maybe save depth in database (currently not used)
+            eq_hash, depth = generate_png(utils.xss.unescape(eq), block_format)
             new = '<img src="/%s%s.png" alt="%s" class="latex_center">' % (img_url_path, eq_hash, eq)
             html = html.replace("$$%s$$" % eq, new)
 
@@ -43,8 +44,9 @@ class MathContent(models.Model):
         inl_maths = inl_re.findall(html)
 
         for eq in inl_maths:
-            eq_hash = generate_png(utils.xss.unescape(eq), inline_format)
-            new = '<img src="/%s%s.png" alt="%s" class="latex">' % (img_url_path, eq_hash, eq)
+            # TODO: save depth in database
+            eq_hash, depth = generate_png(utils.xss.unescape(eq), inline_format)
+            new = '<img src="/%s%s.png" alt="%s" class="latex" style="vertical-align:%dpx">' % (img_url_path, eq_hash, eq, -depth)
             html = html.replace("$%s$" % eq, new)
 
         # Html files don't support newlines in the standard way.
