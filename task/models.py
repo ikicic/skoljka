@@ -11,6 +11,7 @@ from post.generic import PostGenericRelation
 from taggit.managers import TaggableManager
 
 # TODO: rename "author" to "added_by" (or add another column "added_by")
+# TODO: rename "name" to "title"
 
 class TaskPermissionManager(models.Manager):
     def for_user(self, user, permission_type):

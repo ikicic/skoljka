@@ -1,6 +1,31 @@
 ﻿from django.conf import settings
-import os, sys, hashlib, commands, re
+import os, sys, hashlib, re
 
+from mathcontent.models import LatexElement
+
+
+# Obican .getstatusoutput ne radi na Windowimsa, ovo je zamjena
+# Preuzeto s http://mail.python.org/pipermail/python-win32/2008-January/006606.html
+
+mswindows = (sys.platform == "win32")
+def getstatusoutput(cmd):
+    """Return (status, output) of executing cmd in a shell."""
+
+    if not mswindows:
+        cmd = '{ ' + cmd + '; }'
+
+    pipe = os.popen(cmd + ' 2>&1', 'r')
+    text = pipe.read()
+    status = pipe.close()
+
+    if status is None:
+        status = 0
+    if text[-1:] == '\n':
+        text = text[:-1]
+
+    return status, text
+
+    
 export_header = r'''
 \documentclass[12pt,a4paper,oneside,final]{article}
 
@@ -71,13 +96,16 @@ tex_preamble = r'''
 '''
 
 # TODO: enable client-side caching
+# TODO: join depth queries
 def generate_png(eq, format):
     eq_hash = hashlib.md5(eq+format).hexdigest()
     filename = os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'mathcontent/static/math/' + eq_hash))
 
-    if os.path.exists(filename + '.png'):
-        # TODO: fetch depth from database
-        return eq_hash, 0
+    try:
+        latex_element = LatexElement.objects.only("depth").get(pk=eq_hash)
+        return eq_hash, latex_element.depth
+    except:
+        pass
     
     f = open(filename + '.tex', 'w')
     f.write(tex_preamble)
@@ -90,7 +118,7 @@ def generate_png(eq, format):
     os.system('latex -output-directory=%s -interaction=batchmode %s.tex' % (os.path.dirname(filename), filename) )
     # TODO: handle errors and test quality
     cmd = "dvipng -bg Transparent --gamma 1.5 -D 120 --depth* -T tight --strict -o %s.png %s" % (filename, filename)
-    status, stdout = commands.getstatusoutput(cmd)
+    status, stdout = getstatusoutput(cmd)
     
     depth_re = re.compile(r'\[\d+ depth=(-?\d+)\]')
     for line in stdout.splitlines():
@@ -103,6 +131,9 @@ def generate_png(eq, format):
     os.remove(filename + '.log')
     os.remove(filename + '.aux')
     os.remove(filename + '.dvi')
+    
+    latex_element = LatexElement(hash=eq_hash, text=eq, format=format, depth=depth)
+    latex_element.save(force_insert=True)
     
     return eq_hash, depth
 

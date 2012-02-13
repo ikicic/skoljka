@@ -3,16 +3,25 @@ from django.utils.safestring import mark_safe
 
 import re
 import utils.xss
-from mathcontent.latex import generate_png
 
 inline_format = "$%s$ \n \\newpage \n"
 block_format = "\\[\n%s \n\\] \n \\newpage \n"
-# TODO(gzuzic): is this used at all?
+
 img_path = 'mathcontent/static/math/'
 img_url_path = 'static/math/'
 
 # TODO: napraviti MathContentField koji ce se sam spremiti
 # pri spremanju forme, ako je to uopce moguce
+
+
+
+
+class LatexElement(models.Model):
+    hash = models.CharField(max_length=32, primary_key=True)
+    text = models.TextField()
+    format = models.CharField(max_length=64)
+    depth = models.IntegerField()
+
 
 class MathContent(models.Model):
     text = models.TextField();
@@ -29,6 +38,7 @@ class MathContent(models.Model):
     
     # TODO: podrska za $, tj. \$ u tekstu zadatka
     def render(self): # XSS danger!!! Be careful
+        from mathcontent.latex import generate_png
         html = utils.xss.escape(self.text)
 
         blk_re = re.compile(r'\$\$(.*?)\$\$', re.DOTALL)
