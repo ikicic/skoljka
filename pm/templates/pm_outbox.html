@@ -13,7 +13,7 @@
 <a href="/pm/new/">Pošalji novu poruku</a><br><br>
 
 {% for m in pm %}
-<div class="pm">
+<div class="well">
     {{ m.date_created }}
     {% for r in m.recipients.all %}
         {{ r.content_object|recipientlink }}

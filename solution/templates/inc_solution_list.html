@@ -1,5 +1,5 @@
 {% if solutions %}
-    <table width="100%" style="text-align:center;">
+    <table width="100%" class="table-striped table-condensed" style="text-align: center;">
     <tr>
         <th colspan="5">Lista rješenja</th>
     </tr>
@@ -14,9 +14,9 @@
     <tr>
         <td>{{ s.id }}</td>
         <td>{{ s.date_created|timesince }} ago</td>
-        <td><a href="/task/{{ s.task.id }}/" class="title">{{ s.task.name }}</a></td>
+        <td><a href="/task/{{ s.task.id }}/">{{ s.task.name }}</a></td>
         <td>{{ s.author|userlink }}</a></td>
-        <td><a href="/solution/{{ s.id }}/" class="text">{{ s.content.short }}</a></td>
+        <td><a href="/solution/{{ s.id }}/">{{ s.content.short }}</a></td>
     </tr>
     {% endfor %}
     </table>

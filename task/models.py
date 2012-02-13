@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
 from django.utils.safestring import mark_safe
 
+from djangoratings.fields import RatingField
+
 from mathcontent.models import MathContent
 from permissions.models import PerObjectGroupPermission
 #from permissions.models import PerObjectUserPermission
@@ -37,6 +39,7 @@ class Task(models.Model):
     group_permissions = generic.GenericRelation(PerObjectGroupPermission)
     posts = PostGenericRelation()
     tags = TaggableManager(blank=True)
+#    quality_rating = RatingField(range=5, can_change_vote=True, allow_delete=True)
 
     solved_count = models.IntegerField(default=0)
     

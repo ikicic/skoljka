@@ -41,7 +41,7 @@ class Folder(models.Model):
 
     @staticmethod
     def _path_part_to_html(name, path):
-        return u'<a href="/folder%s/">%s</a>' % (path, name)
+        return u'<li><a href="/folder%s/">%s</a></li>' % (path, name)
     @staticmethod
     def _html_tree_node(name, path, depth):
         return u'<div style="padding-left:%dpx">&raquo; <a href="/folder%s/">%s</a></div>\n' % ((depth - 1) * 10, path, name)

@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<table width="60%" style="text-align:center;">
+<table width="60%" class="table-striped table-condensed" style="text-align: center;">
     <tr>
         <th width="30">#</th>
         <th>Ime</th>
@@ -31,8 +31,10 @@
 {% csrf_token %}
 {% for form in forms %}
     {{ form.as_p }}
-{% endfor %}   
-<input type="submit" value="Stvori novu grupu">
+{% endfor %}
+    <div class="actions">
+        <button type="submit" class="btn-primary">Stvori novu grupu</button>
+    </div>
 </form>
 
 {% endblock %}

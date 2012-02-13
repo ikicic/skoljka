@@ -2,16 +2,18 @@
 
 {% block title %}Pretrazivanje: {{ tag_string }}{% endblock %}
 
-
 {% block content %}
 
 <a href="javascript: history.go(-1)">« Vrati se</a><br>
 
 <h2>Pretraživanje</h2>
-<form action="/search/" method="get">
-    Tagovi:<br/>
-    {{ form.as_p }}
-    <input type="submit" value="Pretraži" />
+<form action="/search/" method="get" class="well">
+<table>
+    {{ form.as_table }}
+    <tr><td>
+        <button type="submit" class="btn-primary">Pretraži</button>
+    </td></tr>
+</table>
 </form>
 
 

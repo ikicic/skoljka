@@ -2,52 +2,60 @@
 
 <html>
     <head>
-        <link href="/static/base.css" rel="stylesheet" type="text/css" />
+<!--        <link href="/static/base.css" rel="stylesheet" type="text/css" /> -->
+<!--        <link href="/static/bootstrap.css" rel="stylesheet" type="text/css" /> -->
+        <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet" type="text/css">
         {% block header_list %} {% endblock %} {# put your css-files here #}
         <title>{% block title %}Školjka - bok!{% endblock %}</title>
     </head>
 <body>
 
-<div id="pagecontainer">
-    <div id="header">
-        Školjka
-    </div>
+<div class="row well">
+  <h1>Školjka</h1>
+</div>
 
-    <div id="maincontainer">
-        <div id="leftmenu">
-            <h4>Menu</h4>
+<div class="container-fluid">
+    <div class="row-fluid">
+      <div class="span3">
+        <div class="well sidebar-nav">
+          <ul class="nav nav-list">
             {% if user.is_authenticated %}
             Bok, {{ user|userlink }}!<br><br>
             {% endif %}
-            <a href="/">Početna</a><br>
-            <br>
-            <a href="/folder/">Arhiva</a><br>
+            <li class="nav-header">Menu</li>
+            <li><a href="/">Početna</a></li>
+
+            <li><a href="/folder/">Arhiva</a></li>
             {% block menu_folder_container %}{% endblock %}
             <br>
             {% if user.is_authenticated %}
-                <a href="/logout/">Odjava</a><br>
+                <li><a href="/logout/">Odjava</a></li>
                 <br>
-                <a href="/pm/">Inbox</a><br>
+               <li><a href="/pm/">Inbox</a></li>
             {% else %}
-                <a href="/login/">Prijava</a><br>
-                <a href="/register/">Registracija</a><br>
+               <li><a href="/login/">Prijava</a></li>
+               <li><a href="/register/">Registracija</a></li>
             {% endif %}
             <br>
-            <a href="/memberlist/">Popis korisnika</a><br>
-            <a href="/ranks/">Rang lista</a><br>
+           <li><a href="/memberlist/">Popis korisnika</a></li>
+           <li><a href="/ranks/">Rang lista</a></li>
             <br>
-            <a href="/usergroup/">Popis grupa</a><br>
-            <a href="/task/">Lista zadataka</a><br>
-            <a href="/solution/">Lista rješenja</a><br>
-            <a href="/search/">Pretraživanje</a><br>
+           <li><a href="/usergroup/">Popis grupa</a></li>
+           <li><a href="/task/">Lista zadataka</a></li>
+           <li><a href="/solution/">Lista rješenja</a></li>
+           <li><a href="/search/">Pretraživanje</a></li>
             <br>
+          </ul>
         </div>
+      </div>
 
-        <div id="maincontent">
-        {% block content %}
+      <div class="span9">
+        <div class="well">
+          {% block content %}
             <br><br><br>
-        {% endblock content %}
+          {% endblock content %}
         </div>
+      </div>
     </div>
 </div>
 

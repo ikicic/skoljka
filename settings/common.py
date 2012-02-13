@@ -30,11 +30,12 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.normpath(os.path.join(LOCAL_DIR, 'db.sqlite')),
-        'USER': '',
+        'ENGINE': 'django.db.backends.mysql',
+#        'NAME': os.path.normpath(os.path.join(LOCAL_DIR, 'db.sqlite')),
+        'NAME': 'skoljka',
+        'USER': 'root',
         'PASSWORD': '',
-        'HOST': '',
+        'HOST': 'localhost',
         'PORT': '',
     }
 }
@@ -148,6 +149,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
+    'bootstrap_toolkit',
     'debug_toolbar',
     'django_sorting',
     'pagination',
