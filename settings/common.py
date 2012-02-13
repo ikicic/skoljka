@@ -28,13 +28,18 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+try:
+    __mysql_pwd = open(os.path.normpath(os.path.join(LOCAL_DIR, 'mysql_pwd.txt'))).read().strip()
+except:
+    __mysql_pwd = 'asdf'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
 #        'NAME': os.path.normpath(os.path.join(LOCAL_DIR, 'db.sqlite')),
         'NAME': 'skoljka',
         'USER': 'root',
-        'PASSWORD': '',
+        'PASSWORD': __mysql_pwd,
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -47,7 +52,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Los_Angeles'
+TIME_ZONE = 'Europe/Zagreb'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -149,7 +154,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-    'bootstrap_toolkit',
     'debug_toolbar',
     'django_sorting',
     'pagination',
