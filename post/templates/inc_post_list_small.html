@@ -1,6 +1,6 @@
 <div class="post_list_small">
 {% for post in posts %}
-    <div class="post">
+    <div class="well">
         <span class="post_info">{{ post.author|userlink }} u {{ post.date_created }}</span><br>
         {{ post.content.render|safe }}
         {% if post.date_created != post.last_edit_time %}

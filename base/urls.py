@@ -5,6 +5,6 @@ from django.views.generic.simple import direct_to_template
 # get here.
 
 urlpatterns = patterns('',
-    (r'^$', direct_to_template, {'template': 'base.html'}),
+    (r'^$', 'base.views.homepage'),
     (r'robots\.txt$', direct_to_template, {'template': 'robots.txt', 'mimetype': 'text/plain'}),
 )

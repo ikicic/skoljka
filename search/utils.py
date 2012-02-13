@@ -55,11 +55,15 @@ def search_and_cache(tags):
     tag = Tag.objects.filter(name=tags[-1])
     # search shouldn't include itself
     cached_objects = cached_objects.filter(tag=tag).exclude(content_type=cache_content_type)
-
+    ids = cached_objects.values_list('id', flat=True)
+    
+    if not ids:         # MySQL doesn't like WHERE ... IN with empty list
+        return cache
+        
 # TODO: replace this SELECT with cached_objects query
-    query = 'INSERT INTO "search_searchcacheelement" ("object_id", "content_type_id", "cache_id")       \
-            SELECT "object_id", "content_type_id", %d FROM "taggit_taggeditem" WHERE "id" IN (%s)' %    \
-            (cache.id, ','.join((str(x) for x in cached_objects.values_list('id', flat=True))))
+    query = 'INSERT INTO search_searchcacheelement (object_id, content_type_id, cache_id)       \
+            SELECT object_id, content_type_id, %d FROM taggit_taggeditem WHERE id IN (%s)' %    \
+            (cache.id, ','.join([str(x) for x in ids]))
     print query
 
     cursor = connection.cursor()
