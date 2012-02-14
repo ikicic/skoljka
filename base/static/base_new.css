@@ -1,0 +1,15 @@
+tr.task_submitted td {
+    background-color: #6F6!important;
+}
+tr.task_hidden td, tr.group_hidden td {
+    background-color: #DDD!important;
+}
+pre {
+    display: inline;
+    background-color: #DDD;
+}
+img.latex_center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}

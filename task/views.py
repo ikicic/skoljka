@@ -154,6 +154,8 @@ def detail(request, id):
     task = get_object_or_404(Task, id=id)
     content_type = ContentType.objects.get_for_model(Task)
 
+    solved = request.user.is_authenticated() and Solution.objects.filter(author=request.user, task=task).exists()
+
     if not task.hidden or task.author == request.user:
         perm = ALL
     else:
@@ -169,6 +171,7 @@ def detail(request, id):
             'can_edit': EDIT in perm,
             'can_edit_permissions': EDIT_PERMISSIONS in perm,
             'content_type': content_type,
+            'solved': solved,
         }, context_instance=RequestContext(request))
         
 

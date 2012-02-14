@@ -8,7 +8,7 @@ from permissions.constants import VIEW
 import random
 
 def homepage(request):
-    tasks = list(Task.objects.for_user(request.user, VIEW).order_by('-id')[:10])
+    tasks = list(Task.objects.for_user(request.user, VIEW).distinct().order_by('-id')[:10])
     random.shuffle(tasks)
     
     return render_to_response('homepage.html', {

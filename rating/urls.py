@@ -1,0 +1,1 @@
+from django.conf.urls.defaults import patterns, include, urlurlpatterns = patterns('',    # ajax request    (r'^vote/(?P<object_id>\d+)/(?P<content_type_id>\d+)/(?P<name>[a-z_]+)/', 'rating.views.vote'))

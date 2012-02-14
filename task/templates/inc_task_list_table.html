@@ -2,6 +2,7 @@
 {% load sorting_tags %}
 
 {% load task_tags %}
+{% load rating_tags %}
 
 {% autosort tasks %}
 {% autopaginate tasks %}
@@ -10,13 +11,15 @@
     {{ tasks|multiple_task_link }}<br>
     <table width="100%" class="table-striped table-condensed" style="text-align: center;">
     <tr>
-        <th colspan="5">Lista zadataka</th>
+        <th colspan="7">Lista zadataka</th>
     </tr>
     <tr>
         <th width="50">{% anchor id # %}</th>
         <th>Naslov</th>
         <th>Tagovi</th>
         <th>{% anchor solved_count Rj. %}</th>
+        <th>{% anchor quality_rating_avg Kvaliteta %}</th>
+        <th>{% anchor difficulty_rating_avg Težina %}</th>
     </tr>
 
     {% for task in tasks|cache_task_tags %}
@@ -35,6 +38,8 @@
         {% else %}
             <td>0</td>
         {% endif %}
+        <td style="width:80px;">{{ task.quality_rating|rating_stars }}</td>
+        <td style="width:80px;">{{ task.difficulty_rating|rating_stars }}</td>
     </tr>
     {% endfor %}
     </table>

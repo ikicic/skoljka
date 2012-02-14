@@ -167,6 +167,7 @@ INSTALLED_APPS = (
     'permissions',
     'pm',
     'post',
+    'rating',
     'task',
     'search',
     'solution',

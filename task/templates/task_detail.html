@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load post_tags %}
+{% load rating_tags %}
 
 {% block title %}Pregled zadatka{% endblock %}
 
@@ -11,10 +12,16 @@
 <br><br>
 <div style="text-align:center;font-size:24px;">{{ task.name }}</div>
 <div style="float:left;">
+    {% if solved %}<span class="label label-success">Riješeno</span><br>{% endif %}
     <br>
+    {% if user.is_authenticated %}
+        {% rating_box "Kvaliteta" task.quality_rating %}
+        {% rating_box "Težina" task.difficulty_rating %}
+    {% endif %}
     <a href="/task/export/latex/{{ task.id }}/"><img src="/static/images/tex16.png" alt="LaTeX" title="Export to LaTeX"></a>
     <a href="/task/export/pdf/{{ task.id }}/"><img src="/static/images/pdf16.png" alt="PDF" title="Export to PDF"></a>
 </div>
+
 <div style="text-align:right;">
     Dodao: {{ task.author|userlink }}<br>
     {{ task.date_created|date:"E j, Y" }}<br>
@@ -28,7 +35,7 @@
 </div>
 
 <br>
-<div class="task_content">
+<div class="task_content well">
     {{ task.content.render }}
 </div>
 
