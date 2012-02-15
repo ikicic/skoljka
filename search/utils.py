@@ -72,24 +72,30 @@ def search_and_cache(tags):
 
     print 'ubacio u hash za', tag_string
     return cache
-    
-def search_tasks(tags=[], none_if_blank=True, user=None, show_hidden=False):
+
+
+# none_if_blank? zasto bi to bio posao ove funkcije
+def search_tasks(tags=[], none_if_blank=True, user=None, **kwargs):
     tags = split_tags(tags)
     if none_if_blank and not tags:
         return Task.objects.none()
     task_content_type = ContentType.objects.get_for_model(Task)
 
-    if not tags:
-        cache = None
-    else:
-        tags = sorted(tags)
-        cache = search_and_cache(tags)
-
-    if show_hidden:
+    if kwargs.get('show_hidden'):
         tasks = Task.objects.for_user(user, VIEW)
     else:
         tasks = Task.objects.filter(hidden=False)
+
+    if tags:
+        tags = sorted(tags)
+        cache = search_and_cache(tags)
+        ids = SearchCacheElement.objects.filter(cache=cache, content_type=task_content_type).values_list('object_id', flat=True)
+        tasks = tasks.filter(id__in=ids)
+
+        
+    if kwargs.get('quality_min') is not None: tasks = tasks.filter(quality_rating_avg__gte=kwargs['quality_min'])
+    if kwargs.get('quality_max') is not None: tasks = tasks.filter(quality_rating_avg__lte=kwargs['quality_max'])
+    if kwargs.get('difficulty_min') is not None: tasks = tasks.filter(difficulty_rating_avg__gte=kwargs['difficulty_min'])
+    if kwargs.get('difficulty_max') is not None: tasks = tasks.filter(difficulty_rating_avg__lte=kwargs['difficulty_max'])
     
-    ids = SearchCacheElement.objects.filter(cache=cache, content_type=task_content_type).values_list('object_id', flat=True)
-    
-    return tasks.filter(id__in=ids).distinct()
+    return tasks.distinct()

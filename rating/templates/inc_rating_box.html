@@ -2,8 +2,8 @@
 $(function(){
  $('.{{ m.field.name }}-star').rating({
   callback: function(v,l){
-   $(this.form).ajaxSubmit(function(s){
-    $('#{{ m.field.name }}-value').html(s);
+   $(this.form).ajaxSubmit({
+    target: '#{{ m.field.name }}-value'
    });
   }
  });

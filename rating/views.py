@@ -9,7 +9,7 @@ def vote(request, object_id, content_type_id, name):
     if not request.is_ajax() or request.method != 'POST' or name not in request.POST:
         raise Http404
         
-    value = request.POST[name]
+    value = request.POST[name]      # value == 0 for delete
     try:
         content_type = ContentType.objects.get_for_id(content_type_id)
         instance = content_type.get_object_for_this_type(id=object_id)

@@ -11,9 +11,7 @@ from post.generic import PostGenericRelation
 from rating.fields import RatingField
 from taggit.managers import TaggableManager
 
-QUALITY_RATING_TITLES = [u'Loš. Dosadan.', u'Ima i boljih.', u'Dobar zadatak.', u'Jako dobar. Zanimljiv.', u'Izvrstan. Vrlo zanimljiv.']
-DIFFICULTY_RATING_TITLES = [u'OŠ lakši', u'OŠ teži', u'SŠ lakši', u'SŠ teži', u'Srednje težine',
-    u'Shortlist 1/2', u'Shortlist 3/4', u'Shortlist 5/6', u'Shortlist 7/8', u'Nerješiv']
+from rating.constants import *
 
 # TODO: rename "author" to "added_by" (or add another column "added_by")
 # TODO: rename "name" to "title"
@@ -42,8 +40,8 @@ class Task(models.Model):
     group_permissions = generic.GenericRelation(PerObjectGroupPermission)
     posts = PostGenericRelation()
     tags = TaggableManager(blank=True)
-    quality_rating = RatingField(titles=QUALITY_RATING_TITLES)
-    difficulty_rating = RatingField(range=10, titles=DIFFICULTY_RATING_TITLES)
+    quality_rating = RatingField(**QUALITY_RATING_ATTRS)
+    difficulty_rating = RatingField(**DIFFICULTY_RATING_ATTRS)
 
     solved_count = models.IntegerField(default=0)
     

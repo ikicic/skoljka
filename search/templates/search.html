@@ -17,7 +17,7 @@
 </form>
 
 
-{% if tags %}
+{% if any %}
     <ul>
     {% for tag in tags %}
         <li><a href="/search/?q={{ tag }}">{{ tag }}</a></li>

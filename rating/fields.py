@@ -52,11 +52,17 @@ class RatingManager(models.Manager):
             score.sum -= vote.value
             vote.value = value
             
-        score.sum += vote.value
-        vote.save()
+        # TODO: pametnije ovo napraviti
+        if value == 0:
+            score.count -= 1
+            vote.delete()
+        else:
+            score.sum += vote.value
+            vote.save()
+        
         score.save()
         
-        setattr(self.instance, '%s_avg' % self.field.name, float(score.sum) / score.count)
+        setattr(self.instance, '%s_avg' % self.field.name, 0 if score.count == 0 else float(score.sum) / score.count)
         self.instance.save()
         
 
