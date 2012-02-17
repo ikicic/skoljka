@@ -35,5 +35,5 @@ def homepage(request):
         'latest_task': tasks[0],
         'recent_tasks': tasks[1:5],
         'recommend': recommend[1:],
-        'best_recommend': recommend[0],
+        'best_recommend': None if len(recommend) < 1 else recommend[0],
         }, context_instance=RequestContext(request))
