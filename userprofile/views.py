@@ -20,7 +20,7 @@ def profile(request, pk):
     
 
     user.profile.update_diff_distribution()
-    distribution = user.profile.get_normalized_diff_distribution(100.0)
+    distribution = user.profile.get_normalized_diff_distribution()
     if distribution:
         distribution = zip(DIFFICULTY_RATING_ATTRS['titles'], [int(x * 100) for x in distribution])
     
