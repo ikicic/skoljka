@@ -2,6 +2,35 @@
 
 {% block content %}
 
+{# TODO: DRY, napraviti tag ili nesto, ovo se ponavlja #}
+
+
+<div class="well" style="float:right;"><a href="/task/1/"><h3>Obavijesti</h3><br>(i objašnjenje zašto je sve čudno)</a></div>
+
+{% if recommend %}
+
+<h2>Preporuke</h2>
+<div class="row-fluid">
+    <div class="well">
+        <h4><a href="/task/{{ best_recommend.id }}/">{{ best_recommend.name }}</a></h4><br>
+        {{ best_recommend.content.render }}
+        <div style="text-align:right;color:gray;">{{ best_recommend.date_created|timesince }} ago</div>
+    </div>
+</div>
+<div class="row-fluid">
+    {% for x in recommend %}
+    <div class="span3">
+    <div class="well">
+        <center><a href="/task/{{ x.id }}/">{{ x.name }}</a></center><br>
+        <div style="text-align:right;color:gray;">{{ x.date_created|timesince }} ago</div>
+    </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+
+
 <h2>Nedavno objavljeni zadaci</h2>
 <div class="row-fluid">
     <div class="well">

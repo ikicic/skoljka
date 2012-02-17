@@ -1,10 +1,45 @@
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import Group
-from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.models import User, Group
+from django.db.models import Max
+from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 from userprofile.forms import UserCreationExtendedForm, UserProfileForm
+
+from rating.constants import DIFFICULTY_RATING_ATTRS
+
+@login_required
+def profile(request, pk):
+    # FIXME: vide se skrivene grupe
+    try:
+        user = User.objects.select_related('profile').get(pk=pk)
+    except:
+        raise Http404
+    
+
+    user.profile.update_diff_distribution()
+    distribution = user.profile.get_normalized_diff_distribution(100.0)
+    if distribution:
+        distribution = zip(DIFFICULTY_RATING_ATTRS['titles'], [int(x * 100) for x in distribution])
+    
+    return render_to_response('profile_detail.html', {
+        'profile': user,
+        'distribution': distribution,
+    }, context_instance=RequestContext(request))
+
+
+@permission_required('task.add_advanced')
+def refresh_score(request):
+    s = Solution.objects.values('author', 'task').annotate(Max('correctness_avg'))
+
+    # ... nedovrseno ...
+    
+    return render_to_response('profile_refresh_score.html', {
+        'solutions': s,
+    }, context_instance=RequestContext(request))
+
 
 # TODO: provjeriti postoji li grupa s tim imenom
 def register(request):

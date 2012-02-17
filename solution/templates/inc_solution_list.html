@@ -1,14 +1,23 @@
+{% load pagination_tags %}
+{% load sorting_tags %}
+
+{% load rating_tags %}
+
+{% autosort solutions %}
+{% autopaginate solutions %}
+
 {% if solutions %}
     <table width="100%" class="table-striped table-condensed" style="text-align: center;">
     <tr>
-        <th colspan="5">Lista rješenja</th>
+        <th colspan="6">Lista rješenja</th>
     </tr>
     <tr>
-        <th width="30">#</th>
+        <th width="30">{% anchor id # %}</th>
         <th>Vrijeme</th>
         <th>Zadatak</th>
         <th>Korisnik</th>
         <th>Rješenje</th>
+        <th>Točnost</th>
     </tr>
     {% for s in solutions %}
     <tr>
@@ -17,9 +26,11 @@
         <td><a href="/task/{{ s.task.id }}/">{{ s.task.name }}</a></td>
         <td>{{ s.author|userlink }}</a></td>
         <td><a href="/solution/{{ s.id }}/">{{ s.content.short }}</a></td>
+        <td style="width:80px;">{{ s.correctness|rating_stars:2.0 }}</td>
     </tr>
     {% endfor %}
     </table>
+    {% paginate %}
 {% else %}
     {% if empty_message %}{{ empty_message }}{% endif %}
 {% endif %}

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load post_tags %}
+{% load rating_tags %}
 
 {% block title %}Pregled rješenja{% endblock %}
 
@@ -8,20 +9,23 @@
 
 <a href="javascript: history.go(-1)">« Vrati se</a><br>
 
-Korisnik:<br>
-{{ solution.author|userlink }}<br><br>
-
+<br><br>
+<div style="float:left;">
+    {% if user.is_authenticated %}
+        {% rating_box "Točnost" solution.correctness %}
+    {% endif %}
+</div>
 <div style="float:right;text-align:right;">
     {{ solution.date_created }}<br>
     <a href="/solution/{{ solution.pk }}/edit/">Edit</a><br>
 </div>
 
 
-Zadatak:<br>
-<a href="/task/{{ solution.task_id }}/">{{ solution.task.name }}</a><br><br>
+<br><br><br>
+<i>Korisnik: {{ solution.author|userlink }}</i><br>
+<i>Zadatak: <a href="/task/{{ solution.task_id }}/">{{ solution.task.name }}</a></i><br><br>
+<div class="well">
 
-<br>
-<div id="solution_content">
     {{ solution.content.render|safe }}
 </div>
 

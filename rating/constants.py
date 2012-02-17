@@ -1,4 +1,5 @@
 ﻿# u __init__.py ili ovdje?
+# ili svaka komponenta svoje?
 
 QUALITY_RATING_ATTRS = {
     'range': 5,

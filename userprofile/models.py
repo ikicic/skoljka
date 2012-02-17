@@ -2,13 +2,41 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.template.loader import add_to_builtins
 
+from rating.constants import DIFFICULTY_RATING_ATTRS
+from task.models import Task
+from solution.models import SOLUTION_CORRECT_SCORE
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile')
     
     quote = models.CharField(max_length=200, blank=True)
     
     solved_count = models.IntegerField(default=0)
+    score = models.FloatField(default=0)
+    diff_distribution = models.CharField(max_length=100)
+    
+    # da vraca [] umjesto None?
+    def get_normalized_diff_distribution(self):
+        distribution = self.diff_distribution.split(',')
+        if len(distribution) == 1:
+            return None
+        
+        distribution = [int(x) for x in distribution]
+        total = sum(distribution)
 
+        return None if total == 0 else [float(x) / total for x in distribution]
+        
+        
+    def update_diff_distribution(self, commit=True):
+        tasks = Task.objects.filter(solution__author=self, solution__correctness_avg__gte=SOLUTION_CORRECT_SCORE).values('id', 'difficulty_rating_avg').distinct().order_by()
+
+        distribution = [0] * DIFFICULTY_RATING_ATTRS['range']
+        for x in tasks:
+            distribution[int(x['difficulty_rating_avg'] - 0.5)] += 1
+
+        self.diff_distribution = ','.join(map(str, distribution))
+        if commit:
+            self.save()
 
 
 # ovo navodno nije preporuceno, ali vjerujem da ce se 

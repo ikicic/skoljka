@@ -4,6 +4,9 @@ from django.views.generic import DetailView, ListView, TemplateView
 from django.contrib.auth.models import User
 
 urlpatterns = patterns('',
+# TODO: move to admin
+    (r'^refreshscore/$', 'userprofile.views.refresh_score'),
+
     (r'^memberlist/$', ListView.as_view(
         queryset=User.objects.select_related('profile'),
         context_object_name="user_list",
@@ -11,16 +14,11 @@ urlpatterns = patterns('',
     )),
     
     (r'^ranks/$', ListView.as_view(
-        queryset=User.objects.select_related('profile').order_by('-profile__solved_count'),
+        queryset=User.objects.select_related('profile').order_by('-profile__score', '-profile__solved_count'),
         context_object_name='users',
         template_name='ranks.html')),
 
-# FIXME: vide se skrivene grupe
-    (r'^profile/(?P<pk>\d+)/', DetailView.as_view(
-        queryset=User.objects.select_related('profile'),
-        context_object_name='profile',                # 'user' cannot be used
-        template_name='profile_detail.html')),
-    
+    (r'^profile/(?P<pk>\d+)/', 'userprofile.views.profile'),    
     (r'^register/$', 'userprofile.views.register'),
     (r'^register/complete/', TemplateView.as_view(template_name='registration_complete.html')),
     (r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
