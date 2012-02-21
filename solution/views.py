@@ -1,14 +1,65 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 from task.models import Task
-from solution.models import Solution
+from solution.models import Solution, STATUS
 from mathcontent.forms import MathContentForm
 
+# ... trenutacna implementacija rjesenja je dosta diskutabilna
 
+
+@login_required
+def mark(request, task_id):
+    if request.method != 'POST' or 'action' not in request.POST:
+        return HttpResponseForbidden('Not valid request')
+
+    action = request.POST['action']
+    if action not in ['blank', 'as_solved', 'todo']:
+        return HttpResponseForbidden(u'Action "%s" not valid' % action)
+
+    task = get_object_or_404(Task, pk=task_id)
+        
+    if action == 'official' and task.author != request.user and not request.user.has_perm('mark_as_official_solution'):
+        return HttpResponseForbidden(u'No permission to mark as official solution.')
+    
+    try:
+        solution = Solution.objects.get(task=task, author=request.user)
+        solution.status = STATUS[action]
+        solution.save()
+    except Solution.DoesNotExist:
+        Solution.objects.create(task=task, author=request.user, status=STATUS[action])
+
+    return HttpResponseRedirect('/task/%d/' % int(task_id))
+
+
+# odgovorno za official, i mijenjanje statusa iz solution -> view
+@login_required
+def edit_mark(request, solution_id):
+    if request.method != 'POST' or 'action' not in request.POST:
+        raise HttpResponseForbidden('Not valid request')
+    
+    action = request.POST['action']
+    sol = Solution.objects.filter(pk=solution_id)
+    
+    if action in ['0', '1']:
+        sol.update(is_official=int(action))
+        return HttpResponseRedirect('/solution/%d/' % int(solution_id))
+
+    if action in ['blank', 'as_solved', 'todo']:
+        sol.update(status=STATUS[action])
+        solution = get_object_or_404(Solution, pk=solution_id)
+        return HttpResponseRedirect('/task/%d/' % solution.task_id)
+
+    return HttpResponseForbidden(u'Action "%s" not valid' % action)
+        
+   
+    
+
+
+#TODO: provjeriti za dupla rjesenja
 #TODO: dogovoriti se oko imena ove funkcije, pa i template-a
 #TODO(ikicic): sto ako forma nije valid?
 @login_required
@@ -16,13 +67,15 @@ def submit(request, task_id=None, solution_id=None):
     if solution_id:
         solution = get_object_or_404(Solution, pk=solution_id)
         task = solution.task
-        math_content = solution.content
     elif task_id:
         task = get_object_or_404(Task, pk=task_id)
-        solution = Solution(task=task, author=request.user)
-        math_content = None
+        try:
+            solution = Solution.objects.get(task=task, author=request.user)
+        except Solution.DoesNotExist:
+            solution = Solution(task=task, author=request.user)
     else:
         raise Http404()
+    math_content = solution.content
     
     if request.method == 'POST':
         math_content_form = MathContentForm(request.POST, instance=math_content)
@@ -30,6 +83,7 @@ def submit(request, task_id=None, solution_id=None):
             math_content = math_content_form.save()
             
             solution.content = math_content
+            solution.status = STATUS['submitted']
             solution.save()
             
             task.solved_count = Solution.objects.values("author_id").filter(task=task).distinct().count()
@@ -54,8 +108,7 @@ def submit(request, task_id=None, solution_id=None):
 #   specific user if user_id is defined
 # If some ID is not defined, skips that condition.
 def solution_list(request, task_id=None, user_id=None):
-    # TODO(ikicic) research .objects vs .objects.all()
-    L = Solution.objects.all()
+    L = Solution.objects.exclude(status=STATUS['blank'])
     task = None
     author = None   # 'user' is template reserved word
     

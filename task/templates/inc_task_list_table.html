@@ -22,14 +22,8 @@
         <th>{% anchor difficulty_rating_avg Težina %}</th>
     </tr>
 
-    {% for task in tasks|cache_task_tags %}
-    {% if task.id in submitted_tasks %}
-    <tr class="task_submitted">
-    {% else %}{% if task.hidden %}
-    <tr class="task_hidden">
-    {% else %}
-    <tr>
-    {% endif %}{% endif %}
+    {% for task in tasks|cache_additional_info:user %}
+    <tr class="{% if task.cache_solution %}{{ task.cache_solution.get_html_info.tr_class }}{% else %}{% if task.hidden %}task_hidden{% endif %}{% endif %}">
         <td style="text-align:center;">{{ task.id }}</td>
         <td><a href="/task/{{ task.id }}/" class="title">{{ task.name }}</a></td>
         <td>{% if plus_exclude %}{{ task|tag_list:plus_exclude }}{% else %}{{ task|tag_list }}{% endif %}</td>

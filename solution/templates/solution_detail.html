@@ -12,12 +12,30 @@
 <br><br>
 <div style="float:left;">
     {% if user.is_authenticated %}
-        {% rating_box "Točnost" solution.correctness %}
+        {% if user == solution.author %}
+            Točnost: <div style="width:80px;">{{ solution.correctness|rating_stars:2.0 }}</div>
+        {% else %}
+            {% rating_box "Točnost" solution.correctness %}
+        {% endif %}
     {% endif %}
 </div>
 <div style="float:right;text-align:right;">
     {{ solution.date_created }}<br>
-    <a href="/solution/{{ solution.pk }}/edit/">Edit</a><br>
+    <form action="/solution/{{ solution.pk }}/edit/mark/" method="post">
+        {% csrf_token %}
+        <div class="btn-group">
+            <a class="btn btn-mini" href="/solution/{{ solution.pk }}/edit/">Edit</a>
+            {% if solution.is_official %}
+            <button class="btn btn-mini" name="action" value="0">Makni oznaku službenog</button>
+            {% else %}
+            <button class="btn btn-mini" name="action" value="1">Označi kao službeno</button>
+            {% endif %}            
+            <button class="btn btn-mini" name="action" value="blank" title="Staro rješenje će ostati spremljeno za ponovno slanje, ali neće biti inače vidljivo.">Izbriši rješenje</button>
+            <button class="btn btn-mini" name="action" value="as_solved" title="Tekst rješenja neće biti vidljiv.">Označi kao riješeno</button>
+            <button class="btn btn-mini" name="action" value="todo" title="Tekst rješenja neće biti vidljiv.">To Do</button>
+        </div>
+    </form>
+    {% if solution.is_official %}<span class="label label-info">Službeno rješenje</span>{% endif %}
 </div>
 
 

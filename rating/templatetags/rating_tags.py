@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 
 register = template.Library()
 
+# TODO: readonly parameter (view solution)
 @register.inclusion_tag('inc_rating_box.html', takes_context=True)
 def rating_box(context, text, manager):
     user_vote = manager.get_vote_for_user(context['request'].user)

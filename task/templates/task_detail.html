@@ -12,7 +12,7 @@
 <br><br>
 <div style="text-align:center;font-size:24px;">{{ task.name }}</div>
 <div style="float:left;">
-    {% if solved %}<span class="label label-success">Riješeno</span><br>{% endif %}
+    {% if not solution.is_blank %}<span class="label {{ solution.get_html_info.label_class }}">{{ solution.get_html_info.label_text }}</span><br>{% endif %}
     <br>
     {% if user.is_authenticated %}
         {% rating_box "Kvaliteta" task.quality_rating %}
@@ -34,13 +34,32 @@
     {% if can_edit_permissions %}<a href="/permissions/edit/{{ content_type.id }}/{{ task.id }}/">Edit Permissions</a><br>{% endif %}
 </div>
 
-<br>
+<br><br>
 <div class="task_content well">
     {{ task.content.render }}
 </div>
 
 <br><br><br>
-<a href="/task/{{ task.id }}/submit/">Pošalji rješenje</a><br>
+{% if solution.is_submitted %}
+<a href="/solution/{{ solution.id }}/">Otvori moje rješenje</a><br>
+{% else %}
+<form action="/task/{{ task.id }}/mark/" method="post">
+    {% csrf_token %}
+    <div class="btn-group">
+        <a href="/task/{{ task.id }}/submit/" class="btn">Pošalji rješenje</a>
+        {% if solution.is_as_solved %}
+        <button type="submit" name="action" value="blank" class="btn">Makni oznaku riješenog</button>
+        {% else %}
+        <button type="submit" name="action" value="as_solved" class="btn">Označi kao riješeno</button>
+        {% endif %}
+        {% if solution.is_todo %}
+        <button type="submit" name="action" value="blank" class="btn">Makni To Do oznaku</button>
+        {% else %}
+        <button type="submit" name="action" value="todo" class="btn">To Do</button>
+        {% endif %}
+    </div>
+</form>
+{% endif %}
 <a href="/solution/task/{{ task.id }}/">Pregledaj poslana rješenja</a><br>
 <br>
 <br>

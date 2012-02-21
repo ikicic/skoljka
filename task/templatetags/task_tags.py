@@ -5,14 +5,18 @@ from django.utils.safestring import mark_safe
 from taggit.models import TaggedItem
 from taggit.utils import parse_tags
 
+from solution.models import Solution
+
 import collections
 
 register = template.Library()
 
 @register.filter
-def cache_task_tags(tasks):
+def cache_additional_info(tasks, user):
     task_content_type = ContentType.objects.get_by_natural_key(app_label="task", model="task")
     ids = [x.id for x in tasks]
+    
+    # ----- tags -----
     tagovi = TaggedItem.objects.filter(content_type=task_content_type, object_id__in=ids).select_related('tag')
     tags = collections.defaultdict(list)
     for x in tagovi:
@@ -21,6 +25,13 @@ def cache_task_tags(tasks):
     for task in tasks:
         task._cache_tag_set = sorted(tags[task.id])
         
+    # ----- solutions ------
+    solution = Solution.objects.filter(author=user, task__id__in=ids)
+    sol = dict([(x.task_id, x) for x in solution])
+    for task in tasks:
+        task.cache_solution = sol.get(task.id)
+    # template doesn't allow this to be _cache_solution
+    
     return tasks
 
 @register.filter

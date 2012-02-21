@@ -130,7 +130,9 @@ def new(request, task_id=None):
                 if os.path.exists(filename):
                     os.remove()
             
-            return HttpResponseRedirect('/task/%d/' % task.id if edit else '/task/new/finish/')
+            # TODO: izbrisati task_new_finish.html i url
+            #return HttpResponseRedirect('/task/%d/' % task.id if edit else '/task/new/finish/')
+            return HttpResponseRedirect('/task/%d/' % task.id)
     else:
         task_form = TaskForm(instance=task)
         math_content_form = MathContentForm(instance=math_content)
@@ -143,6 +145,9 @@ def new(request, task_id=None):
         
 def task_list(request):
     tasks = Task.objects.for_user(request.user, VIEW).select_related('author').distinct()
+    # treba mi LEFT JOIN ON (task_task.id = solution_solution.task_id AND solution_solution.author_id = ##)
+    # sada se umjesto toga koristi .cache_additional_info()
+    # (slicno za tag-ove)
         
     return render_to_response( 'task_list.html', {
                 'tasks' : tasks,
@@ -154,7 +159,10 @@ def detail(request, id):
     task = get_object_or_404(Task, id=id)
     content_type = ContentType.objects.get_for_model(Task)
 
-    solved = request.user.is_authenticated() and Solution.objects.filter(author=request.user, task=task).exists()
+    try:
+        solution = request.user.is_authenticated() and Solution.objects.filter(author=request.user, task=task)[:1][0]
+    except (Solution.DoesNotExist, IndexError):
+        solution = None
 
     if not task.hidden or task.author == request.user:
         perm = ALL
@@ -171,7 +179,7 @@ def detail(request, id):
             'can_edit': EDIT in perm,
             'can_edit_permissions': EDIT_PERMISSIONS in perm,
             'content_type': content_type,
-            'solved': solved,
+            'solution': solution,
         }, context_instance=RequestContext(request))
         
 

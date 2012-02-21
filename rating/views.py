@@ -15,6 +15,12 @@ def vote(request, object_id, content_type_id, name):
         instance = content_type.get_object_for_this_type(id=object_id)
     except:
         raise Http404("Something's wrong")
+        
+        
+    specific = ["solution", "task"]
+    if content_type.app_label in specific and content_type.model in specific:
+        if name != "quality_rating" and instance.author == request.user:
+            raise Http404("Not allowed")
     
     manager = getattr(instance, name)
     manager.update(request.user, value)

@@ -25,8 +25,19 @@
         <td>{{ s.date_created|timesince }} ago</td>
         <td><a href="/task/{{ s.task.id }}/">{{ s.task.name }}</a></td>
         <td>{{ s.author|userlink }}</a></td>
-        <td><a href="/solution/{{ s.id }}/">{{ s.content.short }}</a></td>
+        {% if s.is_submitted %}
+        <td>{% if s.is_official %}<span class="label label-info">Službeno</span> {% endif %}<a href="/solution/{{ s.id }}/">{{ s.content.short }}</a></td>
         <td style="width:80px;">{{ s.correctness|rating_stars:2.0 }}</td>
+        {% else %}
+        <td>
+            {% if s.author == user %}<a href="/task/{{ s.task_id }}/submit/">{% endif %}
+                {% if s.is_as_solved %}{prazno}{% endif %}
+                {% if s.is_todo %}{to do}{% endif %}
+            {% if s.author == user %}</a>{% endif %}
+        </td>
+        <td width="width:80px;">&nbsp;</td>
+        {% endif %}
+        
     </tr>
     {% endfor %}
     </table>

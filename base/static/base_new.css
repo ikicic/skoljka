@@ -1,5 +1,17 @@
-tr.task_submitted td {
-    background-color: #6F6!important;
+tr.task_solved td {
+    background-color: #70FF70!important;
+}
+tr.task_submitted_not_rated td {
+    background-color: #FFC!important;
+}
+tr.task_as_solved td {
+    background-color: #AFA!important;
+}
+tr.task_wrong td {
+    background-color: #F99!important;
+}
+tr.task_todo td {
+    background-color: #8FF!important;
 }
 tr.task_hidden td, tr.group_hidden td {
     background-color: #DDD!important;
