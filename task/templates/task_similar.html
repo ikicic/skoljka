@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% load task_tags %}
+
+{% block title %}Slični zadaci{% endblock %}
+
+{% block content %}
+
+<a href="javascript: history.go(-1)">« Vrati se</a>
+
+{% task_small_box task %}
+
+<h2>Slični zadaci</h2>
+
+{% for t in similar|cache_additional_info:user %}
+    {% cycle '<div class="row-fluid">' '' %}
+    {% task_small_box t 'span6' 'similar/' %}
+    {% cycle '' '</div>' %}
+{% endfor %}
+
+
+{% endblock content %}

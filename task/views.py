@@ -2,6 +2,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -9,11 +10,12 @@ from django.template import RequestContext
 from pagination.paginator import InfinitePaginator
 from taggit.utils import parse_tags
 
-from task.models import Task
+from task.models import Task, SimilarTask
 from task.forms import TaskForm, TaskAdvancedForm
 
 from permissions.constants import ALL, EDIT, VIEW, EDIT_PERMISSIONS
 from permissions.utils import get_permissions_for_object_by_id
+from recommend.utils import task_event
 from search.utils import update_search_cache
 from solution.models import Solution
 from solution.views import get_user_solved_tasks
@@ -23,6 +25,79 @@ from mathcontent.models import MathContent
 
 import os, sys, codecs
 
+# TODO: promijeniti nacin na koji se Task i MathContent generiraju.
+# vrijednosti koje ne ovise o samom formatu se direktno trebaju
+# postaviti na vrijednosti iz forme
+
+@transaction.commit_on_success
+@permission_required('task.add_advanced')
+def advanced_new(request):
+    if request.method == 'POST':
+        task_form = TaskAdvancedForm(request.POST)
+        math_content_form = MathContentForm(request.POST)
+        
+        if task_form.is_valid() and math_content_form.is_valid():
+            task_template = task_form.save(commit=False)
+            math_content_template = math_content_form.save(commit=False)            
+            
+            from collections import defaultdict
+            dictionary = defaultdict(unicode)
+
+            from xml.dom.minidom import parseString
+            from xml.dom.minidom import Node
+            dom = parseString(math_content_template.text.encode('utf-8'))
+            # Xml -> <info> ... </info>
+            
+            for x in dom.firstChild.childNodes:
+                if x.nodeType == Node.TEXT_NODE:
+                    continue
+
+                print x
+                if x.nodeName != 'content':
+                    value = x.nodeValue or ''
+                    if x.firstChild:
+                        value += x.firstChild.nodeValue or ''
+                    dictionary[x.nodeName] = value
+                    print (u'Postavljam varijablu "%s" na "%s"' % (x.nodeName, x.nodeValue)).encode('utf-8')
+
+                if x.nodeName == 'content':
+                    print (u'Dodajem zadatak "%s" s tagovima "%s"' % (task_template.name % dictionary, task_form.cleaned_data['_tags'] % dictionary)).encode('utf-8')
+                    value = x.nodeValue or ''
+                    if x.firstChild:
+                        value += x.firstChild.nodeValue or ''
+                    math_content = MathContent()
+                    math_content.text = value     # should be safe
+                    math_content.save()
+                    print 'uspio dodati math_content'
+                
+                    task = Task()
+                    task.name = task_template.name % dictionary
+                    task.author = request.user
+                    task.content = math_content
+# TODO: automatizirati .hidden: (vidi TODO na vrhu funkcije)
+                    task.hidden = task_template.hidden
+                    task.save()
+
+                    tags = parse_tags(task_form.cleaned_data['_tags'] % dictionary)
+                    task.tags.set(*tags)
+                    update_search_cache(task, [], tags)
+                
+            return HttpResponseRedirect('/task/new/finish/')
+    else:
+        task_form = TaskAdvancedForm()
+        math_content_form = MathContentForm()
+
+    return render_to_response( 'task_new.html', {
+                'forms': [task_form, math_content_form],
+                'action_url': request.path,
+                'advanced': True,
+            }, context_instance=RequestContext(request),
+        )
+
+
+################################################
+# ovo je stara verzija, sa starim formatom
+
 # TODO: maknuti debug s vremenom
 def _advanced_new_parse(s, dictionary):
     print 'primio', s
@@ -30,13 +105,8 @@ def _advanced_new_parse(s, dictionary):
     print 'vracam', s
     return s
 
-
-# TODO: promijeniti nacin na koji se Task i MathContent generiraju.
-# vrijednosti koje ne ovise o samom formatu se direktno trebaju
-# postaviti na vrijednosti iz forme
-
 @permission_required('task.add_advanced')
-def advanced_new(request):
+def old_advanced_new(request):
     if request.method == 'POST':
         task_form = TaskAdvancedForm(request.POST)
         math_content_form = MathContentForm(request.POST)
@@ -93,6 +163,9 @@ def advanced_new(request):
                 'advanced': True,
             }, context_instance=RequestContext(request),
         )
+
+# kraj starog koda
+#########################################################
 
 
 @login_required
@@ -164,14 +237,23 @@ def detail(request, id):
     except (Solution.DoesNotExist, IndexError):
         solution = None
 
-    if not task.hidden or task.author == request.user:
+    if task.author == request.user or request.user.is_staff:
         perm = ALL
     else:
         perm = get_permissions_for_object_by_id(request.user, task.id, content_type)
+        
+    if not task.hidden:
+        perm.append(VIEW)
 
     # TODO: nekakav drugi signal
     if VIEW not in perm:
         raise Http404
+
+    # TODO: dovrsiti, ovo je samo tmp
+    task.update_similar_tasks(1)
+    
+    if request.user.is_authenticated():
+        task_event(request.user, task, 'view')
         
     # TODO: DRY content_type
     return render_to_response('task_detail.html', {
@@ -181,7 +263,24 @@ def detail(request, id):
             'content_type': content_type,
             'solution': solution,
         }, context_instance=RequestContext(request))
-        
+
+def similar(request, id):
+    task = get_object_or_404(Task, pk=id)
+    
+    # TODO: dovrsiti, ovo je samo tmp
+    task.update_similar_tasks(1)
+    if request.user.is_authenticated():
+        task_event(request.user, task, 'view')
+    
+    
+    similar_ids = list(SimilarTask.objects.filter(task=task).order_by('-score')[:6].values_list('similar_id', flat=True))
+    print similar_ids
+    similar = Task.objects.filter(id__in=similar_ids)
+    
+    return render_to_response('task_similar.html', {
+            'task': task,
+            'similar': similar,
+        }, context_instance=RequestContext(request))
 
 # TODO: not allowed message        
 def detail_multiple(request, ids):

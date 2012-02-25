@@ -9,6 +9,7 @@ from taggit.managers import TaggableManager
 from permissions.constants import VIEW
 from permissions.models import PerObjectGroupPermission
 #from permissions.models import PerObjectUserPermission
+from task.models import Task
 from search.utils import search_tasks
 from utils.tags import tag_list_to_html
 from utils.string_operations import list_strip
@@ -34,6 +35,8 @@ class Folder(models.Model):
     hidden = models.BooleanField(default=False)
 #    user_permissions = generic.GenericRelation(PerObjectUserPermission)
     group_permissions = generic.GenericRelation(PerObjectGroupPermission)
+    
+    tasks = models.ManyToManyField(Task, blank=True)
     objects = FolderManager();
 
     def __unicode__(self):
@@ -42,6 +45,7 @@ class Folder(models.Model):
     @staticmethod
     def _path_part_to_html(name, path):
         return u'<li><a href="/folder%s/">%s</a></li>' % (path, name)
+
     @staticmethod
     def _html_tree_node(name, path, depth):
         return u'<div style="padding-left:%dpx">&raquo; <a href="/folder%s/">%s</a></div>\n' % ((depth - 1) * 10, path, name)
@@ -49,14 +53,24 @@ class Folder(models.Model):
     def tag_list_html(self):
         return tag_list_to_html(self.tag_filter)
         
-
+    def get_full_path(self):
+        if self.parent is None:
+            return ''
+        return '%s%s/' % (self.parent.get_full_path(), self.slug)
+        
     #SPEED: optimizirati queryje ovdje?
     def get_template_data(self, path, depth, user):
+        if self.tag_filter:
+            tasks = search_tasks(tags=self.tag_filter, user=user, show_hidden=True)
+        else:
+            tasks = self.tasks.all()
+            
         return {
+            'folder': self,
             'name': self.name,
             'tag_list_html': tag_list_to_html(self.tag_filter),
             'child': [{'name': x.name, 'tag_list_html': x.tag_list_html, 'slug': x.slug} for x in Folder.objects.for_user(user, VIEW).filter(parent=self).distinct()],
-            'tasks': search_tasks(tags=self.tag_filter, user=user, show_hidden=True),
+            'tasks': tasks,
             'path_html': Folder._path_part_to_html(self.name, path),
             'menu_folder_tree': '', #Folder._html_tree_node(self.name, path, depth) if self.parent else u'',
         }

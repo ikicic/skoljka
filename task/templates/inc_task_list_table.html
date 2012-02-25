@@ -9,11 +9,25 @@
 
 {% if tasks %}
     {{ tasks|multiple_task_link }}<br>
+    
+    {% if user.profile.selected_folder %}
+        <script>
+            $(function(){
+             $('.folder_checkbox').click(function(){
+              $.ajax({
+                url: '/folder/select/task/' + $(this).parent().next().html() + '/'
+              });
+             });
+            });
+        </script>
+    {% endif %}
+    
     <table width="100%" class="table-striped table-condensed" style="text-align: center;">
     <tr>
-        <th colspan="7">Lista zadataka</th>
+        <th colspan="{% if user.profile.selected_folder %}8{% else %}7{% endif %}">Lista zadataka</th>
     </tr>
     <tr>
+        {% if user.profile.selected_folder %}<th width="50">U mapi</th>{% endif %}
         <th width="50">{% anchor id # %}</th>
         <th>Naslov</th>
         <th>Tagovi</th>
@@ -24,6 +38,9 @@
 
     {% for task in tasks|cache_additional_info:user %}
     <tr class="{% if task.cache_solution %}{{ task.cache_solution.get_html_info.tr_class }}{% else %}{% if task.hidden %}task_hidden{% endif %}{% endif %}">
+        {% if user.profile.selected_folder %}
+            <td><input type="checkbox" class="folder_checkbox"{% if task.is_in_folder %} checked="checked"{% endif %}></td>
+        {% endif %}
         <td style="text-align:center;">{{ task.id }}</td>
         <td><a href="/task/{{ task.id }}/" class="title">{{ task.name }}</a></td>
         <td>{% if plus_exclude %}{{ task|tag_list:plus_exclude }}{% else %}{{ task|tag_list }}{% endif %}</td>

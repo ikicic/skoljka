@@ -1,0 +1,9 @@
+{% load task_tags %}
+
+<div class="{{ div_class }}">
+    <div class="well">
+        <div style="float:right;">{{ task|tag_list }}</div>
+        <h4><a href="/task/{{ task.id }}/{{ url_suffix }}">{{ task.name }}</a></h4><br>
+        {{ task.content.render }}
+    </div>
+</div>

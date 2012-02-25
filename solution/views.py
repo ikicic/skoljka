@@ -43,6 +43,8 @@ def edit_mark(request, solution_id):
     
     action = request.POST['action']
     sol = Solution.objects.filter(pk=solution_id)
+    if sol.author != request.user and not request.user.is_staff:
+        raise HttpResponseForbidden('Not allowed to modify this solution.')
     
     if action in ['0', '1']:
         sol.update(is_official=int(action))

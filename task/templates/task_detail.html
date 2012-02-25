@@ -2,6 +2,7 @@
 
 {% load post_tags %}
 {% load rating_tags %}
+{% load task_tags %}
 
 {% block title %}Pregled zadatka{% endblock %}
 
@@ -12,7 +13,7 @@
 <br><br>
 <div style="text-align:center;font-size:24px;">{{ task.name }}</div>
 <div style="float:left;">
-    {% if not solution.is_blank %}<span class="label {{ solution.get_html_info.label_class }}">{{ solution.get_html_info.label_text }}</span><br>{% endif %}
+    {% if solution and not solution.is_blank %}<span class="label {{ solution.get_html_info.label_class }}">{{ solution.get_html_info.label_text }}</span><br>{% endif %}
     <br>
     {% if user.is_authenticated %}
         {% rating_box "Kvaliteta" task.quality_rating %}
@@ -25,11 +26,7 @@
 <div style="text-align:right;">
     Dodao: {{ task.author|userlink }}<br>
     {{ task.date_created|date:"E j, Y" }}<br>
-    {% if task.tags.all %}
-        [{% for tag in task.tags.all %}
-            <a href="/search/?q={{ tag.name }}" class="tag">{{ tag.name }}</a>{% if not forloop.last %} | {% endif %}
-        {% endfor %}]<br>
-    {% endif %}
+    {{ task|tag_list }}
     {% if can_edit %}<a href="/task/{{ task.pk }}/edit/">Edit</a><br>{% endif %}
     {% if can_edit_permissions %}<a href="/permissions/edit/{{ content_type.id }}/{{ task.id }}/">Edit Permissions</a><br>{% endif %}
 </div>
@@ -61,6 +58,7 @@
 </form>
 {% endif %}
 <a href="/solution/task/{{ task.id }}/">Pregledaj poslana rješenja</a><br>
+<a href="/task/{{ task.id }}/similar/">Slični zadaci</a><br>
 <br>
 <br>
 <br>

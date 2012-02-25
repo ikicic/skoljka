@@ -120,6 +120,8 @@ def generate_png(eq, format):
     cmd = "dvipng -bg Transparent --gamma 1.5 -D 120 --depth* -T tight --strict -o %s.png %s" % (filename, filename)
     status, stdout = getstatusoutput(cmd)
     
+    # print status, stdout
+    
     depth_re = re.compile(r'\[\d+ depth=(-?\d+)\]')
     for line in stdout.splitlines():
         m = depth_re.match(line)

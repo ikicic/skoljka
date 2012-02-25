@@ -62,3 +62,7 @@ class Solution(models.Model):
         return self.status == STATUS['todo']
     def is_blank(self):
         return self.status == STATUS['blank']   # postoji, ali blank
+        
+# nuzno(?) da bi queryji koristili JOIN, a ne subqueryje
+# TODO: neki prikladniji naziv za related_name
+User.add_to_class('solutions', models.ManyToManyField(Task, through=Solution, related_name='solutions_by'))

@@ -2,9 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.template.loader import add_to_builtins
 
+from taggit.models import Tag
+
+from folder.models import Folder
 from rating.constants import DIFFICULTY_RATING_ATTRS
 from task.models import Task
 from solution.models import SOLUTION_CORRECT_SCORE
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile')
@@ -14,6 +18,8 @@ class UserProfile(models.Model):
     solved_count = models.IntegerField(default=0)
     score = models.FloatField(default=0)
     diff_distribution = models.CharField(max_length=100)
+    
+    selected_folder = models.ForeignKey(Folder, blank=True, null=True)
     
     # da vraca [] umjesto None?
     def get_normalized_diff_distribution(self):
@@ -28,7 +34,7 @@ class UserProfile(models.Model):
         
         
     def update_diff_distribution(self, commit=True):
-        tasks = Task.objects.filter(solution__author=self, solution__correctness_avg__gte=SOLUTION_CORRECT_SCORE).values('id', 'difficulty_rating_avg').distinct().order_by()
+        tasks = Task.objects.filter(hidden=False, solution__author=self, solution__correctness_avg__gte=SOLUTION_CORRECT_SCORE).values('id', 'difficulty_rating_avg').distinct().order_by()
 
         distribution = [0] * DIFFICULTY_RATING_ATTRS['range']
         for x in tasks:
@@ -37,6 +43,7 @@ class UserProfile(models.Model):
         self.diff_distribution = ','.join(map(str, distribution))
         if commit:
             self.save()
+
 
 
 # ovo navodno nije preporuceno, ali vjerujem da ce se 

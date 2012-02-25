@@ -6,6 +6,7 @@ urlpatterns = patterns('',
     (r'^$', 'task.views.task_list'),
 
     (r'^(?P<id>\d+)/$', 'task.views.detail'),
+    (r'^(?P<id>\d+)/similar/$', 'task.views.similar'),
     (r'^multiple/(?P<ids>[0-9,]+)/$', 'task.views.detail_multiple'),
 
     (r'^new/$', 'task.views.new'),

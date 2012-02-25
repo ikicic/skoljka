@@ -11,6 +11,10 @@ import collections
 
 register = template.Library()
 
+@register.inclusion_tag('inc_task_small_box.html')
+def task_small_box(task, div_class='', url_suffix=''):
+    return {'task': task, 'div_class': div_class, 'url_suffix': url_suffix}
+
 @register.filter
 def cache_additional_info(tasks, user):
     task_content_type = ContentType.objects.get_by_natural_key(app_label="task", model="task")
@@ -30,8 +34,15 @@ def cache_additional_info(tasks, user):
     sol = dict([(x.task_id, x) for x in solution])
     for task in tasks:
         task.cache_solution = sol.get(task.id)
-    # template doesn't allow this to be _cache_solution
-    
+
+    # ----- folder edit -----
+    if user.is_authenticated():
+        folder = user.profile.selected_folder
+        if folder is not None:
+            selected_tasks = folder.tasks.filter(id__in=ids).values_list('id', flat=True)
+            for task in tasks:
+                task.is_in_folder = task.id in selected_tasks
+        
     return tasks
 
 @register.filter
@@ -50,7 +61,7 @@ def tag_list(task, plus_exclude=None):
     plus = u'<a href="/search/?q=%(tag)s">%(tag)s</a> <a href="/search/?q=' + add + ',%(tag)s">+</a>'
 
     v = [ (no_plus if (not plus_exclude or tag.lower() in plus_exclude_lower) else plus) % {'tag': tag} for tag in task._cache_tag_set]
-    return mark_safe(u' | '.join(v))
+    return mark_safe('<div class="tag_list">%s</div>' % u' | '.join(v))
 
     
 @register.filter
