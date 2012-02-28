@@ -169,6 +169,7 @@ INSTALLED_APPS = (
     'post',
     'rating',
     'recommend',
+    'tags',
     'task',
     'search',
     'solution',

@@ -4,7 +4,7 @@ from django.contrib.contenttypes import generic
 from django.template.defaultfilters import slugify
 
 from model_utils.managers import InheritanceManager
-from taggit.managers import TaggableManager
+from tags.managers import TaggableManager
 
 from permissions.constants import VIEW
 from permissions.models import PerObjectGroupPermission

@@ -2,7 +2,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.utils.safestring import mark_safe
 
-from taggit.models import TaggedItem
+from tags.models import TaggedItem
 from taggit.utils import parse_tags
 
 from solution.models import Solution
@@ -30,10 +30,11 @@ def cache_additional_info(tasks, user):
         task._cache_tag_set = sorted(tags[task.id])
         
     # ----- solutions ------
-    solution = Solution.objects.filter(author=user, task__id__in=ids)
-    sol = dict([(x.task_id, x) for x in solution])
-    for task in tasks:
-        task.cache_solution = sol.get(task.id)
+    if user.is_authenticated():
+        solution = Solution.objects.filter(author=user, task__id__in=ids)
+        sol = dict([(x.task_id, x) for x in solution])
+        for task in tasks:
+            task.cache_solution = sol.get(task.id)
 
     # ----- folder edit -----
     if user.is_authenticated():

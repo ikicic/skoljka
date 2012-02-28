@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.template.loader import add_to_builtins
 
-from taggit.models import Tag
+from tags.models import Tag
 
 from folder.models import Folder
 from rating.constants import DIFFICULTY_RATING_ATTRS

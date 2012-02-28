@@ -7,7 +7,7 @@ from search.models import SearchCache, SearchCacheElement
 from permissions.constants import VIEW
 from task.models import Task
 
-from taggit.models import Tag, TaggedItem
+from tags.models import Tag, TaggedItem
 from taggit.utils import parse_tags
 
 
@@ -61,8 +61,8 @@ def search_and_cache(tags):
         return cache
         
 # TODO: replace this SELECT with cached_objects query
-    query = 'INSERT INTO search_searchcacheelement (object_id, content_type_id, cache_id)       \
-            SELECT object_id, content_type_id, %d FROM taggit_taggeditem WHERE id IN (%s)' %    \
+    query = 'INSERT INTO search_searchcacheelement (object_id, content_type_id, cache_id)   \
+            SELECT object_id, content_type_id, %d FROM tags_taggeditem WHERE id IN (%s)' %  \
             (cache.id, ','.join([str(x) for x in ids]))
     print query
 
@@ -70,7 +70,7 @@ def search_and_cache(tags):
     cursor.execute(query)
     transaction.commit_unless_managed()
 
-    print 'ubacio u hash za', tag_string
+    #print 'ubacio u hash za', tag_string
     return cache
 
 

@@ -9,7 +9,7 @@ from permissions.models import PerObjectGroupPermission
 #from permissions.models import PerObjectUserPermission
 from post.generic import PostGenericRelation
 from rating.fields import RatingField
-from taggit.managers import TaggableManager
+from tags.managers import TaggableManager
 
 from rating.constants import *
 from task.utils import task_similarity
@@ -20,6 +20,12 @@ MAX_SIMILAR_TASKS = 20
 
 # TODO: rename "author" to "added_by" (or add another column "added_by")
 # TODO: rename "name" to "title"
+
+# ovdje ili u recommend?
+class SimilarTask(models.Model):
+    task = models.ForeignKey('Task', db_index=True, related_name='from')
+    similar = models.ForeignKey('Task', db_index=True, related_name='to')
+    score = models.FloatField(db_index=True)
 
 class TaskPermissionManager(models.Manager):
     def for_user(self, user, permission_type):
@@ -47,6 +53,7 @@ class Task(models.Model):
     tags = TaggableManager(blank=True)
     quality_rating = RatingField(**QUALITY_RATING_ATTRS)
     difficulty_rating = RatingField(**DIFFICULTY_RATING_ATTRS)
+    similar = models.ManyToManyField('self', through=SimilarTask, related_name='similar_backward', symmetrical=False)
 
     solved_count = models.IntegerField(default=0)
     
@@ -101,10 +108,3 @@ class Task(models.Model):
             SimilarTask.objects.filter(id__in=to_delete).delete()
                 
             print 'IZBACUJEM', to_delete
-    
-
-# ovdje ili u recommend?
-class SimilarTask(models.Model):
-    task = models.ForeignKey(Task, db_index=True)
-    similar = models.ForeignKey(Task, db_index=True, related_name='similar_backward')
-    score = models.FloatField(db_index=True)

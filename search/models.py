@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 
-from taggit.managers import TaggableManager
+from tags.managers import TaggableManager
 
 class SearchCache(models.Model):
     tag_string = models.CharField(max_length=100, unique=True)

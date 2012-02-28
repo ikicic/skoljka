@@ -1,7 +1,7 @@
 from django.db.models import F, Sum
 from django.contrib.contenttypes.models import ContentType
 
-from taggit.models import TaggedItem
+from tags.models import TaggedItem
 
 from rating.constants import DIFFICULTY_RATING_ATTRS
 from recommend.models import UserTagScore, UserRecommendation
@@ -24,15 +24,11 @@ def task_event(user, task, action):
 
 
 def user_task_score(user, task):
-    content_type = ContentType.objects.get_for_model(task)
-
-    tag_ids = TaggedItem.objects.filter(content_type=content_type, object_id=task.id).values_list('tag_id', flat=True)
-    if len(tag_ids) == 0:
-        return 0
+    tags = task.tags.only('id', 'weight')
 
     diff = task.difficulty_rating_avg
     
-    tag_score = UserTagScore.objects.filter(user=user, tag__in=tag_ids)
+    tag_score = UserTagScore.objects.filter(user=user, tag__in=tags)
     num = den = 0
     
     for x in tag_score:
@@ -46,7 +42,7 @@ def refresh_user_information(user):
     content_type = ContentType.objects.get_for_model(Task)
 
     solution = Solution.objects.filter(author=user, status__gt=STATUS['blank'], task__difficulty_rating_avg__gt=0).select_related('task')
-    tags = TaggedItem.objects.filter(content_type=content_type, object_id__in=solution.values_list('task__id', flat=True))
+    tags = TaggedItem.objects.filter(content_type=content_type, object_id__in=solution.values_list('task__id', flat=True)).select_related('tag')
     
     solution_by_task = dict(((x.task.id, x) for x in solution))
         
@@ -64,7 +60,7 @@ def refresh_user_information(user):
     for x in tags:
         t = tags_info[x.tag_id]
         s = solution_by_task[x.object_id]
-        w = 1 * get_solution_weight(s.date_created)
+        w = x.tag.weight * get_solution_weight(s.date_created)
         diff = s.task.difficulty_rating_avg
         
         t.sum += w * diff
@@ -81,10 +77,15 @@ def refresh_user_information(user):
             tag.variance = 0.8
         tag.save()
 
-def recommend_task(user, task):
+def recommend_task(user, task, recursion=2):
     score = user_task_score(user, task)
     if score > 0:
         object, created = UserRecommendation.objects.get_or_create(user=user, task=task, defaults={'score': score})
         if not created:
             object.score = score
             object.save()
+        if recursion > 0:
+            # TODO: maknuti order by rand()
+            for x in task.similar.select_related('similar').order_by('?')[:recursion]:
+                print 'dodajem slicni zadatak %s preko %s slicnosti %f' % (x, task, 1.0)
+                recommend_task(user, x, recursion=0)

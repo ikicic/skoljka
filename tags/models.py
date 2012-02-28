@@ -1,0 +1,28 @@
+from django.db import models
+from django.utils.translation import ugettext_lazy as _
+
+import taggit
+
+class Tag(taggit.models.TagBase):
+    weight = models.FloatField(default=1.0)
+    hidden = models.BooleanField(default=False)     # jos se ne koristi
+
+    class Meta:
+        verbose_name = _("Tag")
+        verbose_name_plural = _("Tags")
+        
+    def __unicode__(self):
+        return '%s (%.1f)' % (self.name, self.weight)
+
+class TaggedItemBase(taggit.models.ItemBase):
+    tag = models.ForeignKey(Tag, related_name="%(app_label)s_%(class)s_items")
+
+    class Meta:
+        abstract = True
+        
+    # missing tags_for()    
+    
+class TaggedItem(taggit.models.GenericTaggedItemBase, TaggedItemBase):
+    class Meta:
+        verbose_name = _("Tagged Item")
+        verbose_name_plural = _("Tagged Items")    
