@@ -1,0 +1,1 @@
+from django import templatefrom django.utils.safestring import mark_saferegister = template.Library()@register.filterdef grouplink(group):    return mark_safe(u'<a href="/usergroup/%d/">%s</a>' % (group.id, group.name))

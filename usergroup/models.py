@@ -43,7 +43,8 @@ class UserGroup(models.Model):
     hidden = models.BooleanField(default=False)
 
     member_count = models.IntegerField(default=0)
-    
+
+    # DEPRECATED
     def __unicode__(self):
         return mark_safe(u'[<a href="/usergroup/%d/">%s</a>]' % (self.group_id, self.group.name))
     

@@ -25,7 +25,7 @@ def new(request, rec=None):
             recipients = message_form.cleaned_data['list']
 
             for recipient in recipients:
-                r = MessageRecipient(message=message, content_object=recipient)
+                r = MessageRecipient(message=message, group=recipient)
                 r.save()
                 
             return HttpResponseRedirect('/pm/outbox/')
@@ -42,7 +42,8 @@ def new(request, rec=None):
 #TODO: optimizirati
 @login_required
 def inbox(request):
-    pm = MessageRecipient.objects.inbox(request.user).select_related().order_by('-id')
+    #pm = MessageRecipient.objects.inbox(request.user).select_related().order_by('-id')
+    pm = MessageContent.objects.filter(recipients__group__user=request.user).select_related('author', 'content').order_by('-id').distinct()
     return render_to_response('pm_inbox.html', {
             'pm': pm,
         }, context_instance=RequestContext(request))

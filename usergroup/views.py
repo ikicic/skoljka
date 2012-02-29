@@ -17,6 +17,10 @@ from usergroup.models import UserGroup, GroupExtended
 @login_required
 def detail(request, group_id=None):
     group = get_object_or_404(Group.objects.select_related('data'), id=group_id)
+    
+    # FIXME: pipkavo
+    if group.data is None:
+        return HttpResponseRedirect('/profile/%d/' % group.user_set.all()[0].id)
 
     if group.data.author == request.user:
         perm = ALL

@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
+{% load pagination_tags %}
+
 {% load pm_tags %}
+{% load usergroup_tags %}
 
 {% block title %}Inbox{% endblock %}
 
@@ -22,24 +25,29 @@
 <a href="/pm/new/">Pošalji novu poruku</a><br><br>
 {% endif %}
 
-{% for m in pm %}
+
+{% autopaginate pm 5 %}
+
+{% for m in pm|cache_pm_info %}
 <div class="well">
-    {% if m.message.author == user %}
+    {% if m.author == user %}
         Tvoja poruka
     {% else %}
-        Poruka od {{ m.message.author|userlink }}
+        Poruka od {{ m.author|userlink }}
     {% endif %}
     za
-    {% for r in m.message.recipients.all %}
-        {{ r.content_object|recipientlink }}
+    {% for r in m.cache_recipients %}
+        {{ r|grouplink }}{% if not forloop.last %},{% endif %}
     {% endfor %}
-    {{ m.message.date_created }}<br>
-    <b>{{ m.message.subject }}</b><br>
+    {{ m.date_created }}<br>
+    <b>{{ m.subject }}</b><br>
     <br>
-    {{ m.message.content.render|safe }}
+    {{ m.content.render|safe }}
 </div>
 {% empty %}
 <center><i>Nema poruka</i></center><br>
 {% endfor %}
+
+{% paginate %}
 
 {% endblock %}

@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
+{% load pagination_tags %}
+
 {% load pm_tags %}
+{% load usergroup_tags %}
 
 {% block title %}Inbox{% endblock %}
 
@@ -12,11 +15,14 @@
 <a href="/pm/">Inbox</a><br>
 <a href="/pm/new/">Pošalji novu poruku</a><br><br>
 
-{% for m in pm %}
+
+{% autopaginate pm 5 %}
+
+{% for m in pm|cache_pm_info %}
 <div class="well">
     {{ m.date_created }}
-    {% for r in m.recipients.all %}
-        {{ r.content_object|recipientlink }}
+    {% for r in m.cache_recipients %}
+        {{ r|grouplink }}{% if not forloop.last %},{% endif %}
     {% endfor %}
     <br>
     <b>{{ m.subject }}</b><br><br>
@@ -25,5 +31,7 @@
 {% empty %}
 <br><center><i>Nema poruka</i></center><br>
 {% endfor %}
+
+{% paginate %}
 
 {% endblock %}
