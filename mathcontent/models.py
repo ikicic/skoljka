@@ -32,11 +32,13 @@ class MathContent(models.Model):
     def __unicode__(self):
         return self.text
         
-        
     def short(self, length=50):
         return self.text[:length] + "..." if len(self.text) > length else self.text
     
     # TODO: podrska za $, tj. \$ u tekstu zadatka
+    # TODO: optimizirati queryje za depth
+    # latex se treba renderirati samo kod uploadata / edita
+    # (ili npr. da postoji neki flag je je latex vec generiran, to se moze povezati s depth cache-om)
     def render(self): # XSS danger!!! Be careful
         from mathcontent.latex import generate_png
         html = utils.xss.escape(self.text)
@@ -45,7 +47,6 @@ class MathContent(models.Model):
         blk_maths = blk_re.findall(html)
 
         for eq in blk_maths:
-            # TODO: maybe save depth in database (currently not used)
             eq_hash, depth = generate_png(utils.xss.unescape(eq), block_format)
             new = '<img src="/%s%s.png" alt="%s" class="latex_center">' % (img_url_path, eq_hash, eq)
             html = html.replace("$$%s$$" % eq, new)
@@ -54,7 +55,6 @@ class MathContent(models.Model):
         inl_maths = inl_re.findall(html)
 
         for eq in inl_maths:
-            # TODO: save depth in database
             eq_hash, depth = generate_png(utils.xss.unescape(eq), inline_format)
             new = '<img src="/%s%s.png" alt="%s" class="latex" style="vertical-align:%dpx">' % (img_url_path, eq_hash, eq, -depth)
             html = html.replace("$%s$" % eq, new)

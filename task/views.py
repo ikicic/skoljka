@@ -237,6 +237,7 @@ def detail(request, id):
     except (Solution.DoesNotExist, IndexError):
         solution = None
 
+    print 'ja sam ovdje'
     if task.author == request.user or request.user.is_staff:
         perm = ALL
     else:
@@ -250,11 +251,14 @@ def detail(request, id):
         raise Http404
 
     # TODO: dovrsiti, ovo je samo tmp
+    print 'ja sam ovdje2'
     task.update_similar_tasks(1)
+    print 'ja sam ovdje3'
     
     if request.user.is_authenticated():
         task_event(request.user, task, 'view')
         
+    print 'ja sam ovdje4'
     # TODO: DRY content_type
     return render_to_response('task_detail.html', {
             'task': task,

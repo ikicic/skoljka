@@ -37,6 +37,7 @@
 </div>
 
 <br><br><br>
+{% if user.is_authenticated %}
 {% if solution.is_submitted %}
 <a href="/solution/{{ solution.id }}/">Otvori moje rješenje</a><br>
 {% else %}
@@ -56,6 +57,7 @@
         {% endif %}
     </div>
 </form>
+{% endif %}
 {% endif %}
 <a href="/solution/task/{{ task.id }}/">Pregledaj poslana rješenja</a><br>
 <a href="/task/{{ task.id }}/similar/">Slični zadaci</a><br>
