@@ -1,14 +1,15 @@
+from django.conf import settings
 from django.db import models
 from django.utils.safestring import mark_safe
 
+import os
 import re
 import utils.xss
 
 inline_format = "$%s$ \n \\newpage \n"
 block_format = "\\[\n%s \n\\] \n \\newpage \n"
 
-img_path = 'mathcontent/static/math/'
-img_url_path = 'static/math/'
+img_url_path = '/media/math/'
 
 # TODO: napraviti MathContentField koji ce se sam spremiti
 # pri spremanju forme, ako je to uopce moguce
@@ -22,9 +23,8 @@ class LatexElement(models.Model):
     format = models.CharField(max_length=64)
     depth = models.IntegerField()
 
-
 class MathContent(models.Model):
-    text = models.TextField();
+    text = models.TextField()
     
     class Admin:
         pass
@@ -48,7 +48,7 @@ class MathContent(models.Model):
 
         for eq in blk_maths:
             eq_hash, depth = generate_png(utils.xss.unescape(eq), block_format)
-            new = '<img src="/%s%s.png" alt="%s" class="latex_center">' % (img_url_path, eq_hash, eq)
+            new = '<img src="%s%s.png" alt="%s" class="latex_center">' % (img_url_path, eq_hash, eq)
             html = html.replace("$$%s$$" % eq, new)
 
         inl_re = re.compile('\$(.*?)\$', re.DOTALL)
@@ -56,7 +56,7 @@ class MathContent(models.Model):
 
         for eq in inl_maths:
             eq_hash, depth = generate_png(utils.xss.unescape(eq), inline_format)
-            new = '<img src="/%s%s.png" alt="%s" class="latex" style="vertical-align:%dpx">' % (img_url_path, eq_hash, eq, -depth)
+            new = '<img src="%s%s.png" alt="%s" class="latex" style="vertical-align:%dpx">' % (img_url_path, eq_hash, eq, -depth)
             html = html.replace("$%s$" % eq, new)
 
         # Html files don't support newlines in the standard way.
@@ -113,3 +113,21 @@ class MathContent(models.Model):
                 i += 1
 
         return u''.join(out)
+
+
+def attachment_upload_to(instance, filename):
+    return os.path.join(settings.MEDIA_ROOT, 'attachment', str(instance.id), filename)
+
+class Attachment(models.Model):
+    file = models.FileField(upload_to=attachment_upload_to, blank=True)
+    content = models.ForeignKey(MathContent, related_name='attachments')
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def get_url(self):
+        # TODO: this is risky...
+        # file.name includes path
+        return settings.MEDIA_URL + self.file.name[len(settings.MEDIA_ROOT)+1:]
+
+    def get_filename(self):
+        return os.path.basename(self.file.name)
+        

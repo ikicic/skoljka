@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 
+{% load mathcontent_tags %}
 {% load post_tags %}
 {% load rating_tags %}
 {% load task_tags %}
@@ -35,6 +36,7 @@
 <div class="task_content well">
     {{ task.content.render }}
 </div>
+{% mathcontent_attachments task.content %}
 
 <br><br><br>
 {% if user.is_authenticated %}

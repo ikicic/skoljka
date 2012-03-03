@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.conf.urls.defaults import *
 
 # Uncomment the next two lines to enable the admin:
@@ -14,10 +15,12 @@ urlpatterns = patterns('',
 
     # For serving static files
     (r'static/(?P<path>.*)$', 'django.views.static.serve'),
+    (r'media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
 
     (r'^', include('base.urls')),
 
     (r'^folder/', include('folder.urls')),
+    (r'^', include('mathcontent.urls')), # namjerno nije r'^mathcontent/'
     (r'^permissions/', include('permissions.urls')),
     (r'^pm/', include('pm.urls')),
     (r'^rating/', include('rating.urls')),
@@ -28,6 +31,7 @@ urlpatterns = patterns('',
     (r'^', include('userprofile.urls')), # namjerno nije r'^profile/'
     (r'^', include('solution.urls')), # namjerno nije r'^solution/'
 
+    (r'^attachments/', include('attachments.urls')),
     (r'^sentry/', include('sentry.web.urls')),
 
 )

@@ -181,8 +181,8 @@ def new(request, task_id=None):
         edit = False
         
     if request.method == 'POST':
-        task_form = TaskForm(request.POST,instance=task)
-        math_content_form = MathContentForm(request.POST,instance=math_content)
+        task_form = TaskForm(request.POST, instance=task)
+        math_content_form = MathContentForm(request.POST, instance=math_content)
         
         if task_form.is_valid() and math_content_form.is_valid():
             task = task_form.save(commit=False)
@@ -199,7 +199,7 @@ def new(request, task_id=None):
             update_search_cache(task, old_tags, task.tags.values_list('name', flat=True))
             
             if edit:
-                filename = os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'task/static/pdf/task%d.pdf' % task.id))
+                filename = os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'media/pdf/task%d.pdf' % task.id))
                 if os.path.exists(filename):
                     os.remove()
             
@@ -213,6 +213,8 @@ def new(request, task_id=None):
     return render_to_response( 'task_new.html', {
                 'forms': [task_form, math_content_form],
                 'action_url': request.path,
+                'edit': edit,
+                'task': task,
             }, context_instance=RequestContext(request),
         )
         
@@ -237,7 +239,6 @@ def detail(request, id):
     except (Solution.DoesNotExist, IndexError):
         solution = None
 
-    print 'ja sam ovdje'
     if task.author == request.user or request.user.is_staff:
         perm = ALL
     else:
@@ -251,14 +252,11 @@ def detail(request, id):
         raise Http404
 
     # TODO: dovrsiti, ovo je samo tmp
-    print 'ja sam ovdje2'
     task.update_similar_tasks(1)
-    print 'ja sam ovdje3'
     
     if request.user.is_authenticated():
         task_event(request.user, task, 'view')
         
-    print 'ja sam ovdje4'
     # TODO: DRY content_type
     return render_to_response('task_detail.html', {
             'task': task,
@@ -315,7 +313,7 @@ def export_to_latex(request, ids):
     return HttpResponse(content=_export_to_latex(request, ids), content_type='application/x-latex')
 
 def export_to_pdf(request, ids):
-    filename = os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'task/static/pdf/task' + ids))
+    filename = os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'media/pdf/task' + ids))
     print 'filename: ', filename
     if not os.path.exists(filename + '.pdf'):
         f = codecs.open(filename + '.tex', 'w', encoding='utf-8')

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<a href="javascript: history.go(-1)">« Vrati se</a><br><br>
+
+<div class="well">
+    {{ content.render }}
+</div>
+
+<script>
+  $(function(){
+   $('.attdel').click(function(){
+    c=$(this).attr('class')
+    id = $(this).attr('name').substr(c.length)
+    name = $(this).parent().prev().children(":first").html()
+    if (confirm('Jeste li sigurni da želite izbrisati fajl \'' + name + '\'?')) {
+     $.ajax({
+      url: '/attachment/' + id + '/delete/',
+      success: function(){window.location.reload();}
+     });
+    }
+   });
+  });
+</script>
+
+<div class="well">
+    <h4>Postojeće datoteke</h4>
+    <table class="table-striped table-condensed" style="width: 40%">
+    {% for x in content.attachments.all %}
+        <tr>
+            <td><a href="{{ x.get_url }}">{{ x.get_filename }}</a></td>
+            <td><a class="attdel" name="attdel{{ x.id }}" href="#" title="Izbiši">Izbriši</a><br></td>
+        </tr>
+    {% empty %}
+        <tr><td><i>Nema datoteka.</i></td></tr>
+    {% endfor %}
+    </table>
+</div>
+
+<div class="well">
+    <h4>Dodavanje novih datoteka</h4>
+    <form enctype="multipart/form-data" method="post" action="/mathcontent/{{ content.id }}/attachments/">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Pošalji" class="btn-primary">
+    </form>
+</div>
+
+{% endblock %}

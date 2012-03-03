@@ -15,6 +15,7 @@
 
 {% if user.is_authenticated %}
     <div class="post_form">
+        {# dva puta se pristupa get_post_form #}
         <form action="/post/add/" method="post">
             {% csrf_token %}
             <input type="hidden" name="object_id" value="{{ container.pk }}">

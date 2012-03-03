@@ -25,6 +25,8 @@ def getstatusoutput(cmd):
 
     return status, text
 
+def latex_full_filename(filename):
+    return ('"%s%s"' if mswindows else '%s%s') % (settings.LATEX_BIN_DIR, filename)
     
 export_header = r'''
 \documentclass[12pt,a4paper,oneside,final]{article}
@@ -99,7 +101,7 @@ tex_preamble = r'''
 # TODO: join depth queries
 def generate_png(eq, format):
     eq_hash = hashlib.md5(eq+format).hexdigest()
-    filename = os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'mathcontent/static/math/' + eq_hash))
+    filename = os.path.normpath(os.path.join(settings.MEDIA_ROOT, 'math', eq_hash))
 
     try:
         latex_element = LatexElement.objects.only("depth").get(pk=eq_hash)
@@ -115,12 +117,12 @@ def generate_png(eq, format):
     
     # TODO: handle errors
     # TODO: disable logs
-    os.system('latex -output-directory=%s -interaction=batchmode %s.tex' % (os.path.dirname(filename), filename) )
+    os.system('%s -output-directory=%s -interaction=batchmode %s.tex' % (latex_full_filename('latex'), os.path.dirname(filename), filename))
     # TODO: handle errors and test quality
-    cmd = "dvipng -bg Transparent --gamma 1.5 -D 120 --depth* -T tight --strict -o %s.png %s" % (filename, filename)
+    cmd = "%s -bg Transparent --gamma 1.5 -D 120 --depth* -T tight --strict -o %s.png %s" % (latex_full_filename('dvipng'), filename, filename)
     status, stdout = getstatusoutput(cmd)
     
-    # print status, stdout
+    #print cmd, status, stdout
     
     depth_re = re.compile(r'\[\d+ depth=(-?\d+)\]')
     for line in stdout.splitlines():

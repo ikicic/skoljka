@@ -3,9 +3,8 @@
 import sys
 import os.path
 
-from utils.generators import SecretKeyGen
+from local import *
 
-PROJECT_ROOT = os.getcwd()
 SITE_NAME = os.path.basename(PROJECT_ROOT)
 LIB_ROOT = os.path.normpath(os.path.join(PROJECT_ROOT, 'lib'))
 LOCAL_DIR = os.path.normpath(os.path.join(PROJECT_ROOT, 'local'))
@@ -16,34 +15,11 @@ DEBUG_TOOLBAR_ROOT = os.path.normpath(
 sys.path.append(LIB_ROOT)
 sys.path.append(DEBUG_TOOLBAR_ROOT)
 
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
-
 ADMINS = (
-    # Add yourself here
-    ('Bruno Rahle', 'brahle@gmail.com'),
-    ('Goran Zuzic', 'zuza777@gmail.com'),
     ('Ivica Kicic', 'ivicakicic@gmail.com'),
 )
 
 MANAGERS = ADMINS
-
-try:
-    __mysql_pwd = open(os.path.normpath(os.path.join(LOCAL_DIR, 'mysql_pwd.txt'))).read().strip()
-except:
-    __mysql_pwd = 'asdf'
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-#        'NAME': os.path.normpath(os.path.join(LOCAL_DIR, 'db.sqlite')),
-        'NAME': 'skoljka',
-        'USER': 'root',
-        'PASSWORD': __mysql_pwd,
-        'HOST': 'localhost',
-        'PORT': '',
-    }
-}
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -70,7 +46,7 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = os.path.normpath(os.path.join(PROJECT_ROOT, 'media'))
+MEDIA_ROOT = os.path.normpath(os.path.join(LOCAL_DIR, 'media'))
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -80,7 +56,7 @@ MEDIA_URL = '/media/'
 # Absolute path to the directory static files should be collected to. Don't put
 # anything in this directory yourself; store your static files in apps' static/
 # subdirectories and in STATICFILES_DIRS.
-STATIC_ROOT = os.path.normpath(os.path.join(PROJECT_ROOT, 'static'))
+STATIC_ROOT = os.path.normpath(os.path.join(LOCAL_DIR, 'static'))
 
 # URL prefix for static files.
 STATIC_URL = '/static/'
@@ -89,9 +65,6 @@ STATIC_URL = '/static/'
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = '/static/admin/'
-
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = '*+2=z1qx9+zm6bxuz+i&f(y*6xs9v2=alaeap3glfceof_--nm'
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
@@ -125,7 +98,8 @@ MIDDLEWARE_CLASSES = (
     'pagination.middleware.PaginationMiddleware',
 )
 
-ROOT_URLCONF = SITE_NAME.lower() + '.urls'
+#ROOT_URLCONF = SITE_NAME.lower() + '.urls'
+ROOT_URLCONF = 'urls'
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -222,16 +196,3 @@ LOGIN_URL = '/login/'
 
 # Where is a user redirected after a successful log in
 LOGIN_REDIRECT_URL = '/'
-
-
-try:
-    SECRET_KEY = open(SECRET_FILE).read().strip()
-except IOError:
-    try:
-        if not os.path.exists(LOCAL_DIR):
-            os.makedirs(LOCAL_DIR)
-        with open(SECRET_FILE, 'w') as f:
-            f.write(SecretKeyGen.generate(50))
-    except IOError:
-        raise Exception('Cannot open file `%s` for writing.' % SECRET_FILE)
-

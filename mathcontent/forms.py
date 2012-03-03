@@ -1,5 +1,12 @@
-from mathcontent.models import MathContent
 from django.forms import ModelForm
+
+from mathcontent.models import Attachment, MathContent
+
+
+class AttachmentForm(ModelForm):
+    class Meta:
+        model = Attachment
+        fields = ('file', )
 
 class MathContentForm(ModelForm):
     def __init__(self, *args, **kwargs):

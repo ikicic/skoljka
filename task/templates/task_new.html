@@ -21,6 +21,12 @@ Npr. Ime: <pre>IMO 2011</pre>, Tagovi: <pre>IMO, 2011, IMO</pre>.<br><br>
 {% if perms.task.add_advanced %}<a href="/task/new/advanced/">Napredno</a><br><br>{% endif %}
 {% endif %}
 
+{% if edit %}
+    <div style="float:right;">
+        <a href="/mathcontent/{{ task.content.id }}/attachments/" class="btn">Pregled privitaka</a><br>
+    </div>
+{% endif %}
+
 <form action="{{ action_url }}" method="post">
     {% csrf_token %}
     {% for form in forms %}

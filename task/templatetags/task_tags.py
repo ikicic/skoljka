@@ -17,7 +17,6 @@ def task_small_box(task, div_class='', url_suffix=''):
 
 @register.filter
 def cache_additional_info(tasks, user):
-    print 'ovdje'
     task_content_type = ContentType.objects.get_by_natural_key(app_label="task", model="task")
     ids = [x.id for x in tasks]
     
@@ -45,7 +44,6 @@ def cache_additional_info(tasks, user):
             for task in tasks:
                 task.is_in_folder = task.id in selected_tasks
         
-    print 'ovdje'
     return tasks
 
 @register.filter
