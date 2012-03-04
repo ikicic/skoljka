@@ -33,24 +33,18 @@
 
 <h2>Nedavno objavljeni zadaci</h2>
 <div class="row-fluid">
-    <div class="well">
-        <h4><a href="/task/{{ latest_task.id }}/">{{ latest_task.name }}</a></h4><br>
-        {{ latest_task.content.render }}
-        <div style="text-align:right;color:gray;">{{ latest_task.date_created|timesince }} ago</div>
-    </div>
-</div>
-<div class="row-fluid">
     {% for x in recent_tasks %}
-    <div class="span3">
+    <div class="span6">
     <div class="well">
-        <center><a href="/task/{{ x.id }}/">{{ x.name }}</a></center><br>
-        <div style="text-align:right;color:gray;">{{ x.date_created|timesince }} ago</div>
+        <h4><a href="/task/{{ best_recommend.id }}/">{{ best_recommend.name }}</a></h4><br>
+        {{ best_recommend.content.render }}
+        <div style="text-align:right;color:gray;">{{ best_recommend.date_created|timesince }} ago</div>
     </div>
     </div>
     {% endfor %}
 </div>
 
 <br><br><br>
-<h2>Nedavno rješavani zadaci</h2>
+{% include "inc_activity_list.html" with events=recent_activity %}
 
 {% endblock %}

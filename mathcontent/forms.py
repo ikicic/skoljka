@@ -20,3 +20,4 @@ class MathContentForm(ModelForm):
 
     class Meta:
         model = MathContent
+        fields = ('text', )

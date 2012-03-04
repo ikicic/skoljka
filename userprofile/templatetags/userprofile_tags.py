@@ -5,4 +5,4 @@ register = template.Library()
 
 @register.filter
 def userlink(user):
-    return mark_safe(u'<a href="/profile/%d/">%s</a>' % (user.pk, user.username))
+    return mark_safe(u'<a href="/profile/%d/">%s</a>' % (user.pk, user.get_full_name()))

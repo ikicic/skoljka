@@ -32,6 +32,7 @@
         <th>Naslov</th>
         <th>Tagovi</th>
         <th>{% anchor solved_count Rj. %}</th>
+        {% if search_solved_count %}<th>(Rj.)</th>{% endif %}
         <th>{% anchor quality_rating_avg Kvaliteta %}</th>
         <th>{% anchor difficulty_rating_avg Težina %}</th>
     </tr>
@@ -49,6 +50,7 @@
         {% else %}
             <td>0</td>
         {% endif %}
+        {% if search_solved_count %}<td>{{ task.search_solved_count }}</td>{% endif %}
         <td style="width:80px;">{{ task.quality_rating|rating_stars }}</td>
         <td style="width:80px;">{{ task.difficulty_rating|rating_stars }}</td>
     </tr>

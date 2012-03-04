@@ -2,20 +2,21 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
+from activity.models import Action
 from task.models import Task
 from permissions.constants import VIEW
-from recommend.utils import refresh_user_information
+#from recommend.utils import refresh_user_information
 
 import random
 
 def homepage(request):
     tasks = list(Task.objects.for_user(request.user, VIEW).distinct().order_by('-id')[:10])
-    random.shuffle(tasks)
+    tasks = random.sample(tasks, 2)
     
     
     recommend = []
     if request.user.is_authenticated():
-        refresh_user_information(request.user)
+        #refresh_user_information(request.user)
         recommend = list(request.user.recommendations.order_by('-userrecommendation__score')[:10])
 #        distribution = request.user.profile.get_normalized_diff_distribution()
 #        if distribution is not None:
@@ -34,9 +35,10 @@ def homepage(request):
     if len(recommend) > 5:
         recommend = random.sample(recommend, 5)
     
+    # recommend = tasks = []
     return render_to_response('homepage.html', {
-        'latest_task': tasks[0],
-        'recent_tasks': tasks[1:5],
+        'recent_tasks': tasks,
         'recommend': recommend[1:],
         'best_recommend': None if len(recommend) < 1 else recommend[0],
+        'recent_activity': None, # Action.objects.order_by('-id').select_related('actor'),
         }, context_instance=RequestContext(request))

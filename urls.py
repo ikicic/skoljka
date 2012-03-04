@@ -19,6 +19,7 @@ urlpatterns = patterns('',
 
     (r'^', include('base.urls')),
 
+    ('^activity/', include('activity.urls')),
     (r'^folder/', include('folder.urls')),
     (r'^', include('mathcontent.urls')), # namjerno nije r'^mathcontent/'
     (r'^permissions/', include('permissions.urls')),
@@ -31,7 +32,6 @@ urlpatterns = patterns('',
     (r'^', include('userprofile.urls')), # namjerno nije r'^profile/'
     (r'^', include('solution.urls')), # namjerno nije r'^solution/'
 
-    (r'^attachments/', include('attachments.urls')),
     (r'^sentry/', include('sentry.web.urls')),
 
 )

@@ -1,5 +1,7 @@
+from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.db import connection, transaction
+from django.db.models import Count
 from django.template.defaultfilters import slugify
 
 from search.models import SearchCache, SearchCacheElement
@@ -82,9 +84,9 @@ def search_tasks(tags=[], none_if_blank=True, user=None, **kwargs):
     task_content_type = ContentType.objects.get_for_model(Task)
 
     if kwargs.get('show_hidden'):
-        tasks = Task.objects.for_user(user, VIEW)
+        tasks = Task.objects.for_user(user, VIEW).distinct()
     else:
-        tasks = Task.objects.filter(hidden=False)
+        tasks = Task.objects.filter(hidden=False).distinct()
 
     if tags:
         tags = sorted(tags)
@@ -92,10 +94,23 @@ def search_tasks(tags=[], none_if_blank=True, user=None, **kwargs):
         ids = SearchCacheElement.objects.filter(cache=cache, content_type=task_content_type).values_list('object_id', flat=True)
         tasks = tasks.filter(id__in=ids)
 
-        
     if kwargs.get('quality_min') is not None: tasks = tasks.filter(quality_rating_avg__gte=kwargs['quality_min'])
     if kwargs.get('quality_max') is not None: tasks = tasks.filter(quality_rating_avg__lte=kwargs['quality_max'])
     if kwargs.get('difficulty_min') is not None: tasks = tasks.filter(difficulty_rating_avg__gte=kwargs['difficulty_min'])
     if kwargs.get('difficulty_max') is not None: tasks = tasks.filter(difficulty_rating_avg__lte=kwargs['difficulty_max'])
+
+    # TODO: perm
+    if kwargs.get('groups'):
+        ids = ','.join([str(x) for x in tasks.values_list('id', flat=True)])
+        group_ids = ','.join([str(x.id) for x in kwargs['groups']])
+        tasks = Task.objects.raw(
+            'SELECT A.id, A.hidden, A.name, A.solved_count, A.quality_rating_avg, A.difficulty_rating_avg, COUNT(DISTINCT B.id) AS search_solved_count FROM task_task AS A \
+                LEFT JOIN solution_solution AS B ON (B.task_id = A.id) \
+                LEFT JOIN auth_user_groups AS C ON (C.user_id = B.author_id AND C.group_id IN (%s)) \
+                WHERE A.id IN (%s) \
+                GROUP BY A.id' % (group_ids, ids)
+            )
+
+        tasks = list(tasks)
     
-    return tasks.distinct()
+    return tasks

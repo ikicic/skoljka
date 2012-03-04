@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidde
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
+from activity import action as _action
 from task.models import Task
 from solution.models import Solution, STATUS
 from mathcontent.forms import MathContentForm
@@ -17,7 +18,7 @@ def mark(request, task_id):
         return HttpResponseForbidden('Not valid request')
 
     action = request.POST['action']
-    if action not in ['blank', 'as_solved', 'todo']:
+    if action not in ['official', 'blank', 'as_solved', 'todo']:
         return HttpResponseForbidden(u'Action "%s" not valid' % action)
 
     task = get_object_or_404(Task, pk=task_id)
@@ -32,6 +33,14 @@ def mark(request, task_id):
     except Solution.DoesNotExist:
         Solution.objects.create(task=task, author=request.user, status=STATUS[action])
 
+    if action != 'blank':   # not really something interesting
+        # TODO: DRY!
+        type = {'official': _action.SOLUTION_AS_OFFICIAL,
+                'as_solved': _action.SOLUTION_AS_SOLVED,
+                'todo': _action.SOLUTION_TODO,
+            }
+        _action.send(request.user, type[action], action_object=solution, target=task)
+        
     return HttpResponseRedirect('/task/%d/' % int(task_id))
 
 
@@ -48,17 +57,25 @@ def edit_mark(request, solution_id):
     
     if action in ['0', '1']:
         sol.update(is_official=int(action))
+        
+        # TODO: DRY!
+        if action == '1':
+            _action.send(request.user, _action.SOLUTION_AS_OFFICIAL, action_object=sol, target=solution.task_id)
         return HttpResponseRedirect('/solution/%d/' % int(solution_id))
 
     if action in ['blank', 'as_solved', 'todo']:
         sol.update(status=STATUS[action])
         solution = get_object_or_404(Solution, pk=solution_id)
+        
+        # TODO: DRY!
+        if action != 'blank':
+            type = {'as_solved': _action.SOLUTION_AS_SOLVED,
+                    'todo': _action.SOLUTION_TODO}
+            _action.send(request.user, type[action], action_object=solution, target=solutions.task_id)
         return HttpResponseRedirect('/task/%d/' % solution.task_id)
 
     return HttpResponseForbidden(u'Action "%s" not valid' % action)
-        
-   
-    
+
 
 
 #TODO: provjeriti za dupla rjesenja
@@ -87,6 +104,7 @@ def submit(request, task_id=None, solution_id=None):
             solution.content = math_content
             solution.status = STATUS['submitted']
             solution.save()
+            _action.send(request.user, _action.SOLUTION_SUBMIT, action_object=solution, target=task)
             
             task.solved_count = Solution.objects.values("author_id").filter(task=task).distinct().count()
             task.save()

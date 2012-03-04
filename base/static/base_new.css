@@ -30,3 +30,14 @@ div.tag_list {
     font-size: 12px;
     color: #888;
 }
+.activity {
+    border-top: thin solid #CCC;
+    padding: 6px 5px 3px 5px;
+}
+.activity .time {
+    font-size: 12px;
+    color: gray;
+}
+.activity .act_content {
+    margin: 6px 0px 6px 15px;
+}

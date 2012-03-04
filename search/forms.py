@@ -3,6 +3,7 @@ from django import forms
 from rating.widgets import RatingWidget
 from rating.fields import RatingField
 from rating.constants import QUALITY_RATING_ATTRS, DIFFICULTY_RATING_ATTRS
+from usergroup.fields import GroupEntryField
 
 
 class SearchForm(forms.Form):
@@ -14,4 +15,6 @@ class SearchForm(forms.Form):
     quality_max = forms.FloatField(required=False, widget=RatingWidget(attrs=QUALITY_RATING_ATTRS))
     difficulty_min = forms.FloatField(required=False, widget=RatingWidget(attrs=DIFFICULTY_RATING_ATTRS))
     difficulty_max = forms.FloatField(required=False, widget=RatingWidget(attrs=DIFFICULTY_RATING_ATTRS))
-    
+
+class AdvancedSearchForm(forms.Form):
+    groups = GroupEntryField()

@@ -135,6 +135,7 @@ INSTALLED_APPS = (
     'sentry.client',
     'taggit',
     
+    'activity',
     'base',
     'folder',
     'mathcontent',
@@ -150,6 +151,7 @@ INSTALLED_APPS = (
     'usergroup',
     'userprofile',
 )
+
 
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.

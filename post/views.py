@@ -5,6 +5,8 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
+from actstream import action
+
 from mathcontent.forms import MathContentForm
 from post.models import Post
 
@@ -21,7 +23,7 @@ def add_post(request):
     math_content_form = MathContentForm(request.POST)
     if math_content_form.is_valid():
         content = math_content_form.save()
-        post = Post(
+        post = Post.objects.create(
                 object_id = request.POST['object_id'],
                 content_type = ContentType.objects.get(pk=request.POST['content_type_id']),
                 author = request.user,

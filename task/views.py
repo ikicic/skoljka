@@ -251,8 +251,8 @@ def detail(request, id):
     if VIEW not in perm:
         raise Http404
 
-    # TODO: dovrsiti, ovo je samo tmp
-    task.update_similar_tasks(1)
+    # ovo ce ici preko C++ skripte za pocetak
+    # task.update_similar_tasks(1)
     
     if request.user.is_authenticated():
         task_event(request.user, task, 'view')
