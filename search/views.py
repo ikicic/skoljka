@@ -24,7 +24,6 @@ def view(request):
         advanced_form = AdvancedSearchForm(request.GET)
         if advanced_form.is_valid():
             kwargs['groups'] = advanced_form.cleaned_data['groups']
-            search_solved_count = bool(kwargs['groups'])
     else:
         advanced_form = None
 
@@ -39,6 +38,6 @@ def view(request):
         'tags': tags,
         'form': SearchForm(request.GET),
         'advanced_form': advanced_form,
-        'search_solved_count': search_solved_count,
+        'search_solved_count': bool(kwargs.get('groups')),
         'any': bool(request.GET),
         }, context_instance=RequestContext(request))
