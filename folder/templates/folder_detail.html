@@ -9,19 +9,12 @@
 {% block content %}
 
 {% if edit_link %}
-    <div style="float:right;">
-        <script>
-        $(function(){
-         $('#select_folder').click(function(e){
-          $.ajax({
-           url: '/folder/select/{{ folder.id }}/',
-           success: function(r){$('#select_folder').html(r);}
-          });
-         });
-        });
-        </script>
-        <a class="btn" id="select_folder">{{ edit_link }}</a>
-    </div>
+  <div style="float:right;">
+    <form action="/folder/select/{{ folder.id }}/" method="POST">
+      {% csrf_token %}
+      <button class="btn" type="submit" id="select_folder">{{ edit_link }}</button>
+    </form>
+  </div>
 {% endif %}
 <a href="javascript: history.go(-1)">« Vrati se</a><br><br>
 

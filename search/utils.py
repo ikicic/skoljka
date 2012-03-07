@@ -32,7 +32,8 @@ def update_search_cache(object, old_tags, new_tags):
     SearchCache.objects.filter(tags__name__in=diff).delete()
     
     
-    
+
+# TODO: fix case-sensitivity bug    
 # recursive
 # tags SHOULD be sorted (in order to do this efficiently)
 def search_and_cache(tags):
@@ -42,6 +43,7 @@ def search_and_cache(tags):
     except:
         cache = SearchCache(tag_string=tag_string)
         cache.save()
+        # TODO: this line makes trouble
         cache.tags.set(*tags)
         
     cache_content_type = ContentType.objects.get_for_model(SearchCache)

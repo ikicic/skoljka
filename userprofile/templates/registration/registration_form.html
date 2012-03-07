@@ -1,10 +1,10 @@
 {% extends "registration/registration_base.html" %}
-{% block title %}Register for an account{% endblock %}
+{% block title %}Registracija{% endblock %}
 {% block content %}
-<table>
-    <form method='post' action=''>{% csrf_token %}
+<form method="post" action="/accounts/register/">{% csrf_token %}
+    <table>
         {{ form }}
-        <tr><td></td><td><input type="submit" value="Send activation email" /></td>
-    </form>
-</table>
+        <tr><td></td><td><button class="btn btn-primary" type="submit">Registriraj</button></td>
+    </table>
+</form>
 {% endblock %}

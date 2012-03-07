@@ -64,7 +64,8 @@ def group_inbox(request, group_id=None):
     if request.user != group.data.author and not request.user.groups.filter(id=group_id).exists():
         raise Http404
 
-    pm = MessageRecipient.objects.inbox(group).order_by('-id')
+    #pm = MessageRecipient.objects.inbox(group).order_by('-id')
+    pm = MessageContent.objects.filter(recipients__group=group).select_related('author', 'content').order_by('-id').distinct()
     return render_to_response('pm_inbox.html', {
             'pm': pm,
             'group': group,

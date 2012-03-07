@@ -7,6 +7,7 @@ from django.utils.safestring import mark_safe
 from mathcontent.models import MathContent
 from permissions.models import PerObjectGroupPermission
 #from permissions.models import PerObjectUserPermission
+from permissions.utils import has_group_perm
 from post.generic import PostGenericRelation
 from rating.fields import RatingField
 from tags.managers import TaggableManager
@@ -65,6 +66,9 @@ class Task(models.Model):
     def __unicode__(self):
         return '#%d %s' % (self.id, self.name)
 
+    def has_perm(self, user, type):
+        return user.is_staff or self.author == user or has_group_perm(user, self, type)
+        
     def get_tag_ids(self):
         if not hasattr(self, '_cache_tag_ids'):
             self._cache_tag_ids = self.tags.values_list('id', flat=True)

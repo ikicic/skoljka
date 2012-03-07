@@ -4,16 +4,13 @@
 
 {% block content %}
 
-Ovo je trenutacno samo debug.<br><br>
-
-<table width="100%" class="table-striped table-condensed" style="text-align: center;">
+<table width="70%" class="table-striped table-condensed" style="text-align: center;">
 <tr>
     <th>#</th>
-    <th>Username</th>
-    <th>First name</th>
-    <th>Last name</th>
-    <th>Email</th>
-    <th>Quote</th>
+    <th>Korisnik</th>
+    <th>Ime</th>
+    <th>Prezime</th>
+    <th>Član od</th>
 </tr>
 {% for x in user_list %}
 <tr>
@@ -21,8 +18,7 @@ Ovo je trenutacno samo debug.<br><br>
     <td>{{ x|userlink }}</td>
     <td>{{ x.first_name }}</td>
     <td>{{ x.last_name }}</td>
-    <td>--email--</td>
-    <td>{{ x.profile.quote }}</td>
+    <td>{{ x.date_joined|date }}</td>
 </tr>
 {% empty %}
 <tr><td colspan="6">Nema registriranih korisnika</td></tr>

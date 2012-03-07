@@ -3,7 +3,7 @@
 {% block content %}
 
 {% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
+<p>Nevaljano korisničko ime ili zaporka. Molimo probajte ponovno.</p>
 {% endif %}
 
 <form method="post" action="{% url django.contrib.auth.views.login %}">{% csrf_token %}
@@ -17,9 +17,9 @@
     <td>{{ form.password }}</td>
 </tr>
 </table>
-<p><a href="{% url auth_password_reset %}">Forgot</a> your password?  <a href="{% url registration_register %}">Need an account</a>?</p>
+<p><a href="{% url auth_password_reset %}">Zaboravili</a> ste zaporku?  <a href="{% url registration_register %}">Trebate korisnički račun</a>?</p>
 
-<input type="submit" value="login" />
+<button type="submit" class="btn btn-primary">Prijava</button>
 <input type="hidden" name="next" value="{{ next }}" />
 </form>
 

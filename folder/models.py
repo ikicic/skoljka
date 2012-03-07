@@ -9,6 +9,7 @@ from tags.managers import TaggableManager
 from permissions.constants import VIEW
 from permissions.models import PerObjectGroupPermission
 #from permissions.models import PerObjectUserPermission
+from permissions.utils import has_group_perm
 from task.models import Task
 from search.utils import search_tasks
 from utils.tags import tag_list_to_html
@@ -42,6 +43,9 @@ class Folder(models.Model):
     def __unicode__(self):
         return "%s - [%s]" % (self.name, self.tag_filter)
 
+    def has_perm(self, user, type):
+        return user.is_staff or has_group_perm(user, self, type)
+        
     @staticmethod
     def _path_part_to_html(name, path):
         return u'<li><a href="/folder%s/">%s</a></li>' % (path, name)

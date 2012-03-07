@@ -30,6 +30,11 @@
 
 {% for m in pm|cache_pm_info %}
 <div class="well">
+    <div style="float:right;" class="btn-group">
+        <a class="btn btn-mini" href="/pm/{{ m.id }}/reply/">Odgovori</a>
+        <a class="btn btn-mini" href="/pm/{{ m.id }}/replyall/">Odgovori svima</a>
+        <a class="btn btn-mini" href="/pm/{{ m.id }}/forward/">Proslijedi</a>
+    </div>
     {% if m.author == user %}
         Tvoja poruka
     {% else %}

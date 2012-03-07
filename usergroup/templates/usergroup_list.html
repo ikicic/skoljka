@@ -27,14 +27,19 @@
 
 <br>
 <br>
+<br>
 <form action="/usergroup/" method="post">
-{% csrf_token %}
-{% for form in forms %}
-    {{ form.as_p }}
-{% endfor %}
-    <div class="actions">
-        <button type="submit" class="btn-primary">Stvori novu grupu</button>
-    </div>
+  <h4>Stvaranje nove grupe</h3><br>
+  {% csrf_token %}
+  <table>
+    {% for form in forms %}
+      {{ form.as_table }}
+    {% endfor %}
+    <tr>
+      <th></th>
+      <td><button type="submit" class="btn-primary">Stvori novu grupu</button></td>
+    </tr>
+  </table>
 </form>
 
 {% endblock %}

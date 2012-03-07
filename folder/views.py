@@ -1,7 +1,9 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
-from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseRedirect
+
+from permissions.constants import VIEW, EDIT
 
 from folder.models import Folder
 from task.models import Task
@@ -13,7 +15,12 @@ def select_task(request, task_id):
     folder = request.user.profile.selected_folder
     if not request.is_ajax() or folder is None:
         return HttpResponseBadRequest()
+    if not folder.has_perm(request.user, EDIT):
+        return HttpResponseForbidden('Not allowed to edit this folder.')
+        
     task = get_object_or_404(Task, id=task_id)
+    if not task.has_perm(request.user, VIEW):
+        return HttpResponseForbidden('Not allowed to view this task.')
     
     if task in folder.tasks.all():
         folder.tasks.remove(task)
@@ -27,9 +34,9 @@ def select_task(request, task_id):
 
 @login_required
 def select(request, id):
-    if not request.is_ajax():
-        return HttpResponseBadRequest()
     folder = get_object_or_404(Folder, id=id)
+    if not folder.has_perm(request.user, EDIT):
+        return HttpResponseForbidden('Not allowed to edit this folder.')
 
     profile = request.user.profile    
     if profile.selected_folder == folder:
@@ -40,7 +47,8 @@ def select(request, id):
         response = 1
         
     profile.save()
-    return HttpResponse(FOLDER_EDIT_LINK_CONTENT[response])
+    #return HttpResponse(FOLDER_EDIT_LINK_CONTENT[response])
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 
 @login_required
@@ -60,7 +68,7 @@ def view(request, path=u''):
 
     data['path'] = path + '/' if path else ''
     data['tasks'] = data['tasks'].select_related('author')
-    if 'folder' in data and request.user.is_authenticated():
+    if 'folder' in data and data['folder'].has_perm(request.user, EDIT):
         data['edit_link'] = FOLDER_EDIT_LINK_CONTENT[1 if request.user.get_profile().selected_folder == data['folder'] else 0]
     
     return render_to_response('folder_detail.html', 
