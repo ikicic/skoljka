@@ -1,4 +1,4 @@
-from django.db import models
+﻿from django.db import models
 from django.contrib.auth.models import User
 from django.template.loader import add_to_builtins
 
@@ -13,7 +13,18 @@ from solution.models import SOLUTION_CORRECT_SCORE
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile')
     
-    quote = models.CharField(max_length=200, blank=True)
+    GENDER_CHOICES = (
+        ('', 'Neizjašnjeno'),
+        ('M', 'Momak'),
+        ('F', 'Djevojka'),
+    )
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='', verbose_name='Spol')
+    birthday = models.DateField(blank=True, null=True, verbose_name='Dan rođenja', help_text='U formatu YYYY-MM-DD')
+    city = models.CharField(max_length=50, blank=True, verbose_name='Grad')
+    country = models.CharField(max_length=50, blank=True, verbose_name='Država')
+    quote = models.CharField(max_length=200, blank=True, verbose_name='Citat')
+    website = models.CharField(max_length=100, blank=True, verbose_name='Web')
+    
     
     solved_count = models.IntegerField(default=0)
     score = models.FloatField(default=0)

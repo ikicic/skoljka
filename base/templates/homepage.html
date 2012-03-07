@@ -2,6 +2,8 @@
 
 {% block content %}
 
+{% load activity_tags %}
+
 {# TODO: DRY, napraviti tag ili nesto, ovo se ponavlja #}
 
 
@@ -36,15 +38,15 @@
     {% for x in recent_tasks %}
     <div class="span6">
     <div class="well">
-        <h4><a href="/task/{{ best_recommend.id }}/">{{ best_recommend.name }}</a></h4><br>
-        {{ best_recommend.content.render }}
-        <div style="text-align:right;color:gray;">{{ best_recommend.date_created|timesince }} ago</div>
+        <h4><a href="/task/{{ best_recommend.id }}/">{{ x.name }}</a></h4><br>
+        {{ x.content.render }}
+        <div style="text-align:right;color:gray;">{{ x.date_created|timesince }} ago</div>
     </div>
     </div>
     {% endfor %}
 </div>
 
 <br><br><br>
-{% include "inc_activity_list.html" with events=recent_activity %}
+{% activity_list user %}
 
 {% endblock %}

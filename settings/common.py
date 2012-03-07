@@ -32,7 +32,8 @@ TIME_ZONE = 'Europe/Zagreb'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
+#LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'hr'
 
 SITE_ID = 1
 
@@ -131,6 +132,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'django_sorting',
     'pagination',
+    'registration',
     'sentry',
     'sentry.client',
     'taggit',
@@ -152,6 +154,7 @@ INSTALLED_APPS = (
     'userprofile',
 )
 
+ACCOUNT_ACTIVATION_DAYS = 2
 
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.

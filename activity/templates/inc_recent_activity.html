@@ -1,0 +1,16 @@
+{% if activity %}
+    {% for x in activity %}
+        {% ifchanged x.date_created|date:"E_j" %}
+        <div class="act_day">
+            {{ x.date_created|date:"E j" }}
+        </div>
+        {% endifchanged %}
+        <div class="activity">
+            <div class="time">{{ x.date_created|time:"H:i"}}</div>
+            <div class="act_message1">{{ x.actor|userlink }} {{ x.get_message }}</div>
+            <div class="act_message2">{{ x.get_content }}</div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div><i>Nema aktivnosti u zadnje vrijeme.</i></div>
+{% endif %}

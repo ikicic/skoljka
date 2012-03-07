@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% load adminmedia %}
+
+{% block title %}Uređivanje profila{% endblock %}
+
+{% block content %}
+
+<a href="javascript: history.go(-1)">« Vrati se</a><br>
+
+<form action="/profile/edit/" method="POST">
+{% csrf_token %}
+<table>
+{{ form.as_table }}
+<td colspan="2">
+    <button class="btn btn-primary" name="submit">Pošalji</button>
+</td>
+</table>
+</form>
+
+{% endblock %}

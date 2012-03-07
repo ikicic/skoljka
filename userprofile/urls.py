@@ -18,9 +18,13 @@ urlpatterns = patterns('',
         context_object_name='users',
         template_name='ranks.html')),
 
-    (r'^profile/(?P<pk>\d+)/', 'userprofile.views.profile'),    
+    (r'^profile/(?P<pk>\d+)/', 'userprofile.views.profile'),
+    (r'^profile/edit/', 'userprofile.views.edit'),
     (r'^register/$', 'userprofile.views.register'),
     (r'^register/complete/', TemplateView.as_view(template_name='registration_complete.html')),
     (r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
     (r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
+
+    url(r'^accounts/register/$', 'userprofile.views.new_register', name='registration_register'),
+    (r'^accounts/', include('registration.urls')),
 )

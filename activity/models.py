@@ -1,18 +1,27 @@
 ﻿from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.models import ContentType
 from django.utils.safestring import mark_safe
 
 from activity.constants import *
 
 # ... jako nedovrseno ...
 
+# na temelju https://github.com/justquick/django-activity-stream/
+# odnosno https://github.com/justquick/django-activity-stream/blob/master/actstream/models.py
 class Action(models.Model):
     actor = models.ForeignKey(User, db_index=True)
     type = models.IntegerField(db_index=True)
     date_created = models.DateTimeField(auto_now_add=True, db_index=True)
     
-    target_id = models.IntegerField(blank=True, db_index=True)
-    action_object_id = models.IntegerField(blank=True, db_index=True)
+    target_content_type = models.ForeignKey(ContentType, blank=True, related_name='target')
+    target_id = models.IntegerField(blank=True)
+    target = generic.GenericForeignKey('target_content_type', 'target_id')
+    
+    action_object_content_type = models.ForeignKey(ContentType, blank=True, related_name='action_object')
+    action_object_id = models.IntegerField(blank=True)
+    action_object = generic.GenericForeignKey('action_object_content_type', 'action_object_id')
     
     text = models.TextField(blank=True)
 
@@ -32,7 +41,7 @@ class Action(models.Model):
         elif self.type == SOLUTION_AS_SOLVED:
             S = u'je označio kao riješen zadatak'
         elif self.type == SOLUTION_TODO:
-            S = u'je označio s ToDo zadatak'
+            S = u'je označio s To Do zadatak'
         return mark_safe(S)
         
     def get_content(self):

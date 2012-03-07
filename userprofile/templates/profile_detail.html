@@ -6,7 +6,14 @@
 
 <a href="javascript: history.go(-1)">« Vrati se</a><br>
 <br>
-<a href="/pm/new/{{ profile.username }}/">Pošalji poruku</a><br><br>
+{% ifequal user profile %}
+  <div style="float:right;" class="btn-group">
+    <a href="/profile/edit/" class="btn"><i class="icon-user"></i> Uredi profil</a>
+    <a href="/accounts/password/change/" class="btn"><i class="icon-barcode"></i> Promijeni zaporku</a>
+  </div>
+{% else %}
+  <a href="/pm/new/{{ profile.username }}/">Pošalji poruku</a><br><br>
+{% endifequal %}
 
 <div class="row">
     <div class="span5">

@@ -1,9 +1,0 @@
-{% for x in events %}
-<div class="activity">
-    {{ x.actor|userlink }} {{ x.get_message }}<br>
-    <div class="act_content">{{ x.get_content }}</div>
-    <span class="time">{{ x.date_created }}</span>
-</div>
-{% empty %}
-    <div><i>Nema aktivnosti u zadnje vrijeme.</i></div>
-{% endfor %}

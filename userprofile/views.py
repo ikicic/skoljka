@@ -6,9 +6,29 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
-from userprofile.forms import UserCreationExtendedForm, UserProfileForm
+from userprofile.forms import NewUserCreationForm, UserCreationExtendedForm, UserProfileForm, UserProfileEditForm
+from userprofile.models import UserProfile
 
 from rating.constants import DIFFICULTY_RATING_ATTRS
+
+def new_register(request):
+    from registration.views import register as _register
+    return _register(request, form_class=NewUserCreationForm)
+
+
+@login_required
+def edit(request):
+    profile = request.user.get_profile()
+    if request.method == 'POST':
+        form = UserProfileEditForm(request.POST, instance=profile)
+        if form.is_valid():
+            profile = form.save()
+    else:
+        form = UserProfileEditForm(instance=profile)
+        
+    return render_to_response('profile_edit.html', {
+        'form': form,
+    }, context_instance=RequestContext(request))
 
 @login_required
 def profile(request, pk):
@@ -41,6 +61,7 @@ def refresh_score(request):
     }, context_instance=RequestContext(request))
 
 
+# DEPRECATED, to delete
 # TODO: provjeriti postoji li grupa s tim imenom
 def register(request):
     if 'next' in request.REQUEST: 

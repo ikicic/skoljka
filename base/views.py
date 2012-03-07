@@ -40,5 +40,4 @@ def homepage(request):
         'recent_tasks': tasks,
         'recommend': recommend[1:],
         'best_recommend': None if len(recommend) < 1 else recommend[0],
-        'recent_activity': None, # Action.objects.order_by('-id').select_related('actor'),
         }, context_instance=RequestContext(request))

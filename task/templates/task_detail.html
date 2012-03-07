@@ -46,16 +46,16 @@
 <form action="/task/{{ task.id }}/mark/" method="post">
     {% csrf_token %}
     <div class="btn-group">
-        <a href="/task/{{ task.id }}/submit/" class="btn">Pošalji rješenje</a>
+        <a href="/task/{{ task.id }}/submit/" class="btn"><i class="icon-file"></i> Pošalji rješenje</a>
         {% if solution.is_as_solved %}
-        <button type="submit" name="action" value="blank" class="btn">Makni oznaku riješenog</button>
+        <button type="submit" name="action" value="blank" class="btn"><i class="icon-remove"></i> Makni oznaku riješenog</button>
         {% else %}
-        <button type="submit" name="action" value="as_solved" class="btn">Označi kao riješeno</button>
+        <button type="submit" name="action" value="as_solved" class="btn"><i class="icon-ok"></i> Označi kao riješeno</button>
         {% endif %}
         {% if solution.is_todo %}
-        <button type="submit" name="action" value="blank" class="btn">Makni To Do oznaku</button>
+        <button type="submit" name="action" value="blank" class="btn"><i class="icon-remove"></i> Makni To Do oznaku</button>
         {% else %}
-        <button type="submit" name="action" value="todo" class="btn">To Do</button>
+        <button type="submit" name="action" value="todo" class="btn"><i class="icon-tag"></i> To Do</button>
         {% endif %}
     </div>
 </form>

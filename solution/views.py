@@ -15,11 +15,11 @@ from mathcontent.forms import MathContentForm
 @login_required
 def mark(request, task_id):
     if request.method != 'POST' or 'action' not in request.POST:
-        return HttpResponseForbidden('Not valid request')
+        return HttpResponseForbidden('Request not valid.')
 
     action = request.POST['action']
     if action not in ['official', 'blank', 'as_solved', 'todo']:
-        return HttpResponseForbidden(u'Action "%s" not valid' % action)
+        return HttpResponseForbidden(u'Action "%s" not valid.' % action)
 
     task = get_object_or_404(Task, pk=task_id)
         
@@ -31,7 +31,7 @@ def mark(request, task_id):
         solution.status = STATUS[action]
         solution.save()
     except Solution.DoesNotExist:
-        Solution.objects.create(task=task, author=request.user, status=STATUS[action])
+        solution = Solution.objects.create(task=task, author=request.user, status=STATUS[action])
 
     if action != 'blank':   # not really something interesting
         # TODO: DRY!
@@ -60,7 +60,7 @@ def edit_mark(request, solution_id):
         
         # TODO: DRY!
         if action == '1':
-            _action.send(request.user, _action.SOLUTION_AS_OFFICIAL, action_object=sol, target=solution.task_id)
+            _action.send(request.user, _action.SOLUTION_AS_OFFICIAL, action_object=sol, target=solution.task)
         return HttpResponseRedirect('/solution/%d/' % int(solution_id))
 
     if action in ['blank', 'as_solved', 'todo']:
@@ -71,7 +71,7 @@ def edit_mark(request, solution_id):
         if action != 'blank':
             type = {'as_solved': _action.SOLUTION_AS_SOLVED,
                     'todo': _action.SOLUTION_TODO}
-            _action.send(request.user, type[action], action_object=solution, target=solutions.task_id)
+            _action.send(request.user, type[action], action_object=solution, target=solutions.task)
         return HttpResponseRedirect('/task/%d/' % solution.task_id)
 
     return HttpResponseForbidden(u'Action "%s" not valid' % action)
