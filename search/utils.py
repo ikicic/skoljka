@@ -65,8 +65,8 @@ def search_and_cache(tags):
         return cache
         
 # TODO: replace this SELECT with cached_objects query
-    query = 'INSERT INTO search_searchcacheelement (object_id, content_type_id, cache_id)   \
-            SELECT object_id, content_type_id, %d FROM tags_taggeditem WHERE id IN (%s)' %  \
+    query = 'INSERT INTO search_searchcacheelement (object_id, content_type_id, cache_id)'      \
+            ' SELECT object_id, content_type_id, %d FROM tags_taggeditem WHERE id IN (%s)' %    \
             (cache.id, ','.join([str(x) for x in ids]))
     print query
 
@@ -105,6 +105,8 @@ def search_tasks(tags=[], none_if_blank=True, user=None, **kwargs):
     if kwargs.get('groups'):
         ids = ','.join([str(x) for x in tasks.values_list('id', flat=True)])
         group_ids = ','.join([str(x.id) for x in kwargs['groups']])
+        
+        # TODO: ispitati treba li LEFT ili INNER JOIN
         tasks = Task.objects.raw(
             'SELECT A.id, A.hidden, A.name, A.solved_count, A.quality_rating_avg, A.difficulty_rating_avg, COUNT(DISTINCT B.id) AS search_solved_count FROM task_task AS A \
                 LEFT JOIN solution_solution AS B ON (B.task_id = A.id) \

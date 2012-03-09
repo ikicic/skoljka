@@ -31,7 +31,7 @@ Dodaj nove članove:
 <form action="/usergroup/{{ group.pk }}/" method="POST">
     {% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" value="Dodaj">
+    <button type="submit" class="btn">Dodaj</button>    
 </form>
 {% endif %}
 {% endblock %}

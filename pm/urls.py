@@ -7,4 +7,9 @@ urlpatterns = patterns('',
     (r'^new/$', 'pm.views.new'),
     (r'^new/(?P<rec>[^/]+)/$', 'pm.views.new'),
     (r'^group/(?P<group_id>\d+)/$', 'pm.views.group_inbox'),
+    
+    (r'^(?P<id>\d+)/reply/$', 'pm.views.pm_action'),
+    (r'^(?P<id>\d+)/replyall/$', 'pm.views.pm_action'),
+    (r'^(?P<id>\d+)/forward/$', 'pm.views.pm_action'),
+    (r'^(?P<id>\d+)/delete/$', 'pm.views.pm_action'),
 )

@@ -55,7 +55,9 @@
             {% block menu_folder_container %}{% endblock %}
             <br>
             {% if user.is_authenticated %}
-              <li><a href="/pm/"><i class="icon-inbox"></i>Inbox</a></li>
+              <li><a href="/pm/"><i class="icon-inbox"></i>Inbox
+                {% if user.get_profile.unread_pms %}<span class="unread_pms_count">({{ user.get_profile.unread_pms }})</span>{% endif %}
+              </a></li>
             {% else %}
               <li><a href="/accounts/register/" class="register"><i class="icon-arrow-right"></i>Registracija</a></li>
               <li><a href="/accounts/login/"><i class="icon-arrow-right"></i>Prijava</a></li>

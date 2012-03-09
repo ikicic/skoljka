@@ -121,7 +121,7 @@ def convert_to_latex(T):
                 out.append('$')
                 i += 1                        
         else:
-            out.append(esc.get(T[i], T[i]))
+            out.append(reserved.get(T[i], T[i]))
             i += 1
 
     return u''.join(out)

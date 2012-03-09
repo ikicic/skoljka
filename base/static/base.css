@@ -77,3 +77,9 @@ div.tag_list {
 a.register {
     color: red;
 }
+.unread_pms_count {
+    color: red;
+}
+.unread {
+    background-color: #EFC;
+}

@@ -25,10 +25,13 @@ class UserProfile(models.Model):
     quote = models.CharField(max_length=200, blank=True, verbose_name='Citat')
     website = models.CharField(max_length=100, blank=True, verbose_name='Web')
     
-    
+
+    # deprecated or to fix
     solved_count = models.IntegerField(default=0)
     score = models.FloatField(default=0)
     diff_distribution = models.CharField(max_length=100)
+    
+    unread_pms = models.IntegerField(default=0)
     
     selected_folder = models.ForeignKey(Folder, blank=True, null=True)
     

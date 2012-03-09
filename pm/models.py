@@ -5,35 +5,29 @@ from django.contrib.contenttypes.models import ContentType
 
 from mathcontent.forms import MathContent
 
-# TODO: moze li se messaging implementirati preko user/group permission sistema?
-
-# deprecated
-# TODO: implementirati ovo pametnije (vidi permissions)
-class MessageManager(models.Manager):
-    # FIXME: vraca duplikate, a .distinct() ne pomaze (vjerojatno bi se popravilo pametnijom implementacijom)
-    def inbox(self, object):
-        content_type = ContentType.objects.get_for_model(object)
-        result = self.filter(object_id=object.id, content_type=content_type)
-        if isinstance(object, User):
-            group_content_type = ContentType.objects.get(app_label='auth', model='group')
-            result |= self.filter(content_type=group_content_type, object_id__in=object.groups.all())
-        return result;
-        
 class MessageContent(models.Model):
     subject = models.CharField(max_length=120)
     content = models.OneToOneField(MathContent)
-    author = models.ForeignKey(User)
+    author = models.ForeignKey(User, related_name='my_messages')
     date_created = models.DateTimeField(auto_now_add=True)
+    
+    recipients = models.ManyToManyField(User, related_name='messages', through='MessageRecipient')
+    groups = models.ManyToManyField(Group, related_name='messages')
+    
+    deleted_by_author = models.BooleanField(default=False)
     
     def __unicode__(self):
         return u'#%d "%s"' % (self.id, self.subject)
 
 class MessageRecipient(models.Model):
-    group = models.ForeignKey(Group)
-#    object_id = models.PositiveIntegerField()
-#    content_type = models.ForeignKey(ContentType)
-#    content_object = generic.GenericForeignKey()
+    recipient = models.ForeignKey(User)
+    message = models.ForeignKey(MessageContent)
     
-    message = models.ForeignKey(MessageContent, related_name='recipients')
+    read = models.SmallIntegerField(default=0)   # or IntegerField?
+    deleted = models.BooleanField(default=0)
     
-    objects = MessageManager()
+    # potrebni multi indeksi:
+    # (recipient, read)
+    # (recipient, deleted)
+    # moze i 
+    # (recipient, deleted, read)
