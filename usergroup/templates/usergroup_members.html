@@ -1,0 +1,36 @@
+{% extends "usergroup_base.html" %}
+
+{% block title %}Članovi grupe {{ group.name }}{% endblock %}
+
+{% block inner_content %}
+
+<br>
+<table width="60%" class="table-striped table-condensed" style="text-align: center;">
+{% for x in group.data.get_users %}
+  <tr>
+    <td>{{ forloop.counter }}</td>
+    <td>{{ x|userlink }}</td>
+    <td>
+      {% if x == group.data.author %}Tvorac{% endif %}
+    </td>
+    <td>
+      <a href="/pm/new/{{ x.username }}/" title="Pošalji poruku"><i class="icon-play"></i></a>
+    </td>
+    {# TODO: can_view_permissions i ono vezano uz to #}
+  </tr>
+{% empty %}
+  <tr><td><i>Nema članova</i></td></tr>
+{% endfor %}
+</table>
+
+{% if can_add_members %}
+  <br><br><br>
+  Dodaj nove članove:
+  <form action="/usergroup/{{ group.pk }}/members/" method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn">Dodaj</button>    
+  </form>
+{% endif %}
+
+{% endblock %}

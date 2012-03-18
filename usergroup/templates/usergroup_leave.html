@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Grupa {{ group.name }}{% endblock %}
+
+{% block content %}
+
+<div style="text-align:center;font-size:24px;">{{ group.name }}</div>
+<br><br>
+
+<div class="well">
+  Jeste li sigurni da želite izaći iz grupe <a href="/usergroup/{{ group.id }}/">{{ group.name }}</a>?<br><br><br>
+  <form action="/usergroup/{{ group.id }}/leave/" method="POST" class="btn-group">
+    <input type="submit" value="Izađi" class="btn btn-danger">
+    <input type="hidden" name="confirm" value="1">
+    {% csrf_token %}
+    <a href="/usergroup/{{ group.id }}/" class="btn btn-success">Odustani</a>
+  </form>
+</div>
+
+
+{% endblock %}
+    

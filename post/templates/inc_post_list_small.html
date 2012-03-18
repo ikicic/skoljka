@@ -1,29 +1,67 @@
 <div class="post_list_small">
 {% for post in posts %}
-    <div class="well">
+    <div class="well" id="post{{ post.pk }}">
+        {% if user.is_authenticated %}
+          <div style="float:right;">
+            {# <a> i <span> moraju biti jedan do drugoga zbog skripte na dnu! #}
+            <a href="#post" class="post_reply" id="pr{{ post.pk }}">Odgovori</a>
+            <span style="display:none;">{{ post.content.text }}</span><br>
+            
+            {% if post.cache_can_edit %}<a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">Uredi</a>{% endif %}
+          </div>
+        {% endif %}
         <span class="post_info">{{ post.author|userlink }} u {{ post.date_created }}</span><br>
         {{ post.content.render|safe }}
         {% if post.date_created != post.last_edit_time %}
             <br><br>
-            <span class="post_last_edit_info">
-                Zadnja promjena: {{ post.last_edit_by|userlink }} u {{ post.last_edit_time }}
+            <span class="last_edit">
+                Zadnja promjena: {{ post.last_edit_by|userlink }}, {{ post.last_edit_time }}
             </span>
         {% endif %}
-        <div style="float:right;"><a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">Edit</a></div>
     </div>
 {% endfor %}
 
 {% if user.is_authenticated %}
-    <div class="post_form">
+    <div class="post_form" id="post">
         {# dva puta se pristupa get_post_form #}
         <form action="/post/add/" method="post">
             {% csrf_token %}
             <input type="hidden" name="object_id" value="{{ container.pk }}">
             <input type="hidden" name="content_type_id" value="{{ container.posts.get_content_type_id }}">
+            <input type="hidden" name="post_reply_id" value="">
             <input type="hidden" name="post_redirect" value="{{ request.path }}">
             {{ container.posts.get_post_form.as_p }}
-            <input type="submit" value="Post">
+            <input type="submit" value="Pošalji">
+            <span id="reply_to_info" style="display:none;">
+                Odgovor na <a href="#">komentar</a>.
+                <a href="#post" class="icon-remove"></a>
+            </span>
         </form>
     </div>
+    <script>
+     $(function(){
+      $('.post_reply').click(function(){
+       id=$(this).attr('id').substr(2)
+       $('.post_reply_to').removeClass('post_reply_to');
+       $('#post'+id).addClass('post_reply_to');
+       $('input[name="post_reply_id"]').val(id);
+       
+       s='\n\n[quote]'+$(this).next().html()+'[/quote]';
+       $('#id_text').val(s);
+
+       $('#reply_to_info').attr('style', '')       
+       a = $('#reply_to_info a:first')
+       a.html('komentar #'+id)
+       a.attr('href', '#post'+id)
+      });
+     });
+     $(function(){
+      $('#reply_to_info a:last').click(function(){
+       $('.post_reply_to').removeClass('post_reply_to');
+       $('input[name="post_reply_id"]').val('');
+       $('#reply_to_info').attr('style', 'display:none;');
+      });
+     });
+    </script>
 {% endif %}
 </div>

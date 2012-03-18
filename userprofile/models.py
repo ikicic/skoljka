@@ -1,5 +1,5 @@
 ﻿from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.template.loader import add_to_builtins
 
 from tags.models import Tag
@@ -13,6 +13,7 @@ from solution.models import SOLUTION_CORRECT_SCORE
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile')
     
+    # data
     GENDER_CHOICES = (
         ('', 'Neizjašnjeno'),
         ('M', 'Momak'),
@@ -25,15 +26,15 @@ class UserProfile(models.Model):
     quote = models.CharField(max_length=200, blank=True, verbose_name='Citat')
     website = models.CharField(max_length=100, blank=True, verbose_name='Web')
     
+    # utility
+    unread_pms = models.IntegerField(default=0)    
+    selected_folder = models.ForeignKey(Folder, blank=True, null=True)
+    private_group = models.OneToOneField(Group)
 
     # deprecated or to fix
     solved_count = models.IntegerField(default=0)
     score = models.FloatField(default=0)
     diff_distribution = models.CharField(max_length=100)
-    
-    unread_pms = models.IntegerField(default=0)
-    
-    selected_folder = models.ForeignKey(Folder, blank=True, null=True)
     
     # da vraca [] umjesto None?
     def get_normalized_diff_distribution(self):

@@ -74,13 +74,15 @@ def register(request):
         profile_form = UserProfileForm(request.POST)
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save()
-            profile = profile_form.save(commit=False)
-            profile.user = user
-            profile.save()
-            
+
             # one member Group for each User
             group = Group(name=user.username)
             group.save()
+
+            profile = profile_form.save(commit=False)
+            profile.user = user
+            profile.private_group = group
+            profile.save()
             
             user.groups.add(group)
             

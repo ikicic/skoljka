@@ -7,8 +7,6 @@
 {# TODO: DRY, napraviti tag ili nesto, ovo se ponavlja #}
 
 
-<div class="well" style="float:right;"><a href="/task/1/"><h3>Obavijesti</h3><br>(i objašnjenje zašto je sve čudno)</a></div>
-
 {% if recommend %}
 
 <h2>Preporuke</h2>
@@ -38,7 +36,7 @@
     {% for x in recent_tasks %}
     <div class="span6">
     <div class="well">
-        <h4><a href="/task/{{ best_recommend.id }}/">{{ x.name }}</a></h4><br>
+        <h4><a href="/task/{{ x.id }}/">{{ x.name }}</a></h4><br>
         {{ x.content.render }}
         <div style="text-align:right;color:gray;">{{ x.date_created|timesince }} ago</div>
     </div>

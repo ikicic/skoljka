@@ -13,6 +13,7 @@ from taggit.utils import parse_tags
 from task.models import Task, SimilarTask
 from task.forms import TaskForm, TaskAdvancedForm
 
+from activity import action as _action
 from permissions.constants import ALL, EDIT, VIEW, EDIT_PERMISSIONS
 from permissions.utils import get_permissions_for_object_by_id
 from recommend.utils import task_event
@@ -202,6 +203,9 @@ def new(request, task_id=None):
                 filename = os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'media/pdf/task%d.pdf' % task.id))
                 if os.path.exists(filename):
                     os.remove()
+            
+            if not edit and not task.hidden:
+                _action.send(request.user, _action.TASK_ADD, action_object=task, target=task)
             
             # TODO: izbrisati task_new_finish.html i url
             #return HttpResponseRedirect('/task/%d/' % task.id if edit else '/task/new/finish/')

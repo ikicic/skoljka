@@ -86,24 +86,28 @@ def pm_action(request, id):
             link.save()
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
     elif action in ['reply', 'replyall']:
-        subject = 'Re: ' + pm.subject
-        text = "\n\n\n\n========================================================\n" + pm.content.text
+        subject = pm.subject if pm.subject.startswith('Re: ') else 'Re: ' + pm.subject
+        text = "\n\n\n\nPoslao %s %s:[quote]%s[/quote]" % \
+            (pm.author.username, pm.date_created.strftime('%d. %m. %Y. u %H:%M'), pm.content.text)
         
         if action == 'reply':
             group_names = pm.author.username
         else:
-            groups = list(pm.groups.values_list('name', flat=True))
-            groups.append(pm.author.username)
+            G = pm.groups.values_list('id', 'name')
+            groups = [name for id, name in G]
+            
+            # add author to the list if not already in some of the groups
+            if not pm.author.groups.through.objects.filter(user=pm.author, group__in=[id for id, name in G]).exists():
+                groups.append(pm.author.username)
             if request.user.username in groups:
                 groups.remove(request.user.username)
             group_names = ', '.join(groups)
             
         return new(request, rec=group_names, subject=subject, text=text)
     elif action == 'forward':
-        subject = 'Fw: ' + pm.subject
+        subject = pm.subject if pm.subject.startswith('Fw: ') else 'Fw: ' + pm.subject
         group_names = ', '.join(['<%s>' % x for x in pm.groups.values_list('name', flat=True)])
-        text = "\n\n\n\n========================================================\n" \
-               "Poslao/la <%s> dana %s za %s.\n\n%s" % \
+        text = "\n\n\n\n[quote]Poslao/la <%s> dana %s za %s.\n\n%s[/quote]" % \
                (pm.author.username, pm.date_created.strftime('%d. %m. %Y. u %H:%M'), group_names, pm.content.text)
         
         return new(request, subject=subject, text=text)
@@ -132,14 +136,15 @@ def outbox(request):
         }, context_instance=RequestContext(request))
 
 
+# treba li ovo, tj. zelimo li to uopce?
 @login_required
 def group_inbox(request, group_id=None):
     group = get_object_or_404(Group, pk=group_id)
     if request.user != group.data.author and not request.user.groups.filter(id=group_id).exists():
         raise Http404
 
-    #pm = MessageRecipient.objects.inbox(group).order_by('-id')
-    pm = MessageContent.objects.filter(groups=group).select_related('author', 'content').order_by('-id').distinct()
+    #pm = MessageContent.objects.filter(groups=group).select_related('author', 'content').order_by('-id').distinct()
+    pm = MessageContent.groups.through.objects.filter(group=group).select_related('messagecontent', 'messagecontent__author', 'messagecontent__content').order_by('-id')
     return render_to_response('pm_inbox.html', {
             'pm': pm,
             'group': group,

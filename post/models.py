@@ -16,3 +16,10 @@ class Post(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     last_edit_by = models.ForeignKey(User, related_name='+')
     last_edit_time = models.DateTimeField(auto_now=True)
+
+    def can_edit(self, user, container=None):
+        if container is None:
+            container = self.content_object
+        return user.is_superuser            \
+            or self.author_id == user.id    \
+            or hasattr(container, "author_id") and container.author_id == user.id

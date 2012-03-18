@@ -14,10 +14,15 @@ register = template.Library()
 # TODO: replace with .prefetch_related() after switching to Django 1.4
 # (but, this also updates `read` field...)
 # user=None for outbox for now
-def _cache_pm_info(pms, inbox, user):         # ...
-    if inbox:
+def _cache_pm_info(pms, type, user):         # ...
+    if type == 'group_inbox':
+        for x in pms:
+            x.message = x.messagecontent
+            x.message_id = x.messagecontent_id
+
+    if type in ['inbox', 'group_inbox']:
         msg_ids = [x.message_id for x in pms]
-    else:
+    else: # type == 'outbox':
         msg_ids = [x.id for x in pms]
     
     # ----- groups -----
@@ -27,15 +32,16 @@ def _cache_pm_info(pms, inbox, user):         # ...
     for x in pairs:
         pm_groups[x.messagecontent_id].append(x.group)
         
-    if inbox:
+    print pm_groups
+    if type in ['inbox', 'group_inbox']:
         for pm in pms:
             pm.message.cache_recipients = sorted(pm_groups[pm.message_id])
-    else:
+    else: # type == 'outbox':
         for pm in pms:
             pm.cache_recipients = sorted(pm_groups[pm.id])
 
     # ----- `read` field -----
-    if inbox:
+    if type == 'inbox':
         read_recs = []
         for x in pms:
             if x.read: continue
@@ -51,13 +57,17 @@ def _cache_pm_info(pms, inbox, user):         # ...
     
     return pms
     
-@register.filter
-def cache_inbox_info(pms, user):
-    return _cache_pm_info(pms, True, user)
+@register.simple_tag(takes_context='True')
+def cache_inbox_info(context, pms):
+    if context.get('group', None):
+        _cache_pm_info(pms, 'group_inbox', context['user'])
+    else:
+        _cache_pm_info(pms, 'inbox', context['user'])
+    return ''
 
 @register.filter
 def cache_outbox_info(pms):
-    return _cache_pm_info(pms, False, None)
+    return _cache_pm_info(pms, 'outbox', None)
 
 # DEPRECATED
 @register.filter

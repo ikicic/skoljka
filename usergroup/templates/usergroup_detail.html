@@ -1,12 +1,8 @@
-{% extends "base.html" %}
+{% extends "usergroup_base.html" %}
 
 {% block title %}Grupa {{ group.name }}{% endblock %}
 
-{% block content %}
-
-<div style="text-align:center;font-size:24px;">{{ group.name }}</div>
-<br><br>
-{% if is_member %}<a href="/pm/group/{{ group.id }}/">Inbox</a><br><br>{% endif %}
+{% block inner_content %}
 
 <div class="well">
   <table class="table-condensed">
@@ -17,6 +13,7 @@
   {{ group.data.description.render }}<br><br><br>
   Korisnici: 
   {% for x in group.data.get_users %}
+    {% if not forloop.first %}|{% endif %}
     {{ x|userlink }}
   {% empty %}
     <i>Prazno</i>
@@ -26,12 +23,5 @@
 <br><br><br><br>
 <a href="/pm/new/{{ group.name }}/">Pošalji poruku</a>
 <br><br>
-{% if can_add_members %}
-Dodaj nove članove:
-<form action="/usergroup/{{ group.pk }}/" method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn">Dodaj</button>    
-</form>
-{% endif %}
+
 {% endblock %}

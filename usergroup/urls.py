@@ -6,5 +6,9 @@ from usergroup.models import UserGroup
 
 urlpatterns = patterns('',
     (r'^$', 'usergroup.views.list'),
-    (r'^(?P<group_id>\d+)/', 'usergroup.views.detail'),
+    (r'^new/$', 'usergroup.views.new'),
+    (r'^(?P<group_id>\d+)/$', 'usergroup.views.detail'),
+    (r'^(?P<group_id>\d+)/edit/$', 'usergroup.views.new'),
+    (r'^(?P<group_id>\d+)/members/$', 'usergroup.views.members'),
+    (r'^(?P<group_id>\d+)/leave/$', 'usergroup.views.leave'),
 )

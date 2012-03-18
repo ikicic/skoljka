@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div style="text-align:center;font-size:24px;">{{ group.name }}</div>
+<br>
+<div style="float:right;" class="btn-group">
+  {% if is_member %}
+    <a href="/usergroup/{{ group.id }}/leave/" class="btn btn-mini"><i class="icon-remove"></i> Izađi iz grupe</a>
+    <a href="/pm/group/{{ group.id }}/" class="btn btn-mini"><i class="icon-inbox"></i> Inbox</a>
+    {% if can_edit %}<a href="/usergroup/{{ group.id }}/edit/" class="btn btn-mini"><i class="icon-pencil"></i> Uredi podatke</a>{% endif %}
+  {% endif %}
+  <a href="/usergroup/{{ group.id }}/" class="btn btn-mini"><i class="icon-info-sign"></i> Podaci</a>
+  <a href="/usergroup/{{ group.id }}/members/" class="btn btn-mini"><i class="icon-user"></i> Članovi</a>
+</div>
+<br><br>
+
+{% block inner_content %}
+{% endblock %}
+
+{% endblock %}

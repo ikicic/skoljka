@@ -26,10 +26,20 @@ html_escape_table = {
     '<': '&lt;',
 }
 
+tag_open = {
+    'quote': '<div class="quote">',
+}
+
+tag_close = {
+    'quote': '</div>',
+}
+
+# TODO: change i to iterator
 def convert_to_html(T): # XSS danger!!! Be careful
     i = 0
     n = len(T)
     out = []
+    tag_stack = []
     while i < n:
         if T[i] == '\\':
             # parse \$ and similar
@@ -42,6 +52,26 @@ def convert_to_html(T): # XSS danger!!! Be careful
         elif T[i] == '\r' or T[i] == '\n':
             out.append('<br>')
             i += 1
+        elif T[i] == '[':   # [quote]  [/quote] and similar
+            end = T.find(']', i)
+            if end == -1:
+                out.append('{{ Nedostaje znak ] }}')
+            elif end == i + 1 or end == i + 2 and T[i+1] == '/':
+                out.append('{{ Prazan tag? }}')
+            else:
+                tag = T[i+1:end]
+                if tag[0] == '/':
+                    tag = tag[1:]
+                    if not tag_stack or tag_stack[-1] != tag:
+                        out.append('{{ Poredak otvorenih i zatvorenih tagova nije valjan. }}')
+                    else:
+                        out.append(tag_close[tag_stack.pop()])
+                elif tag not in tag_open:
+                    out.append('{{ Nevaljan tag &quot;%s&quot; }}' % xss.escape(tag))
+                else:
+                    tag_stack.append(tag)
+                    out.append(tag_open[tag])
+            i = end + 1
         elif T[i] == '$':
             # parse $  $ and $$  $$
             i += 1
@@ -81,9 +111,13 @@ def convert_to_html(T): # XSS danger!!! Be careful
             out.append(html_escape_table.get(T[i], T[i]))
             i += 1
 
+    if tag_stack:
+        out.append('{{ Neki tagovi nisu zatvoreni }}')
+        while tag_stack:
+            out.append(tag_close[tag_stack.pop()])
     return u''.join(out)
 
-
+# TODO: change i to iterator
 # TODO: performace test
 def convert_to_latex(T):
     # replaces # % ^ & _ { } ~ \

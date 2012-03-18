@@ -1,3 +1,5 @@
+{% load activity_tags %}
+
 {% if activity %}
     {% for x in activity %}
         {% ifchanged x.date_created|date:"E_j" %}
@@ -6,6 +8,10 @@
         </div>
         {% endifchanged %}
         <div class="activity">
+            {% prepare_action_data x %}
+            {% if x.get_label %}
+              <div style="float:right;"><span class="label {{ x.get_label.0 }}">{{ x.get_label.1 }}</span></div>
+            {% endif %}
             <div class="time">{{ x.date_created|time:"H:i"}}</div>
             <div class="act_message1">{{ x.actor|userlink }} {{ x.get_message }}</div>
             <div class="act_message2">{{ x.get_content }}</div>

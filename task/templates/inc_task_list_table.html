@@ -11,15 +11,15 @@
     {{ tasks|multiple_task_link }}<br>
     
     {% if user.profile.selected_folder %}
-        <script>
-            $(function(){
-             $('.folder_checkbox').click(function(){
-              $.ajax({
-                url: '/folder/select/task/' + $(this).parent().next().html() + '/'
-              });
-             });
-            });
-        </script>
+    <script>
+    $(function(){
+     $('.folder_checkbox').click(function(){
+      $.ajax({
+        url: '/folder/select/task/' + $(this).parent().next().html() + '/'
+      });
+     });
+    });
+    </script>
     {% endif %}
     
     <table width="100%" class="table-striped table-condensed" style="text-align: center;">
