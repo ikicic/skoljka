@@ -4,7 +4,7 @@ from mathcontent.latex import generate_png
 inline_format = "$%s$ \n \\newpage \n"
 block_format = "\\[\n%s \n\\] \n \\newpage \n"
 
-img_url_path = '/media/math/'
+img_url_path = '/media/m/'
 
 reserved = {
     '#': '\\#',
@@ -99,12 +99,13 @@ def convert_to_html(T): # XSS danger!!! Be careful
 
             latex = u''.join(latex)
             latex_escaped = xss.escape(latex)
+            
+            hash, depth = generate_png(latex, inline_format if inline else block_format)
+            url = '%s%s/%s/%s/%s.png' % (img_url_path, hash[0], hash[1], hash[2], hash)
             if inline:
-                hash, depth = generate_png(latex, inline_format)
-                img = '<img src="%s%s.png" alt="%s" class="latex" style="vertical-align:%dpx">' % (img_url_path, hash, latex_escaped, -depth)
+                img = '<img src="%s" alt="%s" class="latex" style="vertical-align:%dpx">' % (url, latex_escaped, -depth)
             else:
-                hash, depth = generate_png(latex, block_format)
-                img = '<img src="%s%s.png" alt="%s" class="latex_center">' % (img_url_path, hash, latex_escaped)
+                img = '<img src="%s" alt="%s" class="latex_center">' % (url, latex_escaped)
 
             out.append(img)
         else:

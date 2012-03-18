@@ -101,13 +101,18 @@ tex_preamble = r'''
 # TODO: join depth queries
 def generate_png(eq, format):
     eq_hash = hashlib.md5(eq+format).hexdigest()
-    filename = os.path.normpath(os.path.join(settings.MEDIA_ROOT, 'math', eq_hash))
-
     try:
         latex_element = LatexElement.objects.only("depth").get(pk=eq_hash)
         return eq_hash, latex_element.depth
     except:
         pass
+
+    path = os.path.normpath(os.path.join(settings.MEDIA_ROOT, 'm', eq_hash[0], eq_hash[1], eq_hash[2]))
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    filename = os.path.normpath(os.path.join(path, eq_hash))
+
     
     f = open(filename + '.tex', 'w')
     f.write(tex_preamble)

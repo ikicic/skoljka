@@ -30,6 +30,7 @@
     {% for x in content.attachments.all %}
         <tr>
             <td><a href="{{ x.get_url }}">{{ x.get_filename }}</a></td>
+            <td>{{ x.file.size|filesizeformat }}</td>
             <td><a class="attdel" name="attdel{{ x.id }}" href="#" title="Izbiši">Izbriši</a><br></td>
         </tr>
     {% empty %}

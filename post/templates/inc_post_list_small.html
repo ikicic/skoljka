@@ -1,6 +1,6 @@
 <div class="post_list_small">
 {% for post in posts %}
-    <div class="well" id="post{{ post.pk }}">
+    <div class="well well-small" id="post{{ post.pk }}">
         {% if user.is_authenticated %}
           <div style="float:right;">
             {# <a> i <span> moraju biti jedan do drugoga zbog skripte na dnu! #}
@@ -10,7 +10,7 @@
             {% if post.cache_can_edit %}<a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">Uredi</a>{% endif %}
           </div>
         {% endif %}
-        <span class="post_info">{{ post.author|userlink }} u {{ post.date_created }}</span><br>
+        <div class="post_info">{{ post.author|userlink }} u {{ post.date_created }}</div><br>
         {{ post.content.render|safe }}
         {% if post.date_created != post.last_edit_time %}
             <br><br>

@@ -3,6 +3,7 @@ from django.db import models
 from django.utils.safestring import mark_safe
 
 from skoljka.utils.decorators import autoconnect
+from skoljka.utils.generators import LowerNumKeyGen
 
 import os
 import re
@@ -18,6 +19,9 @@ class LatexElement(models.Model):
     text = models.TextField()
     format = models.CharField(max_length=64)
     depth = models.IntegerField()
+    date_created = models.DateTimeField(auto_now=True, help_text=('If something goes wrong, you would like to have this information.'))
+    # Mjera sigurnosti, dogodilo se da se latex zblokira.
+    # Ne znam razlog, ovime se nadam da ce se olaksati debugiranje.
 
 
 @autoconnect
@@ -55,7 +59,13 @@ class MathContent(models.Model):
 
 
 def attachment_upload_to(instance, filename):
-    return os.path.join(settings.MEDIA_ROOT, 'attachment', str(instance.id), filename)
+    return os.path.join(
+        settings.MEDIA_ROOT,
+        'attachment',
+        str(instance.id // 100),
+        '%05d_%s' % (instance.id, LowerNumKeyGen.generate(length=20)),
+        filename
+    )
 
 class Attachment(models.Model):
     file = models.FileField(upload_to=attachment_upload_to, blank=True)

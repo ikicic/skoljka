@@ -42,15 +42,11 @@ class Action(models.Model):
         return u'<a href="userprofile/%d/">%s</a>' % (self.actor_id, self.actor.get_full_name())
         
     def get_content(self):
-        print self
-        print self.type
-        print POST_SEND
         S = ''
         if self.type in [TASK_ADD, SOLUTION_SUBMIT, SOLUTION_AS_SOLVED, SOLUTION_TODO, SOLUTION_AS_OFFICIAL]:
             S = self.T('task')
         if self.type == POST_SEND:
             S = u'<a href="/task/%d/#post%d">%s</a>' % (self.target_id, self.action_object_id, self.action_object_cache)
-        print S
         return mark_safe(S)
 
     def get_label(self):
