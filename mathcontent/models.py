@@ -73,7 +73,7 @@ class Attachment(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
 
     def get_url(self):
-        # TODO: this is risky...
+        # FIXME: this is risky...
         # file.name includes path
         return settings.MEDIA_URL + self.file.name[len(settings.MEDIA_ROOT)+1:]
 

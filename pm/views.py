@@ -47,6 +47,7 @@ def new(request, rec='', subject='', text=''):
             transaction.commit_unless_managed()
             
             # fix `read` for messages sent also to sender himself
+            # or just delete this?
             MessageRecipient.objects.filter(recipient=request.user, message=message).update(read=1)
 
             return HttpResponseRedirect('/pm/outbox/')

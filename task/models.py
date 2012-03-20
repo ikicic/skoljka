@@ -2,6 +2,7 @@
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.generic import GenericRelation
 from django.utils.safestring import mark_safe
 
 from mathcontent.models import MathContent
@@ -10,6 +11,7 @@ from permissions.models import PerObjectGroupPermission
 from permissions.utils import has_group_perm
 from post.generic import PostGenericRelation
 from rating.fields import RatingField
+from search.models import SearchCacheElement
 from tags.managers import TaggableManager
 
 from rating.constants import *
@@ -49,6 +51,7 @@ class Task(models.Model):
     hidden = models.BooleanField(default=False)
     
 #    user_permissions = generic.GenericRelation(PerObjectUserPermission)
+    search_cache_elements = GenericRelation(SearchCacheElement)
     group_permissions = generic.GenericRelation(PerObjectGroupPermission)
     posts = PostGenericRelation()
     tags = TaggableManager(blank=True)
