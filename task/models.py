@@ -44,11 +44,12 @@ class TaskPermissionManager(models.Manager):
 
 
 class Task(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=120)
     content = models.OneToOneField(MathContent)
     author = models.ForeignKey(User)
     date_created = models.DateTimeField(auto_now_add=True)
     hidden = models.BooleanField(default=False)
+    source = models.CharField(max_length=200)
     
 #    user_permissions = generic.GenericRelation(PerObjectUserPermission)
     search_cache_elements = GenericRelation(SearchCacheElement)

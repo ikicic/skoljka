@@ -55,9 +55,14 @@ def convert_to_html(T): # XSS danger!!! Be careful
         elif T[i] == '[':   # [quote]  [/quote] and similar
             end = T.find(']', i)
             if end == -1:
-                out.append('{{ Nedostaje znak ] }}')
-            elif end == i + 1 or end == i + 2 and T[i+1] == '/':
-                out.append('{{ Prazan tag? }}')
+                out.append('[')     # no error messages for now
+                i += 1
+            elif end == i + 1:
+                out.append('[]')
+                i += 2
+            elif end == i + 2 and T[i+1] == '/':
+                out.append('[/]')
+                i += 3
             else:
                 tag = T[i+1:end]
                 if tag[0] == '/':
@@ -71,7 +76,7 @@ def convert_to_html(T): # XSS danger!!! Be careful
                 else:
                     tag_stack.append(tag)
                     out.append(tag_open[tag])
-            i = end + 1
+                i = end + 1
         elif T[i] == '$':
             # parse $  $ and $$  $$
             i += 1

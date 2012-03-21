@@ -11,9 +11,9 @@ import collections
 
 register = template.Library()
 
-@register.inclusion_tag('inc_task_small_box.html')
-def task_small_box(task, div_class='', url_suffix=''):
-    return {'task': task, 'div_class': div_class, 'url_suffix': url_suffix}
+@register.inclusion_tag('inc_task_small_box.html', takes_context=True)
+def task_small_box(context, task, div_class='', url_suffix='', options=''):
+    return {'user': context['user'], 'task': task, 'div_class': div_class, 'url_suffix': url_suffix, 'options': options}
 
 @register.filter
 def cache_additional_info(tasks, user):
@@ -46,10 +46,10 @@ def cache_additional_info(tasks, user):
         
     return tasks
 
-@register.filter
-def tag_list(task, plus_exclude=None):
+@register.simple_tag(takes_context=True)
+def tag_list(context, task, plus_exclude=None):
     if not hasattr(task, '_cache_tag_set'):
-        task._cache_tag_set = [tag.name for tag in task.tags.order_by('name')]
+        task._cache_tag_set = [tag.name for tag in task.tags.order_by('-weight', 'name')]
 
     if plus_exclude is not None:
         add = u','.join(plus_exclude)
@@ -58,11 +58,21 @@ def tag_list(task, plus_exclude=None):
         add = u''
         plus_exclude_lower = []
 
-    no_plus = u'<a href="/search/?q=%(tag)s">%(tag)s</a>'
-    plus = u'<a href="/search/?q=%(tag)s">%(tag)s</a> <a href="/search/?q=' + add + ',%(tag)s">+</a>'
+    no_plus = u'<a href="/search/?q=%(tag)s"%(hidden)s>%(tag)s</a>'
+    plus = u'<a href="/search/?q=%(tag)s"%(hidden)s>%(tag)s</a> <a href="/search/?q=' + add + ',%(tag)s"%(hidden)s>+</a>'
 
-    v = [ (no_plus if (not plus_exclude or tag.lower() in plus_exclude_lower) else plus) % {'tag': tag} for tag in task._cache_tag_set]
-    return mark_safe('<div class="tag_list">%s</div>' % u' | '.join(v))
+    user = context['user']
+    show_hidden = user.is_authenticated() and user.get_profile().show_hidden_tags
+    
+    v0 = []     # not hidden
+    v1 = []     # hidden
+    for tag in task._cache_tag_set:
+        format = no_plus if (not plus_exclude or tag.lower() in plus_exclude_lower) else plus
+        if tag[0] != '$':
+            v0.append(format % {'tag': tag, 'hidden': ''})
+        elif show_hidden:
+            v1.append(format % {'tag': tag[1:], 'hidden': ' class="hidden_tag"'})
+    return mark_safe('<div class="tag_list">%s</div>' % u' | '.join(v0 + v1))
 
     
 @register.filter

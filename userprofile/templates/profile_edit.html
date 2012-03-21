@@ -8,8 +8,10 @@
 
 <a href="javascript: history.go(-1)">« Vrati se</a><br>
 
+<br>
 <form action="/profile/edit/" method="POST">
 {% csrf_token %}
+{% if success %}<div class="alert alert-success">Promjene uspješno spremljene!</div>{% endif %}
 <table>
 {{ form.as_table }}
 <td colspan="2">

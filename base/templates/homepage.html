@@ -3,6 +3,7 @@
 {% block content %}
 
 {% load activity_tags %}
+{% load task_tags %}
 
 {# TODO: DRY, napraviti tag ili nesto, ovo se ponavlja #}
 
@@ -34,13 +35,7 @@
 <h2>Nedavno objavljeni zadaci</h2>
 <div class="row-fluid">
     {% for x in recent_tasks %}
-    <div class="span6">
-    <div class="well">
-        <h4><a href="/task/{{ x.id }}/">{{ x.name }}</a></h4><br>
-        {{ x.content.render }}
-        <div style="text-align:right;color:gray;">{{ x.date_created|timesince }} ago</div>
-    </div>
-    </div>
+        {% task_small_box x 'span6' '' 'timesince' %}
     {% endfor %}
 </div>
 

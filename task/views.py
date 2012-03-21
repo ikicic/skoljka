@@ -18,7 +18,7 @@ from permissions.constants import ALL, EDIT, VIEW, EDIT_PERMISSIONS
 from permissions.utils import get_permissions_for_object_by_id
 from recommend.utils import task_event
 from search.utils import update_search_cache
-from solution.models import Solution
+from solution.models import Solution, STATUS as _SOLUTION_STATUS
 from solution.views import get_user_solved_tasks
 from mathcontent.forms import MathContentForm
 from mathcontent.latex import export_header, export_task, export_footer
@@ -77,6 +77,7 @@ def advanced_new(request):
                     task.content = math_content
 # TODO: automatizirati .hidden: (vidi TODO na vrhu funkcije)
                     task.hidden = task_template.hidden
+                    task.source = task_template.source
                     task.save()
 
                     tags = parse_tags(task_form.cleaned_data['_tags'] % dictionary)
@@ -279,9 +280,25 @@ def similar(request, id):
         task_event(request.user, task, 'view')
     
     
-    similar_ids = list(SimilarTask.objects.filter(task=task).order_by('-score')[:6].values_list('similar_id', flat=True))
-    print similar_ids
-    similar = Task.objects.filter(id__in=similar_ids)
+    # SPEED: read main task together with the rest
+    similar = list(SimilarTask.objects.filter(task=task).order_by('-score')[:50].values_list('similar_id', 'score'))
+    solutions = Solution.objects.filter(task__similar_backward=task, author=request.user).exclude(status=_SOLUTION_STATUS['blank'])
+
+    sorted_tasks = dict(similar)
+    for s in solutions.only('status', 'correctness_avg', 'task'):
+        p = 1.0
+        if s.is_todo(): p = 2
+        elif s.is_as_solved(): p = 3
+        elif s.is_submitted():
+            print 'OVDJE'
+            if s.is_correct(): p = 5
+        
+        sorted_tasks[s.task_id] *= p
+        
+    sorted_tasks = sorted([(p, id) for id, p in sorted_tasks.iteritems()])
+    similar_ids = [id for p, id in sorted_tasks[:6]]
+    
+    similar = Task.objects.filter(id__in=similar_ids).select_related('content')
     
     return render_to_response('task_similar.html', {
             'task': task,

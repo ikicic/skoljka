@@ -1,9 +1,18 @@
 {% load task_tags %}
+{% load solution_tags %}
 
 <div class="{{ div_class }}">
-    <div class="well">
-        <div style="float:right;">{{ task|tag_list }}</div>
-        <h4><a href="/task/{{ task.id }}/{{ url_suffix }}">{{ task.name }}</a></h4><br>
-        {{ task.content.render }}
+  <div class="well">
+    <div style="float:right;text-align:right;">
+      {% tag_list task %}<br>
+      {% solution_label task %}<br>
     </div>
+    <h4><a href="/task/{{ task.id }}/{{ url_suffix }}">{{ task.name }}</a></h4><br>
+
+    {{ task.content.render }}
+
+    {% if 'timesince' in options %}
+      <div style="text-align:right;color:gray;">{{ task.date_created|timesince }} ago</div>
+    {% endif %}
+  </div>
 </div>

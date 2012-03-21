@@ -20,6 +20,9 @@ pre {
     display: inline;
     background-color: #DDD;
 }
+img.latex, img.latex_center {
+    max-width: 100%;
+}
 img.latex_center {
     display: block;
     margin-left: auto;
@@ -95,4 +98,7 @@ a.register {
 .post_list_small .last_edit {
     font-size: 11px;
     color: #888
+}
+.hidden_tag {
+    color: #999;
 }

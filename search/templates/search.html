@@ -8,6 +8,7 @@
 
 <h2>Pretraživanje</h2>
 <form action="/search/" method="get" class="well">
+{% if errors %}<div class="alert alert-error">{{ errors }}</div>{% endif %}
 <table>
     {{ form.as_table }}
     {% if advanced_form %}
@@ -32,14 +33,17 @@
 
 
 
+
 {% if any %}
     <ul>
     {% for tag in tags %}
-        <li><a href="/search/?q={{ tag }}">{{ tag }}</a></li>
+        <li><a href="/search/?q={{ tag }}"{% if tag.0 == '$' %} class="hidden_tag"{% endif %}>{{ tag }}</a></li>
     {% endfor %}
     </ul>
 
-    {% include "inc_task_list_table.html" with plus_exclude=tags empty_message="Ne postoji zadatak s navedenim tagovima" %}
+    {% if not errors %}
+        {% include "inc_task_list_table.html" with plus_exclude=tags empty_message="Ne postoji zadatak s navedenim tagovima" %}
+    {% endif %}
 {% endif %}
 
 {% endblock content %}

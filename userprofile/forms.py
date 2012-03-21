@@ -77,7 +77,7 @@ class UserProfileEditForm(forms.ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ['gender', 'birthday', 'city', 'country', 'quote', 'website']
+        fields = ['gender', 'birthday', 'city', 'country', 'quote', 'website', 'show_hidden_tags']
 
 # DEPRECATED
 class UserCreationExtendedForm(UserCreationForm):

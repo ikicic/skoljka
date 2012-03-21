@@ -2,6 +2,7 @@
 
 {% block content %}
 
+{% if not new_group %}
 <div style="text-align:center;font-size:24px;">{{ group.name }}</div>
 <br>
 <div style="float:right;" class="btn-group">
@@ -14,6 +15,7 @@
   <a href="/usergroup/{{ group.id }}/members/" class="btn btn-mini"><i class="icon-user"></i> Članovi</a>
 </div>
 <br><br>
+{% endif %}
 
 {% block inner_content %}
 {% endblock %}

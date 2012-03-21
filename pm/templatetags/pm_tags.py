@@ -57,7 +57,7 @@ def _cache_pm_info(pms, type, user):         # ...
     
     return pms
     
-@register.simple_tag(takes_context='True')
+@register.simple_tag(takes_context=True)
 def cache_inbox_info(context, pms):
     if context.get('group', None):
         _cache_pm_info(pms, 'group_inbox', context['user'])

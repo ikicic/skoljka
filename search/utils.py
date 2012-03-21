@@ -48,14 +48,10 @@ def search_and_cache(tags):
         
     cache_content_type = ContentType.objects.get_for_model(SearchCache)
         
-# TODO: change to case-insensitive
-
     cached_objects = TaggedItem.objects
-    tag = Tag.objects.get(name=tags[-1])
+    tag = Tag.objects.get(name__iexact=tags[-1])
     if len(tags) > 1:
         recursion = search_and_cache(tags[:-1])
-#        ids = SearchCacheElement.objects.filter(cache=recursion).values_list('object_id', flat=True)
-#        cached_objects = cached_objects.filter(object_id__in=ids)
         query = 'INSERT INTO search_searchcacheelement (object_id, content_type_id, cache_id)'  \
                 ' SELECT A.object_id, A.content_type_id, %d FROM search_searchcacheelement AS A'    \
                 ' INNER JOIN tags_taggeditem AS B ON (A.object_id = B.object_id AND A.content_type_id = B.content_type_id)' \
@@ -63,20 +59,11 @@ def search_and_cache(tags):
                 % (cache.id, recursion.id, tag.id)
     else:
         # search shouldn't include itself
-#        cached_objects = cached_objects.filter(tag=tag).exclude(content_type=cache_content_type)
-#        ids = cached_objects.values_list('id', flat=True)
         query = 'INSERT INTO search_searchcacheelement (object_id, content_type_id, cache_id)'  \
                 ' SELECT A.object_id, A.content_type_id, %d FROM tags_taggeditem AS A'  \
                 ' WHERE A.tag_id=%d AND A.content_type_id != %d;'   \
                 % (cache.id, tag.id, cache_content_type.id)
-#    query = 'INSERT INTO search_searchcacheelement (object_id, content_type_id, cache_id)'      \
-#            ' SELECT object_id, content_type_id, %d FROM tags_taggeditem WHERE id IN (%s)' %    \
-#            (cache.id, ','.join([str(x) for x in ids]))
-    
-#    if not ids:         # MySQL doesn't like WHERE ... IN with empty list
-#        return cache
         
-# # TODO: replace this SELECT with cached_objects query
     print query
 
     cursor = connection.cursor()

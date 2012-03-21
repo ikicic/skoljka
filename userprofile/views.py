@@ -19,15 +19,19 @@ def new_register(request):
 @login_required
 def edit(request):
     profile = request.user.get_profile()
+
+    success = None
     if request.method == 'POST':
         form = UserProfileEditForm(request.POST, instance=profile)
         if form.is_valid():
             profile = form.save()
+            success = True
     else:
         form = UserProfileEditForm(instance=profile)
         
     return render_to_response('profile_edit.html', {
         'form': form,
+        'success': success,
     }, context_instance=RequestContext(request))
 
 @login_required

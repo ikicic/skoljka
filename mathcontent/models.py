@@ -47,9 +47,11 @@ class MathContent(models.Model):
             return mark_safe(self.html)
             
         from mathcontent.utils import convert_to_html
+        print 'CONVERTING %d...' % self.id
         self.html = convert_to_html(self.text)
         self.no_html_reset = True
         self.save()
+        print 'DONE!'
         
         return mark_safe(self.html)
 

@@ -115,6 +115,7 @@ def new(request, group_id=None):
     return render_to_response('usergroup_new.html', {
             'group': group,
             'edit': edit,
+            'new_group': not edit,
             'forms': [group_form, usergroup_form, description_form],
         }, context_instance=RequestContext(request))
 

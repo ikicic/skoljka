@@ -5,7 +5,6 @@ import taggit
 
 class Tag(taggit.models.TagBase):
     weight = models.FloatField(default=1.0)
-    hidden = models.BooleanField(default=False)     # jos se ne koristi
 
     class Meta:
         verbose_name = _("Tag")

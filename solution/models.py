@@ -20,8 +20,8 @@ STATUS = {'blank': 0, 'as_solved': 1, 'todo': 2, 'submitted': 3}
 
 HTML_INFO = {
     'blank': {'label_class': '', 'label_text': '', 'tr_class': ''},
-    'as_solved': {'label_class': '', 'label_text': u'Riješeno', 'tr_class': 'task_as_solved'},
-    'solved': {'label_class': 'label-success', 'label_text': u'Riješeno', 'tr_class': 'task_solved'},
+    'as_solved': {'label_class': 'label-success', 'label_text': u'Riješeno', 'tr_class': 'task_as_solved'},
+    'solved': {'label_class': 'label-success', 'label_text': u'Točno', 'tr_class': 'task_solved'},
     'wrong': {'label_class': 'label-important', 'label_text': u'Netočno', 'tr_class': 'task_wrong'},
     'todo': {'label_class': 'label-warning', 'label_text': u'To Do', 'tr_class': 'task_todo'},
     'submitted_not_rated': {'label_class': 'label-info', 'label_text': u'Poslano', 'tr_class': 'task_submitted_not_rated'},
@@ -49,11 +49,13 @@ class Solution(models.Model):
         if self.status == STATUS['submitted']:
             if self.correctness_avg == 0.0:
                 return HTML_INFO['submitted_not_rated']
-            return HTML_INFO['solved' if self.correctness_avg >= SOLUTION_CORRECT_SCORE else 'wrong']
+            return HTML_INFO['solved' if self.is_correct() else 'wrong']
         if self.status == STATUS['todo']:
             return HTML_INFO['todo']
         return HTML_INFO['blank']
 
+    def is_correct(self):
+        return self.is_submitted() and self.correctness_avg >= SOLUTION_CORRECT_SCORE
     def is_submitted(self):
         return self.status == STATUS['submitted']
     def is_as_solved(self):

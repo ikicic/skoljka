@@ -31,8 +31,8 @@
         {% else %}
         <td>
             {% if s.author == user %}<a href="/task/{{ s.task_id }}/submit/">{% endif %}
-                {% if s.is_as_solved %}{prazno}{% endif %}
-                {% if s.is_todo %}{to do}{% endif %}
+                {% if s.is_as_solved %}<i>prazno</i>{% endif %}
+                {% if s.is_todo %}<i>to do</i>{% endif %}
             {% if s.author == user %}</a>{% endif %}
         </td>
         <td width="width:80px;">&nbsp;</td>
