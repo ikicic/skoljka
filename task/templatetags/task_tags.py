@@ -2,7 +2,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.utils.safestring import mark_safe
 
-from tags.models import TaggedItem
+from tags.models import TaggedItem, VOTE_WRONG
 from taggit.utils import parse_tags
 
 from solution.models import Solution
@@ -24,7 +24,7 @@ def cache_additional_info(tasks, user):
     tagovi = TaggedItem.objects.filter(content_type=task_content_type, object_id__in=ids).select_related('tag')
     tags = collections.defaultdict(list)
     for x in tagovi:
-        tags[x.object_id].append(x.tag.name)
+        tags[x.object_id].append((x.tag.name, x.votes_sum))
         
     for task in tasks:
         task._cache_tag_set = sorted(tags[task.id])
@@ -46,10 +46,14 @@ def cache_additional_info(tasks, user):
         
     return tasks
 
+# move to tags/templatetags/?
 @register.simple_tag(takes_context=True)
 def tag_list(context, task, plus_exclude=None):
     if not hasattr(task, '_cache_tag_set'):
-        task._cache_tag_set = [tag.name for tag in task.tags.order_by('-weight', 'name')]
+        #task._cache_tag_set = [(tag.name, '?') for tag in task.tags.order_by('-weight', 'name')]
+        task_content_type = ContentType.objects.get_for_model(task)
+        tagovi = TaggedItem.objects.filter(content_type=task_content_type, object_id=task.id).select_related('tag')
+        task._cache_tag_set = [(x.tag.name, x.votes_sum) for x in tagovi]
 
     if plus_exclude is not None:
         add = u','.join(plus_exclude)
@@ -58,21 +62,31 @@ def tag_list(context, task, plus_exclude=None):
         add = u''
         plus_exclude_lower = []
 
-    no_plus = u'<a href="/search/?q=%(tag)s"%(hidden)s>%(tag)s</a>'
-    plus = u'<a href="/search/?q=%(tag)s"%(hidden)s>%(tag)s</a> <a href="/search/?q=' + add + ',%(tag)s"%(hidden)s>+</a>'
+    no_plus = u'<a href="/search/?q=%(tag)s"%(class)s data-votes="%(votes)s">%(tag)s</a>'
+    plus = no_plus + u'<a href="/search/?q=' + add + ',%(tag)s"%(class)s>+</a>'
 
     user = context['user']
     show_hidden = user.is_authenticated() and user.get_profile().show_hidden_tags
     
     v0 = []     # not hidden
     v1 = []     # hidden
-    for tag in task._cache_tag_set:
-        format = no_plus if (not plus_exclude or tag.lower() in plus_exclude_lower) else plus
-        if tag[0] != '$':
-            v0.append(format % {'tag': tag, 'hidden': ''})
+    for name, votes in task._cache_tag_set:
+        format = no_plus if (not plus_exclude or name.lower() in plus_exclude_lower) else plus
+        attr = {'votes': votes, 'class': ''}
+        if name[0] != '$':
+            attr['tag'] = name
         elif show_hidden:
-            v1.append(format % {'tag': tag[1:], 'hidden': ' class="hidden_tag"'})
-    return mark_safe('<div class="tag_list">%s</div>' % u' | '.join(v0 + v1))
+            attr['tag'] = name[1:]
+            attr['class'] = 'hidden_tag'
+        else:
+            continue
+            
+        if votes <= VOTE_WRONG:
+            attr['class'] = 'hidden_wrong_tag' if attr['class'] else 'wrong_tag'
+        attr['class'] = ' class="%s"' % attr['class'] if attr['class'] else ''
+        
+        (v0 if name[0] != '$' else v1).append(format % attr)
+    return mark_safe(u'<div class="tag_list" data-task="%d">%s</div>' % (task.id, u' | '.join(v0 + v1)))
 
     
 @register.filter

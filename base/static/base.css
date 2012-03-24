@@ -102,3 +102,24 @@ a.register {
 .hidden_tag {
     color: #999;
 }
+.wrong_tag {
+    color: #A98;
+}
+.hidden_wrong_tag {
+    color: #CCC;
+}
+
+/* Collision with bootstrap.css, used for jquery tools tooltip */
+.tag_tooltip {
+  display:none;
+  background:#999;
+  border:1px solid #BBB;
+  padding:5px 6px 0px 6px;
+  color:#eee;
+}
+.tag_tooltip img {
+  vertical-align:-3px;
+}
+.tag_tooltip input {
+  margin-top:3px;
+}

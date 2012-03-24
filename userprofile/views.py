@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import User, Group
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -36,21 +36,28 @@ def edit(request):
 
 @login_required
 def profile(request, pk):
-    # FIXME: vide se skrivene grupe
-    try:
-        user = User.objects.select_related('profile').get(pk=pk)
-    except:
-        raise Http404
-    
+    if request.user.is_authenticated() and request.user.pk == pk:
+        user = request.user
+    else:
+        user = get_object_or_404(User.objects.select_related('profile'), pk=pk)    
 
     user.profile.update_diff_distribution()
     distribution = user.profile.get_normalized_diff_distribution()
     if distribution:
         distribution = zip(DIFFICULTY_RATING_ATTRS['titles'], [int(x * 100) for x in distribution])
+        
+    if not request.user.is_authenticated():
+        visible_groups = user.groups.exclude(name=user.username).filter(data__hidden=False).select_related('data')
+    elif request.user.id == pk:
+        visible_groups = user.groups.exclude(name=user.username).select_related('data')
+    else:
+        # TODO: staviti da se vide i zajednicke skrivene grupe
+        visible_groups = user.groups.exclude(name=user.username).filter(data__hidden=False).select_related('data')
     
     return render_to_response('profile_detail.html', {
         'profile': user,
         'distribution': distribution,
+        'visible_groups': visible_groups.distinct(),
     }, context_instance=RequestContext(request))
 
 

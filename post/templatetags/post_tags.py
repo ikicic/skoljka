@@ -8,7 +8,7 @@ def show_posts_small(context, container):
     posts = container.posts.select_related('author', 'content', 'last_edit_by').order_by('-date_created')
     user = context['user']
     for x in posts:
-        x.cache_can_edit = x.can_edit(user)
+        x.cache_can_edit = x.can_edit(user, container)
 
     return {
         'posts': posts,

@@ -10,7 +10,7 @@
             {% if post.cache_can_edit %}<a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">Uredi</a>{% endif %}
           </div>
         {% endif %}
-        <div class="post_info">{{ post.author|userlink }} u {{ post.date_created }}</div><br>
+        <div class="post_info">{{ post.author|userlink }}, {{ post.date_created }}</div><br>
         {{ post.content.render|safe }}
         {% if post.date_created != post.last_edit_time %}
             <br><br>
@@ -23,7 +23,6 @@
 
 {% if user.is_authenticated %}
     <div class="post_form" id="post">
-        {# dva puta se pristupa get_post_form #}
         <form action="/post/add/" method="post">
             {% csrf_token %}
             <input type="hidden" name="object_id" value="{{ container.pk }}">
@@ -31,37 +30,12 @@
             <input type="hidden" name="post_reply_id" value="">
             <input type="hidden" name="post_redirect" value="{{ request.path }}">
             {{ container.posts.get_post_form.as_p }}
-            <input type="submit" value="Pošalji">
+            <input type="submit" class="btn btn-primary" value="Pošalji">
             <span id="reply_to_info" style="display:none;">
                 Odgovor na <a href="#">komentar</a>.
                 <a href="#post" class="icon-remove"></a>
             </span>
         </form>
     </div>
-    <script>
-     $(function(){
-      $('.post_reply').click(function(){
-       id=$(this).attr('id').substr(2)
-       $('.post_reply_to').removeClass('post_reply_to');
-       $('#post'+id).addClass('post_reply_to');
-       $('input[name="post_reply_id"]').val(id);
-       
-       s='\n\n[quote]'+$(this).next().html()+'[/quote]';
-       $('#id_text').val(s);
-
-       $('#reply_to_info').attr('style', '')       
-       a = $('#reply_to_info a:first')
-       a.html('komentar #'+id)
-       a.attr('href', '#post'+id)
-      });
-     });
-     $(function(){
-      $('#reply_to_info a:last').click(function(){
-       $('.post_reply_to').removeClass('post_reply_to');
-       $('input[name="post_reply_id"]').val('');
-       $('#reply_to_info').attr('style', 'display:none;');
-      });
-     });
-    </script>
 {% endif %}
 </div>

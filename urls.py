@@ -24,8 +24,9 @@ urlpatterns = patterns('',
     (r'^', include('mathcontent.urls')), # namjerno nije r'^mathcontent/'
     (r'^permissions/', include('permissions.urls')),
     (r'^pm/', include('pm.urls')),
-    (r'^rating/', include('rating.urls')),
+    (r'^', include('rating.urls')),
     (r'^search/', include('search.urls')),
+    (r'^', include('tags.urls')),
     (r'^task/', include('task.urls')),
     (r'^usergroup/', include('usergroup.urls')),
     (r'^', include('post.urls')), # namjerno nije r'^post/'

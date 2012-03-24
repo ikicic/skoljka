@@ -8,6 +8,7 @@ from django.utils.safestring import mark_safe
 from mathcontent.models import MathContent
 from permissions.models import PerObjectGroupPermission
 #from permissions.models import PerObjectUserPermission
+from permissions.constants import VIEW
 from permissions.utils import has_group_perm
 from post.generic import PostGenericRelation
 from rating.fields import RatingField
@@ -71,6 +72,8 @@ class Task(models.Model):
         return '#%d %s' % (self.id, self.name)
 
     def has_perm(self, user, type):
+        if type == VIEW and not self.hidden:
+            return True
         return user.is_staff or self.author == user or has_group_perm(user, self, type)
         
     def get_tag_ids(self):

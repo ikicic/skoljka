@@ -3,6 +3,10 @@ from django.utils.translation import ugettext_lazy as _
 
 import taggit
 
+from rating.fields import RatingField, SUM
+
+VOTE_WRONG = -5
+
 class Tag(taggit.models.TagBase):
     weight = models.FloatField(default=1.0)
 
@@ -22,6 +26,8 @@ class TaggedItemBase(taggit.models.ItemBase):
     # missing tags_for()    
     
 class TaggedItem(taggit.models.GenericTaggedItemBase, TaggedItemBase):
+    votes = RatingField(type=SUM)
+
     class Meta:
         verbose_name = _("Tagged Item")
-        verbose_name_plural = _("Tagged Items")    
+        verbose_name_plural = _("Tagged Items")

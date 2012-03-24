@@ -5,12 +5,16 @@ from hashlib import md5
 
 from rating.models import Score, Vote
 
+AVERAGE = 1
+SUM = 2
+
 # po uzoru na https://github.com/dcramer/django-ratings
 
 class RatingManager(models.Manager):
     def __init__(self, instance, field):
         self.instance = instance
         self.field = field
+        self.field_name = field.field_name
         self.content_type = None
 
     def get_content_type(self):
@@ -19,7 +23,8 @@ class RatingManager(models.Manager):
         return self.content_type
 
     def get_average(self):
-        return getattr(self.instance, '%s_avg' % self.field.name)
+        # used only for type == AVERAGE
+        return getattr(self.instance, self.field_name)
         
     ##################
     # template helpers
@@ -62,15 +67,21 @@ class RatingManager(models.Manager):
         
         score.save()
         
-        setattr(self.instance, '%s_avg' % self.field.name, 0 if score.count == 0 else float(score.sum) / score.count)
+        if self.field.type == AVERAGE:
+            value = 0 if score.count == 0 else float(score.sum) / score.count
+        else: # SUM
+            value = score.sum
+        
+        setattr(self.instance, self.field_name, value)
         self.instance.save()
+        
+        return value
         
 
 
 class RatingCreator(object):
     def __init__(self, field):
         self.field = field
-        self.avg_field_name = '%s_avg' % self.field.name
 
     def __get__(self, instance, type=None):
         if instance is None:
@@ -79,7 +90,7 @@ class RatingCreator(object):
         return RatingManager(instance, self.field)
 
     def __set__(self, instance, value):
-        setattr(instance, self.avg_field_name, float(value))
+        setattr(instance, self.field_name, float(value))
 
         
 # u slucaju da treba i druge podatke cacheati, pogledaj
@@ -90,6 +101,7 @@ class RatingField(models.FloatField):
     def __init__(self, *args, **kwargs):
         self.range = kwargs.pop('range', 5)
         self.titles = kwargs.pop('titles', range(1, self.range + 1))
+        self.type = kwargs.pop('type', AVERAGE)
         if 'default' not in kwargs:
             kwargs['default'] = 0
         super(RatingField, self).__init__(*args, **kwargs)
@@ -97,8 +109,16 @@ class RatingField(models.FloatField):
     def contribute_to_class(self, cls, name):
         self.name = name
         self.key = md5(name).hexdigest()
-        self.avg_field = models.FloatField(default=0)
-        cls.add_to_class('%s_avg' % name, self.avg_field)
+        
+        if self.type == AVERAGE:
+            self.avg_field = models.FloatField(default=0)
+            self.field_name = '%s_avg' % name
+            cls.add_to_class(self.field_name, self.avg_field)
+        else: # self.type == SUM
+            self.sum_field = models.IntegerField(default=0)
+            self.field_name = '%s_sum' % name
+            cls.add_to_class(self.field_name, self.sum_field)
+            
         setattr(cls, name, RatingCreator(self))
         
     def __get__(self, instance, model):

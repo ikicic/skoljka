@@ -12,7 +12,7 @@ import re
 # pri spremanju forme, ako je to uopce moguce
 
 
-
+MAX_LENGTH = 100000
 
 class LatexElement(models.Model):
     hash = models.CharField(max_length=32, primary_key=True)
@@ -26,7 +26,7 @@ class LatexElement(models.Model):
 
 @autoconnect
 class MathContent(models.Model):
-    text = models.TextField()
+    text = models.TextField(max_length=MAX_LENGTH)
     html = models.TextField()
     
     class Admin:

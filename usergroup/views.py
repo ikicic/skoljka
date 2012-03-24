@@ -49,7 +49,7 @@ def detail(request, group_id=None):
     perm, is_member = group.data.get_permissions_for_user(request.user)
 
     if VIEW not in perm:
-        raise HttpResponseForbidden('You are not member of this group, and you cannot view it\'s details.')
+        return HttpResponseForbidden('You are not member of this group, and you cannot view it\'s details.')
 
     
     return render_to_response('usergroup_detail.html', {

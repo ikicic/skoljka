@@ -10,7 +10,7 @@ $(function(){
 });
 </script>
 <div>
-<form style="display: inline;" action="/rating/vote/{{ m.instance.id }}/{{ m.get_content_type.id }}/{{ m.field.name }}/" method="POST">
+<form style="display: inline;" action="/ajax/rating/vote/{{ m.instance.id }}/{{ m.get_content_type.id }}/{{ m.field.name }}/" method="POST">
     <div style="float:left;width:60px;">{{ text }}:</div>
     {% csrf_token %}
     {% for x in m.get_range_and_titles %}
