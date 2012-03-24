@@ -1,6 +1,7 @@
 ﻿from django.conf import settings
 import os, sys, hashlib, re
 
+from mathcontent import ERROR_DEPTH_VALUE
 from mathcontent.models import LatexElement
 
 
@@ -102,7 +103,7 @@ tex_preamble = r'''
 def generate_png(eq, format):
     eq_hash = hashlib.md5(eq+format).hexdigest()
     try:
-        latex_element = LatexElement.objects.only("depth").get(pk=eq_hash)
+        latex_element = LatexElement.objects.only("depth").get(hash=eq_hash)
         return eq_hash, latex_element.depth
     except:
         pass
@@ -127,22 +128,24 @@ def generate_png(eq, format):
     cmd = "%s -bg Transparent --gamma 1.5 -D 120 --depth* -T tight --strict -o %s.png %s" % (latex_full_filename('dvipng'), filename, filename)
     status, stdout = getstatusoutput(cmd)
     
-    #print cmd, status, stdout
-    
-    depth_re = re.compile(r'\[\d+ depth=(-?\d+)\]')
-    for line in stdout.splitlines():
-        m = depth_re.match(line)
-        if m:
-            depth = int(m.group(1))
-            break
+    if status == 0:
+        depth_re = re.compile(r'\[\d+ depth=(-?\d+)\]')
+        for line in stdout.splitlines():
+            m = depth_re.match(line)
+            if m:
+                depth = int(m.group(1))
+                break
+    else: # error
+        depth = ERROR_DEPTH_VALUE
     
     os.remove(filename + '.tex')
     os.remove(filename + '.log')
     os.remove(filename + '.aux')
-    os.remove(filename + '.dvi')
-    
+
+    if status == 0:
+        os.remove(filename + '.dvi')
+
     latex_element = LatexElement(hash=eq_hash, text=eq, format=format, depth=depth)
     latex_element.save(force_insert=True)
     
     return eq_hash, depth
-

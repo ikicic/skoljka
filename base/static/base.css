@@ -123,3 +123,6 @@ a.register {
 .tag_tooltip input {
   margin-top:3px;
 }
+span.task_submitted a {
+  color: #00F;
+}

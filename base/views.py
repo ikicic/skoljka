@@ -4,8 +4,10 @@ from django.template import RequestContext
 
 from activity.models import Action
 from task.models import Task
+from task.templatetags.task_tags import cache_additional_info as _task__cache_additional_info
 from permissions.constants import VIEW
 #from recommend.utils import refresh_user_information
+from recommend.models import UserRecommendation
 
 import random
 
@@ -17,7 +19,8 @@ def homepage(request):
     recommend = []
     if request.user.is_authenticated():
         #refresh_user_information(request.user)
-        recommend = list(request.user.recommendations.order_by('-userrecommendation__score')[:10])
+        #recommend = list(request.user.recommendations.order_by('-userrecommendation__score'))
+        recommend = list(UserRecommendation.objects.filter(user=request.user).values_list('task_id', flat=True))
 #        distribution = request.user.profile.get_normalized_diff_distribution()
 #        if distribution is not None:
 #            dist = [0] * len(distribution)
@@ -35,6 +38,10 @@ def homepage(request):
     if len(recommend) > 5:
         recommend = random.sample(recommend, 5)
     
+    if recommend:
+        recommend = Task.objects.filter(id__in=recommend)
+        _task__cache_additional_info(recommend, request.user)
+
     # recommend = tasks = []
     return render_to_response('homepage.html', {
         'recent_tasks': tasks,

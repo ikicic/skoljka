@@ -75,7 +75,7 @@ def advanced_new(request):
                     task.name = task_template.name % dictionary
                     task.author = request.user
                     task.content = math_content
-# TODO: automatizirati .hidden: (vidi TODO na vrhu funkcije)
+# TODO: automatizirati .hidden i .source: (vidi TODO na vrhu funkcije)
                     task.hidden = task_template.hidden
                     task.source = task_template.source
                     task.save()
@@ -83,6 +83,10 @@ def advanced_new(request):
                     tags = parse_tags(task_form.cleaned_data['_tags'] % dictionary)
                     task.tags.set(*tags)
                     update_search_cache(task, [], tags)
+                    
+                    difficulty = task_form.cleaned_data['_difficulty']
+                    if difficulty.isdigit():
+                        task.difficulty_rating.update(request.user, difficulty)
                 
             return HttpResponseRedirect('/task/new/finish/')
     else:

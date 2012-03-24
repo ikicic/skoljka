@@ -51,6 +51,7 @@ def refresh_user_information(user):
             self.sum = 0
             self.square_sum = 0
             self.total_weight = 0
+            self.cache_score = 0
             
         def __str__(self):
             return '%f %f %f' % (self.sum, self.square_sum, self.total_weight)
@@ -60,21 +61,26 @@ def refresh_user_information(user):
     for x in tags:
         t = tags_info[x.tag_id]
         s = solution_by_task[x.object_id]
-        w = x.tag.weight * get_solution_weight(s.date_created)
+        # w = x.tag.weight * get_solution_weight(s.date_created)
+        w = get_solution_weight(s.date_created)
         diff = s.task.difficulty_rating_avg
         
         t.sum += w * diff
         t.square_sum += w * diff * diff
         t.total_weight += w
+        t.cache_score += w * x.tag.weight
 
     UserTagScore.objects.filter(user=user).delete()
     for k, v in tags_info.iteritems():
         tag = UserTagScore(user=user, tag_id=k)
+        tag.cache_score = v.cache_score
         tag.interest = v.total_weight
         tag.mean = v.sum / v.total_weight
         tag.variance = (v.square_sum - 2 * tag.mean * v.sum + tag.mean * tag.mean * v.total_weight) / v.total_weight
         if tag.variance < 1e-3:
             tag.variance = 0.8
+        else:
+            tag.variance **= 0.5    # sqrt
         tag.save()
 
 def recommend_task(user, task, recursion=2):

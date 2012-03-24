@@ -4,6 +4,7 @@ from mathcontent.forms import MathContentForm
 
 class TaskAdvancedForm(forms.ModelForm):
     _tags = forms.CharField(max_length=200)
+    _difficulty = forms.CharField(max_length=2)
     class Meta:
         model = Task
         fields = ['name', 'source', 'hidden']

@@ -16,37 +16,64 @@
 {% endifequal %}
 
 <div class="row">
-    <div class="span5">
-        <table class="table table-striped table-condensed table-bordered">
-            <tr><th>Username:</th><td>{{ profile.username }}</td></tr>
-            <tr><th>Ime:</th><td>{{ profile.first_name }}</td></tr>
-            <tr><th>Prezime:</th><td>{{ profile.last_name }}</td></tr>
-            <tr><th>Email:</th><td>-- email --</td></tr>
-            <tr><th>Citat:</th><td>{{ profile.profile.quote }}</td></tr>
-            <tr><th>Grupe:</th><td>
-        </table>
-    </div>
-    <div class="span5">
-        Distribucija
-        <div>
-        {% for x in distribution %}
-            <div style="width:20px;height:100px;float:left;background-color:#EEE;position:relative;" title="{{ x.0 }}">
-                <div style="width:20px;height:{{ x.1 }}%;background-color:#CCC;position:absolute;bottom:0px;"></div>
-            </div>
-        {% empty %}
-            Nema riješenih zadataka.
+  <div class="span5">
+    <table class="table table-striped table-condensed table-bordered">
+      <tr><th>Username:</th><td>{{ profile.username }}</td></tr>
+      <tr><th>Ime:</th><td>{{ profile.first_name }}</td></tr>
+      <tr><th>Prezime:</th><td>{{ profile.last_name }}</td></tr>
+      {# <tr><th>Email:</th><td>-- email --</td></tr> #}
+      <tr><th>Citat:</th><td>{{ profile.profile.quote }}</td></tr>
+      <tr><th>Grupe:</th><td>
+        {% for group in visible_groups %}
+          {% if not forloop.first %}|{% endif %}
+          {{ group.data }}
+          {% endfor %}
+      </td></tr>
+      {% if tags %}
+      <tr><th>Preferirani tagovi:</th><td>
+        {% for x in tags %}
+          <a href="/search/?q={{ x.tag.name }}">{{ x.tag.name }}</a>
         {% endfor %}
-        </div>
+      </td></tr>
+      {% endif %}
+    </table>
+  </div>
+  <div class="span5">
+    Distribucija
+    <div>
+    {% for x in distribution %}
+      <div style="width:20px;height:100px;float:left;background-color:#EEE;position:relative;" title="{{ x.0 }}">
+        <div style="width:20px;height:{{ x.1 }}%;background-color:#CCC;position:absolute;bottom:0px;"></div>
+      </div>
+    {% empty %}
+      Nema riješenih zadataka.
+    {% endfor %}
     </div>
+  </div>
 </div>
 <br><br>
 
-<a href="/solution/user/{{ profile.id }}/">Poslana rješenja</a><br>
-
-<br><br>
-Grupe:
-{% for group in visible_groups %}
-    {% if not forloop.first %}|{% endif %}
-    {{ group.data }}
+<h3 style="display:inline;">Riješeni i poslani zadaci</h3> <a href="/solution/user/{{ profile.id }}/as_solved,submitted/">(otvori sve)</a><br>
+{% for x in solved %}
+  {% if not forloop.first %}|{% endif %}
+  {% if x.is_submitted %}
+    <span class="task_submitted" data-solution="{{ x.id }}"><a href="/task/{{ x.task_id }}/">{{ x.task.name }}</a></span>
+  {% else %}
+    <a href="/task/{{ x.task_id }}/">{{ x.task.name }}</a>    
+  {% endif %}
+{% empty %}
+  <i>Prazno</i>
 {% endfor %}
+<br><br>
+
+<h3 style="display:inline;">To Do</h3> <a href="/solution/user/{{ profile.id }}/todo/">(otvori sve)</a><br>
+{% for x in todo %}
+  {% if not forloop.first %}|{% endif %}
+  <a href="/task/{{ x.task_id }}/">{{ x.task.name }}</a>
+{% empty %}
+  <i>Prazno</i>
+{% endfor %}
+<br><br>
+
+<a href="/solution/user/{{ profile.id }}/">Sva poslana rješenja</a><br>
 {% endblock %}

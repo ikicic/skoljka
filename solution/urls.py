@@ -15,5 +15,6 @@ urlpatterns = patterns('',
     (r'^solution/(?P<solution_id>\d+)/edit/mark/$', 'solution.views.edit_mark'),
     (r'^solution/task/(?P<task_id>\d+)/$', 'solution.views.solution_list'),
     (r'^solution/user/(?P<user_id>\d+)/$', 'solution.views.solution_list'),
+    (r'^solution/user/(?P<user_id>\d+)/(?P<status>[_a-z,]+)/$', 'solution.views.solution_list'),
     (r'^solution/task/(?P<task_id>\d+)/user/(?P<user_id>\d+)/$', 'solution.views.solution_list'),
 )

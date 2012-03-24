@@ -10,6 +10,8 @@ from userprofile.forms import NewUserCreationForm, UserCreationExtendedForm, Use
 from userprofile.models import UserProfile
 
 from rating.constants import DIFFICULTY_RATING_ATTRS
+from recommend.models import UserTagScore
+from solution.models import STATUS
 
 def new_register(request):
     from registration.views import register as _register
@@ -53,11 +55,23 @@ def profile(request, pk):
     else:
         # TODO: staviti da se vide i zajednicke skrivene grupe
         visible_groups = user.groups.exclude(name=user.username).filter(data__hidden=False).select_related('data')
+        
+    tags = UserTagScore.objects.filter(user=user).select_related('tag').order_by('-cache_score')[:10]
+    
+    
+    # task lists
+    todo = user.solution_set.filter(status=STATUS['todo']).select_related('task')[:10]
+    solved = user.solution_set.filter(status__in=[STATUS['as_solved'], STATUS['submitted']]).select_related('task')[:10]
+    
+    
     
     return render_to_response('profile_detail.html', {
         'profile': user,
         'distribution': distribution,
         'visible_groups': visible_groups.distinct(),
+        'tags': tags,
+        'todo': todo,
+        'solved': solved,
     }, context_instance=RequestContext(request))
 
 

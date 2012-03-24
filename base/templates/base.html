@@ -34,7 +34,7 @@
           {% csrf_token %}
           <input id="id_username" name="username" type="text" class="input-small" placeholder="Korisničko ime">
           <input id="id_password" name="password" type="password" class="input-small" placeholder="Zaporka">
-          <button type="submit" class="btn">Login</button>
+          <input type="submit" class="btn" value="Login">
         </form>
       </div>
       {% endif %}
@@ -65,12 +65,12 @@
               <li><a href="/accounts/login/"><i class="icon-arrow-right"></i>Prijava</a></li>
             {% endif %}
             <br>
-            <li><a href="/memberlist/"><i class="icon-user"></i>Popis korisnika</a></li>
-            <li><a href="/ranks/"><i class="icon-list"></i>Rang lista</a></li>
+            <li><a href="/memberlist/"><i class="icon-user"></i>Korisnici</a></li>
+            {# <li><a href="/ranks/"><i class="icon-list"></i>Rang lista</a></li> #}
+            <li><a href="/usergroup/"><i class="icon-glass"></i>Grupe</a></li>
             <br>
-            <li><a href="/usergroup/"><i class="icon-glass"></i>Popis grupa</a></li>
-            <li><a href="/task/"><i class="icon-envelope"></i>Lista zadataka</a></li>
-            <li><a href="/solution/"><i class="icon-pencil"></i>Lista rješenja</a></li>
+            <li><a href="/task/"><i class="icon-envelope"></i>Zadaci</a></li>
+            <li><a href="/solution/"><i class="icon-pencil"></i>Rješenja</a></li>
             <li><a href="/search/"><i class="icon-search"></i>Pretraživanje</a></li>
             <br>
             {% if user.is_authenticated %}

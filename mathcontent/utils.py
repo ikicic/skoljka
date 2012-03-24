@@ -1,4 +1,6 @@
 from skoljka.utils import xss
+
+from mathcontent import ERROR_DEPTH_VALUE
 from mathcontent.latex import generate_png
 
 inline_format = "$%s$ \n \\newpage \n"
@@ -106,13 +108,16 @@ def convert_to_html(T): # XSS danger!!! Be careful
             latex_escaped = xss.escape(latex)
             
             hash, depth = generate_png(latex, inline_format if inline else block_format)
-            url = '%s%s/%s/%s/%s.png' % (img_url_path, hash[0], hash[1], hash[2], hash)
-            if inline:
-                img = '<img src="%s" alt="%s" class="latex" style="vertical-align:%dpx">' % (url, latex_escaped, -depth)
+            if depth == ERROR_DEPTH_VALUE:
+                out.append('{{ INVALID LATEX }}')
             else:
-                img = '<img src="%s" alt="%s" class="latex_center">' % (url, latex_escaped)
+                url = '%s%s/%s/%s/%s.png' % (img_url_path, hash[0], hash[1], hash[2], hash)
+                if inline:
+                    img = '<img src="%s" alt="%s" class="latex" style="vertical-align:%dpx">' % (url, latex_escaped, -depth)
+                else:
+                    img = '<img src="%s" alt="%s" class="latex_center">' % (url, latex_escaped)
 
-            out.append(img)
+                out.append(img)
         else:
             out.append(html_escape_table.get(T[i], T[i]))
             i += 1

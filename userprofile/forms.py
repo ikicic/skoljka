@@ -17,7 +17,7 @@ class NewUserCreationForm(forms.Form):
     email = forms.EmailField(widget=forms.TextInput(attrs=dict(attrs_dict, maxlength=75)), label=_(u'Email'))
     password1 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict, render_value=False), label=_(u'Zaporka'))
     password2 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict, render_value=False), label=_(u'Zaporka (ponovno)'))
-    
+        
     def clean_username(self):
         username = self.cleaned_data['username']
         if User.objects.filter(username__iexact=username).exists() \
@@ -25,6 +25,12 @@ class NewUserCreationForm(forms.Form):
             raise forms.ValidationError(_(u'This name is already reserved. Please choose another.'))
         return self.cleaned_data['username']
 
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError(_(u'E-mail address already in use. Please choose another.'))
+        return self.cleaned_data['email']
+        
     def clean(self):
         if 'password1' in self.cleaned_data and 'password2' in self.cleaned_data:
             if self.cleaned_data['password1'] != self.cleaned_data['password2']:
@@ -37,13 +43,13 @@ class NewUserCreationForm(forms.Form):
             def __call__(self, user):
                 C = self.form.cleaned_data
                 
-                # spremi profil, ostali podaci idu preko Edit Profile
-                profile = UserProfile(user=user)
-                profile.save()
-                
                 # one member Group for each User
                 group = Group(name=user.username)
                 group.save()
+
+                # spremi profil, ostali podaci idu preko Edit Profile
+                profile = UserProfile(user=user, private_group=group)
+                profile.save()
                 
                 user.groups.add(group)
                 

@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
@@ -127,7 +127,7 @@ def submit(request, task_id=None, solution_id=None):
 #   specific task if task_id is defined
 #   specific user if user_id is defined
 # If some ID is not defined, skips that condition.
-def solution_list(request, task_id=None, user_id=None):
+def solution_list(request, task_id=None, user_id=None, status=None):
     L = Solution.objects.exclude(status=STATUS['blank'])
     task = None
     author = None   # 'user' is template reserved word
@@ -138,6 +138,16 @@ def solution_list(request, task_id=None, user_id=None):
     if user_id is not None:
         author = get_object_or_404(User, pk=user_id)
         L = L.filter(author=author)
+    if status is not None:
+        status = status.split(',')
+        if not status or 'blank' in status or any((x not in STATUS for x in status)):
+            return HttpResponseBadRequest('Invalid status.')
+            
+        if len(status) == 1:
+            L = L.filter(status=STATUS[status[0]])
+        else:
+            L = L.filter(status__in=[STATUS[x] for x in status])
+            
     L = L.select_related('author', 'content', 'task')
 
     return render_to_response('solution_list.html', {
