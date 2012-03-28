@@ -4,6 +4,8 @@ import os, sys, hashlib, re
 from mathcontent import ERROR_DEPTH_VALUE
 from mathcontent.models import LatexElement
 
+from skoljka.utils.timeout import run_command
+
 
 # Obican .getstatusoutput ne radi na Windowimsa, ovo je zamjena
 # Preuzeto s http://mail.python.org/pipermail/python-win32/2008-January/006606.html
@@ -123,12 +125,15 @@ def generate_png(eq, format):
     
     # TODO: handle errors
     # TODO: disable logs
-    os.system('%s -output-directory=%s -interaction=batchmode %s.tex' % (latex_full_filename('latex'), os.path.dirname(filename), filename))
-    # TODO: handle errors and test quality
-    cmd = "%s -bg Transparent --gamma 1.5 -D 120 --depth* -T tight --strict -o %s.png %s" % (latex_full_filename('dvipng'), filename, filename)
-    status, stdout = getstatusoutput(cmd)
+    cmd = '%s -output-directory=%s -interaction=batchmode %s.tex' % (latex_full_filename('latex'), os.path.dirname(filename), filename)
+    error = run_command(cmd, timeout=5)
+        
+    if not error:
+        # TODO: handle errors and test quality
+        cmd = "%s -bg Transparent --gamma 1.5 -D 120 --depth* -T tight --strict -o %s.png %s" % (latex_full_filename('dvipng'), filename, filename)
+        status, stdout = getstatusoutput(cmd)
     
-    if status == 0:
+    if not error and status == 0:
         depth_re = re.compile(r'\[\d+ depth=(-?\d+)\]')
         for line in stdout.splitlines():
             m = depth_re.match(line)
@@ -137,12 +142,12 @@ def generate_png(eq, format):
                 break
     else: # error
         depth = ERROR_DEPTH_VALUE
-    
+
     os.remove(filename + '.tex')
     os.remove(filename + '.log')
     os.remove(filename + '.aux')
 
-    if status == 0:
+    if not error and status == 0:
         os.remove(filename + '.dvi')
 
     latex_element = LatexElement(hash=eq_hash, text=eq, format=format, depth=depth)

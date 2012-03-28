@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
@@ -23,6 +23,8 @@ from solution.views import get_user_solved_tasks
 from mathcontent.forms import MathContentForm
 from mathcontent.latex import export_header, export_task, export_footer
 from mathcontent.models import MathContent
+
+from skoljka.utils.timeout import run_command
 
 import os, sys, codecs
 
@@ -337,6 +339,7 @@ def _export_to_latex(request, ids):
 def export_to_latex(request, ids):
     return HttpResponse(content=_export_to_latex(request, ids), content_type='application/x-latex')
 
+# TODO: delete related pdf files on task edit
 def export_to_pdf(request, ids):
     filename = os.path.normpath(os.path.join(settings.LOCAL_DIR, 'media/pdf/task' + ids))
     print 'filename: ', filename
@@ -344,9 +347,14 @@ def export_to_pdf(request, ids):
         f = codecs.open(filename + '.tex', 'w', encoding='utf-8')
         f.write(_export_to_latex(request, ids))
         f.close()
-        
-        os.system('latex -output-directory=%s -interaction=batchmode %s.tex' % (os.path.dirname(filename), filename))
-        os.system('dvipdfm -o %s %s' % (filename + '.pdf', filename))
+
+        error = run_command('latex -output-directory=%s -interaction=batchmode %s.tex' % (os.path.dirname(filename), filename), timeout=10)
+        if error:
+            return HttpResponseServerError('LaTeX generation error, possibly timeout! Error code: %d' % error)
+            
+        error = run_command('dvipdfm -o %s %s' % (filename + '.pdf', filename), timeout=10)
+        if error:
+            return HttpResponseServerError('dvipdfm Error %d!' % error)
         # os.remove(filename + '.tex')
         # os.remove(filename + '.log')
         # os.remove(filename + '.aux')
