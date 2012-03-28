@@ -53,11 +53,12 @@ export_header = u'''
 \\fancypagestyle{plain}{
     \\fancyhf{}
     \\fancyfoot[R]{\\footnotesize\\bf\\thepage}
-    \\fancyfoot[L]{\\footnotesize\\bf Školjka}
     \\renewcommand{\\headrulewidth}{0pt}
-    \\renewcommand{\\footrulewidth}{0.5pt}
+    \\renewcommand{\\footrulewidth}{0pt}
     \\renewcommand{\\footrule}{\\vskip-\\footrulewidth \\hrule width\\headwidth height\\footrulewidth}
 }
+
+\\usepackage{hyperref}
 
 \\setlength{\\parindent}{0pt}
 \\setlength{\\parskip}{6pt}
@@ -79,7 +80,8 @@ export_header = u'''
 
 # use %(title)s to get task title, and %(content)s to get problem statement
 export_task = u'''
-    \\section*{%(title)s}
+    \\subsection*{%(title)s}
+    \\begin{flushright}\url{OVDJE UBACI LINK, NE TREBA HENDLANJE SPEC CHAROVA}\\end{flushright}
     %(content)s
 '''
 
