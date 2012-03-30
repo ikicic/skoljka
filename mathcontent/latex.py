@@ -30,7 +30,9 @@ def getstatusoutput(cmd):
 
 def latex_full_filename(filename):
     return ('"%s%s"' if mswindows else '%s%s') % (settings.LATEX_BIN_DIR, filename)
-    
+
+
+# ur' ' won't work well, because each \u would have to be escaped
 export_header = u'''
 \\documentclass[12pt,a4paper,oneside,final]{article}
 
@@ -81,7 +83,7 @@ export_header = u'''
 # use %(title)s to get task title, and %(content)s to get problem statement
 export_task = u'''
     \\subsection*{%(title)s}
-    \\begin{flushright}\url{OVDJE UBACI LINK, NE TREBA HENDLANJE SPEC CHAROVA}\\end{flushright}
+    \\begin{flushright}\\url{http://skoljka.no-ip.org%(url)s}\\end{flushright}
     %(content)s
 '''
 
@@ -145,11 +147,10 @@ def generate_png(eq, format):
     else: # error
         depth = ERROR_DEPTH_VALUE
 
-    os.remove(filename + '.tex')
-    os.remove(filename + '.log')
-    os.remove(filename + '.aux')
-
     if not error and status == 0:
+        os.remove(filename + '.tex')
+        os.remove(filename + '.log')
+        os.remove(filename + '.aux')
         os.remove(filename + '.dvi')
 
     latex_element = LatexElement(hash=eq_hash, text=eq, format=format, depth=depth)

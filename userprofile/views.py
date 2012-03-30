@@ -75,6 +75,7 @@ def profile(request, pk):
     }, context_instance=RequestContext(request))
 
 
+# deprecated?
 @permission_required('task.add_advanced')
 def refresh_score(request):
     s = Solution.objects.values('author', 'task').annotate(Max('correctness_avg'))

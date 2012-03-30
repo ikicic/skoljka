@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden, Http404
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
@@ -9,22 +9,23 @@ from task.models import Task
 from solution.models import Solution, STATUS
 from mathcontent.forms import MathContentForm
 
+from skoljka.utils.decorators import response, require
+
 # ... trenutacna implementacija rjesenja je dosta diskutabilna
 
 
+@require(post='action')
+@response()
 @login_required
 def mark(request, task_id):
-    if request.method != 'POST' or 'action' not in request.POST:
-        return HttpResponseForbidden('Request not valid.')
-
     action = request.POST['action']
     if action not in ['official', 'blank', 'as_solved', 'todo']:
-        return HttpResponseForbidden(u'Action "%s" not valid.' % action)
+        return (403, u'Action "%s" not valid.' % action)
 
     task = get_object_or_404(Task, pk=task_id)
         
     if action == 'official' and task.author != request.user and not request.user.has_perm('mark_as_official_solution'):
-        return HttpResponseForbidden(u'No permission to mark as official solution.')
+        return (403, u'No permission to mark as official solution.')
     
     try:
         solution = Solution.objects.get(task=task, author=request.user)
@@ -41,19 +42,18 @@ def mark(request, task_id):
             }
         _action.send(request.user, type[action], action_object=solution, target=task)
         
-    return HttpResponseRedirect('/task/%d/' % int(task_id))
+    return (response.REDIRECT, '/task/%d/' % int(task_id))
 
 
 # odgovorno za official, i mijenjanje statusa iz solution -> view
+@require(post='action')
+@response()
 @login_required
 def edit_mark(request, solution_id):
-    if request.method != 'POST' or 'action' not in request.POST:
-        raise HttpResponseForbidden('Not valid request')
-    
     action = request.POST['action']
     sol = Solution.objects.filter(pk=solution_id)
     if sol.author != request.user and not request.user.is_staff:
-        raise HttpResponseForbidden('Not allowed to modify this solution.')
+        raise (403, 'Not allowed to modify this solution.')
     
     if action in ['0', '1']:
         sol.update(is_official=int(action))
@@ -61,7 +61,7 @@ def edit_mark(request, solution_id):
         # TODO: DRY!
         if action == '1':
             _action.send(request.user, _action.SOLUTION_AS_OFFICIAL, action_object=sol, target=solution.task)
-        return HttpResponseRedirect('/solution/%d/' % int(solution_id))
+        return ('/solution/%d/' % int(solution_id),)
 
     if action in ['blank', 'as_solved', 'todo']:
         sol.update(status=STATUS[action])
@@ -72,9 +72,9 @@ def edit_mark(request, solution_id):
             type = {'as_solved': _action.SOLUTION_AS_SOLVED,
                     'todo': _action.SOLUTION_TODO}
             _action.send(request.user, type[action], action_object=solution, target=solutions.task)
-        return HttpResponseRedirect('/task/%d/' % solution.task_id)
+        return ('/task/%d/' % solution.task_id,)
 
-    return HttpResponseForbidden(u'Action "%s" not valid' % action)
+    return (403, u'Action "%s" not valid' % action)
 
 
 
@@ -82,6 +82,7 @@ def edit_mark(request, solution_id):
 #TODO: dogovoriti se oko imena ove funkcije, pa i template-a
 #TODO(ikicic): sto ako forma nije valid?
 @login_required
+@response('solution_submit.html')
 def submit(request, task_id=None, solution_id=None):
     if solution_id:
         solution = get_object_or_404(Solution, pk=solution_id)
@@ -112,22 +113,23 @@ def submit(request, task_id=None, solution_id=None):
             profile.solved_count = Solution.objects.values('task_id').filter(author=request.user).distinct().count()
             profile.save()
             
-            return HttpResponseRedirect("/solution/%d/" % (solution.id,))
+            return ("/solution/%d/" % (solution.id,),)
         
-    return render_to_response('solution_submit.html', {
+    return {
         'form': MathContentForm(instance=math_content),
         'task': task,
         'action_url': request.path,
-        },
-        context_instance=RequestContext(request),
-    )
+    }
 
-# TODO(gzuzic): move description to docstring
-# Outputs list of solution related to
-#   specific task if task_id is defined
-#   specific user if user_id is defined
-# If some ID is not defined, skips that condition.
+@response('solution_list.html')
 def solution_list(request, task_id=None, user_id=None, status=None):
+    """
+        Outputs list of solutions related to
+        specific task if task_id is defined,
+        specific user if user_id is defined.
+        If some ID is not defined, skips that condition.
+    """
+    
     L = Solution.objects.exclude(status=STATUS['blank'])
     task = None
     author = None   # 'user' is template reserved word
@@ -150,12 +152,11 @@ def solution_list(request, task_id=None, user_id=None, status=None):
             
     L = L.select_related('author', 'content', 'task')
 
-    return render_to_response('solution_list.html', {
-            'solutions': L.order_by('-id'),
-            'task': task,
-            'author': author,
-        },  context_instance=RequestContext(request),
-    )
+    return {
+        'solutions': L.order_by('-id'),
+        'task': task,
+        'author': author,
+    }
 
 def get_user_solved_tasks(user):
     if not user.is_authenticated():

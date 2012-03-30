@@ -8,14 +8,11 @@ from tags.models import Tag, TaggedItem
 from task.models import Task
 from permissions.constants import VIEW
 
+from skoljka.utils.decorators import ajax
 
 @login_required
+@ajax(post=['value', 'tag', 'task'])
 def tag_vote(request):
-    if not request.is_ajax() or request.method != 'POST':
-        return HttpResponseBadRequest()
-    if any((x not in request.POST for x in ['value', 'tag', 'task'])):
-        return HttpResponseBadRequest()
-        
     tag = get_object_or_404(Tag, name=request.POST['tag'])
     
     task_ct = ContentType.objects.get_for_model(Task)
@@ -29,8 +26,9 @@ def tag_vote(request):
     return HttpResponse(value)
 
 @login_required
+@ajax(method='POST')
 def vote(request, object_id, content_type_id, name):
-    if not request.is_ajax() or request.method != 'POST' or name not in request.POST:
+    if name not in request.POST:
         raise Http404
         
     value = request.POST[name]      # value == 0 for delete

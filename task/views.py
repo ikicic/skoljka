@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
+from django.db.models import Min
 from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -24,9 +25,10 @@ from mathcontent.forms import MathContentForm
 from mathcontent.latex import export_header, export_task, export_footer
 from mathcontent.models import MathContent
 
+from skoljka.utils.decorators import response
 from skoljka.utils.timeout import run_command
 
-import os, sys, codecs
+import os, sys, codecs, datetime
 
 # TODO: promijeniti nacin na koji se Task i MathContent generiraju.
 # vrijednosti koje ne ovise o samom formatu se direktno trebaju
@@ -228,19 +230,20 @@ def new(request, task_id=None):
                 'task': task,
             }, context_instance=RequestContext(request),
         )
-        
+
+@response('task_list.html')
 def task_list(request):
     tasks = Task.objects.for_user(request.user, VIEW).select_related('author').distinct()
     # treba mi LEFT JOIN ON (task_task.id = solution_solution.task_id AND solution_solution.author_id = ##)
     # sada se umjesto toga koristi .cache_additional_info()
     # (slicno za tag-ove)
         
-    return render_to_response( 'task_list.html', {
-                'tasks' : tasks,
-                'submitted_tasks' : get_user_solved_tasks(request.user),
-            }, context_instance=RequestContext(request),
-        )
+    return {
+        'tasks' : tasks,
+        'submitted_tasks' : get_user_solved_tasks(request.user),
+    }
 
+@response('task_detail.html')
 def detail(request, id):
     task = get_object_or_404(Task, id=id)
     content_type = ContentType.objects.get_for_model(Task)
@@ -269,14 +272,15 @@ def detail(request, id):
         task_event(request.user, task, 'view')
         
     # TODO: DRY content_type
-    return render_to_response('task_detail.html', {
-            'task': task,
-            'can_edit': EDIT in perm,
-            'can_edit_permissions': EDIT_PERMISSIONS in perm,
-            'content_type': content_type,
-            'solution': solution,
-        }, context_instance=RequestContext(request))
+    return {
+        'task': task,
+        'can_edit': EDIT in perm,
+        'can_edit_permissions': EDIT_PERMISSIONS in perm,
+        'content_type': content_type,
+        'solution': solution,
+    }
 
+@response('task_similar.html')
 def similar(request, id):
     task = get_object_or_404(Task, pk=id)
     
@@ -306,12 +310,10 @@ def similar(request, id):
     
     similar = Task.objects.filter(id__in=similar_ids).select_related('content')
     
-    return render_to_response('task_similar.html', {
-            'task': task,
-            'similar': similar,
-        }, context_instance=RequestContext(request))
+    return {'task': task, 'similar': similar}
 
 # TODO: not allowed message        
+@response('task_detail_multiple.html')
 def detail_multiple(request, ids):
     ids = [int(x) for x in ids.split(',')]
     if not ids or 0 in ids:
@@ -319,11 +321,11 @@ def detail_multiple(request, ids):
         
     tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=ids).select_related('content').distinct()
     id_list = [str(x) for x in ids]
-    return render_to_response('task_detail_multiple.html', {
-                'tasks': tasks,
-                'id_list': ', '.join(id_list),
-                'id_list_ns': ','.join(id_list),
-            }, context_instance=RequestContext(request))
+    return {
+        'tasks': tasks,
+        'id_list': ', '.join(id_list),
+        'id_list_ns': ','.join(id_list),
+    }
 
 def _export_to_latex(request, ids):
     ids = [int(x) for x in ids.split(',')]
@@ -331,7 +333,11 @@ def _export_to_latex(request, ids):
         raise Http404
         
     tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=ids).select_related('content').distinct()
-    content = u''.join([export_task % {'title': x.name, 'content': x.content.convert_to_latex()} for x in tasks])
+    content = u''.join([export_task % {
+            'title': x.name,
+            'content': x.content.convert_to_latex(),
+            'url': x.get_absolute_url(),
+        } for x in tasks])
     return u'%s%s%s' % (export_header, content, export_footer)
     
 
@@ -339,11 +345,23 @@ def _export_to_latex(request, ids):
 def export_to_latex(request, ids):
     return HttpResponse(content=_export_to_latex(request, ids), content_type='application/x-latex')
 
-# TODO: delete related pdf files on task edit
+# TODO: permission
 def export_to_pdf(request, ids):
     filename = os.path.normpath(os.path.join(settings.LOCAL_DIR, 'media/pdf/task' + ids))
     print 'filename: ', filename
-    if not os.path.exists(filename + '.pdf'):
+    
+    generate = True
+    if os.path.exists(filename + '.pdf'):
+        # TODO: DRY!!
+        _ids = [int(x) for x in ids.split(',')]
+        if not _ids or 0 in _ids:
+            raise Http404
+
+        oldest_file_mtime = Task.objects.for_user(request.user, VIEW).filter(id__in=_ids).aggregate(Min('last_edit_date'))['last_edit_date__min']
+        if datetime.datetime.fromtimestamp(os.path.getmtime(filename + '.pdf')) > oldest_file_mtime:
+            generate = False
+        
+    if generate:
         f = codecs.open(filename + '.tex', 'w', encoding='utf-8')
         f.write(_export_to_latex(request, ids))
         f.close()

@@ -66,6 +66,7 @@ def convert_to_html(T): # XSS danger!!! Be careful
                 out.append('[/]')
                 i += 3
             else:
+                # TODO: output original message part on any error
                 tag = T[i+1:end]
                 if tag[0] == '/':
                     tag = tag[1:]

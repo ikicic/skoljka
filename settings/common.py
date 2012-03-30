@@ -15,12 +15,6 @@ DEBUG_TOOLBAR_ROOT = os.path.normpath(
 sys.path.append(LIB_ROOT)
 sys.path.append(DEBUG_TOOLBAR_ROOT)
 
-ADMINS = (
-    ('Ivica Kicic', 'ivicakicic@gmail.com'),
-)
-
-MANAGERS = ADMINS
-
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.

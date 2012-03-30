@@ -12,6 +12,7 @@ from recommend.models import UserRecommendation
 import random
 
 def homepage(request):
+    # TODO: cache this query
     tasks = list(Task.objects.for_user(request.user, VIEW).distinct().order_by('-id')[:10])
     tasks = random.sample(tasks, 2)
     

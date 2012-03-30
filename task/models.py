@@ -49,6 +49,7 @@ class Task(models.Model):
     content = models.OneToOneField(MathContent)
     author = models.ForeignKey(User)
     date_created = models.DateTimeField(auto_now_add=True)
+    last_edit_date = models.DateTimeField(auto_now=True)
     hidden = models.BooleanField(default=False)
     source = models.CharField(max_length=200)
     
@@ -70,6 +71,9 @@ class Task(models.Model):
     
     def __unicode__(self):
         return '#%d %s' % (self.id, self.name)
+        
+    def get_absolute_url(self):
+        return '/task/%d/' % self.id
 
     def has_perm(self, user, type):
         if type == VIEW and not self.hidden:
@@ -82,6 +86,7 @@ class Task(models.Model):
         return self._cache_tag_ids
 
 
+    # deprecated?
     # TODO: preurediti, ovo je samo tmp
     # random try function
     def update_similar_tasks(self, cnt):

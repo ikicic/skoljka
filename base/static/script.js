@@ -97,7 +97,8 @@ $(function(){
   });
   
   /* Delete tag */
-  $('#tt_delete').click(function(){
+  $('#tt_delete').click(function(e){
+    e.preventDefault();
     tag=$('#tt_text').data('tag');
     $('#tt_info').html('...');
     $.post('/ajax/tag/delete/', {
@@ -115,7 +116,8 @@ $(function(){
   });
 
   /* Tag tooltip */
-  vote_func = function(v){
+  vote_func = function(e,v){
+    e.preventDefault();
     tag=$('#tt_text').data('tag');
     $('#tt_info').html('...');
     $.post('/ajax/tag/vote/', {
@@ -128,8 +130,8 @@ $(function(){
       $('#tt_text').html(data); /* bug if response is delayed */
     });
   }
-  $('#tt_plus').click(function(){vote_func(1)});
-  $('#tt_minus').click(function(){vote_func(-1)});
+  $('#tt_plus').click(function(e){vote_func(e,1)});
+  $('#tt_minus').click(function(e){vote_func(e,-1)});
 
   $('.tag_list a').tooltip({
     tip: '#tag_tooltip',
