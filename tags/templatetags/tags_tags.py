@@ -10,6 +10,7 @@ register = template.Library()
 # http://docs.jquery.com/Plugins/Autocomplete/autocomplete
 # zato sto podrzava multiple i autofill, i ima kratak js kod (ovisi samo o jqueryju)
 
+# DEPRECATED: mustmatch parameter (it's annoying)
 @register.simple_tag(takes_context=True)
 def tags_autocomplete_script(context, mustmatch=False):
     names = Tag.objects.values_list('name', flat=True)
