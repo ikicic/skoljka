@@ -16,5 +16,10 @@ class SearchForm(forms.Form):
     difficulty_min = forms.FloatField(required=False, widget=RatingWidget(attrs=DIFFICULTY_RATING_ATTRS))
     difficulty_max = forms.FloatField(required=False, widget=RatingWidget(attrs=DIFFICULTY_RATING_ATTRS))
 
+    def __init__(self, *args, **kwargs):
+        super(SearchForm, self).__init__(*args, **kwargs)
+        
+        self.fields['q'].widget.attrs.update({'class': 'ac_tags'})
+
 class AdvancedSearchForm(forms.Form):
     groups = GroupEntryField()

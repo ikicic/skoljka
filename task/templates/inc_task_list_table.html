@@ -43,7 +43,7 @@
             <td><input type="checkbox" class="folder_checkbox"{% if task.is_in_folder %} checked="checked"{% endif %}></td>
         {% endif %}
         <td style="text-align:center;">{{ task.id }}</td>
-        <td><a href="/task/{{ task.id }}/" class="title">{{ task.name }}</a></td>
+        <td>{{ task.get_link }}</td>
         <td>{% if plus_exclude %}{% tag_list task plus_exclude %}{% else %}{% tag_list task %}{% endif %}</td>
         {% if task.solved_count > 0 %}
             <td><a href="/solution/task/{{ task.id }}/">{{ task.solved_count }}</a></td>

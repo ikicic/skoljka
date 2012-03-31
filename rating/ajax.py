@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
-from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
+from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseServerError
 from django.shortcuts import get_object_or_404
 from rating.fields import RatingField
 
@@ -36,13 +36,13 @@ def vote(request, object_id, content_type_id, name):
         content_type = ContentType.objects.get_for_id(content_type_id)
         instance = content_type.get_object_for_this_type(id=object_id)
     except:
-        raise Http404("Something's wrong")
+        return HttpResponseServerError("Something's wrong")
         
         
     specific = ["solution", "task"]
     if content_type.app_label in specific and content_type.model in specific:
         if name == "quality_rating" and instance.author == request.user:
-            raise Http404("Not allowed")
+            return HttpResponseForbidden("Not allowed")
     
     manager = getattr(instance, name)
     value = manager.update(request.user, value)

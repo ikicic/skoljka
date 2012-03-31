@@ -59,7 +59,7 @@
   {% if x.is_submitted %}
     <span class="task_submitted" data-solution="{{ x.id }}"><a href="/task/{{ x.task_id }}/">{{ x.task.name }}</a></span>
   {% else %}
-    <a href="/task/{{ x.task_id }}/">{{ x.task.name }}</a>    
+    {{ x.task.get_link }}
   {% endif %}
 {% empty %}
   <i>Prazno</i>
@@ -69,7 +69,7 @@
 <h3 style="display:inline;">To Do</h3> <a href="/solution/user/{{ profile.id }}/todo/">(otvori sve)</a><br>
 {% for x in todo %}
   {% if not forloop.first %}|{% endif %}
-  <a href="/task/{{ x.task_id }}/">{{ x.task.name }}</a>
+  {{ x.task.get_link }}
 {% empty %}
   <i>Prazno</i>
 {% endfor %}

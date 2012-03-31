@@ -7,7 +7,7 @@
       {% tag_list task %}<br>
       {% solution_label task %}<br>
     </div>
-    <h4><a href="/task/{{ task.id }}/{{ url_suffix }}">{{ task.name }}</a></h4><br>
+    <h4><a href="/task/{{ task.id }}/{{ url_suffix }}" class="task">{{ task.name }}</a></h4><br>
 
     {{ task.content.render }}
 

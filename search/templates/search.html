@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load tags_tags %}
+
 {% block title %}Pretrazivanje: {{ tag_string }}{% endblock %}
 
 {% block content %}
@@ -31,7 +33,7 @@
 </table>
 </form>
 
-
+{% tags_autocomplete_script 1 %}
 
 
 {% if any %}

@@ -74,6 +74,9 @@ class Task(models.Model):
         
     def get_absolute_url(self):
         return '/task/%d/' % self.id
+        
+    def get_link(self):
+        return mark_safe('<a href="/task/%d/" class="task">%s</a>' % (self.id, self.name))
 
     def has_perm(self, user, type):
         if type == VIEW and not self.hidden:

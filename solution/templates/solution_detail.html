@@ -45,7 +45,7 @@
 
 <br><br><br>
 <i>Korisnik: {{ solution.author|userlink }}</i><br>
-<i>Zadatak: <a href="/task/{{ solution.task_id }}/">{{ solution.task.name }}</a></i><br><br>
+<i>Zadatak: {{ solution.task.get_link }}</i><br><br>
 <div class="well">
 
     {{ solution.content.render|safe }}

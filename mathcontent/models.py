@@ -26,7 +26,7 @@ class LatexElement(models.Model):
 
 @autoconnect
 class MathContent(models.Model):
-    text = models.TextField(max_length=MAX_LENGTH)
+    text = models.TextField(max_length=MAX_LENGTH, verbose_name='Tekst')
     html = models.TextField()
     
     class Admin:

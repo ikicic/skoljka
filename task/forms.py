@@ -10,6 +10,11 @@ class TaskAdvancedForm(forms.ModelForm):
         fields = ['name', 'source', 'hidden']
 
 class TaskForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(TaskForm, self).__init__(*args, **kwargs)
+        
+        self.fields['tags'].widget.attrs.update({'class': 'ac_tags'})
+
     class Meta:
         model = Task
         fields = ['name', 'tags', 'source', 'hidden']

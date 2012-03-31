@@ -9,7 +9,7 @@ Edit Post:<br>
     {% csrf_token %}
     {{ math_content_form.as_p }}
     {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
-    <input type="submit" value="Edit">
+    <input type="submit" class="btn btn-primary" value="Spremi">
 </form>
 {% endblock %}
 

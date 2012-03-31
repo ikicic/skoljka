@@ -23,7 +23,7 @@
     <tr>
         <td>{{ s.id }}</td>
         <td>{{ s.date_created|timesince }} ago</td>
-        <td><a href="/task/{{ s.task.id }}/">{{ s.task.name }}</a></td>
+        <td>{{ s.task.get_link }}</td>
         <td>{{ s.author|userlink }}</a></td>
         {% if s.is_submitted %}
         <td>{% if s.is_official %}<span class="label label-info">Službeno</span> {% endif %}<a href="/solution/{{ s.id }}/">{{ s.content.short }}</a></td>

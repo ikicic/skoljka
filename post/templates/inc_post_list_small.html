@@ -1,4 +1,5 @@
 <div class="post_list_small">
+<h4>Komentari:</h4>
 {% for post in posts %}
     <div class="well well-small" id="post{{ post.pk }}">
         {% if user.is_authenticated %}
@@ -30,7 +31,7 @@
             <input type="hidden" name="post_reply_id" value="">
             <input type="hidden" name="post_redirect" value="{{ request.path }}">
             {{ container.posts.get_post_form.as_p }}
-            <input type="submit" class="btn btn-primary" value="Pošalji">
+            <input type="submit" class="btn btn-primary" value="Pošalji komentar">
             <span id="reply_to_info" style="display:none;">
                 Odgovor na <a href="#">komentar</a>.
                 <a href="#post" class="icon-remove"></a>

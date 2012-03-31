@@ -4,7 +4,7 @@
 
 {% block content %}
 
-Zadatak: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br><br>
+Zadatak: {{ task.get_link }}<br><br>
 <div class="task_content">
     {{ task.content.render }}
 </div><br>

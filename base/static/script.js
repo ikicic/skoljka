@@ -1,3 +1,29 @@
+/* Django & Ajax POST method */
+/* http://stackoverflow.com/questions/5100539/django-csrf-check-failing-with-an-ajax-post-request */
+$.ajaxSetup({ 
+     beforeSend: function(xhr, settings) {
+         function getCookie(name) {
+             var cookieValue = null;
+             if (document.cookie && document.cookie != '') {
+                 var cookies = document.cookie.split(';');
+                 for (var i = 0; i < cookies.length; i++) {
+                     var cookie = jQuery.trim(cookies[i]);
+                     // Does this cookie string begin with the name we want?
+                 if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                     break;
+                 }
+             }
+         }
+         return cookieValue;
+         }
+         if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+             // Only send the token to relative URLs i.e. locally.
+             xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+         }
+     } 
+});
+
 /* Automatically add preview button and div after MathContentForm */
 $(function(){
  mc=$('.mathcontent_text');
@@ -42,30 +68,7 @@ $(function(){
  });
 });
 
-/* http://stackoverflow.com/questions/5100539/django-csrf-check-failing-with-an-ajax-post-request */
-$.ajaxSetup({ 
-     beforeSend: function(xhr, settings) {
-         function getCookie(name) {
-             var cookieValue = null;
-             if (document.cookie && document.cookie != '') {
-                 var cookies = document.cookie.split(';');
-                 for (var i = 0; i < cookies.length; i++) {
-                     var cookie = jQuery.trim(cookies[i]);
-                     // Does this cookie string begin with the name we want?
-                 if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                     break;
-                 }
-             }
-         }
-         return cookieValue;
-         }
-         if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-             // Only send the token to relative URLs i.e. locally.
-             xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-         }
-     } 
-});
+
 
 /* Tag tooltip & add new tag */
 $(function(){
@@ -146,6 +149,24 @@ $(function(){
   });
 });
 
+/* Task tooltip */
+$(function(){
+  /* NOT COMPLETED */
+  return;
+  if(!($('a.task').length))return;
+  $('body').append(
+      '<div id="task_tooltip" class="task_tooltip btn-group">'
+    + '<a id="task_tt_submit" href="#" title="Pošalji rješenje" class="btn btn-mini"><i class="icon-file"></i></a>'
+    + '<a id="task_tt_as_solved" href="#" title="Označi kao riješeno" class="btn btn-mini"><i class="icon-ok"></i></a>'
+    + '<a id="task_tt_todo" href="#" title="To Do" class="btn btn-mini"><i class="icon-tag"></i></a>'
+    + '</div>'
+  );
+  
+  $('a.task').tooltip({
+    tip: '#task_tooltip',
+    position: 'bottom center',
+  });
+});
 
 
 /* UserProfile solved task list, view solution link */
