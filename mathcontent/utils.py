@@ -119,6 +119,14 @@ def convert_to_html(T): # XSS danger!!! Be careful
                     img = '<img src="%s" alt="%s" class="latex_center">' % (url, latex_escaped)
 
                 out.append(img)
+
+                svgurl = '%s%s/%s/%s/%s.svg' % (img_url_path, hash[0], hash[1], hash[2], hash)
+                if inline:
+                    svgimg = '<object data="%s" type="image/svg+xml" alt="%s" class="latex" style="vertical-align:%dpx"></object>' % (svgurl, latex_escaped, -depth)
+                else:
+                    svgimg = '<object data="%s" type="image/svg+xml" alt="%s" class="latex_center"></object>' % (svgurl, latex_escaped)
+
+                out.append(svgurl)
         else:
             out.append(html_escape_table.get(T[i], T[i]))
             i += 1

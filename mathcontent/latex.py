@@ -135,6 +135,7 @@ def generate_png(eq, format):
     if not error:
         # TODO: handle errors and test quality
         cmd = "%s -bg Transparent --gamma 1.5 -D 120 --depth* -T tight --strict -o %s.png %s" % (latex_full_filename('dvipng'), filename, filename)
+        svgcmd = "%s -p 1 -n -o %s.svg %s" % (latex_full_filename('dvisvgm'), filename, filename)
         status, stdout = getstatusoutput(cmd)
     
     if not error and status == 0:
