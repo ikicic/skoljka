@@ -11,8 +11,7 @@ from registration.models import RegistrationProfile
 
 attrs_dict = { 'class': 'required' }
 
-# delete old and rename this to UserCreationForm
-class NewUserCreationForm(forms.Form):
+class UserCreationForm(forms.Form):
     username = forms.RegexField(regex=r'^\w+$', max_length=30, widget=forms.TextInput(attrs=attrs_dict), label=_(u'Korisničko ime'))
     email = forms.EmailField(widget=forms.TextInput(attrs=dict(attrs_dict, maxlength=75)), label=_(u'Email'))
     password1 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict, render_value=False), label=_(u'Zaporka'))
@@ -63,7 +62,11 @@ class NewUserCreationForm(forms.Form):
             profile_callback=callback)
         return new_user
 
-
+class UserEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name']
+        
 class UserProfileEditForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(UserProfileEditForm, self).__init__(*args, **kwargs)
@@ -84,15 +87,3 @@ class UserProfileEditForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ['gender', 'birthday', 'city', 'country', 'quote', 'website', 'show_hidden_tags']
-
-# DEPRECATED
-class UserCreationExtendedForm(UserCreationForm):
-    class Meta:
-        model = User
-        fields = ['username', 'email', 'password1', 'password2', 'first_name', 'last_name']
-
-# DEPRECATED
-class UserProfileForm(forms.ModelForm):
-    class Meta:
-        model = UserProfile
-        fields = ['quote']

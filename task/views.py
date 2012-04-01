@@ -62,7 +62,6 @@ def advanced_new(request):
                     value = x.nodeValue or ''
                     if x.firstChild:
                         value += x.firstChild.nodeValue or ''
-                    dictionary[x.nodeName] = value
                     print (u'Postavljam varijablu "%s" na "%s"' % (x.nodeName, x.nodeValue)).encode('utf-8')
 
                 if x.nodeName == 'content':
@@ -74,6 +73,11 @@ def advanced_new(request):
                     math_content.text = value     # should be safe
                     math_content.save()
                     print 'uspio dodati math_content'
+                    
+                    # rucno spajam 'tags1' i 'tags'
+                    if 'tags1' in dictionary:
+                        dictionary['tags'] = dictionary.get('tags', '') + ',' + dictionary['tags1']
+                        dictionary.pop('tags1')     # samo za ovaj zadatak!
                 
                     task = Task()
                     task.name = task_template.name % dictionary

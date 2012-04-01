@@ -6,7 +6,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
-from userprofile.forms import NewUserCreationForm, UserCreationExtendedForm, UserProfileForm, UserProfileEditForm
+from userprofile.forms import UserCreationForm, UserEditForm, UserProfileEditForm
 from userprofile.models import UserProfile
 
 from rating.constants import DIFFICULTY_RATING_ATTRS
@@ -15,7 +15,7 @@ from solution.models import STATUS
 
 def new_register(request):
     from registration.views import register as _register
-    return _register(request, form_class=NewUserCreationForm)
+    return _register(request, form_class=UserCreationForm)
 
 
 @login_required
@@ -24,15 +24,18 @@ def edit(request):
 
     success = None
     if request.method == 'POST':
-        form = UserProfileEditForm(request.POST, instance=profile)
-        if form.is_valid():
-            profile = form.save()
+        form1 = UserEditForm(request.POST, instance=request.user)
+        form2 = UserProfileEditForm(request.POST, instance=profile)
+        if form1.is_valid() and form2.is_valid():
+            request.user = form1.save()
+            profile = form2.save()
             success = True
     else:
-        form = UserProfileEditForm(instance=profile)
+        form1 = UserEditForm(instance=request.user)
+        form2 = UserProfileEditForm(instance=profile)
         
     return render_to_response('profile_edit.html', {
-        'form': form,
+        'forms': [form1, form2],
         'success': success,
     }, context_instance=RequestContext(request))
 

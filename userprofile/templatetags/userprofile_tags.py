@@ -1,6 +1,8 @@
 from django import template
 from django.utils.safestring import mark_safe
 
+from skoljka.utils.xss import escape
+
 register = template.Library()
 
 @register.filter
@@ -15,4 +17,4 @@ def userlink(user, what=None):
     if not name:
         name = user.username
             
-    return mark_safe(u'<a href="/profile/%d/">%s</a>' % (user.pk, name))
+    return mark_safe(u'<a href="/profile/%d/" title="%s">%s</a>' % (user.pk, escape(user.get_full_name()), escape(name)))
