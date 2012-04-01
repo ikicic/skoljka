@@ -11,8 +11,7 @@ register = template.Library()
 # zato sto podrzava multiple i autofill, i ima kratak js kod (ovisi samo o jqueryju)
 
 @register.simple_tag(takes_context=True)
-def tags_autocomplete_script(context, mustmatch=False):
+def tags_autocomplete_script(context):
     names = Tag.objects.values_list('name', flat=True)
-    options = ',mustMatch:true' if mustmatch else ''
     
-    return u'<script>$(".ac_tags").autocomplete(["%s"],{multiple:true,autoFill:true%s});</script>' % (u'","'.join(names), options)
+    return u'<script>$(".ac_tags").autocomplete(["%s"],{multiple:true,autoFill:true});</script>' % u'","'.join(names)

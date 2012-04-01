@@ -42,6 +42,8 @@ class Command(object):
             return -1
         return self.process.returncode
 
-def run_command(cmd, timeout=5):
+def run_command(cmd, timeout=5, shell=True, **kwargs):
+    # shell=True makes this method vulnerable to shell injection!
+    # DO NOT execute any commands constructed from external input!
     command = Command(cmd)
-    return command.run(timeout)
+    return command.run(timeout, shell=shell, **kwargs)
