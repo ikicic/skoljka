@@ -135,6 +135,7 @@ def generate_png(eq, format):
     if not error:
         # TODO: handle errors and test quality
         cmd = "%s -bg Transparent --gamma 1.5 -D 120 --depth* -T tight --strict -o %s.png %s" % (latex_full_filename('dvipng'), filename, filename)
+        svgcmd = "%s -p 1 -n -o %s.svg %s" % (latex_full_filename('dvisvgm'), filename, filename)
         status, stdout = getstatusoutput(cmd)
     
     if not error and status == 0:
@@ -152,9 +153,6 @@ def generate_png(eq, format):
         os.remove(filename + '.log')
         os.remove(filename + '.aux')
         os.remove(filename + '.dvi')
-
-        svgcmd = "%s -p 1 -n -o %s.svg %s" % (latex_full_filename('dvisvgm'), filename, filename)
-        svgerror = run_command(svgcmd, timeout=5)
 
     latex_element = LatexElement(hash=eq_hash, text=eq, format=format, depth=depth)
     latex_element.save(force_insert=True)
