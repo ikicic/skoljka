@@ -16,6 +16,7 @@ from task.forms import TaskForm, TaskAdvancedForm
 
 from activity import action as _action
 from permissions.constants import ALL, EDIT, VIEW, EDIT_PERMISSIONS
+from permissions.models import PerObjectGroupPermission
 from permissions.utils import get_permissions_for_object_by_id
 from recommend.utils import task_event
 from search.utils import update_search_cache
@@ -24,6 +25,7 @@ from solution.views import get_user_solved_tasks
 from mathcontent.forms import MathContentForm
 from mathcontent.latex import export_header, export_task, export_footer
 from mathcontent.models import MathContent
+from usergroup.forms import GroupEntryForm
 
 from skoljka.utils.decorators import response
 from skoljka.utils.timeout import run_command
@@ -40,10 +42,13 @@ def advanced_new(request):
     if request.method == 'POST':
         task_form = TaskAdvancedForm(request.POST)
         math_content_form = MathContentForm(request.POST)
+        group_form = GroupEntryForm(request.POST)
         
-        if task_form.is_valid() and math_content_form.is_valid():
+        if task_form.is_valid() and math_content_form.is_valid() and group_form.is_valid():
             task_template = task_form.save(commit=False)
             math_content_template = math_content_form.save(commit=False)            
+
+            groups = group_form.cleaned_data['list']
             
             from collections import defaultdict
             dictionary = defaultdict(unicode)
@@ -57,12 +62,15 @@ def advanced_new(request):
                 if x.nodeType == Node.TEXT_NODE:
                     continue
 
-                print x
                 if x.nodeName != 'content':
-                    value = x.nodeValue or ''
-                    if x.firstChild:
-                        value += x.firstChild.nodeValue or ''
-                    print (u'Postavljam varijablu "%s" na "%s"' % (x.nodeName, x.nodeValue)).encode('utf-8')
+                    if x.nodeValue:
+                        value = x.nodeValue
+                    elif x.firstChild and x.firstChild.nodeValue:
+                        value = x.firstChild.nodeValue
+                    else:
+                        value = ''
+                    dictionary[x.nodeName] = value
+                    print (u'Postavljam varijablu "%s" na "%s"' % (x.nodeName, value)).encode('utf-8')
 
                 if x.nodeName == 'content':
                     print (u'Dodajem zadatak "%s" s tagovima "%s"' % (task_template.name % dictionary, task_form.cleaned_data['_tags'] % dictionary)).encode('utf-8')
@@ -83,26 +91,35 @@ def advanced_new(request):
                     task.name = task_template.name % dictionary
                     task.author = request.user
                     task.content = math_content
-# TODO: automatizirati .hidden i .source: (vidi TODO na vrhu funkcije)
+# TODO: automatizirati .hidden (vidi TODO na vrhu funkcije)
                     task.hidden = task_template.hidden
-                    task.source = task_template.source
+                    task.source = task_template.source % dictionary
                     task.save()
 
+                    # WARNING: .set is case-sensitive!
                     tags = parse_tags(task_form.cleaned_data['_tags'] % dictionary)
                     task.tags.set(*tags)
                     update_search_cache(task, [], tags)
                     
-                    difficulty = task_form.cleaned_data['_difficulty']
-                    if difficulty.isdigit():
-                        task.difficulty_rating.update(request.user, difficulty)
+                    # --- difficulty ---
+                    difficulty = task_form.cleaned_data['_difficulty'] % dictionary
+                    if difficulty:
+                        task.difficulty_rating.update(request.user, int(difficulty))
+                        
+                    # --- group permissions ---
+                    for x in groups:
+                        PerObjectGroupPermission.objects.create(content_object=task, group=x, permission_type=VIEW)
+                        PerObjectGroupPermission.objects.create(content_object=task, group=x, permission_type=EDIT)
+                        
                 
             return HttpResponseRedirect('/task/new/finish/')
     else:
         task_form = TaskAdvancedForm()
+        group_form = GroupEntryForm()
         math_content_form = MathContentForm()
 
     return render_to_response( 'task_new.html', {
-                'forms': [task_form, math_content_form],
+                'forms': [task_form, group_form, math_content_form],
                 'action_url': request.path,
                 'advanced': True,
             }, context_instance=RequestContext(request),

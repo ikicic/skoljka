@@ -26,7 +26,7 @@ class GroupEntryField(forms.CharField):
     
 #TODO: optimizirati
     def clean(self, value):
-        if value is None:
+        if not value.strip():
             return []
         list = [x.strip() for x in value.split(',')]
         not_found = []
@@ -38,7 +38,7 @@ class GroupEntryField(forms.CharField):
                 not_found.append(x)
     
         if not_found:
-            raise forms.ValidationError(u'Nepostojeće grupe / korisnici: %s' % ' '.join(not_found))
+            raise forms.ValidationError(u'Nepostojeće grupe / korisnici: /%s/' % ' '.join(not_found))
             
         return found
 

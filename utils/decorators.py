@@ -80,17 +80,21 @@ class response:
             if isinstance(x, dict):         # use default template
                 status = 200
                 content = x
-            if isinstance(x, (int, long)):  # empty content, status code defined
+            elif isinstance(x, (int, long)):  # empty content, status code defined
                 status = x
                 content = ''
-            if isinstance(x, tuple):        # given a tuple
+            elif isinstance(x, tuple):        # given a tuple
                 # len == 1 -> redirect
                 # len == 2 -> status (int), content (string / dict)
                 # len == 3 -> status (int), template (string), content (string / dict)
                 if len(x) == 1:
                     return HttpResponseRedirect(x[0])
                 if len(x) == 2:
-                    status, content = x
+                    dummy, content = x
+                    if isinstance(dummy, basestring):
+                        template = dummy
+                    else:
+                        status = dummy
                 elif len(x) == 3:
                     status, template, content = x
                 

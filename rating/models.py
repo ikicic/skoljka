@@ -26,7 +26,6 @@ class Score(models.Model):
     
     sum = models.IntegerField(default=0)
     count = models.IntegerField(default=0)
-    # distribution = models.CommaSeperatedIntegerField()
     
     class Meta:
         unique_together = (('object_id', 'content_type', 'key'),)
