@@ -126,7 +126,7 @@ def convert_to_html(T): # XSS danger!!! Be careful
                 else:
                     svgimg = '<object data="%s" type="image/svg+xml" alt="%s" class="latex_center"></object>' % (svgurl, latex_escaped)
 
-                out.append(svgimg)
+                out.append(svgurl)
         else:
             out.append(html_escape_table.get(T[i], T[i]))
             i += 1
