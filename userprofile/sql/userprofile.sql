@@ -2,3 +2,5 @@ INSERT INTO `auth_user` VALUES (1, 'arhiva', '', '', 'skoljka@getaldic.org', 'sh
 INSERT INTO `auth_group` VALUES (1, 'arhiva');
 INSERT INTO `auth_user_groups` VALUES (1, 1, 1);
 INSERT INTO `userprofile_userprofile` VALUES (1, 1, '', NULL, '', '', '', '', 0, 0, NULL, 1, 0, 0.0, '');
+
+UPDATE `django_site` SET `domain` = 'skoljka.no-ip.org', `name` = 'skoljka.no-ip.org'

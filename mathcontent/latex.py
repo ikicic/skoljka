@@ -1,5 +1,5 @@
 ﻿from django.conf import settings
-import os, sys, hashlib, re
+import os, sys, hashlib, re, codecs
 
 from mathcontent import ERROR_DEPTH_VALUE
 from mathcontent.models import LatexElement
@@ -107,7 +107,7 @@ tex_preamble = r'''
 # TODO: enable client-side caching
 # TODO: join depth queries
 def generate_png(eq, format):
-    eq_hash = hashlib.md5(eq+format).hexdigest()
+    eq_hash = hashlib.md5((eq+format).encode('utf-8')).hexdigest()
     try:
         latex_element = LatexElement.objects.only("depth").get(hash=eq_hash)
         return eq_hash, latex_element.depth
@@ -121,9 +121,9 @@ def generate_png(eq, format):
     filename = os.path.normpath(os.path.join(path, eq_hash))
 
     
-    f = open(filename + '.tex', 'w')
+    f = codecs.open(filename + '.tex', 'w', encoding='utf-8')
     f.write(tex_preamble)
-    f.write(format % eq)
+    f.write(unicode(format) % eq)
     f.write('\end{preview}\end{document}')
     f.close()
     
