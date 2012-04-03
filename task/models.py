@@ -45,6 +45,7 @@ class TaskPermissionManager(models.Manager):
 
 
 class Task(models.Model):
+    # napomena: cache za Solution POST_SEND activity ovisi o ovom max_length, nemojte previse povecavati
     name = models.CharField(max_length=120)
     content = models.OneToOneField(MathContent)
     author = models.ForeignKey(User)

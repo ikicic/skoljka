@@ -38,8 +38,8 @@ export_header = u'''
 
 \\usepackage[margin=2cm]{geometry}
 
-\\usepackage[utf8]{inputenc}
 \\usepackage[T1]{fontenc}
+\\usepackage[utf8]{inputenc}
 \\usepackage[croatian]{babel}
 \\usepackage[centertags,intlimits,namelimits,sumlimits]{amsmath}
 \\usepackage{amsfonts}
@@ -93,8 +93,8 @@ export_footer = u'''
 
 tex_preamble = r'''
 \documentclass{article}
-\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{amssymb}

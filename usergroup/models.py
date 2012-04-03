@@ -49,7 +49,10 @@ class UserGroup(models.Model):
     # DEPRECATED
     def __unicode__(self):
         return mark_safe(u'[<a href="/usergroup/%d/">%s</a>]' % (self.group_id, self.group.name))
-    
+
+    def get_absolute_url(self):
+        return '/usergroup/%d/' % self.id
+        
     def get_users(self):
         return User.objects.filter(groups__pk=self.group.pk)
 
@@ -69,7 +72,7 @@ class UserGroup(models.Model):
 
 # iako ovo izgleda jako cudno (grupna prava za grupe), zapravo je jako korisno
 # grupa ima sama sebi dodijeljena neka prava (npr. VIEW)
-# TODO: zasto onda postoji is_member (koji je ipak bitna informacija)?
+# TODO: zasto onda postoji is_member (koja je ipak bitna informacija)?
 
 # problem oko related_name, umjesto defaultnog 'group' stavio sam 'groups' (ikicic)
 Group.add_to_class('group_permissions', generic.GenericRelation(PerObjectGroupPermission, related_name='groups'))

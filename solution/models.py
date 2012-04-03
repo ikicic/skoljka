@@ -41,6 +41,9 @@ class Solution(models.Model):
     
     class Meta:
         unique_together=(('task', 'author'),)
+
+    def get_absolute_url(self):
+        return '/solution/%d/' % self.id
         
     # template helpers
     def get_html_info(self):

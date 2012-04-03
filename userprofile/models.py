@@ -39,6 +39,9 @@ class UserProfile(models.Model):
     score = models.FloatField(default=0)
     diff_distribution = models.CharField(max_length=100)
     
+    def get_absolute_url(self):
+        return '/profile/%d/' % self.id
+
     # da vraca [] umjesto None?
     def get_normalized_diff_distribution(self):
         distribution = self.diff_distribution.split(',')

@@ -1,5 +1,6 @@
 from activity.models import Action
 from activity.constants import *
+from skoljka.utils import xss
 
 # SPEED: rucno napraviti upite
 # shortcut
@@ -19,6 +20,15 @@ def send(actor, type, **kwargs):
             action.target_cache = action.target.name
         elif hasattr(action.target, "username"):
             action.target_cache = action.target.username
+        elif action.target._meta.app_label == 'solution' and action.target._meta.module_name == 'solution':
+            data = [
+                action.target.author_id,
+                action.target.author.username,
+                action.target.task_id,
+                action.target.task.name,
+            ]
+            # 250 chars should be enough for this
+            action.target_cache = POST_SEND_CACHE_SEPARATOR.join([xss.escape(unicode(x)) for x in data])
 
     # ----- type specific -----
     if type == POST_SEND:
