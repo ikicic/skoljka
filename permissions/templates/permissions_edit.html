@@ -1,15 +1,30 @@
 {% extends "base.html" %}
 
+{% load permissions_tags %}
+
 {% block content %}
 
 <a href="javascript: history.go(-1)">« Vrati se</a><br><br>
 
+<table width="60%" class="table-striped table-condensed" style="text-align: center;">
+  <tr><th>Grupa / korisnik</th><th>View</th><th>Edit</th></tr>
+  {% for x in groups %}
+    <tr>
+      <td><a href="/usergroup/{{ x.id }}/">{{ x.name }}</a></td>
+      <td>{{ x|cached_permission:"VIEW" }}</td>
+      <td>{{ x|cached_permission:"EDIT" }}</td>
+  {% empty %}
+    <tr><td colspan="3">Nema specifičnih dozvola</td></tr>
+  {% endfor %}
+</table>
+
+<br><br><br>
+
 Edit EDIT permission:<br><br>
-<a href="">Resetiraj formu</a><br>
 <form action="" method="POST">
 {% csrf_token %}
 {{ form.as_p }}
-<input type="submit" value="Submit">
+<input type="submit" value="Submit" class="btn btn-primary">
 </form>
 
 {{ message }}

@@ -54,7 +54,6 @@ class Task(models.Model):
     hidden = models.BooleanField(default=False)
     source = models.CharField(max_length=200)
     
-#    user_permissions = generic.GenericRelation(PerObjectUserPermission)
     search_cache_elements = GenericRelation(SearchCacheElement)
     group_permissions = generic.GenericRelation(PerObjectGroupPermission)
     posts = PostGenericRelation()

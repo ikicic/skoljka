@@ -39,6 +39,10 @@ import os, sys, codecs, datetime
 @transaction.commit_on_success
 @permission_required('task.add_advanced')
 def advanced_new(request):
+    """
+        Used only by admin
+    """
+        
     if request.method == 'POST':
         task_form = TaskAdvancedForm(request.POST)
         math_content_form = MathContentForm(request.POST)
@@ -201,6 +205,9 @@ def old_advanced_new(request):
 
 @login_required
 def new(request, task_id=None):
+    """
+        New Task and Edit Task
+    """
     if task_id:
         task = get_object_or_404(Task, pk=task_id)
         math_content = task.content
@@ -228,12 +235,8 @@ def new(request, task_id=None):
             # Required for django-taggit:
             task_form.save_m2m()
             update_search_cache(task, old_tags, task.tags.values_list('name', flat=True))
-            
-            if edit:
-                filename = os.path.normpath(os.path.join(settings.PROJECT_ROOT, 'media/pdf/task%d.pdf' % task.id))
-                if os.path.exists(filename):
-                    os.remove()
-            
+
+            # send action if creating a new nonhidden task
             if not edit and not task.hidden:
                 _action.send(request.user, _action.TASK_ADD, action_object=task, target=task)
             
@@ -282,17 +285,16 @@ def detail(request, id):
     if not task.hidden:
         perm.append(VIEW)
 
-    # TODO: nekakav drugi signal
     if VIEW not in perm:
-        raise Http404
+        return (response.FORBIDDEN, 'Not allowed to view this task!')
 
     # ovo ce ici preko C++ skripte za pocetak
     # task.update_similar_tasks(1)
-    
+
+    # used for recommendation system and similar
     if request.user.is_authenticated():
         task_event(request.user, task, 'view')
         
-    # TODO: DRY content_type
     return {
         'task': task,
         'can_edit': EDIT in perm,
@@ -321,7 +323,6 @@ def similar(request, id):
         if s.is_todo(): p = 2
         elif s.is_as_solved(): p = 3
         elif s.is_submitted():
-            print 'OVDJE'
             if s.is_correct(): p = 5
         
         sorted_tasks[s.task_id] *= p
@@ -333,7 +334,8 @@ def similar(request, id):
     
     return {'task': task, 'similar': similar}
 
-# TODO: not allowed message        
+
+# TODO: permissions, not allowed message
 @response('task_detail_multiple.html')
 def detail_multiple(request, ids):
     ids = [int(x) for x in ids.split(',')]
@@ -348,7 +350,13 @@ def detail_multiple(request, ids):
         'id_list_ns': ','.join(id_list),
     }
 
+
+# TODO: permission
 def _export_to_latex(request, ids):
+    """
+        Generates LaTeX for given Tasks.
+    """
+    
     ids = [int(x) for x in ids.split(',')]
     if not ids or 0 in ids:
         raise Http404
@@ -364,10 +372,19 @@ def _export_to_latex(request, ids):
 
 # TODO: not allowed message
 def export_to_latex(request, ids):
+    """
+        Calls _convert_to_latex to generate latex and simply returns as file.
+    """
     return HttpResponse(content=_export_to_latex(request, ids), content_type='application/x-latex')
 
 # TODO: permission
 def export_to_pdf(request, ids):
+    """
+        Generates PDF if it doesn't exist or it is outdated, using _convert_to_latex.
+        
+        Redirects to pdf.
+    """
+    
     filename = os.path.normpath(os.path.join(settings.LOCAL_DIR, 'media/pdf/task' + ids))
     print 'filename: ', filename
     
@@ -389,7 +406,7 @@ def export_to_pdf(request, ids):
 
         error = run_command('latex -output-directory=%s -interaction=batchmode %s.tex' % (os.path.dirname(filename), filename), timeout=10)
         if error:
-            return HttpResponseServerError('LaTeX generation error, possibly timeout! Error code: %d' % error)
+            return HttpResponseServerError('LaTeX generation error! Error code: %d' % error)
             
         error = run_command('dvipdfm -o %s %s' % (filename + '.pdf', filename), timeout=10)
         if error:

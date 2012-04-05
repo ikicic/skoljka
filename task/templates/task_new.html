@@ -4,7 +4,7 @@
 
 {% block title %}
     {% if edit %}
-        Uređivanje zadatka {{ edit }}
+        Uređivanje zadatka {{ task.name }}
     {% else %}
         Novi zadatak
     {% endif %}
@@ -31,9 +31,12 @@ Npr. Ime: <pre>IMO 2011</pre>, Tagovi: <pre>IMO, 2011, IMO</pre>.<br><br>
 
 <form action="{{ action_url }}" method="post">
     {% csrf_token %}
+    <table>
     {% for form in forms %}
-        {{ form.as_p }}
+        {{ form.as_table }}
     {% endfor %} 
+    </table>
+    <br>
     <input type="submit" class="btn btn-primary" value="Pošalji" />
 </form>
 {% tags_autocomplete_script %}
