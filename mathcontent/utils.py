@@ -2,9 +2,10 @@ from skoljka.utils import xss
 
 from mathcontent import ERROR_DEPTH_VALUE
 from mathcontent.latex import generate_png
+from mathcontent.latex import generate_svg
 
-inline_format = "$%s$ \n \\newpage \n"
-block_format = "\\[\n%s \n\\] \n \\newpage \n"
+inline_format = "$%s$"
+block_format = "\\[%s\\]"
 
 img_url_path = '/media/m/'
 
@@ -120,13 +121,18 @@ def convert_to_html(T): # XSS danger!!! Be careful
 
                 out.append(img)
 
-                svgurl = '%s%s/%s/%s/%s.svg' % (img_url_path, hash[0], hash[1], hash[2], hash)
+            hash, depth = generate_svg(latex, inline_format if inline else block_format)
+            if depth == ERROR_DEPTH_VALUE:
+                out.append('{{ INVALID LATEX }}')
+            else:
+                url = '%s%s/%s/%s/%s.svg' % (img_url_path, hash[0], hash[1], hash[2], hash)
                 if inline:
-                    svgimg = '<object data="%s" type="image/svg+xml" alt="%s" class="latex" style="vertical-align:%dpx"></object>' % (svgurl, latex_escaped, -depth)
+                    obj = '<object data="%s" type="image/svg+xml" alt="%s" class="latex" style="vertical-align:%fpt"></object>' % (url, latex_escaped, -depth)
                 else:
-                    svgimg = '<object data="%s" type="image/svg+xml" alt="%s" class="latex_center"></object>' % (svgurl, latex_escaped)
+                    obj = '<object data="%s" type="image/svg+xml" alt="%s" class="latex_center"></object>' % (url, latex_escaped)
 
-#                out.append(svgimg)
+                out.append(obj)
+
         else:
             out.append(html_escape_table.get(T[i], T[i]))
             i += 1
