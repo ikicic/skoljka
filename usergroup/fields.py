@@ -26,7 +26,7 @@ class GroupEntryField(forms.CharField):
     
 #TODO: optimizirati
     def clean(self, value):
-        if not value.strip():
+        if not value or not value.strip():
             return []
         list = [x.strip() for x in value.split(',')]
         not_found = []

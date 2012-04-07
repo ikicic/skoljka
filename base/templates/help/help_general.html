@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Pomoć{% endblock %}
+
+{% block header_list %}
+<style>
+  .staff { color: gray; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+Kratka objašnjenja...<br><br><br>
+
+
+<h4 id="search">Pretraživanje</h4>
+Pretraživanje vršite po tagovima, težini i kvaliteti.<br>
+Osim običnih tagova, postoje i 'skriveni' tagovi, koji počinju znakom $.
+Ti tagovi su namijenjeni detaljnijoj kategorizaciji zadataka.
+Razlog što su ti skriveni je taj što su ti tagovi zapravo hintovi za rješavanje zadatka.
+Te tagove uglavnom ne želite vidjeti. No, oni vam mogu poslužiti u slučaju kada želite izvježbati korištenje neke specifične metode ili teorema.
+
+{% if user.is_staff %}
+<div class="staff">
+  <b>Napredno</b><br>
+  Osim običnog pretraživanja, može vas zanimati koliko je korisnika unutar nekog skupa grupa (i pojedinaca) riješilo te zadatke. U tom slučaju otvorite <i>napredne opcije</i> i navedite grupe i korisnike.
+</div>
+{% endif %}
+
+<br><br><br>
+
+<h4 id="solution">Slanje rješenja</h4>
+Imate više opcija:
+<ul>
+  <li><b>Označiti kao riješeno</b> - Ova opcija služi vama kao evidencija, da ne morate cijelo vrijeme razmišljati jeste li neki zadatak već riješili prije ili ne. Molimo, nemojte bezveze stavljati da ste riješili neki zadatak.
+  <li><b>Označiti kao To Do</b> - Ukoliko vam se neki zadatak čini zanimljivim, možete ga označiti na ovaj način da biste ga htjeli jednog lijepog dana riješiti.
+  <li><b>Poslati rješenje</b> - Napišete rješenje (vidi <a href="#format">Format</a>) i pošaljete ga. Automatski će se dodati novost da ste poslali rješenje za taj zadatak. Nakon toga, drugi mogu ocjenjivati točnost i kvalitetu vašeg rješenja. Molimo, poštujte oznake razina (točno rješenje dobiva ocjenu 3, dok kvalitetna netipična rješenja dobivaju 4 ili 5). Kasnije možete i mijenjati svoje rješenje, otvorite rješenje i kliknete na Edit u gornjem desnom dijelu stranice.
+</ul>
+<br>
+Na temelju riješenih zadataka (uz priloženo rješenje ili bez), sustav će procijenjivati za koje tipove zadataka (i koje težine) ste vi najviše zainteresirani te će vam pokušavati davati preporuke (koje možete vidjeti na Početnoj stranici). Zadaci bez označene težine ili bez označenih tagova neće ući u to razmatranje. Napomena: Preporuke se neće obnoviti čim riješite novi zadatak, nego tek nakon nekog vremena.
+
+<br><br><br>
+
+
+<h4 id="newtask">Dodavanje zadataka</h4>
+Kliknite na Zadaci -> Dodaj novi zadatak.<br><br>
+Podaci koje trebate / možete unijeti su:<br>
+<ul>
+  <li><b>Naslov zadatka</b> - po vlastitom izboru, npr. kratak opis sadržaja zadatka, ili neko nevezano ime</li>
+  <li><b>Tagovi</b> - kategorije zadatka, npr. drzavno, 2004, ss1, algebra, nejednakost; pogledajte dodatne primjere</li>
+  <li><b>Izvor</b> - natjecanje s kojeg ste preuzeli zadatak (navedite što više informacija: ime natjecanja, godina, razina, kategorija...), ili npr. 'vlastiti zadatak'</li>
+  <li><b>Hidden</b> - je li zadatak sakriven ili ne, tj. je li javno vidljiv</li>
+  <li><b>Tekst</b> - sadržaj zadatka. Format je objašnjen <a href="#format">ovdje</a></li>
+</ul>
+<br>
+Napomene:<br>
+<ul>
+  <li>Prije nego što dodate zadatak, provjerite postoji li već isti zadatak u arhivi. (poslužite se pretraživanjem)</li>
+  <li>Ukoliko ne navedete tagove, sustav ga neće moći povezati sa sličnim zadacima.</li>
+  <li>Također, sustav neće moći tražiti slične zadatke ukoliko nije postavljena težina zadatka.<br>Tako da, nakon što dodate zadatak, sami procijenite težinu i glasajte.</li>
+</ul>
+
+
+<br><br><br>
+
+<h4 id="format">Format</h4>
+Ovaj format se odnosi na tekst zadataka, rješenja, privatne poruke, opis grupa i dr.<br>
+<br>
+Osim što možete pisati standardan tekst, format podržava i <a href="#latex">LaTeX</a>. Kratke upute:
+<ul>
+  <li>$ ... $ - inline LaTeX, na mjesto ... stavljate neki matematički izraz</li>
+  <li>$$ ... $$ - block LaTex, isto što i $ ... $, samo što se prikazuje u zasebnom retku, centrirano</li>
+  <li>U slučaju da želite napisati samostalni znak $, pišite \$.</li>
+  <li>Znak \ pišete kao \\.</li>
+  <li>Znakove [ i ] pišete kao \[ i \].</li>
+  <li>(ovo zadnje se odnosi na nedovršeni BB Code. Za sada je to samo zbog [quote] [/quote])</li>
+</ul>
+
+<br><br><br>
+
+<h4 id="latex">LaTeX</h4>
+<br>
+Evo par linkova:<br>
+<a href="http://www.artofproblemsolving.com/Wiki/index.php/LaTeX:Symbols">http://www.artofproblemsolving.com/Wiki/index.php/LaTeX:Symbols</a><br>
+<a href="ftp://ftp.ams.org/ams/doc/amsmath/short-math-guide.pdf">ftp://ftp.ams.org/ams/doc/amsmath/short-math-guide.pdf</a><br>
+<br>
+Općenito možete pogledati kako su napisani postojeći zadaci.
+
+
+{% endblock %}
