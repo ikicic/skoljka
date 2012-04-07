@@ -9,7 +9,14 @@ from permissions.constants import VIEW
 #from recommend.utils import refresh_user_information
 from recommend.models import UserRecommendation
 
+from skoljka.utils.decorators import response
+
 import random
+
+@response('help/help_general.html')
+def help(request):
+    return {}
+
 
 def homepage(request):
     # TODO: cache this query

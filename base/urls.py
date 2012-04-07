@@ -7,4 +7,6 @@ from django.views.generic.simple import direct_to_template
 urlpatterns = patterns('',
     (r'^$', 'base.views.homepage'),
 #    (r'robots\.txt$', direct_to_template, {'template': 'robots.txt', 'mimetype': 'text/plain'}),
+
+    (r'^help/$', 'base.views.help'),
 )

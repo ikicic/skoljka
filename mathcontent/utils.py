@@ -1,4 +1,4 @@
-from skoljka.utils import xss
+﻿from skoljka.utils import xss
 
 from mathcontent import ERROR_DEPTH_VALUE
 from mathcontent.latex import generate_png
@@ -31,14 +31,57 @@ html_escape_table = {
 
 tag_open = {
     'quote': '<div class="quote">',
+
+# img accepts attachment attribute, index of attachment to use as a src (1-based)
+    'img': '<img alt="Attachment image"%(extra)s>',
 }
 
+# automatically converted attributes as %(extra)s
+tag_attrs = {
+    'img': ('width', 'height'),
+}
+
+# tags without a close tag should have None value (or not be defined at all)
 tag_close = {
     'quote': '</div>',
+    'img': None,
 }
 
+
+def parse_bb_code(S):
+    """
+        Split tag name and attributes.
+        Returns tuple (name, attrs), where attrs is a dictionary.
+        
+        Note:
+            Doesn't support spaces and = symbol in attribute values!
+        
+        Example:
+            S = 'img attachment=2 width=100px'
+            
+            name = u'img'
+            attrs = {u'attachment': u'2', u'width': u'100px'}
+    """
+    
+    # is there any shortcut for this in Python 2.7?
+    tmp = S.split(' ')
+    name = tmp[0]
+    attrs = tmp[1:]
+    
+    attrs = dict([x.split('=') for x in attrs])
+    
+    return name, attrs
+
+
 # TODO: change i to iterator
-def convert_to_html(T): # XSS danger!!! Be careful
+def convert_to_html(T, content=None): # XSS danger!!! Be careful
+    """
+        Converts MathContent format to HTML
+        
+        To support features like [img], it must be called with a 
+        a content instance.
+    """
+
     i = 0
     n = len(T)
     out = []
@@ -66,9 +109,14 @@ def convert_to_html(T): # XSS danger!!! Be careful
             elif end == i + 2 and T[i+1] == '/':
                 out.append('[/]')
                 i += 3
-            else:
+            else: # non empty tag
                 # TODO: output original message part on any error
-                tag = T[i+1:end]
+                try:
+                    tag, attrs = parse_bb_code(T[i+1:end])
+                except:
+                    # if bb code not valid (or if not bb code at all), output original text
+                    out.append(T[i+1:end])
+                    
                 if tag[0] == '/':
                     tag = tag[1:]
                     if not tag_stack or tag_stack[-1] != tag:
@@ -78,8 +126,31 @@ def convert_to_html(T): # XSS danger!!! Be careful
                 elif tag not in tag_open:
                     out.append('{{ Nevaljan tag &quot;%s&quot; }}' % xss.escape(tag))
                 else:
-                    tag_stack.append(tag)
-                    out.append(tag_open[tag])
+                    # ask for close tag if there should be one
+                    if tag_close.get(tag, None) is not None:
+                        tag_stack.append(tag)
+                    open = tag_open[tag]
+
+                    # process attributes
+                    extra = ''
+                    if tag in tag_attrs:
+                        for key, value in attrs.iteritems():
+                            if key in tag_attrs[tag]:
+                                extra += ' %s="%s"' % (key, xss.escape(attrs[key]))
+                    
+                    if tag == 'img':
+                        src = ''
+                        if 'attachment' in attrs:
+                            try:
+                                k = int(attrs['attachment']) - 1
+                                file = content.attachments.order_by('id')[k]
+                                src = file.get_url()
+                            except:
+                                out.append(u'{{ Greška pri preuzimanju img datoteke. (Nevaljan broj?) }}')
+                        extra += ' src="%s"' % src
+                        
+                    open %= {'extra': extra}
+                    out.append(open)
                 i = end + 1
         elif T[i] == '$':
             # parse $  $ and $$  $$
@@ -109,6 +180,7 @@ def convert_to_html(T): # XSS danger!!! Be careful
             latex = u''.join(latex)
             latex_escaped = xss.escape(latex)
             
+            # FIXME: don't save error message to depth
             hash, depth = generate_png(latex, inline_format if inline else block_format)
             if depth == ERROR_DEPTH_VALUE:
                 out.append('{{ INVALID LATEX }}')
@@ -121,6 +193,7 @@ def convert_to_html(T): # XSS danger!!! Be careful
 
                 out.append(img)
 
+            # FIXME: don't save error message to depth
             hash, depth = generate_svg(latex, inline_format if inline else block_format)
             if depth == ERROR_DEPTH_VALUE:
                 out.append('{{ INVALID LATEX }}')
@@ -143,13 +216,17 @@ def convert_to_html(T): # XSS danger!!! Be careful
             out.append(tag_close[tag_stack.pop()])
     return u''.join(out)
 
+# TODO: [img][/img] support
 # TODO: change i to iterator
 # TODO: performace test
 def convert_to_latex(T):
-    # replaces # % ^ & _ { } ~ \
-    # with \# \% \textasciicircum{} \& \_ \{ \} \~{} \textbackslash{}
-    # keeps \$ as \$, because $ is a special char anyway
-
+    """
+        Converts MathContent Format to LaTeX
+        
+        Replaces # % ^ & _ { } ~ \
+        with \# \% \textasciicircum{} \& \_ \{ \} \~{} \textbackslash{},
+        but keeps \$ as \$, because $ is a special char anyway
+    """
 
     out = []
     

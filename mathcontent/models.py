@@ -48,7 +48,7 @@ class MathContent(models.Model):
             
         from mathcontent.utils import convert_to_html
         print 'CONVERTING %d...' % self.id
-        self.html = convert_to_html(self.text)
+        self.html = convert_to_html(self.text, self)
         self.no_html_reset = True
         self.save()
         print 'DONE!'
