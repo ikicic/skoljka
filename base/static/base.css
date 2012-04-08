@@ -77,10 +77,10 @@ pre {
     display: inline;
     background-color: #DDD;
 }
-img.latex, img.latex_center {
+img.latex, img.latex_center, object.latex, object.latex_center {
     max-width: 100%;
 }
-img.latex_center {
+img.latex_center, object.latex_center {
     display: block;
     margin-left: auto;
     margin-right: auto;
