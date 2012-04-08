@@ -54,6 +54,76 @@ def ajax(*args, **kwargs):
 
 # this is a decorator
 class response:
+    """
+        Views helper and shortcut decorator.
+
+        Primary shortcut for
+            return render_to_response(template, {
+                dictionary
+            }, context_instance=RequestContext(request))
+        
+        
+        Parameter:
+            Takes an optional parameter template, path and filename to template.
+            Response decorator must be initialized!
+            NOT VALID:
+                @response
+                def detail(request):
+                    return 'This is response'
+            
+            VALID:
+            @response()
+            def detail(request):
+                return 'This is response'
+                
+                
+        Possible return values:
+        - dict:
+            Dictionary given to template renderer. Template parameter
+            must be given!
+        - string:
+            Return string as is, with status code 200 OK.
+        - int:
+            Return empty response with given status code.
+            If given value is 404, it will raise Http404.
+        - tuple:
+            There are four different formats:
+            - (string, ) - Redirects to given url.
+            - (int, content) - Returns content with given status code.
+            - (string, content) - Returns content with given template.
+            - (int, string, content) - Returns content with given
+                template and status code.
+                
+            Here `content` denotes string or dict.
+                If a string is given, just return it as is.
+                In case of a dict, it is passed to a template renderer.
+        
+        Additional, template filename can be passed via dict as a 'TEMPLATE' element.
+
+
+        Examples:
+        @response('template_name.html')
+        def view(request, some_parameter, another_parameter=None):
+            return {'a': 1, 'b': 2}
+
+        @response('default_template.html')
+        def view(request, id):
+            obj = get_object_or_404(Object, id=id)
+            if obj.hidden and obj.author != request.user:
+                # returns 403 Forbidden
+                return (403, 'Object %d is hidden' % id)
+              
+            if (...something...):
+                # redirects to Edit page
+                return ('/obj/%d/edit/' % id, )
+                
+            if (...something else...):
+                # everything OK, but use another template
+                return ('specific_template.html', {'obj': obj})
+              
+            return {'obj': obj}
+    """
+    
     OK = 200
     BAD_REQUEST = 400
     FORBIDDEN = 403
@@ -81,6 +151,8 @@ class response:
                 status = 200
                 content = x
             elif isinstance(x, (int, long)):  # empty content, status code defined
+                if x == 404:
+                    raise Http404
                 status = x
                 content = ''
             elif isinstance(x, tuple):        # given a tuple

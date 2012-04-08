@@ -17,8 +17,8 @@ action_label = {
 
 
 
-# Comments on solution have to cache more than one information
-# Solution author id > username > Task id > name > author
+# Comments on solution have to cache more than one information:
+# Solution author_id > username > Task id > name > author_id.
 # Not really a best solution, but this it way
 # will be easier to escape >, using skoljka.utils.xss
 POST_SEND_CACHE_SEPARATOR = u'>'

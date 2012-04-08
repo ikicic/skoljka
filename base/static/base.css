@@ -55,6 +55,7 @@
 /* ================================= */
 /* skoljka css: */
 
+/* changes to Bootstrap */
 tr.task_solved td {
     background-color: #70FF70!important;
 }
@@ -73,6 +74,15 @@ tr.task_todo td {
 tr.task_hidden td, tr.group_hidden td {
     background-color: #DDD!important;
 }
+.thin {
+    line-height: normal;
+    margin: 0px;
+    padding: 0px;
+    border-width: 0px;
+}
+
+
+/* other */
 pre {
     display: inline;
     background-color: #DDD;
@@ -166,7 +176,8 @@ a.register {
     color: #CCC;
 }
 
-/* Collision with bootstrap.css, used for jquery tools tooltip */
+/* for jquery tools tooltip */
+/* cannot use `tooltip`, as it is already used by bootstrap.css */
 .tag_tooltip {
   display:none;
   background:#A2A2A2;
