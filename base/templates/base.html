@@ -47,6 +47,7 @@
     <div class="row-fluid">
       <div class="span3">
         <div class="well sidebar-nav">
+          {# FIXME: <br> inside <ul>? #}
           <ul class="nav nav-list">
             {% if user.is_authenticated %}
             Zdravo, {{ user|userlink:"first_name" }}!<br><br>
@@ -78,6 +79,8 @@
               <li><a href="/accounts/logout/"><i class="icon-off"></i>Odjava</a></li>
               <br>
             {% endif %}
+            <br>
+            <li><a href="/help/"><i class="icon-question-sign"></i> Pomoć</a></li>
           </ul>
         </div>
       </div>

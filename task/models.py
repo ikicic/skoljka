@@ -52,7 +52,7 @@ class Task(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     last_edit_date = models.DateTimeField(auto_now=True)
     hidden = models.BooleanField(default=False)
-    source = models.CharField(max_length=200)
+    source = models.CharField(max_length=200, blank=True)
     
     search_cache_elements = GenericRelation(SearchCacheElement)
     group_permissions = generic.GenericRelation(PerObjectGroupPermission)

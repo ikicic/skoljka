@@ -24,11 +24,15 @@ $.ajaxSetup({
      } 
 });
 
-/* Automatically add preview button and div after MathContentForm */
+/* Automatically add preview button, help link and div after MathContentForm */
 $(function(){
  mc=$('.mathcontent_text');
  f=mc.closest('form');
- f.children('input[type=submit]').after(' <button type="button" class="btn mathcontent_preview_button">Pregled</button>')
+ /* Preview button and help link */
+ f.children('input[type=submit]').after(
+     ' <button type="button" class="btn mathcontent_preview_button">Pregled</button>'
+   + ' <a href="/help/#format" title="Pomoć oko formata" target="_blank"><i class="icon-question-sign"></i></a>'
+ )
  f.append('<br><div class="mathcontent_preview well" style="display:none;"></div>')
 
  /* Preview button, send AJAX request to convert to html (and generate necessarry .png files) */
