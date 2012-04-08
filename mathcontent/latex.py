@@ -95,11 +95,13 @@ tex_preamble = r'''
 \documentclass{article}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath}
+\usepackage[centertags,intlimits,namelimits,sumlimits]{amsmath}
 \usepackage{amsthm}
 \usepackage{amssymb}
 \usepackage[active]{preview}
 \pagestyle{empty}
+\DeclareMathOperator{\tg}{tg}
+\DeclareMathOperator{\ctg}{ctg}
 \begin{document}
 \begin{preview}
 '''
@@ -164,13 +166,15 @@ tex_preamble_svg = r'''
 \documentclass[12pt]{article}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath}
+\usepackage[centertags,intlimits,namelimits,sumlimits]{amsmath}
 \usepackage{amsthm}
 \usepackage{amssymb}
 \usepackage[active]{preview}
 \pagestyle{empty}
+\DeclareMathOperator{\tg}{tg}
+\DeclareMathOperator{\ctg}{ctg}
 \begin{document}
-\newcommand{\MYFORMULA}{'''
+'''
 
 depth_out_1 = r'''
 \newwrite\outputstream
@@ -182,7 +186,7 @@ depth_out_2 = r'''
 
 # TODO: enable client-side caching
 # TODO: join depth queries
-def generate_svg(eq, format):
+def generate_svg(eq, format, isInline):
     eq_hash = hashlib.md5((eq+format).encode('utf-8')).hexdigest()
     # try:
         # latex_element = LatexElement.objects.only("depth").get(hash=eq_hash)
@@ -199,12 +203,12 @@ def generate_svg(eq, format):
 
     f = codecs.open(filename + '.tex', 'w', encoding='utf-8')
     f.write(tex_preamble_svg)
-    f.write(unicode(format) % eq)
-    f.write('}\setbox0\hbox{\MYFORMULA}')
+    f.write(r'''\newcommand{\MYFORMULA}{''' + (unicode(format) % eq) + '}')
+    if isInline:
+        f.write('\setbox0\hbox{\MYFORMULA}')
     f.write(r'''\begin{preview}\MYFORMULA\end{preview}''')
-    f.write(depth_out_1)
-    f.write(unicode(eq_hash + '.dat'))
-    f.write(depth_out_2)
+    if isInline:
+        f.write(depth_out_1 + unicode(eq_hash + '.dat') + depth_out_2)
     f.write('\end{document}')
     f.close()
 
@@ -218,7 +222,9 @@ def generate_svg(eq, format):
         status, stdout = getstatusoutput(cmd) # there is a bug in the latest dvisvgm version - there are TeX pt's in SVG file instead of CSS pt's
         print stdout
 
-    if not error and status == 0:
+    if not error and status == 0 and not isInline:
+        depth = 0
+    elif not error and status == 0 and isInline:
         page_size_re = re.compile('\s*page size: (\d+\.\d+)pt x (\d+\.\d+)pt \((\d+\.\d+)mm x (\d+\.\d+)mm\)')
         for line in stdout.splitlines():
             print line
