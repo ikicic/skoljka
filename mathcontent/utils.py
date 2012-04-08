@@ -194,7 +194,7 @@ def convert_to_html(T, content=None): # XSS danger!!! Be careful
                 out.append(img)
 
             # FIXME: don't save error message to depth
-            hash, depth = generate_svg(latex, inline_format if inline else block_format, True if inline else False)
+            hash, depth = generate_svg(latex, inline_format if inline else block_format, inline)
             if depth == ERROR_DEPTH_VALUE:
                 out.append('{{ INVALID LATEX }}')
             else:

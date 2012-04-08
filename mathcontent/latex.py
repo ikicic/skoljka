@@ -186,7 +186,7 @@ depth_out_2 = r'''
 
 # TODO: enable client-side caching
 # TODO: join depth queries
-def generate_svg(eq, format, isInline):
+def generate_svg(eq, format, inline):
     eq_hash = hashlib.md5((eq+format).encode('utf-8')).hexdigest()
     # try:
         # latex_element = LatexElement.objects.only("depth").get(hash=eq_hash)
@@ -204,10 +204,10 @@ def generate_svg(eq, format, isInline):
     f = codecs.open(filename + '.tex', 'w', encoding='utf-8')
     f.write(tex_preamble_svg)
     f.write(r'''\newcommand{\MYFORMULA}{''' + (unicode(format) % eq) + '}')
-    if isInline:
+    if inline:
         f.write('\setbox0\hbox{\MYFORMULA}')
     f.write(r'''\begin{preview}\MYFORMULA\end{preview}''')
-    if isInline:
+    if inline:
         f.write(depth_out_1 + unicode(eq_hash + '.dat') + depth_out_2)
     f.write('\end{document}')
     f.close()
@@ -222,9 +222,9 @@ def generate_svg(eq, format, isInline):
         status, stdout = getstatusoutput(cmd) # there is a bug in the latest dvisvgm version - there are TeX pt's in SVG file instead of CSS pt's
         print stdout
 
-    if not error and status == 0 and not isInline:
+    if not error and status == 0 and not inline:
         depth = 0
-    elif not error and status == 0 and isInline:
+    elif not error and status == 0 and inline:
         page_size_re = re.compile('\s*page size: (\d+\.\d+)pt x (\d+\.\d+)pt \((\d+\.\d+)mm x (\d+\.\d+)mm\)')
         for line in stdout.splitlines():
             print line
