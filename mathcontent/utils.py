@@ -6,6 +6,7 @@ from mathcontent.latex import generate_svg
 
 inline_format = "$%s$"
 block_format = "\\[%s\\]"
+advanced_format = "%s"
 
 img_url_path = '/media/m/'
 
@@ -30,6 +31,8 @@ html_escape_table = {
 }
 
 tag_open = {
+    'b': '<b>',
+    'i': '<i>',
     'quote': '<div class="quote">',
 
 # img accepts attachment attribute, index of attachment to use as a src (1-based)
@@ -43,6 +46,8 @@ tag_attrs = {
 
 # tags without a close tag should have None value (or not be defined at all)
 tag_close = {
+    'b': '</b>',
+    'i': '</i>',
     'quote': '</div>',
     'img': None,
 }
@@ -139,27 +144,35 @@ def convert_to_html(T, content=None): # XSS danger!!! Be careful
                                 extra += ' %s="%s"' % (key, xss.escape(attrs[key]))
                     
                     if tag == 'img':
-                        src = ''
-                        if 'attachment' in attrs:
+                        if not content:
+                            open = u'{{ Slika nije dostupna u pregledu }}'
+                        elif 'attachment' not in attrs:
+                            open = u'{{ Nedostaje "attachment" atribut }}'
+                        else:
                             try:
                                 k = int(attrs['attachment']) - 1
                                 file = content.attachments.order_by('id')[k]
-                                src = file.get_url()
+                                extra += ' src="%s"' % xss.escape(file.get_url())
                             except:
-                                out.append(u'{{ Greška pri preuzimanju img datoteke. (Nevaljan broj?) }}')
-                        extra += ' src="%s"' % src
+                                open = u'{{ Greška pri preuzimanju img datoteke. (Nevaljan broj?) }}'
                         
                     open %= {'extra': extra}
                     out.append(open)
                 i = end + 1
         elif T[i] == '$':
-            # parse $  $ and $$  $$
-            i += 1
-            if i < n and T[i] == '$':
-                inline = False
+            # parse $  $, $$  $$ and $$$  $$$
+            cnt = 0
+            while i < n and T[i] == '$':
+                cnt += 1
                 i += 1
+                
+            inline = cnt == 1
+            if cnt == 1:
+                format = inline_format
+            elif cnt == 2:
+                format = block_format
             else:
-                inline = True
+                format = advanced_format
 
             # this should work for all weird cases with \\ and \$
             latex = []
@@ -167,7 +180,9 @@ def convert_to_html(T, content=None): # XSS danger!!! Be careful
                 if T[i:i+2] == '\\$' or T[i:i+2] == '\\\\':
                     latex.append(T[i:i+2])
                     i += 2
-                elif T[i] == '$':
+                elif cnt <= 2 and T[i] == '$' or cnt == 3 and T[i:i+2] == '$$':
+                # this could be also written more strictly as
+                # elif T[i:i+cnt] == '$' * cnt:
                     break;
                 else:
                     latex.append(T[i])
@@ -181,7 +196,7 @@ def convert_to_html(T, content=None): # XSS danger!!! Be careful
             latex_escaped = xss.escape(latex)
             
             # FIXME: don't save error message to depth
-            hash, depth = generate_png(latex, inline_format if inline else block_format)
+            hash, depth = generate_png(latex, format)
             if depth == ERROR_DEPTH_VALUE:
                 out.append('{{ INVALID LATEX }}')
             else:
@@ -194,7 +209,8 @@ def convert_to_html(T, content=None): # XSS danger!!! Be careful
                 out.append(img)
 
             # FIXME: don't save error message to depth
-            hash, depth = generate_svg(latex, inline_format if inline else block_format, inline)
+            # hash, depth = generate_svg(latex, format, inline)
+            hash, depth = 'aaaaaaaaaaaaa', 0
             if depth == ERROR_DEPTH_VALUE:
                 out.append('{{ INVALID LATEX }}')
             else:
@@ -204,7 +220,7 @@ def convert_to_html(T, content=None): # XSS danger!!! Be careful
                 else:
                     obj = '<object data="%s" type="image/svg+xml" alt="%s" class="latex_center"></object>' % (url, latex_escaped)
 
-                out.append(obj)
+                # out.append(obj)
 
         else:
             out.append(html_escape_table.get(T[i], T[i]))

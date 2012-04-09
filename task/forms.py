@@ -13,9 +13,9 @@ class TaskForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TaskForm, self).__init__(*args, **kwargs)
         
-        self.fields['tags'].widget.attrs.update({'class': 'ac_tags span5'})
+        self.fields['tags'].widget.attrs.update({'class': 'ac_tags span6'})
         for x in ['name', 'source']:
-            self.fields[x].widget.attrs.update({'class': 'span5'})
+            self.fields[x].widget.attrs.update({'class': 'span6'})
 
     class Meta:
         model = Task
