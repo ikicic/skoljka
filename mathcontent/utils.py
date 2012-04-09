@@ -2,9 +2,11 @@
 
 from mathcontent import ERROR_DEPTH_VALUE
 from mathcontent.latex import generate_png
+from mathcontent.latex import generate_svg
 
-inline_format = "$%s$ \n \\newpage \n"
-block_format = "\\[\n%s \n\\] \n \\newpage \n"
+inline_format = "$%s$"
+block_format = "\\[%s\\]"
+advanced_format = "%s"
 
 img_url_path = '/media/m/'
 
@@ -29,18 +31,24 @@ html_escape_table = {
 }
 
 tag_open = {
+    'b': '<b>',
+    'i': '<i>',
     'quote': '<div class="quote">',
+
+# img accepts attachment attribute, index of attachment to use as a src (1-based)
     'img': '<img alt="Attachment image"%(extra)s>',
 }
-# img accepts attachment attribute, index of attachment to use as a src (1-based)
 
 # automatically converted attributes as %(extra)s
 tag_attrs = {
     'img': ('width', 'height'),
 }
+# img accepts attachment attribute, index of attachment to use as a src (1-based)
 
-# None means that text MUST NOT have a close tag for that tag type.
+# tags without a close tag should have None value (or not be defined at all)
 tag_close = {
+    'b': '</b>',
+    'i': '</i>',
     'quote': '</div>',
     'img': None,
 }
@@ -78,8 +86,8 @@ def convert_to_html(T, content=None): # XSS danger!!! Be careful
         
         To support features like [img], it must be called with a 
         a content instance.
-       
     """
+
     i = 0
     n = len(T)
     out = []
@@ -137,27 +145,35 @@ def convert_to_html(T, content=None): # XSS danger!!! Be careful
                                 extra += ' %s="%s"' % (key, xss.escape(attrs[key]))
                     
                     if tag == 'img':
-                        src = ''
-                        if 'attachment' in attrs:
+                        if not content:
+                            open = u'{{ Slika nije dostupna u pregledu }}'
+                        elif 'attachment' not in attrs:
+                            open = u'{{ Nedostaje "attachment" atribut }}'
+                        else:
                             try:
                                 k = int(attrs['attachment']) - 1
                                 file = content.attachments.order_by('id')[k]
-                                src = file.get_url()
+                                extra += ' src="%s"' % xss.escape(file.get_url())
                             except:
-                                out.append(u'{{ Greška pri preuzimanju img datoteke. (Nevaljan broj?) }}')
-                        extra += ' src="%s"' % src
+                                open = u'{{ Greška pri preuzimanju img datoteke. (Nevaljan broj?) }}'
                         
                     open %= {'extra': extra}
                     out.append(open)
                 i = end + 1
         elif T[i] == '$':
-            # parse $  $ and $$  $$
-            i += 1
-            if i < n and T[i] == '$':
-                inline = False
+            # parse $  $, $$  $$ and $$$  $$$
+            cnt = 0
+            while i < n and T[i] == '$':
+                cnt += 1
                 i += 1
+                
+            inline = cnt == 1
+            if cnt == 1:
+                format = inline_format
+            elif cnt == 2:
+                format = block_format
             else:
-                inline = True
+                format = advanced_format
 
             # this should work for all weird cases with \\ and \$
             latex = []
@@ -165,7 +181,9 @@ def convert_to_html(T, content=None): # XSS danger!!! Be careful
                 if T[i:i+2] == '\\$' or T[i:i+2] == '\\\\':
                     latex.append(T[i:i+2])
                     i += 2
-                elif T[i] == '$':
+                elif cnt <= 2 and T[i] == '$' or cnt == 3 and T[i:i+2] == '$$':
+                # this could be also written more strictly as
+                # elif T[i:i+cnt] == '$' * cnt:
                     break;
                 else:
                     latex.append(T[i])
@@ -178,8 +196,8 @@ def convert_to_html(T, content=None): # XSS danger!!! Be careful
             latex = u''.join(latex)
             latex_escaped = xss.escape(latex)
             
-            # TODO: don't save error message in depth
-            hash, depth = generate_png(latex, inline_format if inline else block_format)
+            # FIXME: don't save error message to depth
+            hash, depth = generate_png(latex, format)
             if depth == ERROR_DEPTH_VALUE:
                 out.append('{{ INVALID LATEX }}')
             else:
@@ -191,13 +209,20 @@ def convert_to_html(T, content=None): # XSS danger!!! Be careful
 
                 out.append(img)
 
-                svgurl = '%s%s/%s/%s/%s.svg' % (img_url_path, hash[0], hash[1], hash[2], hash)
+            # FIXME: don't save error message to depth
+            # hash, depth = generate_svg(latex, format, inline)
+            hash, depth = 'aaaaaaaaaaaaa', 0
+            if depth == ERROR_DEPTH_VALUE:
+                out.append('{{ INVALID LATEX }}')
+            else:
+                url = '%s%s/%s/%s/%s.svg' % (img_url_path, hash[0], hash[1], hash[2], hash)
                 if inline:
-                    svgimg = '<object data="%s" type="image/svg+xml" alt="%s" class="latex" style="vertical-align:%dpx"></object>' % (svgurl, latex_escaped, -depth)
+                    obj = '<object data="%s" type="image/svg+xml" alt="%s" class="latex" style="vertical-align:%fpt"></object>' % (url, latex_escaped, -depth)
                 else:
-                    svgimg = '<object data="%s" type="image/svg+xml" alt="%s" class="latex_center"></object>' % (svgurl, latex_escaped)
+                    obj = '<object data="%s" type="image/svg+xml" alt="%s" class="latex_center"></object>' % (url, latex_escaped)
 
-#                out.append(svgimg)
+                # out.append(obj)
+
         else:
             out.append(html_escape_table.get(T[i], T[i]))
             i += 1
@@ -207,8 +232,6 @@ def convert_to_html(T, content=None): # XSS danger!!! Be careful
         while tag_stack:
             out.append(tag_close[tag_stack.pop()])
     return u''.join(out)
-
-
 
 # TODO: [img][/img] support
 # TODO: change i to iterator

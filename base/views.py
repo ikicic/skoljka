@@ -17,6 +17,7 @@ import random
 def help(request):
     return {}
 
+
 def homepage(request):
     # TODO: cache this query
     tasks = list(Task.objects.for_user(request.user, VIEW).distinct().order_by('-id')[:10])

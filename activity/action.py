@@ -26,6 +26,7 @@ def send(actor, type, **kwargs):
                 action.target.author.username,
                 action.target.task_id,
                 action.target.task.name,
+                action.target.task.author_id,
             ]
             # 250 chars should be enough for this
             action.target_cache = POST_SEND_CACHE_SEPARATOR.join([xss.escape(unicode(x)) for x in data])
@@ -33,6 +34,6 @@ def send(actor, type, **kwargs):
     # ----- type specific -----
     if type == POST_SEND:
         T = action.action_object.content.text
-        action.action_object_cache = T[:98] + '...' if len(T) > 100 else T
+        action.action_object_cache = T[:78] + '...' if len(T) > 80 else T
     
     action.save()

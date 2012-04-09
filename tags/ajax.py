@@ -11,6 +11,7 @@ from skoljka.utils.decorators import ajax
 
 # dokumentirati:
 #   perm: delete_tag
+#   (TODO: uzeti neko drugo ime, ovo je rezervirano vec)
 
 
 @login_required

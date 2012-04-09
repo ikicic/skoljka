@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% load sorting_tags %}
+
+
+{% block title %}Popis tagova{% endblock %}
+
+{% block content %}
+<a href="javascript: history.go(-1)">« Vrati se</a><br><br>
+
+<h3>Popis tagova</h3>
+
+<br>
+
+{% if can_edit %}
+  {% if message %}
+    <div class="alert {{ alert_class }}">
+      {{ message }}
+    </div>
+    <br>
+  {% endif %}
+  
+  <form method="POST" action="{{ request.get_full_path }}">
+    {% csrf_token %}
+{% endif %}
+
+
+<table width="40%" class="table-striped table-condensed" style="text-align: center;">
+  <tr>
+    <th>{% anchor name Tag %}</th>
+    <th>{% anchor taggeditem_count "Broj zadataka" %}</th>
+    <th>{% anchor weight Težina %}</th>
+    {% if can_edit %}<th>Nova težina</th>{% endif %}
+  </tr>
+  {% autosort tags %}
+  {% for x in tags %}
+  
+  {# TODO: Django 1.4 elif #}
+  {# using task_ classes to make less mess in base.css #}
+  {% if x.id in invalid %}
+  <tr class="task_wrong">
+  {% else %}{% if x.id in updated %}
+  <tr class="task_as_solved">
+  {% else %}
+  <tr>
+  {% endif %}{% endif %}
+    <td><a href="/search/?q={{ x.name }}" {% if x.name.0 == '$' %}class="hidden_tag"{% endif %}>{{ x.name }}</a></td>
+    <td>{{ x.taggeditem_count }}</td>
+    <td>{{ x.weight }}</td>
+    {% if can_edit %}<td><input type="text" tabindex="{{ forloop.counter }}" name="w{{ x.id }}" class="thin span1"></td>{% endif %}
+  </tr>
+  {% endfor %}
+</table>
+
+
+{% if can_edit %}
+    <input type="submit" value="Pošalji" class="btn btn-primary">
+  </form>
+{% endif %}
+
+{% endblock %}
