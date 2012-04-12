@@ -10,7 +10,6 @@ from permissions.constants import VIEW
 
 from skoljka.utils.decorators import ajax
 
-@login_required
 @ajax(post=['value', 'tag', 'task'])
 def tag_vote(request):
     tag = get_object_or_404(Tag, name=request.POST['tag'])
@@ -25,7 +24,6 @@ def tag_vote(request):
     value = taggeditem.votes.update(request.user, request.POST['value'])
     return HttpResponse(value)
 
-@login_required
 @ajax(method='POST')
 def vote(request, object_id, content_type_id, name):
     if name not in request.POST:

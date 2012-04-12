@@ -14,7 +14,6 @@ from skoljka.utils.decorators import ajax
 #   (TODO: uzeti neko drugo ime, ovo je rezervirano vec)
 
 
-@login_required
 @ajax(post=['name', 'task'])
 def delete(request):
     # TODO: DRY
@@ -31,7 +30,6 @@ def delete(request):
     
     return '1'
 
-@login_required
 @ajax(post=['name', 'task'])
 def add(request):
     # TODO: DRY

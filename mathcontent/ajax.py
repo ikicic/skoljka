@@ -7,7 +7,6 @@ from mathcontent.utils import convert_to_html
 
 from skoljka.utils.decorators import ajax
 
-@login_required
 @ajax(get='text')
 def preview(request):
     # TODO: POST method!

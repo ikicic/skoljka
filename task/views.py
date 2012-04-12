@@ -315,10 +315,14 @@ def similar(request, id):
     
     # SPEED: read main task together with the rest
     similar = list(SimilarTask.objects.filter(task=task).order_by('-score')[:50].values_list('similar_id', 'score'))
-    solutions = Solution.objects.filter(task__similar_backward=task, author=request.user).exclude(status=_SOLUTION_STATUS['blank'])
+    if request.user.is_authenticated():
+        solutions = Solution.objects.filter(task__similar_backward=task, author=request.user).exclude(status=_SOLUTION_STATUS['blank'])
+        solutions = solutions.only('status', 'correctness_avg', 'task')
+    else:
+        solutions = []
 
     sorted_tasks = dict(similar)
-    for s in solutions.only('status', 'correctness_avg', 'task'):
+    for s in solutions:
         p = 1.0
         if s.is_todo(): p = 2
         elif s.is_as_solved(): p = 3

@@ -101,7 +101,7 @@ $(function(){
      $('#tt_info').html(ok ? 'Spremljeno' : 'Greška');
      if (ok) $('#tt_text').data('tag').parent().append(' | ' + name);
    });
-  });
+  });  
   
   /* Delete tag */
   $('#tt_delete').click(function(e){
@@ -109,17 +109,19 @@ $(function(){
     tag=$('#tt_text').data('tag');
     $('#tt_info').html('...');
     $.post('/ajax/tag/delete/', {
-      name: tag.html(),
-      task: tag.parent().attr('data-task')
-    }, function(data) {
-      if ( data == '1' ) {
-        $('#tt_text').data('tooltip').hide();
-        tag.remove();
-      } else {
-        msg = data == '0' ? 'Nemaš prava.' : 'Greška!';
-        $('#tt_info').html(msg);
-      }
+        name: tag.html(),
+        task: tag.parent().attr('data-task')
+      }, function(data) {
+        if ( data == '1' ) {
+          $('#tt_text').data('tooltip').hide();
+          tag.remove();
+        } else {
+          msg = data == '0' ? 'Nemaš prava.' : 'Greška!';
+          $('#tt_info').html(msg);
+        }
     });
+    // TODO: switch to JQuery 1.5+
+    // .error(function(){$('#tt_info').html('Error');});
   });
 
   /* Tag tooltip */
@@ -128,14 +130,16 @@ $(function(){
     tag=$('#tt_text').data('tag');
     $('#tt_info').html('...');
     $.post('/ajax/tag/vote/', {
-      value: v,
-      tag: tag.html(),
-      task: tag.parent().attr('data-task')
-    }, function(data){
-      tag.attr('data-votes', data);      
-      $('#tt_info').html('');
-      $('#tt_text').html(data); /* bug if response is delayed */
+        value: v,
+        tag: tag.html(),
+        task: tag.parent().attr('data-task')
+      }, function(data){
+        tag.attr('data-votes', data);      
+        $('#tt_info').html('');
+        $('#tt_text').html(data); /* bug if response is delayed */
     });
+    // TODO: switch to JQuery 1.5+
+    // .error(function(){$('#tt_info').html('Error');});
   }
   $('#tt_plus').click(function(e){vote_func(e,1)});
   $('#tt_minus').click(function(e){vote_func(e,-1)});
