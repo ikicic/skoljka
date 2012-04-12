@@ -366,6 +366,7 @@ def _export_to_latex(request, ids):
             'title': x.name,
             'content': x.content.convert_to_latex(),
             'url': x.get_absolute_url(),
+            'source': '\\textbf{Izvor:} ' + x.source if x.source else '',
         } for x in tasks])
     return u'%s%s%s' % (export_header, content, export_footer)
     
@@ -373,14 +374,16 @@ def _export_to_latex(request, ids):
 # TODO: not allowed message
 def export_to_latex(request, ids):
     """
-        Calls _convert_to_latex to generate latex and simply returns as file.
+        Calls _export_to_latex to generate latex and simply returns as file.
     """
-    return HttpResponse(content=_export_to_latex(request, ids), content_type='application/x-latex')
+    response = HttpResponse(content=_export_to_latex(request, ids), content_type='application/x-latex')
+    response['Content-Disposition'] = 'filename=taskexport.tex'
+    return response
 
 # TODO: permission
 def export_to_pdf(request, ids):
     """
-        Generates PDF if it doesn't exist or it is outdated, using _convert_to_latex.
+        Generates PDF if it doesn't exist or it is outdated, using _export_to_latex.
         
         Redirects to pdf.
     """

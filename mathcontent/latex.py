@@ -45,6 +45,7 @@ export_header = u'''
 \\usepackage{amsfonts}
 \\usepackage{amssymb}
 \\usepackage{enumitem}
+\\usepackage[normalem]{ulem}
 
 \\usepackage[HTML]{xcolor}
 \\definecolor{btn_primary}{HTML}{0055CC}
@@ -99,7 +100,7 @@ export_header = u'''
 # use %(title)s to get task title, and %(content)s to get problem statement
 export_task = u'''
     \\subsection*{\\color{btn_primary}%(title)s}
-    \\begin{flushright}\\url{http://skoljka.no-ip.org%(url)s}\\par\\footnotesize\\color{css_gray}\\textbf{Izvor:} IZVOR OVDJE\\end{flushright}
+    \\begin{flushright}\\url{http://skoljka.no-ip.org%(url)s}\\par\\footnotesize\\color{css_gray}%(source)s\\end{flushright}
     %(content)s
 '''
 
