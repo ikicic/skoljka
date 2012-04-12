@@ -94,6 +94,8 @@ img.latex_center, object.latex_center {
     display: block;
     margin-left: auto;
     margin-right: auto;
+    margin-top: 6pt;
+    margin-bottom: 6pt;
 }
 div.tag_list {
     display: inline;

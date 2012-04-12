@@ -34,7 +34,7 @@ def latex_full_filename(filename):
 
 # ur' ' won't work well, because each \u would have to be escaped
 export_header = u'''
-\\documentclass[12pt,a4paper,oneside,final]{article}
+\\documentclass[10pt,a4paper,oneside,final]{article}
 
 \\usepackage[margin=2cm]{geometry}
 
@@ -45,6 +45,11 @@ export_header = u'''
 \\usepackage{amsfonts}
 \\usepackage{amssymb}
 \\usepackage{enumitem}
+\\usepackage[normalem]{ulem}
+
+\\usepackage[HTML]{xcolor}
+\\definecolor{btn_primary}{HTML}{0055CC}
+\\definecolor{css_gray}{HTML}{808080}
 
 \\usepackage{fancyhdr}
 \\fancypagestyle{empty}{
@@ -61,6 +66,18 @@ export_header = u'''
 }
 
 \\usepackage{hyperref}
+\\hypersetup{
+    unicode=true,
+    colorlinks=true,
+    pdfborder={0 0 0},
+    linkcolor=btn_primary,
+    citecolor=btn_primary,
+    filecolor=btn_primary,
+    urlcolor=btn_primary,
+    pdfstartpage={1},
+    pdfstartview=FitH,
+    pdfnewwindow=true
+}
 
 \\setlength{\\parindent}{0pt}
 \\setlength{\\parskip}{6pt}
@@ -82,8 +99,8 @@ export_header = u'''
 
 # use %(title)s to get task title, and %(content)s to get problem statement
 export_task = u'''
-    \\subsection*{%(title)s}
-    \\begin{flushright}\\url{http://skoljka.no-ip.org%(url)s}\\end{flushright}
+    \\subsection*{\\color{btn_primary}%(title)s}
+    \\begin{flushright}\\url{http://skoljka.no-ip.org%(url)s}\\par\\footnotesize\\color{css_gray}%(source)s\\end{flushright}
     %(content)s
 '''
 

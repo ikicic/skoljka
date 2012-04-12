@@ -2,11 +2,18 @@ from functools import wraps
 from django.contrib.auth.decorators import login_required
 from django.db.models.signals import pre_save
 from django.db.models.signals import post_save
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponsePermanentRedirect, HttpResponseNotAllowed
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseRedirect, HttpResponsePermanentRedirect, HttpResponseNotAllowed
 from django.template import loader, RequestContext
 
 # TODO: add login check
-def require(method=[], ajax=None, post=[], get=[]):
+def require(method=[], ajax=None, post=[], get=[], force_login=True):
+    """
+        TODO
+        
+        If force_login is set to True, require will return ResponseForbidden
+        if user not logged in.
+    """
+    
     if isinstance(method, basestring):
         method = [method]
     if isinstance(post, basestring):
@@ -27,6 +34,12 @@ def require(method=[], ajax=None, post=[], get=[]):
                     return HttpResponseBadRequest('Ajax only!')
                 elif not ajax and request.is_ajax():
                     return HttpResponseBadRequest('Ajax not allowed!')
+                    
+            if force_login is not None:
+                if force_login and not request.user.is_authenticated():
+                    return HttpResponseForbidden('Login first!')
+                elif not force_login and request.user.is_authenticated():
+                    return HttpResponseForbidden('No registered users allowed!')
             
             if request.method not in method:
                 return HttpResponseNotAllowed(method)
@@ -48,8 +61,15 @@ def require(method=[], ajax=None, post=[], get=[]):
         return wraps(func)(inner)
     return decorator
 
+
 def ajax(*args, **kwargs):
-    return require(ajax=True, *args, **kwargs)
+    """
+        Shortcut for @require, with default parameters:
+            ajax=True
+            force_login=True
+    """
+    
+    return require(ajax=True, force_login=kwargs.get('force_login', True), *args, **kwargs)
 
 
 # this is a decorator
