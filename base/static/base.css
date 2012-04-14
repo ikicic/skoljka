@@ -199,3 +199,25 @@ a.register {
 span.task_submitted a {
   color: #00F;
 }
+
+/* MathContent */
+.mc {
+  position: relative;
+}
+.mc_viewsource {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  margin-left: 2px;
+}
+.mc_viewsource a i {
+  opacity: 0.15;
+}
+div.mc_viewsource_text {
+  margin-top: 10px;
+  color: #666;
+  white-space: pre-line;
+}
+a.mc_viewsource_clipboard {
+  margin-top: 7px;
+}

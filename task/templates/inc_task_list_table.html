@@ -5,7 +5,7 @@
 {% load rating_tags %}
 
 {% autosort tasks %}
-{% autopaginate tasks %}
+{% autopaginate tasks 25 %}
 
 {% if tasks %}
     {{ tasks|multiple_task_link }}<br>

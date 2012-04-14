@@ -21,11 +21,10 @@
 </div>
 <div style="float:right;text-align:right;">
     {{ solution.date_created }}<br>
-    {% if solution.author == user or user.is_staff %}
+    {% if solution.author == user or user.is_staff or solution.task.author == user %}
     <form action="/solution/{{ solution.pk }}/edit/mark/" method="post">
         {% csrf_token %}
         <div class="btn-group">
-            <a class="btn btn-mini" href="/solution/{{ solution.pk }}/edit/">Edit</a>
             {% if user.is_staff or solution.task.author == user %}
                 {% if solution.is_official %}
                 <button class="btn btn-mini" name="action" value="0">Makni oznaku službenog</button>
@@ -33,9 +32,12 @@
                 <button class="btn btn-mini" name="action" value="1">Označi kao službeno</button>
                 {% endif %}            
             {% endif %}
-            <button class="btn btn-mini" name="action" value="blank" title="Staro rješenje će ostati spremljeno za ponovno slanje, ali neće biti inače vidljivo.">Izbriši rješenje</button>
-            <button class="btn btn-mini" name="action" value="as_solved" title="Tekst rješenja neće biti vidljiv.">Označi kao riješeno</button>
-            <button class="btn btn-mini" name="action" value="todo" title="Tekst rješenja neće biti vidljiv.">To Do</button>
+            {% ifequal solution.author.id user.id %}
+                <button class="btn btn-mini" name="action" value="blank" title="Staro rješenje će ostati spremljeno za ponovno slanje, ali neće biti inače vidljivo.">Izbriši rješenje</button>
+                <button class="btn btn-mini" name="action" value="as_solved" title="Tekst rješenja neće biti vidljiv.">Označi kao riješeno</button>
+                <button class="btn btn-mini" name="action" value="todo" title="Tekst rješenja neće biti vidljiv.">To Do</button>
+                <a class="btn btn-mini" href="/solution/{{ solution.pk }}/edit/">Edit</a>
+            {% endifequal %}
         </div>
     </form>
     {% endif %}
@@ -47,8 +49,12 @@
 <i>Korisnik: {{ solution.author|userlink }}</i><br>
 <i>Zadatak: {{ solution.task.get_link }}</i><br><br>
 <div class="well">
-
-    {{ solution.content.render|safe }}
+    {# TODO: render tag! #}
+    {% if user.is_authenticated %}
+        {{ solution.content.render_quote }}
+    {% else %}
+        {{ solution.content.render }}
+    {% endif %}
 </div>
 
 <br><br><br>

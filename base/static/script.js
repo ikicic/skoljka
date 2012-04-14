@@ -47,7 +47,19 @@ $(function(){
  });
 });
 
-/* Used for inc_post_list_small.html */
+/* MathContent View source link */
+$(function(){
+  $('.mc_viewsource_toggle').click(function(e){
+    e.preventDefault();
+    $(this).closest('.mc').find('.mc_viewsource_text').toggle();
+  });
+  $('.mc_viewsource_quote').click(function(e){
+    s = $.trim($(this).closest('.mc').find('.mc_viewsource_text').html());
+    $('#id_text').val('\n\n[quote]' + s + '[/quote]');
+  });
+})
+
+/* Reply link for comments, Used for inc_post_list_small.html */
 $(function(){
  $('.post_reply').click(function(){
   id=$(this).attr('id').substr(2)

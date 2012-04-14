@@ -12,7 +12,8 @@ from registration.models import RegistrationProfile
 attrs_dict = { 'class': 'required' }
 
 class UserCreationForm(forms.Form):
-    username = forms.RegexField(regex=r'^\w+$', max_length=30, widget=forms.TextInput(attrs=attrs_dict), label=_(u'Korisničko ime'))
+    username = forms.RegexField(regex=r'^\w+$', max_length=30, widget=forms.TextInput(attrs=attrs_dict), label=_(u'Korisničko ime'),
+        help_text=_(u'Korisničko ime će biti vidljivo drugim korisnicima'))
     email = forms.EmailField(widget=forms.TextInput(attrs=dict(attrs_dict, maxlength=75)), label=_(u'Email'))
     password1 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict, render_value=False), label=_(u'Zaporka'))
     password2 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict, render_value=False), label=_(u'Zaporka (ponovno)'))

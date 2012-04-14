@@ -99,6 +99,9 @@ def _convert(T, type, handle_latex_func, escape_table, content=None): # XSS dang
         a content instance.
     """
     
+    # force strip
+    T = T.strip()
+    
     if type == TYPE_HTML:
         newline = '<br>'
     else:
