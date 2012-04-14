@@ -411,13 +411,13 @@ def export_to_pdf(request, ids):
         f.write(_export_to_latex(request, ids))
         f.close()
 
-        error = run_command('latex -output-directory=%s -interaction=batchmode %s.tex' % (os.path.dirname(filename), filename), timeout=10)
+        error = run_command('pdflatex -output-directory=%s -interaction=batchmode %s.tex' % (os.path.dirname(filename), filename), timeout=10)
         if error:
             return HttpResponseServerError('LaTeX generation error! Error code: %d' % error)
             
-        error = run_command('dvipdfm -o %s %s' % (filename + '.pdf', filename), timeout=10)
-        if error:
-            return HttpResponseServerError('dvipdfm Error %d!' % error)
+        # error = run_command('dvipdfm -o %s %s' % (filename + '.pdf', filename), timeout=10)
+        # if error:
+            # return HttpResponseServerError('dvipdfm Error %d!' % error)
         # os.remove(filename + '.tex')
         # os.remove(filename + '.log')
         # os.remove(filename + '.aux')

@@ -40,11 +40,11 @@ tag_open = {
     'b': ('<b>', '\\textbf{'),
     'i': ('<i>', '\\emph{'),
     's': ('<s>', '\\sout{'),
-    'u': ('<u>', '\\underline{'),
+    'u': ('<u>', '\\uline{'),
     'quote': ('<div class="quote">', ''),
 
 # img accepts attachment attribute, index of attachment to use as a src (1-based)
-    'img': ('<img alt="Attachment image"%(extra)s>', ''),
+    'img': ('<img alt="Attachment image"%(extra)s>', ''), # \\includegraphics[comma-separated key-value list of options]{absolute or relative path}
 }
 
 # automatically converted attributes as %(extra)s
