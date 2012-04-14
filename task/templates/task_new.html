@@ -23,12 +23,18 @@ Npr. Ime: <pre>IMO 2011</pre>, Tagovi: <pre>IMO, 2011, IMO</pre>.<br><br>
 {% if perms.task.add_advanced %}<a href="/task/new/advanced/">Napredno</a><br><br>{% endif %}
 {% endif %}
 
-{% if edit %}
-    <div style="float:right;text-align:right;">
+<div style="float:right;text-align:right;">
+    {% if edit %}
         <a href="/mathcontent/{{ task.content.id }}/attachments/" class="btn">Pregled datoteka</a><br><br>
-        <a href="/tags/" target="_blank">Popis tagova</a>
-    </div>
-{% endif %}
+    {% endif %}
+    <a href="/tags/" target="_blank">Popis tagova</a>
+</div>
+
+<br>
+<div style="width:70%;margin-left:10px;"><i>Napomena: Nemojte dodavati zadatke za koja nemate prava.
+Također, nemojte dodavati zadatke s domaćih natjecanja (općinskih, županijskih, državnih, izbornih) i s olimpijada (IMO, shortlist, MEMO, HMO), jer će to prije ili poslije dodati mentori. Ukoliko dodajete zadatke s natjecanja, po mogućnosti dodajte sve zadatke odjednom (svih, primjerice, pet zadataka).</i></div>
+
+<br><br>
 
 <form action="{{ action_url }}" method="post">
     {% csrf_token %}

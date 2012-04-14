@@ -34,7 +34,12 @@
 
 <br><br>
 <div class="task_content well">
-    {{ task.content.render }}
+    {# TODO: render tag! #}
+    {% if user.is_authenticated %}
+        {{ task.content.render_quote }}
+    {% else %}
+        {{ task.content.render }}
+    {% endif %}
 </div>
 {% mathcontent_attachments task.content %}
 
@@ -42,7 +47,7 @@
 <br><br><br>
 {% if user.is_authenticated %}
 {% if solution.is_submitted %}
-<a href="/solution/{{ solution.id }}/">Otvori moje rješenje</a><br>
+<a href="/solution/{{ solution.id }}/">Prikaži moje rješenje</a><br>
 {% else %}
 <form action="/task/{{ task.id }}/mark/" method="post">
     {% csrf_token %}

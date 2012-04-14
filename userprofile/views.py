@@ -14,6 +14,8 @@ from recommend.models import UserTagScore
 from solution.models import STATUS
 
 def new_register(request):
+    if request.user.is_authenticated():
+        return HttpResponseRedirect('/')
     from registration.views import register as _register
     return _register(request, form_class=UserCreationForm)
 

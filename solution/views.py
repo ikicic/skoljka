@@ -87,12 +87,14 @@ def submit(request, task_id=None, solution_id=None):
     if solution_id:
         solution = get_object_or_404(Solution, pk=solution_id)
         task = solution.task
+        edit = True
     elif task_id:
         task = get_object_or_404(Task, pk=task_id)
         try:
             solution = Solution.objects.get(task=task, author=request.user)
         except Solution.DoesNotExist:
             solution = Solution(task=task, author=request.user)
+        edit = False
     else:
         raise Http404()
     math_content = solution.content
@@ -105,7 +107,8 @@ def submit(request, task_id=None, solution_id=None):
             solution.content = math_content
             solution.status = STATUS['submitted']
             solution.save()
-            _action.send(request.user, _action.SOLUTION_SUBMIT, action_object=solution, target=task)
+            if not edit:
+                _action.send(request.user, _action.SOLUTION_SUBMIT, action_object=solution, target=task)
             
             task.solved_count = Solution.objects.values("author_id").filter(task=task).distinct().count()
             task.save()

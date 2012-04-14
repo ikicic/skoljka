@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.utils.safestring import mark_safe
+from django.template.loader import render_to_string
 
 from skoljka.utils.decorators import autoconnect
 from skoljka.utils.generators import LowerNumKeyGen
@@ -42,18 +43,26 @@ class MathContent(models.Model):
         if not hasattr(self, 'no_html_reset'):
             self.html = None
     
-    def render(self):
-        if self.html is not None:
-            return mark_safe(self.html)
-            
-        from mathcontent.utils import convert_to_html
-        print 'CONVERTING %d...' % self.id
-        self.html = convert_to_html(self.text, self)
-        self.no_html_reset = True
-        self.save()
-        print 'DONE!'
+    def render(self, quote=False):
+        if self.html is None:
+            from mathcontent.utils import convert_to_html
+            print 'CONVERTING %d...' % self.id
+            self.html = convert_to_html(self.text, self)
+            self.no_html_reset = True
+            self.save()
+            print 'DONE!'
         
-        return mark_safe(self.html)
+        return render_to_string('inc_mathcontent_render.html', {
+            'content': self,
+            # TODO: make a template tag
+            # 'view_source': request.user.is_authenticated(),
+            'view_source': True,
+            'quote': quote,
+        })
+        
+    # TODO: template tag!
+    def render_quote(self):
+        return self.render(quote=True)
 
     def convert_to_latex(self):
         from mathcontent.utils import convert_to_latex as _convert_to_latex

@@ -1,0 +1,15 @@
+<div class="mc">
+  {{ content.html|safe }}
+{% if view_source %}
+  <div class="mc_viewsource">
+    {% if quote %}
+      <a href="#post" class="mc_viewsource_quote" title="Citiraj"><i class="icon-edit"></i></a>
+    {% endif %}
+    <a href="#" class="mc_viewsource_toggle" title="Pogledaj tekst"><i class="icon-share"></i></a>
+  </div>
+  <div class="mc_viewsource_text" style="display:none;">
+    {{ content.text }}
+  </div>
+{% endif %}
+</div>
+

@@ -38,6 +38,8 @@ export_header = u'''
 
 \\usepackage[margin=2cm]{geometry}
 
+\\usepackage{graphicx}
+
 \\usepackage[T1]{fontenc}
 \\usepackage[utf8]{inputenc}
 \\usepackage[croatian]{babel}
@@ -74,19 +76,13 @@ export_header = u'''
     citecolor=btn_primary,
     filecolor=btn_primary,
     urlcolor=btn_primary,
-    pdfstartpage={1},
+    pdfstartpage=1,
     pdfstartview=FitH,
     pdfnewwindow=true
 }
 
 \\setlength{\\parindent}{0pt}
 \\setlength{\\parskip}{6pt}
-
-\\renewcommand{\\ge}{\\geqslant}
-\\renewcommand{\\geq}{\\geqslant}
-\\renewcommand{\\le}{\\leqslant}
-\\renewcommand{\\leq}{\\leqslant}
-\\renewcommand{\\angle}{\\sphericalangle}
 
 \\DeclareMathOperator{\\tg}{tg}
 \\DeclareMathOperator{\\ctg}{ctg}

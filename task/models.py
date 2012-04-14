@@ -46,13 +46,13 @@ class TaskPermissionManager(models.Manager):
 
 class Task(models.Model):
     # napomena: cache za Solution POST_SEND activity ovisi o ovom max_length, nemojte previse povecavati
-    name = models.CharField(max_length=120)
+    name = models.CharField(max_length=120, verbose_name='Naslov')
     content = models.OneToOneField(MathContent)
     author = models.ForeignKey(User)
     date_created = models.DateTimeField(auto_now_add=True)
     last_edit_date = models.DateTimeField(auto_now=True)
-    hidden = models.BooleanField(default=False)
-    source = models.CharField(max_length=200, blank=True)
+    hidden = models.BooleanField(default=False, verbose_name='Sakriven')
+    source = models.CharField(max_length=200, blank=True, verbose_name='Izvor')
     
     search_cache_elements = GenericRelation(SearchCacheElement)
     group_permissions = generic.GenericRelation(PerObjectGroupPermission)
