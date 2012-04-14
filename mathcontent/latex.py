@@ -38,6 +38,8 @@ export_header = u'''
 
 \\usepackage[margin=2cm]{geometry}
 
+\\usepackage{graphicx}
+
 \\usepackage[T1]{fontenc}
 \\usepackage[utf8]{inputenc}
 \\usepackage[croatian]{babel}
