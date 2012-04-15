@@ -51,8 +51,8 @@
             <td>0</td>
         {% endif %}
         {% if search_solved_count %}<td>{{ task.search_solved_count }}</td>{% endif %}
-        <td style="width:80px;">{{ task.quality_rating|rating_stars }}</td>
-        <td style="width:80px;">{{ task.difficulty_rating|rating_stars }}</td>
+        <td style="width:80px;">{% rating_stars task.quality_rating %}</td>
+        <td style="width:80px;">{% rating_stars task.difficulty_rating %}</td>
     </tr>
     {% endfor %}
     </table>

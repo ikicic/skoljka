@@ -14,6 +14,8 @@ class Vote(models.Model):
     value = models.IntegerField()
     date = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        unique_together=(('content_type', 'object_id', 'key', 'user'),)
     
 # strpati object_id, content_type i key u jedan key?
 class Score(models.Model):

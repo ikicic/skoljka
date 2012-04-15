@@ -16,6 +16,13 @@ class RatingManager(models.Manager):
         self.field = field
         self.field_name = field.field_name
         self.content_type = None
+        
+    def get_query_set(self, *args, **kwargs):
+        return Vote.objects.get_query_set(*args, **kwargs).filter(
+            object_id=self.instance.id,
+            content_type=self.get_content_type(),
+            key=self.field.key,
+        )
 
     def get_content_type(self):
         if self.content_type is None:

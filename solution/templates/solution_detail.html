@@ -13,7 +13,7 @@
 <div style="float:left;">
     {% if user.is_authenticated %}
         {% if user == solution.author %}
-            Točnost: <div style="width:80px;">{{ solution.correctness|rating_stars:2.0 }}</div>
+            Točnost: <div style="width:80px;">{% rating_stars solution.correctness 2.0 %}</div>
         {% else %}
             {% rating_box "Točnost" solution.correctness %}
         {% endif %}
@@ -57,6 +57,19 @@
     {% endif %}
 </div>
 
+{% if solution.correctness_avg %}
+  <br>
+  <h5><a href="#" id="solution_ratings_toggle">Ocjene: ({{ ratings|length }})</a></h5>
+  <table class="table-striped table-condensed" style="text-align:center;width:400px;display:none;" id="solution_ratings">
+  {% for x in ratings %}
+    <tr>
+      <td style="width:140px;">{{ x.date }}</td>
+      <td>{{ x.user|userlink }}</td>
+      <td style="width:80px;">{% rating_stars solution.correctness 2.0 x.value %}</td>
+    </tr>
+  {% endfor %}
+  </table>
+{% endif %}
 <br><br><br>
 {% show_posts_small solution %}
 

@@ -1,42 +1,43 @@
 <div class="post_list_small">
 <h4>Komentari:</h4>
+
 {% for post in posts %}
-    <div class="well well-small" id="post{{ post.pk }}">
-        {% if user.is_authenticated %}
-          <div style="float:right;">
-            {# <a> i <span> moraju biti jedan do drugoga zbog skripte na dnu! #}
-            <a href="#post" class="post_reply" id="pr{{ post.pk }}">Odgovori</a>
-            <span style="display:none;">{{ post.content.text }}</span><br>
-            
-            {% if post.cache_can_edit %}<a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">Uredi</a>{% endif %}
-          </div>
-        {% endif %}
-        <div class="post_info">{{ post.author|userlink }}, {{ post.date_created }}</div><br>
-        {{ post.content.render|safe }}
-        {% if post.date_created != post.last_edit_time %}
-            <br><br>
-            <span class="last_edit">
-                Zadnja promjena: {{ post.last_edit_by|userlink }}, {{ post.last_edit_time }}
-            </span>
-        {% endif %}
-    </div>
+  <div class="well well-small post" id="post{{ post.pk }}">
+    {% if user.is_authenticated %}
+      <div style="float:right;">
+        <a href="#post" class="post_reply" id="pr{{ post.pk }}">Odgovori</a>
+        {% if post.cache_can_edit %}<br><a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">Uredi</a>{% endif %}
+      </div>
+    {% endif %}
+
+    <div class="post_info">{{ post.author|userlink }}, {{ post.date_created }}</div>
+
+    {{ post.content.render }}
+
+    {% if post.date_created != post.last_edit_time %}
+      <br><br>
+      <span class="last_edit">
+        Zadnja promjena: {{ post.last_edit_by|userlink }}, {{ post.last_edit_time }}
+      </span>
+    {% endif %}
+  </div>
 {% endfor %}
 
 {% if user.is_authenticated %}
-    <div class="post_form" id="post">
-        <form action="/post/add/" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="object_id" value="{{ container.pk }}">
-            <input type="hidden" name="content_type_id" value="{{ container.posts.get_content_type_id }}">
-            <input type="hidden" name="post_reply_id" value="">
-            <input type="hidden" name="post_redirect" value="{{ request.path }}">
-            {{ container.posts.get_post_form.as_p }}
-            <input type="submit" class="btn btn-primary" value="Pošalji komentar">
-            <span id="reply_to_info" style="display:none;">
-                Odgovor na <a href="#">komentar</a>.
-                <a href="#post" class="icon-remove"></a>
-            </span>
-        </form>
-    </div>
+  <div class="post_form" id="post">
+    <form action="/post/add/" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="object_id" value="{{ container.pk }}">
+      <input type="hidden" name="content_type_id" value="{{ container.posts.get_content_type_id }}">
+      <input type="hidden" name="post_reply_id" value="">
+      <input type="hidden" name="post_redirect" value="{{ request.path }}">
+      {{ container.posts.get_post_form.as_p }}
+      <input type="submit" class="btn btn-primary" value="Pošalji komentar">
+      <span id="reply_to_info" style="display:none;">
+        Odgovor na <a href="#">komentar</a>.
+        <a href="#post" class="icon-remove"></a>
+      </span>
+    </form>
+  </div>
 {% endif %}
 </div>
