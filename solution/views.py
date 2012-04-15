@@ -13,6 +13,21 @@ from skoljka.utils.decorators import response, require
 
 # ... trenutacna implementacija rjesenja je dosta diskutabilna
 
+# TODO: task permissions (?)
+@response('solution_detail.html')
+@login_required
+def detail(request, solution_id):
+    solution = get_object_or_404(Solution.objects.select_related('content', 'author', 'task'), id=solution_id)
+    
+    if solution.correctness_avg:
+        ratings = solution.correctness.select_related('user')
+    else:
+        ratings = []
+    
+    return {
+        'solution': solution,
+        'ratings': ratings,
+    }
 
 @require(post='action')
 @response()
@@ -53,7 +68,7 @@ def edit_mark(request, solution_id):
     action = request.POST['action']
     sol = Solution.objects.filter(pk=solution_id)
     if sol.author != request.user and not request.user.is_staff:
-        raise (403, 'Not allowed to modify this solution.')
+        return (403, 'Not allowed to modify this solution.')
     
     if action in ['0', '1']:
         sol.update(is_official=int(action))

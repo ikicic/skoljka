@@ -24,71 +24,83 @@ $.ajaxSetup({
      } 
 });
 
+
 /* Automatically add preview button, help link and div after MathContentForm */
 $(function(){
- mc=$('.mathcontent_text');
- f=mc.closest('form');
- /* Preview button and help link */
- f.children('input[type=submit]').after(
-     ' <button type="button" class="btn mathcontent_preview_button">Pregled</button>'
-   + ' <a href="/help/#format" title="Pomoć oko formata" target="_blank"><i class="icon-question-sign"></i></a>'
- )
- f.append('<br><div class="mathcontent_preview well" style="display:none;"></div>')
+  mc = $('.mathcontent_text');
+  f = mc.closest('form');
+  /* Preview button and help link */
+  f.children('input[type=submit]').after(
+      ' <button type="button" class="btn mathcontent_preview_button">Pregled</button>'
+    + ' <a href="/help/#format" title="Pomoć oko formata" target="_blank"><i class="icon-question-sign"></i></a>'
+  )
+  f.append('<br><div class="mathcontent_preview well" style="display:none;"></div>')
 
- /* Preview button, send AJAX request to convert to html (and generate necessarry .png files) */
- $('.mathcontent_preview_button').click(function(){
-  t=$('.mathcontent_text').val();
-  p=$('.mathcontent_preview');
-  p.html('Učitavanje...');
-  p.attr('style', 'block');
-  $.get('/ajax/mathcontent/preview/', {text: t}, function(d){
-   p.html(d);
+  /* Preview button, send AJAX request to convert to html (and generate necessarry .png files) */
+  $('.mathcontent_preview_button').click(function(){
+    t = $('.mathcontent_text').val();
+    p = $('.mathcontent_preview');
+    p.html('Učitavanje...');
+    p.attr('style', 'block');
+    $.get('/ajax/mathcontent/preview/', {text: t}, function(d){
+      p.html(d);
+    });
   });
- });
 });
 
-/* MathContent View source link */
+
+/* Reply link for comments, Used for inc_post_list_small.html */
+/* MathContent View source & quote link */
+function quote(mc) {
+  s = $.trim(mc.find('.mc_viewsource_text').text());
+  $('#id_text').val('\n\n[quote]' + s + '[/quote]');  
+}
+
+function set_reply(id) {
+  $('.post_reply_to').removeClass('post_reply_to');
+  if (id)
+    $('#post' + id).addClass('post_reply_to');
+
+  $('input[name="post_reply_id"]').val(id);
+  $('#reply_to_info').attr('style', id ? 'display:inline;' : 'display:none;');
+}
+
 $(function(){
+  /* Post reply */
+  $('.post_reply').click(function(){
+    id = $(this).attr('id').substr(2)
+
+    set_reply(id);
+    quote($(this).closest('.post').find('.mc'));
+
+    a = $('#reply_to_info a:first')
+    a.html('komentar #' + id)
+    a.attr('href', '#post' + id)
+  });
+
+  /* Cancel post reply */
+  $('#reply_to_info a:last').click(function(){
+    set_reply('');
+  });
+
+  /* MathContent view source link */
   $('.mc_viewsource_toggle').click(function(e){
     e.preventDefault();
     $(this).closest('.mc').find('.mc_viewsource_text').toggle();
   });
+  
+  /* MathContent quote link */
   $('.mc_viewsource_quote').click(function(e){
-    s = $.trim($(this).closest('.mc').find('.mc_viewsource_text').html());
-    $('#id_text').val('\n\n[quote]' + s + '[/quote]');
+    set_reply('');
+    quote($(this).closest('.mc'));
   });
 })
-
-/* Reply link for comments, Used for inc_post_list_small.html */
-$(function(){
- $('.post_reply').click(function(){
-  id=$(this).attr('id').substr(2)
-  $('.post_reply_to').removeClass('post_reply_to');
-  $('#post'+id).addClass('post_reply_to');
-  $('input[name="post_reply_id"]').val(id);
-   
-  s='\n\n[quote]'+$(this).next().html()+'[/quote]';
-  $('#id_text').val(s);
-
-  $('#reply_to_info').attr('style', 'inline')       
-  a = $('#reply_to_info a:first')
-  a.html('komentar #'+id)
-  a.attr('href', '#post'+id)
- });
-});
-$(function(){
- $('#reply_to_info a:last').click(function(){
-  $('.post_reply_to').removeClass('post_reply_to');
-  $('input[name="post_reply_id"]').val('');
-  $('#reply_to_info').attr('style', 'display:none;');
- });
-});
 
 
 
 /* Tag tooltip & add new tag */
 $(function(){
-  if(!($('.tag_list').length))return;
+  if (!( $('.tag_list').length )) return;
   $('body').append(
       '<div id="tag_tooltip" class="tag_tooltip">'
     + '<span id="tt_text"></span> '
@@ -103,6 +115,7 @@ $(function(){
   $('#tt_add').keypress(function(event){
    name = $(this).val()
    if (event.which != 13 || name.length == 0) return;
+   
    $(this).val('');
    $('#tt_info').html('Slanje...');
    $.post('/ajax/tag/add/', {
@@ -118,13 +131,15 @@ $(function(){
   /* Delete tag */
   $('#tt_delete').click(function(e){
     e.preventDefault();
-    tag=$('#tt_text').data('tag');
+    
+    tag = $('#tt_text').data('tag');
     $('#tt_info').html('...');
+    
     $.post('/ajax/tag/delete/', {
         name: tag.html(),
         task: tag.parent().attr('data-task')
       }, function(data) {
-        if ( data == '1' ) {
+        if (data == '1') {
           $('#tt_text').data('tooltip').hide();
           tag.remove();
         } else {
@@ -139,13 +154,15 @@ $(function(){
   /* Tag tooltip */
   vote_func = function(e,v){
     e.preventDefault();
+    
     tag=$('#tt_text').data('tag');
     $('#tt_info').html('...');
+    
     $.post('/ajax/tag/vote/', {
         value: v,
         tag: tag.html(),
         task: tag.parent().attr('data-task')
-      }, function(data){
+      }, function(data) {
         tag.attr('data-votes', data);      
         $('#tt_info').html('');
         $('#tt_text').html(data); /* bug if response is delayed */
@@ -160,8 +177,8 @@ $(function(){
     tip: '#tag_tooltip',
     position: 'bottom center',
     onBeforeShow: function(){
-      tag=this.getTrigger();
-      x=$('#tt_text');
+      tag = this.getTrigger();
+      x = $('#tt_text');
       x.html(tag.attr('data-votes'));
       x.data('tag', tag);
       x.data('tooltip', this);
@@ -173,7 +190,7 @@ $(function(){
 $(function(){
   /* NOT COMPLETED */
   return;
-  if(!($('a.task').length))return;
+  if (!( $('a.task').length )) return;
   $('body').append(
       '<div id="task_tooltip" class="task_tooltip btn-group">'
     + '<a id="task_tt_submit" href="#" title="Pošalji rješenje" class="btn btn-mini"><i class="icon-file"></i></a>'
@@ -184,7 +201,7 @@ $(function(){
   
   $('a.task').tooltip({
     tip: '#task_tooltip',
-    position: 'bottom center',
+    position: 'bottom center'
   });
 });
 
@@ -192,8 +209,19 @@ $(function(){
 /* UserProfile solved task list, view solution link */
 $(function(){
   $('span.task_submitted').hover(
-    function(){
-      id=$(this).attr('data-solution');
+    function() {
+      id = $(this).attr('data-solution');
       $(this).append(' <a id="view_solution123" href="/solution/'+id+'/"><i class="icon-search"></i></a>');
-    }, function(){$('#view_solution123').remove();});
+    }, function(){
+        $('#view_solution123').remove();
+    });
+});
+
+
+/* Solution toggle votes */
+$(function() {
+  $('#solution_ratings_toggle').click(function(e) {
+    e.preventDefault();
+    $('#solution_ratings').toggle();
+  });
 });
