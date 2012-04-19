@@ -66,27 +66,28 @@ def mark(request, task_id):
 @login_required
 def edit_mark(request, solution_id):
     action = request.POST['action']
-    sol = Solution.objects.filter(pk=solution_id)
-    if sol.author != request.user and not request.user.is_staff:
+    solution = get_object_or_404(Solution, id=solution_id)
+    if solution.author != request.user and not request.user.is_staff:
         return (403, 'Not allowed to modify this solution.')
     
     if action in ['0', '1']:
-        sol.update(is_official=int(action))
+        solution.is_official = int(action)
+        solution.save()
         
         # TODO: DRY!
         if action == '1':
-            _action.send(request.user, _action.SOLUTION_AS_OFFICIAL, action_object=sol, target=solution.task)
+            _action.send(request.user, _action.SOLUTION_AS_OFFICIAL, action_object=solution, target=solution.task)
         return ('/solution/%d/' % int(solution_id),)
 
     if action in ['blank', 'as_solved', 'todo']:
-        sol.update(status=STATUS[action])
-        solution = get_object_or_404(Solution, pk=solution_id)
+        solution.status = STATUS[action]
+        solution.save()
         
         # TODO: DRY!
         if action != 'blank':
             type = {'as_solved': _action.SOLUTION_AS_SOLVED,
                     'todo': _action.SOLUTION_TODO}
-            _action.send(request.user, type[action], action_object=solution, target=solutions.task)
+            _action.send(request.user, type[action], action_object=solution, target=solution.task)
         return ('/task/%d/' % solution.task_id,)
 
     return (403, u'Action "%s" not valid' % action)
