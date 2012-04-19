@@ -40,8 +40,9 @@ export_header = u'''
 
 \\usepackage{graphicx}
 
-\\usepackage[T1]{fontenc}
+\\usepackage{cmap}
 \\usepackage[utf8]{inputenc}
+\\usepackage[T1]{fontenc}
 \\usepackage[croatian]{babel}
 \\usepackage[centertags,intlimits,namelimits,sumlimits]{amsmath}
 \\usepackage{amsfonts}
