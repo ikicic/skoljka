@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseServerError
 from django.shortcuts import get_object_or_404
+from django.utils.formats import number_format
 from rating.fields import RatingField
 
 from tags.models import Tag, TaggedItem
@@ -22,7 +23,7 @@ def tag_vote(request):
     taggeditem = get_object_or_404(TaggedItem, tag=tag, object_id=request.POST['task'], content_type=task_ct)
         
     value = taggeditem.votes.update(request.user, request.POST['value'])
-    return HttpResponse(value)
+    return HttpResponse(number_format(value, 1))
 
 @ajax(method='POST')
 def vote(request, object_id, content_type_id, name):
@@ -45,4 +46,4 @@ def vote(request, object_id, content_type_id, name):
     manager = getattr(instance, name)
     value = manager.update(request.user, value)
     
-    return HttpResponse(value)
+    return HttpResponse(number_format(value, 1))

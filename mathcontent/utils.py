@@ -44,7 +44,7 @@ tag_open = {
     'quote': ('<div class="quote">', ''),
 
 # img accepts attachment attribute, index of attachment to use as a src (1-based)
-    'img': ('<img alt="Attachment image"%(extra)s>', ''), # \\includegraphics[comma-separated key-value list of options]{absolute or relative path}
+    'img': ('<img alt="Attachment image"%(extra)s>', '\\includegraphics%(extra)s'),
 }
 
 # automatically converted attributes as %(extra)s
@@ -163,15 +163,17 @@ def _convert(T, type, handle_latex_func, escape_table, content=None): # XSS dang
                     open = tag_open[tag][type]
 
                     # process attributes
-                    # (currently only for HTML)
-                    # TODO: <img> for LaTeX
+                    # WARNING: currently HTML and LaTeX use same attribute names and formats!
                     extra = ''
                     if tag in tag_attrs:
                         for key, value in attrs.iteritems():
                             if key in tag_attrs[tag]:
-                                extra += ' %s="%s"' % (key, xss.escape(attrs[key]))
+                                if type == TYPE_HTML:
+                                    extra += ' %s="%s"' % (key, xss.escape(attrs[key]))
+                                else:
+                                    extra += ',%s=%s' % (key, xss.escape(attrs[key]))
                     
-                    if type == TYPE_HTML and tag == 'img':
+                    if tag == 'img':
                         if not content:
                             open = u'{{ Slika nije dostupna u pregledu }}'
                         elif 'attachment' not in attrs:
@@ -180,7 +182,12 @@ def _convert(T, type, handle_latex_func, escape_table, content=None): # XSS dang
                             try:
                                 k = int(attrs['attachment']) - 1
                                 file = content.attachments.order_by('id')[k]
-                                extra += ' src="%s"' % xss.escape(file.get_url())
+                                if type == TYPE_HTML:
+                                    extra += ' src="%s"' % xss.escape(file.get_url())
+                                else: # type == TYPE_LATEX
+                                    # skip first comma
+                                    extra = '[%s]{%s}' % (extra[1:], file.get_full_path_and_filename())
+                                
                             except:
                                 open = u'{{ Greška pri preuzimanju img datoteke. (Nevaljan broj?) }}'
                         

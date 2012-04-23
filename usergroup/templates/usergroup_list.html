@@ -16,7 +16,7 @@
     {% else %}
     <tr>
     {% endif %}
-        <td>{{ g.id }}</td>
+        <td>{{ forloop.counter }}</td>
         <td>{{ g.data }}</td>
         <td>{{ g.data.member_count }}</td>
     </tr>

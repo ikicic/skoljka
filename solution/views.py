@@ -140,6 +140,13 @@ def submit(request, task_id=None, solution_id=None):
         'action_url': request.path,
     }
 
+    
+def _is_valid_status(status):
+    if not status:
+        return True
+    L = status.split(',')
+    return 'blank' not in L and all((x in STATUS for x in L))
+
 @response('solution_list.html')
 def solution_list(request, task_id=None, user_id=None, status=None):
     """
@@ -149,6 +156,18 @@ def solution_list(request, task_id=None, user_id=None, status=None):
         If some ID is not defined, skips that condition.
     """
     
+    if status is None:
+        status = request.GET.get('status', None)
+        if status is not None and not _is_valid_status(status):
+            return (response.BAD_REQUEST, 'Invalid status.')
+        if request.user.is_authenticated():
+            profile = request.user.get_profile()
+            if status is not None:
+                profile.solution_status_filter = status
+                profile.save()
+            else:
+                status = profile.solution_status_filter
+            
     L = Solution.objects.exclude(status=STATUS['blank'])
     task = None
     author = None   # 'user' is template reserved word
@@ -159,11 +178,11 @@ def solution_list(request, task_id=None, user_id=None, status=None):
     if user_id is not None:
         author = get_object_or_404(User, pk=user_id)
         L = L.filter(author=author)
-    if status is not None:
-        status = status.split(',')
-        if not status or 'blank' in status or any((x not in STATUS for x in status)):
-            return HttpResponseBadRequest('Invalid status.')
+    if status:
+        if not _is_valid_status(status):
+            return (response.BAD_REQUEST, 'Invalid status.')
             
+        status = status.split(',')
         if len(status) == 1:
             L = L.filter(status=STATUS[status[0]])
         else:
@@ -171,10 +190,18 @@ def solution_list(request, task_id=None, user_id=None, status=None):
             
     L = L.select_related('author', 'content', 'task')
 
+    url_no_status = '/solution/'
+    if user_id:
+        url_no_status += 'user/{0}/'.format(user_id)
+    if task_id:
+        url_no_status += 'task/{0}/'.format(task_id)
+    
     return {
         'solutions': L.order_by('-id'),
         'task': task,
         'author': author,
+        'url_no_status': url_no_status,
+        'submitted_active': 'active' if status == [u'submitted'] else '',
     }
 
 def get_user_solved_tasks(user):

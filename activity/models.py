@@ -20,6 +20,7 @@ class Action(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, db_index=True)
     
     # group can also act like user
+    # remove and completely replace with permissions?
     group = models.ForeignKey(Group, db_index=True, blank=True, null=True, related_name='activities', help_text='To whom it may concern.')
     public = models.BooleanField(db_index=True, default=True)
     

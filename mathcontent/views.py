@@ -10,15 +10,20 @@ from mathcontent.models import MathContent, Attachment
 
 @login_required
 def delete_attachment(request, id):
-    attachment = get_object_or_404(Attachment, id=id)
+    attachment = get_object_or_404(Attachment.select_related('content'), id=id)
     
     # TODO: POST method!
     if not request.is_ajax():
         return HttpResponseBadRequest()
         
+    # refresh HTML cache
+    attachment.content.html = None
+    attachment.content.save()
+
     # TODO: permissions!!
     attachment.file.delete()
     attachment.delete()
+    
     
     return HttpResponse('OK')
 
@@ -34,9 +39,18 @@ def edit_attachments(request, id):
             
             # moram ovako tako da bi se mogao generirati pravilan filename
             form = AttachmentForm(request.POST, request.FILES, instance=attachment)
-            attachment = form.save()
+            attachment = form.save(commit=False)
+            name = attachment.file.name.replace(' ', '')
+            if '.' in name:
+                name, ext = name.rsplit('.', 1)
+                name = name.replace('.', '') + '.' + ext
+            attachment.file.name = name
+            attachment.save()
             
-            print attachment
+            # refresh HTML cache
+            content.html = None
+            content.save()
+            
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
     else:
         form = AttachmentForm()

@@ -66,7 +66,7 @@ class MathContent(models.Model):
 
     def convert_to_latex(self):
         from mathcontent.utils import convert_to_latex as _convert_to_latex
-        return _convert_to_latex(self.text)
+        return _convert_to_latex(self.text, self)
 
 
 def attachment_upload_to(instance, filename):
@@ -91,3 +91,5 @@ class Attachment(models.Model):
     def get_filename(self):
         return os.path.basename(self.file.name)
         
+    def get_full_path_and_filename(self):
+        return self.file.name

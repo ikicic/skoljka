@@ -20,14 +20,17 @@ class UserProfile(models.Model):
         ('F', 'Djevojka'),
     )
     gender = models.CharField(blank=True, max_length=1, choices=GENDER_CHOICES, default='', verbose_name='Spol')
-    birthday = models.DateField(blank=True, null=True, verbose_name='Dan rođenja', help_text='U formatu YYYY-MM-DD')
+    birthday = models.DateField(blank=True, null=True, verbose_name=u'Dan rođenja', help_text='U formatu YYYY-MM-DD')
     city = models.CharField(max_length=50, blank=True, verbose_name='Grad')
-    country = models.CharField(max_length=50, blank=True, verbose_name='Država')
+    country = models.CharField(max_length=50, blank=True, verbose_name=u'Država')
     quote = models.CharField(max_length=200, blank=True, verbose_name='Citat')
     website = models.CharField(max_length=100, blank=True, verbose_name='Web')
     
     # options
     show_hidden_tags = models.BooleanField(default=False, verbose_name='Prikazuj skrivene tagove')
+    
+    # automatic options
+    solution_status_filter = models.CharField(max_length=32, blank=True, default='')
     
     # utility
     unread_pms = models.IntegerField(default=0)    

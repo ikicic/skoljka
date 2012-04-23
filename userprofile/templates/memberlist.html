@@ -14,7 +14,7 @@
 </tr>
 {% for x in user_list %}
 <tr>
-    <td>{{ x.id }}
+    <td>{{ forloop.counter }}
     <td>{{ x|userlink }}</td>
     <td>{{ x.first_name }}</td>
     <td>{{ x.last_name }}</td>
