@@ -1,19 +1,5 @@
-<script>
-/*$(function(){
- $('.{{ m.field.name }}-star').rating({
-  callback: function(v,l){
-   alert(v);
-   alert(l);
-   $(this.form).ajaxSubmit({
-    target: '#{{ m.field.name }}-value'
-   });
-  }
- });
-});//*/
-</script>
 <div>
   <div style="float:left;width:60px;">{{ text }}:</div>
-  {% csrf_token %}
   {% for x in m.get_range_and_titles %}
     <input name="{{ m.field.name }}" type="radio" class="{{ m.field.name }}-star{{ m.get_star_split }}" value="{{ x.0 }}" title="{{ x.1 }}"{% ifequal user_vote x.0 %} checked="checked"{% endifequal %}>
   {% endfor %}

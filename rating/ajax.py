@@ -23,7 +23,7 @@ def tag_vote(request):
     taggeditem = get_object_or_404(TaggedItem, tag=tag, object_id=request.POST['task'], content_type=task_ct)
         
     value = taggeditem.votes.update(request.user, request.POST['value'])
-    return HttpResponse(number_format(value, 1))
+    return HttpResponse(value)
 
 @ajax(method='POST')
 def vote(request, object_id, content_type_id, name):

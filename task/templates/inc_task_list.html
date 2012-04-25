@@ -1,0 +1,55 @@
+{% load pagination_tags %}
+{% load sorting_tags %}
+
+{% load task_tags %}
+{% load rating_tags %}
+{% load userprofile_tags %}
+
+{% autosort tasks %}
+{% autopaginate tasks 25 %}
+
+{% cache_task_info tasks %}
+
+{% if tasks %}
+    {% if user.profile.selected_folder %}
+    <script>
+    $(function(){
+     $('.folder_checkbox').click(function(){
+      $.ajax({
+        url: '/folder/select/task/' + $(this).parent().next().html() + '/'
+      });
+     });
+    });
+    </script>
+    {% endif %}
+    
+    {% useroptions "task_view_type" %}
+      {% useroption 0 "<i class=icon-list></i> Lista" default %}
+      {% useroption 1 "<i class=icon-align-justify></i> Tekst" %}
+      {% useroption 2 "<i class=icon-th-large></i> Dva stupca" %}
+    {% enduseroptions %}
+    <br><br>
+        
+    {# value must be unicode #}
+    {% if task_view_type == '0' %}
+      {% include "inc_task_list_table.html" %}
+    {% endif %}
+
+    {% if task_view_type == '1' %}
+      {% for task in tasks %}
+        {% task_small_box task 'task_text' '' '' %}
+      {% endfor %}
+    {% endif %}
+
+    {% if task_view_type == '2' %}
+      {% for task in tasks %}
+        {% cycle '<div class="row-fluid">' '' %}
+        {% task_small_box task 'span6' '' %}
+        {% cycle '' '</div>' %}
+      {% endfor %}
+    {% endif %}
+
+    {% paginate %}
+{% else %}
+    {% if empty_message %}{{ empty_message }}{% endif %}
+{% endif %}

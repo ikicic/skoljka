@@ -160,13 +160,6 @@ def solution_list(request, task_id=None, user_id=None, status=None):
         status = request.GET.get('status', None)
         if status is not None and not _is_valid_status(status):
             return (response.BAD_REQUEST, 'Invalid status.')
-        if request.user.is_authenticated():
-            profile = request.user.get_profile()
-            if status is not None:
-                profile.solution_status_filter = status
-                profile.save()
-            else:
-                status = profile.solution_status_filter
             
     L = Solution.objects.exclude(status=STATUS['blank'])
     task = None
@@ -178,29 +171,14 @@ def solution_list(request, task_id=None, user_id=None, status=None):
     if user_id is not None:
         author = get_object_or_404(User, pk=user_id)
         L = L.filter(author=author)
-    if status:
-        if not _is_valid_status(status):
-            return (response.BAD_REQUEST, 'Invalid status.')
-            
-        status = status.split(',')
-        if len(status) == 1:
-            L = L.filter(status=STATUS[status[0]])
-        else:
-            L = L.filter(status__in=[STATUS[x] for x in status])
-            
+                        
     L = L.select_related('author', 'content', 'task')
 
-    url_no_status = '/solution/'
-    if user_id:
-        url_no_status += 'user/{0}/'.format(user_id)
-    if task_id:
-        url_no_status += 'task/{0}/'.format(task_id)
-    
     return {
+        'filter_by_status': status,
         'solutions': L.order_by('-id'),
         'task': task,
         'author': author,
-        'url_no_status': url_no_status,
         'submitted_active': 'active' if status == [u'submitted'] else '',
     }
 

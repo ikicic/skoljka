@@ -241,3 +241,22 @@ div.mc_viewsource_text {
 a.mc_viewsource_clipboard {
   margin-top: 7px;
 }
+.news {
+  padding: 20px 5px;
+}
+.news .mc {
+  padding-left: 10px;
+}
+.news .title {
+  font-weight: bold;
+  color: #0080DD;
+  padding: 10px 0px;
+}
+.news .added_by {
+  color: #AAAAAA;
+  padding: 10px 0px;
+  font-size: 12px;
+}
+.task_text {
+  padding: 10px 0px;
+}

@@ -1,16 +1,22 @@
 {% load pagination_tags %}
-{% load sorting_tags %}
-
 {% load rating_tags %}
+{% load solution_tags %}
+{% load sorting_tags %}
+{% load userprofile_tags %}
+
+{% useroptions "solution_status_filter" %}
+  {% useroption "" "Sva rješenja" default %}
+  {% useroption "submitted" "Poslana" %}
+{% enduseroptions %}
+
+{# filter queryset if filter_status is not None #}
+{% filter_solutions_by_status solutions filter_by_status %}
 
 {% autosort solutions %}
 {% autopaginate solutions %}
 
-{% if solutions %}
-    <div style="float:right;padding:8px;" class="btn-group">
-      <a href="{{ url_no_status }}?status=" class="btn btn-mini">Sva rješenja</a>
-      <a href="{{ url_no_status }}?status=submitted" class="btn btn-mini {{ submitted_active }}">Poslana</a>
-    </div>
+{% if solutions %}    
+    
     <table width="100%" class="table-striped table-condensed" style="text-align: center;">
     <tr>
         <th colspan="6">Lista rješenja</th>

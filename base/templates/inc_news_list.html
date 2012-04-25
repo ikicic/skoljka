@@ -1,0 +1,19 @@
+{% if news %}
+<div class="{{ div_class }}">
+  {% if title %}<h2>{{ title }}</h2>{% endif %}
+  
+  {% for x in news %}
+  <div class="news">
+    <div class="title">
+      {% if user.is_staff %}
+        <a href="/task/{{ x.id }}/">{{ x.name }}</a>
+      {% else %}
+        {{ x.name }}
+      {% endif %}
+    </div>
+    {{ x.content.render }}
+    <div class="added_by">Dodao/la {{ x.author|userlink }} {{ x.date_created }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}

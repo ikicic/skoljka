@@ -30,11 +30,8 @@ class MathContent(models.Model):
     text = models.TextField(max_length=MAX_LENGTH, verbose_name='Tekst')
     html = models.TextField(blank=True, null=True)
     
-    class Admin:
-        pass
-    
     def __unicode__(self):
-        return self.text
+        return self.short()
         
     def short(self, length=50):
         return self.text[:length] + "..." if len(self.text) > length else self.text

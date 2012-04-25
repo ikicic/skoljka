@@ -72,10 +72,31 @@ def ajax(*args, **kwargs):
     return require(ajax=True, force_login=kwargs.get('force_login', True), *args, **kwargs)
 
 
+def response_update_cookie(request, name, value):
+    """
+        Push cookie update to request.
+        MUST be used together with @response, as it will
+        do the update before the respond.
+    """
+    if not hasattr(request, '_response_update_cookies'):
+        request._response_update_cookies = {}
+    request._response_update_cookies[name] = value
+    
+
+def _flush_cookie_update(request, response):
+    if not hasattr(request, '_response_update_cookies'):
+        return response
+    for key, value in request._response_update_cookies.iteritems():
+        response.set_cookie(str(key), str(value))
+    return response
+    
 # this is a decorator
 class response:
     """
         Views helper and shortcut decorator.
+        
+        Flushes cookie update, pushed by response_update_cookie!
+        (only on status OK and redirects)
 
         Primary shortcut for
             return render_to_response(template, {
@@ -160,7 +181,7 @@ class response:
         def inner(request, *args, **kwargs):
             x = func(request, *args, **kwargs)
             if isinstance(x, basestring):
-                return HttpResponse(x)
+                return _flush_cookie_update(request, HttpResponse(x))
 
             status = None
             content = None
@@ -180,7 +201,7 @@ class response:
                 # len == 2 -> status (int), content (string / dict)
                 # len == 3 -> status (int), template (string), content (string / dict)
                 if len(x) == 1:
-                    return HttpResponseRedirect(x[0])
+                    return _flush_cookie_update(request, HttpResponseRedirect(x[0]))
                 if len(x) == 2:
                     dummy, content = x
                     if isinstance(dummy, basestring):
@@ -197,14 +218,19 @@ class response:
                 
             if content is not None:                
                 if status == response.REDIRECT:
-                    return HttpResponseRedirect(content)
+                    rsp = HttpResponseRedirect(content)
                 elif status == response.MOVED:
-                    return HttpResponsePermanentRedirect(content)
+                    rsp = HttpResponsePermanentRedirect(content)
                 else:
-                    return HttpResponse(content, status=status)
+                    rsp = HttpResponse(content, status=status)
+            else:
+                # can't recognize data, return original
+                rsp = x
                 
-            # can't recognize data, return original
-            return x
+                
+            if isinstance(rsp, HttpResponse) and status in (response.OK, response.MOVED, response.REDIRECT):
+                return _flush_cookie_update(request, rsp)
+            return rsp
         return wraps(func)(inner)
 
 

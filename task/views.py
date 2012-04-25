@@ -219,7 +219,7 @@ def new(request, task_id=None):
         edit = False
         
     if request.method == 'POST':
-        task_form = TaskForm(request.POST, instance=task)
+        task_form = TaskForm(request.POST, instance=task, user=request.user)
         math_content_form = MathContentForm(request.POST, instance=math_content)
         
         if task_form.is_valid() and math_content_form.is_valid():
@@ -257,9 +257,9 @@ def new(request, task_id=None):
 
 @response('task_list.html')
 def task_list(request):
-    tasks = Task.objects.for_user(request.user, VIEW).select_related('author').distinct()
+    tasks = Task.objects.for_user(request.user, VIEW).select_related('author', 'content').distinct()
     # treba mi LEFT JOIN ON (task_task.id = solution_solution.task_id AND solution_solution.author_id = ##)
-    # sada se umjesto toga koristi .cache_additional_info()
+    # sada se umjesto toga koristi .cache_task_info()
     # (slicno za tag-ove)
         
     return {

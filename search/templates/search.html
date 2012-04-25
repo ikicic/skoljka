@@ -44,7 +44,7 @@
     </ul>
 
     {% if not errors %}
-        {% include "inc_task_list_table.html" with plus_exclude=tags empty_message="Ne postoji zadatak s navedenim tagovima" %}
+        {% include "inc_task_list.html" with plus_exclude=tags empty_message="Ne postoji zadatak s navedenim tagovima" %}
     {% endif %}
 {% endif %}
 

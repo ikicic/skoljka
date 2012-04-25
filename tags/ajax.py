@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from tags.models import Tag, TaggedItem
 from task.models import Task
 from permissions.constants import VIEW
+from search.utils import update_search_cache
 
 from skoljka.utils.decorators import ajax
 
@@ -37,6 +38,10 @@ def add(request):
     if len(name) == 0:
         return HttpResponseBadRequest('Tag name has to be at least one character long.')
         
+    # 'news' is used to mark task as news
+    if name.lower() in ['news', 'oldnews']:
+        return HttpResponseForbidden('Nedozvoljeno ime taga.')
+        
     task = get_object_or_404(Task, id=request.POST['task'])
     if not task.has_perm(request.user, VIEW):
         return HttpResponseForbidden('Not allowed to view or edit this task.')
@@ -49,6 +54,10 @@ def add(request):
         tag = Tag.objects.get(name__iexact=request.POST['name'])
     except Tag.DoesNotExist:
         tag = Tag.objects.create(name=request.POST['name'])
+        
+    old_tags = list(task.tags.values_list('name', flat=True))
     taggeditem, created = TaggedItem.objects.get_or_create(object_id=task.id, content_type=task_ct, tag=tag)
+    if created:
+        update_search_cache(task, old_tags, task.tags.values_list('name', flat=True))
     
     return '1' if created else '0'

@@ -49,7 +49,7 @@ def view(request):
     if not error:
         tasks = search_tasks(tags, none_if_blank=False, user=request.user, **kwargs)
         if hasattr(tasks, 'select_related'):
-            tasks = tasks.select_related('author')
+            tasks = tasks.select_related('author', 'content')
     else:
         tasks = Task.objects.none()
         

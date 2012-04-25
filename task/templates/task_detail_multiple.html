@@ -22,7 +22,8 @@
 {% endcomment %}
 
 {# TODO: DRY, make new tag for this #}
-{% for task in tasks|cache_additional_info:user %}
+{% cache_task_info tasks %}
+{% for task in tasks %}
     {% cycle '<div class="row-fluid">' '' %}
     {% task_small_box task 'span6' '' %}
     {% cycle '' '</div>' %}
