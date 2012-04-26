@@ -29,7 +29,8 @@
     {{ task.date_created|date:"E j, Y" }}<br>
     {% tag_list task %}<br>
     {% if can_edit %}<a href="/task/{{ task.pk }}/edit/">Edit</a><br>{% endif %}
-    {% if can_edit_permissions %}<a href="/permissions/edit/{{ content_type.id }}/{{ task.id }}/">Edit Permissions</a><br>{% endif %}
+    {% if can_edit_permissions %}<a href="/permissions/edit/{{ content_type.id }}/{{ task.id }}/">Edit Permissions</a>{% endif %}
+    <br>
 </div>
 
 <br><br>
