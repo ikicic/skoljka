@@ -12,7 +12,7 @@ from pagination.paginator import InfinitePaginator
 from taggit.utils import parse_tags
 
 from task.models import Task, SimilarTask
-from task.forms import TaskForm, TaskAdvancedForm
+from task.forms import TaskForm, TaskAdvancedForm, TaskExportForm, EXPORT_FORMAT_CHOICES
 
 from activity import action as _action
 from permissions.constants import ALL, EDIT, VIEW, EDIT_PERMISSIONS
@@ -23,14 +23,14 @@ from search.utils import update_search_cache
 from solution.models import Solution, STATUS as _SOLUTION_STATUS
 from solution.views import get_user_solved_tasks
 from mathcontent.forms import MathContentForm
-from mathcontent.latex import export_header, export_task, export_footer
+from mathcontent import latex
 from mathcontent.models import MathContent
 from usergroup.forms import GroupEntryForm
 
 from skoljka.utils.decorators import response
 from skoljka.utils.timeout import run_command
 
-import os, sys, codecs, datetime
+import os, sys, hashlib, codecs, datetime
 
 # TODO: promijeniti nacin na koji se Task i MathContent generiraju.
 # vrijednosti koje ne ovise o samom formatu se direktno trebaju
@@ -257,7 +257,7 @@ def new(request, task_id=None):
 
 @response('task_list.html')
 def task_list(request):
-    tasks = Task.objects.for_user(request.user, VIEW).select_related('author', 'content').distinct()
+    tasks = Task.objects.for_user(request.user, VIEW).select_related('content').distinct()
     # treba mi LEFT JOIN ON (task_task.id = solution_solution.task_id AND solution_solution.author_id = ##)
     # sada se umjesto toga koristi .cache_task_info()
     # (slicno za tag-ove)
@@ -314,7 +314,8 @@ def similar(request, id):
     
     
     # SPEED: read main task together with the rest
-    similar = list(SimilarTask.objects.filter(task=task).order_by('-score')[:50].values_list('similar_id', 'score'))
+    # no need to sort here
+    similar = list(SimilarTask.objects.filter(task=task)[:50].values_list('similar_id', 'score'))
     if request.user.is_authenticated():
         solutions = Solution.objects.filter(task__similar_backward=task, author=request.user).exclude(status=_SOLUTION_STATUS['blank'])
         solutions = solutions.only('status', 'correctness_avg', 'task')
@@ -331,14 +332,20 @@ def similar(request, id):
         
         sorted_tasks[s.task_id] *= p
         
-    sorted_tasks = sorted([(p, id) for id, p in sorted_tasks.iteritems()])
+    # sort here
+    sorted_tasks = sorted([(p, id) for id, p in sorted_tasks.iteritems()], reverse=True)
     similar_ids = [id for p, id in sorted_tasks[:6]]
     
     similar = Task.objects.filter(id__in=similar_ids).select_related('content')
     
-    return {'task': task, 'similar': similar}
+    return {
+        'task': task,
+        'similar': similar,
+        'view_type': 'similar_task_view_type',
+    }
 
 
+# DEPRECATED
 # TODO: permissions, not allowed message
 @response('task_detail_multiple.html')
 def detail_multiple(request, ids):
@@ -355,66 +362,65 @@ def detail_multiple(request, ids):
     }
 
 
-# TODO: permission
-def _export_to_latex(request, ids):
-    """
-        Generates LaTeX for given Tasks.
-    """
-    
-    ids = [int(x) for x in ids.split(',')]
-    if not ids or 0 in ids:
-        raise Http404
+
+def _convert_to_latex(tasks, has_title, has_url, has_source, has_index, has_id, *args, **kwargs):
+    content = [latex.export_header]
+    for k, x in enumerate(tasks):
+        # DRY?
+        export_title = latex.export_title % x.name if has_title else ''
+        export_url = latex.export_url % x.get_absolute_url() if has_url else ''
+        export_source = latex.export_source % ('\\textbf{Izvor:} ' + x.source if x.source else '') if has_source else ''
+        export_index = latex.export_index % (k + 1) if has_index else ''
+        export_id = ('(%d)' % x.id if has_index else '%d.' % x.id) if has_id else ''
         
-    tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=ids).select_related('content').distinct()
-    content = u''.join([export_task % {
-            'title': x.name,
+        content.append(latex.export_task % {
+            'export_title': export_title,
+            'export_url': export_url,
+            'export_source': export_source,
+            'export_index': export_index,
+            'export_id': export_id,
             'content': x.content.convert_to_latex(),
-            'url': x.get_absolute_url(),
-            'source': '\\textbf{Izvor:} ' + x.source if x.source else '',
-        } for x in tasks])
-    return u'%s%s%s' % (export_header, content, export_footer)
+        })
+    content.append(latex.export_footer)
     
+    return u''.join(content)
+   
 
-# TODO: not allowed message
-def export_to_latex(request, ids):
-    """
-        Calls _export_to_latex to generate latex and simply returns as file.
-    """
-    response = HttpResponse(content=_export_to_latex(request, ids), content_type='application/x-latex')
-    response['Content-Disposition'] = 'filename=taskexport.tex'
-    return response
+# output latex or pdf, permission already checked
+def _export(ids, tasks, form):
+    format = form.cleaned_data['format']
 
-# TODO: permission
-def export_to_pdf(request, ids):
-    """
-        Generates PDF if it doesn't exist or it is outdated, using _export_to_latex.
+    hash = hashlib.md5(repr((ids, form.cleaned_data))).hexdigest()
+    
+    # check if .pdf exists
+    if format == 'pdf':
+        filename = os.path.normpath(os.path.join(settings.LOCAL_DIR, 'media/pdf/task' + hash))
+        if os.path.exists(filename + '.pdf'):
+            oldest_file_mtime = tasks.aggregate(Min('last_edit_date'))['last_edit_date__min']
+            if datetime.datetime.fromtimestamp(os.path.getmtime(filename + '.pdf')) > oldest_file_mtime:
+                # already up-to-date
+                return HttpResponseRedirect('/media/pdf/task%s.pdf' % hash)
+
+
+
+    latex = _convert_to_latex(tasks, **form.cleaned_data)
+
+
+
+    if format == 'latex':
+        response = HttpResponse(content=latex, content_type='application/x-latex')
+        response['Content-Disposition'] = 'filename=taskexport.tex'
+        return response
         
-        Redirects to pdf.
-    """
-    
-    filename = os.path.normpath(os.path.join(settings.LOCAL_DIR, 'media/pdf/task' + ids))
-    print 'filename: ', filename
-    
-    generate = True
-    if os.path.exists(filename + '.pdf'):
-        # TODO: DRY!!
-        _ids = [int(x) for x in ids.split(',')]
-        if not _ids or 0 in _ids:
-            raise Http404
-
-        oldest_file_mtime = Task.objects.for_user(request.user, VIEW).filter(id__in=_ids).aggregate(Min('last_edit_date'))['last_edit_date__min']
-        if datetime.datetime.fromtimestamp(os.path.getmtime(filename + '.pdf')) > oldest_file_mtime:
-            generate = False
-        
-    if generate:
+    if format == 'pdf':
         f = codecs.open(filename + '.tex', 'w', encoding='utf-8')
-        f.write(_export_to_latex(request, ids))
+        f.write(latex)
         f.close()
 
         error = run_command('pdflatex -output-directory=%s -interaction=batchmode %s.tex' % (os.path.dirname(filename), filename), timeout=10)
         if error:
             return HttpResponseServerError('LaTeX generation error! Error code: %d' % error)
-            
+
         # error = run_command('dvipdfm -o %s %s' % (filename + '.pdf', filename), timeout=10)
         # if error:
             # return HttpResponseServerError('dvipdfm Error %d!' % error)
@@ -422,5 +428,50 @@ def export_to_pdf(request, ids):
         # os.remove(filename + '.log')
         # os.remove(filename + '.aux')
         # os.remove(filename + '.dvi')
+
+        return HttpResponseRedirect('/media/pdf/task%s.pdf' % hash)
         
-    return HttpResponseRedirect('/media/pdf/task%s.pdf' % ids)
+    
+    return 404
+        
+    
+    
+@response('task_export.html')
+def export(request, format, ids):
+    available_formats = dict(EXPORT_FORMAT_CHOICES)
+    if format not in available_formats:
+        raise Http404
+        
+    try:
+        id_list = [int(x) for x in ids.split(',')]
+    except ValueError:
+        raise Http404
+        
+    # check for permissions
+    tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=id_list).select_related('content').distinct()
+    if len(tasks) != len(id_list):
+        raise Http404('Neki od navedenih zadataka ne postoje ili su sakriveni.')
+        
+    # permission ok, use shortened query
+    tasks = Task.objects.filter(id__in=id_list).select_related('content')
+        
+    if request.method == 'POST':
+        form = TaskExportForm(request.POST)
+        if form.is_valid():
+            return _export(ids, tasks, form)
+    else:
+        if len(id_list) == 1:
+            data = (format, True, True, True, False, False)
+        else:
+            data = (format, False, False, False, False, True)
+            
+        data = dict(zip(('format', 'has_title', 'has_url', 'has_source', 'has_index', 'has_id'), data))
+        print data
+        form = TaskExportForm(data)
+        
+    return {
+        'format': available_formats[format],
+        'ids': ids,
+        'form': form,
+        'tasks': tasks,
+    }

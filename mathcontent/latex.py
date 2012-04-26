@@ -94,11 +94,15 @@ export_header = u'''
 \\begin{document}
 '''
 
-# use %(title)s to get task title, and %(content)s to get problem statement
+# TODO: change to .format, not %
+export_title = u'\\subsection*{\\color{btn_primary}%s}'
+export_url = u'\\url{http://skoljka.org%s}'
+export_source = u'\\par\\footnotesize\\color{css_gray}%s'
+export_index = u'%d.'
 export_task = u'''
-    \\subsection*{\\color{btn_primary}%(title)s}
-    \\begin{flushright}\\url{http://skoljka.no-ip.org%(url)s}\\par\\footnotesize\\color{css_gray}%(source)s\\end{flushright}
-    %(content)s
+    %(export_title)s
+    \\begin{flushright}%(export_url)s%(export_source)s\\end{flushright}
+    %(export_index)s %(export_id)s %(content)s
 '''
 
 export_footer = u'''

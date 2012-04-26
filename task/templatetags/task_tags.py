@@ -45,6 +45,9 @@ def cache_task_info(context, tasks):
             for task in tasks:
                 task.is_in_folder = task.id in selected_tasks
         
+        
+    # ------ context variables --------
+    context['task_ids'] = ids
     return ''
 
 # move to tags/templatetags/?

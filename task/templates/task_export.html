@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Pretvaranje u {{ format }}{% endblock %}
+
+{% block content %}
+
+<h3>Pretvaranje u {{ format }}</h3>
+<br><br>
+
+<form action="{{ request.get_full_path }}" method="POST">
+
+  <h4>Postavke:</h4>
+  <br>
+  {% csrf_token %}
+  <table width="40%" class="table-striped" style="text-align:center;">
+    {{ form.as_table }}
+  </table>
+  <input type="submit" value="Pretvori" class="btn btn-primary">
+  
+  <br><br>
+  <h4>Zadaci:</h4>
+  <br>
+  <table width="40%" class="table-striped table-condensed" style="text-align:center;">
+    {% for x in tasks %}
+      <tr><td>{{ x.id }}</td><td><a href="{{ x.get_absolute_url }}">{{ x.name }}</a></td></tr>
+    {% endfor %}
+  </table>
+
+</form>
+
+{% endblock %}

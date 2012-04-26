@@ -16,7 +16,6 @@ class UserOptionNode(template.Node):
         self.is_default = is_default
         
     def render(self, context):
-        # TODO: move field_name to parser (and __init__), not context
         field_name = context._useroptions_field_name
         value = unicode(context._useroptions_value)
         
@@ -40,31 +39,43 @@ class UserOptionNode(template.Node):
 
 
 class UserOptionsNode(template.Node):
-    def __init__(self, nodelist, field_name, default_value, allowed_values):
+    def __init__(self, nodelist, field_name, default_value, allowed_values, save_to):
         self.nodelist = nodelist
         self.field_name = field_name
         self.default_value = default_value
         self.allowed_values = allowed_values
+        self.save_to = save_to
 
     def render(self, context):
         user = context['user']
 
-        value = context['request'].GET.get(self.field_name, None)
+        # TODO: DRY
+        if isinstance(self.field_name, basestring):
+            field_name = self.field_name
+        else:
+            field_name = self.field_name.resolve(context)
+            
+        if isinstance(self.save_to, basestring):
+            save_to = self.save_to
+        else:
+            save_to = self.save_to.resolve(context)
+        
+
+        value = context['request'].GET.get(field_name, None)
         if value is not None and value in self.allowed_values:
             if user.is_authenticated():
-                setattr(user.get_profile(), self.field_name, value)
+                setattr(user.get_profile(), field_name, value)
                 user.get_profile().save()
             else:
-                response_update_cookie(context['request'], self.field_name, value)
+                response_update_cookie(context['request'], field_name, value)
         elif user.is_authenticated():
-            value = getattr(user.get_profile(), self.field_name)
+            value = getattr(user.get_profile(), field_name)
         else:
-            value = context['request'].COOKIES.get(self.field_name, self.default_value)
+            value = context['request'].COOKIES.get(field_name, self.default_value)
 
-        context._useroptions_field_name = self.field_name
+        context._useroptions_field_name = field_name
         context._useroptions_value = unicode(value)
-        context[self.field_name] = unicode(value)
-        print 'CONTEXT FIELDNAME', context[self.field_name]
+        context[save_to] = unicode(value)
         
         out = '<div style="float:right;padding:8px;" class="btn-group">'    \
             + self.nodelist.render(context) \
@@ -82,15 +93,15 @@ def useroption(parser, token):
     value = bits[1]
     if value[0] == value[-1] and value[0] in ('"', "'"):
         value = value[1:-1]
-
+        
     return UserOptionNode(value, bits[2][1:-1], is_default)
 
 
 @register.tag
 def useroptions(parser, token):
     bits = token.contents.split()
-    if len(bits) != 2:
-        raise TemplateSyntaxError("One value expected for 'useroptions'.")
+    if len(bits) not in (2, 4):
+        raise TemplateSyntaxError("One or three values expected for 'useroptions'.")
 
     nodelist = parser.parse(('enduseroptions',))
     parser.delete_first_token()
@@ -99,11 +110,23 @@ def useroptions(parser, token):
     allowed_values = [x.value for x in children]
     default_value = filter((lambda x: x.is_default), children)
     
+    field_name = bits[1]
+    if field_name[0] == field_name[-1] and field_name[0] in ('"', "'"):
+        field_name = field_name[1:-1]
+    else:
+        field_name = parser.compile_filter(field_name)
+        
+    if len(bits) == 4:
+        if bits[2] != 'as':
+            raise TemplateSyntaxError("Second string must be 'as' for 'useroptions'.")
+        save_to = bits[3]
+    else:
+        save_to = field_name
     
     if len(default_value) != 1:
         raise TemplateSyntaxError("Exactly one 'useroption' must have 'default' parameter!")
     
-    return UserOptionsNode(nodelist, bits[1][1:-1], default_value[0].value, allowed_values)
+    return UserOptionsNode(nodelist, field_name, default_value[0].value, allowed_values, save_to)
     
 
             

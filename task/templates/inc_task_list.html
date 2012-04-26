@@ -23,31 +23,42 @@
     </script>
     {% endif %}
     
-    {% useroptions "task_view_type" %}
-      {% useroption 0 "<i class=icon-list></i> Lista" default %}
-      {% useroption 1 "<i class=icon-align-justify></i> Tekst" %}
-      {% useroption 2 "<i class=icon-th-large></i> Dva stupca" %}
-    {% enduseroptions %}
+    <div>
+      {# TODO: move padding:8px somewhere else #}
+      <div style="float:left;padding:8px;">
+        <a href="/task/export/latex/{{ task_ids|join:',' }}/"><img src="/static/images/tex16.png" alt="LaTeX" title="Pretvori u LaTeX"></a>
+        <a href="/task/export/pdf/{{ task_ids|join:',' }}/"><img src="/static/images/pdf16.png" alt="PDF" title="Pretvori u PDF"></a>
+      </div>
+      {% useroptions view_type|default:"task_view_type" as view %}
+        {% useroption 0 "<i class=icon-list></i> Lista" default %}
+        {% useroption 1 "<i class=icon-align-justify></i> Tekst" %}
+        {% useroption 2 "<i class=icon-th-large></i> Dva stupca" %}
+      {% enduseroptions %}
+    </div>
     <br><br>
         
     {# value must be unicode #}
-    {% if task_view_type == '0' %}
+    {% if view == '0' %}
       {% include "inc_task_list_table.html" %}
     {% endif %}
 
-    {% if task_view_type == '1' %}
+    {% if view == '1' %}
       {% for task in tasks %}
         {% task_small_box task 'task_text' '' '' %}
       {% endfor %}
     {% endif %}
 
-    {% if task_view_type == '2' %}
+    {% if view == '2' %}
       {% for task in tasks %}
         {% cycle '<div class="row-fluid">' '' %}
         {% task_small_box task 'span6' '' %}
         {% cycle '' '</div>' %}
       {% endfor %}
+      {% if not tasks|length|divisibleby:2 %}
+        </div>
+      {% endif %}
     {% endif %}
+    
 
     {% paginate %}
 {% else %}

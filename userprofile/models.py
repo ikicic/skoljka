@@ -32,6 +32,7 @@ class UserProfile(models.Model):
     # automatic options
     solution_status_filter = models.CharField(max_length=32, blank=True, default='')
     task_view_type = models.SmallIntegerField(default=0)
+    similar_task_view_type = models.SmallIntegerField(default=2)
     
     # utility
     unread_pms = models.IntegerField(default=0)    

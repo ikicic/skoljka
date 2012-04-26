@@ -12,12 +12,8 @@
 
 <h2>Slični zadaci</h2>
 
-{% cache_task_info similar %}
-{% for t in similar %}
-    {% cycle '<div class="row-fluid">' '' %}
-    {% task_small_box t 'span6' 'similar/' %}
-    {% cycle '' '</div>' %}
-{% endfor %}
+
+{% include "inc_task_list.html" with tasks=similar %}
 
 
 {% endblock content %}

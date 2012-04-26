@@ -4,6 +4,20 @@ from mathcontent.forms import MathContentForm
 
 from taggit.utils import parse_tags
 
+EXPORT_FORMAT_CHOICES = (('latex', 'LaTeX'), ('pdf', 'PDF'))
+
+class TaskExportForm(forms.Form):
+    format = forms.ChoiceField(choices=EXPORT_FORMAT_CHOICES)
+    has_title = forms.BooleanField(label='Naslov', required=False)
+    has_url = forms.BooleanField(label='URL', required=False)
+    has_source = forms.BooleanField(label='Izvor', required=False)
+    has_index = forms.BooleanField(label='Broj', required=False)
+    has_id = forms.BooleanField(label='ID', required=False)
+    
+    def __init__(self, *args, **kwargs):
+        super(TaskExportForm, self).__init__(*args, **kwargs)
+        self.fields['format'].widget.attrs.update({'class': 'input-small'})
+    
 
 class TaskAdvancedForm(forms.ModelForm):
     _tags = forms.CharField(max_length=200)
