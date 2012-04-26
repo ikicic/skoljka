@@ -4,7 +4,7 @@ from django.template import RequestContext
 
 from activity.models import Action
 from task.models import Task
-from task.templatetags.task_tags import cache_additional_info as _task__cache_additional_info
+from task.templatetags.task_tags import cache_task_info
 from permissions.constants import VIEW
 #from recommend.utils import refresh_user_information
 from recommend.models import UserRecommendation
@@ -49,7 +49,9 @@ def homepage(request):
     
     if recommend:
         recommend = Task.objects.filter(id__in=recommend)
-        _task__cache_additional_info(recommend, request.user)
+        
+        # context, tasks
+        cache_task_info({'user': request.user}, recommend)
 
     # recommend = tasks = []
     return render_to_response('homepage.html', {

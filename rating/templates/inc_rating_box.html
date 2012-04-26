@@ -1,20 +1,11 @@
-<script>
-$(function(){
- $('.{{ m.field.name }}-star').rating({
-  callback: function(v,l){
-   $(this.form).ajaxSubmit({
-    target: '#{{ m.field.name }}-value'
-   });
-  }
- });
-});
-</script>
 <div>
-<form style="display: inline;" action="/ajax/rating/vote/{{ m.instance.id }}/{{ m.get_content_type.id }}/{{ m.field.name }}/" method="POST">
-    <div style="float:left;width:60px;">{{ text }}:</div>
-    {% csrf_token %}
-    {% for x in m.get_range_and_titles %}
-        <input name="{{ m.field.name }}" type="radio" class="{{ m.field.name }}-star{{ m.get_star_split }}" value="{{ x.0 }}" title="{{ x.1 }}"{% ifequal user_vote x.0 %} checked="checked"{% endifequal %}>{% endfor %}
-    &nbsp; Avg: <span id="{{ m.field.name }}-value">{{ m.get_average|floatformat:1 }}</span>
-</form>
+  <div style="float:left;width:60px;">{{ text }}:</div>
+  {% for x in m.get_range_and_titles %}
+    <input name="{{ m.field.name }}" type="radio" class="{{ m.field.name }}-star{{ m.get_star_split }}" value="{{ x.0 }}" title="{{ x.1 }}"{% ifequal user_vote x.0 %} checked="checked"{% endifequal %}>
+  {% endfor %}
+  &nbsp; Avg: <span id="{{ m.field.name }}-value">{{ m.get_average|floatformat:1 }}</span>
 </div>
+
+<script>
+  jquery_rating_submit('{{ m.field.name }}','/ajax/rating/vote/{{ m.instance.id }}/{{ m.get_content_type.id }}/{{ m.field.name }}/');
+</script>

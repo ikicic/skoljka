@@ -5,7 +5,7 @@ import taggit
 
 from rating.fields import RatingField, SUM
 
-VOTE_WRONG = -5
+VOTE_WRONG = -1
 
 class Tag(taggit.models.TagBase):
     weight = models.FloatField(default=1.0)

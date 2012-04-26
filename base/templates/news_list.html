@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% load news_tags %}
+
+{% block title %}Novosti{% endblock %}
+
+{% block content %}
+<h3>Novosti</h3>
+
+<div style="float:right;">
+  <a href="/news/new/" class="btn">Dodaj novost</a>
+</div>
+
+{% show_news %}
+
+{% endblock %}

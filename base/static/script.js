@@ -100,6 +100,7 @@ $(function(){
 
 /* Tag tooltip & add new tag */
 $(function(){
+  if (!is_authenticated) return;
   if (!( $('.tag_list').length )) return;
   $('body').append(
       '<div id="tag_tooltip" class="tag_tooltip">'
@@ -225,3 +226,18 @@ $(function() {
     $('#solution_ratings').toggle();
   });
 });
+
+/* jQuery Rating Submit Function */
+function jquery_rating_submit(name, url) {
+  $(function() {
+    $('.' + name + '-star').rating({
+      callback: function(v, l) {
+        data = {};
+        data[name] = typeof v == 'undefined' ? 0 : v;
+        $.post(url, data, function(x) {
+          $('#' + name + '-value').html(x);
+        });
+      }
+    });
+  });
+}

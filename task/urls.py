@@ -7,15 +7,16 @@ urlpatterns = patterns('',
 
     (r'^(?P<id>\d+)/$', 'task.views.detail'),
     (r'^(?P<id>\d+)/similar/$', 'task.views.similar'),
+    
+    # DEPRECATED
     (r'^multiple/(?P<ids>[0-9,]+)/$', 'task.views.detail_multiple'),
 
     (r'^new/$', 'task.views.new'),
     (r'^new/advanced/$', 'task.views.advanced_new'),
     (r'^(?P<task_id>\d+)/edit/$', 'task.views.new'),
     
-    # this url format to keep robots away with Disallow: /task/export/
-    (r'^export/latex/(?P<ids>[0-9,]+)/', 'task.views.export_to_latex'),
-    (r'^export/pdf/(?P<ids>[0-9,]+)/', 'task.views.export_to_pdf'),
+    # this url format used to keep robots away with Disallow: /task/export/
+    (r'^export/(?P<format>\w+)/(?P<ids>[0-9,]+)/', 'task.views.export'),
     (r'^new/finish/$',
         TemplateView.as_view(template_name='task_new_finish.html')),
 )

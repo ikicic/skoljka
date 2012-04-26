@@ -8,7 +8,7 @@ urlpatterns = patterns('',
     (r'^refreshscore/$', 'userprofile.views.refresh_score'),
 
     (r'^memberlist/$', ListView.as_view(
-        queryset=User.objects.select_related('profile'),
+        queryset=User.objects.select_related('profile').exclude(username='arhiva'),
         context_object_name="user_list",
         template_name="memberlist.html",
     )),

@@ -9,19 +9,18 @@
 </div>
 
 <script>
-  $(function(){
-   $('.attdel').click(function(){
-    c=$(this).attr('class')
-    id = $(this).attr('name').substr(c.length)
-    name = $(this).parent().prev().children(":first").html()
+$(function(){
+  $('.attdel').click(function(){
+    id = $(this).attr('data-id')
+    name = $(this).attr('data-name')
     if (confirm('Jeste li sigurni da želite izbrisati fajl \'' + name + '\'?')) {
-     $.ajax({
-      url: '/attachment/' + id + '/delete/',
-      success: function(){window.location.reload();}
-     });
+      $.ajax({
+        url: '/attachment/' + id + '/delete/',
+        success: function(){window.location.reload();}
+      });
     }
-   });
   });
+});
 </script>
 
 <div class="well">
@@ -31,7 +30,7 @@
         <tr>
             <td><a href="{{ x.get_url }}">{{ x.get_filename }}</a></td>
             <td>{{ x.file.size|filesizeformat }}</td>
-            <td><a class="attdel" name="attdel{{ x.id }}" href="#" title="Izbiši">Izbriši</a><br></td>
+            <td><a class="attdel" data-id="{{ x.id }}" data-name="{{ x.get_filename }}" href="#" title="Izbiši">Izbriši</a><br></td>
         </tr>
     {% empty %}
         <tr><td><i>Nema datoteka.</i></td></tr>

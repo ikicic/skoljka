@@ -2,10 +2,12 @@
 {% load solution_tags %}
 
 <div class="{{ div_class }}">
+  {% if well %}
   <div class="well">
+  {% endif %}
     <div style="float:right;text-align:right;">
       {% tag_list task %}<br>
-      {% solution_label task %}<br>
+      {% solution_label task %}
     </div>
     <h4><a href="/task/{{ task.id }}/{{ url_suffix }}" class="task">{{ task.name }}</a></h4><br>
 
@@ -14,5 +16,7 @@
     {% if 'timesince' in options %}
       <div style="text-align:right;color:gray;">{{ task.date_created|timesince }} ago</div>
     {% endif %}
+  {% if well %}
   </div>
+  {% endif %}
 </div>

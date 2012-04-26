@@ -4,15 +4,14 @@
   <head>
     <link href="/static/bootstrap.css" rel="stylesheet" type="text/css" />
     <link href="/static/base.css" rel="stylesheet" type="text/css" />
-    <link href="/static/images/shell.ico" rel="shortcut icon" />
+    <link href="/static/images/favicon.ico" rel="shortcut icon" />
+    <script>is_authenticated={{ user.is_authenticated|lower }};</script>
     <script src="/static/jquery.min.js" type="text/javascript"></script>
     <script src="http://cdn.jquerytools.org/1.2.6/all/jquery.tools.min.js"></script>
-    <script src="/static/jquery.form.min.js" type="text/javascript" language="javascript"></script>
     <script src="/static/jquery.MetaData.js" type="text/javascript" language="javascript"></script>
     <script src="/static/jquery.rating.pack.js" type="text/javascript" language="javascript"></script>
     <script src="/static/jquery.autocomplete.min.js" type="text/javascript" language="javascript"></script>
     <script src="/static/script.js" type="text/javascript" language="javascript"></script>
-    <link href="/static/jquery.rating.css" type="text/css" rel="stylesheet" />
 
     {% block header_list %} {% endblock %} {# put your css-files here #}
     <title>{% block title %}Školjka{% endblock %}</title>
@@ -20,11 +19,13 @@
 <body>
 
 <div class="row well header">
-  <div style="float:left;"><h1><a href="/" class="sitename">Školjka</a></h1></div>
+  <div style="float:left;">
+    <h1><a href="/" class="sitename"><img src="/static/images/shell32.png" style="vertical-align:top;"> Školjka</a></h1>
+  </div>
   <div style="float:right;margin-top:4px;">
     <div class="row-fluid">
       <div style="float:left;margin-right:5px;">
-      <h3><a href="/folder/zadatak-dana/?sort=id&dir=desc">Zadatak dana</a></h3>
+      {# <h3><a href="/folder/zadatak-dana/?sort=id&dir=desc">Zadatak dana</a></h3> #}
       {% if user.profile.selected_folder %}
         Uređivanje mape <a href="/folder/{{ user.profile.selected_folder.id }}/">{{ user.profile.selected_folder.name }}</a>
       {% endif %}
@@ -81,6 +82,11 @@
             {% endif %}
             <br>
             <li><a href="/help/"><i class="icon-question-sign"></i> Pomoć</a></li>
+            {% if user.is_staff %}
+              <br>
+              <li class="nav-header">Admin</li>
+              <li><a href="/admin/"><i class="icon-lock"></i> Admin</a></li>
+            {% endif %}
           </ul>
         </div>
       </div>

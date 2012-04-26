@@ -81,7 +81,9 @@ def search_tasks(tags=[], none_if_blank=True, user=None, **kwargs):
         return Task.objects.none()
     task_content_type = ContentType.objects.get_for_model(Task)
 
-    if kwargs.get('show_hidden'):
+    if kwargs.get('no_hidden_check'):
+        tasks = Task.objects.all()
+    elif kwargs.get('show_hidden'):
         tasks = Task.objects.for_user(user, VIEW).distinct()
     else:
         tasks = Task.objects.filter(hidden=False).distinct()

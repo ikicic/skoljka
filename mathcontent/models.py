@@ -30,11 +30,8 @@ class MathContent(models.Model):
     text = models.TextField(max_length=MAX_LENGTH, verbose_name='Tekst')
     html = models.TextField(blank=True, null=True)
     
-    class Admin:
-        pass
-    
     def __unicode__(self):
-        return self.text
+        return self.short()
         
     def short(self, length=50):
         return self.text[:length] + "..." if len(self.text) > length else self.text
@@ -66,7 +63,7 @@ class MathContent(models.Model):
 
     def convert_to_latex(self):
         from mathcontent.utils import convert_to_latex as _convert_to_latex
-        return _convert_to_latex(self.text)
+        return _convert_to_latex(self.text, self)
 
 
 def attachment_upload_to(instance, filename):
@@ -91,3 +88,5 @@ class Attachment(models.Model):
     def get_filename(self):
         return os.path.basename(self.file.name)
         
+    def get_full_path_and_filename(self):
+        return self.file.name

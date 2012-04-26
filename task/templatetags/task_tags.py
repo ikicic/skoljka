@@ -12,11 +12,12 @@ import collections
 register = template.Library()
 
 @register.inclusion_tag('inc_task_small_box.html', takes_context=True)
-def task_small_box(context, task, div_class='', url_suffix='', options=''):
-    return {'user': context['user'], 'task': task, 'div_class': div_class, 'url_suffix': url_suffix, 'options': options}
+def task_small_box(context, task, div_class='', url_suffix='', options='', well=True):
+    return {'user': context['user'], 'task': task, 'div_class': div_class, 'url_suffix': url_suffix, 'options': options, 'well': well}
 
-@register.filter
-def cache_additional_info(tasks, user):
+@register.simple_tag(takes_context=True)
+def cache_task_info(context, tasks):    
+    user = context['user']
     task_content_type = ContentType.objects.get_by_natural_key(app_label="task", model="task")
     ids = [x.id for x in tasks]
     
@@ -44,7 +45,10 @@ def cache_additional_info(tasks, user):
             for task in tasks:
                 task.is_in_folder = task.id in selected_tasks
         
-    return tasks
+        
+    # ------ context variables --------
+    context['task_ids'] = ids
+    return ''
 
 # move to tags/templatetags/?
 @register.simple_tag(takes_context=True)
