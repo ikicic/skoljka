@@ -84,6 +84,8 @@ def refresh_user_information(user):
         tag.save()
 
 def recommend_task(user, task, recursion=2):
+    # iskopcano za prezentaciju, jer tak i tak ima krivu formulu
+    return
     score = user_task_score(user, task)
     if score > 0:
         object, created = UserRecommendation.objects.get_or_create(user=user, task=task, defaults={'score': score})

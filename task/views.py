@@ -308,7 +308,7 @@ def similar(request, id):
     task = get_object_or_404(Task, pk=id)
     
     # TODO: dovrsiti, ovo je samo tmp
-    task.update_similar_tasks(1)
+    # task.update_similar_tasks(1)
     if request.user.is_authenticated():
         task_event(request.user, task, 'view')
     
@@ -325,10 +325,10 @@ def similar(request, id):
     sorted_tasks = dict(similar)
     for s in solutions:
         p = 1.0
-        if s.is_todo(): p = 2
-        elif s.is_as_solved(): p = 3
+        if s.is_todo(): p = 0.5
+        elif s.is_as_solved(): p = 0.3
         elif s.is_submitted():
-            if s.is_correct(): p = 5
+            if s.is_correct(): p = 0.2
         
         sorted_tasks[s.task_id] *= p
         

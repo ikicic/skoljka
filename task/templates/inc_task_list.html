@@ -36,19 +36,21 @@
       {% enduseroptions %}
     </div>
     <br><br>
-        
+
     {# value must be unicode #}
     {% if view == '0' %}
       {% include "inc_task_list_table.html" %}
     {% endif %}
 
     {% if view == '1' %}
+      {% paginate %}
       {% for task in tasks %}
         {% task_small_box task 'task_text' '' '' %}
       {% endfor %}
     {% endif %}
 
     {% if view == '2' %}
+      {% paginate %}
       {% for task in tasks %}
         {% cycle '<div class="row-fluid">' '' %}
         {% task_small_box task 'span6' '' %}
