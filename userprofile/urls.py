@@ -26,5 +26,5 @@ urlpatterns = patterns('',
     (r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
 
     url(r'^accounts/register/$', 'userprofile.views.new_register', name='registration_register'),
-    (r'^accounts/', include('registration.urls')),
+    (r'^accounts/', include('registration.backends.default.urls')),
 )

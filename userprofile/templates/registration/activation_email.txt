@@ -1,11 +1,9 @@
-You (or someone pretending to be you) have asked to register an account at 
-{{ site.name }}.  If this wasn't you, please ignore this email
-and your address will be removed from our records.
+Zahvaljujemo Vam što ste se registrirali na Školjci!
 
-To activate this account, please click the following link within the next 
-{{ expiration_days }} days:
+Kako biste aktivirali svoj korisnički račun, molimo
+Vas da kliknete na sljedeći link:
 
-http://{{site.domain}}/accounts/activate/{{ activation_key }}
+http://{{ site.domain }}/accounts/activate/{{ activation_key }}
 
-Sincerely,
-{{ site.name }} Management
+Školjka
+online arhiva zadataka iz matematike

@@ -17,7 +17,7 @@ def new_register(request):
     if request.user.is_authenticated():
         return HttpResponseRedirect('/')
     from registration.views import register as _register
-    return _register(request, form_class=UserCreationForm)
+    return _register(request, 'registration.backends.default.DefaultBackend', form_class=UserCreationForm)
 
 
 @login_required
