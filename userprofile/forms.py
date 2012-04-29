@@ -9,7 +9,7 @@ from registration.models import RegistrationProfile
 
 # na temelju django-registration/forms.py RegistrationForm
 
-attrs_dict = { 'class': 'required' }
+attrs_dict = {'class': 'required'}
 
 class UserCreationForm(forms.Form):
     username = forms.RegexField(regex=r'^\w+$', max_length=30, widget=forms.TextInput(attrs=attrs_dict), label=_(u'Korisničko ime'),
@@ -37,31 +37,6 @@ class UserCreationForm(forms.Form):
                 raise forms.ValidationError(_(u'You must type the same password each time'))
         return self.cleaned_data
     
-    def save(self, profile_callback=None):
-        # postoji li neki pametniji nacin za ovo?
-        class RegisterCreateProfile(object):
-            def __call__(self, user):
-                C = self.form.cleaned_data
-                
-                # one member Group for each User
-                group = Group(name=user.username)
-                group.save()
-
-                # spremi profil, ostali podaci idu preko Edit Profile
-                profile = UserProfile(user=user, private_group=group)
-                profile.save()
-                
-                user.groups.add(group)
-                
-        callback = RegisterCreateProfile()
-        callback.form = self
-                
-        new_user = RegistrationProfile.objects.create_inactive_user(
-            username=self.cleaned_data['username'],
-            password=self.cleaned_data['password1'],
-            email=self.cleaned_data['email'],
-            profile_callback=callback)
-        return new_user
 
 class UserEditForm(forms.ModelForm):
     class Meta:
