@@ -1,6 +1,9 @@
-﻿from django.db import models
-from django.contrib.auth.models import User, Group
+﻿from django.contrib.auth.models import User, Group
+from django.db import models
+from django.dispatch import receiver
 from django.template.loader import add_to_builtins
+
+from registration.signals import user_registered
 
 from tags.models import Tag
 
@@ -9,6 +12,19 @@ from rating.constants import DIFFICULTY_RATING_ATTRS
 from task.models import Task
 from solution.models import SOLUTION_CORRECT_SCORE
 
+
+@receiver(user_registered)
+def create_user_profile(sender, user, request, **kwargs):
+    # one member Group for each User
+    group = Group(name=user.username)
+    group.save()
+
+    # spremi profil, ostali podaci idu preko Edit Profile
+    profile = UserProfile(user=user, private_group=group)
+    profile.save()
+    
+    user.groups.add(group)
+    
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile')
@@ -43,6 +59,9 @@ class UserProfile(models.Model):
     solved_count = models.IntegerField(default=0)
     score = models.FloatField(default=0)
     diff_distribution = models.CharField(max_length=100)
+    
+    def __unicode__(self):
+        return u'UserProfile for ' + self.user.username
     
     def get_absolute_url(self):
         return '/profile/%d/' % self.id
