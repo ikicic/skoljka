@@ -13,7 +13,7 @@ SOLUTION_RATING_ATTRS = {
 }
 
 # TODO: nekako drugacije ovo nazvati
-SOLUTION_CORRECT_SCORE = 2
+SOLUTION_CORRECT_SCORE = 2.7
 
 # solution.status
 STATUS = {'blank': 0, 'as_solved': 1, 'todo': 2, 'submitted': 3}

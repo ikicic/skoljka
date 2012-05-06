@@ -1,5 +1,6 @@
 ﻿from django.contrib.auth.models import User, Group
 from django.db import models
+from django.db.models import Q
 from django.dispatch import receiver
 from django.template.loader import add_to_builtins
 
@@ -10,7 +11,7 @@ from tags.models import Tag
 from folder.models import Folder
 from rating.constants import DIFFICULTY_RATING_ATTRS
 from task.models import Task
-from solution.models import SOLUTION_CORRECT_SCORE
+from solution.models import STATUS, SOLUTION_CORRECT_SCORE
 
 
 @receiver(user_registered)
@@ -58,7 +59,7 @@ class UserProfile(models.Model):
     # deprecated or to fix
     solved_count = models.IntegerField(default=0)
     score = models.FloatField(default=0)
-    diff_distribution = models.CharField(max_length=100)
+    diff_distribution = models.CharField(max_length=100, blank=True)
     
     def __unicode__(self):
         return u'UserProfile for ' + self.user.username
@@ -79,10 +80,16 @@ class UserProfile(models.Model):
         
         
     def update_diff_distribution(self, commit=True):
-        tasks = Task.objects.filter(hidden=False, solution__author=self, solution__correctness_avg__gte=SOLUTION_CORRECT_SCORE).values('id', 'difficulty_rating_avg').distinct().order_by()
+        tasks = Task.objects.filter(
+            Q(solution__status=STATUS['as_solved']) | Q(solution__correctness_avg__gte=SOLUTION_CORRECT_SCORE) & Q(solution__status=STATUS['submitted']),
+            hidden=False,
+            solution__author=self
+        ).values('id', 'difficulty_rating_avg').distinct().order_by()
+        print tasks.query
 
         distribution = [0] * DIFFICULTY_RATING_ATTRS['range']
         for x in tasks:
+            print x, x['difficulty_rating_avg']
             distribution[int(x['difficulty_rating_avg'] - 0.5)] += 1
 
         self.diff_distribution = ','.join(map(str, distribution))
