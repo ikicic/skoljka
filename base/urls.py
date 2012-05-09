@@ -8,5 +8,7 @@ urlpatterns = patterns('',
     (r'^$', 'base.views.homepage'),
 #    (r'robots\.txt$', direct_to_template, {'template': 'robots.txt', 'mimetype': 'text/plain'}),
 
-    (r'^help/$', 'base.views.help'),
+    (r'^help/$', direct_to_template, {'template': 'help/help.html'}),
+    (r'^help/instructions/$', direct_to_template, {'template': 'help/help_instructions.html'}),
+    (r'^about/$', direct_to_template, {'template': 'about.html'}),
 )

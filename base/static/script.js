@@ -32,7 +32,7 @@ $(function(){
   /* Preview button and help link */
   f.children('input[type=submit]').after(
       ' <button type="button" class="btn mathcontent_preview_button">Pregled</button>'
-    + ' <a href="/help/#format" title="Pomoć oko formata" target="_blank"><i class="icon-question-sign"></i></a>'
+    + ' <a href="/help/instructions/#format" title="Pomoć oko formata" target="_blank"><i class="icon-question-sign"></i></a>'
   )
   f.append('<br><div class="mathcontent_preview well" style="display:none;"></div>')
 
@@ -241,3 +241,22 @@ function jquery_rating_submit(name, url) {
     });
   });
 }
+
+/* Email decode */
+/* email = even position characters + reversed(odd) (0-based) */
+function decode_email(e) {
+  output = '';
+  for (i = 0; i < e.length; ++i)
+    output += i % 2 == 0 ? e[i / 2] : e[e.length - (i + 1) / 2];
+  return output;
+}
+
+$(function() {
+  $('.imejl').each(function() {
+    a = $(this);
+    email = decode_email(a.attr('data-address'));
+    if (a.html().length == 0)
+      a.html(email);
+    a.attr('href', 'mailto:' + email);
+  });
+});

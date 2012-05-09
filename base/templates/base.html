@@ -23,6 +23,7 @@
   <div style="float:left;">
     <h1><a href="/" class="sitename"><img src="/static/images/shell32.png" style="vertical-align:top;"> Školjka</a></h1>
   </div>
+  {% if not user.is_authenticated or user.profile.selected_folder %}
   <div style="float:right;margin-top:4px;">
     <div class="row-fluid">
       <div style="float:left;margin-right:5px;">
@@ -43,6 +44,7 @@
       {% endif %}
     </div>
   </div>
+  {% endif %}
 </div>
 
 <div class="container-fluid">
@@ -83,6 +85,7 @@
             {% endif %}
             <br>
             <li><a href="/help/"><i class="icon-question-sign"></i> Pomoć</a></li>
+            <li><a href="/about/"><i class="icon-flag"></i> O nama</a></li>
             {% if user.is_staff %}
               <br>
               <li class="nav-header">Admin</li>
@@ -103,6 +106,9 @@
 </div>
 
 
-<div class="footer">Školjka v0.6 &copy; 2012 Ivica Kičić &amp; <a href="http://getaldic.org">MNM</a>.</div>
+<div class="footer">
+  Školjka v0.6 © 2012 Ivica Kičić &amp; <a href="http://getaldic.org/">MNM</a>. &nbsp;
+  Hosting by <a href="http://www.kset.org/"><img src="/static/images/kset_logo_white.png" style="vertical-align:-2px;"></a>
+</div>
 </body>
 </html>

@@ -1,4 +1,4 @@
-from django import template
+﻿from django import template
 from django.template.base import TemplateSyntaxError
 from django.utils.safestring import mark_safe
 
@@ -143,3 +143,13 @@ def userlink(user, what=None):
         name = user.username
             
     return mark_safe(u'<a href="/profile/%d/" title="%s">%s</a>' % (user.pk, escape(user.get_full_name()), escape(name)))
+
+
+
+def encode_email(email):
+    a, b = email[::2], email[1::2]
+    return a + b[::-1]
+
+@register.simple_tag
+def email_link(email, html=''):
+    return mark_safe(u'<a href="#" class="imejl" title="Pošalji email" data-address="{0}">{1}</a>'.format(encode_email(email), html))
