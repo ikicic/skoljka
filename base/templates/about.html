@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}O nama{% endblock %}
+
+{% block header_list %}
+<style>
+  h4 { margin-top: 40px; }
+  p { margin: 5px 0px 0px 8px; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+<h2>Školjka</h2>
+online arhiva zadataka iz matematike
+
+
+<h4>Ideja</h4>
+<p>Ivica Kičić - {% email_link 'ivicakicic@gmail.com' '<i class="icon-envelope"></i>' %}</p>
+
+
+<h4>Programeri</h4>
+<p>Ivica Kičić (glavni programer)<br>
+Ivan Kokan</p>
+
+
+<h4>Podrška</h4>
+<p>Udruga Mladi nadareni matematičari "Marin Getaldić" - <a href="http://getaldic.org/">MNM</a></p>
+
+
+<h4>Hosting</h4>
+<p>Klub studenata elektrotehnike - <a href="http://www.kset.org/">KSET</a></p>
+
+<h4>Ostalo</h4>
+<p>Crno-bijele ikone - <a href="http://glyphicons.com/">Glyphicons</a><br>
+Druge ikone - <a href="http://findicons.com/icon/38001/shell">Logo</a> i <a href="http://findicons.com/">druge</a><br>
+</p>
+
+<h4>Kontakt</h4>
+<p>{% email_link 'skoljka@getaldic.org' %}</p>
+
+{% endblock %}
