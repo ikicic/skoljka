@@ -96,7 +96,7 @@ export_header = u'''
 
 # TODO: change to .format, not %
 export_title = u'\\subsection*{\\color{btn_primary}%s}'
-export_url = u'\\url{http://skoljka.org%s}'
+export_url = u'\\url{http://www.skoljka.org%s}'
 export_source = u'\\par\\footnotesize\\color{css_gray}%s'
 export_index = u'%d.'
 export_task = u'''
