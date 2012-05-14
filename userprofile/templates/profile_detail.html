@@ -75,5 +75,14 @@
 {% endfor %}
 <br><br>
 
+<h3 style="display:inline;">Dodani zadaci</h3> <a href="/task/user/{{ profile.id }}/">(otvori sve)</a><br>
+{% for x in task_added %}
+  {% if not forloop.first %}|{% endif %}
+  {{ x.get_link }}
+{% empty %}
+  <i>Prazno</i>
+{% endfor %}
+<br><br>
+
 <a href="/solution/user/{{ profile.id }}/">Sva poslana rješenja</a><br>
 {% endblock %}

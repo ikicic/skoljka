@@ -12,6 +12,7 @@ from userprofile.models import UserProfile
 from rating.constants import DIFFICULTY_RATING_ATTRS
 from recommend.models import UserTagScore
 from solution.models import STATUS
+from task.models import Task
 
 def new_register(request):
     if request.user.is_authenticated():
@@ -65,8 +66,10 @@ def profile(request, pk):
     
     
     # task lists
+    # TODO: permissions
     todo = user.solution_set.filter(status=STATUS['todo']).select_related('task')[:10]
     solved = user.solution_set.filter(status__in=[STATUS['as_solved'], STATUS['submitted']]).select_related('task')[:10]
+    task_added = Task.objects.filter(author=user, hidden=False)[:10]
     
     
     
@@ -76,6 +79,7 @@ def profile(request, pk):
         'visible_groups': visible_groups.distinct(),
         'tags': tags,
         'todo': todo,
+        'task_added': task_added,
         'solved': solved,
     }, context_instance=RequestContext(request))
 

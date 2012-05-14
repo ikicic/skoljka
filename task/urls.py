@@ -4,6 +4,7 @@ from task.models import Task
 
 urlpatterns = patterns('',
     (r'^$', 'task.views.task_list'),
+    (r'^user/(?P<user_id>\d+)/$', 'task.views.task_list'),
 
     (r'^(?P<id>\d+)/$', 'task.views.detail'),
     (r'^(?P<id>\d+)/similar/$', 'task.views.similar'),
