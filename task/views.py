@@ -256,11 +256,14 @@ def new(request, task_id=None):
         )
 
 @response('task_list.html')
-def task_list(request):
+def task_list(request, user_id=None):
     tasks = Task.objects.for_user(request.user, VIEW).select_related('content').distinct()
     # treba mi LEFT JOIN ON (task_task.id = solution_solution.task_id AND solution_solution.author_id = ##)
     # sada se umjesto toga koristi .cache_task_info()
     # (slicno za tag-ove)
+    
+    if user_id:
+        tasks = tasks.filter(author_id=user_id)
         
     return {
         'tasks' : tasks,

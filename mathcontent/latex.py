@@ -127,6 +127,8 @@ tex_preamble = r'''
 # TODO: enable client-side caching
 # TODO: join depth queries
 def generate_png(eq, format):
+    eq = eq.strip()
+    
     eq_hash = hashlib.md5((eq+format).encode('utf-8')).hexdigest()
     try:
         latex_element = LatexElement.objects.only("depth").get(hash=eq_hash)
