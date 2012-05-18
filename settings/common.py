@@ -87,7 +87,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'sentry.client.middleware.Sentry404CatchMiddleware',
+#    'sentry.client.middleware.Sentry404CatchMiddleware',
 #    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django_sorting.middleware.SortingMiddleware',
     'pagination.middleware.PaginationMiddleware',
@@ -127,8 +127,8 @@ INSTALLED_APPS = (
     'django_sorting',
     'pagination',
     'registration',
-    'sentry',
-    'sentry.client',
+#    'sentry',
+#    'sentry.client',
     'taggit',
     
     'activity',
@@ -164,11 +164,11 @@ LOGGING = {
         },
     },
     'handlers': {
-        'sentry': {
-            'level': 'DEBUG',
-            'class': 'sentry.client.handlers.SentryHandler',
-            'formatter': 'verbose'
-        },
+#        'sentry': {
+#            'level': 'DEBUG',
+#            'class': 'sentry.client.handlers.SentryHandler',
+#            'formatter': 'verbose'
+#        },
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
@@ -178,13 +178,13 @@ LOGGING = {
     'loggers': {
         '()': {
             'level': 'WARNING',
-            'handlers': ['sentry'],
+#            'handlers': ['sentry'],
         },
-        'sentry.errors': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-            'propagate': False,
-        },
+#        'sentry.errors': {
+#            'level': 'DEBUG',
+#            'handlers': ['console'],
+#            'propagate': False,
+#        },
     },
 }
 
