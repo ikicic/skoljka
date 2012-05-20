@@ -160,6 +160,7 @@ def generate_png(eq, format):
         svgcmd = "%s -p 1 -n -o %s.svg %s" % (latex_full_filename('dvisvgm'), filename, filename)
         status, stdout = getstatusoutput(cmd)
     
+    depth = ERROR_DEPTH_VALUE
     if not error and status == 0:
         depth_re = re.compile(r'\[\d+ depth=(-?\d+)\]')
         for line in stdout.splitlines():
@@ -167,8 +168,8 @@ def generate_png(eq, format):
             if m:
                 depth = int(m.group(1))
                 break
-    else: # error
-        depth = ERROR_DEPTH_VALUE
+        if depth == ERROR_DEPTH_VALUE:
+            print 'ERROR stdout:', stdout
 
     if not error and status == 0:
         os.remove(filename + '.tex')
