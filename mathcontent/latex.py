@@ -162,9 +162,9 @@ def generate_png(eq, format):
     
     depth = ERROR_DEPTH_VALUE
     if not error and status == 0:
-        depth_re = re.compile(r'\[\d+ depth=(-?\d+)\]')
+        depth_re = re.compile(r'.*\[\d+ depth=(-?\d+)\]')
         for line in stdout.splitlines():
-            m = depth_re.match(line)
+            m = depth_re.match(line.strip())
             if m:
                 depth = int(m.group(1))
                 break
