@@ -10,42 +10,42 @@
 
 <h2>Pretraživanje</h2>
 <form action="/search/" method="get" class="well">
-{% if errors %}<div class="alert alert-error">{{ errors }}</div>{% endif %}
-<table>
+  {% if errors %}<div class="alert alert-error">{{ errors }}</div>{% endif %}
+  <table>
     {{ form.as_table }}
     {% if advanced_form %}
     <tr><td colspan="2">
-        <a href="#" class="toggler toggle"{% if search_solved_count %} style="display:none;"{% endif %}>Prikaži napredne opcije</a>
-        <a href="#" class="toggler toggle"{% if not search_solved_count %} style="display:none;"{% endif %}>Sakrij napredne opcije</a>
-        <div class="toggle"{% if not search_solved_count %} style="display:none;"{% endif %}>
-            {{ advanced_form.as_p }}
-        </div>
-        <script>
-          $(".toggler").click(function(){
-           $(".toggle").toggle();
-          });
-        </script>
+      <a href="#" class="toggler toggle"{% if search_solved_count %} style="display:none;"{% endif %}>Prikaži napredne opcije</a>
+      <a href="#" class="toggler toggle"{% if not search_solved_count %} style="display:none;"{% endif %}>Sakrij napredne opcije</a>
+      <div class="toggle"{% if not search_solved_count %} style="display:none;"{% endif %}>
+        {{ advanced_form.as_p }}
+      </div>
+      <script>
+        $(".toggler").click(function(){
+          $(".toggle").toggle();
+        });
+      </script>
     </td></tr>
     {% endif %}
     <tr><td colspan="2">
         <button type="submit" class="btn btn-primary"><i class="icon-search"></i> Pretraži</button>
     </td></tr>
-</table>
+  </table>
 </form>
 
 {% tags_autocomplete_script %}
 
 
 {% if any %}
-    <ul>
+  <ul>
     {% for tag in tags %}
-        <li><a href="/search/?q={{ tag }}"{% if tag.0 == '$' %} class="hidden_tag"{% endif %}>{{ tag }}</a></li>
+      <li><a href="/search/?q={{ tag }}"{% if tag.0 == '$' %} class="hidden_tag"{% endif %}>{{ tag }}</a></li>
     {% endfor %}
-    </ul>
+  </ul>
 
-    {% if not errors %}
-        {% include "inc_task_list.html" with plus_exclude=tags empty_message="Ne postoji zadatak s navedenim tagovima" %}
-    {% endif %}
+  {% if not errors %}
+    {% include "inc_task_list.html" with plus_exclude=tags empty_message="Ne postoji zadatak s navedenim tagovima" %}
+  {% endif %}
 {% endif %}
 
 {% endblock content %}

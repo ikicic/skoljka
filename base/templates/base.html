@@ -2,17 +2,17 @@
 
 <html>
   <head>
-    <link href="/static/bootstrap.css" rel="stylesheet" type="text/css" />
-    <link href="/static/base.css" rel="stylesheet" type="text/css" />
-    <link href="/static/images/favicon.ico" rel="shortcut icon" />
+    <link href="/static/bootstrap.css" rel="stylesheet">
+    <link href="/static/base.css" rel="stylesheet">
+    <link href="/static/images/favicon.ico" rel="shortcut icon">
     <script>is_authenticated={{ user.is_authenticated|lower }};</script>
-    <script src="/static/jquery.min.js" type="text/javascript"></script>
+    <script src="/static/jquery.min.js"></script>
     {# <script src="http://cdn.jquerytools.org/1.2.6/all/jquery.tools.min.js"></script> #}
-    <script src="/static/jquery.tools.min.js" type="text/javascript" language="javascript"></script>
-    <script src="/static/jquery.MetaData.js" type="text/javascript" language="javascript"></script>
-    <script src="/static/jquery.rating.pack.js" type="text/javascript" language="javascript"></script>
-    <script src="/static/jquery.autocomplete.min.js" type="text/javascript" language="javascript"></script>
-    <script src="/static/script.js" type="text/javascript" language="javascript"></script>
+    <script src="/static/jquery.tools.min.js"></script>
+    <script src="/static/jquery.MetaData.js"></script>
+    <script src="/static/jquery.rating.pack.js"></script>
+    <script src="/static/jquery.autocomplete.min.js"></script>
+    <script src="/static/script.js"></script>
 
     {% block header_list %} {% endblock %} {# put your css-files here #}
     <title>{% block title %}Školjka{% endblock %}</title>
@@ -24,85 +24,87 @@
     <h1><a href="/" class="sitename"><img src="/static/images/shell32.png" style="vertical-align:top;"> Školjka</a></h1>
   </div>
   {% if not user.is_authenticated or user.profile.selected_folder %}
-  <div style="float:right;margin-top:4px;">
-    <div class="row-fluid">
-      <div style="float:left;margin-right:5px;">
-      {# <h3><a href="/folder/zadatak-dana/?sort=id&dir=desc">Zadatak dana</a></h3> #}
-      {% if user.profile.selected_folder %}
-        Uređivanje mape <a href="/folder/{{ user.profile.selected_folder.id }}/">{{ user.profile.selected_folder.name }}</a>
-      {% endif %}
+    <div style="float:right;margin-top:4px;">
+      <div class="row-fluid">
+        <div style="float:left;margin-right:5px;">
+          {# <h3><a href="/folder/zadatak-dana/?sort=id&dir=desc">Zadatak dana</a></h3> #}
+          {% if user.profile.selected_folder %}
+            Uređivanje mape <a href="/folder/{{ user.profile.selected_folder.id }}/">{{ user.profile.selected_folder.name }}</a>
+          {% endif %}
+        </div>
+        {% if not user.is_authenticated %}
+          <div style="float:left;">
+            <form class="form-inline" action="/accounts/login/" method="POST">
+              {% csrf_token %}
+              <input id="id_username" name="username" type="text" class="input-small" placeholder="Korisničko ime">
+              <input id="id_password" name="password" type="password" class="input-small" placeholder="Lozinka">
+              <input type="submit" class="btn" value="Prijava">
+            </form>
+          </div>
+        {% endif %}
       </div>
-      {% if not user.is_authenticated %}
-      <div style="float:left;">
-        <form class="form-inline" action="/accounts/login/" method="POST">
-          {% csrf_token %}
-          <input id="id_username" name="username" type="text" class="input-small" placeholder="Korisničko ime">
-          <input id="id_password" name="password" type="password" class="input-small" placeholder="Lozinka">
-          <input type="submit" class="btn" value="Prijava">
-        </form>
-      </div>
-      {% endif %}
     </div>
-  </div>
   {% endif %}
 </div>
 
 <div class="container-fluid">
-    <div class="row-fluid">
-      <div class="span3">
-        <div class="well sidebar-nav">
-          {# FIXME: <br> inside <ul>? #}
-          <ul class="nav nav-list">
-            {% if user.is_authenticated %}
+  <div class="row-fluid">
+    <div class="span3">
+      <div class="well sidebar-nav">
+        {# FIXME: <br> inside <ul>? #}
+        <ul class="nav nav-list">
+          {% if user.is_authenticated %}
             Zdravo, {{ user|userlink:"first_name" }}!<br><br>
-            {% endif %}
-            <li class="nav-header">Menu</li>
-            <li><a href="/"><i class="icon-home"></i>Početna</a></li>
+          {% endif %}
+          <li class="nav-header">Menu</li>
+          <li><a href="/"><i class="icon-home"></i>Početna</a></li>
 
-            <li><a href="/folder/"><i class="icon-book"></i>Arhiva</a></li>
-            {% block menu_folder_container %}{% endblock %}
+          <li><a href="/folder/"><i class="icon-book"></i>Arhiva</a></li>
+          {% block menu_folder_container %}{% endblock %}
+          <br>
+          {% if user.is_authenticated %}
+            <li><a href="/pm/"><i class="icon-inbox"></i>Inbox
+              {% if user.get_profile.unread_pms %}
+                <span class="unread_pms_count">({{ user.get_profile.unread_pms }})</span>
+              {% endif %}
+            </a></li>
+          {% else %}
+            <li><a href="/accounts/register/" class="register"><i class="icon-arrow-right"></i>Registracija</a></li>
+            <li><a href="/accounts/login/"><i class="icon-arrow-right"></i>Prijava</a></li>
+          {% endif %}
+          <br>
+          <li><a href="/memberlist/"><i class="icon-user"></i>Korisnici</a></li>
+          {# <li><a href="/ranks/"><i class="icon-list"></i>Rang lista</a></li> #}
+          <li><a href="/usergroup/"><i class="icon-glass"></i>Grupe</a></li>
+          <br>
+          <li><a href="/task/"><i class="icon-envelope"></i>Zadaci</a></li>
+          <li><a href="/solution/"><i class="icon-pencil"></i>Rješenja</a></li>
+          <li><a href="/search/"><i class="icon-search"></i>Pretraživanje</a></li>
+          <br>
+          {% if user.is_authenticated %}
+            <li><a href="/accounts/logout/"><i class="icon-off"></i>Odjava</a></li>
             <br>
-            {% if user.is_authenticated %}
-              <li><a href="/pm/"><i class="icon-inbox"></i>Inbox
-                {% if user.get_profile.unread_pms %}<span class="unread_pms_count">({{ user.get_profile.unread_pms }})</span>{% endif %}
-              </a></li>
-            {% else %}
-              <li><a href="/accounts/register/" class="register"><i class="icon-arrow-right"></i>Registracija</a></li>
-              <li><a href="/accounts/login/"><i class="icon-arrow-right"></i>Prijava</a></li>
-            {% endif %}
+          {% endif %}
+          <br>
+          <li><a href="/help/"><i class="icon-question-sign"></i> Pomoć</a></li>
+          <li><a href="/about/"><i class="icon-flag"></i> O nama</a></li>
+          {% if user.is_staff %}
             <br>
-            <li><a href="/memberlist/"><i class="icon-user"></i>Korisnici</a></li>
-            {# <li><a href="/ranks/"><i class="icon-list"></i>Rang lista</a></li> #}
-            <li><a href="/usergroup/"><i class="icon-glass"></i>Grupe</a></li>
-            <br>
-            <li><a href="/task/"><i class="icon-envelope"></i>Zadaci</a></li>
-            <li><a href="/solution/"><i class="icon-pencil"></i>Rješenja</a></li>
-            <li><a href="/search/"><i class="icon-search"></i>Pretraživanje</a></li>
-            <br>
-            {% if user.is_authenticated %}
-              <li><a href="/accounts/logout/"><i class="icon-off"></i>Odjava</a></li>
-              <br>
-            {% endif %}
-            <br>
-            <li><a href="/help/"><i class="icon-question-sign"></i> Pomoć</a></li>
-            <li><a href="/about/"><i class="icon-flag"></i> O nama</a></li>
-            {% if user.is_staff %}
-              <br>
-              <li class="nav-header">Admin</li>
-              <li><a href="/admin/"><i class="icon-lock"></i> Admin</a></li>
-            {% endif %}
-          </ul>
-        </div>
-      </div>
-
-      <div class="span9">
-        <div class="well">
-          {% block content %}
-            <br><br><br>
-          {% endblock content %}
-        </div>
+            <li class="nav-header">Admin</li>
+            <li><a href="/admin/"><i class="icon-lock"></i> Admin</a></li>
+          {% endif %}
+        </ul>
       </div>
     </div>
+
+    <div class="span9">
+      <div class="well">
+        {% block content %}
+          <br><br><br>
+        {% endblock content %}
+      </div>
+    </div>
+  </div>
 </div>
 
 

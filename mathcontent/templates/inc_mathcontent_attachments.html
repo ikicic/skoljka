@@ -1,8 +1,8 @@
 {% if files %}
-<span style="font-size:12px;">
-Datoteke:<br>
-{% for x in files %}
+  <span style="font-size:12px;">
+  Datoteke:<br>
+  {% for x in files %}
     <i class="icon-download"></i> <i><a href="{{ x.get_url }}">{{ x.get_filename }}</a> {{ x.file.size|filesizeformat }}<br></i>
-{% endfor %}
-</span>
+  {% endfor %}
+  </span>
 {% endif %}

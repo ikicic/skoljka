@@ -10,19 +10,19 @@
 {% block content %}
 
 <div style="text-align:center;font-size:24px;">
-{% if group %}
+  {% if group %}
     [<a href="/usergroup/{{ group.id }}/">{{ group.name }}</a>] inbox
-{% else %}
+  {% else %}
     Inbox
-{% endif %}
+  {% endif %}
 </div>
 
 <br>
 {% if group %}
-<a href="/pm/new/{{ group.name }}/">Pošalji novu poruku na grupu</a><br><br>
+  <a href="/pm/new/{{ group.name }}/">Pošalji novu poruku na grupu</a><br><br>
 {% else %}
-<a href="/pm/outbox/">Outbox</a><br>
-<a href="/pm/new/">Pošalji novu poruku</a><br><br>
+  <a href="/pm/outbox/">Outbox</a><br>
+  <a href="/pm/new/">Pošalji novu poruku</a><br><br>
 {% endif %}
 
 
@@ -31,35 +31,39 @@
 {% cache_inbox_info pm %}
 
 {% for x in pm %}
-<div class="well{% if x.read == 0 %} unread{% endif %}">
+  <div class="well{% if x.read == 0 %} unread{% endif %}">
     <div style="float:right;" class="btn-group">
-        {% ifnotequal user x.message.author %}<a class="btn btn-mini" href="/pm/{{ x.message.id }}/reply/" title="Odgovori"><i class="icon-play"></i></a>{% endifnotequal %}
-        <a class="btn btn-mini" href="/pm/{{ x.message.id }}/replyall/" title="Odgovori svima"><i class="icon-forward"></i></a>
-        <a class="btn btn-mini" href="/pm/{{ x.message.id }}/forward/" title="Proslijedi"><i class="icon-share-alt"></i></a>
-        {% if not group %}<a class="btn btn-mini" href="/pm/{{ x.message.id }}/delete/" title="Izbriši"><i class="icon-remove"></i></a>{% endif %}
+      {% ifnotequal user x.message.author %}
+        <a class="btn btn-mini" href="/pm/{{ x.message.id }}/reply/" title="Odgovori"><i class="icon-play"></i></a>
+      {% endifnotequal %}
+      <a class="btn btn-mini" href="/pm/{{ x.message.id }}/replyall/" title="Odgovori svima"><i class="icon-forward"></i></a>
+      <a class="btn btn-mini" href="/pm/{{ x.message.id }}/forward/" title="Proslijedi"><i class="icon-share-alt"></i></a>
+      {% if not group %}
+        <a class="btn btn-mini" href="/pm/{{ x.message.id }}/delete/" title="Izbriši"><i class="icon-remove"></i></a>
+      {% endif %}
     </div>
     {% if x.read == 0 %}
       <div style="float:right;margin-right:5px;">
         <span class="label label-info">Nova poruka</span>
       </div>
     {% endif %}
-    
+
     {% if x.message.author == user %}
-        Tvoja poruka
+      Tvoja poruka
     {% else %}
-        Poruka od {{ x.message.author|userlink }}
+      Poruka od {{ x.message.author|userlink }}
     {% endif %}
     za
     {% for r in x.message.cache_recipients %}
-        {{ r|grouplink }}{% if not forloop.last %},{% endif %}
+      {{ r|grouplink }}{% if not forloop.last %},{% endif %}
     {% endfor %}
     {{ x.message.date_created }}<br>
     <b>{{ x.message.subject }}</b><br>
     <br>
     {{ x.message.content.render|safe }}
-</div>
+  </div>
 {% empty %}
-<center><i>Nema poruka</i></center><br>
+  <center><i>Nema poruka</i></center><br>
 {% endfor %}
 
 {% paginate %}

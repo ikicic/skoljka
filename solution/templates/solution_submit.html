@@ -6,15 +6,15 @@
 
 Zadatak: {{ task.get_link }}<br><br>
 <div class="task_content">
-    {{ task.content.render }}
+  {{ task.content.render }}
 </div><br>
 
 <br><br>
 Write solution:
 <form action="{{ action_url }}" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" class="btn btn-primary" value="Submit" />
+  {% csrf_token %}
+  {{ form.as_p }}
+  <input type="submit" class="btn btn-primary" value="Submit" />
 </form>
 
 {% endblock content %}

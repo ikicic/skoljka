@@ -10,16 +10,20 @@
 
 <br>
 <form action="/profile/edit/" method="POST">
-{% csrf_token %}
-{% if success %}<div class="alert alert-success">Promjene uspješno spremljene!</div>{% endif %}
-<table>
-{% for form in forms %}
-{{ form.as_table }}
-{% endfor %}
-<td colspan="2">
-    <button class="btn btn-primary" name="submit">Pošalji</button>
-</td>
-</table>
+  {% csrf_token %}
+  {% if success %}
+    <div class="alert alert-success">Promjene uspješno spremljene!</div>
+  {% endif %}
+  <table>
+    {% for form in forms %}
+      {{ form.as_table }}
+    {% endfor %}
+    <tr>
+      <td colspan="2">
+        <button class="btn btn-primary" name="submit">Pošalji</button>
+      </td>
+    </tr>
+  </table>
 </form>
 
 {% endblock %}

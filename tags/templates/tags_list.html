@@ -2,7 +2,6 @@
 
 {% load sorting_tags %}
 
-
 {% block title %}Popis tagova{% endblock %}
 
 {% block content %}
@@ -12,6 +11,7 @@
 
 <br>
 
+{# FORM BEGIN #}
 {% if can_edit %}
   {% if message %}
     <div class="alert {{ alert_class }}">
@@ -19,11 +19,10 @@
     </div>
     <br>
   {% endif %}
-  
+
   <form method="POST" action="{{ request.get_full_path }}">
     {% csrf_token %}
 {% endif %}
-
 
 <table width="40%" class="table-striped table-condensed" style="text-align: center;">
   <tr>
@@ -34,25 +33,26 @@
   </tr>
   {% autosort tags %}
   {% for x in tags %}
-  
-  {# TODO: Django 1.4 elif #}
-  {# using task_ classes to make less mess in base.css #}
-  {% if x.id in invalid %}
-  <tr class="task_wrong">
-  {% else %}{% if x.id in updated %}
-  <tr class="task_as_solved">
-  {% else %}
-  <tr>
-  {% endif %}{% endif %}
-    <td><a href="/search/?q={{ x.name }}" {% if x.name.0 == '$' %}class="hidden_tag"{% endif %}>{{ x.name }}</a></td>
-    <td>{{ x.taggeditem_count }}</td>
-    <td>{{ x.weight }}</td>
-    {% if can_edit %}<td><input type="text" tabindex="{{ forloop.counter }}" name="w{{ x.id }}" class="thin span1"></td>{% endif %}
-  </tr>
+    {# using task_ classes to make less mess in base.css #}
+    {% if x.id in invalid %}
+      <tr class="task_wrong">
+    {% elif x.id in updated %}
+      <tr class="task_as_solved">
+    {% else %}
+      <tr>
+    {% endif %}
+
+      <td><a href="/search/?q={{ x.name }}" {% if x.name.0 == '$' %}class="hidden_tag"{% endif %}>{{ x.name }}</a></td>
+      <td>{{ x.taggeditem_count }}</td>
+      <td>{{ x.weight }}</td>
+      {% if can_edit %}
+        <td><input type="text" tabindex="{{ forloop.counter }}" name="w{{ x.id }}" class="thin span1"></td>
+      {% endif %}
+    </tr>
   {% endfor %}
 </table>
 
-
+{# FORM END #}
 {% if can_edit %}
     <input type="submit" value="Pošalji" class="btn btn-primary">
   </form>

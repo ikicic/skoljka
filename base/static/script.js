@@ -54,7 +54,7 @@ $(function(){
 function quote(mc) {
   s = $.trim(mc.find('.mc_viewsource_text').text());
   $('#id_text').val('\n\n[quote]' + s + '[/quote]');  
-}
+};
 
 function set_reply(id) {
   $('.post_reply_to').removeClass('post_reply_to');
@@ -63,7 +63,7 @@ function set_reply(id) {
 
   $('input[name="post_reply_id"]').val(id);
   $('#reply_to_info').attr('style', id ? 'display:inline;' : 'display:none;');
-}
+};
 
 $(function(){
   /* Post reply */
@@ -94,7 +94,7 @@ $(function(){
     set_reply('');
     quote($(this).closest('.mc'));
   });
-})
+});
 
 
 
@@ -214,7 +214,7 @@ $(function(){
       id = $(this).attr('data-solution');
       $(this).append(' <a id="view_solution123" href="/solution/'+id+'/"><i class="icon-search"></i></a>');
     }, function(){
-        $('#view_solution123').remove();
+      $('#view_solution123').remove();
     });
 });
 
@@ -240,7 +240,7 @@ function jquery_rating_submit(name, url) {
       }
     });
   });
-}
+};
 
 /* Email decode */
 /* email = even position characters + reversed(odd) (0-based) */
@@ -249,7 +249,7 @@ function decode_email(e) {
   for (i = 0; i < e.length; ++i)
     output += i % 2 == 0 ? e[i / 2] : e[e.length - (i + 1) / 2];
   return output;
-}
+};
 
 $(function() {
   $('.imejl').each(function() {

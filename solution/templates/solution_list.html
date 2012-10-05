@@ -8,15 +8,14 @@
 
 <br>
 {% if task %}
-    Rješenja vezana uz zadatak: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br>
+  Rješenja vezana uz zadatak: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br>
 {% endif %}
 {% if author %}
-    Korisnik: {{ author|userlink }}<br>
+  Korisnik: {{ author|userlink }}<br>
 {% endif %}
 
 <br>  
 
 {% include "inc_solution_list.html" with solutions=solutions empty_message="Nema poslanih rješenja za ovaj zadatak." %}
-
 
 {% endblock content %}

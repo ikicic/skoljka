@@ -16,42 +16,42 @@
 {% autopaginate solutions %}
 
 {% if solutions %}    
-    
-    <table width="100%" class="table-striped table-condensed" style="text-align: center;">
+  
+  <table width="100%" class="table-striped table-condensed" style="text-align: center;">
     <tr>
-        <th colspan="6">Lista rješenja</th>
+      <th colspan="6">Lista rješenja</th>
     </tr>
     <tr>
-        <th width="30">{% anchor id # %}</th>
-        <th>Vrijeme</th>
-        <th>Zadatak</th>
-        <th>Korisnik</th>
-        <th>Rješenje</th>
-        <th>Točnost</th>
+      <th width="30">{% anchor id # %}</th>
+      <th>Vrijeme</th>
+      <th>Zadatak</th>
+      <th>Korisnik</th>
+      <th>Rješenje</th>
+      <th>Točnost</th>
     </tr>
     {% for s in solutions %}
-    <tr>
-        <td>{{ s.id }}</td>
-        <td>{{ s.date_created|timesince }} ago</td>
-        <td>{{ s.task.get_link }}</td>
-        <td>{{ s.author|userlink }}</a></td>
+      <tr>
+        <td>{{ s.id }}
+        <td>{{ s.date_created|timesince }} ago
+        <td>{{ s.task.get_link }}
+        <td>{{ s.author|userlink }}</a>
         {% if s.is_submitted %}
-        <td>{% if s.is_official %}<span class="label label-info">Službeno</span> {% endif %}<a href="/solution/{{ s.id }}/">{{ s.content.short }}</a></td>
-        <td style="width:80px;">{% rating_stars s.correctness 2.7 %}</td>
+          <td>
+            {% if s.is_official %}<span class="label label-info">Službeno</span> {% endif %}
+            <a href="/solution/{{ s.id }}/">{{ s.content.short }}</a>
+          <td style="width:80px;">{% rating_stars s.correctness 2.7 %}
         {% else %}
-        <td>
+          <td>
             {% if s.author == user %}<a href="/task/{{ s.task_id }}/submit/">{% endif %}
-                {% if s.is_as_solved %}<i>prazno</i>{% endif %}
-                {% if s.is_todo %}<i>to do</i>{% endif %}
+              {% if s.is_as_solved %}<i>prazno</i>{% endif %}
+              {% if s.is_todo %}<i>to do</i>{% endif %}
             {% if s.author == user %}</a>{% endif %}
-        </td>
-        <td style="width:80px;">&nbsp;</td>
+          <td style="width:80px;">&nbsp;
         {% endif %}
-        
-    </tr>
+      </tr>
     {% endfor %}
-    </table>
-    {% paginate %}
+  </table>
+  {% paginate %}
 {% else %}
-    {% if empty_message %}{{ empty_message }}{% endif %}
+  {% if empty_message %}{{ empty_message }}{% endif %}
 {% endif %}

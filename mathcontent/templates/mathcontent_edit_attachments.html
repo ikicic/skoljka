@@ -5,7 +5,7 @@
 <a href="javascript: history.go(-1)">« Vrati se</a><br><br>
 
 <div class="well">
-    {{ content.render }}
+  {{ content.render }}
 </div>
 
 <script>
@@ -13,7 +13,7 @@ $(function(){
   $('.attdel').click(function(){
     id = $(this).attr('data-id')
     name = $(this).attr('data-name')
-    if (confirm('Jeste li sigurni da želite izbrisati fajl \'' + name + '\'?')) {
+    if (confirm('Jeste li sigurni da želite izbrisati datoteku \'' + name + '\'?')) {
       $.ajax({
         url: '/attachment/' + id + '/delete/',
         success: function(){window.location.reload();}
@@ -24,27 +24,27 @@ $(function(){
 </script>
 
 <div class="well">
-    <h4>Postojeće datoteke</h4>
-    <table class="table-striped table-condensed" style="width: 40%">
-    {% for x in content.attachments.all %}
-        <tr>
-            <td><a href="{{ x.get_url }}">{{ x.get_filename }}</a></td>
-            <td>{{ x.file.size|filesizeformat }}</td>
-            <td><a class="attdel" data-id="{{ x.id }}" data-name="{{ x.get_filename }}" href="#" title="Izbiši">Izbriši</a><br></td>
-        </tr>
-    {% empty %}
-        <tr><td><i>Nema datoteka.</i></td></tr>
-    {% endfor %}
-    </table>
+  <h4>Postojeće datoteke</h4>
+  <table class="table-striped table-condensed" style="width: 40%">
+  {% for x in content.attachments.all %}
+    <tr>
+      <td><a href="{{ x.get_url }}">{{ x.get_filename }}</a></td>
+      <td>{{ x.file.size|filesizeformat }}</td>
+      <td><a class="attdel" data-id="{{ x.id }}" data-name="{{ x.get_filename }}" href="#" title="Izbiši">Izbriši</a><br></td>
+    </tr>
+  {% empty %}
+    <tr><td><i>Nema datoteka.</i></td></tr>
+  {% endfor %}
+  </table>
 </div>
 
 <div class="well">
-    <h4>Dodavanje novih datoteka</h4>
-    <form enctype="multipart/form-data" method="post" action="/mathcontent/{{ content.id }}/attachments/">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value="Pošalji" class="btn-primary">
-    </form>
+  <h4>Dodavanje novih datoteka</h4>
+  <form enctype="multipart/form-data" method="post" action="/mathcontent/{{ content.id }}/attachments/">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Pošalji" class="btn-primary">
+  </form>
 </div>
 
 {% endblock %}

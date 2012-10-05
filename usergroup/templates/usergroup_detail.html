@@ -6,8 +6,14 @@
 
 <div class="well">
   <table class="table-condensed">
-    <tr><th>Stvoreno</th><td>{{ group.data.date_created }} ({{ group.data.author|userlink }})</td></tr>
-    <tr><th>Broj članova</th><td>{{ group.data.member_count }}</td></tr>
+    <tr>
+      <th>Stvoreno</th>
+      <td>{{ group.data.date_created }} ({{ group.data.author|userlink }})</td>
+    </tr>
+    <tr>
+      <th>Broj članova</th>
+      <td>{{ group.data.member_count }}</td>
+    </tr>
   </table>
   <br>
   {{ group.data.description.render }}<br><br><br>
