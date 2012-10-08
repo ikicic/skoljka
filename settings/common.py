@@ -254,10 +254,11 @@ else:
 TEMPLATE_PREPROCESSOR_OPTIONS = {
     # Defaults settings for all application
     # NOTE: Validation is disabled as HTML5 is not supported
-    '*': ('html', 'whitespace-compression', 'no-validate-html' ),
+    #'*': ('html', 'whitespace-compression', 'no-validate-html' ),
+    '*': ('no-html', ),
 
     # Override for specific applications
-    ('django.contrib.admin', 'django.contrib.admindocs', 'debug_toolbar'): ('no-html',),
+    #('django.contrib.admin', 'django.contrib.admindocs', 'debug_toolbar'): ('no-html',),
 }
 
 ######################################

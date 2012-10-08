@@ -1,3 +1,5 @@
+/* TODO: replace _ with - */
+
 /* ================================= */
 /* jquery.autocomplete.css */
 
@@ -122,11 +124,6 @@ object.latex_center {
   margin-top: 6pt;
   margin-bottom: 6pt;
 }
-div.tag_list {
-  display: inline;
-  font-size: 12px;
-  color: #888;
-}
 .activity {
   border-top: thin solid #DDD;
   padding: 6px 5px 3px 5px;
@@ -194,33 +191,45 @@ a.register {
   font-size: 11px;
   color: #888
 }
-.hidden_tag {
+
+/* Tags */
+.tag-list {
+  display: inline;
+  font-size: 12px;
+  color: #888;
+}
+.tag-hidden {
   color: #999;
 }
-.wrong_tag {
+.tag-wrong {
   color: #A98;
 }
-.hidden_wrong_tag {
+.tag-hidden.tag-wrong {
   color: #CCC;
+}
+.tag-votes {
+  color: #C8C8C8;
+  vertical-align: super;
+  font-size: smaller;
 }
 
 /* for jquery tools tooltip */
 /* cannot use `tooltip`, as it is already used by bootstrap.css */
-.tag_tooltip {
+.tag-tooltip {
   display:none;
   background:#A2A2A2;
   border:1px solid #BBB;
   padding:5px 6px 0px 6px;
   color:#eee;
 }
-.task_tooltip {
-  display:none;
-}
-.tag_tooltip img {
+.tag-tooltip img {
   vertical-align:-3px;
 }
-.tag_tooltip input {
+.tag-tooltip input {
   margin-top:3px;
+}
+.task_tooltip {
+  display:none;
 }
 span.task_submitted a {
   color: #00F;
@@ -247,6 +256,8 @@ div.mc_viewsource_text {
 a.mc_viewsource_clipboard {
   margin-top: 7px;
 }
+
+/* News */
 .news {
   padding: 20px 5px;
 }

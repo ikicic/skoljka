@@ -98,12 +98,30 @@ $(function(){
 
 
 
+/* Tag list, put votes count next to tag */
+function refresh_tag_votes(tag) {
+  /* tag-vote-count MUST be next to the tag */
+  var votes = parseInt(tag.attr('data-votes'));
+  var span = tag.next('.tag-votes');
+  if (span.length)
+    span.html(votes ? votes : '');
+  else if (votes)
+    tag.after('<span class="tag-votes">' + votes + '</span>');  
+}
+
+
+$(function(){
+  $('.tag-list a').each(function(index) {
+    refresh_tag_votes($(this));
+  });
+});
+
 /* Tag tooltip & add new tag */
 $(function(){
   if (!is_authenticated) return;
-  if (!( $('.tag_list').length )) return;
+  if (!( $('.tag-list').length )) return;
   $('body').append(
-      '<div id="tag_tooltip" class="tag_tooltip">'
+      '<div id="tag-tooltip" class="tag-tooltip">'
     + '<span id="tt_text"></span> '
     + '<a id="tt_plus" href="#" title="Valjan"><img src="/static/images/plus_circle.png"></a> '
     + '<a id="tt_minus" href="#" title="Nevaljan"><img src="/static/images/minus_circle.png"></a> '
@@ -153,20 +171,25 @@ $(function(){
   });
 
   /* Tag tooltip */
-  vote_func = function(e,v){
+  vote_func = function(e, value){
     e.preventDefault();
     
     var tag = $('#tt_text').data('tag');
     $('#tt_info').html('...');
     
     $.post('/ajax/tag/vote/', {
-        value: v,
+        value: value,
         tag: tag.html(),
         task: tag.parent().attr('data-task')
-      }, function(data) {
-        tag.attr('data-votes', data);      
+      }, function(vote_count) {
+        // TODO: color is not updated, maybe generate whole tag list using javascript
+        tag.attr('data-votes', vote_count);
         $('#tt_info').html('');
-        $('#tt_text').html(data); /* bug if response is delayed */
+        $('#tt_text').html(vote_count); /* bug if response is delayed */
+        
+        // TODO: use <= VOTE_WRONG instead of < 0
+        tag.toggleClass('tag-wrong', parseInt(vote_count) < 0);
+        refresh_tag_votes(tag);
     });
     // TODO: switch to JQuery 1.5+
     // .error(function(){$('#tt_info').html('Error');});
@@ -174,8 +197,8 @@ $(function(){
   $('#tt_plus').click(function(e){vote_func(e,1);});
   $('#tt_minus').click(function(e){vote_func(e,-1);});
 
-  $('.tag_list a').tooltip({
-    tip: '#tag_tooltip',
+  $('.tag-list a').tooltip({
+    tip: '#tag-tooltip',
     position: 'bottom center',
     onBeforeShow: function(){
       var tag = this.getTrigger();
