@@ -11,8 +11,8 @@
 <script>
 $(function(){
   $('.attdel').click(function(){
-    id = $(this).attr('data-id')
-    name = $(this).attr('data-name')
+    var id = $(this).attr('data-id');
+    var name = $(this).attr('data-name');
     if (confirm('Jeste li sigurni da želite izbrisati datoteku \'' + name + '\'?')) {
       $.ajax({
         url: '/attachment/' + id + '/delete/',

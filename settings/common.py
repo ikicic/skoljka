@@ -5,6 +5,10 @@ import os.path
 
 from local import *
 
+######################################
+# GENERAL
+######################################
+
 SITE_NAME = os.path.basename(PROJECT_ROOT)
 LIB_ROOT = os.path.normpath(os.path.join(PROJECT_ROOT, 'lib'))
 LOCAL_DIR = os.path.normpath(os.path.join(PROJECT_ROOT, 'local'))
@@ -81,18 +85,6 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-#    'sentry.client.middleware.Sentry404CatchMiddleware',
-#    'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'django_sorting.middleware.SortingMiddleware',
-    'pagination.middleware.PaginationMiddleware',
-)
-
 #ROOT_URLCONF = SITE_NAME.lower() + '.urls'
 ROOT_URLCONF = 'urls'
 
@@ -114,6 +106,34 @@ TEMPLATE_DIRS = (
 
 AUTH_PROFILE_MODULE = 'userprofile.UserProfile'
 
+INTERNAL_IPS = ('127.0.0.1',)
+
+# Where the loging happens
+LOGIN_URL = '/login/'
+
+# Where is a user redirected after a successful log in
+LOGIN_REDIRECT_URL = '/'
+
+######################################
+# Middleware
+######################################
+
+MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+#    'sentry.client.middleware.Sentry404CatchMiddleware',
+#    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'django_sorting.middleware.SortingMiddleware',
+    'pagination.middleware.PaginationMiddleware',
+)
+
+######################################
+# Installed apps
+######################################
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.admin',
@@ -126,11 +146,13 @@ INSTALLED_APPS = (
 #    'debug_toolbar',
     'django_sorting',
     'pagination',
+    'pipeline',
     'registration',
 #    'sentry',
 #    'sentry.client',
     'taggit',
-    
+    'template_preprocessor',
+
     'activity',
     'base',
     'folder',
@@ -148,7 +170,9 @@ INSTALLED_APPS = (
     'userprofile',
 )
 
-ACCOUNT_ACTIVATION_DAYS = 7
+######################################
+# Logging
+######################################
 
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
@@ -188,10 +212,95 @@ LOGGING = {
     },
 }
 
-INTERNAL_IPS = ('127.0.0.1',)
+######################################
+# django-registration
+######################################
 
-# Where the loging happens
-LOGIN_URL = '/login/'
+ACCOUNT_ACTIVATION_DAYS = 7
 
-# Where is a user redirected after a successful log in
-LOGIN_REDIRECT_URL = '/'
+######################################
+# django-template-preprocessor
+######################################
+
+# https://docs.djangoproject.com/en/dev/ref/settings/#languages
+gettext_dummy = lambda s: s
+
+# Define languages -> otherwise templates will be compiled in all possible languages
+LANGUAGES = (
+     ('en', gettext_dummy('English')),
+     ('hr', gettext_dummy('Croatian')),
+)
+
+MEDIA_CACHE_DIR = os.path.normpath(os.path.join(MEDIA_ROOT, 'cache'))
+MEDIA_CACHE_URL = os.path.normpath(os.path.join(MEDIA_URL, 'cache'))
+TEMPLATE_CACHE_DIR = os.path.normpath(os.path.join(LOCAL_DIR, 'templates', 'cache'))
+
+# Wrap template loaders
+if DEBUG:
+    TEMPLATE_LOADERS = (
+        ('template_preprocessor.template.loaders.ValidatorLoader',
+        #('template_preprocessor.template.loaders.RuntimeProcessedLoader',
+            TEMPLATE_LOADERS
+        ),
+    )
+else:
+    TEMPLATE_LOADERS = (
+        ('template_preprocessor.template.loaders.PreprocessedLoader',
+            TEMPLATE_LOADERS
+        ),
+    )
+
+# Enabled modules of the template preprocessor
+TEMPLATE_PREPROCESSOR_OPTIONS = {
+    # Defaults settings for all application
+    # NOTE: Validation is disabled as HTML5 is not supported
+    '*': ('html', 'whitespace-compression', 'no-validate-html' ),
+
+    # Override for specific applications
+    ('django.contrib.admin', 'django.contrib.admindocs', 'debug_toolbar'): ('no-html',),
+}
+
+######################################
+# django-pipeline
+######################################
+
+# compresses static files (css & js) on collectstatic
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+
+# TODO: fix /*! */ comments, they should be uncompressed
+PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.cssmin.CssminCompressor'
+PIPELINE_CSS = {
+    'bootstrap': {
+        'source_filenames': (
+          'bootstrap.css',
+        ),
+        'output_filename': 'bootstrap.min.css',
+    },
+    'base': {
+        'source_filenames': (
+          'base.css',
+        ),
+        'output_filename': 'base.min.css',
+    },
+}
+
+# TODO: fix /*! */ comments, they should be preserved
+PIPELINE_JS_COMPRESSOR = 'utils.jscompressor.JSCompressor'
+PIPELINE_JS = {
+    'jquerystuff': {
+        'source_filenames': (
+          'jquery.min.js',
+          'jquery.autocomplete.min.js',
+          'jquery.form.min.js',
+          'jquery.MetaData.js',
+          'jquery.tools.min.js',
+        ),
+        'output_filename': 'jquerystuff.js',
+    },
+    'skoljka': {
+        'source_filenames': {
+            'script.js',
+        },
+        'output_filename': 'skoljka.js',
+    },
+}

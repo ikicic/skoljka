@@ -1,11 +1,19 @@
+{% load compressed %}
+
 <!DOCTYPE html>
 
 <html>
   <head>
+    <script>is_authenticated={{ user.is_authenticated|lower }};</script>
+    {% compressed_css 'bootstrap' %}
+    {% compressed_css 'base' %}
+    {% compressed_js 'jquerystuff' %}
+    {% compressed_js 'skoljka' %}
+    <link href="/static/images/favicon.ico" rel="shortcut icon">
+
+    {% comment %}<!--
     <link href="/static/bootstrap.css" rel="stylesheet">
     <link href="/static/base.css" rel="stylesheet">
-    <link href="/static/images/favicon.ico" rel="shortcut icon">
-    <script>is_authenticated={{ user.is_authenticated|lower }};</script>
     <script src="/static/jquery.min.js"></script>
     {# <script src="http://cdn.jquerytools.org/1.2.6/all/jquery.tools.min.js"></script> #}
     <script src="/static/jquery.tools.min.js"></script>
@@ -13,6 +21,7 @@
     <script src="/static/jquery.rating.pack.js"></script>
     <script src="/static/jquery.autocomplete.min.js"></script>
     <script src="/static/script.js"></script>
+    -->{% endcomment %}
 
     {% block header_list %} {% endblock %} {# put your css-files here #}
     <title>{% block title %}Školjka{% endblock %}</title>
@@ -21,7 +30,7 @@
 
 <div class="row well header">
   <div style="float:left;">
-    <h1><a href="/" class="sitename"><img src="/static/images/shell32.png" style="vertical-align:top;"> Školjka</a></h1>
+    <h1><a href="/" class="sitename"><img src="/static/images/shell32.png" style="vertical-align:top;" alt=""> Školjka</a></h1>
   </div>
   {% if not user.is_authenticated or user.profile.selected_folder %}
     <div style="float:right;margin-top:4px;">
@@ -110,7 +119,7 @@
 
 <div class="footer">
   Školjka v0.6 © 2012 Ivica Kičić &amp; <a href="http://getaldic.org/">MNM</a>. &nbsp;
-  Hosting by <a href="http://www.kset.org/"><img src="/static/images/kset_logo_white.png" style="vertical-align:-2px;"></a>
+  Hosting by <a href="http://www.kset.org/"><img src="/static/images/kset_logo_white.png" style="vertical-align:-2px;" alt="KSET"></a>
 </div>
 </body>
 </html>
