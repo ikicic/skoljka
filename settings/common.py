@@ -304,3 +304,9 @@ PIPELINE_JS = {
         'output_filename': 'skoljka.js',
     },
 }
+
+######################################
+# django-pagination
+######################################
+
+PAGINATION_DEFAULT_WINDOW = 3
