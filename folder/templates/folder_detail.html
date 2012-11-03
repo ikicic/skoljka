@@ -29,11 +29,10 @@
 
 
 <ul>
-{% for x in child %}
+  {% for x in child %}
     <li><a href="/folder/{{ path }}{{ x.slug }}/">{{ x.name }}</a> {{ x.tag_list_html|safe }}</li>
-{% endfor %}
+  {% endfor %}
 </ul>
-
 
 
 {% include 'inc_task_list.html' with tasks=tasks empty_message="Nema zadataka." %}

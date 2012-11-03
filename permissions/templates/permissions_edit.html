@@ -7,14 +7,21 @@
 <a href="javascript: history.go(-1)">« Vrati se</a><br><br>
 
 <table width="60%" class="table-striped table-condensed" style="text-align: center;">
-  <tr><th>Grupa / korisnik</th><th>View</th><th>Edit</th></tr>
+  <tr>
+    <th>Grupa / korisnik</th>
+    <th>View</th>
+    <th>Edit</th>
+  </tr>
   {% for x in groups %}
     <tr>
       <td><a href="/usergroup/{{ x.id }}/">{{ x.name }}</a></td>
       <td>{{ x|cached_permission:"VIEW" }}</td>
       <td>{{ x|cached_permission:"EDIT" }}</td>
+    </tr>
   {% empty %}
-    <tr><td colspan="3">Nema specifičnih dozvola</td></tr>
+    <tr>
+      <td colspan="3">Nema specifičnih dozvola</td>
+    </tr>
   {% endfor %}
 </table>
 

@@ -9,9 +9,6 @@ urlpatterns = patterns('',
     (r'^(?P<id>\d+)/$', 'task.views.detail'),
     (r'^(?P<id>\d+)/similar/$', 'task.views.similar'),
     
-    # DEPRECATED
-    (r'^multiple/(?P<ids>[0-9,]+)/$', 'task.views.detail_multiple'),
-
     (r'^new/$', 'task.views.new'),
     (r'^new/advanced/$', 'task.views.advanced_new'),
     (r'^(?P<task_id>\d+)/edit/$', 'task.views.new'),

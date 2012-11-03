@@ -106,7 +106,7 @@ function refresh_tag_votes(tag) {
   if (span.length)
     span.html(votes ? votes : '');
   else if (votes)
-    tag.after('<span class="tag-votes">' + votes + '</span>');  
+    tag.after('<sup class="tag-votes">' + votes + '</sup>');
 }
 
 

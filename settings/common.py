@@ -109,7 +109,7 @@ AUTH_PROFILE_MODULE = 'userprofile.UserProfile'
 INTERNAL_IPS = ('127.0.0.1',)
 
 # Where the loging happens
-LOGIN_URL = '/login/'
+LOGIN_URL = '/accounts/login/'
 
 # Where is a user redirected after a successful log in
 LOGIN_REDIRECT_URL = '/'
@@ -294,6 +294,7 @@ PIPELINE_JS = {
           'jquery.form.min.js',
           'jquery.MetaData.js',
           'jquery.tools.min.js',
+          'jquery.rating.pack.js',  # rating/static/
         ),
         'output_filename': 'jquerystuff.js',
     },

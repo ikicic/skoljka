@@ -129,7 +129,6 @@ def advanced_new(request):
             }, context_instance=RequestContext(request),
         )
 
-
 ################################################
 # ovo je stara verzija, sa starim formatom
 
@@ -201,7 +200,6 @@ def old_advanced_new(request):
 
 # kraj starog koda
 #########################################################
-
 
 @login_required
 def new(request, task_id=None):
@@ -347,25 +345,6 @@ def similar(request, id):
         'view_type': 'similar_task_view_type',
     }
 
-
-# DEPRECATED
-# TODO: permissions, not allowed message
-@response('task_detail_multiple.html')
-def detail_multiple(request, ids):
-    ids = [int(x) for x in ids.split(',')]
-    if not ids or 0 in ids:
-        raise Http404
-        
-    tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=ids).select_related('content').distinct()
-    id_list = [str(x) for x in ids]
-    return {
-        'tasks': tasks,
-        'id_list': ', '.join(id_list),
-        'id_list_ns': ','.join(id_list),
-    }
-
-
-
 def _convert_to_latex(tasks, has_title, has_url, has_source, has_index, has_id, *args, **kwargs):
     content = [latex.export_header]
     for k, x in enumerate(tasks):
@@ -387,7 +366,6 @@ def _convert_to_latex(tasks, has_title, has_url, has_source, has_index, has_id, 
     content.append(latex.export_footer)
     
     return u''.join(content)
-   
 
 # output latex or pdf, permission already checked
 def _export(ids, tasks, form):
@@ -404,11 +382,7 @@ def _export(ids, tasks, form):
                 # already up-to-date
                 return HttpResponseRedirect('/media/pdf/task%s.pdf' % hash)
 
-
-
     latex = _convert_to_latex(tasks, **form.cleaned_data)
-
-
 
     if format == 'latex':
         response = HttpResponse(content=latex, content_type='application/x-latex')
@@ -436,9 +410,7 @@ def _export(ids, tasks, form):
         
     
     return 404
-        
-    
-    
+
 @response('task_export.html')
 def export(request, format, ids):
     available_formats = dict(EXPORT_FORMAT_CHOICES)

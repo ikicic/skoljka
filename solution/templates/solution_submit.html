@@ -10,7 +10,6 @@ Zadatak: {{ task.get_link }}<br><br>
 </div><br>
 
 <br><br>
-Write solution:
 <form action="{{ action_url }}" method="post">
   {% csrf_token %}
   {{ form.as_p }}

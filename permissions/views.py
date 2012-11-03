@@ -50,7 +50,7 @@ def edit(request, type_id, id):
     for perm in perms:
         group = perm.group
         if group.id in groups:
-            groups._cache_permissions.append(perm.id)
+            groups[group.id]._cache_permissions.append(perm.id)
         else:
             groups[group.id] = group
             groups[group.id]._cache_permissions = [perm.id]

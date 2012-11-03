@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Post{% endblock %}
+{% block title %}Uređivanje poruke{% endblock %}
 
 {% block content %}
-Edit Post:<br>
+Uređivanje poruke:<br><br>
 
 <form action="/post/{{ post.pk }}/edit/" method="post">
   {% csrf_token %}
