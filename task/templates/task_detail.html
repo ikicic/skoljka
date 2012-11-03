@@ -3,7 +3,7 @@
 {% load mathcontent_tags %}
 {% load post_tags %}
 {% load rating_tags %}
-{% load task_tags %}
+{% load tags_tags %}
 
 {% block title %}Pregled zadatka{% endblock %}
 
@@ -14,60 +14,69 @@
 <br><br>
 <div style="text-align:center;font-size:24px;">{{ task.name }}</div>
 <div style="float:left;">
-    {% if solution and not solution.is_blank %}<span class="label {{ solution.get_html_info.label_class }}">{{ solution.get_html_info.label_text }}</span><br>{% endif %}
-    <br>
-    {% if user.is_authenticated %}
-        {% rating_box "Kvaliteta" task.quality_rating %}
-        {% rating_box "Težina" task.difficulty_rating %}
-    {% endif %}
-    <a href="/task/export/latex/{{ task.id }}/"><img src="/static/images/tex16.png" alt="LaTeX" title="Export to LaTeX"></a>
-    <a href="/task/export/pdf/{{ task.id }}/"><img src="/static/images/pdf16.png" alt="PDF" title="Export to PDF"></a>
+  {% if solution and not solution.is_blank %}
+    <span class="label {{ solution.get_html_info.label_class }}">{{ solution.get_html_info.label_text }}</span><br>
+  {% endif %}
+  <br>
+  {% if user.is_authenticated %}
+    {% rating_box "Kvaliteta" task.quality_rating %}
+    {% rating_box "Težina" task.difficulty_rating %}
+  {% endif %}
+  <a href="/task/export/latex/{{ task.id }}/"><img src="/static/images/tex16.png" alt="LaTeX" title="Export to LaTeX"></a>
+  <a href="/task/export/pdf/{{ task.id }}/"><img src="/static/images/pdf16.png" alt="PDF" title="Export to PDF"></a>
 </div>
 
 <div style="text-align:right;">
-    Dodao: {{ task.author|userlink }}<br>
-    {{ task.date_created|date:"E j, Y" }}<br>
-    {% tag_list task %}<br>
-    {% if can_edit %}<a href="/task/{{ task.pk }}/edit/">Edit</a><br>{% endif %}
-    {% if can_edit_permissions %}<a href="/permissions/edit/{{ content_type.id }}/{{ task.id }}/">Edit Permissions</a>{% endif %}
-    <br>
+  Dodao: {{ task.author|userlink }}<br>
+  {{ task.date_created|date:"E j, Y" }}<br>
+  {% tag_list task %}<br>
+  {% if can_edit %}<a href="/task/{{ task.pk }}/edit/">Uredi tekst</a><br>{% endif %}
+  {% if can_edit_permissions %}<a href="/permissions/edit/{{ content_type.id }}/{{ task.id }}/">Privilegije</a>{% endif %}<br>
 </div>
 
 <br><br>
 <div class="task_content well">
-    {# TODO: render tag! #}
-    {% if user.is_authenticated %}
-        {{ task.content.render_quote }}
-    {% else %}
-        {{ task.content.render }}
-    {% endif %}
+  {# TODO: render tag! #}
+  {% if user.is_authenticated %}
+    {{ task.content.render_quote }}
+  {% else %}
+    {{ task.content.render }}
+  {% endif %}
 </div>
+
 {% mathcontent_attachments task.content %}
 
-{% if task.source %}<div style="float:right;">Izvor: {{ task.source }}</div>{% endif %}
-<br><br><br>
-{% if user.is_authenticated %}
-{% if solution.is_submitted %}
-<a href="/solution/{{ solution.id }}/">Prikaži moje rješenje</a><br>
-{% else %}
-<form action="/task/{{ task.id }}/mark/" method="post">
-    {% csrf_token %}
-    <div class="btn-group">
-        <a href="/task/{{ task.id }}/submit/" class="btn"><i class="icon-file"></i> Pošalji rješenje</a>
-        {% if solution.is_as_solved %}
-        <button type="submit" name="action" value="blank" class="btn"><i class="icon-remove"></i> Makni oznaku riješenog</button>
-        {% else %}
-        <button type="submit" name="action" value="as_solved" class="btn"><i class="icon-ok"></i> Označi kao riješeno</button>
-        {% endif %}
-        {% if solution.is_todo %}
-        <button type="submit" name="action" value="blank" class="btn"><i class="icon-remove"></i> Makni To Do oznaku</button>
-        {% else %}
-        <button type="submit" name="action" value="todo" class="btn"><i class="icon-tag"></i> To Do</button>
-        {% endif %}
-    </div>
-</form>
-{% endif %}
-{% endif %}
+<div>
+  {% if task.source %}
+    <div class="task-source">Izvor: {{ task.source }}</div>
+  {% endif %}
+
+  {% if user.is_authenticated %}
+    {% if solution.is_submitted %}
+      <a href="/solution/{{ solution.id }}/">Prikaži moje rješenje</a><br>
+    {% else %}
+      <form action="/task/{{ task.id }}/mark/" method="post">
+        {% csrf_token %}
+        <div class="btn-group">
+          <a href="/task/{{ task.id }}/submit/" class="btn"><i class="icon-file"></i> Pošalji rješenje</a>
+
+          {% if solution.is_as_solved %}
+            <button type="submit" name="action" value="blank" class="btn"><i class="icon-remove"></i> Makni oznaku riješenog</button>
+          {% else %}
+            <button type="submit" name="action" value="as_solved" class="btn"><i class="icon-ok"></i> Označi kao riješeno</button>
+          {% endif %}
+
+          {% if solution.is_todo %}
+            <button type="submit" name="action" value="blank" class="btn"><i class="icon-remove"></i> Makni To Do oznaku</button>
+          {% else %}
+            <button type="submit" name="action" value="todo" class="btn"><i class="icon-tag"></i> To Do</button>
+          {% endif %}
+        </div>
+      </form>
+    {% endif %}
+  {% endif %}
+</div>
+
 <a href="/solution/task/{{ task.id }}/">Pregledaj poslana rješenja</a><br>
 <a href="/task/{{ task.id }}/similar/">Slični zadaci</a><br>
 <br>

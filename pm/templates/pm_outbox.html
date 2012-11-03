@@ -19,22 +19,24 @@
 {% autopaginate pm %}
 
 {% for m in pm|cache_outbox_info %}
-<div class="well">
+  <div class="well">
     <div style="float:right;" class="btn-group">
-        <a class="btn btn-mini" href="/pm/{{ m.id }}/replyall/" title="Odgovori svima"><i class="icon-forward"></i></a>
-        <a class="btn btn-mini" href="/pm/{{ m.id }}/forward/" title="Proslijedi"><i class="icon-share-alt"></i></a>
-        {% if not group %}<a class="btn btn-mini" href="/pm/{{ m.id }}/delete/" title="Izbriši"><i class="icon-remove"></i></a>{% endif %}
+      <a class="btn btn-mini" href="/pm/{{ m.id }}/replyall/" title="Odgovori svima"><i class="icon-forward"></i></a>
+      <a class="btn btn-mini" href="/pm/{{ m.id }}/forward/" title="Proslijedi"><i class="icon-share-alt"></i></a>
+      {% if not group %}
+        <a class="btn btn-mini" href="/pm/{{ m.id }}/delete/" title="Izbriši"><i class="icon-remove"></i></a>
+      {% endif %}
     </div>
     {{ m.date_created }}
     {% for r in m.cache_recipients %}
-        {{ r|grouplink }}{% if not forloop.last %},{% endif %}
+      {{ r|grouplink }}{% if not forloop.last %},{% endif %}
     {% endfor %}
     <br>
     <b>{{ m.subject }}</b><br><br>
     {{ m.content.render|safe }}
-</div>
+  </div>
 {% empty %}
-<br><center><i>Nema poruka</i></center><br>
+  <br><center><i>Nema poruka</i></center><br>
 {% endfor %}
 
 {% paginate %}

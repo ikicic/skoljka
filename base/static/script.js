@@ -27,8 +27,8 @@ $.ajaxSetup({
 
 /* Automatically add preview button, help link and div after MathContentForm */
 $(function(){
-  mc = $('.mathcontent_text');
-  f = mc.closest('form');
+  var mc = $('.mathcontent_text');
+  var f = mc.closest('form');
   /* Preview button and help link */
   f.children('input[type=submit]').after(
       ' <button type="button" class="btn mathcontent_preview_button">Pregled</button>'
@@ -38,8 +38,8 @@ $(function(){
 
   /* Preview button, send AJAX request to convert to html (and generate necessarry .png files) */
   $('.mathcontent_preview_button').click(function(){
-    t = $('.mathcontent_text').val();
-    p = $('.mathcontent_preview');
+    var t = $('.mathcontent_text').val();
+    var p = $('.mathcontent_preview');
     p.html('Učitavanje...');
     p.attr('style', 'block');
     $.get('/ajax/mathcontent/preview/', {text: t}, function(d){
@@ -52,9 +52,9 @@ $(function(){
 /* Reply link for comments, Used for inc_post_list_small.html */
 /* MathContent View source & quote link */
 function quote(mc) {
-  s = $.trim(mc.find('.mc_viewsource_text').text());
+  var s = $.trim(mc.find('.mc_viewsource_text').text());
   $('#id_text').val('\n\n[quote]' + s + '[/quote]');  
-}
+};
 
 function set_reply(id) {
   $('.post_reply_to').removeClass('post_reply_to');
@@ -63,17 +63,17 @@ function set_reply(id) {
 
   $('input[name="post_reply_id"]').val(id);
   $('#reply_to_info').attr('style', id ? 'display:inline;' : 'display:none;');
-}
+};
 
 $(function(){
   /* Post reply */
   $('.post_reply').click(function(){
-    id = $(this).attr('id').substr(2)
+    var id = $(this).attr('id').substr(2)
 
     set_reply(id);
     quote($(this).closest('.post').find('.mc'));
 
-    a = $('#reply_to_info a:first')
+    var a = $('#reply_to_info a:first')
     a.html('komentar #' + id)
     a.attr('href', '#post' + id)
   });
@@ -94,16 +94,34 @@ $(function(){
     set_reply('');
     quote($(this).closest('.mc'));
   });
-})
+});
 
 
+
+/* Tag list, put votes count next to tag */
+function refresh_tag_votes(tag) {
+  /* tag-vote-count MUST be next to the tag */
+  var votes = parseInt(tag.attr('data-votes'));
+  var span = tag.next('.tag-votes');
+  if (span.length)
+    span.html(votes ? votes : '');
+  else if (votes)
+    tag.after('<sup class="tag-votes">' + votes + '</sup>');
+}
+
+
+$(function(){
+  $('.tag-list a').each(function(index) {
+    refresh_tag_votes($(this));
+  });
+});
 
 /* Tag tooltip & add new tag */
 $(function(){
   if (!is_authenticated) return;
-  if (!( $('.tag_list').length )) return;
+  if (!( $('.tag-list').length )) return;
   $('body').append(
-      '<div id="tag_tooltip" class="tag_tooltip">'
+      '<div id="tag-tooltip" class="tag-tooltip">'
     + '<span id="tt_text"></span> '
     + '<a id="tt_plus" href="#" title="Valjan"><img src="/static/images/plus_circle.png"></a> '
     + '<a id="tt_minus" href="#" title="Nevaljan"><img src="/static/images/minus_circle.png"></a> '
@@ -114,7 +132,7 @@ $(function(){
   
   /* Add tag */
   $('#tt_add').keypress(function(event){
-   name = $(this).val()
+   var name = $(this).val()
    if (event.which != 13 || name.length == 0) return;
    
    $(this).val('');
@@ -123,7 +141,7 @@ $(function(){
      name: name,
      task: $('#tt_text').data('tag').parent().attr('data-task')
    }, function(data){
-     ok = data == '1'
+     var ok = data == '1'
      $('#tt_info').html(ok ? 'Spremljeno' : 'Greška');
      if (ok) $('#tt_text').data('tag').parent().append(' | ' + name);
    });
@@ -133,7 +151,7 @@ $(function(){
   $('#tt_delete').click(function(e){
     e.preventDefault();
     
-    tag = $('#tt_text').data('tag');
+    var tag = $('#tt_text').data('tag');
     $('#tt_info').html('...');
     
     $.post('/ajax/tag/delete/', {
@@ -144,7 +162,7 @@ $(function(){
           $('#tt_text').data('tooltip').hide();
           tag.remove();
         } else {
-          msg = data == '0' ? 'Nemaš prava.' : 'Greška!';
+          var msg = data == '0' ? 'Nemaš prava.' : 'Greška!';
           $('#tt_info').html(msg);
         }
     });
@@ -153,33 +171,38 @@ $(function(){
   });
 
   /* Tag tooltip */
-  vote_func = function(e,v){
+  vote_func = function(e, value){
     e.preventDefault();
     
-    tag=$('#tt_text').data('tag');
+    var tag = $('#tt_text').data('tag');
     $('#tt_info').html('...');
     
     $.post('/ajax/tag/vote/', {
-        value: v,
+        value: value,
         tag: tag.html(),
         task: tag.parent().attr('data-task')
-      }, function(data) {
-        tag.attr('data-votes', data);      
+      }, function(vote_count) {
+        // TODO: color is not updated, maybe generate whole tag list using javascript
+        tag.attr('data-votes', vote_count);
         $('#tt_info').html('');
-        $('#tt_text').html(data); /* bug if response is delayed */
+        $('#tt_text').html(vote_count); /* bug if response is delayed */
+        
+        // TODO: use <= VOTE_WRONG instead of < 0
+        tag.toggleClass('tag-wrong', parseInt(vote_count) < 0);
+        refresh_tag_votes(tag);
     });
     // TODO: switch to JQuery 1.5+
     // .error(function(){$('#tt_info').html('Error');});
   }
-  $('#tt_plus').click(function(e){vote_func(e,1)});
-  $('#tt_minus').click(function(e){vote_func(e,-1)});
+  $('#tt_plus').click(function(e){vote_func(e,1);});
+  $('#tt_minus').click(function(e){vote_func(e,-1);});
 
-  $('.tag_list a').tooltip({
-    tip: '#tag_tooltip',
+  $('.tag-list a').tooltip({
+    tip: '#tag-tooltip',
     position: 'bottom center',
     onBeforeShow: function(){
-      tag = this.getTrigger();
-      x = $('#tt_text');
+      var tag = this.getTrigger();
+      var x = $('#tt_text');
       x.html(tag.attr('data-votes'));
       x.data('tag', tag);
       x.data('tooltip', this);
@@ -211,10 +234,10 @@ $(function(){
 $(function(){
   $('span.task_submitted').hover(
     function() {
-      id = $(this).attr('data-solution');
-      $(this).append(' <a id="view_solution123" href="/solution/'+id+'/"><i class="icon-search"></i></a>');
+      var id = $(this).attr('data-solution');
+      $(this).append(' <a id="view_solution123" href="/solution/' + id + '/"><i class="icon-search"></i></a>');
     }, function(){
-        $('#view_solution123').remove();
+      $('#view_solution123').remove();
     });
 });
 
@@ -231,30 +254,30 @@ $(function() {
 function jquery_rating_submit(name, url) {
   $(function() {
     $('.' + name + '-star').rating({
-      callback: function(v, l) {
-        data = {};
-        data[name] = typeof v == 'undefined' ? 0 : v;
+      callback: function(value, link) {
+        var data = {};
+        data[name] = typeof value == 'undefined' ? 0 : value;
         $.post(url, data, function(x) {
           $('#' + name + '-value').html(x);
         });
       }
     });
   });
-}
+};
 
 /* Email decode */
 /* email = even position characters + reversed(odd) (0-based) */
 function decode_email(e) {
-  output = '';
-  for (i = 0; i < e.length; ++i)
+  var output = '';
+  for (var i = 0; i < e.length; ++i)
     output += i % 2 == 0 ? e[i / 2] : e[e.length - (i + 1) / 2];
   return output;
-}
+};
 
 $(function() {
   $('.imejl').each(function() {
-    a = $(this);
-    email = decode_email(a.attr('data-address'));
+    var a = $(this);
+    var email = decode_email(a.attr('data-address'));
     if (a.html().length == 0)
       a.html(email);
     a.attr('href', 'mailto:' + email);

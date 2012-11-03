@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Post{% endblock %}
+{% block title %}Uređivanje poruke{% endblock %}
 
 {% block content %}
-Edit Post:<br>
+Uređivanje poruke:<br><br>
 
 <form action="/post/{{ post.pk }}/edit/" method="post">
-    {% csrf_token %}
-    {{ math_content_form.as_p }}
-    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
-    <input type="submit" class="btn btn-primary" value="Spremi">
+  {% csrf_token %}
+  {{ math_content_form.as_p }}
+  {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+  <input type="submit" class="btn btn-primary" value="Spremi">
 </form>
 {% endblock %}
 

@@ -1,3 +1,6 @@
+/* TODO: replace _ with - */
+/* TODO: sass */
+
 /* ================================= */
 /* jquery.autocomplete.css */
 
@@ -38,7 +41,7 @@
 }
 
 .ac_loading {
-	background: white url('indicator.gif') right center no-repeat;
+
 }
 
 .ac_odd {
@@ -53,6 +56,7 @@
 
 /* end of jquery.autocomplete.css */
 /* ================================= */
+
 
 /* ================================= */
 /* jQuery.Rating Plugin CSS - http://www.fyneworks.com/jquery/star-rating/ */
@@ -70,193 +74,315 @@ div.star-rating{background:transparent!important;overflow:hidden!important}
 /* ================================= */
 
 /* jQuery Rating fix */
-div.readonly-star{float:left;height:15px;text-indent:-999em;display:block;background:transparent;overflow:hidden;background:url(star.gif) repeat-x 0 0px;}
+div.readonly-star {
+  float: left;
+  height: 15px;
+  text-indent: -999em;
+  display: block;
+  background: transparent;
+  overflow: hidden;
+  background: url(star.gif) repeat-x 0 0px;
+}
 
-
+/* ================================= */
 /* skoljka css: */
+
 
 /* changes to Bootstrap */
 tr.task_solved td {
-    background-color: #70FF70!important;
+  background-color: #70FF70!important;
 }
+
 tr.task_submitted_not_rated td {
-    background-color: #FFC!important;
+  background-color: #FFC!important;
 }
+
 tr.task_as_solved td {
-    background-color: #AFA!important;
+  background-color: #AFA!important;
 }
+
 tr.task_wrong td {
-    background-color: #F99!important;
+  background-color: #F99!important;
 }
+
 tr.task_todo td {
-    background-color: #8FF!important;
+  background-color: #8FF!important;
 }
-tr.task_hidden td, tr.group_hidden td {
-    background-color: #DDD!important;
+
+tr.task_hidden td,
+tr.group_hidden td {
+  background-color: #DDD!important;
 }
+
 .thin {
-    line-height: normal;
-    margin: 0px;
-    padding: 0px;
-    border-width: 0px;
+  line-height: normal;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+}
+
+/* this is kind of tricky, please find a better solution! */
+.content .row,
+.content .btn-group {
+  display: inline-block;
 }
 
 
-/* other */
-pre {
-    display: inline;
-    background-color: #DDD;
-}
-img.latex, img.latex_center, object.latex, object.latex_center {
-    max-width: 100%;
-}
-img.latex_center, object.latex_center {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 6pt;
-    margin-bottom: 6pt;
-}
-div.tag_list {
-    display: inline;
-    font-size: 12px;
-    color: #888;
-}
-.activity {
-    border-top: thin solid #DDD;
-    padding: 6px 5px 3px 5px;
-}
-.activity .time {
-    font-size: 12px;
-    color: gray;
-}
-.activity .act_message1 {
-    margin: 0px 0px 0px 25px;
-}
-.activity .act_message2 {
-    margin: 6px 0px 6px 45px;
-}
-.act_day {
-    font-size: 18px;
-    border-top: thin solid #DDD;
-    padding: 4px;
-    color: #AAA;
-}
+/* General */
 .header {
-    padding: 5px!important;
+  padding: 5px!important;
 }
+
 .header form {
-    padding: 0px!important;
-    margin: 0px!important;
+  padding: 0px!important;
+  margin: 0px!important;
 }
+
+.container-fluid .sidebar {
+  position: relative;
+  top: 0;
+  left: auto;
+  width: 260px;
+  float: left;
+}
+
+.container-fluid .content {
+  margin: 0 0 0 280px;
+}
+
+.nav-hello-user {
+  padding: 0 0 1em 15px;
+}
+
 .footer {
-    margin: 0px 20px 5px 10px;
-    text-align: right;
-    font-size: 12px;
-    color: #BBB;
+  margin: 0px 20px 5px 10px;
+  text-align: right;
+  font-size: 12px;
+  color: #BBB;
 }
+
 .sitename {
-    color: black;
-    padding-left: 20px;
+  color: black;
+  padding-left: 20px;
 }
+
 .sitename:hover {
-    color: black;
-    text-decoration: none;
+  color: black;
+  text-decoration: none;
 }
+
 .footer a {
-    color: #8CF;
+  color: #8CF;
 }
+
 a.register {
-    color: red;
+  color: red;
 }
+
 .unread_pms_count {
-    color: red;
+  color: red;
 }
-.unread, .post_reply_to {
-    background-color: #EFC;
+
+.unread,
+.post_reply_to {
+  background-color: #EFC;
 }
+
+
+/* Activity */
+.activity {
+  border-top: thin solid #DDD;
+  padding: 6px 5px 3px 5px;
+}
+
+.activity .time {
+  font-size: 12px;
+  color: gray;
+}
+
+.activity .act_message1 {
+  margin: 0px 0px 0px 25px;
+}
+
+.activity .act_message2 {
+  margin: 6px 0px 6px 45px;
+}
+
+.act_day {
+  font-size: 18px;
+  border-top: thin solid #DDD;
+  padding: 4px;
+  color: #AAA;
+}
+
 .quote {
-    border: 1px solid #CDF;
-    background-color: #EEF;
-    padding: 5px;
+  border: 1px solid #CDF;
+  background-color: #EEF;
+  padding: 5px;
 }
+
 .post_list_small .post_info {
-    color: #666;
-    margin-bottom: 12px;
+  color: #666;
+  margin-bottom: 12px;
 }
+
 .post_list_small .last_edit {
-    font-size: 11px;
-    color: #888
+  font-size: 11px;
+  color: #888
 }
-.hidden_tag {
-    color: #999;
+
+
+/* Tags */
+.tag-list {
+  display: inline;
+  font-size: 12px;
+  color: #888;
 }
-.wrong_tag {
-    color: #A98;
+
+.tag-hidden {
+  color: #999;
 }
-.hidden_wrong_tag {
-    color: #CCC;
+
+.tag-wrong {
+  color: #A98;
 }
+
+.tag-hidden.tag-wrong {
+  color: #CCC;
+}
+
+.tag-votes {
+  color: #C8C8C8;
+}
+
 
 /* for jquery tools tooltip */
 /* cannot use `tooltip`, as it is already used by bootstrap.css */
-.tag_tooltip {
+.tag-tooltip {
   display:none;
   background:#A2A2A2;
   border:1px solid #BBB;
   padding:5px 6px 0px 6px;
   color:#eee;
 }
+
+.tag-tooltip img {
+  vertical-align:-3px;
+}
+
+.tag-tooltip input {
+  margin-top:3px;
+}
+
 .task_tooltip {
   display:none;
 }
-.tag_tooltip img {
-  vertical-align:-3px;
-}
-.tag_tooltip input {
-  margin-top:3px;
-}
+
 span.task_submitted a {
   color: #00F;
 }
+
 
 /* MathContent */
 .mc {
   position: relative;
 }
+
 .mc_viewsource {
   position: absolute;
   bottom: 0px;
   right: 0px;
   margin-left: 2px;
 }
+
 .mc_viewsource a i {
   opacity: 0.15;
 }
+
 div.mc_viewsource_text {
   margin-top: 10px;
   color: #666;
   white-space: pre-line;
 }
+
 a.mc_viewsource_clipboard {
   margin-top: 7px;
 }
+
+pre {
+  display: inline;
+  background-color: #DDD;
+}
+
+img.latex,
+img.latex_center,
+object.latex,
+object.latex_center {
+  max-width: 100%;
+}
+
+img.latex_center,
+object.latex_center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 6pt;
+  margin-bottom: 6pt;
+}
+
+
+/* News */
 .news {
   padding: 20px 5px;
 }
+
 .news .mc {
   padding-left: 10px;
 }
+
 .news .title {
   font-weight: bold;
   color: #0080DD;
   padding: 10px 0px;
 }
+
 .news .added_by {
   color: #AAAAAA;
   padding: 10px 0px;
   font-size: 12px;
 }
+
+
+/* Task */
 .task_text {
   padding: 10px 0px;
+}
+
+.task-source {
+  float: right;
+  display: inline;
+}
+
+
+/* Profile */
+.profile-distribution > div {
+  width: 20px;
+  height: 100px;
+  float: left;
+  background-color: #EEE;
+  position: relative;
+}
+
+.profile-distribution > div > div {
+  width: 20px;
+  background-color: #CCC;
+  position: absolute;
+  bottom: 0px;
+}
+
+.profile-task-list {
+  margin: 1em 0;
+}
+.profile-task-list > h3 {
+  display: inline;
 }

@@ -16,42 +16,23 @@
 
 <h2>Preporuke</h2>
 <div class="row-fluid">
-    {% comment %}
-    <div class="well">
-        <h4><a href="/task/{{ best_recommend.id }}/">{{ best_recommend.name }}</a></h4><br>
-        {{ best_recommend.content.render }}
-        <div style="text-align:right;color:gray;">{{ best_recommend.date_created|timesince }} ago</div>
-    </div>
-    {% endcomment %}
-    {% task_small_box best_recommend %}
+  {% task_small_box best_recommend %}
 </div>
 <div class="row-fluid">
-    {% for x in recommend %}
-    {% comment %}
-    <div class="span3">
-    <div class="well">
-        <center>{{ x.get_link }}</center><br>
-        <div style="text-align:right;color:gray;">{{ x.date_created|timesince }} ago</div>
-    </div>
-    </div>
-    {% endcomment %}
-    {% endfor %}
-
-    {% for t in recommend %}
-        {% cycle '<div class="row-fluid">' '' %}
-        {% task_small_box t 'span6' '' %}
-        {% cycle '' '</div>' %}
-    {% endfor %}
+  {% for t in recommend %}
+    {% cycle '<div class="row-fluid">' '' %}
+    {% task_small_box t 'span6' '' %}
+    {% cycle '' '</div>' %}
+  {% endfor %}
 </div>
 {% endif %}
 
 
-
 <h2>Nedavno objavljeni zadaci</h2>
 <div class="row-fluid">
-    {% for x in recent_tasks %}
-        {% task_small_box x 'span6' '' 'timesince' %}
-    {% endfor %}
+  {% for x in recent_tasks %}
+    {% task_small_box x 'span6' '' 'timesince' %}
+  {% endfor %}
 </div>
 
 <br><br><br>

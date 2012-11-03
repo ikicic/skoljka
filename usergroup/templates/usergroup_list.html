@@ -5,23 +5,25 @@
 {% block content %}
 
 <table width="60%" class="table-striped table-condensed" style="text-align: center;">
-    <tr>
-        <th width="30">#</th>
-        <th>Ime</th>
-        <th>Broj korisnika</th>
-    </tr>
+  <tr>
+    <th width="30">#</th>
+    <th>Ime</th>
+    <th>Broj korisnika</th>
+  </tr>
 {% for g in groups %}
-    {% if g.data.hidden %}
-    <tr class="group_hidden">
-    {% else %}
-    <tr>
-    {% endif %}
-        <td>{{ forloop.counter }}</td>
-        <td>{{ g.data }}</td>
-        <td>{{ g.data.member_count }}</td>
-    </tr>
+  {% if g.data.hidden %}
+  <tr class="group_hidden">
+  {% else %}
+  <tr>
+  {% endif %}
+    <td>{{ forloop.counter }}</td>
+    <td>{{ g.data }}</td>
+    <td>{{ g.data.member_count }}</td>
+  </tr>
 {% empty %}
-    <tr><td colspan="3">Nema nikakvih grupa</td></tr>
+  <tr>
+    <td colspan="3">Nema nikakvih grupa</td>
+  </tr>
 {% endfor %}
 </table>
 

@@ -3,50 +3,55 @@
 {% load tags_tags %}
 
 {% block title %}
-    {% if edit %}
-        Uređivanje zadatka {{ task.name }}
-    {% else %}
-        Novi zadatak
-    {% endif %}
+  {% if edit %}
+    Uređivanje zadatka {{ task.name }}
+  {% else %}
+    Novi zadatak
+  {% endif %}
 {% endblock %}
 
 
 {% block content %}
 
 {% if advanced %}
-<a href="/task/new/">Jednostavno</a><br><br>
-Naprednim dodavanjem zadataka možete odjednom dodati više zadataka sličnog imena i sličnih tagova.<br>
-Zadatke razdvajajte oznakom <pre>@@@@@</pre>.<br>
-Ukoliko želite navesti broj zadatka u imenu ili tagovima, napišite <pre>[[#]]</pre>.<br>
-Npr. Ime: <pre>IMO 2011</pre>, Tagovi: <pre>IMO, 2011, IMO</pre>.<br><br>
+  <a href="/task/new/">Jednostavno</a><br><br>
+  Naprednim dodavanjem zadataka možete odjednom dodati više zadataka sličnog imena i sličnih tagova.<br>
+  Zadatke razdvajajte oznakom <pre>@@@@@</pre>.<br>
+  Ukoliko želite navesti broj zadatka u imenu ili tagovima, napišite <pre>[[#]]</pre>.<br>
+  Npr. Ime: <pre>IMO 2011</pre>, Tagovi: <pre>IMO, 2011, IMO</pre>.<br><br>
 {% else %}
-{% if perms.task.add_advanced %}<a href="/task/new/advanced/">Napredno</a><br><br>{% endif %}
+  {% if perms.task.add_advanced %}<a href="/task/new/advanced/">Napredno</a><br><br>{% endif %}
 {% endif %}
 
 <div style="float:right;text-align:right;">
-    {% if edit %}
-        <a href="/mathcontent/{{ task.content.id }}/attachments/" class="btn">Pregled datoteka</a><br><br>
-    {% endif %}
-    <a href="/tags/" target="_blank">Popis tagova</a>
+  {% if edit %}
+    <a href="/mathcontent/{{ task.content.id }}/attachments/" class="btn">Pregled datoteka</a><br><br>
+  {% endif %}
+  <a href="/tags/" target="_blank">Popis tagova</a>
 </div>
 
 <br>
-<div style="width:70%;margin-left:10px;"><i>Napomena: Nemojte dodavati zadatke za koja nemate prava.
-Također, nemojte dodavati zadatke s domaćih natjecanja (općinskih, županijskih, državnih, izbornih) i s olimpijada (IMO, shortlist, MEMO, HMO), jer će to prije ili poslije dodati mentori. Ukoliko dodajete zadatke s natjecanja, po mogućnosti dodajte sve zadatke odjednom (svih, primjerice, pet zadataka).
-<br><br><span style="color:red;">Nemojte dodavati zadatke s ovogodišnjeg izbornog natjecanja!</span></i></div>
+<div style="width: 70%; margin-left: 10px; font-style: italic;">
+  Napomena: Nemojte dodavati zadatke za koja nemate prava. Također, nemojte
+  dodavati zadatke s domaćih natjecanja (općinskih, županijskih, državnih,
+  izbornih) i s olimpijada (IMO, shortlist, MEMO, HMO), jer će to prije ili
+  poslije dodati mentori. Ukoliko dodajete zadatke s natjecanja, po mogućnosti
+  dodajte sve zadatke odjednom (svih, primjerice, pet zadataka).
+</div>
 
 <br><br>
 
 <form action="{{ action_url }}" method="post">
-    {% csrf_token %}
-    <table>
+  {% csrf_token %}
+  <table>
     {% for form in forms %}
-        {{ form.as_table }}
+      {{ form.as_table }}
     {% endfor %} 
-    </table>
-    <br>
-    <input type="submit" class="btn btn-primary" value="Pošalji" />
+  </table>
+  <br>
+  <input type="submit" class="btn btn-primary" value="Pošalji">
 </form>
+
 {% tags_autocomplete_script %}
 
 {% endblock content %}

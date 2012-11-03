@@ -11,7 +11,9 @@
 {% block inner_content %}
 
 <form action="/usergroup/{% if edit %}{{ group.id }}/edit/{% else %}new/{% endif %}" method="post">
-  <h4>{% if edit %}Uređivanje grupe {{ group.name }}{% else %}Stvaranje nove grupe{% endif %}</h4><br>
+  <h4>
+    {% if edit %}Uređivanje grupe {{ group.name }}{% else %}Nova grupa{% endif %}
+  </h4><br>
   {% csrf_token %}
   <table>
     {% for form in forms %}
@@ -20,7 +22,9 @@
     <tr>
       <th></th>
       <td class="btn-group">
-        <button type="submit" class="btn btn-primary">{% if edit %}Pošalji{% else %}Stvori novu grupu{% endif %}</button>
+        <button type="submit" class="btn btn-primary">
+          {% if edit %}Pošalji{% else %}Napravi novu grupu{% endif %}
+        </button>
         <a href="/usergroup/{% if edit %}{{ group.id }}/{% endif %}" class="btn">Odustani</a>
       </td>
     </tr>
