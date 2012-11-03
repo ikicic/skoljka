@@ -122,8 +122,9 @@ tr.group_hidden td {
 }
 
 /* this is kind of tricky, please find a better solution! */
+.content .btn-group,
 .content .row,
-.content .btn-group {
+.content .row-fluid {
   display: inline-block;
 }
 
