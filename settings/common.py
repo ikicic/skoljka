@@ -227,7 +227,7 @@ gettext_dummy = lambda s: s
 
 # Define languages -> otherwise templates will be compiled in all possible languages
 LANGUAGES = (
-     ('en', gettext_dummy('English')),
+     # ('en', gettext_dummy('English')),
      ('hr', gettext_dummy('Croatian')),
 )
 
