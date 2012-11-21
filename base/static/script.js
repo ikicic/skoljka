@@ -1,3 +1,14 @@
+/*
+  PLEASE NOTE:
+
+  To make some function public (and to keep its name), use this format:
+    function_name = function(a, b, c) {
+      (...)
+    }
+
+*/
+
+
 /* Django & Ajax POST method */
 /* http://stackoverflow.com/questions/5100539/django-csrf-check-failing-with-an-ajax-post-request */
 $.ajaxSetup({ 
@@ -251,7 +262,7 @@ $(function() {
 });
 
 /* jQuery Rating Submit Function */
-function jquery_rating_submit(name, url) {
+jquery_rating_submit = function(name, url) {
   $(function() {
     $('.' + name + '-star').rating({
       callback: function(value, link) {
