@@ -193,16 +193,27 @@ LOGGING = {
 #            'class': 'sentry.client.handlers.SentryHandler',
 #            'formatter': 'verbose'
 #        },
-        'console': {
+        'null': {
             'level': 'DEBUG',
+            'class': 'django.utils.log.NullHandler',
+        },
+        'console': {
+            'level': 'WARNING',
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
+            'formatter': 'verbose',
         }
     },
     'loggers': {
-        '()': {
-            'level': 'WARNING',
+        'django': {
+            'handlers': ['null'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.request': {
 #            'handlers': ['sentry'],
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
         },
 #        'sentry.errors': {
 #            'level': 'DEBUG',
@@ -235,20 +246,21 @@ MEDIA_CACHE_DIR = os.path.normpath(os.path.join(MEDIA_ROOT, 'cache'))
 MEDIA_CACHE_URL = os.path.normpath(os.path.join(MEDIA_URL, 'cache'))
 TEMPLATE_CACHE_DIR = os.path.normpath(os.path.join(LOCAL_DIR, 'templates', 'cache'))
 
+# DISABLED due to the bug: https://github.com/citylive/django-template-preprocessor/issues/20
 # Wrap template loaders
-if DEBUG:
-    TEMPLATE_LOADERS = (
-        ('template_preprocessor.template.loaders.ValidatorLoader',
-        #('template_preprocessor.template.loaders.RuntimeProcessedLoader',
-            TEMPLATE_LOADERS
-        ),
-    )
-else:
-    TEMPLATE_LOADERS = (
-        ('template_preprocessor.template.loaders.PreprocessedLoader',
-            TEMPLATE_LOADERS
-        ),
-    )
+# if DEBUG:
+#     TEMPLATE_LOADERS = (
+#         ('template_preprocessor.template.loaders.ValidatorLoader',
+#         #('template_preprocessor.template.loaders.RuntimeProcessedLoader',
+#             TEMPLATE_LOADERS
+#         ),
+#     )
+# else:
+#     TEMPLATE_LOADERS = (
+#         ('template_preprocessor.template.loaders.PreprocessedLoader',
+#             TEMPLATE_LOADERS
+#         ),
+#     )
 
 # Enabled modules of the template preprocessor
 TEMPLATE_PREPROCESSOR_OPTIONS = {
@@ -268,7 +280,7 @@ TEMPLATE_PREPROCESSOR_OPTIONS = {
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
 # TODO: fix /*! */ comments, they should be uncompressed
-PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.cssmin.CssminCompressor'
+PIPELINE_CSS_COMPRESSOR = 'utils.csscompressor.CSSCompressor'
 PIPELINE_CSS = {
     'bootstrap': {
         'source_filenames': (
