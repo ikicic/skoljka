@@ -246,21 +246,20 @@ MEDIA_CACHE_DIR = os.path.normpath(os.path.join(MEDIA_ROOT, 'cache'))
 MEDIA_CACHE_URL = os.path.normpath(os.path.join(MEDIA_URL, 'cache'))
 TEMPLATE_CACHE_DIR = os.path.normpath(os.path.join(LOCAL_DIR, 'templates', 'cache'))
 
-# DISABLED due to the bug: https://github.com/citylive/django-template-preprocessor/issues/20
 # Wrap template loaders
-# if DEBUG:
-#     TEMPLATE_LOADERS = (
-#         ('template_preprocessor.template.loaders.ValidatorLoader',
-#         #('template_preprocessor.template.loaders.RuntimeProcessedLoader',
-#             TEMPLATE_LOADERS
-#         ),
-#     )
-# else:
-#     TEMPLATE_LOADERS = (
-#         ('template_preprocessor.template.loaders.PreprocessedLoader',
-#             TEMPLATE_LOADERS
-#         ),
-#     )
+if DEBUG:
+    TEMPLATE_LOADERS = (
+        ('template_preprocessor.template.loaders.ValidatorLoader',
+        #('template_preprocessor.template.loaders.RuntimeProcessedLoader',
+            TEMPLATE_LOADERS
+        ),
+    )
+else:
+    TEMPLATE_LOADERS = (
+        ('template_preprocessor.template.loaders.PreprocessedLoader',
+            TEMPLATE_LOADERS
+        ),
+    )
 
 # Enabled modules of the template preprocessor
 TEMPLATE_PREPROCESSOR_OPTIONS = {
