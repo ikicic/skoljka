@@ -39,7 +39,8 @@ def mark(request, task_id):
 
     task = get_object_or_404(Task, pk=task_id)
         
-    if action == 'official' and task.author != request.user and not request.user.has_perm('mark_as_official_solution'):
+    if action == 'official' and task.author != request.user \
+            and not request.user.has_perm('mark_as_official_solution'):
         return (403, u'No permission to mark as official solution.')
     
     try:

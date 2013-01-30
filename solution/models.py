@@ -9,7 +9,8 @@ from task.models import Task
 
 SOLUTION_RATING_ATTRS = {
     'range': 5,
-    'titles': [u'Netočno', u'Točno uz manje nedostatke.', u'Točno.', u'Točno i domišljato.', u'Genijalno! Neviđeno!'],
+    'titles': [u'Netočno', u'Točno uz manje nedostatke.', u'Točno.',
+        u'Točno i domišljato.', u'Genijalno! Neviđeno!'],
 }
 
 # TODO: nekako drugacije ovo nazvati
@@ -18,14 +19,20 @@ SOLUTION_CORRECT_SCORE = 2.6
 # solution.status
 STATUS = {'blank': 0, 'as_solved': 1, 'todo': 2, 'submitted': 3}
 
-HTML_INFO = {
-    'blank': {'label_class': '', 'label_text': '', 'tr_class': ''},
-    'as_solved': {'label_class': 'label-success', 'label_text': u'Riješeno', 'tr_class': 'task_as_solved'},
-    'solved': {'label_class': 'label-success', 'label_text': u'Točno', 'tr_class': 'task_solved'},
-    'wrong': {'label_class': 'label-important', 'label_text': u'Netočno', 'tr_class': 'task_wrong'},
-    'todo': {'label_class': 'label-warning', 'label_text': u'To Do', 'tr_class': 'task_todo'},
-    'submitted_not_rated': {'label_class': 'label-info', 'label_text': u'Poslano', 'tr_class': 'task_submitted_not_rated'},
+# Each element of HTML_INFO is dict with keys from _HTML_INFO_KEYS and values
+# from _HTML_INFO
+_HTML_INFO_KEYS = ('label_class', 'label_text', 'tr_class')
+_HTML_INFO = {
+    'blank': ('', '', ''),
+    'as_solved': ('label-success', u'Riješeno', 'task_as_solved'),
+    'solved': ('label-success', u'Točno', 'task_solved'),
+    'wrong': ('label-important', u'Netočno', 'task_wrong'),
+    'todo': ('label-warning', u'To Do', 'task_todo'),
+    'submitted_not_rated': ('label-info', u'Poslano', 'task_submitted_not_rated'),
 }
+
+HTML_INFO = {key: dict(zip(_HTML_INFO_KEYS, value)) for key, value in _HTML_INFO.iteritems()}
+
 
 class Solution(models.Model):
     task = models.ForeignKey(Task)

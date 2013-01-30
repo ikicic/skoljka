@@ -247,19 +247,22 @@ MEDIA_CACHE_URL = os.path.normpath(os.path.join(MEDIA_URL, 'cache'))
 TEMPLATE_CACHE_DIR = os.path.normpath(os.path.join(LOCAL_DIR, 'templates', 'cache'))
 
 # Wrap template loaders
-if DEBUG:
-    TEMPLATE_LOADERS = (
-        ('template_preprocessor.template.loaders.ValidatorLoader',
-        #('template_preprocessor.template.loaders.RuntimeProcessedLoader',
-            TEMPLATE_LOADERS
-        ),
-    )
-else:
+if not DEBUG:
     TEMPLATE_LOADERS = (
         ('template_preprocessor.template.loaders.PreprocessedLoader',
             TEMPLATE_LOADERS
         ),
     )
+## Template preprocessor for now completely disabled in debug mode. If there
+## will be any need to change this, please make it as an option.
+## (add a bool constant to local.py and local.template.py)
+# else:
+#     TEMPLATE_LOADERS = (
+#         ('template_preprocessor.template.loaders.ValidatorLoader',
+#         #('template_preprocessor.template.loaders.RuntimeProcessedLoader',
+#             TEMPLATE_LOADERS
+#         ),
+#     )
 
 # Enabled modules of the template preprocessor
 TEMPLATE_PREPROCESSOR_OPTIONS = {
