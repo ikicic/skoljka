@@ -113,9 +113,9 @@ class response:
                     return 'This is response'
             
             VALID:
-            @response()
-            def detail(request):
-                return 'This is response'
+                @response()
+                def detail(request):
+                    return 'This is response'
                 
                 
         Possible return values:
@@ -125,6 +125,7 @@ class response:
         - string:
             Return string as is, with status code 200 OK.
         - int:
+            TODO: Return *default* response (...) (i.e. some message)
             Return empty response with given status code.
             If given value is 404, it will raise Http404.
         - tuple:
@@ -202,7 +203,7 @@ class response:
                 # len == 3 -> status (int), template (string), content (string / dict)
                 if len(x) == 1:
                     return _flush_cookie_update(request, HttpResponseRedirect(x[0]))
-                if len(x) == 2:
+                elif len(x) == 2:
                     dummy, content = x
                     if isinstance(dummy, basestring):
                         template = dummy
@@ -214,7 +215,8 @@ class response:
             # render to string if given a dict
             if isinstance(content, dict):
                 template = template or content.pop('TEMPLATE', None)
-                content = loader.render_to_string(template, content, context_instance=RequestContext(request))
+                content = loader.render_to_string(template, content,
+                    context_instance=RequestContext(request))
                 
             if content is not None:                
                 if status == response.REDIRECT:
@@ -228,7 +230,8 @@ class response:
                 rsp = x
                 
                 
-            if isinstance(rsp, HttpResponse) and status in (response.OK, response.MOVED, response.REDIRECT):
+            if isinstance(rsp, HttpResponse) and status in (response.OK,
+                    response.MOVED, response.REDIRECT):
                 return _flush_cookie_update(request, rsp)
             return rsp
         return wraps(func)(inner)

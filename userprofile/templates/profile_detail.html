@@ -47,16 +47,21 @@
     </table>
   </div>
   <div class="span5">
-    Distribucija
-    <div class="profile-distribution">
-      {% for x in distribution %}
-        <div title="{{ x.0 }}">
-          <div style="height:{{ x.1 }}%;"></div>
-        </div>
-      {% empty %}
-        Nema riješenih zadataka.
-      {% endfor %}
-    </div>
+    {% if distribution %}
+      Distribucija:
+      <div class="profile-distribution">
+        {% for x in distribution %}
+          <div title="{{ x.0 }} - {{ x.2 }}">
+            <div style="height:{{ x.1 }}%;"></div>
+          </div>
+        {% endfor %}
+      </div>
+      <div>
+        Ukupno riješenih zadataka: {{ profile.profile.solved_count }}
+      </div>
+    {% else %}
+      Nema riješenih zadataka.
+    {% endif %}
   </div>
 </div>
 

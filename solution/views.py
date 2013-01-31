@@ -6,7 +6,7 @@ from django.template import RequestContext
 
 from activity import action as _action
 from task.models import Task
-from solution.models import Solution, STATUS
+from solution.models import Solution, STATUS, _update_solved_count
 from mathcontent.forms import MathContentForm
 
 from skoljka.utils.decorators import response, require
@@ -29,73 +29,96 @@ def detail(request, solution_id):
         'ratings': ratings,
     }
 
-@require(post='action')
-@response()
-@login_required
-def mark(request, task_id):
+
+def _do_mark(request, solution, task):
+    """
+        Update solution status:
+            As Solved
+            To Do
+            Blank
+
+        Or mark / unmark official flag
+        
+        Creates Solution if it doesn't exist (in that case Task is given)
+    """
+
     action = request.POST['action']
-    if action not in ['official', 'blank', 'as_solved', 'todo']:
+
+    # check requset and privileges
+    if action not in ['official0', 'official1', 'blank', 'as_solved', 'todo']:
         return (403, u'Action "%s" not valid.' % action)
 
-    task = get_object_or_404(Task, pk=task_id)
-        
-    if action == 'official' and task.author != request.user \
+    if action in ['official0', 'official1'] and task.author != request.user \
             and not request.user.has_perm('mark_as_official_solution'):
         return (403, u'No permission to mark as official solution.')
-    
-    try:
-        solution = Solution.objects.get(task=task, author=request.user)
-        solution.status = STATUS[action]
-        solution.save()
-    except Solution.DoesNotExist:
-        solution = Solution.objects.create(task=task, author=request.user, status=STATUS[action])
 
-    if action != 'blank':   # not really something interesting
-        # TODO: DRY!
-        type = {'official': _action.SOLUTION_AS_OFFICIAL,
+    # as_solved, todo, blank
+    if solution is None:
+        solution, dummy = Solution.objects.get_or_create(task=task, author=request.user)
+        
+    if solution.author != request.user and not request.user.is_staff:
+        return (403, 'Not allowed to modify this solution.')
+
+
+    # keep track of the number of solutions for the task
+    was_solved = solution.is_solved()
+
+
+    # update
+    if action in ['official0', 'official1']:
+        solution.is_official = action == 'official1'
+    elif action in ['blank', 'as_solved', 'todo']:
+        solution.status = STATUS[action]
+
+    solution.save()
+
+
+    # log the action
+    if action in ['official1', 'as_solved', 'todo']:
+        type = {'official1': _action.SOLUTION_AS_OFFICIAL,
                 'as_solved': _action.SOLUTION_AS_SOLVED,
                 'todo': _action.SOLUTION_TODO,
             }
         _action.send(request.user, type[action], action_object=solution, target=task)
+
         
-    return (response.REDIRECT, '/task/%d/' % int(task_id))
+    # update solved count if necessary
+    delta = solution.is_solved() - was_solved
+    if delta:
+        _update_solved_count(delta, task, request.user.get_profile())
+
+    return None     # ok
 
 
-# odgovorno za official, i mijenjanje statusa iz solution -> view
+@require(post='action')
+@response()
+@login_required
+def mark(request, task_id):
+    """
+        Called from Task view
+    """
+    task = get_object_or_404(Task, pk=task_id)
+
+    # _do_mark will create Solution if it doesn't exist
+    ret_value = _do_mark(request, None, task)
+
+    return ret_value or (response.REDIRECT, '/task/%d/' % int(task_id))
+
+
 @require(post='action')
 @response()
 @login_required
 def edit_mark(request, solution_id):
-    action = request.POST['action']
+    """
+        Called from Solution view
+    """
     solution = get_object_or_404(Solution, id=solution_id)
-    if solution.author != request.user and not request.user.is_staff:
-        return (403, 'Not allowed to modify this solution.')
     
-    if action in ['0', '1']:
-        solution.is_official = int(action)
-        solution.save()
-        
-        # TODO: DRY!
-        if action == '1':
-            _action.send(request.user, _action.SOLUTION_AS_OFFICIAL, action_object=solution, target=solution.task)
-        return ('/solution/%d/' % int(solution_id),)
-
-    if action in ['blank', 'as_solved', 'todo']:
-        solution.status = STATUS[action]
-        solution.save()
-        
-        # TODO: DRY!
-        if action != 'blank':
-            type = {'as_solved': _action.SOLUTION_AS_SOLVED,
-                    'todo': _action.SOLUTION_TODO}
-            _action.send(request.user, type[action], action_object=solution, target=solution.task)
-        return ('/task/%d/' % solution.task_id,)
-
-    return (403, u'Action "%s" not valid' % action)
+    ret_value = _do_mark(request, solution, solution.task)
+    
+    return ret_value or ('/task/%d/' % solution.task_id,)
 
 
-
-#TODO: provjeriti za dupla rjesenja
 #TODO: dogovoriti se oko imena ove funkcije, pa i template-a
 #TODO(ikicic): sto ako forma nije valid?
 @login_required
@@ -107,13 +130,11 @@ def submit(request, task_id=None, solution_id=None):
         edit = True
     elif task_id:
         task = get_object_or_404(Task, pk=task_id)
-        try:
-            solution = Solution.objects.get(task=task, author=request.user)
-        except Solution.DoesNotExist:
-            solution = Solution(task=task, author=request.user)
+        solution, dummy = Solution.objects.get_or_create(task=task, author=request.user)
         edit = False
     else:
-        raise Http404()
+        return 404
+
     math_content = solution.content
     
     if request.method == 'POST':
@@ -121,18 +142,19 @@ def submit(request, task_id=None, solution_id=None):
         if math_content_form.is_valid():
             math_content = math_content_form.save()
             
+            was_solved = solution.is_solved()
+            
             solution.content = math_content
             solution.status = STATUS['submitted']
             solution.save()
             if not edit:
                 _action.send(request.user, _action.SOLUTION_SUBMIT, action_object=solution, target=task)
             
-            task.solved_count = Solution.objects.values("author_id").filter(task=task).distinct().count()
-            task.save()
-            profile = request.user.get_profile()
-            profile.solved_count = Solution.objects.values('task_id').filter(author=request.user).distinct().count()
-            profile.save()
-            
+            # update solved count if necessary
+            delta = solution.is_solved() - was_solved
+            if delta:
+                _update_solved_count(delta, task, request.user.get_profile())
+
             return ("/solution/%d/" % (solution.id,),)
         
     return {
@@ -141,7 +163,6 @@ def submit(request, task_id=None, solution_id=None):
         'action_url': request.path,
     }
 
-    
 def _is_valid_status(status):
     if not status:
         return True

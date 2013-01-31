@@ -7,11 +7,6 @@ from rating.fields import RatingField
 from rating.constants import *
 from task.models import Task
 
-SOLUTION_RATING_ATTRS = {
-    'range': 5,
-    'titles': [u'Netočno', u'Točno uz manje nedostatke.', u'Točno.',
-        u'Točno i domišljato.', u'Genijalno! Neviđeno!'],
-}
 
 # TODO: nekako drugacije ovo nazvati
 SOLUTION_CORRECT_SCORE = 2.6
@@ -34,6 +29,47 @@ _HTML_INFO = {
 HTML_INFO = {key: dict(zip(_HTML_INFO_KEYS, value)) for key, value in _HTML_INFO.iteritems()}
 
 
+def _update_solved_count(delta, task, profile, save_task=True, save_profile=True):
+    """
+        Update solution counter for given Task and UserProfile.
+
+        To disable automatic saving, set save_task and/or save_profile to False.
+    """
+    if delta == 0:
+        return
+
+    task.solved_count += delta
+    if save_task:
+        task.save()
+
+    profile.solved_count += delta
+    profile.update_diff_distribution(task, delta)
+    if save_profile:
+        profile.save()
+
+def _solution_on_update(solution, field_name, old_value, new_value):
+    """
+        Updates statistics (number of correct solution for Task and UserProfile)
+        in case solution correctness is changed.
+    """
+    if solution.status != STATUS['submitted']:
+        return # not interesting
+
+    old = old_value >= SOLUTION_CORRECT_SCORE
+    new = new_value >= SOLUTION_CORRECT_SCORE
+
+    if old != new:
+        _update_solved_count(new - old, solution.task,
+            solution.author.get_profile())
+
+
+SOLUTION_RATING_ATTRS = {
+    'range': 5,
+    'titles': [u'Netočno', u'Točno uz manje nedostatke.', u'Točno.',
+        u'Točno i domišljato.', u'Genijalno! Neviđeno!'],
+    'on_update': _solution_on_update,
+}
+
 class Solution(models.Model):
     task = models.ForeignKey(Task)
     author = models.ForeignKey(User)
@@ -41,17 +77,17 @@ class Solution(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     last_edit_time = models.DateTimeField(auto_now=True)
     posts = PostGenericRelation()
-    
-    status = models.IntegerField()
+
+    status = models.IntegerField(default=STATUS['blank']) # view STATUS for more info
     is_official = models.BooleanField()
     correctness = RatingField(**SOLUTION_RATING_ATTRS)
-    
+
     class Meta:
         unique_together=(('task', 'author'),)
 
     def get_absolute_url(self):
         return '/solution/%d/' % self.id
-        
+
     # template helpers
     def get_html_info(self):
         if self.status == STATUS['as_solved']:
@@ -64,17 +100,24 @@ class Solution(models.Model):
             return HTML_INFO['todo']
         return HTML_INFO['blank']
 
+    def is_solved(self):
+        return self.is_as_solved() or self.is_correct()
+
     def is_correct(self):
         return self.is_submitted() and self.correctness_avg >= SOLUTION_CORRECT_SCORE
+
     def is_submitted(self):
         return self.status == STATUS['submitted']
+
     def is_as_solved(self):
         return self.status == STATUS['as_solved']
+
     def is_todo(self):
         return self.status == STATUS['todo']
+
     def is_blank(self):
         return self.status == STATUS['blank']   # postoji, ali blank
-        
+
 # nuzno(?) da bi queryji koristili JOIN, a ne subqueryje
 # TODO: neki prikladniji naziv za related_name
 User.add_to_class('solutions', models.ManyToManyField(Task, through=Solution, related_name='solutions_by'))

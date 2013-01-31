@@ -29,7 +29,7 @@
       <td>{{ task.get_link }}</td>
       <td>{% if plus_exclude %}{% tag_list task plus_exclude %}{% else %}{% tag_list task %}{% endif %}</td>
 
-      {% if task.solved_count > 0 %}
+      {% if task.solved_count != 0 %}
         <td><a href="/solution/task/{{ task.id }}/">{{ task.solved_count }}</a></td>
       {% else %}
         <td>0</td>

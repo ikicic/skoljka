@@ -62,7 +62,7 @@ class Task(models.Model):
     difficulty_rating = RatingField(**DIFFICULTY_RATING_ATTRS)
     similar = models.ManyToManyField('self', through=SimilarTask, related_name='similar_backward', symmetrical=False)
 
-    solved_count = models.IntegerField(default=0)
+    solved_count = models.IntegerField(default=0, db_index=True)
     
     objects = TaskPermissionManager()
 

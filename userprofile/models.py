@@ -63,23 +63,26 @@ class UserProfile(models.Model):
     
     def __unicode__(self):
         return u'UserProfile for ' + self.user.username
-    
+
     def get_absolute_url(self):
         return '/profile/%d/' % self.id
 
-    # da vraca [] umjesto None?
-    def get_normalized_diff_distribution(self):
+    def get_diff_distribution(self):
+        """
+            Returns distribution as a list of integers.
+            If there are no solved problems, returns list of zeros.
+        """
         distribution = self.diff_distribution.split(',')
         if len(distribution) == 1:
-            return None
-        
-        distribution = [int(x) for x in distribution]
-        total = sum(distribution)
+            return [0] * DIFFICULTY_RATING_ATTRS['range']
+        return map(int, distribution)
 
-        return None if total == 0 else [float(x) / total for x in distribution]
-        
-        
-    def update_diff_distribution(self, commit=True):
+    def refresh_diff_distribution(self, commit=True):
+        """
+            Refresh solved task difficulty distribution manually.
+            Not really meant to be called (but callable from admin), because
+            distribution should be automatically updated on any change...
+        """
         tasks = Task.objects.filter(
             Q(solution__status=STATUS['as_solved']) | Q(solution__correctness_avg__gte=SOLUTION_CORRECT_SCORE) & Q(solution__status=STATUS['submitted']),
             hidden=False,
@@ -96,6 +99,12 @@ class UserProfile(models.Model):
         if commit:
             self.save()
 
+    def update_diff_distribution(self, task, delta):
+        diff = int(task.difficulty_rating_avg - 0.5)
+    
+        D = self.diff_distribution.split(',')
+        D[diff] = str(int(D[diff]) + delta)
+        self.diff_distribution = ','.join(D)
 
 
 # ovo navodno nije preporuceno, ali vjerujem da ce se 

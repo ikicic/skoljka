@@ -49,11 +49,18 @@ def profile(request, pk):
     else:
         user = get_object_or_404(User.objects.select_related('profile'), pk=pk)    
 
-    user.profile.update_diff_distribution()
-    distribution = user.profile.get_normalized_diff_distribution()
-    if distribution:
-        distribution = zip(DIFFICULTY_RATING_ATTRS['titles'], [int(x * 100) for x in distribution])
-        
+    # DEPRECATED. Distribution should be now updated automatically...
+    # user.profile.refresh_diff_distribution()
+
+    distribution = user.profile.get_diff_distribution()
+    high = max(distribution)
+    if high > 0:
+        scale = 100.0 / max(high, 10)
+        scaled = [int(x * scale) for x in distribution]
+        distribution = zip(DIFFICULTY_RATING_ATTRS['titles'], scaled, distribution)
+    else:
+        distribution = None
+
     if not request.user.is_authenticated():
         visible_groups = user.groups.exclude(name=user.username).filter(data__hidden=False).select_related('data')
     elif request.user.id == pk:

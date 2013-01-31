@@ -366,6 +366,13 @@ object.latex_center {
 
 
 /* Profile */
+.profile-distribution:after {
+  content: " ";
+  display: block; 
+  height: 0; 
+  clear: both;
+}
+
 .profile-distribution > div {
   width: 20px;
   height: 100px;

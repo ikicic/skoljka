@@ -48,7 +48,3 @@ def cache_task_info(context, tasks):
     # ------ context variables --------
     context['task_ids'] = ids
     return ''
-
-@register.filter
-def multiple_task_link(tasks):
-    return mark_safe(u'<a href="/task/multiple/%s/">Prikaži tekstove zadataka odjednom</a>' % ','.join([str(x.id) for x in tasks]))

@@ -12,11 +12,16 @@ SUM = 2
 
 class RatingManager(models.Manager):
     def __init__(self, instance, field):
+        """
+            on_update callback arguments:
+                (object instance, field_name, old_value, new_value)
+        """
         self.instance = instance
         self.field = field
         self.field_name = field.field_name
         self.content_type = None
-        
+        self.on_update = None
+
     def get_query_set(self, *args, **kwargs):
         return Vote.objects.get_query_set(*args, **kwargs).filter(
             object_id=self.instance.id,
@@ -32,15 +37,15 @@ class RatingManager(models.Manager):
     def get_average(self):
         # used only for type == AVERAGE
         return getattr(self.instance, self.field_name)
-        
+
     ##################
     # template helpers
     def get_range_and_titles(self):
         return zip(range(1, self.field.range + 1), self.field.titles)
-        
+
     def get_star_split(self):
         return '' if self.field.range == 5 else ' {split:%d}' % (self.field.range / 5)
-        
+
     # end template helpers
     ##################
         
@@ -52,12 +57,15 @@ class RatingManager(models.Manager):
         except Vote.DoesNotExist:
             return None
 
-
     # TODO: optimizirati, ovo radi nepotrebne upite
     def update(self, user, value):
         value = int(value)
-        score, created = Score.objects.get_or_create(object_id=self.instance.pk, content_type=self.get_content_type(), key=self.field.key)
-        vote, created = Vote.objects.get_or_create(object_id=self.instance.pk, content_type=self.content_type, key=self.field.key, user=user, defaults={'value': value})
+        score, created = Score.objects.get_or_create(object_id=self.instance.pk,
+            content_type=self.get_content_type(), key=self.field.key)
+        vote, created = Vote.objects.get_or_create(object_id=self.instance.pk,
+            content_type=self.content_type, key=self.field.key, user=user,
+            defaults={'value': value})
+
         if created:
             score.count += 1
         else:
@@ -71,17 +79,21 @@ class RatingManager(models.Manager):
         else:
             score.sum += vote.value
             vote.save()
-        
+
         score.save()
-        
+
         if self.field.type == AVERAGE:
             value = 0 if score.count == 0 else float(score.sum) / score.count
         else: # SUM
             value = score.sum
-        
+
+        old_value = getattr(self.instance, self.field_name, value)
         setattr(self.instance, self.field_name, value)
         self.instance.save()
         
+        if self.field.on_update:
+            self.field.on_update(self.instance, self.field_name, old_value, value)
+
         return value
         
 
@@ -109,6 +121,7 @@ class RatingField(models.FloatField):
         self.range = kwargs.pop('range', 5)
         self.titles = kwargs.pop('titles', range(1, self.range + 1))
         self.type = kwargs.pop('type', AVERAGE)
+        self.on_update = kwargs.pop('on_update', None)
         if 'default' not in kwargs:
             kwargs['default'] = 0
         super(RatingField, self).__init__(*args, **kwargs)
