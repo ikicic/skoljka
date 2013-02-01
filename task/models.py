@@ -14,7 +14,6 @@ from post.generic import PostGenericRelation
 from rating.fields import RatingField
 from search.models import SearchCacheElement
 from tags.managers import TaggableManager
-#from userprofile.models import task_difficulty_on_update
 
 from task.utils import task_similarity
 

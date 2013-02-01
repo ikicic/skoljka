@@ -1,5 +1,4 @@
 ﻿from django.contrib.auth.models import User, Group
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection, models, transaction
 from django.db.models import Q
 from django.dispatch import receiver
@@ -141,7 +140,7 @@ class UserProfile(models.Model):
             element = self.user.diff_distribution.get(difficulty=diff)
             element.solved_count += delta
             element.save()
-        except DoesNotExist:
+        except DifficultyDistribution.DoesNotExist:
             bulk = [DifficultyDistribution(user=self.user, difficulty=x,
                     solved_count=(delta if x == diff else 0))
                 for x in range(0, DIFFICULTY_RATING_ATTRS['range'])]
