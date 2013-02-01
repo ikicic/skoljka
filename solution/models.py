@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from mathcontent.models import MathContent
 from post.generic import PostGenericRelation
 from rating.fields import RatingField
-from rating.constants import *
 from task.models import Task
 
 

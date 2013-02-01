@@ -16,6 +16,10 @@ SECRET_KEY = ''     # secret key here
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
+        # TODO: Investigate which engine to use -- MyISAM or InnoDB
+        # Different engines for different tables might cause problems to
+        # foreign key relations.
+        'OPTIONS': { 'init_command': 'SET storage_engine=MyISAM;' },
         'NAME': '',                 # enter database name here
         'USER': '',                 # enter mysql username here
         'PASSWORD': '',             # enter password here

@@ -3,11 +3,10 @@ from django.contrib.contenttypes.models import ContentType
 
 from tags.models import TaggedItem
 
-from rating.constants import DIFFICULTY_RATING_ATTRS
 from recommend.models import UserTagScore, UserRecommendation
 from recommend.constants import *
 from solution.models import Solution, STATUS
-from task.models import Task
+from task.models import Task, DIFFICULTY_RATING_ATTRS
 
 from collections import defaultdict
 from datetime import datetime

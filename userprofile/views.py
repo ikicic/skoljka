@@ -9,10 +9,9 @@ from django.template import RequestContext
 from userprofile.forms import UserCreationForm, UserEditForm, UserProfileEditForm
 from userprofile.models import UserProfile
 
-from rating.constants import DIFFICULTY_RATING_ATTRS
 from recommend.models import UserTagScore
 from solution.models import STATUS
-from task.models import Task
+from task.models import Task, DIFFICULTY_RATING_ATTRS
 
 def new_register(request):
     if request.user.is_authenticated():

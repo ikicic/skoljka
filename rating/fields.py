@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
+from django.core.urlresolvers import get_callable
 
 from hashlib import md5
 
@@ -92,6 +93,9 @@ class RatingManager(models.Manager):
         self.instance.save()
         
         if self.field.on_update:
+            # automatically cache the function pointer itself, don't search
+            # for the function every time
+            self.field.on_update = get_callable(self.field.on_update)
             self.field.on_update(self.instance, self.field_name, old_value, value)
 
         return value
