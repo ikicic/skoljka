@@ -7,6 +7,8 @@ from django.utils.safestring import mark_safe
 from activity.constants import *
 from userprofile.templatetags.userprofile_tags import userlink
 
+# TODO: napraviti neki shortcut za ttype = (A.type, A.subtype)
+
 # 3. 4. 2012. (ikicic) Znam da ovo nije najpametnije izvedeno, pa evo neki prijedlozi:
 # 1) da Action pamti reply_to ForeignKey na Post, tj. ID poruke na koju je self odgovor
 # 2) da Action sam moze konstruirati link u kojem se nalazi
@@ -17,6 +19,7 @@ from userprofile.templatetags.userprofile_tags import userlink
 class Action(models.Model):
     actor = models.ForeignKey(User, db_index=True)
     type = models.IntegerField(db_index=True)
+    subtype = models.IntegerField()
     date_created = models.DateTimeField(auto_now_add=True, db_index=True)
     
     # group can also act like user
@@ -51,9 +54,10 @@ class Action(models.Model):
         
     def get_content(self):
         S = ''
-        if self.type in [TASK_ADD, SOLUTION_SUBMIT, SOLUTION_AS_SOLVED, SOLUTION_TODO, SOLUTION_AS_OFFICIAL]:
+        ttype = (self.type, self.subtype)
+        if ttype in [TASK_ADD, SOLUTION_SUBMIT, SOLUTION_AS_SOLVED, SOLUTION_TODO, SOLUTION_AS_OFFICIAL]:
             S = self.T('task')
-        if self.type == POST_SEND:
+        if ttype == POST_SEND:
             S = self.T(url_extra='#post%d' % self.action_object_id, text=self.action_object_cache)
         return mark_safe(S)
 
@@ -61,7 +65,7 @@ class Action(models.Model):
         if hasattr(self, '_label'):
             return self._label
         else:
-            return action_label.get(self.type)
+            return action_label.get((self.type, self.subtype))
     
     def get_message(self):
         return getattr(self, '_message', u'')

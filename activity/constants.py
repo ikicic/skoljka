@@ -1,15 +1,22 @@
-TASK_ADD = 101              # public    DONE
+# (type, subtype)
 
-SOLUTION_SUBMIT = 201       # public    DONE
-SOLUTION_AS_SOLVED = 202    # public    DONE
-SOLUTION_TODO = 203         # public    DONE
-SOLUTION_AS_OFFICIAL = 210  # public    NOT DONE
-SOLUTION_RATE = 220         # public, solution.author   NOT DONE
+TASK_ADD = (100, 1)                         # public    DONE
 
-POST_SEND = 301             # target=related_object, action_object=post, group=replied comment's author     DONE
+SOLUTION_SEND = 200
+SOLUTION_SUBMIT = (SOLUTION_SEND, 1)        # public    DONE
+SOLUTION_AS_SOLVED = (SOLUTION_SEND, 2)     # public    DONE
+SOLUTION_TODO = (SOLUTION_SEND, 3)          # public    DONE
 
-GROUP_ADD = 401             # group     DONE
-GROUP_LEAVE = 402           # group     DONE
+SOLUTION_AS_OFFICIAL = (210, 0)             # public    NOT DONE
+
+SOLUTION_RATE = (220, 0)    # public, solution.author   NOT DONE
+
+# target=related_object, action_object=post, group=replied comment's author
+POST_SEND = (300, 1)        # DONE
+
+GROUP_CHANGE = 400
+GROUP_ADD = (GROUP_CHANGE, 1)       # group     DONE
+GROUP_LEAVE = (GROUP_CHANGE, 2)     # group     DONE
 
 action_label = {
     TASK_ADD: ('label-success', 'Novi zadatak'),

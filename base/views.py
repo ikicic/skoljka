@@ -19,8 +19,8 @@ def homepage(request):
     tasks = list(Task.objects.for_user(request.user, VIEW).distinct().order_by('-id')[:10])
     if len(tasks) > 2:
         tasks = random.sample(tasks, 2)
-    
-    
+
+
     recommend = []
     if request.user.is_authenticated():
         #refresh_user_information(request.user)
@@ -42,10 +42,10 @@ def homepage(request):
 #                recommend.extend(Task.objects.filter(difficulty_rating_avg__range=(k - .5, k + .5)).order_by('?')[:x])
     if len(recommend) > 5:
         recommend = random.sample(recommend, 5)
-    
+
     if recommend:
         recommend = Task.objects.filter(id__in=recommend)
-        
+
         # context, tasks
         cache_task_info({'user': request.user}, recommend)
 

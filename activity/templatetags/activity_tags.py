@@ -8,24 +8,44 @@ from userprofile.templatetags.userprofile_tags import userlink
 
 register = template.Library()
 
+def G(male, female, gender):
+    """
+        (gender) Returns string male if user is male, female if female.
+        If gender isn't given, returns both strings separated with '/'.
+    """
+    if gender == 'M':
+        return male
+    elif gender == 'F':
+        return female
+    return male + '/' + female
+
 @register.simple_tag(takes_context=True)
 def prepare_action_data(context, A):
     user = context['user']
     
+    # TODO: finish this...
+    # gender = ????
+    gender = ''
+    G1 = G('o', 'la', gender)
+
+    ttype = (A.type, A.subtype)
+    print ttype, SOLUTION_AS_SOLVED
+
     S = ''
-    if A.type == TASK_ADD:
-        S = u'je dodao/la novi zadatak'
-    elif A.type == SOLUTION_SUBMIT:
-        S = u'je poslao/la %s za zadatak' % A.A('solution', u'rješenje')
-    elif A.type == SOLUTION_AS_SOLVED:
-        S = u'je oznacio/la kao riješen zadatak'
-    elif A.type == SOLUTION_TODO:
-        S = u'je oznacio/la s To Do zadatak'
-    elif A.type == GROUP_ADD:
-        S = u'je dodao korisnika/cu %s u grupu %s' % (A.A('profile'), A.T('usergroup'))
-    elif A.type == GROUP_LEAVE:
+    if ttype == TASK_ADD:
+        S = u'je doda%s novi zadatak' % G1
+    elif ttype == SOLUTION_SUBMIT:
+        S = u'je posla%s %s za zadatak' % (G1, A.A('solution', u'rješenje'))
+    elif ttype == SOLUTION_AS_SOLVED:
+        S = u'je označi%s kao riješen zadatak' % G1
+    elif ttype == SOLUTION_TODO:
+        S = u'je označi%s s To Do zadatak' % G1
+    elif ttype == GROUP_ADD:
+        S = u'je dodao korisni%s %s u grupu %s' %   \
+            (G('ka', 'cu', gender), A.A('profile'), A.T('usergroup'))
+    elif ttype == GROUP_LEAVE:
         S = u'je izašao/la iz grupe %s' % A.T('group')
-    elif A.type == POST_SEND:
+    elif ttype == POST_SEND:
     
         # ovisno o tipu targeta (zadatak, rjesenje), onoga na sto je zakacen post
         # razno se pristupa podacima
@@ -63,10 +83,10 @@ def prepare_action_data(context, A):
             
         if user.is_authenticated() and user.get_profile().private_group_id == A.group_id:
             A._label = ('label-info', 'Odgovor')
-            S = u'je odgovorio/la na tvoj komentar na %s:' % object
+            S = u'je odgovori%s na tvoj komentar na %s:' % (G1, object)
         else:
-            S = u'je poslao/la <a href="/%s/%d/#post%d">komentar</a> na %s' % \
-                (content_type.model, A.target_id, A.action_object_id, object)
+            S = u'je posla%s <a href="/%s/%d/#post%d">komentar</a> na %s' % \
+                (G1, content_type.model, A.target_id, A.action_object_id, object)
         
     A._message = mark_safe(S)
     

@@ -32,7 +32,9 @@ def leave(request, group_id=None):
             request.user.groups.remove(group)
             group.data.member_count = User.groups.through.objects.filter(group=group).count()
             group.data.save(force_update=True)
-            _action.send(request.user, _action.GROUP_LEAVE, action_object=request.user, target=group, public=False, group=group)
+            _action.add(request.user, _action.GROUP_LEAVE,
+                action_object=request.user, target=group, public=False,
+                group=group)
             return ('/usergroup/', )
 
     return {'group': group}
@@ -147,7 +149,8 @@ def members(request, group_id=None):
                 #user.groups.add(group)
                 dummy, created = User.groups.through.objects.get_or_create(user=user, group=group)
                 if created:
-                    _action.send(request.user, _action.GROUP_ADD, action_object=user, target=group, public=False, group=group)
+                    _action.add(request.user, _action.GROUP_ADD,
+                        action_object=user, target=group, public=False, group=group)
             group.data.member_count = group.data.get_users().count()
             group.data.save()
             form = UserEntryForm()

@@ -236,7 +236,8 @@ def new(request, task_id=None):
 
             # send action if creating a new nonhidden task
             if not edit and not task.hidden:
-                _action.send(request.user, _action.TASK_ADD, action_object=task, target=task)
+                _action.add(request.user, _action.TASK_ADD,
+                    action_object=task, target=task)
             
             # TODO: izbrisati task_new_finish.html i url
             #return HttpResponseRedirect('/task/%d/' % task.id if edit else '/task/new/finish/')

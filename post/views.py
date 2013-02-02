@@ -1,4 +1,4 @@
-from django import forms
+﻿from django import forms
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
@@ -17,11 +17,13 @@ import sys
 def add_post(request):
     if request.method != 'POST':
         raise Http404
-    if any(x not in request.POST for x in ['post_reply_id', 'post_redirect', 'object_id', 'content_type_id']):
+    if any(x not in request.POST for x in ['post_reply_id', 'post_redirect',
+            'object_id', 'content_type_id']):
         raise Http404
-        
+
     reply_to_id = request.POST['post_reply_id']
-    reply_to = None if not reply_to_id else get_object_or_404(Post.objects.select_related('author'), pk=reply_to_id)
+    reply_to = None if not reply_to_id else get_object_or_404(
+        Post.objects.select_related('author'), pk=reply_to_id)
 
     math_content_form = MathContentForm(request.POST)
     if math_content_form.is_valid():
@@ -41,7 +43,7 @@ def add_post(request):
             except Group.DoesNotExist:
                 pass
                 # TODO: report error
-        
+
         content = math_content_form.save()
         post = Post.objects.create(
                 content_object = object,
@@ -50,17 +52,19 @@ def add_post(request):
                 content = content
             )
         post.save()
-        
+
         if reply_to:
             try:
-                reply_to_author_group = Group.objects.get(name=reply_to.author.username)
+                reply_to_author_group = Group.objects.get(
+                    name=reply_to.author.username)
             except Group.DoesNotExist:
                 pass
                 # TODO: report error
         else:
             reply_to_author_group = None
 
-        _action.send(request.user, _action.POST_SEND, action_object=post, target=object, group=reply_to_author_group)
+        _action.add(request.user, _action.POST_SEND, action_object=post,
+            target=object, group=reply_to_author_group)
 
     return HttpResponseRedirect(request.POST['post_redirect'])
 

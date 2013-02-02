@@ -75,11 +75,15 @@ def _do_mark(request, solution, task):
 
     # log the action
     if action in ['official1', 'as_solved', 'todo']:
-        type = {'official1': _action.SOLUTION_AS_OFFICIAL,
-                'as_solved': _action.SOLUTION_AS_SOLVED,
-                'todo': _action.SOLUTION_TODO,
+        type_desc = {'official1': _action.SOLUTION_AS_OFFICIAL,
+                     'as_solved': _action.SOLUTION_AS_SOLVED,
+                     'todo': _action.SOLUTION_TODO,
             }
-        _action.send(request.user, type[action], action_object=solution, target=task)
+        _action.replace_or_add(request.user, type_desc[action],
+            action_object=solution, target=task)
+    elif action == 'blank':
+        _action.remove(request.user, type=_action.SOLUTION_SEND,
+            action_object=solution, target=task)
 
         
     # update solved count if necessary
@@ -148,7 +152,8 @@ def submit(request, task_id=None, solution_id=None):
             solution.status = STATUS['submitted']
             solution.save()
             if not edit:
-                _action.send(request.user, _action.SOLUTION_SUBMIT, action_object=solution, target=task)
+                _action.replace_or_add(request.user, _action.SOLUTION_SUBMIT,
+                    action_object=solution, target=task)
             
             # update solved count if necessary
             delta = solution.is_solved() - was_solved
