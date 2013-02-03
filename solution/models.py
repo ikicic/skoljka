@@ -63,9 +63,9 @@ def _solution_on_update(solution, field_name, old_value, new_value):
 
 
 SOLUTION_RATING_ATTRS = {
-    'range': 5,
-    'titles': [u'Netočno', u'Točno uz manje nedostatke.', u'Točno.',
-        u'Točno i domišljato.', u'Genijalno! Neviđeno!'],
+    'range': 6,
+    'titles': [u'Neocijenjeno', u'Netočno', u'Točno uz manje nedostatke.',
+        u'Točno.', u'Točno i domišljato.', u'Genijalno! Neviđeno!'],
     'on_update': _solution_on_update,
 }
 

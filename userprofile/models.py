@@ -22,17 +22,19 @@ def create_user_profile(sender, user, request, **kwargs):
     # spremi profil, ostali podaci idu preko Edit Profile
     profile = UserProfile(user=user, private_group=group)
     profile.save()
-    
+
     user.groups.add(group)
-    
+
+def diff_to_index(diff):
+    return int(diff + 0.5)
 
 def task_difficulty_on_update(task, field_name, old_value, new_value):
     """
-        If necessary, update all difficulty distribution counters 
+        If necessary, update all difficulty distribution counters
         for all users that solved given task.
     """
-    old = int(old_value - 0.5)
-    new = int(new_value - 0.5)
+    old = diff_to_index(old_value)
+    new = diff_to_index(new_value)
 
     if old == new:
         return
@@ -48,7 +50,7 @@ def task_difficulty_on_update(task, field_name, old_value, new_value):
             task.id, STATUS['as_solved'], STATUS['submitted'],
             SOLUTION_CORRECT_SCORE
         )
-        
+
     cursor = connection.cursor()
     cursor.execute(base.format(-1, old))
     cursor.execute(base.format(1, new))
@@ -59,10 +61,10 @@ class DifficultyDistribution(models.Model):
     user = models.ForeignKey(User, related_name='diff_distribution')
     difficulty = models.IntegerField(db_index=True)
     solved_count = models.IntegerField()
-    
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile')
-    
+
     # data
     GENDER_CHOICES = (
         ('', 'Neizjašnjeno'),
@@ -75,24 +77,24 @@ class UserProfile(models.Model):
     country = models.CharField(max_length=50, blank=True, verbose_name=u'Država')
     quote = models.CharField(max_length=200, blank=True, verbose_name='Citat')
     website = models.CharField(max_length=100, blank=True, verbose_name='Web')
-    
+
     # options
     show_hidden_tags = models.BooleanField(default=False, verbose_name='Prikazuj skrivene tagove')
-    
+
     # automatic options
     solution_status_filter = models.CharField(max_length=32, blank=True, default='')
     task_view_type = models.SmallIntegerField(default=0)
     similar_task_view_type = models.SmallIntegerField(default=2)
-    
+
     # utility
-    unread_pms = models.IntegerField(default=0)    
+    unread_pms = models.IntegerField(default=0)
     selected_folder = models.ForeignKey(Folder, blank=True, null=True)
     private_group = models.OneToOneField(Group)
 
     solved_count = models.IntegerField(default=0)
     # deprecated or to fix
     score = models.FloatField(default=0)
-    
+
     def __unicode__(self):
         return u'UserProfile for ' + self.user.username
 
@@ -116,26 +118,28 @@ class UserProfile(models.Model):
             distribution should be automatically updated on any change...
         """
         tasks = Task.objects.filter(
-            Q(solution__status=STATUS['as_solved']) | Q(solution__correctness_avg__gte=SOLUTION_CORRECT_SCORE) & Q(solution__status=STATUS['submitted']),
+            Q(solution__status=STATUS['as_solved'])
+                | Q(solution__correctness_avg__gte=SOLUTION_CORRECT_SCORE)
+                & Q(solution__status=STATUS['submitted']),
             hidden=False,
             solution__author=self
         ).values('id', 'difficulty_rating_avg').distinct().order_by()
 
         distribution = [0] * DIFFICULTY_RATING_ATTRS['range']
         for x in tasks:
-            distribution[int(x['difficulty_rating_avg'] - 0.5)] += 1
+            distribution[diff_to_index(x['difficulty_rating_avg'])] += 1
 
         # ok, this part could be done better...
         DifficultyDistribution.objects.filter(user=self.user).delete()
         DifficultyDistribution.objects.bulk_create([
             DifficultyDistribution(user=self.user, difficulty=D, solved_count=C)
             for D, C in enumerate(distribution)])
-        
+
         if commit:
             self.save()
 
     def update_diff_distribution(self, task, delta):
-        diff = int(task.difficulty_rating_avg - 0.5)
+        diff = diff_to_index(task.difficulty_rating_avg)
         try:
             element = self.user.diff_distribution.get(difficulty=diff)
             element.solved_count += delta
@@ -148,6 +152,6 @@ class UserProfile(models.Model):
 
 
 
-# ovo navodno nije preporuceno, ali vjerujem da ce se 
+# ovo navodno nije preporuceno, ali vjerujem da ce se
 # dovoljno cesto koristiti da DRY nadjaca
 add_to_builtins('userprofile.templatetags.userprofile_tags')

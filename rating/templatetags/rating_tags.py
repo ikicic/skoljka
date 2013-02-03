@@ -19,10 +19,9 @@ def rating_stars(manager, red_if_lt=0.0, value=None):
     if value is None:
         value = getattr(manager.instance, '%s_avg' % manager.field.name)
     left = int(80 * value / float(manager.field.range))
-    
-    # FIXME: ovisi o jeziku!!!
-    title = 'Neocijenjeno' if value == 0 else manager.field.titles[int(value - 0.5)]
-    
+
+    title = manager.field.titles[int(value + 0.5)]
+
     # TODO: ako min ili max samo jedan div
     return mark_safe(
         u'<div class="readonly-star" style="background-position:0px %(shift)dpx;width:%(left)spx;" title="%(title)s"></div>'

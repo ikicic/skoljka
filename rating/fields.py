@@ -42,7 +42,7 @@ class RatingManager(models.Manager):
     ##################
     # template helpers
     def get_range_and_titles(self):
-        return zip(range(1, self.field.range + 1), self.field.titles)
+        return zip(range(1, self.field.range), self.field.titles[1:])
 
     def get_star_split(self):
         return '' if self.field.range == 5 else ' {split:%d}' % (self.field.range / 5)
