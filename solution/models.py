@@ -72,9 +72,9 @@ SOLUTION_RATING_ATTRS = {
 class Solution(models.Model):
     task = models.ForeignKey(Task)
     author = models.ForeignKey(User)
-    content = models.ForeignKey(MathContent, blank=True, null=True)     # a ipak sam stavio null...
-    date_created = models.DateTimeField(auto_now_add=True)
-    last_edit_time = models.DateTimeField(auto_now=True)
+    content = models.ForeignKey(MathContent, blank=True, null=True) # a ipak sam stavio null...
+    date_created = models.DateTimeField(auto_now_add=True, db_index=True)
+    last_edit_time = models.DateTimeField(auto_now=True)  # only for submitted
     posts = PostGenericRelation()
 
     status = models.IntegerField(default=STATUS['blank']) # view STATUS for more info

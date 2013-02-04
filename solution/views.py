@@ -11,6 +11,8 @@ from mathcontent.forms import MathContentForm
 
 from skoljka.utils.decorators import response, require
 
+from datetime import datetime
+
 # ... trenutacna implementacija rjesenja je dosta diskutabilna
 
 # TODO: task permissions (?)
@@ -68,6 +70,8 @@ def _do_mark(request, solution, task):
     if action in ['official0', 'official1']:
         solution.is_official = action == 'official1'
     elif action in ['blank', 'as_solved', 'todo']:
+        if action != 'blank':
+            solution.date_created = datetime.now()
         solution.status = STATUS[action]
 
     solution.save()
@@ -150,6 +154,7 @@ def submit(request, task_id=None, solution_id=None):
             
             solution.content = math_content
             solution.status = STATUS['submitted']
+            solution.date_created = datetime.now()
             solution.save()
             if not edit:
                 _action.replace_or_add(request.user, _action.SOLUTION_SUBMIT,
@@ -203,7 +208,7 @@ def solution_list(request, task_id=None, user_id=None, status=None):
 
     return {
         'filter_by_status': status,
-        'solutions': L.order_by('-id'),
+        'solutions': L.order_by('-date_created'),
         'task': task,
         'author': author,
         'submitted_active': 'active' if status == [u'submitted'] else '',

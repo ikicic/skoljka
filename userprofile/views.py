@@ -73,9 +73,11 @@ def profile(request, pk):
     
     # task lists
     # TODO: permissions
-    todo = user.solution_set.filter(status=STATUS['todo']).select_related('task')[:10]
-    solved = user.solution_set.filter(status__in=[STATUS['as_solved'], STATUS['submitted']]).select_related('task')[:10]
-    task_added = Task.objects.filter(author=user, hidden=False)[:10]
+    todo = user.solution_set.filter(status=STATUS['todo'])  \
+        .select_related('task').order_by('-date_created')[:10]
+    solved = user.solution_set.filter(status__in=[STATUS['as_solved'],
+        STATUS['submitted']]).select_related('task').order_by('-date_created')[:10]
+    task_added = Task.objects.filter(author=user, hidden=False).order_by('-id')[:10]
     
     
     
