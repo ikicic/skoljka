@@ -58,4 +58,5 @@ def tag_list(context, owner, plus_exclude=None):
 def tags_autocomplete_script(context):
     names = Tag.objects.values_list('name', flat=True)
     
+    # TODO: split tags by , or similar (use only one additional char per tag)
     return u'<script>$(".ac_tags").autocomplete(["%s"],{multiple:true,autoFill:true});</script>' % u'","'.join(names)

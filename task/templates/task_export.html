@@ -7,14 +7,14 @@
 <h3>Pretvaranje u {{ format }}</h3>
 <br><br>
 
-<form action="{{ request.get_full_path }}" method="POST">
+<form action="/task/export/" method="POST">
   <h4>Postavke:</h4>
   <br>
   {% csrf_token %}
   <table width="40%" class="table-striped" style="text-align:center;">
     {{ form.as_table }}
   </table>
-  <input type="submit" value="Pretvori" class="btn btn-primary">
+  <input type="submit" name="action" value="Pretvori" class="btn btn-primary">
 
   <br><br>
   <h4>Zadaci:</h4>

@@ -15,20 +15,46 @@ def task_small_box(context, task, div_class='', url_suffix='', options='', well=
     return {'user': context['user'], 'task': task, 'div_class': div_class, 'url_suffix': url_suffix, 'options': options, 'well': well}
 
 @register.simple_tag(takes_context=True)
-def cache_task_info(context, tasks):    
+def task_options_mode_check(context):
+    """
+        Checks if 'options' GET key is set, and available for current user.
+    """
+    if context['user'].is_staff:
+        context['options_mode'] = 'options' in context['request'].GET
+    return ''
+
+@register.simple_tag(takes_context=True)
+def cache_task_info_lite(context, tasks):
+    """
+        Prepares data for task list in options mode, where whole queryset
+        is selected, and only basic info is visible (such as queryset length...)
+    """
+    ids = [x.id for x in tasks]
+
+    # ------ context variables --------
+    context['task_ids'] = ids
+    return ''
+
+
+@register.simple_tag(takes_context=True)
+def cache_task_info(context, tasks):
+    """
+        Prepares data (tags, solution status and similar) for task list.
+        Usually just one page of tasks is considered.
+    """
     user = context['user']
     task_content_type = ContentType.objects.get_by_natural_key(app_label="task", model="task")
     ids = [x.id for x in tasks]
-    
+
     # ----- tags -----
     tagovi = TaggedItem.objects.filter(content_type=task_content_type, object_id__in=ids).select_related('tag')
     tags = collections.defaultdict(list)
     for x in tagovi:
         tags[x.object_id].append((x.tag.name, x.votes_sum))
-        
+
     for task in tasks:
         task._cache_tag_set = sorted(tags[task.id])
-        
+
     # ----- solutions ------
     if user.is_authenticated():
         solution = Solution.objects.filter(author=user, task__id__in=ids)
@@ -43,8 +69,8 @@ def cache_task_info(context, tasks):
             selected_tasks = folder.tasks.filter(id__in=ids).values_list('id', flat=True)
             for task in tasks:
                 task.is_in_folder = task.id in selected_tasks
-        
-        
+
+
     # ------ context variables --------
     context['task_ids'] = ids
     return ''

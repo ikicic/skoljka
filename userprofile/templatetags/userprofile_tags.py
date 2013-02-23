@@ -3,6 +3,7 @@ from django.template.base import TemplateSyntaxError
 from django.utils.safestring import mark_safe
 
 from skoljka.utils.decorators import response_update_cookie
+from skoljka.utils.templatetags.utils_tags import generate_get_query_string
 from skoljka.utils.xss import escape
 
 register = template.Library()
@@ -14,25 +15,15 @@ class UserOptionNode(template.Node):
         self.value = unicode(value)
         self.text = text
         self.is_default = is_default
-        
+
     def render(self, context):
         field_name = context._useroptions_field_name
         value = unicode(context._useroptions_value)
-        
-        # TODO: move to utils
-        # (from django-pagination/templatetags/pagination_tags.py:paginate)
-        getvars = context['request'].GET.copy()
-        if field_name in getvars:
-            del getvars[field_name]
-        if len(getvars.keys()) > 0:
-            getvars = '&amp;' + escape(getvars.urlencode())
-        else:
-            getvars = ''
-        
-        return mark_safe(u'<a href="?{0}={1}{2}" class="btn btn-mini{3}">{4}</a>\n'.format(
-            field_name,
-            escape(self.value),
-            getvars,
+
+        kwargs = dict([(field_name, self.value)])
+
+        return mark_safe(u'<a href="?{0}" class="btn btn-mini{1}">{2}</a>\n'.format(
+            generate_get_query_string(context, **kwargs),
             ' active' if value == self.value else '',
             self.text,
         ))
@@ -54,12 +45,12 @@ class UserOptionsNode(template.Node):
             field_name = self.field_name
         else:
             field_name = self.field_name.resolve(context)
-            
+
         if isinstance(self.save_to, basestring):
             save_to = self.save_to
         else:
             save_to = self.save_to.resolve(context)
-        
+
 
         value = context['request'].GET.get(field_name, None)
         if value is not None and value in self.allowed_values:
@@ -76,7 +67,7 @@ class UserOptionsNode(template.Node):
         context._useroptions_field_name = field_name
         context._useroptions_value = unicode(value)
         context[save_to] = unicode(value)
-        
+
         out = '<div style="float:right;padding:8px;" class="btn-group">'    \
             + self.nodelist.render(context) \
             + '</div>'
@@ -89,11 +80,11 @@ def useroption(parser, token):
     if len(bits) not in (3, 4):
         raise TemplateSyntaxError("Two or three parameters expected for 'useroption'.")
     is_default = len(bits) == 4 and bits[-1] == 'default'
-    
+
     value = bits[1]
     if value[0] == value[-1] and value[0] in ('"', "'"):
         value = value[1:-1]
-        
+
     return UserOptionNode(value, bits[2][1:-1], is_default)
 
 
@@ -105,31 +96,31 @@ def useroptions(parser, token):
 
     nodelist = parser.parse(('enduseroptions',))
     parser.delete_first_token()
-    
+
     children = nodelist.get_nodes_by_type(UserOptionNode)
     allowed_values = [x.value for x in children]
     default_value = filter((lambda x: x.is_default), children)
-    
+
     field_name = bits[1]
     if field_name[0] == field_name[-1] and field_name[0] in ('"', "'"):
         field_name = field_name[1:-1]
     else:
         field_name = parser.compile_filter(field_name)
-        
+
     if len(bits) == 4:
         if bits[2] != 'as':
             raise TemplateSyntaxError("Second string must be 'as' for 'useroptions'.")
         save_to = bits[3]
     else:
         save_to = field_name
-    
+
     if len(default_value) != 1:
         raise TemplateSyntaxError("Exactly one 'useroption' must have 'default' parameter!")
-    
-    return UserOptionsNode(nodelist, field_name, default_value[0].value, allowed_values, save_to)
-    
 
-            
+    return UserOptionsNode(nodelist, field_name, default_value[0].value, allowed_values, save_to)
+
+
+
 @register.filter
 def userlink(user, what=None):
     name = None
@@ -137,19 +128,9 @@ def userlink(user, what=None):
         name = user.get_full_name().strip()
     elif what:
         name = getattr(user, what, None)
-        
+
     # full_name kao default bi stvarao gadne probleme kod PM-a
     if not name:
         name = user.username
-            
+
     return mark_safe(u'<a href="/profile/%d/" title="%s">%s</a>' % (user.pk, escape(user.get_full_name()), escape(name)))
-
-
-
-def encode_email(email):
-    a, b = email[::2], email[1::2]
-    return a + b[::-1]
-
-@register.simple_tag
-def email_link(email, html=''):
-    return mark_safe(u'<a href="#" class="imejl" title="Pošalji email" data-address="{0}">{1}</a>'.format(encode_email(email), html))

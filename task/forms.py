@@ -8,12 +8,13 @@ EXPORT_FORMAT_CHOICES = (('latex', 'LaTeX'), ('pdf', 'PDF'))
 
 class TaskExportForm(forms.Form):
     format = forms.ChoiceField(choices=EXPORT_FORMAT_CHOICES)
+    ids = forms.CharField(widget=forms.HiddenInput())
     has_title = forms.BooleanField(label='Naslov', required=False)
     has_url = forms.BooleanField(label='URL', required=False)
     has_source = forms.BooleanField(label='Izvor', required=False)
     has_index = forms.BooleanField(label='Broj', required=False)
     has_id = forms.BooleanField(label='ID', required=False)
-    
+
     def __init__(self, *args, **kwargs):
         super(TaskExportForm, self).__init__(*args, **kwargs)
         self.fields['format'].widget.attrs.update({'class': 'input-small'})

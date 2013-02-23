@@ -18,5 +18,5 @@ class RatingWidget(RadioSelect):
                 'value': x+1,
                 'title': A['titles'][x],
                 'checked': ' checked="checked"' if x+1 == value else '',
-            } for x in range(A['range'])]
+            } for x in range(1, A['range'])]
         return mark_safe(u'<div>%s</div>' % ''.join(stars))

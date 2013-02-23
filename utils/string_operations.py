@@ -1,4 +1,4 @@
-# useful string operations
+﻿# useful string operations
 
 def list_strip(L, remove_empty=True):
     T = [x.strip() for x in L]

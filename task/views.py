@@ -42,18 +42,18 @@ def advanced_new(request):
     """
         Used only by admin
     """
-        
+
     if request.method == 'POST':
         task_form = TaskAdvancedForm(request.POST)
         math_content_form = MathContentForm(request.POST)
         group_form = GroupEntryForm(request.POST)
-        
+
         if task_form.is_valid() and math_content_form.is_valid() and group_form.is_valid():
             task_template = task_form.save(commit=False)
-            math_content_template = math_content_form.save(commit=False)            
+            math_content_template = math_content_form.save(commit=False)
 
             groups = group_form.cleaned_data['list']
-            
+
             from collections import defaultdict
             dictionary = defaultdict(unicode)
 
@@ -61,7 +61,7 @@ def advanced_new(request):
             from xml.dom.minidom import Node
             dom = parseString(math_content_template.text.encode('utf-8'))
             # Xml -> <info> ... </info>
-            
+
             for x in dom.firstChild.childNodes:
                 if x.nodeType == Node.TEXT_NODE:
                     continue
@@ -85,12 +85,12 @@ def advanced_new(request):
                     math_content.text = value     # should be safe
                     math_content.save()
                     print 'uspio dodati math_content'
-                    
+
                     # rucno spajam 'tags1' i 'tags'
                     if 'tags1' in dictionary:
                         dictionary['tags'] = dictionary.get('tags', '') + ',' + dictionary['tags1']
                         dictionary.pop('tags1')     # samo za ovaj zadatak!
-                
+
                     task = Task()
                     task.name = task_template.name % dictionary
                     task.author = request.user
@@ -104,18 +104,18 @@ def advanced_new(request):
                     tags = parse_tags(task_form.cleaned_data['_tags'] % dictionary)
                     task.tags.set(*tags)
                     update_search_cache(task, [], tags)
-                    
+
                     # --- difficulty ---
                     difficulty = task_form.cleaned_data['_difficulty'] % dictionary
                     if difficulty:
                         task.difficulty_rating.update(request.user, int(difficulty))
-                        
+
                     # --- group permissions ---
                     for x in groups:
                         PerObjectGroupPermission.objects.create(content_object=task, group=x, permission_type=VIEW)
                         PerObjectGroupPermission.objects.create(content_object=task, group=x, permission_type=EDIT)
-                        
-                
+
+
             return HttpResponseRedirect('/task/new/finish/')
     else:
         task_form = TaskAdvancedForm()
@@ -144,16 +144,16 @@ def old_advanced_new(request):
     if request.method == 'POST':
         task_form = TaskAdvancedForm(request.POST)
         math_content_form = MathContentForm(request.POST)
-        
+
         if task_form.is_valid() and math_content_form.is_valid():
             task_template = task_form.save(commit=False)
-            math_content_template = math_content_form.save(commit=False)            
-            
+            math_content_template = math_content_form.save(commit=False)
+
             contents = math_content_template.text.split('@@@@@')
             contents = [x.strip() for x in contents]
-            
+
             dictionary = dict()
-            
+
             print contents
             print len(contents)
             for k in xrange(len(contents)):
@@ -165,15 +165,15 @@ def old_advanced_new(request):
                         dictionary[key.strip()] = var
                         print u'Postavljam varijablu "%s" na "%s"' % (key.strip(), var)
                     content = content[new_vars + 3:].strip()
-                
+
                 if not content:     # skip empty tasks
                     continue
-                    
+
                 math_content = MathContent()
                 math_content.text = content
                 math_content.save()
                 print 'uspio dodati math_content'
-                
+
                 task = Task()
                 task.name = _advanced_new_parse(task_template.name, dictionary)
                 task.author = request.user
@@ -185,7 +185,7 @@ def old_advanced_new(request):
                 tags = parse_tags(_advanced_new_parse(task_form.cleaned_data['_tags'], dictionary))
                 task.tags.set(*tags)
                 update_search_cache(task, [], tags)
-                
+
             return HttpResponseRedirect('/task/new/finish/')
     else:
         task_form = TaskAdvancedForm()
@@ -215,21 +215,21 @@ def new(request, task_id=None):
         task = math_content = None
         old_tags = []
         edit = False
-        
+
     if request.method == 'POST':
         task_form = TaskForm(request.POST, instance=task, user=request.user)
         math_content_form = MathContentForm(request.POST, instance=math_content)
-        
+
         if task_form.is_valid() and math_content_form.is_valid():
             task = task_form.save(commit=False)
             math_content = math_content_form.save()
-            
+
             if not edit:
                 task.author = request.user
 
             task.content = math_content
             task.save()
-            
+
             # Required for django-taggit:
             task_form.save_m2m()
             update_search_cache(task, old_tags, task.tags.values_list('name', flat=True))
@@ -238,14 +238,14 @@ def new(request, task_id=None):
             if not edit and not task.hidden:
                 _action.add(request.user, _action.TASK_ADD,
                     action_object=task, target=task)
-            
+
             # TODO: izbrisati task_new_finish.html i url
             #return HttpResponseRedirect('/task/%d/' % task.id if edit else '/task/new/finish/')
             return HttpResponseRedirect('/task/%d/' % task.id)
     else:
         task_form = TaskForm(instance=task)
         math_content_form = MathContentForm(instance=math_content)
- 
+
     return render_to_response( 'task_new.html', {
                 'forms': [task_form, math_content_form],
                 'action_url': request.path,
@@ -260,10 +260,10 @@ def task_list(request, user_id=None):
     # treba mi LEFT JOIN ON (task_task.id = solution_solution.task_id AND solution_solution.author_id = ##)
     # sada se umjesto toga koristi .cache_task_info()
     # (slicno za tag-ove)
-    
+
     if user_id:
         tasks = tasks.filter(author_id=user_id)
-        
+
     return {
         'tasks' : tasks,
         'submitted_tasks' : get_user_solved_tasks(request.user),
@@ -283,7 +283,7 @@ def detail(request, id):
         perm = ALL
     else:
         perm = get_permissions_for_object_by_id(request.user, task.id, content_type)
-        
+
     if not task.hidden:
         perm.append(VIEW)
 
@@ -296,7 +296,7 @@ def detail(request, id):
     # used for recommendation system and similar
     if request.user.is_authenticated():
         task_event(request.user, task, 'view')
-        
+
     return {
         'task': task,
         'can_edit': EDIT in perm,
@@ -308,13 +308,13 @@ def detail(request, id):
 @response('task_similar.html')
 def similar(request, id):
     task = get_object_or_404(Task, pk=id)
-    
+
     # TODO: dovrsiti, ovo je samo tmp
     # task.update_similar_tasks(1)
     if request.user.is_authenticated():
         task_event(request.user, task, 'view')
-    
-    
+
+
     # SPEED: read main task together with the rest
     # no need to sort here
     similar = list(SimilarTask.objects.filter(task=task)[:50].values_list('similar_id', 'score'))
@@ -331,15 +331,15 @@ def similar(request, id):
         elif s.is_as_solved(): p = 0.3
         elif s.is_submitted():
             if s.is_correct(): p = 0.2
-        
+
         sorted_tasks[s.task_id] *= p
-        
+
     # sort here
     sorted_tasks = sorted([(p, id) for id, p in sorted_tasks.iteritems()], reverse=True)
     similar_ids = [id for p, id in sorted_tasks[:6]]
-    
+
     similar = Task.objects.filter(id__in=similar_ids).select_related('content')
-    
+
     return {
         'task': task,
         'similar': similar,
@@ -355,7 +355,7 @@ def _convert_to_latex(tasks, has_title, has_url, has_source, has_index, has_id, 
         export_source = latex.export_source % ('\\textbf{Izvor:} ' + x.source if x.source else '') if has_source else ''
         export_index = latex.export_index % (k + 1) if has_index else ''
         export_id = ('(%d)' % x.id if has_index else '%d.' % x.id) if has_id else ''
-        
+
         content.append(latex.export_task % {
             'export_title': export_title,
             'export_url': export_url,
@@ -365,7 +365,7 @@ def _convert_to_latex(tasks, has_title, has_url, has_source, has_index, has_id, 
             'content': x.content.convert_to_latex(),
         })
     content.append(latex.export_footer)
-    
+
     return u''.join(content)
 
 # output latex or pdf, permission already checked
@@ -373,7 +373,7 @@ def _export(ids, tasks, form):
     format = form.cleaned_data['format']
 
     hash = hashlib.md5(repr((ids, form.cleaned_data))).hexdigest()
-    
+
     # check if .pdf exists
     if format == 'pdf':
         filename = os.path.normpath(os.path.join(settings.LOCAL_DIR, 'media/pdf/task' + hash))
@@ -389,7 +389,7 @@ def _export(ids, tasks, form):
         response = HttpResponse(content=latex, content_type='application/x-latex')
         response['Content-Disposition'] = 'filename=taskexport.tex'
         return response
-        
+
     if format == 'pdf':
         f = codecs.open(filename + '.tex', 'w', encoding='utf-8')
         f.write(latex)
@@ -408,46 +408,68 @@ def _export(ids, tasks, form):
         # os.remove(filename + '.dvi')
 
         return HttpResponseRedirect('/media/pdf/task%s.pdf' % hash)
-        
-    
+
+
     return 404
 
 @response('task_export.html')
-def export(request, format, ids):
+def export(request, format=None, ids=None):
+    """
+        Exports tasks with given ids to given format.
+        Format and ids can be given as GET or POST information.
+    """
+
+    # Please note that both TaskExportForm and unnamed form (format, ids)
+    # use POST method. To prevent collision, submit button in TaskExportForm
+    # is named 'action'.
+
+    POST = request.POST.copy()
+
+    # Move URL / GET data to POST
+    if format and ids:
+        POST['format'] = format
+        POST['ids'] = ids
+    else:
+        format = POST.get('format')
+        ids  = POST.get('ids')
+
+    print POST
+
     available_formats = dict(EXPORT_FORMAT_CHOICES)
-    if format not in available_formats:
+    if not ids or format not in available_formats:
         raise Http404
-        
+
     try:
         id_list = [int(x) for x in ids.split(',')]
     except ValueError:
         raise Http404
-        
+
     # check for permissions
     tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=id_list).select_related('content').distinct()
     if len(tasks) != len(id_list):
         raise Http404('Neki od navedenih zadataka ne postoje ili su sakriveni.')
-        
+
     # permission ok, use shortened query
     tasks = Task.objects.filter(id__in=id_list).select_related('content')
-        
-    if request.method == 'POST':
-        form = TaskExportForm(request.POST)
+
+    if request.method == 'POST' and 'action' in POST:
+        form = TaskExportForm(POST)
         if form.is_valid():
             return _export(ids, tasks, form)
+
+    # otherwise, if form not given or not valid:
+
+    if len(id_list) == 1:
+        data = (format, ids, True, True, True, False, False)
     else:
-        if len(id_list) == 1:
-            data = (format, True, True, True, False, False)
-        else:
-            data = (format, False, False, False, False, True)
-            
-        data = dict(zip(('format', 'has_title', 'has_url', 'has_source', 'has_index', 'has_id'), data))
-        print data
-        form = TaskExportForm(data)
-        
+        data = (format, ids, False, False, False, False, True)
+
+    data = dict(zip(('format', 'ids', 'has_title', 'has_url', 'has_source',
+        'has_index', 'has_id'), data))
+    form = TaskExportForm(data)
+
     return {
         'format': available_formats[format],
-        'ids': ids,
         'form': form,
         'tasks': tasks,
     }

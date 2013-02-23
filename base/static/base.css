@@ -394,3 +394,10 @@ object.latex_center {
 .profile-task-list > h3 {
   display: inline;
 }
+
+button.blank {
+  border: 0px;
+  background: transparent;
+  margin: 0px;
+  padding: 0px;
+}

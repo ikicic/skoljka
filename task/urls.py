@@ -14,6 +14,7 @@ urlpatterns = patterns('',
     (r'^(?P<task_id>\d+)/edit/$', 'task.views.new'),
     
     # this url format used to keep robots away with Disallow: /task/export/
+    (r'^export/$', 'task.views.export'),
     (r'^export/(?P<format>\w+)/(?P<ids>[0-9,]+)/', 'task.views.export'),
     (r'^new/finish/$',
         TemplateView.as_view(template_name='task_new_finish.html')),

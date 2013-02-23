@@ -168,6 +168,7 @@ INSTALLED_APPS = (
     'solution',
     'usergroup',
     'userprofile',
+    'utils',
 )
 
 ######################################
