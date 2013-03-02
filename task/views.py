@@ -347,7 +347,7 @@ def similar(request, id):
     }
 
 # final filename is 'attachments/task_id/attachment index/filename.ext'
-ZIP_ATTACHMENT_DIR = 'attachments/'
+ZIP_ATTACHMENT_DIR = 'attachments'
 
 def _convert_to_latex(tasks, has_title, has_url, has_source, has_index, has_id, *args, **kwargs):
     """
@@ -365,7 +365,7 @@ def _convert_to_latex(tasks, has_title, has_url, has_source, has_index, has_id, 
         export_id = ('(%d)' % x.id if has_index else '%d.' % x.id) if has_id else ''
 
         # no / at the end
-        attachment_path = is_latex and ZIP_ATTACHMENT_DIR + str(x.id)
+        attachment_path = is_latex and '{}/{}'.format(ZIP_ATTACHMENT_DIR, x.id)
 
         content.append(latex.export_task % {
             'export_title': export_title,
@@ -389,7 +389,7 @@ def _export(ids, tasks, form):
     format = form.cleaned_data['format']
 
     if format not in ['latex', 'pdf']:
-        return 404
+        return (400, 'Export format not valid')
 
     # Please note that .tex created for .pdf is not the same as .tex for
     # exporting (e.g. there are differences in the attachment path).
@@ -447,7 +447,7 @@ def _export(ids, tasks, form):
         for task in tasks:
             for k in range(len(task.cache_file_list)):
                 attachment = task.cache_file_list[k]
-                f.write(attachment.file.name, '{}{}/{}/{}'.format(
+                f.write(attachment.file.name, '{}/{}/{}/{}'.format(
                     ZIP_ATTACHMENT_DIR, task.id, k, attachment.get_filename()))
 
         f.close()
@@ -495,8 +495,10 @@ def export(request, format=None, ids=None):
     tasks = Task.objects.filter(id__in=id_list)
 
     # force queryset evaluation and prepare all attachments...
+    content_to_task = {}
     for task in tasks:
         task.cache_file_list = []
+        content_to_task[task.content_id] = task
 
     # attachments
     query = "SELECT A.* FROM mathcontent_attachment A"                  \
@@ -504,7 +506,7 @@ def export(request, format=None, ids=None):
             " WHERE B.id IN ({})".format(ids)
     attachments = list(Attachment.objects.raw(query))
     for attachment in attachments:
-        task.cache_file_list.append(attachment)
+        content_to_task[attachment.content_id].cache_file_list.append(attachment)
 
     if request.method == 'POST' and 'action' in POST:
         form = TaskExportForm(POST)
