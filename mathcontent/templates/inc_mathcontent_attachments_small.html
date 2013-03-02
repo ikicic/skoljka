@@ -1,0 +1,7 @@
+{% if attachments %}
+  <span class="attachments_small">
+    {% for x in attachments %}
+      <a href="{{ x.get_url }}" title="{{ x.get_filename }}">[{{ forloop.counter }}]</a>
+    {% endfor %}
+  </span>
+{% endif %}

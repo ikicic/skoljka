@@ -61,9 +61,9 @@ class MathContent(models.Model):
     def render_quote(self):
         return self.render(quote=True)
 
-    def convert_to_latex(self):
+    def convert_to_latex(self, attachment_path=None):
         from mathcontent.utils import convert_to_latex as _convert_to_latex
-        return _convert_to_latex(self.text, self)
+        return _convert_to_latex(self.text, self, attachment_path)
 
 
 def attachment_upload_to(instance, filename):

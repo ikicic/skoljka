@@ -1,4 +1,4 @@
-from django import forms
+﻿from django import forms
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
@@ -24,13 +24,13 @@ from solution.models import Solution, STATUS as _SOLUTION_STATUS
 from solution.views import get_user_solved_tasks
 from mathcontent.forms import MathContentForm
 from mathcontent import latex
-from mathcontent.models import MathContent
+from mathcontent.models import MathContent, Attachment
 from usergroup.forms import GroupEntryForm
 
 from skoljka.utils.decorators import response
 from skoljka.utils.timeout import run_command
 
-import os, sys, hashlib, codecs, datetime
+import os, sys, hashlib, codecs, datetime, zipfile
 
 # TODO: promijeniti nacin na koji se Task i MathContent generiraju.
 # vrijednosti koje ne ovise o samom formatu se direktno trebaju
@@ -346,7 +346,15 @@ def similar(request, id):
         'view_type': 'similar_task_view_type',
     }
 
+# final filename is 'attachments/task_id/attachment index/filename.ext'
+ZIP_ATTACHMENT_DIR = 'attachments/'
+
 def _convert_to_latex(tasks, has_title, has_url, has_source, has_index, has_id, *args, **kwargs):
+    """
+        Attachments go to attachments/task_id/attachment_index/filename.ext.
+    """
+    is_latex = kwargs['format'] == 'latex'
+
     content = [latex.export_header]
     for k, x in enumerate(tasks):
         # DRY?
@@ -356,46 +364,70 @@ def _convert_to_latex(tasks, has_title, has_url, has_source, has_index, has_id, 
         export_index = latex.export_index % (k + 1) if has_index else ''
         export_id = ('(%d)' % x.id if has_index else '%d.' % x.id) if has_id else ''
 
+        # no / at the end
+        attachment_path = is_latex and ZIP_ATTACHMENT_DIR + str(x.id)
+
         content.append(latex.export_task % {
             'export_title': export_title,
             'export_url': export_url,
             'export_source': export_source,
             'export_index': export_index,
             'export_id': export_id,
-            'content': x.content.convert_to_latex(),
+            'content': x.content.convert_to_latex(
+                attachment_path=attachment_path),
         })
     content.append(latex.export_footer)
 
     return u''.join(content)
 
-# output latex or pdf, permission already checked
 def _export(ids, tasks, form):
+    """
+        Output LaTeX or PDF, permission already checked.
+        It is assumed that Attachments are already saved in tasks[...] as
+        .cache_file_list
+    """
     format = form.cleaned_data['format']
 
+    if format not in ['latex', 'pdf']:
+        return 404
+
+    # Please note that .tex created for .pdf is not the same as .tex for
+    # exporting (e.g. there are differences in the attachment path).
+    # Those two cases will be distinguished by different hashes.
     hash = hashlib.md5(repr((ids, form.cleaned_data))).hexdigest()
 
-    # check if .pdf exists
-    if format == 'pdf':
-        filename = os.path.normpath(os.path.join(settings.LOCAL_DIR, 'media/pdf/task' + hash))
-        if os.path.exists(filename + '.pdf'):
-            oldest_file_mtime = tasks.aggregate(Min('last_edit_date'))['last_edit_date__min']
-            if datetime.datetime.fromtimestamp(os.path.getmtime(filename + '.pdf')) > oldest_file_mtime:
-                # already up-to-date
-                return HttpResponseRedirect('/media/pdf/task%s.pdf' % hash)
+    create_archive = form.cleaned_data['create_archive']
+    filename = os.path.normpath(os.path.join(settings.LOCAL_DIR,
+        'media/export/task' + hash))    # no extension
+
+    # check if output already exists
+    ext = '.pdf' if format == 'pdf' else '.tex'
+    fext = '.zip' if create_archive else ext         # final ext
+
+    # TODO: check if archive exists (currently, it is not trivially possible
+    # to check if there were some changes to attachments)
+    if not create_archive and os.path.exists(filename + fext):
+        oldest_file_mtime = tasks.aggregate(Min('last_edit_date'))['last_edit_date__min']
+        if datetime.datetime.fromtimestamp(os.path.getmtime(filename + fext)) > oldest_file_mtime:
+            # already up-to-date
+            return HttpResponseRedirect('/media/export/task{}{}'.format(hash, fext))
 
     latex = _convert_to_latex(tasks, **form.cleaned_data)
 
-    if format == 'latex':
+    # if latex without archive, do not create file, but directly output it
+    if format == 'latex' and not create_archive:
         response = HttpResponse(content=latex, content_type='application/x-latex')
         response['Content-Disposition'] = 'filename=taskexport.tex'
         return response
 
-    if format == 'pdf':
-        f = codecs.open(filename + '.tex', 'w', encoding='utf-8')
-        f.write(latex)
-        f.close()
+    # otherwise, save generated latex into a file
+    f = codecs.open(filename + '.tex', 'w', encoding='utf-8')
+    f.write(latex)
+    f.close()
 
-        error = run_command('pdflatex -output-directory=%s -interaction=batchmode %s.tex' % (os.path.dirname(filename), filename), timeout=10)
+    if format == 'pdf':
+        error = run_command('pdflatex -output-directory=%s -interaction=batchmode %s.tex' \
+            % (os.path.dirname(filename), filename), timeout=10)
         if error:
             return HttpResponseServerError('LaTeX generation error! Error code: %d' % error)
 
@@ -407,10 +439,20 @@ def _export(ids, tasks, form):
         # os.remove(filename + '.aux')
         # os.remove(filename + '.dvi')
 
-        return HttpResponseRedirect('/media/pdf/task%s.pdf' % hash)
+    if create_archive:
+        f = zipfile.ZipFile(filename + '.zip', mode='w',
+            compression=zipfile.ZIP_DEFLATED)
 
+        f.write(filename + ext, 'task{}{}'.format(hash, ext))
+        for task in tasks:
+            for k in range(len(task.cache_file_list)):
+                attachment = task.cache_file_list[k]
+                f.write(attachment.file.name, '{}{}/{}/{}'.format(
+                    ZIP_ATTACHMENT_DIR, task.id, k, attachment.get_filename()))
 
-    return 404
+        f.close()
+
+    return HttpResponseRedirect('/media/export/task{}{}'.format(hash, fext))
 
 @response('task_export.html')
 def export(request, format=None, ids=None):
@@ -450,26 +492,47 @@ def export(request, format=None, ids=None):
         raise Http404('Neki od navedenih zadataka ne postoje ili su sakriveni.')
 
     # permission ok, use shortened query
-    tasks = Task.objects.filter(id__in=id_list).select_related('content')
+    tasks = Task.objects.filter(id__in=id_list)
+
+    # force queryset evaluation and prepare all attachments...
+    for task in tasks:
+        task.cache_file_list = []
+
+    # attachments
+    query = "SELECT A.* FROM mathcontent_attachment A"                  \
+            " INNER JOIN task_task B ON A.content_id = B.content_id"    \
+            " WHERE B.id IN ({})".format(ids)
+    attachments = list(Attachment.objects.raw(query))
+    for attachment in attachments:
+        task.cache_file_list.append(attachment)
 
     if request.method == 'POST' and 'action' in POST:
         form = TaskExportForm(POST)
         if form.is_valid():
+            # note that attachments are imported into each task as .cache_file_list
             return _export(ids, tasks, form)
 
     # otherwise, if form not given or not valid:
 
+    create_archive = len(attachments) > 0
     if len(id_list) == 1:
-        data = (format, ids, True, True, True, False, False)
+        data = (format, ids, True, True, True, False, False, create_archive)
     else:
-        data = (format, ids, False, False, False, False, True)
+        data = (format, ids, False, False, False, False, True, create_archive)
 
     data = dict(zip(('format', 'ids', 'has_title', 'has_url', 'has_source',
-        'has_index', 'has_id'), data))
+        'has_index', 'has_id', 'create_archive'), data))
     form = TaskExportForm(data)
+
+    if len(attachments):
+        form.fields['create_archive'].label = \
+            'Zip arhiva (ukupno datoteka: {}+1)'.format(len(attachments))
+    else:
+        form.fields['create_archive'].widget = forms.HiddenInput()
 
     return {
         'format': available_formats[format],
         'form': form,
         'tasks': tasks,
+        'attachments': attachments,
     }

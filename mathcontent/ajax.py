@@ -11,8 +11,8 @@ from skoljka.utils.decorators import ajax
 def preview(request):
     # TODO: POST method!
     text = request.GET['text']
-    
+
     if len(text) > MAX_LENGTH:
-        return HttpResponseBadRequest('Too long message.')
-        
+        return HttpResponseBadRequest('Message too long.')
+
     return convert_to_html(text)

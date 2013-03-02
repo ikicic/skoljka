@@ -15,6 +15,9 @@ class TaskExportForm(forms.Form):
     has_index = forms.BooleanField(label='Broj', required=False)
     has_id = forms.BooleanField(label='ID', required=False)
 
+    # label will be manually set later
+    create_archive = forms.BooleanField(required=False)
+
     def __init__(self, *args, **kwargs):
         super(TaskExportForm, self).__init__(*args, **kwargs)
         self.fields['format'].widget.attrs.update({'class': 'input-small'})

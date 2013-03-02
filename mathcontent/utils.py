@@ -1,8 +1,7 @@
 ﻿from skoljka.utils import xss
 
 from mathcontent import ERROR_DEPTH_VALUE
-from mathcontent.latex import generate_png
-from mathcontent.latex import generate_svg
+from mathcontent.latex import generate_png, generate_svg
 
 # used for tag_open[tag][type]
 TYPE_HTML = 0
@@ -92,7 +91,8 @@ def parse_bb_code(S):
 
 # TODO: change i to iterator
 #def convert_to_html(T, content=None): # XSS danger!!! Be careful
-def _convert(T, type, handle_latex_func, escape_table, content=None): # XSS danger!!! Be careful
+def _convert(T, type, handle_latex_func, escape_table, content=None,
+        attachment_path=None): # XSS danger!!! Be careful
     """
         Converts MathContent format to HTML (type 0) or LaTeX (type 1)
         
@@ -186,8 +186,12 @@ def _convert(T, type, handle_latex_func, escape_table, content=None): # XSS dang
                                 if type == TYPE_HTML:
                                     extra += ' src="%s"' % xss.escape(file.get_url())
                                 else: # type == TYPE_LATEX
-                                    # skip first comma
-                                    extra = '[%s]{%s}' % (extra[1:], file.get_full_path_and_filename())
+                                    if attachment_path:
+                                        filename = '{}/{}/{}'.format(
+                                            attachment_path, k, file.get_filename())
+                                    else:
+                                        filename = file.get_full_path_and_filename()
+                                    extra = '[%s]{%s}' % (extra[1:], filename)
                                 
                             except:
                                 open = u'{{ Greška pri preuzimanju img datoteke. (Nevaljan broj?) }}'
@@ -298,8 +302,7 @@ def _handle_latex_latex(cnt, text):
     # $$$ uses no formatting
     return text
 
-# TODO: [img][/img] support    
-def convert_to_latex(T, content=None):
+def convert_to_latex(T, content=None, attachment_path=None):
     """
         Converts MathContent Format to LaTeX
         
@@ -309,4 +312,5 @@ def convert_to_latex(T, content=None):
         
         Handles BBCode [i], [b] etc.
     """
-    return _convert(T, TYPE_LATEX, _handle_latex_latex, reserved, content=content)
+    return _convert(T, TYPE_LATEX, _handle_latex_latex, reserved,
+        content=content, attachment_path=attachment_path)
