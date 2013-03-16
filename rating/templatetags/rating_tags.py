@@ -1,4 +1,4 @@
-from django import template
+﻿from django import template
 from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
 
@@ -18,7 +18,7 @@ def rating_box(context, text, manager):
 def rating_stars(manager, red_if_lt=0.0, value=None):
     if value is None:
         value = getattr(manager.instance, '%s_avg' % manager.field.name)
-    left = int(80 * value / float(manager.field.range))
+    left = int(80 * value / float(manager.field.range - 1))
 
     title = manager.field.titles[int(value + 0.5)]
 
@@ -28,4 +28,3 @@ def rating_stars(manager, red_if_lt=0.0, value=None):
         u'<div class="readonly-star" style="background-position:-%(left)spx 0px;width:%(right)spx;" title="%(title)s"></div>' % {
             'left': left, 'right': int(80 - left), 'title': title, 'shift': (-16 if value < red_if_lt else -32),
         })
-
