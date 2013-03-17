@@ -7,5 +7,7 @@ urlpatterns = patterns('',
     (r'^(?P<id>\d+)/', 'folder.views.detail_by_id'),
     (r'^select/(?P<id>\d+)/', 'folder.views.select'),
     (r'^select/task/(?P<task_id>\d+)/', 'folder.views.select_task'),
-    (r'^(?P<path>[-a-zA-Z0-9/ ]+)/$', 'folder.views.view'),
+
+    # path includes last /
+    (r'^(?P<path>[-a-zA-Z0-9/ ]+)$', 'folder.views.view'),
 )

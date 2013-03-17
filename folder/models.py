@@ -15,6 +15,8 @@ from search.utils import search_tasks
 from utils.tags import tag_list_to_html
 from utils.string_operations import list_strip
 
+import itertools
+
 # TODO: hm, DRY? ovo se ponavlja i u task
 class FolderManager(InheritanceManager):
     def for_user(self, user, permission_type):
@@ -31,12 +33,21 @@ class Folder(models.Model):
     name = models.CharField(max_length=64)
     slug = models.SlugField(max_length=64)
     parent = models.ForeignKey('self', blank=True, null=True)
+    parent_index = models.IntegerField(default=0)
     tag_filter = models.CharField(max_length=256, blank=True)
+
+    # Folder Collection
+    structure = models.TextField(blank=True)
+
+    # Cache
+    # e.g. '', 'category/', 'category/geometry/'
+    cache_path = models.CharField(max_length=1000, blank=True, db_index=True)
+    cache_ancestor_ids = models.CharField(max_length=255, blank=True)
 
     hidden = models.BooleanField(default=False)
 #    user_permissions = generic.GenericRelation(PerObjectUserPermission)
     group_permissions = generic.GenericRelation(PerObjectGroupPermission)
-    
+
     tasks = models.ManyToManyField(Task, blank=True)
     objects = FolderManager();
 
@@ -45,85 +56,29 @@ class Folder(models.Model):
 
     def has_perm(self, user, type):
         return user.is_staff or has_group_perm(user, self, type)
-        
-    @staticmethod
-    def _path_part_to_html(name, path):
-        return u'<li><a href="/folder%s/">%s</a></li>' % (path, name)
 
     @staticmethod
-    def _html_tree_node(name, path, depth):
-        return u'<div style="padding-left:%dpx">&raquo; <a href="/folder%s/">%s</a></div>\n' % ((depth - 1) * 10, path, name)
-        
+    def _html_breadcrumb_item(name, path):
+        return u'<li><a href="/folder/%s">%s</a></li>' % (path, name)
+
+    @staticmethod
+    def _html_menu_item(name, path, depth):
+        return u'<div style="padding-left:%dpx">&raquo; '   \
+            '<a href="/folder/%s">%s</a></div>\n' % ((depth - 1) * 10, path, name)
+
     def tag_list_html(self):
         return tag_list_to_html(self.tag_filter)
-        
+
     def get_full_path(self):
         if self.parent is None:
             return ''
         return '%s%s/' % (self.parent.get_full_path(), self.slug)
-        
-    #SPEED: optimizirati queryje ovdje?
-    def get_template_data(self, path, depth, user):
-        if self.tag_filter:
-            tasks = search_tasks(tags=self.tag_filter, user=user, show_hidden=True)
-        else:
-            tasks = self.tasks.all()
-            
-        return {
-            'folder': self,
-            'name': self.name,
-            'tag_list_html': tag_list_to_html(self.tag_filter),
-            'child': [{'name': x.name, 'tag_list_html': x.tag_list_html, 'slug': x.slug} for x in Folder.objects.for_user(user, VIEW).filter(parent=self).distinct()],
-            'tasks': tasks,
-            'path_html': Folder._path_part_to_html(self.name, path),
-            'menu_folder_tree': '', #Folder._html_tree_node(self.name, path, depth) if self.parent else u'',
-        }
-        
-    #SPEED: optimizirati?
-    #TODO: listu zamijeniti necim primjerenijim za parametar P
-    #TODO: menu_folder_tree pretvoriti u u''.join(), a ne +=
-    def _get_template_data_from_path(self, P, path, depth, user):
-        if not P:
-            data = self.get_template_data(path, depth, user)
-            for child in data['child']:
-                data['menu_folder_tree'] += Folder._html_tree_node(child['name'], '%s/%s' % (path, child['slug']), depth + 1)
-
-            return data
-            
-        menu_folder_tree = ''
-        T = None
-
-        for x in Folder.objects.for_user(user, VIEW).filter(parent=self).distinct():
-            menu_folder_tree += Folder._html_tree_node(x.name, '%s/%s' % (path, x.slug), depth + 1)
-            if x.slug == P[0]:
-                T = x.get_template_data_from_path(P[1:], '%s/%s' % (path, x.slug), depth + 1, user)
-                if not T:
-                    return None
-                    
-                T['path_html'] = Folder._path_part_to_html(self.name, path) + " &raquo; " + T['path_html']
-                T['menu_folder_tree'] = menu_folder_tree + T['menu_folder_tree']
-                menu_folder_tree = ''
-                    
-                
-        if T is not None:
-            T['menu_folder_tree'] += menu_folder_tree
-            return T
-            
-        return None
-    
-    def get_template_data_from_path(self, *args, **kwargs):
-        """Polymorphically call a deriving class member function"""
-        return Folder.objects.select_subclasses().get(id=self.id)._get_template_data_from_path(*args, **kwargs)
-    
-
-   
-        
-        
-class FolderCollection(Folder):
-    structure = models.TextField()
 
     @staticmethod
     def _parse_child(child):
+        """
+            Parse child info. For structured / virtual folders only.
+        """
         T = list_strip(child.split('/'), remove_empty=False)
         if len(T) == 1:
             data = [T[0], tag_list_to_html(T[0]), T[0], slugify(T[0])]
@@ -132,67 +87,185 @@ class FolderCollection(Folder):
         else:
             data = [T[0], tag_list_to_html(T[1]), T[1], slugify(T[2])]
         return dict(zip(['name', 'tag_list_html', 'tags', 'slug'], data))
-        
-    
+
+    def get_template_data_from_path(self, path, user):
+        # For folders with additional structure, path must start with cache_path
+        # but for folders without structure, paths must be equal
+        if self.structure and not path.startswith(self.cache_path) \
+                or not self.structure and path != self.cache_path:
+            print bool(self.structure), self.cache_path, path
+            return None
+
+        ###############################
+        # Prepare folder information
+        ###############################
+
+        chain_ids = [int(x) for x in self.cache_ancestor_ids.split(',') if x]
+        chain = Folder.objects.in_bulk(chain_ids)
+
+        chain_ids.append(self.id)
+        chain[self.id] = self       # manually add self
+
+        # Get all visible subfolders related to current chain.
+        all_children = list(Folder.objects.for_user(user, VIEW) \
+            .filter(parent_id__in=chain_ids).distinct())
+
+        for folder in all_children:
+            # chain
+            ch_ids = [int(x) for x in folder.cache_ancestor_ids.split(',') if x]
+
+            folder._depth = len(ch_ids)
+            folder._multiindex = [chain[id].parent_index for id in ch_ids]
+            folder._multiindex.append(folder.parent_index)
+
+        # check permission for current folder
+        subfolder_ids = set((subfolder.id for subfolder in all_children))
+        for folder in chain.itervalues():
+            if folder.parent_id is not None and folder.id not in subfolder_ids:
+                return None
+
+        # menu tree order
+        all_children.sort(key=lambda x: x._multiindex)
+
+
+        # Virtual / structured folders?
+        if self.structure:
+            subdata = self._get_template_data_from_path__collection(path, user)
+            if not subdata:
+                return None
+        else:
+            subdata = {}
+
+        # list of all tags; whole chain including virtual folders
+        tag_list = itertools.chain(subdata.get('tag_list', []),
+            *[x.tag_filter.split(',') for x in chain.itervalues()])
+        tag_list = set(filter(None, tag_list))    # remove duplicates
+
+        # Check if there is any tag filter to cancel. Tag "xyz" will be
+        # removed if there is another tag "~xyz" in the list.
+        # For example, a folder has "geo" tag, but some of its subfolders
+        # wants to disable it for some reason, then the subfolder can have
+        # "~geo" as one of its filter tags.
+
+        # Please note that ~ is not the same as -, because - is reserved for
+        # eventual (?) advanced search.
+        to_remove = []
+        for tag in tag_list:
+            if tag[0] == '~':
+                to_remove.append(tag)
+                to_remove.append(tag[1:])
+
+        # remove, and finally convert back to list
+        tag_list -= set(to_remove)
+        tag_list = list(tag_list)
+
+        if tag_list:
+            tasks = search_tasks(tags=tag_list, user=user, show_hidden=True)
+        else:
+            tasks = self.tasks.all()
+
+
+        ###############################
+        # Generate HTML code
+        ###############################
+
+        # Manually insert virtual subfolders in the middle of menu
+        menu = []
+        for x in all_children:
+            menu.append(Folder._html_menu_item(x.name, x.cache_path, x._depth))
+            if x.id == self.id:
+                menu.extend(subdata.get('menu', []))
+
+        # Merge real chain and virtual
+        breadcrumb = [Folder._html_breadcrumb_item(chain[id].name,
+            chain[id].cache_path) for id in chain_ids]
+        breadcrumb.extend(subdata.get('breadcrumb', []))
+
+        # If current folder has some subfolders, then show "Select subcategory"
+        # message in the case tasks queryset is empty. If there is no
+        # subfolders, show "Folder empty" message.
+        has_subfolders = subdata.get('has_subfolders') \
+            or any((x.parent_id == self.id for x in all_children))
+        data = {
+            'menu_folder_tree': u''.join(menu),
+            'tasks': tasks,
+            'breadcrumb': u' &raquo; '.join(breadcrumb),
+            'tag_list_html': tag_list_to_html(tag_list),
+            'has_subfolders': has_subfolders,
+        }
+
+        # if not virtual and no tag filters
+        if self.cache_path == path and not tag_list:
+            data['folder'] = self
+
+        return data
+
+
+    # Folder Collection
     #TODO(ikicic): uljepsati i pojasniti kod
     #TODO: optimizirati! (mozda i serializirati za sql)
-    #TODO: menu_folder_tree pretvoriti u u''.join(), a ne +=
-    def _get_template_data_from_path(self, P, path, depth, user):
-        # Nije moguce postavljati posebna prava za pojedine
-        # subfoldere FolderCollection-a.
-    
+    def _get_template_data_from_path__collection(self, path, user):
+        # Note that it is not possible to set permissions for virtual folders.
+
         structure = []
         for G in list_strip(self.structure.split('@')):
             levels = []
             for L in list_strip(G.split('|')):
-                levels.append([FolderCollection._parse_child(C) for C in list_strip(L.split(';'))])
+                levels.append([Folder._parse_child(C) for C in list_strip(L.split(';'))])
             structure.append(levels)
-        
+
+        depth = self.cache_path.count('/')
+        P = filter(None, path[len(self.cache_path):].split('/'))
+
+        print depth, P
+
+        has_subfolders = False
         tree = []
-        output_full_tags = u''
-        output_children = []
-        output_path_html = u''
+        tag_list = []
+        breadcrumb = []
         any = False
         for G in structure:         # for each group
             k = 0
-            current_path = path
+            current_path = self.cache_path
             tree_end = []
-            
+
             # k == len(P) is hack
             while k <= len(P) and k < len(G):    # levels
                 next = None
                 tree_end2 = []
                 for C in G[k]:                  # for each child
+                    menu_item = Folder._html_menu_item(C['name'],
+                        '%s%s/' % (current_path, C['slug']), k + depth + 1)
                     if next is None:
-                        tree.append(Folder._html_tree_node(C['name'], '%s/%s' % (current_path, C['slug']), k + depth + 1))
+                        tree.append(menu_item)
                         if k < len(P) and P[k] == C['slug']:
                             next = C
                     else:
-                        tree_end2.append(Folder._html_tree_node(C['name'], '%s/%s' % (current_path, C['slug']), k + depth + 1))
+                        tree_end2.append(menu_item)
                 tree_end = tree_end2 + tree_end
-                
+
                 if next is None:
                     break
                 else:
                     k += 1
-                    current_path += '/' + next['slug']
-                    output_full_tags += ',' + next['tags']
-                    output_path_html += ' &raquo; ' + Folder._path_part_to_html(next['name'], path)
+                    current_path += next['slug'] + '/'
+                    tag_list.extend(next['tags'].split(','))
+                    breadcrumb.append(Folder._html_breadcrumb_item(next['name'], path))
             tree.extend(tree_end)
-            
+
             if k == len(P):     # k will never be greater than len(P)
                 if k < len(G):
-                    output_children.extend(G[k])
+                    has_subfolders = True
                 any = True      # url is ok
-                
+
         if not any:
             return None         # url is not ok
+
+        print 'has_subfolders', has_subfolders, path
         return {
-            'name': self.name,
-            'tag_list_html': tag_list_to_html( output_full_tags ),
-            'child': output_children,
-            'tasks': search_tasks(tags=output_full_tags, user=user, show_hidden=True),
-            'path_html': output_path_html,
-            'menu_folder_tree': u''.join(tree),
+            'tag_list': tag_list,
+            'breadcrumb': breadcrumb,
+            'menu': tree,
+            'has_subfolders': has_subfolders,
         }
 
