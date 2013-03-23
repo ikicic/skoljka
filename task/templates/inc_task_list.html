@@ -31,29 +31,57 @@
     });
     </script>
   {% endif %}
-  
-  <div>
-    {# TODO: move padding:8px somewhere else #}
-    <div style="float:left;padding:8px;">
-      <form action="/task/export/" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="ids" value="{{ task_ids|join:',' }}">
-        <button type="submit" class="blank" name="format" value="latex"><img src="/static/images/tex16.png" alt="LaTeX" title="Pretvori u LaTeX"></button>
-        <button type="submit" class="blank" name="format" value="pdf"><img src="/static/images/pdf16.png" alt="PDF" title="Pretvori u PDF"></button>
-      </form>
+
+
+  <div class="task-action-bar">
+    {% comment %}
+      -----------
+      The implementation of action bar is a little bit tricky. It is assumed that right bar is the tallest.
+      Therefore, left and center have to be centered vertically.
+      Also, middle bar has to be centered horizontally *independently* of left and right action bars.
+      Vertical align solution taken from: http://emergentweb.com/test/valign.html (note three divs!)
+      If anyone knows any better solution, feel free to change this.
+      -----------
+    {% endcomment %}
+
+    <div class="task-action-bar-right">
+      {% useroptions view_type|default:"task_view_type" as view %}
+        {% useroption 0 "<i class=icon-list></i> Lista" default %}
+        {% useroption 1 "<i class=icon-align-justify></i> Tekst" %}
+        {% useroption 2 "<i class=icon-th-large></i> Dva stupca" %}
+        {% if user.is_staff %}
+          <a href="?{% generate_get_query_string options='' %}" class="btn btn-mini{% if options_mode %} active{% endif %}">
+            <i class="icon-cog"></i> Opcije
+          </a>
+        {% endif %}
+      {% enduseroptions %}
     </div>
-    {% useroptions view_type|default:"task_view_type" as view %}
-      {% useroption 0 "<i class=icon-list></i> Lista" default %}
-      {% useroption 1 "<i class=icon-align-justify></i> Tekst" %}
-      {% useroption 2 "<i class=icon-th-large></i> Dva stupca" %}
-      {% if user.is_staff %}
-        <a href="?{% generate_get_query_string options='' %}" class="btn btn-mini{% if options_mode %} active{% endif %}">
-          <i class="icon-cog"></i> Opcije
-        </a>
-      {% endif %}
-    {% enduseroptions %}
+
+    <div class="task-action-bar-left center-vertically">
+      <div> {# vertical center fix #}
+        <div>
+          <div>
+            <form action="/task/export/" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="ids" value="{{ task_ids|join:',' }}">
+              <button type="submit" class="blank" name="format" value="latex"><img src="/static/images/tex16.png" alt="LaTeX" title="Pretvori u LaTeX"></button>
+              <button type="submit" class="blank" name="format" value="pdf"><img src="/static/images/pdf16.png" alt="PDF" title="Pretvori u PDF"></button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="task-action-bar-header center-vertically">
+      <div> {# vertical center fix #}
+        <div>
+          <div>
+            Lista zadataka
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <br><br>
 
   {% if options_mode %}
     <div>
@@ -70,7 +98,7 @@
     {% if view == '1' %}
       {% paginate %}
       {% for task in tasks %}
-        {% task_small_box task 'task_text' '' '' %}
+        {% task_small_box task 'task-text' '' '' %}
       {% endfor %}
     {% endif %}
 

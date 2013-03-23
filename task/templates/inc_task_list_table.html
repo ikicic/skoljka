@@ -6,9 +6,6 @@
 
 <table width="100%" class="table-striped table-condensed" style="text-align: center;">
   <tr>
-    <th colspan="{% if user.profile.selected_folder %}8{% else %}7{% endif %}">Lista zadataka</th>
-  </tr>
-  <tr>
     {% if user.profile.selected_folder %}<th width="50">U mapi</th>{% endif %}
     <th width="50">{% anchor id # %}</th>
     <th>Naslov</th>

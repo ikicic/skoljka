@@ -28,10 +28,13 @@
   </head>
 <body>
 
-<div class="row well header">
-  <div style="float:left;">
-    <h1><a href="/" class="sitename"><img src="/static/images/shell32.png" style="vertical-align:top;" alt=""> Školjka</a></h1>
-  </div>
+<div id="header" class="row well">
+  <h1 id="sitename">
+    <a href="/">
+      <img src="/static/images/shell32.png" style="vertical-align:top;" alt=""> Školjka
+    </a>
+  </h1>
+
   {% if not user.is_authenticated or user.profile.selected_folder %}
     <div style="float:right;margin-top:4px;">
       <div class="row-fluid">
@@ -57,7 +60,7 @@
 </div>
 
 <div class="container-fluid">
-  <div class="sidebar">
+  <div id="sidebar">
     <div class="well">
       {% if user.is_authenticated %}
         <div class="nav-hello-user">Zdravo, {{ user|userlink:"first_name" }}!</div>
@@ -104,7 +107,7 @@
     </div>
   </div>
 
-  <div class="content">
+  <div id="content">
     <div class="well">
       {% block content %}
         <br><br><br>
@@ -114,7 +117,7 @@
 </div>
 
 
-<div class="footer">
+<div id="footer">
   Školjka v0.6.1 © 2012 Ivica Kičić &amp; <a href="http://mnm.hr/">MNM</a>. &nbsp;
   Hosting by <a href="http://www.kset.org/"><img src="/static/images/kset_logo_white.png" style="vertical-align:-2px;" alt="KSET"></a>
 </div>

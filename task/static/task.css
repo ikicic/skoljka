@@ -1,0 +1,73 @@
+/* Vertical align solution taken from: http://emergentweb.com/test/valign.html */
+.center-vertically {
+  height: 100%;
+}
+
+.center-vertically > div {
+  display: table;
+  height: 100%;
+  width: 100%;
+}
+
+.center-vertically > div > div {
+  display: table-cell;
+  vertical-align: middle;
+  margin: 0;
+  padding: 0;
+}
+
+.center-vertically > div > div > div {
+  margin: 0 auto;
+}
+
+
+.task-action-bar {
+  background-color: #F8F8F8;
+  overflow:auto;
+  position: relative;
+}
+
+.task-action-bar:before,
+.task-action-bar:after {
+  content:"";
+  display:table;
+}
+.task-action-bar:after {
+  clear:both;
+}
+
+.task-action-bar-left {
+  position: absolute;
+  left: 8px;
+  top: 0px;
+  height: 100%; 
+  display: inline-block;
+}
+
+.task-action-bar-left form {
+  margin: 0;  /* Fix */
+}
+
+.task-action-bar-header {
+  font-size: 13px;
+  font-weight: bold;
+  position: absolute;
+  left: 50%;
+  width: 200px;
+  margin-left: -100px;
+  text-align: center;
+}
+
+.task-action-bar-right {
+  float: right;
+}
+
+
+.task-text {
+  padding: 10px 0px;
+}
+
+.task-source {
+  float: right;
+  display: inline;
+}

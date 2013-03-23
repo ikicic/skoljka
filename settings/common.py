@@ -294,6 +294,7 @@ PIPELINE_CSS = {
     'base': {
         'source_filenames': (
           'base.css',
+          'task.css',
         ),
         'output_filename': 'base.min.css',
     },

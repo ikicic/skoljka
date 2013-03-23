@@ -122,57 +122,65 @@ tr.group_hidden td {
 }
 
 /* this is kind of tricky, please find a better solution! */
-.content .btn-group,
-.content .row,
-.content .row-fluid {
+#content .btn-group,
+#content .row,
+#content .row-fluid {
   display: inline-block;
 }
 
 
 /* General */
-.header {
+#header {
   padding: 5px!important;
 }
 
-.header form {
+#header form {
   padding: 0px!important;
   margin: 0px!important;
 }
 
-.container-fluid .sidebar {
+#sidebar {
   position: relative;
   top: 0;
   left: auto;
-  width: 260px;
+  width: 255px;
   float: left;
 }
 
-.container-fluid .content {
-  margin: 0 0 0 280px;
+#sidebar > div {
+  padding: 19px 15px;
+}
+
+#content {
+  margin: 0 0 0 275px;
 }
 
 .nav-hello-user {
   padding: 0 0 1em 15px;
 }
 
-.footer {
+#footer {
   margin: 0px 20px 5px 10px;
   text-align: right;
   font-size: 12px;
   color: #BBB;
 }
 
-.sitename {
-  color: black;
+#sitename {
+  float: left;
   padding-left: 20px;
 }
 
-.sitename:hover {
+#sitename a {
+  color: black;
+}
+
+#sitename a:hover {
   color: black;
   text-decoration: none;
 }
 
-.footer a {
+#footer a {
   color: #8CF;
 }
 
@@ -352,18 +360,6 @@ object.latex_center {
   padding: 10px 0px;
   font-size: 12px;
 }
-
-
-/* Task */
-.task_text {
-  padding: 10px 0px;
-}
-
-.task-source {
-  float: right;
-  display: inline;
-}
-
 
 /* Profile */
 .profile-distribution:after {

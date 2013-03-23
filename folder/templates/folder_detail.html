@@ -24,7 +24,6 @@
     {{ breadcrumb|safe }}
   </ul>
 {% endif %}
-<br>
 
 {% if has_subfolders %}
   {% include 'inc_task_list.html' with tasks=tasks empty_message="Odaberite neku od podkategorija." %}
