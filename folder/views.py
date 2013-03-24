@@ -1,15 +1,17 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
+from django.template.defaultfilters import slugify
 from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseRedirect
 
 from permissions.constants import VIEW, EDIT
+from permissions.models import PerObjectGroupPermission
 from task.models import Task
-from utils.decorators import response
+from skoljka.utils.decorators import response
 
 from folder.models import Folder
-
-FOLDER_EDIT_LINK_CONTENT = ['Uredi', 'Zatvori']
+from folder.forms import FolderForm
+from folder.utils import refresh_cache
 
 @login_required
 def select_task(request, task_id):
@@ -55,7 +57,7 @@ def select(request, id):
 @login_required
 def detail_by_id(request, id):
     folder = get_object_or_404(Folder, id=id)
-    return HttpResponseRedirect('/folder/' + folder.get_full_path())
+    return HttpResponseRedirect(folder.get_absolute_url())
 
 
 @response('folder_detail.html')
@@ -81,7 +83,7 @@ def view(request, path=u''):
         except Folder.DoesNotExist:
             pass
 
-        index = max(0, path.rfind('/', 0, index))
+        index = path.rfind('/', 0, index)
 
     if not folder:
         # Root folder missing?
@@ -94,8 +96,59 @@ def view(request, path=u''):
 
     # Some additional tuning
     data['tasks'] = data['tasks'].select_related('author')
-    if 'folder' in data and data['folder'].has_perm(request.user, EDIT):
-        data['edit_link'] = FOLDER_EDIT_LINK_CONTENT[
-            int(request.user.get_profile().selected_folder == data['folder'])]
+
+    folder = data.get('folder')
+    if folder and folder.has_perm(request.user, EDIT):
+        data['edit_link'] = True
+        if not data['tag_list']:
+            data['select_link'] = True
 
     return data
+
+@response('folder_new.html')
+def new(request, folder_id=None):
+    # Analogous to task.models.new
+
+    print request.META.get('HTTP_REFERER')
+    if folder_id:
+        folder = get_object_or_404(Folder, id=folder_id)
+        edit = True
+        old_parent_id = folder.parent_id
+    else:
+        folder = old_parent_id = None
+        edit = False
+
+    if request.method == 'POST':
+        folder_form = FolderForm(request.POST, instance=folder, user=request.user)
+        if folder_form.is_valid():
+            folder = folder_form.save(commit=False)
+
+            folder.slug = slugify(folder.name)
+
+            if not edit:
+                folder.author = request.user
+
+            folder.save()
+
+            if not edit:
+                for x in [VIEW, EDIT]:
+                    PerObjectGroupPermission.objects.create(
+                        group_id=request.user.get_profile().private_group_id,
+                        content_object=folder, permission_type=x)
+
+            # Refresh Folder cache.
+            # TODO: Optimize, update only necessary folders.
+            if old_parent_id != folder.parent_id:
+                refresh_cache(Folder.objects.all())
+
+            # Get new path
+            folder = Folder.objects.get(id=folder.id)
+            return HttpResponseRedirect(folder.get_absolute_url())
+    else:
+        folder_form = FolderForm(instance=folder, user=request.user)
+
+    return {
+        'form': folder_form,
+        'edit': edit,
+        'folder': folder,
+    }

@@ -202,6 +202,7 @@ def old_advanced_new(request):
 #########################################################
 
 @login_required
+@response('task_new.html')
 def new(request, task_id=None):
     """
         New Task and Edit Task
@@ -211,6 +212,8 @@ def new(request, task_id=None):
         math_content = task.content
         old_tags = list(task.tags.values_list('name', flat=True))
         edit = True
+        if not task.has_perm(request.user, EDIT):
+            return 403
     else:
         task = math_content = None
         old_tags = []
@@ -241,18 +244,17 @@ def new(request, task_id=None):
 
             # TODO: izbrisati task_new_finish.html i url
             #return HttpResponseRedirect('/task/%d/' % task.id if edit else '/task/new/finish/')
-            return HttpResponseRedirect('/task/%d/' % task.id)
+            return HttpResponseRedirect(task.get_absolute_url())
     else:
         task_form = TaskForm(instance=task)
         math_content_form = MathContentForm(instance=math_content)
 
-    return render_to_response( 'task_new.html', {
-                'forms': [task_form, math_content_form],
-                'action_url': request.path,
-                'edit': edit,
-                'task': task,
-            }, context_instance=RequestContext(request),
-        )
+    return {
+        'forms': [task_form, math_content_form],
+        'action_url': request.path,
+        'edit': edit,
+        'task': task,
+    }
 
 @response('task_list.html')
 def task_list(request, user_id=None):

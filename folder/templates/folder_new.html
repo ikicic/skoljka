@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if edit %}
+    Uređivanje kategorije {{ folder.name }}
+  {% else %}
+    Nova kategorija
+  {% endif %}
+{% endblock %}
+
+
+{% block content %}
+
+<form action="{{ request.path }}" method="post">
+  {% csrf_token %}
+  <table>
+    {{ form.as_table }}
+  </table>
+  <br>
+  <input type="submit" class="btn btn-primary" value="Pošalji">
+</form>
+
+
+
+{% endblock content %}

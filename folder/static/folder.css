@@ -1,0 +1,11 @@
+.folder-ab-container {
+  float: right;
+  display: table;
+}
+
+.folder-ab-tag-list {
+  display: table-cell;
+  vertical-align: middle;
+  height: 100%;
+  padding: 0 4px 4px 0;
+}

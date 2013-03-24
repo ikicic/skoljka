@@ -8,14 +8,30 @@
 
 {% block content %}
 
-<div style="float:right;">
-  {{ tag_list_html|safe }}
-  {% if edit_link %}
-    <form action="/folder/select/{{ folder.id }}/" method="POST" style="display: inline;">
-      {% csrf_token %}
-      <button class="btn" type="submit" id="select_folder">{{ edit_link }}</button>
-    </form>
-  {% endif %}
+<div class="folder-ab-container">
+  <div class="folder-ab-tag-list">
+    {{ tag_list_html|safe }}
+  </div>
+  <div class="btn-group">
+    {% if select_link %}
+      <form action="/folder/select/{{ folder.id }}/" method="POST" style="display: inline;">
+        {% if user.get_profile.selected_folder_id != folder.id %}
+          <button class="btn" type="submit" id="select_folder" title="Aktivirajte kako biste mogli dodavati i brisati zadatke iz kolekcije">
+            <i class="icon-check"></i> Odaberi
+          </button>
+        {% else %}
+          <button class="btn" type="submit" id="select_folder">
+            <i class="icon-check"></i> Zatvori
+          </button>
+        {% endif %}
+        {% csrf_token %}
+      </form>
+    {% endif %}
+    {% if edit_link %}
+      <a href="/folder/{{ folder.id }}/edit/" class="btn"><i class="icon-edit"></i> Uredi</a>
+    {% endif %}
+    <a href="/folder/new/" class="btn"><i class="icon-plus"></i> Napravi kolekciju</a>
+  </div>
 </div>
 <a href="javascript: history.go(-1)">« Vrati se</a><br><br>
 

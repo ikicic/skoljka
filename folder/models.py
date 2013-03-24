@@ -3,7 +3,6 @@ from django.db.models import Q
 from django.contrib.contenttypes import generic
 from django.template.defaultfilters import slugify
 
-from model_utils.managers import InheritanceManager
 from tags.managers import TaggableManager
 
 from permissions.constants import VIEW
@@ -12,24 +11,30 @@ from permissions.models import PerObjectGroupPermission
 from permissions.utils import has_group_perm
 from task.models import Task
 from search.utils import search_tasks
-from utils.tags import tag_list_to_html
-from utils.string_operations import list_strip
+from skoljka.utils.tags import tag_list_to_html
+from skoljka.utils.string_operations import list_strip
 
 import itertools
 
 # TODO: hm, DRY? ovo se ponavlja i u task
-class FolderManager(InheritanceManager):
+class FolderManager(models.Manager):
     def for_user(self, user, permission_type):
         if user is not None and user.is_authenticated():
-            return super(FolderManager, self).get_query_set().filter(
-                  Q(hidden=False)
-#                | Q(user_permissions__user=user, user_permissions__permission_type=permission_type)
-                | Q(group_permissions__group__user=user, group_permissions__permission_type=permission_type))
+            q = Q(group_permissions__group__user=user,
+                group_permissions__permission_type=permission_type)
+            if permission_type == VIEW:
+                q |= Q(hidden=False)
+            return self.filter(q)
+        elif permission_type == VIEW:
+            return self.filter(hidden=False)
         else:
-            return super(FolderManager, self).get_query_set().filter(hidden=False)
+            return self.none()
 
 
 class Folder(models.Model):
+    class Meta:
+        permissions = (("can_publish_folders", "Can publish folders"), )
+
     name = models.CharField(max_length=64)
     slug = models.SlugField(max_length=64)
     parent = models.ForeignKey('self', blank=True, null=True)
@@ -54,6 +59,11 @@ class Folder(models.Model):
     def __unicode__(self):
         return "%s - [%s]" % (self.name, self.tag_filter)
 
+    def get_absolute_url(self):
+        # TODO: add id to URL -- '/folder/<id>/<path>/' -- to be able to use
+        # old urls (in case the folder is moved somewhere)
+        return '/folder/' + self.cache_path
+
     def has_perm(self, user, type):
         return user.is_staff or has_group_perm(user, self, type)
 
@@ -68,11 +78,6 @@ class Folder(models.Model):
 
     def tag_list_html(self):
         return tag_list_to_html(self.tag_filter)
-
-    def get_full_path(self):
-        if self.parent is None:
-            return ''
-        return '%s%s/' % (self.parent.get_full_path(), self.slug)
 
     @staticmethod
     def _parse_child(child):
@@ -190,12 +195,13 @@ class Folder(models.Model):
             'menu_folder_tree': u''.join(menu),
             'tasks': tasks,
             'breadcrumb': u' &raquo; '.join(breadcrumb),
+            'tag_list': tag_list,
             'tag_list_html': tag_list_to_html(tag_list),
             'has_subfolders': has_subfolders,
         }
 
         # if not virtual and no tag filters
-        if self.cache_path == path and not tag_list:
+        if self.cache_path == path:
             data['folder'] = self
 
         return data
