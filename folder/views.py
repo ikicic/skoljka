@@ -5,7 +5,7 @@ from django.template.defaultfilters import slugify
 from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseRedirect
 
 from permissions.constants import VIEW, EDIT
-from permissions.models import PerObjectGroupPermission
+from permissions.models import ObjectPermission
 from task.models import Task
 from skoljka.utils.decorators import response
 
@@ -132,7 +132,7 @@ def new(request, folder_id=None):
 
             if not edit:
                 for x in [VIEW, EDIT]:
-                    PerObjectGroupPermission.objects.create(
+                    ObjectPermission.objects.create(
                         group_id=request.user.get_profile().private_group_id,
                         content_object=folder, permission_type=x)
 

@@ -1,4 +1,4 @@
 from django.contrib import admin
-from permissions.models import PerObjectGroupPermission
+from permissions.models import ObjectPermission
 
-admin.site.register(PerObjectGroupPermission)
+admin.site.register(ObjectPermission)

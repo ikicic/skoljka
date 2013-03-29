@@ -8,7 +8,7 @@ from django.template import RequestContext
 from activity import action as _action
 from mathcontent.forms import MathContentForm
 from permissions.constants import *
-from permissions.models import PerObjectGroupPermission
+from permissions.models import ObjectPermission
 from usergroup.forms import GroupForm, UserGroupForm, UserEntryForm
 from usergroup.models import UserGroup, GroupExtended
 
@@ -101,13 +101,13 @@ def new(request, group_id=None):
                 # TODO: napraviti ALL samo za grupe
                 author_group = Group.objects.get(name=request.user.username)
                 for perm in ALL:
-                    author_perm = PerObjectGroupPermission(content_object=group, group=author_group, permission_type=perm)
+                    author_perm = ObjectPermission(content_object=group, group=author_group, permission_type=perm)
                     author_perm.save()
 
                 # permissions assigned to whole group (each member)
                 # every group member has perm to view it
                 for perm in [VIEW]:
-                    self_perm = PerObjectGroupPermission(content_object=group, group=group, permission_type=perm)
+                    self_perm = ObjectPermission(content_object=group, group=group, permission_type=perm)
                     self_perm.save()
             
             return ('/usergroup/%d/' % group.id, )

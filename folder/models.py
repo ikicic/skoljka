@@ -6,8 +6,7 @@ from django.template.defaultfilters import slugify
 from tags.managers import TaggableManager
 
 from permissions.constants import VIEW
-from permissions.models import PerObjectGroupPermission
-#from permissions.models import PerObjectUserPermission
+from permissions.models import ObjectPermission
 from permissions.utils import has_group_perm
 from task.models import Task
 from search.utils import search_tasks
@@ -20,8 +19,8 @@ import itertools
 class FolderManager(models.Manager):
     def for_user(self, user, permission_type):
         if user is not None and user.is_authenticated():
-            q = Q(group_permissions__group__user=user,
-                group_permissions__permission_type=permission_type)
+            q = Q(permissions__group__user=user,
+                permissions__permission_type=permission_type)
             if permission_type == VIEW:
                 q |= Q(hidden=False)
             return self.filter(q)
@@ -50,8 +49,7 @@ class Folder(models.Model):
     cache_ancestor_ids = models.CharField(max_length=255, blank=True)
 
     hidden = models.BooleanField(default=False)
-#    user_permissions = generic.GenericRelation(PerObjectUserPermission)
-    group_permissions = generic.GenericRelation(PerObjectGroupPermission)
+    permissions = generic.GenericRelation(ObjectPermission)
 
     tasks = models.ManyToManyField(Task, blank=True)
     objects = FolderManager();

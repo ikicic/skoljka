@@ -16,7 +16,7 @@ from task.forms import TaskForm, TaskAdvancedForm, TaskExportForm, EXPORT_FORMAT
 
 from activity import action as _action
 from permissions.constants import ALL, EDIT, VIEW, EDIT_PERMISSIONS
-from permissions.models import PerObjectGroupPermission
+from permissions.models import ObjectPermission
 from permissions.utils import get_permissions_for_object_by_id
 from recommend.utils import task_event
 from search.utils import update_search_cache
@@ -112,8 +112,8 @@ def advanced_new(request):
 
                     # --- group permissions ---
                     for x in groups:
-                        PerObjectGroupPermission.objects.create(content_object=task, group=x, permission_type=VIEW)
-                        PerObjectGroupPermission.objects.create(content_object=task, group=x, permission_type=EDIT)
+                        ObjectPermission.objects.create(content_object=task, group=x, permission_type=VIEW)
+                        ObjectPermission.objects.create(content_object=task, group=x, permission_type=EDIT)
 
 
             return HttpResponseRedirect('/task/new/finish/')

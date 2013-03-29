@@ -5,8 +5,7 @@ from django.contrib.contenttypes import generic
 from django.utils.safestring import mark_safe
 
 from permissions.constants import *
-from permissions.models import PerObjectGroupPermission
-#from permissions.models import PerObjectUserPermission
+from permissions.models import ObjectPermission
 from permissions.utils import get_permissions_for_object
 from mathcontent.models import MathContent
 
@@ -22,8 +21,7 @@ class GroupPermissionManager(models.Manager):
             return self.filter(
                   Q(data__hidden=False)
                 | Q(data__author=user)
-#                | Q(user_permissions__user=user, user_permissions__permission_type=permission_type)
-                | Q(group_permissions__group__user=user, group_permissions__permission_type=permission_type)).distinct()
+                | Q(permissions__group__user=user, permissions__permission_type=permission_type)).distinct()
         else:
             return self.filter(data__hidden=False)
 
@@ -67,12 +65,9 @@ class UserGroup(models.Model):
                 perm.append(VIEW)
         return perm, is_member
 
-# ovo nije preporuceno, ali nemam kako drugacije napraviti (ikicic)
-#Group.add_to_class('user_permissions', generic.GenericRelation(PerObjectUserPermission))
-
 # iako ovo izgleda jako cudno (grupna prava za grupe), zapravo je jako korisno
 # grupa ima sama sebi dodijeljena neka prava (npr. VIEW)
 # TODO: zasto onda postoji is_member (koja je ipak bitna informacija)?
 
 # problem oko related_name, umjesto defaultnog 'group' stavio sam 'groups' (ikicic)
-Group.add_to_class('group_permissions', generic.GenericRelation(PerObjectGroupPermission, related_name='groups'))
+Group.add_to_class('permissions', generic.GenericRelation(ObjectPermission, related_name='groups'))

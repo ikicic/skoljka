@@ -7,7 +7,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 from permissions.constants import VIEW
-from permissions.models import PerObjectGroupPermission
+from permissions.models import ObjectPermission
 from usergroup.forms import GroupEntryForm
 
 # TODO: permission to change permissions?
@@ -25,11 +25,11 @@ def edit(request, type_id, id):
         form = GroupEntryForm(request.POST)
         if form.is_valid():
             groups = form.cleaned_data['list']
-            PerObjectGroupPermission.objects.filter(
+            ObjectPermission.objects.filter(
                 content_type=type_id, object_id=id, permission_type=VIEW).delete()
                 
             for x in groups:
-                perm = PerObjectGroupPermission(content_object=object, group=x, permission_type=VIEW)
+                perm = ObjectPermission(content_object=object, group=x, permission_type=VIEW)
                 try:
                     perm.save()
                 except IntegrityError:
@@ -38,14 +38,14 @@ def edit(request, type_id, id):
             message = u'Promjene spremljene.'
     else:
         initial = ', '.join(
-            PerObjectGroupPermission.objects.filter(                        \
-                content_type=type_id, object_id=id, permission_type=VIEW    \
+            ObjectPermission.objects.filter(
+                content_type=type_id, object_id=id, permission_type=VIEW
             ).values_list('group__name', flat=True)
         )
         form = GroupEntryForm(initial={'list': initial})
         
     
-    perms = PerObjectGroupPermission.objects.filter(object_id=id, content_type=content_type)
+    perms = ObjectPermission.objects.filter(object_id=id, content_type=content_type)
     groups = dict()
     for perm in perms:
         group = perm.group

@@ -6,8 +6,7 @@ from django.contrib.contenttypes.generic import GenericRelation
 from django.utils.safestring import mark_safe
 
 from mathcontent.models import MathContent
-from permissions.models import PerObjectGroupPermission
-#from permissions.models import PerObjectUserPermission
+from permissions.models import ObjectPermission
 from permissions.constants import VIEW, EDIT
 from permissions.utils import has_group_perm
 from post.generic import PostGenericRelation
@@ -51,8 +50,8 @@ class TaskPermissionManager(models.Manager):
     def for_user(self, user, permission_type):
         if user is not None and user.is_authenticated():
             # yeah, right...
-            q = Q(author=user) | Q(group_permissions__group__user=user,
-                    group_permissions__permission_type=permission_type)
+            q = Q(author=user) | Q(permissions__group__user=user,
+                    permissions__permission_type=permission_type)
             if permission_type == VIEW:
                 q |= Q(hidden=False)
             return self.filter(q)
@@ -73,12 +72,13 @@ class Task(models.Model):
     source = models.CharField(max_length=200, blank=True, verbose_name='Izvor')
     
     search_cache_elements = GenericRelation(SearchCacheElement)
-    group_permissions = generic.GenericRelation(PerObjectGroupPermission)
+    permissions = generic.GenericRelation(ObjectPermission)
     posts = PostGenericRelation()
     tags = TaggableManager(blank=True)
     quality_rating = RatingField(**QUALITY_RATING_ATTRS)
     difficulty_rating = RatingField(**DIFFICULTY_RATING_ATTRS)
-    similar = models.ManyToManyField('self', through=SimilarTask, related_name='similar_backward', symmetrical=False)
+    similar = models.ManyToManyField('self', through=SimilarTask,
+        related_name='similar_backward', symmetrical=False)
 
     solved_count = models.IntegerField(default=0, db_index=True)
     
