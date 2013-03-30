@@ -6,9 +6,7 @@ from django.contrib.contenttypes.generic import GenericRelation
 from django.utils.safestring import mark_safe
 
 from mathcontent.models import MathContent
-from permissions.models import ObjectPermission
-from permissions.constants import VIEW, EDIT
-from permissions.utils import has_group_perm
+from permissions.models import BasePermissionsModel
 from post.generic import PostGenericRelation
 from rating.fields import RatingField
 from search.models import SearchCacheElement
@@ -46,6 +44,7 @@ class SimilarTask(models.Model):
     similar = models.ForeignKey('Task', db_index=True, related_name='to')
     score = models.FloatField(db_index=True)
 
+"""
 class TaskPermissionManager(models.Manager):
     def for_user(self, user, permission_type):
         if user is not None and user.is_authenticated():
@@ -59,9 +58,9 @@ class TaskPermissionManager(models.Manager):
             return self.filter(hidden=False)
         else:
             return self.none()
+"""
 
-
-class Task(models.Model):
+class Task(BasePermissionsModel):
     # napomena: cache za Solution POST_SEND activity ovisi o ovom max_length, nemojte previse povecavati
     name = models.CharField(max_length=120, verbose_name='Naslov')
     content = models.OneToOneField(MathContent)
@@ -72,7 +71,6 @@ class Task(models.Model):
     source = models.CharField(max_length=200, blank=True, verbose_name='Izvor')
     
     search_cache_elements = GenericRelation(SearchCacheElement)
-    permissions = generic.GenericRelation(ObjectPermission)
     posts = PostGenericRelation()
     tags = TaggableManager(blank=True)
     quality_rating = RatingField(**QUALITY_RATING_ATTRS)
@@ -81,10 +79,8 @@ class Task(models.Model):
         related_name='similar_backward', symmetrical=False)
 
     solved_count = models.IntegerField(default=0, db_index=True)
-    
-    objects = TaskPermissionManager()
 
-    class Meta:
+    class Meta(BasePermissionsModel.Meta):
         ordering = ['id']
     
     def __unicode__(self):
@@ -96,11 +92,12 @@ class Task(models.Model):
     def get_link(self):
         return mark_safe('<a href="/task/%d/" class="task">%s</a>' % (self.id, self.name))
 
+    """
     def has_perm(self, user, type):
         if type == VIEW and not self.hidden:
             return True
         return user.is_staff or self.author == user or has_group_perm(user, self, type)
-        
+    """
     def get_tag_ids(self):
         if not hasattr(self, '_cache_tag_ids'):
             self._cache_tag_ids = self.tags.values_list('id', flat=True)

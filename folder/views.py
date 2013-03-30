@@ -1,10 +1,11 @@
 from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.template.defaultfilters import slugify
 from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseRedirect
 
-from permissions.constants import VIEW, EDIT
+from permissions.constants import VIEW, EDIT, EDIT_PERMISSIONS
 from permissions.models import ObjectPermission
 from task.models import Task
 from skoljka.utils.decorators import response
@@ -98,7 +99,7 @@ def view(request, path=u''):
     data['tasks'] = data['tasks'].select_related('author')
 
     folder = data.get('folder')
-    if folder and folder.has_perm(request.user, EDIT):
+    if folder and folder.user_has_perm(request.user, EDIT):
         data['edit_link'] = True
         if not data['tag_list']:
             data['select_link'] = True
@@ -109,7 +110,6 @@ def view(request, path=u''):
 def new(request, folder_id=None):
     # Analogous to task.models.new
 
-    print request.META.get('HTTP_REFERER')
     if folder_id:
         folder = get_object_or_404(Folder, id=folder_id)
         edit = True
@@ -130,12 +130,6 @@ def new(request, folder_id=None):
 
             folder.save()
 
-            if not edit:
-                for x in [VIEW, EDIT]:
-                    ObjectPermission.objects.create(
-                        group_id=request.user.get_profile().private_group_id,
-                        content_object=folder, permission_type=x)
-
             # Refresh Folder cache.
             # TODO: Optimize, update only necessary folders.
             if old_parent_id != folder.parent_id:
@@ -147,8 +141,21 @@ def new(request, folder_id=None):
     else:
         folder_form = FolderForm(instance=folder, user=request.user)
 
-    return {
+    data = {
         'form': folder_form,
         'edit': edit,
         'folder': folder,
     }
+
+    if edit:
+        permissions = folder.get_user_permissions(request.user)
+
+        if EDIT not in permissions:
+            return ('/', )
+
+        if EDIT_PERMISSIONS in permissions:
+            data['can_edit_permissions'] = True
+            data['content_type'] = ContentType.objects.get_for_model(Folder)
+
+
+    return data

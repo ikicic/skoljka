@@ -1,13 +1,11 @@
 from django.db import models
-from django.db.models import Q
 from django.contrib.contenttypes import generic
 from django.template.defaultfilters import slugify
 
 from tags.managers import TaggableManager
 
 from permissions.constants import VIEW
-from permissions.models import ObjectPermission
-from permissions.utils import has_group_perm
+from permissions.models import PermissionsModel
 from task.models import Task
 from search.utils import search_tasks
 from skoljka.utils.tags import tag_list_to_html
@@ -15,22 +13,7 @@ from skoljka.utils.string_operations import list_strip
 
 import itertools
 
-# TODO: hm, DRY? ovo se ponavlja i u task
-class FolderManager(models.Manager):
-    def for_user(self, user, permission_type):
-        if user is not None and user.is_authenticated():
-            q = Q(permissions__group__user=user,
-                permissions__permission_type=permission_type)
-            if permission_type == VIEW:
-                q |= Q(hidden=False)
-            return self.filter(q)
-        elif permission_type == VIEW:
-            return self.filter(hidden=False)
-        else:
-            return self.none()
-
-
-class Folder(models.Model):
+class Folder(PermissionsModel):
     class Meta:
         permissions = (("can_publish_folders", "Can publish folders"), )
 
@@ -48,11 +31,7 @@ class Folder(models.Model):
     cache_path = models.CharField(max_length=1000, blank=True, db_index=True)
     cache_ancestor_ids = models.CharField(max_length=255, blank=True)
 
-    hidden = models.BooleanField(default=False)
-    permissions = generic.GenericRelation(ObjectPermission)
-
     tasks = models.ManyToManyField(Task, blank=True)
-    objects = FolderManager();
 
     def __unicode__(self):
         return "%s - [%s]" % (self.name, self.tag_filter)
@@ -61,9 +40,6 @@ class Folder(models.Model):
         # TODO: add id to URL -- '/folder/<id>/<path>/' -- to be able to use
         # old urls (in case the folder is moved somewhere)
         return '/folder/' + self.cache_path
-
-    def has_perm(self, user, type):
-        return user.is_staff or has_group_perm(user, self, type)
 
     @staticmethod
     def _html_breadcrumb_item(name, path):

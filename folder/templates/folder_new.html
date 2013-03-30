@@ -11,6 +11,11 @@
 
 {% block content %}
 
+{% if can_edit_permissions %}
+  <div style="float: right;">
+    <a href="/permissions/edit/{{ content_type.id }}/{{ folder.id }}/" class="btn">Privilegije</a>
+  </div>
+{% endif %}
 <form action="{{ request.path }}" method="post">
   {% csrf_token %}
   <table>

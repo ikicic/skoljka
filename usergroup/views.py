@@ -7,7 +7,7 @@ from django.template import RequestContext
 
 from activity import action as _action
 from mathcontent.forms import MathContentForm
-from permissions.constants import *
+from permissions.constants import VIEW, EDIT, EDIT_PERMISSIONS, ADD_MEMBERS
 from permissions.models import ObjectPermission
 from usergroup.forms import GroupForm, UserGroupForm, UserEntryForm
 from usergroup.models import UserGroup, GroupExtended
@@ -20,12 +20,12 @@ def leave(request, group_id=None):
     group = get_object_or_404(Group.objects.select_related('data'), id=group_id)
     if group.data is None:
         return (403, 'Can\'t leave your private user-group.')
-        
+
     # TODO: ovaj query vjerojatno radi nepotreban JOIN
     is_member = request.user.groups.filter(id=group_id).exists()
     if not is_member:
         return (403, 'You are not member of this group.')
-    
+
     print request.POST
     if request.method == 'POST':
         if request.POST.get('confirm') == u'1':
@@ -44,17 +44,18 @@ def leave(request, group_id=None):
 @response('usergroup_detail.html')
 def detail(request, group_id=None):
     group = get_object_or_404(Group.objects.select_related('data'), id=group_id)
-    
+
     # FIXME: pipkavo
     if group.data is None:
         return ('/profile/%d/' % group.user_set.all()[0].id,)
 
-    perm, is_member = group.data.get_permissions_for_user(request.user)
+    perm = group.data.get_user_permissions(request.user)
+    is_member = group.data.is_member(request.user)
 
     if VIEW not in perm:
         return (403, 'You are not member of this group, and you cannot view it\'s details.')
 
-    
+
     return {
         'group': group,
         'is_member': is_member,
@@ -73,7 +74,7 @@ def new(request, group_id=None):
             return (400, 'You can\'t edit your own private user-group (or there is some data error).')
 
         usergroup = group.data
-        perm, is_member = usergroup.get_permissions_for_user(request.user)
+        perm = usergroup.get_user_permissions(request.user)
         if EDIT not in perm:
             return (403, 'You do not have permission to edit this group\'s details.')
 
@@ -82,48 +83,49 @@ def new(request, group_id=None):
     else:
         group = usergroup = description = None
         edit = False
-        
+
+    POST = request.POST if request.method == 'POST' else None
+
+    print 'hidden:', usergroup.hidden, type(usergroup.hidden)
+
+    # https://code.djangoproject.com/ticket/7190
+    # (fixed in later versions of Django...)
+    usergroup.hidden = bool(usergroup.hidden)
+
+    group_form = GroupForm(POST, instance=group, prefix='x')
+    usergroup_form = UserGroupForm(POST, instance=usergroup, prefix='y')
+    description_form = MathContentForm(POST, instance=description, prefix='z')
+
     if request.method == 'POST':
-        group_form = GroupForm(request.POST, instance=group)
-        usergroup_form = UserGroupForm(request.POST, instance=usergroup)
-        description_form = MathContentForm(request.POST, instance=description)
         if group_form.is_valid() and usergroup_form.is_valid() and description_form.is_valid():
             group = group_form.save()
             description = description_form.save();
+
             usergroup = usergroup_form.save(commit=False)
-            
-            usergroup.group = group
             usergroup.description = description
-            usergroup.author = request.user
-            usergroup.save()
 
             if not edit:
-                # TODO: napraviti ALL samo za grupe
-                author_group = Group.objects.get(name=request.user.username)
-                for perm in ALL:
-                    author_perm = ObjectPermission(content_object=group, group=author_group, permission_type=perm)
-                    author_perm.save()
+                usergroup.group = group
+                usergroup.author = request.user
 
                 # permissions assigned to whole group (each member)
                 # every group member has perm to view it
-                for perm in [VIEW]:
-                    self_perm = ObjectPermission(content_object=group, group=group, permission_type=perm)
-                    self_perm.save()
-            
+                ObjectPermission.objects.create(content_object=group,
+                    group=group, permission_type=VIEW)
+
+            usergroup.save()
+
             return ('/usergroup/%d/' % group.id, )
-    else:
-        group_form = GroupForm(instance=group)
-        usergroup_form = UserGroupForm(instance=usergroup)
-        description_form = MathContentForm(instance=description)
 
     return ('usergroup_new.html', {
+        'can_edit': True,
         'group': group,
         'edit': edit,
         'new_group': not edit,
         'forms': [group_form, usergroup_form, description_form],
     })
 
-        
+
 @login_required
 @response('usergroup_list.html')
 def list(request):
@@ -136,8 +138,9 @@ def list(request):
 @response('usergroup_members.html')
 def members(request, group_id=None):
     group = get_object_or_404(Group.objects.select_related('data'), id=group_id)
-    perm, is_member = group.data.get_permissions_for_user(request.user)
-    
+    perm = group.data.get_user_permissions(request.user)
+    is_member = group.data.is_member(request.user)
+
     if VIEW not in perm:
         return (403, 'You do not have permission to edit this group\'s details.')
 
@@ -155,7 +158,7 @@ def members(request, group_id=None):
             group.data.save()
             form = UserEntryForm()
     else:
-        form = UserEntryForm()   
+        form = UserEntryForm()
 
 
     return {

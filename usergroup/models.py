@@ -5,13 +5,11 @@ from django.contrib.contenttypes import generic
 from django.utils.safestring import mark_safe
 
 from permissions.constants import *
-from permissions.models import ObjectPermission
-from permissions.utils import get_permissions_for_object
+from permissions.models import ObjectPermission, get_permissions_for_object
 from mathcontent.models import MathContent
 
-# TODO: for_user DRY!!
-# TODO: optimizirati ovaj upit, npr. rucno dati prava
-# autoru, da se ovdje ne treba to navoditi
+# TODO: optimizirati ovaj upit, npr. rucno dati prava autoru, da se ovdje
+#       ne treba to navoditi
 
 class GroupPermissionManager(models.Manager):
     def for_user(self, user, permission_type):
@@ -25,22 +23,25 @@ class GroupPermissionManager(models.Manager):
         else:
             return self.filter(data__hidden=False)
 
-# zbog managera
 # FIXME: nesto ne stima vezano uz ovo, izgleda da on ne tretira kao Group
 # za svaku grupu radi dodatan query (!) (mozda je to problem zbog neceg drugog)
 class GroupExtended(Group):
+    """
+        It is not easily possible to get Group queryset with filters
+        related to UserGroup.
+    """
     objects = GroupPermissionManager()
-    
+
     class Meta:
         proxy = True
 
-        
+
 class UserGroup(models.Model):
     group = models.OneToOneField(Group, related_name='data')
     description = models.OneToOneField(MathContent)
     author = models.ForeignKey(User)
     date_created = models.DateTimeField(auto_now_add=True)
-    hidden = models.BooleanField(default=False)
+    hidden = models.BooleanField(default=False, verbose_name='Sakriveno')
 
     member_count = models.IntegerField(default=0)
 
@@ -50,20 +51,25 @@ class UserGroup(models.Model):
 
     def get_absolute_url(self):
         return '/usergroup/%d/' % self.id
-        
+
     def get_users(self):
         return User.objects.filter(groups__pk=self.group.pk)
 
-    def get_permissions_for_user(self, user):
+    def get_user_permissions(self, user):
+        """
+            Note that we would rather stick permission to Group, and not to
+            UserGroup. That's why we don't use PermissionsModel.
+        """
         if self.author == user:
-            perm = ALL
-            is_member = True
+            perm = MODEL_DEFAULT + [ADD_MEMBERS]
         else:
             perm = get_permissions_for_object(user, self.group)
-            is_member = user.groups.through.objects.filter(user=user, group=self.group).exists()
             if not self.hidden:
                 perm.append(VIEW)
-        return perm, is_member
+        return perm
+
+    def is_member(self, user):
+        return User.groups.through.objects.filter(user=user, group=self.group).exists()
 
 # iako ovo izgleda jako cudno (grupna prava za grupe), zapravo je jako korisno
 # grupa ima sama sebi dodijeljena neka prava (npr. VIEW)

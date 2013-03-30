@@ -15,9 +15,8 @@ from task.models import Task, SimilarTask
 from task.forms import TaskForm, TaskAdvancedForm, TaskExportForm, EXPORT_FORMAT_CHOICES
 
 from activity import action as _action
-from permissions.constants import ALL, EDIT, VIEW, EDIT_PERMISSIONS
+from permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS
 from permissions.models import ObjectPermission
-from permissions.utils import get_permissions_for_object_by_id
 from recommend.utils import task_event
 from search.utils import update_search_cache
 from solution.models import Solution, STATUS as _SOLUTION_STATUS
@@ -212,7 +211,7 @@ def new(request, task_id=None):
         math_content = task.content
         old_tags = list(task.tags.values_list('name', flat=True))
         edit = True
-        if not task.has_perm(request.user, EDIT):
+        if not task.user_has_perm(request.user, EDIT):
             return 403
     else:
         task = math_content = None
@@ -220,6 +219,7 @@ def new(request, task_id=None):
         edit = False
 
     if request.method == 'POST':
+        print request.POST
         task_form = TaskForm(request.POST, instance=task, user=request.user)
         math_content_form = MathContentForm(request.POST, instance=math_content)
 
@@ -277,17 +277,12 @@ def detail(request, id):
     content_type = ContentType.objects.get_for_model(Task)
 
     try:
-        solution = request.user.is_authenticated() and Solution.objects.filter(author=request.user, task=task)[:1][0]
+        solution = request.user.is_authenticated() \
+            and Solution.objects.get(author=request.user, task=task)
     except (Solution.DoesNotExist, IndexError):
         solution = None
 
-    if task.author == request.user or request.user.is_staff:
-        perm = ALL
-    else:
-        perm = get_permissions_for_object_by_id(request.user, task.id, content_type)
-
-    if not task.hidden:
-        perm.append(VIEW)
+    perm = task.get_user_permissions(request.user)
 
     if VIEW not in perm:
         return (response.FORBIDDEN, 'Not allowed to view this task!')
@@ -315,7 +310,6 @@ def similar(request, id):
     # task.update_similar_tasks(1)
     if request.user.is_authenticated():
         task_event(request.user, task, 'view')
-
 
     # SPEED: read main task together with the rest
     # no need to sort here

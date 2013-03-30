@@ -10,9 +10,9 @@
     {% if is_member %}
       <a href="/usergroup/{{ group.id }}/leave/" class="btn btn-mini"><i class="icon-remove"></i> Izađi iz grupe</a>
       <a href="/pm/group/{{ group.id }}/" class="btn btn-mini"><i class="icon-inbox"></i> Inbox</a>
-      {% if can_edit %}
-        <a href="/usergroup/{{ group.id }}/edit/" class="btn btn-mini"><i class="icon-pencil"></i> Uredi podatke</a>
-      {% endif %}
+    {% endif %}
+    {% if can_edit %}
+      <a href="/usergroup/{{ group.id }}/edit/" class="btn btn-mini"><i class="icon-pencil"></i> Uredi podatke</a>
     {% endif %}
     <a href="/usergroup/{{ group.id }}/" class="btn btn-mini"><i class="icon-info-sign"></i> Podaci</a>
     <a href="/usergroup/{{ group.id }}/members/" class="btn btn-mini"><i class="icon-user"></i> Članovi</a>

@@ -9,14 +9,16 @@
 <table width="60%" class="table-striped table-condensed" style="text-align: center;">
   <tr>
     <th>Grupa / korisnik</th>
-    <th>View</th>
-    <th>Edit</th>
+    {% for permission in applicable_permissions %}
+      <th>{{ permission.0 }}</th>
+    {% endfor %}
   </tr>
   {% for x in groups %}
     <tr>
       <td><a href="/usergroup/{{ x.id }}/">{{ x.name }}</a></td>
-      <td>{{ x|cached_permission:"VIEW" }}</td>
-      <td>{{ x|cached_permission:"EDIT" }}</td>
+      {% for permission in applicable_permissions %}
+        <td>{{ x|cached_permission:permission.1 }}</td>
+      {% endfor %}
     </tr>
   {% empty %}
     <tr>
