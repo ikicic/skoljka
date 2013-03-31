@@ -10,3 +10,4 @@ ALTER TABLE permissions_perobjectgrouppermission RENAME TO permissions_objectper
 
 ALTER TABLE folder_folder ADD COLUMN author_id INT NOT NULL;
 ALTER TABLE folder_folder ADD INDEX folder_folder_45845435 (author_id);
+UPDATE folder_folder SET author_id = 1;

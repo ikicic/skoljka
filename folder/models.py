@@ -46,9 +46,11 @@ class Folder(PermissionsModel):
         return u'<li><a href="/folder/%s">%s</a></li>' % (path, name)
 
     @staticmethod
-    def _html_menu_item(name, path, depth):
-        return u'<div style="padding-left:%dpx">&raquo; '   \
-            '<a href="/folder/%s">%s</a></div>\n' % ((depth - 1) * 10, path, name)
+    def _html_menu_item(name, path, depth, user, author, is_hidden):
+        cls = 'nav-folder-hidden' if is_hidden else 'nav-folder'
+        return u'<li class="%s" style="margin-left:%dpx;"> '   \
+            '<a href="/folder/%s">%s</a></li>\n' % (cls, depth * 10 - 7,
+            path, name)
 
     def tag_list_html(self):
         return tag_list_to_html(self.tag_filter)
@@ -151,7 +153,8 @@ class Folder(PermissionsModel):
         # Manually insert virtual subfolders in the middle of menu
         menu = []
         for x in all_children:
-            menu.append(Folder._html_menu_item(x.name, x.cache_path, x._depth))
+            menu.append(Folder._html_menu_item(x.name, x.cache_path, x._depth,
+                user, x.author, x.hidden))
             if x.id == self.id:
                 menu.extend(subdata.get('menu', []))
 
@@ -215,7 +218,8 @@ class Folder(PermissionsModel):
                 tree_end2 = []
                 for C in G[k]:                  # for each child
                     menu_item = Folder._html_menu_item(C['name'],
-                        '%s%s/' % (current_path, C['slug']), k + depth + 1)
+                        '%s%s/' % (current_path, C['slug']), k + depth + 1,
+                        user, self.author, self.hidden)
                     if next is None:
                         tree.append(menu_item)
                         if k < len(P) and P[k] == C['slug']:

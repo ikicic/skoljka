@@ -9,3 +9,16 @@
   height: 100%;
   padding: 0 4px 4px 0;
 }
+
+.nav-folder, .nav-folder-hidden {
+  line-height: 13px;
+  padding-left: -5px;
+  list-style-position: inside;
+}
+.nav-folder {
+  list-style-type: disc;
+}
+
+.nav-folder-hidden {
+  list-style-type: circle;
+}

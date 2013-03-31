@@ -6,34 +6,48 @@
 
 <a href="javascript: history.go(-1)">« Vrati se</a><br><br>
 
-<table width="60%" class="table-striped table-condensed" style="text-align: center;">
-  <tr>
-    <th>Grupa / korisnik</th>
-    {% for permission in applicable_permissions %}
-      <th>{{ permission.0 }}</th>
-    {% endfor %}
-  </tr>
-  {% for x in groups %}
+<form action="{{ request.get_full_path }}" method="POST">
+  {% csrf_token %}
+  <input type="hidden" id="action" name="action" value="remove-permissions">
+  <table width="60%" class="table-striped table-condensed" style="text-align: center;">
     <tr>
-      <td><a href="/usergroup/{{ x.id }}/">{{ x.name }}</a></td>
+      <th>Grupa / korisnik</th>
       {% for permission in applicable_permissions %}
-        <td>{{ x|cached_permission:permission.1 }}</td>
+        <th>{{ permission.0 }}</th>
       {% endfor %}
+      <th></th>
     </tr>
-  {% empty %}
-    <tr>
-      <td colspan="3">Nema specifičnih dozvola</td>
-    </tr>
-  {% endfor %}
-</table>
+    {% for x in groups %}
+      <tr>
+        <td><a href="/usergroup/{{ x.id }}/">{{ x.name }}</a></td>
+        {% for permission in applicable_permissions %}
+          <td>{{ x|cached_permission:permission.1 }}</td>
+        {% endfor %}
+        <td>
+          <button type="submit" class="blank" id="group-id" name="group-id" value="{{ x.id }}" title="Makni privilegiju">
+            <i class="icon-remove"></i>
+          </button>
+        </td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="{{ applicable_permissions|length|add:'2' }}">Nema specifičnih dozvola</td>
+      </tr>
+    {% endfor %}
+  </table>
+</form>
 
 <br><br><br>
 
-Edit EDIT permission:<br><br>
+Dodavanje privilegija:<br><br>
 <form action="" method="POST">
+  {% for x in applicable_permissions %}
+    <input type="checkbox"{% if x.1 in selected_types %} checked="checked"{% endif %} id="perm-{{ x.1 }}" name="perm-{{ x.1 }}"> {{ x.0 }}<br>
+  {% endfor %}
+  <br>
   {% csrf_token %}
   {{ form.as_p }}
-  <input type="submit" value="Submit" class="btn btn-primary">
+  <input type="submit" value="Dodaj" class="btn btn-primary">
 </form>
 
 {{ message }}

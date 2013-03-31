@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 
-from permissions.constants import VIEW, MODEL_DEFAULT
+from permissions.constants import VIEW, MODEL_DEFAULT, constants_names
 
 class ObjectPermission(models.Model):
     object_id = models.PositiveIntegerField()
@@ -50,6 +50,16 @@ def get_permissions_for_object(user, obj):
     content_type = ContentType.objects.get_for_model(obj)
     return get_permissions_for_object_by_id(user, obj.id, content_type)
 
+def convert_permission_names_to_values(names):
+    permission_types = []
+    for x in names:
+        if isinstance(x, basestring):
+            permission_types.extend(constants_names[x])
+        else:
+            permission_types.append(x)
+
+    # remove duplicates
+    return list(set(permission_types))
 
 
 class PermissionManager(models.Manager):
@@ -90,7 +100,8 @@ class BasePermissionsModel(models.Model):
         are always visible (everyone has VIEW permission granted).
 
         Use object_permissions list to specify which permissions are applicable
-        to the model.
+        to the model. You can use numbers or permission names (for more info,
+        look at constants_names)
     """
     class Meta:
         abstract = True
@@ -115,7 +126,8 @@ class BasePermissionsModel(models.Model):
 
     def get_user_permissions(self, user):
         if user == getattr(self, 'author', None):
-            return self.__class__.object_permissions
+            # TODO: cache result?
+            return convert_permission_names_to_values(self.__class__.object_permissions)
 
         permissions = get_permissions_for_object(user, self)
         if not self.hidden:

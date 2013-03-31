@@ -18,7 +18,6 @@ import random
 
 MAX_SIMILAR_TASKS = 20
 
-# TODO: rename "author" to "added_by" (or add another column "added_by")
 # TODO: rename "name" to "title"
 
 # Please note that 0th element stands for undefined.
@@ -44,23 +43,10 @@ class SimilarTask(models.Model):
     similar = models.ForeignKey('Task', db_index=True, related_name='to')
     score = models.FloatField(db_index=True)
 
-"""
-class TaskPermissionManager(models.Manager):
-    def for_user(self, user, permission_type):
-        if user is not None and user.is_authenticated():
-            # yeah, right...
-            q = Q(author=user) | Q(permissions__group__user=user,
-                    permissions__permission_type=permission_type)
-            if permission_type == VIEW:
-                q |= Q(hidden=False)
-            return self.filter(q)
-        elif permission_type == VIEW:
-            return self.filter(hidden=False)
-        else:
-            return self.none()
-"""
 
 class Task(BasePermissionsModel):
+    object_permissions = ['view', 'edit', 'edit_permissions'] # override
+
     # napomena: cache za Solution POST_SEND activity ovisi o ovom max_length, nemojte previse povecavati
     name = models.CharField(max_length=120, verbose_name='Naslov')
     content = models.OneToOneField(MathContent)
@@ -92,12 +78,6 @@ class Task(BasePermissionsModel):
     def get_link(self):
         return mark_safe('<a href="/task/%d/" class="task">%s</a>' % (self.id, self.name))
 
-    """
-    def has_perm(self, user, type):
-        if type == VIEW and not self.hidden:
-            return True
-        return user.is_staff or self.author == user or has_group_perm(user, self, type)
-    """
     def get_tag_ids(self):
         if not hasattr(self, '_cache_tag_ids'):
             self._cache_tag_ids = self.tags.values_list('id', flat=True)

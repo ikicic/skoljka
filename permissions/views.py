@@ -10,8 +10,9 @@ from usergroup.forms import GroupEntryForm
 from skoljka.utils.decorators import response
 
 from permissions.constants import VIEW, EDIT_PERMISSIONS
-from permissions.constants import constants, constants_names
+from permissions.constants import constants
 from permissions.models import ObjectPermission, has_group_perm
+from permissions.models import convert_permission_names_to_values
 
 
 # TODO: permission to change permissions?
@@ -33,40 +34,56 @@ def edit(request, type_id, id):
         return 403
 
     # Convert list of strings (permission names) to list of permission types
-    object_permissions = getattr(model, 'Meta.object_permissions', ['default'])
-    print object_permissions
-    print sum([constants_names[name] for name in object_permissions], [])
-    permission_types = list(set(sum(
-        [constants_names[name] for name in object_permissions], [])))
+    object_permissions = getattr(model, 'object_permissions', ['default'])
 
-    # Get (name, value) pairs and order in the specific order.
+    permission_types = convert_permission_names_to_values(object_permissions)
+
+    # Get (name, value) pairs in the specific order.
     applicable_permissions = [(name, value)
         for name, value in constants if value in permission_types]
 
+
+    selected_types = [VIEW]
+
+    form = None
     message = u''
     if request.method == 'POST':
-        form = GroupEntryForm(request.POST)
-        if form.is_valid():
-            groups = form.cleaned_data['list']
-            ObjectPermission.objects.filter(
-                content_type=type_id, object_id=id, permission_type=VIEW).delete()
+        action = request.POST.get('action')
 
-            for x in groups:
-                perm = ObjectPermission(content_object=object, group=x, permission_type=VIEW)
-                try:
-                    perm.save()
-                except IntegrityError:
-                    pass
+        if action == 'remove-permissions':
+            group_id = request.POST.get('group-id')
+            if group_id:
+                ObjectPermission.objects.filter(object_id=id,
+                    content_type_id=type_id, group_id=group_id).delete()
+        else:
+            form = GroupEntryForm(request.POST)
+            if form.is_valid():
+                groups = form.cleaned_data['list']
+                selected_types = [x[1] for x in applicable_permissions
+                    if ('perm-%d' % x[1]) in request.POST]
 
-            message = u'Promjene spremljene.'
-    else:
-        initial = ', '.join(
-            ObjectPermission.objects.filter(
-                content_type=type_id, object_id=id, permission_type=VIEW
-            ).values_list('group__name', flat=True)
-        )
-        form = GroupEntryForm(initial={'list': initial})
+                # delete all old selected permission for given groups
+                # (make sure there will be no duplicates...)
+                ObjectPermission.objects.filter(
+                    content_type=type_id, object_id=id,
+                    permission_type__in=selected_types, group__in=groups).delete()
 
+                # add them back
+                perm = []
+                for x in selected_types:
+                    for y in groups:
+                        perm.append(ObjectPermission(content_object=object,
+                            permission_type=x, group=y))
+
+                ObjectPermission.objects.bulk_create(perm)
+
+                message = u'Promjene spremljene.'
+
+                form = None # reset
+
+
+    if form is None:
+        form = GroupEntryForm()
 
     perms = ObjectPermission.objects.filter(object_id=id, content_type=content_type)
     groups = dict()
@@ -85,4 +102,5 @@ def edit(request, type_id, id):
         'message': message,
         'groups': groups.itervalues(),
         'applicable_permissions': applicable_permissions,
+        'selected_types': selected_types,
     }

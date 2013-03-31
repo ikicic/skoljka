@@ -5,16 +5,16 @@ from usergroup.fields import UserEntryField, GroupEntryField, UserAndGroupEntryF
 from usergroup.models import UserGroup
 
 class UserEntryForm(forms.Form):
-    list = UserEntryField()
+    list = UserEntryField(label='Popis korisnika')
 
 class GroupEntryForm(forms.Form):
-    list = GroupEntryField()
+    list = GroupEntryField(label='Popis grupa')
 
 class UserAndGroupEntryForm(forms.Form):
-    list = UserAndGroupEntryField()
+    list = UserAndGroupEntryField(label='Popis korisnika i grupa')
 
 class SeperatedUserAndGroupEntryForm(forms.Form):
-    list = SeperatedUserAndGroupEntryField()
+    list = SeperatedUserAndGroupEntryField(label='Popis')
 
 class GroupForm(forms.ModelForm):
     class Meta:
