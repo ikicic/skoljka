@@ -91,6 +91,8 @@ class UserProfile(models.Model):
         'Na ovaj način možete odabrati da vam se uvijek prikazuju rješenja '
         'dovoljno laganih zadataka, što je pogotovo korisno ako ste '
         'ispravljač.'))
+    show_solution_task = models.BooleanField(default=True,
+        verbose_name='Prikazuj tekst zadatka uz rješenje.')
 
     # (any better name?)
     evaluator = models.BooleanField(default=False, verbose_name='Ispravljač',

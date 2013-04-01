@@ -46,8 +46,11 @@ def cache_solution_info(context, solutions):
     user = context['user']
 
     task_ids = [x.task_id for x in solutions]
-    my_solutions = Solution.objects.filter(author=user, task_id__in=task_ids)
-    my_solutions = {x.task_id: x for x in my_solutions}
+    if user.is_authenticated():
+        my_solutions = Solution.objects.filter(author=user, task_id__in=task_ids)
+        my_solutions = {x.task_id: x for x in my_solutions}
+    else:
+        my_solutions = {}
 
     for y in solutions:
         y._cache_my_solution = my_solutions.get(y.task_id)
@@ -57,7 +60,7 @@ def check_solution_for_obfuscation(context, solution, text):
     my_solution = getattr(solution, '_cache_my_solution', None)
     if solution.should_obfuscate(context['user'], my_solution):
         text = obfuscate_text(text)
-        title = u'title="Niste riješili ovaj zadatak!"'
+        title = mark_safe(u'title="Niste riješili ovaj zadatak!"')
     else:
         title = u''
 

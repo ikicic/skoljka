@@ -2,6 +2,10 @@
   position: relative;
 }
 
+#solution-toggle-task {
+  font-weight: bold;
+}
+
 #solution-unhide-box {
   position: absolute;
   background-color: #FEFEFE;

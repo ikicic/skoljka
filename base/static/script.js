@@ -1,3 +1,4 @@
+/* TODO: replace _ with - */
 /*
   PLEASE NOTE:
 
@@ -95,13 +96,14 @@ $(function(){
   });
 
   /* MathContent view source link */
-  $('.mc_viewsource_toggle').click(function(e){
+  /* TODO: change to .on() after migrating to newer jQuery */
+  $('.mc_viewsource_toggle').live('click', function(e) {
     e.preventDefault();
     $(this).closest('.mc').find('.mc_viewsource_text').toggle();
   });
   
   /* MathContent quote link */
-  $('.mc_viewsource_quote').click(function(e){
+  $('.mc_viewsource_quote').live('click', function(e) {
     set_reply('');
     quote($(this).closest('.mc'));
   });
@@ -252,14 +254,6 @@ $(function(){
     });
 });
 
-
-/* Solution toggle votes */
-$(function() {
-  $('#solution_ratings_toggle').click(function(e) {
-    e.preventDefault();
-    $('#solution_ratings').toggle();
-  });
-});
 
 /* jQuery Rating Submit Function */
 jquery_rating_submit = function(name, url) {

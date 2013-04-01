@@ -75,4 +75,4 @@ class UserProfileEditForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ['gender', 'show_hidden_tags', 'show_unsolved_task_solutions',
-            'hide_solution_min_diff', 'evaluator']
+            'hide_solution_min_diff', 'show_solution_task', 'evaluator']

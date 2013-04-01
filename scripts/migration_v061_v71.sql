@@ -21,3 +21,4 @@ ALTER TABLE userprofile_userprofile DROP COLUMN website;
 ALTER TABLE userprofile_userprofile ADD COLUMN show_unsolved_task_solutions TINYINT(1) NOT NULL DEFAULT 0;
 ALTER TABLE userprofile_userprofile ADD COLUMN evaluator TINYINT(1) NOT NULL DEFAULT 0;
 ALTER TABLE userprofile_userprofile ADD COLUMN hide_solution_min_diff DOUBLE NOT NULL DEFAULT 0;
+ALTER TABLE userprofile_userprofile ADD COLUMN show_solution_task TINYINT(1) NOT NULL DEFAULT 1;

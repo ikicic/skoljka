@@ -17,10 +17,15 @@ from datetime import datetime
 
 # TODO: task permissions (?)
 @response('solution_detail.html')
-@login_required
 def detail(request, solution_id):
+    # default is True
+    show_task = not request.user.is_authenticated() \
+        or request.user.get_profile().show_solution_task
+
+    args = ['task.content'] if show_task else []
+
     solution = get_object_or_404(Solution.objects.select_related('content',
-        'author', 'task'), id=solution_id)
+        'author', 'task', *args), id=solution_id)
 
     if solution.correctness_avg:
         ratings = solution.correctness.select_related('user')
@@ -31,6 +36,7 @@ def detail(request, solution_id):
         'solution': solution,
         'ratings': ratings,
         'hidden': solution.should_obfuscate(request.user),
+        'show_task': show_task,
     }
 
 

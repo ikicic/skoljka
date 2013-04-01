@@ -122,6 +122,9 @@ class Solution(models.Model):
             Check if the user should see the content of this solution.
             If users_solution is not given, it will be manually retrieved.
         """
+        if not user.is_authenticated():
+            return True # default options is to hide solutions
+
         if self.author == user:
             return False # always show my own solutions
 

@@ -9,11 +9,11 @@
 
 <a href="javascript: history.go(-1)">« Vrati se</a><br>
 
-<br><br>
+<br>
 <div style="float:left;">
   {% if user.is_authenticated %}
     {% if user == solution.author %}
-      Točnost: <div style="width:80px;">{% rating_stars solution.correctness 2.0 %}</div>
+      Točnost: <div style="width:80px;display:inline-block;">{% rating_stars solution.correctness 2.0 %}</div>
     {% else %}
       {% rating_box "Točnost" solution.correctness %}
     {% endif %}
@@ -41,13 +41,37 @@
       </div>
     </form>
   {% endif %}
-  {% if solution.is_official %}<span class="label label-info">Službeno rješenje</span>{% endif %}
+  {% if solution.is_official %}
+    <span class="label label-info">Službeno rješenje</span>
+  {% endif %}
 </div>
 
 
-<br><br><br>
+<br><br>
 <i>Korisnik: {{ solution.author|userlink }}</i><br>
-<i>Zadatak: {{ solution.task.get_link }}</i><br><br>
+<i>Zadatak: {{ solution.task.get_link }}</i>
+<a href="#" id="solution-toggle-task">
+  ({{ show_task|yesno:"Sakrij,Prikaži"}} tekst zadatka)
+</a>
+
+<br><br>
+
+{% if show_task %}
+  <div class="well" id="solution-task">
+    {# TODO: DRY? render conditionally tag? #}
+    {% if user.is_authenticated %}
+      {{ solution.task.content.render_quote }}
+    {% else %}
+      {{ solution.task.content.render }}
+    {% endif %}
+  </div>
+{% else %}
+  <div class="well" id="solution-task" style="display: none;"
+    data-content-id="{{ solution.task.content_id }}"
+    data-quote="{{ user.is_authenticated|yesno:'1,0' }}">
+  </div>
+{% endif %}
+
 <div class="well" id="solution-container">
   {% if hidden %}
     <div id="solution-unhide-box">
@@ -77,8 +101,8 @@
 
 {% if solution.correctness_avg %}
   <br>
-  <h5><a href="#" id="solution_ratings_toggle">Ocjene: ({{ ratings|length }})</a></h5>
-  <table class="table-striped table-condensed" style="text-align:center;width:400px;display:none;" id="solution_ratings">
+  <h5><a href="#" id="solution-ratings-toggle">Ocjene: ({{ ratings|length }})</a></h5>
+  <table class="table-striped table-condensed" style="text-align:center;width:400px;display:none;" id="solution-ratings">
   {% for x in ratings %}
     <tr>
       <td style="width:140px;">{{ x.date }}</td>
