@@ -66,6 +66,8 @@
     {% endif %}
   </div>
 {% else %}
+  {# Note: JS code reads data-content-id to check if the text is loaded. #}
+  {# After loading, the info is removed! #}
   <div class="well" id="solution-task" style="display: none;"
     data-content-id="{{ solution.task.content_id }}"
     data-quote="{{ user.is_authenticated|yesno:'1,0' }}">
