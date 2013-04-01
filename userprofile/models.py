@@ -3,6 +3,7 @@ from django.db import connection, models, transaction
 from django.db.models import Q
 from django.dispatch import receiver
 from django.template.loader import add_to_builtins
+from django.utils.html import mark_safe
 
 from registration.signals import user_registered
 
@@ -62,24 +63,39 @@ class DifficultyDistribution(models.Model):
     difficulty = models.IntegerField(db_index=True)
     solved_count = models.IntegerField()
 
+def icon_help_text(text):
+    return mark_safe(
+        ' <i class="icon-question-sign" title="{}"></i>'.format(text))
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile')
 
     # data
+    # Don't ask for useless private(!) information!
     GENDER_CHOICES = (
         ('', 'Neizjašnjeno'),
         ('M', 'Momak'),
         ('F', 'Djevojka'),
     )
-    gender = models.CharField(blank=True, max_length=1, choices=GENDER_CHOICES, default='', verbose_name='Spol')
-    birthday = models.DateField(blank=True, null=True, verbose_name=u'Dan rođenja', help_text='U formatu YYYY-MM-DD')
-    city = models.CharField(max_length=50, blank=True, verbose_name='Grad')
-    country = models.CharField(max_length=50, blank=True, verbose_name=u'Država')
-    quote = models.CharField(max_length=200, blank=True, verbose_name='Citat')
-    website = models.CharField(max_length=100, blank=True, verbose_name='Web')
+    gender = models.CharField(blank=True, max_length=1, choices=GENDER_CHOICES,
+        default='', verbose_name='Spol', help_text=icon_help_text(
+            'Za gramatičke i pravopisne potrebe.'))
 
     # options
-    show_hidden_tags = models.BooleanField(default=False, verbose_name='Prikazuj skrivene tagove')
+    show_hidden_tags = models.BooleanField(default=False,
+        verbose_name='Prikazuj skrivene tagove')
+    show_unsolved_task_solutions = models.BooleanField(default=False,
+        verbose_name='Prikazuj rješenja neriješenih zadataka')
+    hide_solution_min_diff = models.FloatField(default=0,
+        verbose_name='Ili ako je je težina manja od', help_text=icon_help_text(
+        'Na ovaj način možete odabrati da vam se uvijek prikazuju rješenja '
+        'dovoljno laganih zadataka, što je pogotovo korisno ako ste '
+        'ispravljač.'))
+
+    # (any better name?)
+    evaluator = models.BooleanField(default=False, verbose_name='Ispravljač',
+        help_text=icon_help_text('Kao ispravljač bit ćete obavještavani o '
+        'poslanim rješenjima drugih korisnika.'))
 
     # automatic options
     solution_status_filter = models.CharField(max_length=32, blank=True, default='')

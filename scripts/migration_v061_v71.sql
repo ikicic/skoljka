@@ -11,3 +11,13 @@ ALTER TABLE permissions_perobjectgrouppermission RENAME TO permissions_objectper
 ALTER TABLE folder_folder ADD COLUMN author_id INT NOT NULL;
 ALTER TABLE folder_folder ADD INDEX folder_folder_45845435 (author_id);
 UPDATE folder_folder SET author_id = 1;
+
+
+ALTER TABLE userprofile_userprofile DROP COLUMN birthday;
+ALTER TABLE userprofile_userprofile DROP COLUMN city;
+ALTER TABLE userprofile_userprofile DROP COLUMN country;
+ALTER TABLE userprofile_userprofile DROP COLUMN quote;
+ALTER TABLE userprofile_userprofile DROP COLUMN website;
+ALTER TABLE userprofile_userprofile ADD COLUMN show_unsolved_task_solutions TINYINT(1) NOT NULL DEFAULT 0;
+ALTER TABLE userprofile_userprofile ADD COLUMN evaluator TINYINT(1) NOT NULL DEFAULT 0;
+ALTER TABLE userprofile_userprofile ADD COLUMN hide_solution_min_diff DOUBLE NOT NULL DEFAULT 0;

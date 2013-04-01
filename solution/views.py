@@ -1,4 +1,4 @@
-from django.contrib.auth.decorators import login_required
+﻿from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
@@ -19,16 +19,18 @@ from datetime import datetime
 @response('solution_detail.html')
 @login_required
 def detail(request, solution_id):
-    solution = get_object_or_404(Solution.objects.select_related('content', 'author', 'task'), id=solution_id)
-    
+    solution = get_object_or_404(Solution.objects.select_related('content',
+        'author', 'task'), id=solution_id)
+
     if solution.correctness_avg:
         ratings = solution.correctness.select_related('user')
     else:
         ratings = []
-    
+
     return {
         'solution': solution,
         'ratings': ratings,
+        'hidden': solution.should_obfuscate(request.user),
     }
 
 
@@ -40,7 +42,7 @@ def _do_mark(request, solution, task):
             Blank
 
         Or mark / unmark official flag
-        
+
         Creates Solution if it doesn't exist (in that case Task is given)
     """
 
@@ -57,7 +59,7 @@ def _do_mark(request, solution, task):
     # as_solved, todo, blank
     if solution is None:
         solution, dummy = Solution.objects.get_or_create(task=task, author=request.user)
-        
+
     if solution.author != request.user and not request.user.is_staff:
         return (403, 'Not allowed to modify this solution.')
 
@@ -89,7 +91,7 @@ def _do_mark(request, solution, task):
         _action.remove(request.user, type=_action.SOLUTION_SEND,
             action_object=solution, target=task)
 
-        
+
     # update solved count if necessary
     delta = solution.is_solved() - was_solved
     if delta:
@@ -121,9 +123,9 @@ def edit_mark(request, solution_id):
         Called from Solution view
     """
     solution = get_object_or_404(Solution, id=solution_id)
-    
+
     ret_value = _do_mark(request, solution, solution.task)
-    
+
     return ret_value or ('/task/%d/' % solution.task_id,)
 
 
@@ -144,14 +146,14 @@ def submit(request, task_id=None, solution_id=None):
         return 404
 
     math_content = solution.content
-    
+
     if request.method == 'POST':
         math_content_form = MathContentForm(request.POST, instance=math_content)
         if math_content_form.is_valid():
             math_content = math_content_form.save()
-            
+
             was_solved = solution.is_solved()
-            
+
             solution.content = math_content
             solution.status = STATUS['submitted']
             solution.date_created = datetime.now()
@@ -159,14 +161,14 @@ def submit(request, task_id=None, solution_id=None):
             if not edit:
                 _action.replace_or_add(request.user, _action.SOLUTION_SUBMIT,
                     action_object=solution, target=task)
-            
+
             # update solved count if necessary
             delta = solution.is_solved() - was_solved
             if delta:
                 _update_solved_count(delta, task, request.user.get_profile())
 
             return ("/solution/%d/" % (solution.id,),)
-        
+
     return {
         'form': MathContentForm(instance=math_content),
         'task': task,
@@ -187,23 +189,23 @@ def solution_list(request, task_id=None, user_id=None, status=None):
         specific user if user_id is defined.
         If some ID is not defined, skips that condition.
     """
-    
+
     if status is None:
         status = request.GET.get('status', None)
         if status is not None and not _is_valid_status(status):
             return (response.BAD_REQUEST, 'Invalid status.')
-            
+
     L = Solution.objects.exclude(status=STATUS['blank'])
     task = None
     author = None   # 'user' is template reserved word
-    
+
     if task_id is not None:
         task = get_object_or_404(Task, pk=task_id)
         L = L.filter(task=task)
     if user_id is not None:
         author = get_object_or_404(User, pk=user_id)
         L = L.filter(author=author)
-                        
+
     L = L.select_related('author', 'content', 'task')
 
     return {

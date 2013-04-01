@@ -177,6 +177,8 @@ INSTALLED_APPS = (
 
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
+
+# TODO: Finish this. Admin emails are still not being sent!
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -296,6 +298,7 @@ PIPELINE_CSS = {
           'base.css',
           'folder.css',
           'task.css',
+          'solution.css',
         ),
         'output_filename': 'base.min.css',
     },
@@ -318,6 +321,7 @@ PIPELINE_JS = {
     'skoljka': {
         'source_filenames': {
             'script.js',
+            'solution.js',
         },
         'output_filename': 'skoljka.js',
     },

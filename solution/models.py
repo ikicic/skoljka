@@ -117,6 +117,35 @@ class Solution(models.Model):
     def is_blank(self):
         return self.status == STATUS['blank']   # postoji, ali blank
 
+    def should_obfuscate(self, user, users_solution=0):
+        """
+            Check if the user should see the content of this solution.
+            If users_solution is not given, it will be manually retrieved.
+        """
+        if self.author == user:
+            return False # always show my own solutions
+
+        # check user settings
+        profile = user.get_profile()
+        if profile.show_unsolved_task_solutions     \
+                or self.task.difficulty_rating_avg < profile.hide_solution_min_diff:
+            # Show always, or because it's too easy. Note that if the min_diff
+            # option is not set, the comparison will always be False!
+            return False
+
+        # if user's solution not given, search for it
+        if users_solution is 0:
+            try:
+                users_solution = Solution.objects.get(author=user,
+                    task_id=self.task_id)
+            except Solution.DoesNotExist:
+                return True
+
+        # if there is no solution -> obfuscate
+        # if there is, check if it is solved
+        return not users_solution or not users_solution.is_solved()
+
+
 # nuzno(?) da bi queryji koristili JOIN, a ne subqueryje
 # TODO: neki prikladniji naziv za related_name
 User.add_to_class('solutions', models.ManyToManyField(Task, through=Solution, related_name='solutions_by'))

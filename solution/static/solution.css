@@ -1,0 +1,18 @@
+#solution-container {
+  position: relative;
+}
+
+#solution-unhide-box {
+  position: absolute;
+  background-color: #FEFEFE;
+  border: 1px solid #DDDDDD;
+  top: 7px;
+  left: 7px;
+  right: 7px;
+  bottom: 7px;
+  text-align: center;
+}
+
+#solution-unhide-box:hover {
+  background-color: #F4F4F4;
+}

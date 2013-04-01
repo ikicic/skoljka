@@ -3,9 +3,15 @@ from django.contrib.admin import widgets
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User, Group
 from django.utils.translation import ugettext_lazy as _
+
+from rating.widgets import RatingWidget
+from task.models import DIFFICULTY_RATING_ATTRS
+
 from userprofile.models import UserProfile
 
 from registration.models import RegistrationProfile
+
+# TODO: Upgrado to Django 1.5 (merge UserProfile with User)
 
 # na temelju django-registration/forms.py RegistrationForm
 
@@ -39,6 +45,12 @@ class UserCreationForm(forms.Form):
     
 
 class UserEditForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(UserEditForm, self).__init__(*args, **kwargs)
+
+        self.fields['first_name'].label = 'Ime'
+        self.fields['last_name'].label = 'Prezime'
+
     class Meta:
         model = User
         fields = ['first_name', 'last_name']
@@ -46,20 +58,21 @@ class UserEditForm(forms.ModelForm):
 class UserProfileEditForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(UserProfileEditForm, self).__init__(*args, **kwargs)
-        
-        F = self.fields
-        
-        F['birthday'].widget = widgets.AdminDateWidget()
-        field_class = {
-            'gender': 'span2',
-            'birthday': 'span2',
-            'city': 'span2',
-            'country': 'span2',
-        }
-        for k, v in field_class.iteritems():
-            F[k].widget.attrs['class'] = v
 
+        self.fields['gender'].widget.attrs['class'] = 'span2'
+        self.fields['hide_solution_min_diff'].required = False
+        self.fields['hide_solution_min_diff'].widget = \
+            RatingWidget(attrs=DIFFICULTY_RATING_ATTRS)
+
+    def clean_hide_solution_min_diff(self):
+        data = self.cleaned_data['hide_solution_min_diff']
+
+        if not data:
+            data = 0
+        print 'ovdje asfadf', self, data
+        return data
 
     class Meta:
         model = UserProfile
-        fields = ['gender', 'birthday', 'city', 'country', 'quote', 'website', 'show_hidden_tags']
+        fields = ['gender', 'show_hidden_tags', 'show_unsolved_task_solutions',
+            'hide_solution_min_diff', 'evaluator']

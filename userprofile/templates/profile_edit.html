@@ -14,7 +14,7 @@
   {% if success %}
     <div class="alert alert-success">Promjene uspješno spremljene!</div>
   {% endif %}
-  <table>
+  <table class="kill-br">
     {% for form in forms %}
       {{ form.as_table }}
     {% endfor %}

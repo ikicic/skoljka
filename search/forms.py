@@ -1,7 +1,6 @@
 ﻿from django import forms
 
 from rating.widgets import RatingWidget
-from rating.fields import RatingField
 from task.models import QUALITY_RATING_ATTRS, DIFFICULTY_RATING_ATTRS
 from usergroup.fields import GroupEntryField
 

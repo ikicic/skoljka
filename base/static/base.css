@@ -129,6 +129,40 @@ tr.group_hidden td {
 }
 
 
+/* Hacks */
+/*   Anything that should or could have a better solution. */
+
+.kill-br br {
+  /* as_table inserts unwanted <br> between field and its help_text */
+  /* This is the easiest way to remove its effect */
+  display: none;
+}
+
+/* Vertical align solution taken from: http://emergentweb.com/test/valign.html */
+.center-vertically {
+  height: 100%;
+}
+
+.center-vertically > div {
+  display: table;
+  height: 100%;
+  width: 100%;
+}
+
+.center-vertically > div > div {
+  display: table-cell;
+  vertical-align: middle;
+  margin: 0;
+  padding: 0;
+}
+
+.center-vertically > div > div > div {
+  margin: 0 auto;
+}
+
+/* Hacks End */
+
+
 /* General */
 #header {
   padding: 5px!important;
