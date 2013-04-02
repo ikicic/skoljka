@@ -114,12 +114,12 @@ class BasePermissionsModel(models.Model):
 
     def user_has_perm(self, user, type):
         """
-            Check if given user has
+            Check if given user has permission 'type'.
         """
         if user == getattr(self, 'author', None):
             return True
 
-        if getattr(self, 'hidden', None) is True:
+        if getattr(self, 'hidden', None) is False:
             return type == VIEW
 
         return has_group_perm(user, self, type)

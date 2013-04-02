@@ -96,14 +96,13 @@ $(function(){
   });
 
   /* MathContent view source link */
-  /* TODO: change to .on() after migrating to newer jQuery */
-  $('.mc_viewsource_toggle').live('click', function(e) {
+  $('body').on('click', '.mc_viewsource_toggle', function(e) {
     e.preventDefault();
     $(this).closest('.mc').find('.mc_viewsource_text').toggle();
   });
   
   /* MathContent quote link */
-  $('.mc_viewsource_quote').live('click', function(e) {
+  $('body').on('click', '.mc_viewsource_quote', function(e) {
     set_reply('');
     quote($(this).closest('.mc'));
   });

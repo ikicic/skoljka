@@ -1,0 +1,29 @@
+Don't forget to mark License comments with
+  /*!   */
+instead of
+  /*    */
+
+
+Describe in short what is which plugin used for.
+Add any other useful info (such as jQuery compatibility).
+
+
+jquery.autocomplete (Jörn Zaefferer)
+  Used for tag autocompletion.
+  Incompatible with 1.9+ because it uses .browser.
+  The whole plugin is deprecated, but is used for its simplicity and size.
+
+jquery.form
+  Dependency of jquery.rating
+  No minified version(?)
+
+jquery.Metadata
+  Dependency of jquery.rating
+  Deprecated (not in development).
+
+jquery.rating
+  Required jQuery: 1.8+
+  .rating() (radio button "star design")
+
+jquery.tools
+  .tooltip()

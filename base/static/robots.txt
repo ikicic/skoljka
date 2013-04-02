@@ -1,7 +1,8 @@
 User-agent: *
+Disallow: /ajax/
+Disallow: /permissions/
 Disallow: /search/
 Disallow: /task/new/
 Disallow: /task/multiple/
 Disallow: /task/edit/
 Disallow: /task/export/
-Disallow: /permissions/

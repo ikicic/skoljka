@@ -293,14 +293,14 @@ PIPELINE_CSS = {
         ),
         'output_filename': 'bootstrap.min.css',
     },
-    'base': {
+    'skoljka': {
         'source_filenames': (
           'base.css',
           'folder.css',
           'task.css',
           'solution.css',
         ),
-        'output_filename': 'base.min.css',
+        'output_filename': 'skoljka.min.css',
     },
 }
 
@@ -309,21 +309,21 @@ PIPELINE_JS_COMPRESSOR = 'utils.jscompressor.JSCompressor'
 PIPELINE_JS = {
     'jquerystuff': {
         'source_filenames': (
-          'jquery.min.js',
+#          'jquery.min.js', # using cdn now
           'jquery.autocomplete.min.js',
           'jquery.form.min.js',
           'jquery.MetaData.js',
           'jquery.tools.min.js',
           'jquery.rating.pack.js',  # rating/static/
         ),
-        'output_filename': 'jquerystuff.js',
+        'output_filename': 'jquerystuff.min.js',
     },
     'skoljka': {
         'source_filenames': {
             'script.js',
             'solution.js',
         },
-        'output_filename': 'skoljka.js',
+        'output_filename': 'skoljka.min.js',
     },
 }
 

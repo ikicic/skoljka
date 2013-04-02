@@ -23,7 +23,7 @@ def delete(request):
         
     tag = get_object_or_404(Tag, name=request.POST['name'])
     task = get_object_or_404(Task, id=request.POST['task'])
-    if not task.has_perm(request.user, VIEW):
+    if not task.user_has_perm(request.user, VIEW):
         return HttpResponseForbidden('Not allowed to view or edit this task.')
     task_ct = ContentType.objects.get_for_model(Task)
         
@@ -43,7 +43,7 @@ def add(request):
         return HttpResponseForbidden('Nedozvoljeno ime taga.')
         
     task = get_object_or_404(Task, id=request.POST['task'])
-    if not task.has_perm(request.user, VIEW):
+    if not task.user_has_perm(request.user, VIEW):
         return HttpResponseForbidden('Not allowed to view or edit this task.')
 
     task_ct = ContentType.objects.get_for_model(Task)

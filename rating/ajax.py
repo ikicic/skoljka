@@ -17,7 +17,7 @@ def tag_vote(request):
     
     task_ct = ContentType.objects.get_for_model(Task)
     task = Task.objects.get(id=request.POST['task'])
-    if not task.has_perm(request.user, VIEW):
+    if not task.user_has_perm(request.user, VIEW):
         return HttpResponseForbidden('Not allowed to view or edit this task.')
         
     taggeditem = get_object_or_404(TaggedItem, tag=tag, object_id=request.POST['task'], content_type=task_ct)

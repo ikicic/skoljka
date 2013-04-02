@@ -19,11 +19,11 @@ def select_task(request, task_id):
     folder = request.user.profile.selected_folder
     if not request.is_ajax() or folder is None:
         return HttpResponseBadRequest()
-    if not folder.has_perm(request.user, EDIT):
+    if not folder.user_has_perm(request.user, EDIT):
         return HttpResponseForbidden('Not allowed to edit this folder.')
 
     task = get_object_or_404(Task, id=task_id)
-    if not task.has_perm(request.user, VIEW):
+    if not task.user_has_perm(request.user, VIEW):
         return HttpResponseForbidden('Not allowed to view this task.')
 
     if task in folder.tasks.all():
@@ -39,7 +39,7 @@ def select_task(request, task_id):
 @login_required
 def select(request, id):
     folder = get_object_or_404(Folder, id=id)
-    if not folder.has_perm(request.user, EDIT):
+    if not folder.user_has_perm(request.user, EDIT):
         return HttpResponseForbidden('Not allowed to edit this folder.')
 
     profile = request.user.profile
