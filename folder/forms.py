@@ -21,10 +21,28 @@ class FolderForm(forms.ModelForm):
             q = q.exclude(id=self.instance.id)
 
         self.fields['parent'] = forms.ModelChoiceField(
-            queryset=q.distinct(),
+            queryset=q.filter(editable=True).distinct(),
             label='Roditelj')
 
 
     class Meta:
         model = Folder
-        fields = ['name', 'parent', 'tag_filter', 'structure']
+        fields = ['name', 'parent', 'tag_filter']
+
+class FolderAdvancedCreateForm(forms.Form):
+    structure = forms.CharField(widget=forms.Textarea(), label='Struktura')
+    # parent = added in init...
+
+    def __init__(self, user, *args, **kwargs):
+        user = kwargs.pop('user', None)
+
+        super(FolderAdvancedCreateForm, self).__init__(*args, **kwargs)
+
+        # bootstrap fix
+        self.fields['structure'].widget.attrs.update({
+            'rows': 10, 'cols': 100, 'class': 'uneditable-textarea',
+        })
+        self.fields['parent'] = forms.ModelChoiceField(
+            queryset=Folder.objects.for_user(user, VIEW)    \
+                .filter(editable=True).distinct(),
+            label='Roditelj')

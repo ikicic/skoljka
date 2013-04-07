@@ -11,16 +11,29 @@
 
 {% block content %}
 
-{% if can_edit_permissions %}
-  <div style="float: right;">
+<div style="float: right;" class="btn-group">
+  {% if advanced_create_permission %}
+    <a href="/folder/new/advanced/" class="btn">Napredno dodavanje</a>
+  {% endif %}
+  {% if can_edit_permissions %}
     <a href="/permissions/edit/{{ content_type.id }}/{{ folder.id }}/" class="btn">Privilegije</a>
-  </div>
-{% endif %}
+  {% endif %}
+</div>
+
 <form action="{{ request.path }}" method="post">
   {% csrf_token %}
   <table>
     {{ form.as_table }}
   </table>
+  {% if children %}
+    <h6>Poredak podkategorija</h6>
+    {% for x in children %}
+      <div>
+        <input type="text" name="child-{{ x.id }}" value="{{ x.parent_index }}" class="input-mini">
+        {{ x.name }}
+      </div>
+    {% endfor %}
+  {% endif %}
   <br>
   <input type="submit" class="btn btn-primary" value="Pošalji">
 </form>

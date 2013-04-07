@@ -41,6 +41,7 @@ def edit(request):
         'success': success,
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def profile(request, pk):
     if request.user.is_authenticated() and request.user.pk == pk:
@@ -87,7 +88,6 @@ def profile(request, pk):
     task_added = Task.objects.filter(author=user, **kwargs2).order_by('-id')[:10]
 
 
-
     return render_to_response('profile_detail.html', {
         'profile': user,
         'distribution': distribution,
@@ -97,59 +97,3 @@ def profile(request, pk):
         'task_added': task_added,
         'solved': solved,
     }, context_instance=RequestContext(request))
-
-
-# deprecated?
-@permission_required('task.add_advanced')
-def refresh_score(request):
-    s = Solution.objects.values('author', 'task').annotate(Max('correctness_avg'))
-
-    # ... nedovrseno ...
-
-    return render_to_response('profile_refresh_score.html', {
-        'solutions': s,
-    }, context_instance=RequestContext(request))
-
-
-# DEPRECATED, to delete
-# TODO: provjeriti postoji li grupa s tim imenom
-def register(request):
-    if 'next' in request.REQUEST:
-        next_url = request.REQUEST['next']
-    else:
-        next_url = '/register/complete/'
-
-    if request.method == "POST":
-        user_form = UserCreationExtendedForm(request.POST)
-        profile_form = UserProfileForm(request.POST)
-        if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
-
-            # one member Group for each User
-            group = Group(name=user.username)
-            group.save()
-
-            profile = profile_form.save(commit=False)
-            profile.user = user
-            profile.private_group = group
-            profile.save()
-
-            user.groups.add(group)
-
-            username = user_form.cleaned_data['username']
-            password = user_form.cleaned_data['password1']
-            user = authenticate(username=username, password=password)
-
-            if user is not None and user.is_active:
-                login(request, user)
-                return HttpResponseRedirect(next_url)
-    else:
-        user_form = UserCreationExtendedForm()
-        profile_form = UserProfileForm()
-
-    return render_to_response(
-        'register.html',
-        {'forms': [ user_form, profile_form ], 'next': next_url},
-        context_instance=RequestContext(request)
-    )
-

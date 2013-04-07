@@ -321,6 +321,7 @@ PIPELINE_JS = {
     'skoljka': {
         'source_filenames': {
             'script.js',
+            'folder.js',
             'solution.js',
         },
         'output_filename': 'skoljka.min.js',

@@ -8,14 +8,7 @@
 
 <form method="post" action="{% url django.contrib.auth.views.login %}">{% csrf_token %}
   <table>
-    <tr>
-      <td>Korisničko ime:</td>
-      <td>{{ form.username }}</td>
-    </tr>
-    <tr>
-      <td>Lozinka:</td>
-      <td>{{ form.password }}</td>
-    </tr>
+    {{ form.as_table }}
   </table>
   <p><a href="{% url auth_password_reset %}">Zaboravili</a> ste lozinku?  <a href="{% url registration_register %}">Nemate korisnički račun</a>?</p>
 

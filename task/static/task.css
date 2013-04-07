@@ -39,10 +39,14 @@
   float: right;
 }
 
+.task-table td {
+  padding: 3px 5px;
+}
 
 .task-text {
   padding: 10px 0px;
 }
+
 
 .task-source {
   float: right;

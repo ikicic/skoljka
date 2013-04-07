@@ -15,6 +15,8 @@ from task.models import Task, SimilarTask
 from task.forms import TaskForm, TaskAdvancedForm, TaskExportForm, EXPORT_FORMAT_CHOICES
 
 from activity import action as _action
+from folder.models import Folder
+from folder.utils import get_folder_template_data
 from permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS
 from permissions.models import ObjectPermission
 from recommend.utils import task_event
@@ -26,6 +28,7 @@ from mathcontent import latex
 from mathcontent.models import MathContent, Attachment
 from usergroup.forms import GroupEntryForm
 
+from skoljka.utils import get_referrer_path
 from skoljka.utils.decorators import response
 from skoljka.utils.timeout import run_command
 
@@ -294,12 +297,17 @@ def detail(request, id):
     if request.user.is_authenticated():
         task_event(request.user, task, 'view')
 
+    referrer = get_referrer_path(request)
+    folder_data = referrer and get_folder_template_data(referrer, request.user,
+        Folder.DATA_MENU)
+
     return {
         'task': task,
         'can_edit': EDIT in perm,
         'can_edit_permissions': EDIT_PERMISSIONS in perm,
         'content_type': content_type,
         'solution': solution,
+        'menu_folder_tree': folder_data['menu_folder_tree'],
     }
 
 @response('task_similar.html')

@@ -14,6 +14,9 @@ from permissions.constants import constants
 from permissions.models import ObjectPermission, has_group_perm
 from permissions.models import convert_permission_names_to_values
 
+# Model specific:
+from folder.models import Folder
+
 
 # TODO: permission to change permissions?
 
@@ -96,6 +99,12 @@ def edit(request, type_id, id):
             groups[group.id]._cache_permissions = [perm.permission_type]
 
 
+    # Model specific tuning:
+    menu_folder_tree = None
+    if content_type.app_label == 'folder' and content_type.model == 'folder':
+        tmp = object.get_template_data(request.user, Folder.DATA_MENU)
+        menu_folder_tree = tmp['menu_folder_tree']
+
     return {
         'object': object,
         'form': form,
@@ -103,4 +112,5 @@ def edit(request, type_id, id):
         'groups': groups.itervalues(),
         'applicable_permissions': applicable_permissions,
         'selected_types': selected_types,
+        'menu_folder_tree': menu_folder_tree
     }

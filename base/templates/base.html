@@ -12,18 +12,6 @@
     {% compressed_js 'skoljka' %}
     <link href="/static/images/favicon.ico" rel="shortcut icon">
 
-    {% comment %}<!--
-    <link href="/static/bootstrap.css" rel="stylesheet">
-    <link href="/static/base.css" rel="stylesheet">
-    <script src="/static/jquery.min.js"></script>
-    {# <script src="http://cdn.jquerytools.org/1.2.6/all/jquery.tools.min.js"></script> #}
-    <script src="/static/jquery.tools.min.js"></script>
-    <script src="/static/jquery.MetaData.js"></script>
-    <script src="/static/jquery.rating.pack.js"></script>
-    <script src="/static/jquery.autocomplete.min.js"></script>
-    <script src="/static/script.js"></script>
-    -->{% endcomment %}
-
     {% block header_list %} {% endblock %} {# put your css-files here #}
     <title>{% block title %}Školjka{% endblock %}</title>
   </head>
@@ -49,7 +37,7 @@
           <div style="float:left;">
             <form class="form-inline" action="/accounts/login/" method="POST">
               {% csrf_token %}
-              <input id="id_username" name="username" type="text" class="input-small" placeholder="Korisničko ime">
+              <input id="id_username" name="username" type="text" class="input-small" placeholder="Korisničko ime"{% if homepage %} autofocus{% endif %}>
               <input id="id_password" name="password" type="password" class="input-small" placeholder="Lozinka">
               <input type="submit" class="btn" value="Prijava">
             </form>
@@ -71,7 +59,9 @@
         <li><a href="/"><i class="icon-home"></i>Početna</a></li>
 
         <li><a href="/folder/"><i class="icon-book"></i>Arhiva</a></li>
-        {% block menu_folder_container %}{% endblock %}
+        {% block menu_folder_container %}
+          {{ menu_folder_tree|safe }}
+        {% endblock %}
         <li><br></li>
         {% if user.is_authenticated %}
           <li><a href="/pm/"><i class="icon-inbox"></i>Inbox

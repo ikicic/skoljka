@@ -2,10 +2,6 @@
 
 {% block title %}Arhiva{% endblock %}
 
-{% if menu_folder_tree %}
-  {% block menu_folder_container %}{{ menu_folder_tree|safe }}{% endblock %}
-{% endif %}
-
 {% block content %}
 
 <div class="folder-ab-container">
@@ -30,7 +26,9 @@
     {% if edit_link %}
       <a href="/folder/{{ folder.id }}/edit/" class="btn"><i class="icon-edit"></i> Uredi</a>
     {% endif %}
-    <a href="/folder/new/" class="btn"><i class="icon-plus"></i> Napravi kolekciju</a>
+    {% if user.is_authenticated %}
+      <a href="/folder/new/" class="btn"><i class="icon-plus"></i> Napravi kolekciju</a>
+    {% endif %}
   </div>
 </div>
 <a href="javascript: history.go(-1)">« Vrati se</a><br><br>

@@ -4,10 +4,10 @@
 {% load task_tags %}
 {% load rating_tags %}
 
-<table width="100%" class="table-striped table-condensed" style="text-align: center;">
+<table width="100%" class="table-striped task-table" style="text-align: center;">
   <tr>
     {% if user.profile.selected_folder %}<th width="50">U mapi</th>{% endif %}
-    <th width="50">{% anchor id # %}</th>
+    <th width="30">{% anchor id # %}</th>
     <th>Naslov</th>
     <th>Tagovi</th>
     <th>{% anchor solved_count Rj. %}</th>
@@ -22,7 +22,7 @@
         <td><input type="checkbox" class="folder_checkbox"{% if task.is_in_folder %} checked="checked"{% endif %}></td>
       {% endif %}
 
-      <td style="text-align:center;">{{ task.id }}</td>
+      <td>{{ task.id }}</td>
       <td>{{ task.get_link }}</td>
       <td>{% if plus_exclude %}{% tag_list task plus_exclude %}{% else %}{% tag_list task %}{% endif %}</td>
 
