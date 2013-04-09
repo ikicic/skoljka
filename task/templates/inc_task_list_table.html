@@ -5,6 +5,7 @@
 {% load rating_tags %}
 
 <table width="100%" class="table-striped task-table" style="text-align: center;">
+  <thead>
   <tr>
     {% if user.profile.selected_folder %}<th width="50">U mapi</th>{% endif %}
     <th width="30">{% anchor id # %}</th>
@@ -15,7 +16,9 @@
     <th>{% anchor quality_rating_avg Kvaliteta %}</th>
     <th>{% anchor difficulty_rating_avg Težina %}</th>
   </tr>
+  </thead>
 
+  <tbody>
   {% for task in tasks %}
     <tr class="{% if task.cache_solution %}{{ task.cache_solution.get_html_info.tr_class }}{% elif task.hidden %}task_hidden{% endif %}">
       {% if user.profile.selected_folder %}
@@ -40,4 +43,5 @@
       <td style="width:80px;">{% rating_stars task.difficulty_rating %}</td>
     </tr>
   {% endfor %}
+  </tbody>
 </table>

@@ -30,10 +30,9 @@ def update_search_cache(object, old_tags, new_tags):
 
     # this will delete SearchCacheElement rows as well
     SearchCache.objects.filter(tags__name__in=diff).delete()
-    
-    
 
-# TODO: fix case-sensitivity bug    
+
+
 # recursive
 # tags SHOULD be sorted (in order to do this efficiently)
 def search_and_cache(tags):
@@ -43,11 +42,11 @@ def search_and_cache(tags):
     except:
         cache = SearchCache(tag_string=tag_string)
         cache.save()
-        # TODO: this line makes trouble
+        # Make sure tags here are written exactly the same as those in database!
         cache.tags.set(*tags)
-        
+
     cache_content_type = ContentType.objects.get_for_model(SearchCache)
-        
+
     cached_objects = TaggedItem.objects
     tag = Tag.objects.get(name__iexact=tags[-1])
     if len(tags) > 1:
@@ -63,8 +62,6 @@ def search_and_cache(tags):
                 ' SELECT A.object_id, A.content_type_id, %d FROM tags_taggeditem AS A'  \
                 ' WHERE A.tag_id=%d AND A.content_type_id != %d;'   \
                 % (cache.id, tag.id, cache_content_type.id)
-        
-    print query
 
     cursor = connection.cursor()
     cursor.execute(query)
@@ -79,6 +76,11 @@ def search_tasks(tags=[], none_if_blank=True, user=None, **kwargs):
     tags = split_tags(tags)
     if none_if_blank and not tags:
         return Task.objects.none()
+
+    # case-sensitivity bug fix:
+    available = Tag.objects.filter(name__in=tags).values_list('name', flat=True)
+    tags = list(available)
+
     task_content_type = ContentType.objects.get_for_model(Task)
 
     if kwargs.get('no_hidden_check'):
@@ -102,7 +104,7 @@ def search_tasks(tags=[], none_if_blank=True, user=None, **kwargs):
     if kwargs.get('groups'):
         ids = ','.join([str(x) for x in tasks.values_list('id', flat=True)])
         group_ids = ','.join([str(x.id) for x in kwargs['groups']])
-        
+
         # TODO: ispitati treba li LEFT ili INNER JOIN
         tasks = Task.objects.raw(
             'SELECT A.id, A.hidden, A.name, A.solved_count, A.quality_rating_avg, A.difficulty_rating_avg, COUNT(DISTINCT B.id) AS search_solved_count FROM task_task AS A \
@@ -113,5 +115,5 @@ def search_tasks(tags=[], none_if_blank=True, user=None, **kwargs):
             )
 
         tasks = list(tasks)
-    
+
     return tasks

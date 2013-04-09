@@ -1,5 +1,7 @@
+/* Task action */
+
 .task-action-bar {
-  background-color: #F8F8F8;
+  background-color: rgb(246, 248, 247);
   overflow:auto;
   position: relative;
 }
@@ -39,12 +41,50 @@
   float: right;
 }
 
+/* End task action */
+
+
+/* Task table */
 .task-table td {
   padding: 3px 5px;
 }
 
+/* Task status */
+.task-solved td {
+  background-color: #70FF70;
+}
+
+.task-submitted-not-rated td {
+  background-color: #FFC;
+}
+
+.task-as-solved td {
+  background-color: #AFA;
+}
+
+.task-wrong td {
+  background-color: #F99;
+}
+
+.task-todo td {
+  background-color: #8FF;
+}
+
+.task-hidden td {
+  background-color: #DDD;
+}
+
+/* End task table */
+
+
 .task-text {
   padding: 10px 0px;
+}
+
+.task-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: normal;
 }
 
 

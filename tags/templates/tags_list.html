@@ -33,11 +33,12 @@
   </tr>
   {% autosort tags %}
   {% for x in tags %}
-    {# using task_ classes to make less mess in base.css #}
+    {# using task- classes to make less mess in base.css #}
+    {# TODO: create specific css classes for tags, do not use classes from unrelated parts of the code #}
     {% if x.id in invalid %}
-      <tr class="task_wrong">
+      <tr class="task-wrong">
     {% elif x.id in updated %}
-      <tr class="task_as_solved">
+      <tr class="task-as-solved">
     {% else %}
       <tr>
     {% endif %}

@@ -18,11 +18,11 @@ STATUS = {'blank': 0, 'as_solved': 1, 'todo': 2, 'submitted': 3}
 _HTML_INFO_KEYS = ('label_class', 'label_text', 'tr_class')
 _HTML_INFO = {
     'blank': ('', '', ''),
-    'as_solved': ('label-success', u'Riješeno', 'task_as_solved'),
-    'solved': ('label-success', u'Točno', 'task_solved'),
-    'wrong': ('label-important', u'Netočno', 'task_wrong'),
-    'todo': ('label-warning', u'To Do', 'task_todo'),
-    'submitted_not_rated': ('label-info', u'Poslano', 'task_submitted_not_rated'),
+    'as_solved': ('label-success', u'Riješeno', 'task-as-solved'),
+    'solved': ('label-success', u'Točno', 'task-solved'),
+    'wrong': ('label-important', u'Netočno', 'task-wrong'),
+    'todo': ('label-warning', u'To Do', 'task-todo'),
+    'submitted_not_rated': ('label-info', u'Poslano', 'task-submitted-not-rated'),
 }
 
 HTML_INFO = {key: dict(zip(_HTML_INFO_KEYS, value)) for key, value in _HTML_INFO.iteritems()}

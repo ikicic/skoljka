@@ -4,12 +4,12 @@
 
 {% block content %}
 
+<br>
 Zadatak: {{ task.get_link }}<br><br>
-<div class="task_content">
+<div class="task-content well">
   {{ task.content.render }}
-</div><br>
+</div>
 
-<br><br>
 <form action="{{ action_url }}" method="post">
   {% csrf_token %}
   {{ form.as_p }}

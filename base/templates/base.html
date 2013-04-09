@@ -17,10 +17,10 @@
   </head>
 <body>
 
-<div id="header" class="row well">
+<div id="header" class="row">
   <h1 id="sitename">
     <a href="/">
-      <img src="/static/images/shell32.png" style="vertical-align:top;" alt=""> Školjka
+      <img src="/static/images/shell32.png" alt=""> Školjka
     </a>
   </h1>
 
@@ -48,9 +48,8 @@
   {% endif %}
 </div>
 
-<div class="container-fluid">
+<div id="site-container">
   <div id="sidebar">
-    <div class="well">
       {% if user.is_authenticated %}
         <div class="nav-hello-user">Zdravo, {{ user|userlink:"first_name" }}!</div>
       {% endif %}
@@ -95,15 +94,12 @@
           <li><a href="/admin/"><i class="icon-lock"></i> Admin</a></li>
         {% endif %}
       </ul>
-    </div>
   </div>
 
   <div id="content">
-    <div class="well">
       {% block content %}
         <br><br><br>
       {% endblock content %}
-    </div>
   </div>
 </div>
 

@@ -299,7 +299,7 @@ def detail(request, id):
 
     referrer = get_referrer_path(request)
     folder_data = referrer and get_folder_template_data(referrer, request.user,
-        Folder.DATA_MENU)
+        Folder.DATA_MENU) or {}
 
     return {
         'task': task,
@@ -307,7 +307,7 @@ def detail(request, id):
         'can_edit_permissions': EDIT_PERMISSIONS in perm,
         'content_type': content_type,
         'solution': solution,
-        'menu_folder_tree': folder_data['menu_folder_tree'],
+        'menu_folder_tree': folder_data.get('menu_folder_tree', ''),
     }
 
 @response('task_similar.html')

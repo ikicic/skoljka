@@ -55,6 +55,8 @@ def cache_solution_info(context, solutions):
     for y in solutions:
         y._cache_my_solution = my_solutions.get(y.task_id)
 
+    return ''
+
 @register.simple_tag(takes_context=True)
 def check_solution_for_obfuscation(context, solution, text):
     my_solution = getattr(solution, '_cache_my_solution', None)

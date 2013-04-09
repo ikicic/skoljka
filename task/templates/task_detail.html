@@ -14,7 +14,7 @@
 
 
 <br><br>
-<div style="text-align:center;font-size:24px;">{{ task.name }}</div>
+<h3 class="task-title">{{ task.name }}</h3>
 <div style="float:left;">
   {% if solution and not solution.is_blank %}
     <span class="label {{ solution.get_html_info.label_class }}">{{ solution.get_html_info.label_text }}</span><br>
@@ -37,7 +37,7 @@
 </div>
 
 <br><br>
-<div class="task_content well">
+<div class="task-content well">
   {# TODO: render tag! #}
   {% if user.is_authenticated %}
     {{ task.content.render_quote }}

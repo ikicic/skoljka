@@ -90,29 +90,25 @@ div.readonly-star {
 
 
 /* changes to Bootstrap */
-tr.task_solved td {
-  background-color: #70FF70!important;
+.nav .nav-header {
+  padding: 3px 12px;
 }
 
-tr.task_submitted_not_rated td {
-  background-color: #FFC!important;
+.nav-list > li > a {
+  padding: 3px 12px;
 }
 
-tr.task_as_solved td {
-  background-color: #AFA!important;
+.label {
+  box-shadow: 1px 1px 3px black;
 }
 
-tr.task_wrong td {
-  background-color: #F99!important;
-}
-
-tr.task_todo td {
-  background-color: #8FF!important;
-}
-
-tr.task_hidden td,
 tr.group_hidden td {
   background-color: #DDD!important;
+}
+
+.table-striped tbody tr:nth-child(odd) td,
+.table-striped tbody tr:nth-child(odd) th {
+  background-color: rgb(244, 247, 246);
 }
 
 .thin {
@@ -120,6 +116,13 @@ tr.group_hidden td {
   margin: 0px;
   padding: 0px;
   border-width: 0px;
+}
+
+.well {
+  /* background-color: rgb(248, 245, 243); rgb(246, 250, 244)*/
+  background-color: rgb(250, 252, 252);
+  border: 0px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 /* this is kind of tricky, please find a better solution! */
@@ -165,7 +168,20 @@ tr.group_hidden td {
 
 
 /* General */
+body {
+  background-image: url('images/bg_pattern.png');
+}
+
+h2 {
+  text-shadow: 1px 1px 1px rgb(182, 182, 182);
+}
+
 #header {
+  background-color: rgb(206, 216, 214);
+  /* background: -webkit-gradient(linear, left top, left bottom, from(rgb(216, 213, 206)), to(rgb(231, 227, 219))); */
+  background: -webkit-gradient(linear, left top, left bottom, from(rgb(206, 216, 214)), to(rgb(219, 229, 231)));
+  box-shadow: 0 1px 4px #333;
+  margin-bottom: 3px;
   padding: 5px!important;
 }
 
@@ -174,31 +190,32 @@ tr.group_hidden td {
   margin: 0px!important;
 }
 
-#sidebar {
-  position: relative;
-  top: 0;
-  left: auto;
-  width: 255px;
-  float: left;
+#site-container {
+  padding: 10px;
 }
 
-#sidebar > div {
-  padding: 19px 15px;
+#content, #sidebar {
+  border-radius: 5px;
+  box-shadow: 0 1px 4px #333;
 }
 
 #content {
-  margin: 0 0 0 275px;
+  margin: 0 0 0 249px;
+  /* background-color: rgb(235, 231, 229); rgb(232, 236, 235) */
+  background-color: rgb(240, 245, 244);
+  padding: 10px;
+}
+
+#sidebar {
+  /* background-color: rgb(245, 242, 240); */
+  background-color: rgb(246, 250, 249);
+  float: left;
+  padding: 15px 5px;
+  width: 225px;
 }
 
 .nav-hello-user {
-  padding: 0 0 1em 15px;
-}
-
-#footer {
-  margin: 0px 20px 5px 10px;
-  text-align: right;
-  font-size: 12px;
-  color: #BBB;
+  padding: 0 0 1em 12px;
 }
 
 #sitename {
@@ -206,8 +223,14 @@ tr.group_hidden td {
   padding-left: 20px;
 }
 
+#sitename img {
+  vertical-align: -0.2em;
+}
+
 #sitename a {
   color: black;
+  font-style: italic;
+  text-shadow: 0 0 32px rgb(89, 90, 131), 1px 1px 1px rgb(182, 182, 182);
 }
 
 #sitename a:hover {
@@ -215,9 +238,17 @@ tr.group_hidden td {
   text-decoration: none;
 }
 
-#footer a {
-  color: #8CF;
+#footer {
+  margin: 0px 20px 5px 10px;
+  text-align: right;
+  font-size: 12px;
+  color: #D0D0D0;
 }
+
+#footer a {
+  color: #ADF;
+}
+
 
 a.register {
   color: red;
@@ -234,14 +265,16 @@ a.register {
 
 
 /* Activity */
+.activity, .act_day {
+  border-top: thin solid #CCC;
+}
 .activity {
-  border-top: thin solid #DDD;
   padding: 6px 5px 3px 5px;
 }
 
 .activity .time {
   font-size: 12px;
-  color: gray;
+  color: rgb(141, 144, 162);
 }
 
 .activity .act_message1 {
@@ -254,15 +287,14 @@ a.register {
 
 .act_day {
   font-size: 18px;
-  border-top: thin solid #DDD;
   padding: 4px;
-  color: #AAA;
+  color: #666;
 }
 
 .quote {
-  border: 1px solid #CDF;
-  background-color: #EEF;
-  padding: 5px;
+  border-left: 1px solid #CDF;
+  background-color: rgb(238, 245, 238);
+  padding: 6px;
 }
 
 .post_list_small .post_info {
@@ -303,11 +335,13 @@ a.register {
 /* for jquery tools tooltip */
 /* cannot use `tooltip`, as it is already used by bootstrap.css */
 .tag-tooltip {
-  display:none;
-  background:#A2A2A2;
-  border:1px solid #BBB;
-  padding:5px 6px 0px 6px;
-  color:#eee;
+  background: rgb(239, 241, 228);
+  border: 1px solid #CCC;
+  border-radius: 3px;
+  box-shadow: 1px 1px 3px rgb(201, 201, 201);
+  color: #444;
+  display: none;
+  padding: 5px 6px 0px 6px;
 }
 
 .tag-tooltip img {
