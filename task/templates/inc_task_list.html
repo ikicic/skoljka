@@ -19,19 +19,6 @@
 {% endif %}
 
 {% if tasks %}
-  {% if user.profile.selected_folder %}
-    <script>
-    $(function(){
-      $('.folder_checkbox').click(function(){
-        $.ajax({
-          url: '/folder/select/task/' + $(this).parent().next().html() + '/'
-        });
-      });
-    });
-    </script>
-  {% endif %}
-
-
   <div class="task-action-bar">
     {% comment %}
       -----------

@@ -26,3 +26,6 @@ ALTER TABLE userprofile_userprofile ADD COLUMN show_unsolved_task_solutions TINY
 ALTER TABLE userprofile_userprofile ADD COLUMN evaluator TINYINT(1) NOT NULL DEFAULT 0;
 ALTER TABLE userprofile_userprofile ADD COLUMN hide_solution_min_diff DOUBLE NOT NULL DEFAULT 0;
 ALTER TABLE userprofile_userprofile ADD COLUMN show_solution_task TINYINT(1) NOT NULL DEFAULT 1;
+
+
+ALTER TABLE folder_folder_tasks ADD COLUMN position INT NOT NULL DEFAULT 0;

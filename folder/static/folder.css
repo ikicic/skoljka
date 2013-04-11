@@ -10,6 +10,12 @@
   padding: 0 4px 4px 0;
 }
 
+.folder-task-position {
+  width: 30px;
+  margin: 0px;
+  padding: 0 4px;
+}
+
 .nav-folder, .nav-folder-hidden {
   line-height: 13px;
   padding-left: -5px;

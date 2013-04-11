@@ -1,24 +1,7 @@
-{% extends "base.html" %}
+{% extends "folder_edit_base.html" %}
 
-{% block title %}
-  {% if edit %}
-    Uređivanje kategorije {{ folder.name }}
-  {% else %}
-    Nova kategorija
-  {% endif %}
-{% endblock %}
+{% block inner_content %}
 
-
-{% block content %}
-
-<div style="float: right;" class="btn-group">
-  {% if advanced_create_permission %}
-    <a href="/folder/new/advanced/" class="btn">Napredno dodavanje</a>
-  {% endif %}
-  {% if can_edit_permissions %}
-    <a href="/permissions/edit/{{ content_type.id }}/{{ folder.id }}/" class="btn">Privilegije</a>
-  {% endif %}
-</div>
 
 <form action="{{ request.path }}" method="post">
   {% csrf_token %}
@@ -39,5 +22,4 @@
 </form>
 
 
-
-{% endblock content %}
+{% endblock %}

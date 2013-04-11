@@ -50,28 +50,30 @@
 }
 
 /* Task status */
+
+/* Don't remove !important. Otherwise odd rows won't be affected. */
 .task-solved td {
-  background-color: #70FF70;
+  background-color: #70FF70!important;
 }
 
 .task-submitted-not-rated td {
-  background-color: #FFC;
+  background-color: #FFC!important;
 }
 
 .task-as-solved td {
-  background-color: #AFA;
+  background-color: #AFA!important;
 }
 
 .task-wrong td {
-  background-color: #F99;
+  background-color: #F99!important;
 }
 
 .task-todo td {
-  background-color: #8FF;
+  background-color: #8FF!important;
 }
 
 .task-hidden td {
-  background-color: #DDD;
+  background-color: #DDD!important;
 }
 
 /* End task table */

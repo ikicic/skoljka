@@ -13,7 +13,7 @@
   <div class="btn-group">
     {% if select_link %}
       <form action="/folder/select/{{ folder.id }}/" method="POST" style="display: inline;">
-        {% if user.get_profile.selected_folder_id != folder.id %}
+        {% if not this_folder_selected %}
           <button class="btn" type="submit" id="select_folder" title="Aktivirajte kako biste mogli dodavati i brisati zadatke iz kolekcije">
             <i class="icon-check"></i> Odaberi
           </button>

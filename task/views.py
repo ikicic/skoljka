@@ -353,14 +353,15 @@ def similar(request, id):
 # final filename is 'attachments/task_id/attachment index/filename.ext'
 ZIP_ATTACHMENT_DIR = 'attachments'
 
-def _convert_to_latex(tasks, has_title, has_url, has_source, has_index, has_id, *args, **kwargs):
+def _convert_to_latex(sorted_tasks, has_title, has_url, has_source, has_index,
+        has_id, *args, **kwargs):
     """
         Attachments go to attachments/task_id/attachment_index/filename.ext.
     """
     is_latex = kwargs['format'] == 'latex'
 
     content = [latex.export_header]
-    for k, x in enumerate(tasks):
+    for k, x in enumerate(sorted_tasks):
         # DRY?
         export_title = latex.export_title % x.name if has_title else ''
         export_url = latex.export_url % x.get_absolute_url() if has_url else ''
@@ -384,7 +385,7 @@ def _convert_to_latex(tasks, has_title, has_url, has_source, has_index, has_id, 
 
     return u''.join(content)
 
-def _export(ids, tasks, form):
+def _export(ids, sorted_tasks, tasks, form):
     """
         Output LaTeX or PDF, permission already checked.
         It is assumed that Attachments are already saved in tasks[...] as
@@ -416,7 +417,7 @@ def _export(ids, tasks, form):
             # already up-to-date
             return HttpResponseRedirect('/media/export/task{}{}'.format(hash, fext))
 
-    latex = _convert_to_latex(tasks, **form.cleaned_data)
+    latex = _convert_to_latex(sorted_tasks, **form.cleaned_data)
 
     # if latex without archive, do not create file, but directly output it
     if format == 'latex' and not create_archive:
@@ -491,12 +492,17 @@ def export(request, format=None, ids=None):
         raise Http404
 
     # check for permissions
-    tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=id_list).select_related('content').distinct()
+    tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=id_list).distinct()
     if len(tasks) != len(id_list):
         raise Http404('Neki od navedenih zadataka ne postoje ili su sakriveni.')
 
     # permission ok, use shortened query
     tasks = Task.objects.filter(id__in=id_list)
+
+    # keep the same order as in id_list
+    task_position = {id: position for position, id in enumerate(id_list)}
+    sorted_tasks = list(tasks)
+    sorted_tasks.sort(key=lambda task: task_position[task.id])
 
     # force queryset evaluation and prepare all attachments...
     content_to_task = {}
@@ -516,7 +522,7 @@ def export(request, format=None, ids=None):
         form = TaskExportForm(POST)
         if form.is_valid():
             # note that attachments are imported into each task as .cache_file_list
-            return _export(ids, tasks, form)
+            return _export(ids, sorted_tasks, tasks, form)
 
     # otherwise, if form not given or not valid:
 
@@ -539,6 +545,6 @@ def export(request, format=None, ids=None):
     return {
         'format': available_formats[format],
         'form': form,
-        'tasks': tasks,
+        'tasks': sorted_tasks,
         'attachments': attachments,
     }

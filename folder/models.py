@@ -12,6 +12,8 @@ from skoljka.utils.string_operations import slugify
 
 import itertools
 
+FOLDER_TASKS_DB_TABLE = 'folder_folder_tasks'
+
 class Folder(PermissionsModel):
     class Meta:
         permissions = (
@@ -40,7 +42,7 @@ class Folder(PermissionsModel):
     # Cache
     cache_ancestor_ids = models.CharField(max_length=255, blank=True)
 
-    tasks = models.ManyToManyField(Task, blank=True)
+    tasks = models.ManyToManyField(Task, blank=True, through='FolderTask')
 
     def __unicode__(self):
         return u'%s - [%s]' % (self.name, self.tag_filter)
@@ -132,8 +134,12 @@ class Folder(PermissionsModel):
             if self.tag_filter:
                 tasks = search_tasks(tags=self.tag_filter, user=user,
                     show_hidden=True)
+                foldertasks = None
             else:
-                tasks = self.tasks.for_user(user, VIEW).all()
+                tasks = self.tasks.for_user(user, VIEW) \
+                    .order_by('foldertask__position').distinct()
+                #  .extra(select={'position': FOLDER_TASKS_DB_TABLE + '.position'}, order_by=['position'])
+
 
             #------ HTML ------#
 
@@ -146,3 +152,12 @@ class Folder(PermissionsModel):
         data['folder'] = self
 
         return data
+
+
+class FolderTask(models.Model):
+    class Meta:
+        db_table = FOLDER_TASKS_DB_TABLE
+
+    folder = models.ForeignKey(Folder)
+    task = models.ForeignKey(Task)
+    position = models.IntegerField(default=0)

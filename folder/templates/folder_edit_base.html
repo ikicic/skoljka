@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if edit %}
+    Uređivanje kategorije {{ folder.name }}
+  {% else %}
+    Nova kategorija
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div style="float: right;" class="btn-group">
+  <a href="/folder/{{ folder.id }}/edit/" class="btn">Osnovno</a>
+  {% if advanced_create_permission %}
+    <a href="/folder/new/advanced/" class="btn">Napredno dodavanje</a>
+  {% endif %}
+  {% if can_edit_permissions %}
+    <a href="/permissions/edit/{{ content_type.id }}/{{ folder.id }}/" class="btn">Privilegije</a>
+  {% endif %}
+  {% if folder and not folder.tag_filter and folder.editable %}
+    <a href="/folder/{{ folder.id }}/edit/tasks/" class="btn">Poredak zadataka</a>
+  {% endif %}
+</div>
+
+<a href="javascript: history.go(-1)">« Vrati se</a><br><br>
+
+{% block inner_content %}
+{% endblock %}
+
+{% endblock %}

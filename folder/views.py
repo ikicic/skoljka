@@ -1,6 +1,7 @@
 ﻿from django.contrib.admin.models import LogEntry, CHANGE
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Max, Count
 from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -12,9 +13,67 @@ from permissions.models import ObjectPermission
 from task.models import Task
 from skoljka.utils.decorators import response
 
-from folder.models import Folder
+from folder.models import Folder, FolderTask, FOLDER_TASKS_DB_TABLE
 from folder.forms import FolderForm, FolderAdvancedCreateForm
 from folder.utils import refresh_cache, get_folder_template_data
+
+import re
+
+def _edit_tasks_tasks(folder, user):
+    return folder.tasks.for_user(user, VIEW) \
+        .extra(select={'position': FOLDER_TASKS_DB_TABLE + '.position'},
+            order_by=['position']).distinct()
+
+@login_required
+@response('folder_edit_tasks.html')
+def edit_tasks(request, folder_id):
+    folder = get_object_or_404(Folder, id=folder_id)
+
+    if not folder.editable:
+        return 403
+
+    if not folder.user_has_perm(request.user, EDIT):
+        return 403
+
+    # Not able to use FolderTask.objects.filter, as it is still required to
+    # check permissions...
+
+    invalid = set()
+    unknown = set()
+    updated = set()
+
+    if request.method == 'POST':
+        tasks = _edit_tasks_tasks(folder, request.user)
+        task_info = dict(tasks.values_list('id', 'position'))
+        for key, value in request.POST.iteritems():
+            if not re.match('^position-\d+$', key):
+                continue
+
+            id = int(key[9:])
+            if id not in task_info:
+                unknown.add(id)
+            elif not value.isdigit():
+                invalid.add(id)
+            else:
+                value = int(value)
+                if value != task_info[id]:
+                    FolderTask.objects.filter(folder=folder, task_id=id)    \
+                        .update(position=value)
+                    updated.add(id)
+
+    tasks = _edit_tasks_tasks(folder, request.user)
+
+    data = {
+        'folder': folder,
+        'tasks': tasks,
+        'invalid': invalid,
+        'unknown': unknown,
+        'updated': updated,
+    }
+
+    data.update(folder.get_template_data(request.user, Folder.DATA_MENU))
+
+    return data
 
 @login_required
 def select_task(request, task_id):
@@ -28,11 +87,20 @@ def select_task(request, task_id):
     if not task.user_has_perm(request.user, VIEW):
         return HttpResponseForbidden('Not allowed to view this task.')
 
-    if task in folder.tasks.all():
-        folder.tasks.remove(task)
+    is_checked = request.POST['checked'] == 'true'
+
+    filter = FolderTask.objects.filter(folder=folder, task=task)
+    exists = filter.exists()
+
+    if exists and is_checked:
+        filter.delete()
         response = '0'
-    else:
-        folder.tasks.add(task)
+    elif not exists and not is_checked:
+        info = FolderTask.objects.filter(folder=folder) \
+            .aggregate(Max('position'), Count('id'))
+
+        position = max(info['position__max'], info['id__count']) + 1
+        FolderTask.objects.create(folder=folder, task=task, position=position)
         response = '1'
 
     return HttpResponse(response)
@@ -57,12 +125,6 @@ def select(request, id):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 
-@login_required
-def detail_by_id(request, id):
-    folder = get_object_or_404(Folder, id=id)
-    return HttpResponseRedirect(folder.get_absolute_url())
-
-
 @response('folder_detail.html')
 def view(request, id=None, description=u''):
     if id is None:
@@ -82,6 +144,8 @@ def view(request, id=None, description=u''):
         data['edit_link'] = True
         if not data['tag_list']:
             data['select_link'] = True
+        if request.user.get_profile().selected_folder == folder:
+            data['this_folder_selected'] = True
 
     return data
 
@@ -145,7 +209,7 @@ def new(request, folder_id=None):
             if old_parent_id != folder.parent_id:
                 refresh_cache(Folder.objects.all())
 
-            
+
             # return HttpResponseRedirect(folder.get_absolute_url())
     else:
         folder_form = FolderForm(instance=folder, user=request.user)

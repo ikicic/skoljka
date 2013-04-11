@@ -1,0 +1,45 @@
+{% extends "folder_edit_base.html" %}
+
+{% block inner_content %}
+
+<form action="{{ request.path }}" method="POST">
+  {% csrf_token %}
+
+  {% if unknown %}
+    Nepoznati ID-evi zadataka: {{ unknown|join:', ' }} ??<br>
+  {% endif %}
+
+  <table width="100%" class="table-striped" style="text-align: center;">
+    <thead>
+      <th>Pozicija</th>
+      <th>Nova</th>
+      <th width="30">#</th>
+      <th>Naslov</th>
+      <th width="30">Rj.</th>
+    </thead>
+    <tbody>
+      {% for task in tasks %}
+        {# TODO: create specific css classes for tags, do not use classes from unrelated parts of the code #}
+        {% if task.id in invalid %}
+          <tr class="task-wrong">
+        {% elif task.id in updated %}
+          <tr class="task-as-solved">
+        {% else %}
+          <tr>
+        {% endif %}
+
+          <td>{{ task.position }}</td>
+          <td><input class="folder-task-position" name="position-{{ task.id }}" value="{{ task.position }}"></td>
+          <td>{{ task.id }}</td>
+          <td>{{ task.get_link }}</td>
+          <td>{{ task.solved_count }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <br><br>
+  <input type="submit" class="btn-primary" value="Pošalji" style="margin-left: 50px;">
+</form>
+
+{% endblock %}

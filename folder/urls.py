@@ -12,4 +12,5 @@ urlpatterns = patterns('',
     (r'^new/$', 'folder.views.new'),
     (r'^new/advanced/$', 'folder.views.advanced_new'),
     (r'^(?P<folder_id>\d+)/edit/$', 'folder.views.new'),
+    (r'^(?P<folder_id>\d+)/edit/tasks/$', 'folder.views.edit_tasks'),
 )
