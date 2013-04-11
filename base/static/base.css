@@ -1,5 +1,6 @@
 /* TODO: replace _ with - */
-/* TODO: sass */
+/* TODO: Sass! Most of the colors are closely related. */
+/*   Changing the color now requires changing all the colors manually. */
 
 /* ================================= */
 /* jquery.autocomplete.css */
@@ -123,6 +124,7 @@ tr.group_hidden td {
   background-color: rgb(250, 252, 252);
   border: 0px;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.5);
+  padding: 15px;
 }
 
 /* this is kind of tricky, please find a better solution! */
@@ -172,8 +174,12 @@ body {
   background-image: url('images/bg_pattern.png');
 }
 
-h2 {
+h2, h3, h4 {
   text-shadow: 1px 1px 1px rgb(182, 182, 182);
+}
+
+h4 a {
+  text-shadow: 1px 1px 1px rgb(210, 210, 210);
 }
 
 #header {
@@ -402,16 +408,13 @@ object.latex_center {
 img.latex_center,
 object.latex_center {
   display: block;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 6pt;
-  margin-bottom: 6pt;
+  margin: 6pt auto;
 }
 
 
 /* News */
 .news {
-  padding: 20px 5px;
+  padding: 0 5px;
 }
 
 .news .mc {
@@ -424,7 +427,7 @@ object.latex_center {
   padding: 10px 0px;
 }
 
-.news .added_by {
+.news .added-by {
   color: #AAAAAA;
   padding: 10px 0px;
   font-size: 12px;

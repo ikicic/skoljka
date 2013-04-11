@@ -1,5 +1,7 @@
 <div class="post_list_small">
-<h4>Komentari:</h4>
+{% if user.is_authenticated or posts %}
+  <h4>Komentari:</h4>
+{% endif %}
 
 {% for post in posts %}
   <div class="well well-small post" id="post{{ post.pk }}">

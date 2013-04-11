@@ -6,11 +6,9 @@
 {% load task_tags %}
 {% load base_tags %}
 
-{# TODO: DRY, napraviti tag ili nesto, ovo se ponavlja #}
-
-
 {% show_news 'well' 'Novosti' %}
 
+{# TODO: DRY, napraviti tag ili nesto, ovo se ponavlja #}
 
 {% if recommend %}
 
@@ -36,6 +34,7 @@
 </div>
 
 <br><br><br>
+<h3>Nedavne aktivnosti:</h3>
 {% activity_list user %}
 
 {% endblock %}

@@ -2,7 +2,9 @@
 
 {% load tags_tags %}
 
-{% block title %}Pretrazivanje: {{ tag_string }}{% endblock %}
+{% block title %}
+  Pretraživanje{% if tags %}: {{ tags|join:', ' }}{% endif %}
+{% endblock %}
 
 {% block content %}
 
@@ -20,6 +22,7 @@
       <div class="toggle"{% if not search_solved_count %} style="display:none;"{% endif %}>
         {{ advanced_form.as_p }}
       </div>
+      {# TODO: move to .js! #}
       <script>
         $(".toggler").click(function(){
           $(".toggle").toggle();

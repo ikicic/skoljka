@@ -3,7 +3,7 @@
 {% load post_tags %}
 {% load rating_tags %}
 
-{% block title %}Pregled rješenja{% endblock %}
+{% block title %}Rješenje zadatka &quot;{{ solution.task.name }}&quot; korisnika &quot;{{ solution.author }}&quot;{% endblock %}
 
 {% block content %}
 
@@ -20,7 +20,7 @@
   {% endif %}
 </div>
 <div style="float:right;text-align:right;">
-  {{ solution.date_created }}<br>
+  {{ solution.date_created }} ({{ solution.date_created|timesince }})<br>
   {% if solution.author == user or user.is_staff or solution.task.author == user %}
     <form action="/solution/{{ solution.pk }}/edit/mark/" method="post">
       {% csrf_token %}

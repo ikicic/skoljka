@@ -2,9 +2,9 @@
 
 {% if activity %}
   {% for x in activity %}
-    {% ifchanged x.date_created|date:"E_j" %}
+    {% ifchanged x.date_created|date:"j_E" %}
       <div class="act_day">
-        {{ x.date_created|date:"E j" }}
+        {{ x.date_created|date:"j. E" }}
       </div>
     {% endifchanged %}
     <div class="activity">

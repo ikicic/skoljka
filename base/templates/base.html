@@ -10,10 +10,15 @@
     {% compressed_css 'skoljka' %}
     {% compressed_js 'jquerystuff' %}
     {% compressed_js 'skoljka' %}
+
+    {# TODO: move to /favicon.ico. More a server configuration problem, but still... #}
     <link href="/static/images/favicon.ico" rel="shortcut icon">
 
-    {% block header_list %} {% endblock %} {# put your css-files here #}
-    <title>{% block title %}Školjka{% endblock %}</title>
+    {% block header_list %} {% endblock %} {# manually put more head stuff here #}
+    <title>{% block title %}Školjka - Web arhiva zadataka iz matematike{% endblock %}</title>
+
+    <meta name="content-language" content="hr">
+    <meta name="description" content="Web arhiva zadataka iz matematike. Sadrži zadatke s prijašnjih državnih, županijskih, općinskih natjecanja te Međunarodnih i Srednjoeuropskih olimpijada. Školjka može poslužiti svakom učeniku koji se želi pripremati za natjecanja iz matematike.">
   </head>
 <body>
 

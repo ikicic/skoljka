@@ -34,7 +34,7 @@
       {% check_solution_for_obfuscation s s.content.short %}
       <tr>
         <td>{{ s.id }}
-        <td>{{ s.date_created|timesince }} ago
+        <td>{{ s.date_created|timesince }}
         <td>{{ s.task.get_link }}
         <td>{{ s.author|userlink }}</a>
         {% if s.is_submitted %}
