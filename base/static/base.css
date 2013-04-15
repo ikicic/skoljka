@@ -99,6 +99,10 @@ div.readonly-star {
   padding: 3px 12px;
 }
 
+.nav-list > li > a > span {
+  font-size: 12px;
+}
+
 .label {
   box-shadow: 1px 1px 3px black;
 }
@@ -216,6 +220,7 @@ h4 a {
   /* background-color: rgb(245, 242, 240); */
   background-color: rgb(246, 250, 249);
   float: left;
+  margin-bottom: 10px;
   padding: 15px 5px;
   width: 225px;
 }
@@ -235,6 +240,7 @@ h4 a {
 
 #sitename a {
   color: black;
+  font-family: Georgia, Arial, serif;
   font-style: italic;
   text-shadow: 0 0 32px rgb(89, 90, 131), 1px 1px 1px rgb(182, 182, 182);
 }

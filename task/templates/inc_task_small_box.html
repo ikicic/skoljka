@@ -14,7 +14,7 @@
     {{ task.content.render }}
 
     {% if 'timesince' in options %}
-      <div style="text-align:right;color:gray;">{{ task.date_created|timesince }} ago</div>
+      <div style="text-align:right;color:gray;">{{ task.date_created|timesince }}</div>
     {% endif %}
   {% if well %}
   </div>
