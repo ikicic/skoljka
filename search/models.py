@@ -5,8 +5,14 @@ from django.contrib.contenttypes.models import ContentType
 
 from tags.managers import TaggableManager
 
+def _normal_search_key(tags):
+    return 'N' + ','.join([str(tag.id) for tag in tags])
+
+def _reverse_search_key(tags):
+    return 'R' + ','.join([str(tag.id) for tag in tags])
+
 class SearchCache(models.Model):
-    tag_string = models.CharField(max_length=100, unique=True)
+    key = models.CharField(max_length=100, unique=True)
     tags = TaggableManager()
 
 

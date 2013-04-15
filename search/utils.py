@@ -4,7 +4,8 @@ from django.db import connection, transaction
 from django.db.models import Count
 from django.template.defaultfilters import slugify
 
-from search.models import SearchCache, SearchCacheElement
+from search.models import SearchCache, SearchCacheElement, _normal_search_key, \
+    _reverse_search_key
 
 from permissions.constants import VIEW
 from task.models import Task
@@ -20,6 +21,34 @@ def split_tags(tags):
         tags = []
     return filter(None, [x.strip() for x in tags])
 
+def get_available_tags(tags):
+    """
+        Get the list of tag names and returns existing tags queryset.
+        Note that the order of tags might not be preserved.
+
+        Argument:
+            list or tag names, comma-separated string of tags...
+            (Passes the argument to split_tags)
+
+        Example:
+        tags = get_available_tags(['Memo', 'GEO', '2007', 'unknown_tag'])
+        tags.values_list('name', flat=True)
+        --> ['geo', 'MEMO', '2007']
+    """
+
+    return Tag.objects.filter(name__in=split_tags(tags))
+
+def replace_with_original_tags(tags):
+    """
+        Search for existing tags and fix cases.
+    """
+    available = list(get_available_tags(tags).values_list('name', flat=True))
+    lowercase = {x.lower(): x for x in available}
+
+    # If it exists, return original tag name. Otherwise, use as it is written.
+    return [lowercase.get(y.lower(), y) for y in tags]
+
+
 
 # TODO: optimize!
 # old_tags and new_tags are list of strings, not objects!
@@ -34,23 +63,30 @@ def update_search_cache(object, old_tags, new_tags):
 
 
 # recursive
-# tags SHOULD be sorted (in order to do this efficiently)
-def search_and_cache(tags):
-    tag_string = u','.join(tags)
+def _search_and_cache(tags):
+    """
+        Search for all objects whose tags make superset of tags argument.
+
+        Arguments:
+            tags == list of Tag instances
+
+        Note:
+            To make this method more efficient, tags should be sorted by some
+            of its attributes (e.g. id).
+    """
+    key = _normal_search_key(tags)
     try:
-        return SearchCache.objects.get(tag_string=tag_string)
+        return SearchCache.objects.get(key=key)
     except:
-        cache = SearchCache(tag_string=tag_string)
+        cache = SearchCache(key=key)
         cache.save()
-        # Make sure tags here are written exactly the same as those in database!
         cache.tags.set(*tags)
 
     cache_content_type = ContentType.objects.get_for_model(SearchCache)
 
-    cached_objects = TaggedItem.objects
-    tag = Tag.objects.get(name__iexact=tags[-1])
+    tag = tags[-1]
     if len(tags) > 1:
-        recursion = search_and_cache(tags[:-1])
+        recursion = _search_and_cache(tags[:-1])
         query = 'INSERT INTO search_searchcacheelement (object_id, content_type_id, cache_id)'  \
                 ' SELECT A.object_id, A.content_type_id, %d FROM search_searchcacheelement AS A'    \
                 ' INNER JOIN tags_taggeditem AS B ON (A.object_id = B.object_id AND A.content_type_id = B.content_type_id)' \
@@ -67,32 +103,42 @@ def search_and_cache(tags):
     cursor.execute(query)
     transaction.commit_unless_managed()
 
-    #print 'ubacio u hash za', tag_string
     return cache
 
+def search(tags):
+    """
+        Search objects with given tags.
+
+        Unknown tags are ignored.
+
+        Returns SearchCache object if any (existing) tag given, otherwise None.
+    """
+
+    # what if an unknown tag is in the list?
+    tags = get_available_tags(tags)
+
+    # Sort before calling...
+    tags = sorted(tags, key=lambda x: x.id)
+
+    return _search_and_cache(tags) if tags else None
 
 # none_if_blank? zasto bi to bio posao ove funkcije
 def search_tasks(tags=[], none_if_blank=True, user=None, **kwargs):
-    tags = split_tags(tags)
-    if none_if_blank and not tags:
-        return Task.objects.none()
-
-    # case-sensitivity bug fix:
-    available = Tag.objects.filter(name__in=tags).values_list('name', flat=True)
-    tags = list(available)
-
-    task_content_type = ContentType.objects.get_for_model(Task)
+    # TODO: remove none_if_blank parameter!
 
     if kwargs.get('no_hidden_check'):
         tasks = Task.objects.all()
     elif kwargs.get('show_hidden'):
         tasks = Task.objects.for_user(user, VIEW).distinct()
     else:
-        tasks = Task.objects.filter(hidden=False).distinct()
+        tasks = Task.objects.filter(hidden=False)
 
-    if tags:
-        tags = sorted(tags)
-        cache = search_and_cache(tags)
+    tags = split_tags(tags)
+    if none_if_blank and not tags:
+        return Task.objects.none()
+
+    cache = search(tags)
+    if cache:
         tasks = tasks.filter(search_cache_elements__cache=cache)
 
     if kwargs.get('quality_min') is not None: tasks = tasks.filter(quality_rating_avg__gte=kwargs['quality_min'])
@@ -106,6 +152,7 @@ def search_tasks(tags=[], none_if_blank=True, user=None, **kwargs):
         group_ids = ','.join([str(x.id) for x in kwargs['groups']])
 
         # TODO: ispitati treba li LEFT ili INNER JOIN
+        # FIXME: why just these columns?
         tasks = Task.objects.raw(
             'SELECT A.id, A.hidden, A.name, A.solved_count, A.quality_rating_avg, A.difficulty_rating_avg, COUNT(DISTINCT B.id) AS search_solved_count FROM task_task AS A \
                 LEFT JOIN solution_solution AS B ON (B.task_id = A.id) \
@@ -116,4 +163,5 @@ def search_tasks(tags=[], none_if_blank=True, user=None, **kwargs):
 
         tasks = list(tasks)
 
+    print tasks.query
     return tasks

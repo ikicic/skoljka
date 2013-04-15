@@ -1,10 +1,10 @@
+/* Structure */
 DROP TABLE folder_foldercollection;
 
 ALTER TABLE folder_folder CHANGE COLUMN slug short_name VARCHAR(128) NOT NULL;
 UPDATE folder_folder SET short_name = name;
 
 ALTER TABLE folder_folder ADD COLUMN editable TINYINT(1) NOT NULL DEFAULT 1 AFTER hidden;
-ALTER TABLE folder_folder ADD INDEX fodler_folder_editable (editable);
 
 ALTER TABLE folder_folder ADD COLUMN parent_index INT NOT NULL DEFAULT 0 AFTER parent_id;
 ALTER TABLE folder_folder ADD COLUMN cache_ancestor_ids VARCHAR(255) NOT NULL;
@@ -29,3 +29,11 @@ ALTER TABLE userprofile_userprofile ADD COLUMN show_solution_task TINYINT(1) NOT
 
 
 ALTER TABLE folder_folder_tasks ADD COLUMN position INT NOT NULL DEFAULT 0;
+
+
+ALTER TABLE search_searchcache CHANGE COLUMN tag_string `key` VARCHAR(100) NOT NULL;
+
+/* Indices */
+
+ALTER TABLE folder_folder ADD INDEX folder_folder_editable (editable);
+ALTER TABLE search_searchcacheelement ADD INDEX search_searchcacheelement_tuple1 (cache_id, content_type_id, object_id);
