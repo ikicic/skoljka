@@ -13,19 +13,28 @@ SOLUTION_CORRECT_SCORE = 2.6
 # solution.status
 STATUS = {'blank': 0, 'as_solved': 1, 'todo': 2, 'submitted': 3}
 
+# Key names of detailed states.
+# For more info, look at Solution.get_detailed_status()
+# If you need to change the order, don't forget to update get_detailed_status()
+DETAILED_STATUS_NAME = ['blank', 'as_solved', 'todo', 'submitted_not_rated',
+    'wrong', 'solved']
+DETAILED_STATUS = {name: i for i, name in enumerate(DETAILED_STATUS_NAME)}
+
 # Each element of HTML_INFO is dict with keys from _HTML_INFO_KEYS and values
 # from _HTML_INFO
 _HTML_INFO_KEYS = ('label_class', 'label_text', 'tr_class')
 _HTML_INFO = {
     'blank': ('', '', ''),
     'as_solved': ('label-success', u'Riješeno', 'task-as-solved'),
-    'solved': ('label-success', u'Točno', 'task-solved'),
-    'wrong': ('label-important', u'Netočno', 'task-wrong'),
     'todo': ('label-warning', u'To Do', 'task-todo'),
     'submitted_not_rated': ('label-info', u'Poslano', 'task-submitted-not-rated'),
+    'wrong': ('label-important', u'Netočno', 'task-wrong'),
+    'solved': ('label-success', u'Točno', 'task-solved'),
 }
 
-HTML_INFO = {key: dict(zip(_HTML_INFO_KEYS, value)) for key, value in _HTML_INFO.iteritems()}
+# status number -> dict(info_key -> value)
+HTML_INFO = {DETAILED_STATUS[key]: dict(zip(_HTML_INFO_KEYS, value))
+    for key, value in _HTML_INFO.iteritems()}
 
 
 def _update_solved_count(delta, task, profile, save_task=True, save_profile=True):
@@ -70,6 +79,10 @@ SOLUTION_RATING_ATTRS = {
 }
 
 class Solution(models.Model):
+    # TODO: replace status with what currently is called 'detailed status'?
+    # Or add detailed_status? That would be much easier to implement, as it
+    # can be just added to pre_save.
+
     task = models.ForeignKey(Task)
     author = models.ForeignKey(User)
     content = models.ForeignKey(MathContent, blank=True, null=True) # a ipak sam stavio null...
@@ -89,15 +102,27 @@ class Solution(models.Model):
 
     # template helpers
     def get_html_info(self):
-        if self.status == STATUS['as_solved']:
-            return HTML_INFO['as_solved']
+        # Get current detailed status, and then it's info...
+        return HTML_INFO[self.get_detailed_status()]
+
+    def get_detailed_status(self):
+        """
+            Detailed status, unlike normal .status, describes also the
+            correctness of the solution.
+        """
+        # Maybe just save that number in db, and set it in pre_save?
+
+        # The only special case actually...
         if self.status == STATUS['submitted']:
             if self.correctness_avg == 0.0:
-                return HTML_INFO['submitted_not_rated']
-            return HTML_INFO['solved' if self.is_correct() else 'wrong']
-        if self.status == STATUS['todo']:
-            return HTML_INFO['todo']
-        return HTML_INFO['blank']
+                return 3 # DETAILED_STATUS['submitted_not_rated']
+            elif self.correctness_avg < SOLUTION_CORRECT_SCORE:
+                return 4 # DETAILED_STATUS['wrong']
+            else:
+                return 5 # DETAILED_STATUS['solved']
+
+        # Otherwise, the order is the same...
+        return self.status
 
     def is_solved(self):
         return self.is_as_solved() or self.is_correct()
