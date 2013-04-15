@@ -3,6 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.safestring import mark_safe
 
 from tags.models import Tag, TaggedItem, VOTE_WRONG
+from tags.utils import get_object_tagged_items
 
 register = template.Library()
 
@@ -10,11 +11,6 @@ register = template.Library()
 def tag_list(context, owner, plus_exclude=None):
     # TODO: make this contenttype-independent (look at last line)
     # TODO: memcache this
-    if not hasattr(owner, '_cache_tag_set'):
-        #owner._cache_tag_set = [(tag.name, '?') for tag in owner.tags.order_by('-weight', 'name')]
-        owner_content_type = ContentType.objects.get_for_model(owner)
-        tags = TaggedItem.objects.filter(content_type=owner_content_type, object_id=owner.id).select_related('tag')
-        owner._cache_tag_set = [(x.tag.name, x.votes_sum) for x in tags]
 
     if plus_exclude is not None:
         add = u','.join(plus_exclude)
@@ -31,7 +27,9 @@ def tag_list(context, owner, plus_exclude=None):
 
     v0 = []     # not hidden
     v1 = []     # hidden
-    for name, votes in owner._cache_tag_set:
+    for tagged_item in get_object_tagged_items(owner):
+        name, votes = tagged_item.tag.name, tagged_item.votes_sum
+
         format = no_plus if (not plus_exclude or name.lower() in plus_exclude_lower) else plus
         attr = {'votes': votes, 'class': ''}
         if name[0] != '$':
@@ -45,7 +43,7 @@ def tag_list(context, owner, plus_exclude=None):
         if votes <= VOTE_WRONG:
             attr['class'] += ' tag-wrong'
         attr['class'] = ' class="%s"' % attr['class'].strip() if attr['class'] else ''
-        
+
         (v0 if name[0] != '$' else v1).append(format % attr)
 
     # TODO: do not use model-specific names
@@ -57,6 +55,6 @@ def tag_list(context, owner, plus_exclude=None):
 @register.simple_tag(takes_context=True)
 def tags_autocomplete_script(context):
     names = Tag.objects.values_list('name', flat=True)
-    
+
     # TODO: split tags by , or similar (use only one additional char per tag)
     return u'<script>$(".ac_tags").autocomplete(["%s"],{multiple:true,autoFill:true});</script>' % u'","'.join(names)

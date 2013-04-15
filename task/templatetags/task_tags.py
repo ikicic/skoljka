@@ -47,13 +47,15 @@ def cache_task_info(context, tasks):
     ids = [x.id for x in tasks]
 
     # ----- tags -----
-    tagovi = TaggedItem.objects.filter(content_type=task_content_type, object_id__in=ids).select_related('tag')
-    tags = collections.defaultdict(list)
+    tagovi = TaggedItem.objects.filter(content_type=task_content_type,
+        object_id__in=ids).select_related('tag')
+    tagged_items = collections.defaultdict(list)
     for x in tagovi:
-        tags[x.object_id].append((x.tag.name, x.votes_sum))
+        tagged_items[x.object_id].append(x)
 
     for task in tasks:
-        task._cache_tag_set = sorted(tags[task.id])
+        task._cache_tagged_items = sorted(tagged_items[task.id],
+            key=lambda x: (x.tag.name, x.votes_sum))
 
     # ----- solutions ------
     if user.is_authenticated():

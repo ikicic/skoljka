@@ -12,8 +12,6 @@ from rating.fields import RatingField
 from search.models import SearchCacheElement
 from tags.managers import TaggableManager
 
-from task.utils import task_similarity
-
 import random
 
 MAX_SIMILAR_TASKS = 20
@@ -55,7 +53,7 @@ class Task(BasePermissionsModel):
     last_edit_date = models.DateTimeField(auto_now=True)
     hidden = models.BooleanField(default=False, verbose_name='Sakriven')
     source = models.CharField(max_length=200, blank=True, verbose_name='Izvor')
-    
+
     search_cache_elements = GenericRelation(SearchCacheElement)
     posts = PostGenericRelation()
     tags = TaggableManager(blank=True)
@@ -68,26 +66,22 @@ class Task(BasePermissionsModel):
 
     class Meta(BasePermissionsModel.Meta):
         ordering = ['id']
-    
+
     def __unicode__(self):
         return '#%d %s' % (self.id, self.name)
-        
+
     def get_absolute_url(self):
         return '/task/%d/' % self.id
-        
+
     def get_link(self):
         return mark_safe('<a href="/task/%d/" class="task">%s</a>' % (self.id, self.name))
-
-    def get_tag_ids(self):
-        if not hasattr(self, '_cache_tag_ids'):
-            self._cache_tag_ids = self.tags.values_list('id', flat=True)
-        return self._cache_tag_ids
-
 
     # deprecated?
     # TODO: preurediti, ovo je samo tmp
     # random try function
     def update_similar_tasks(self, cnt):
+        from task.utils import task_similarity
+
         similar = SimilarTask.objects.filter(task=self).values_list('similar_id', flat=True)
 
         # TODO: maknuti ORDER BY RAND()
@@ -96,7 +90,7 @@ class Task(BasePermissionsModel):
             similarity = task_similarity(self, x)
             print 'SPAJAM ', self.id, ' SA ', x.id, ' UZ SCORE ', similarity
             SimilarTask.objects.create(task=self, similar=x, score=similarity)
-        
+
         similar = SimilarTask.objects.filter(task=self).values_list('id', 'score')
         over = len(similar) - MAX_SIMILAR_TASKS
         print 'SLICNI ZADACI: ', similar
@@ -113,12 +107,12 @@ class Task(BasePermissionsModel):
                             break
                         else:
                             R -= score
-                        
+
                     if id not in to_delete:
                         break
-                        
+
                 to_delete.append(id)
-                
+
             SimilarTask.objects.filter(id__in=to_delete).delete()
-                
+
             print 'IZBACUJEM', to_delete
