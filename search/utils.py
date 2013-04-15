@@ -13,6 +13,7 @@ from task.models import Task
 from tags.models import Tag, TaggedItem
 from taggit.utils import parse_tags
 
+from collections import defaultdict
 
 def split_tags(tags):
     if type(tags) is unicode:
@@ -65,8 +66,6 @@ def update_search_cache(object, old_tags, new_tags):
 # recursive
 def _search_and_cache(tags):
     """
-        Search for all objects whose tags make superset of tags argument.
-
         Arguments:
             tags == list of Tag instances
 
@@ -107,9 +106,9 @@ def _search_and_cache(tags):
 
 def search(tags):
     """
-        Search objects with given tags.
+        Find all objects whose tags make superset of given tags.
 
-        Unknown tags are ignored.
+        Note: Unknown tags are ignored.
 
         Returns SearchCache object if any (existing) tag given, otherwise None.
     """
@@ -117,7 +116,8 @@ def search(tags):
     # what if an unknown tag is in the list?
     tags = get_available_tags(tags)
 
-    # Sort before calling...
+    # Sort before calling. (tag order does not matter, but it makes search
+    # more efficient)
     tags = sorted(tags, key=lambda x: x.id)
 
     return _search_and_cache(tags) if tags else None
@@ -163,5 +163,68 @@ def search_tasks(tags=[], none_if_blank=True, user=None, **kwargs):
 
         tasks = list(tasks)
 
-    print tasks.query
     return tasks
+
+def reverse_search(tags):
+    """
+        Find all objects whose tags are a subset of given tags.
+
+        Returns SearchCache object if any (existing) tag given, otherwise None.
+
+        Example:
+            reverse_search(['imo', '1997'])
+            --> SearchCache pointing to:
+                --> Folder with filter tag 'imo'
+                --> Folder with filter tag 'imo', '1997'
+                (...)
+
+            Examples of non matching objects:
+            --> Folder with filter tag 'shortlist', '1997'
+            --> Task with tags 'imo', '1997', 'geo'
+    """
+    tags = get_available_tags(tags)
+    if len(tags) == 0:
+        return None
+
+    key = _reverse_search_key(tags)
+
+    try:
+        return SearchCache.objects.get(key=key)
+    except SearchCache.DoesNotExist:
+        pass
+
+    # Create cache object.
+    cache = SearchCache(key=key)
+    cache.save()
+    cache.tags.set(*tags)
+
+    # Generate SQL query
+    cache_content_type = ContentType.objects.get_for_model(SearchCache)
+    tag_ids = [x.id for x in tags]
+    query = 'SELECT DISTINCT A.object_id, A.content_type_id, A.tag_id FROM tags_taggeditem A' \
+            '   INNER JOIN tags_taggeditem B'   \
+            '       ON (A.object_id = B.object_id AND A.content_type_id = B.content_type_id)'   \
+            '   WHERE B.tag_id IN (%s) AND B.content_type_id != %d' \
+        % (','.join([str(id) for id in tag_ids]), cache_content_type.id)
+
+    # Manually fetch.
+    cursor = connection.cursor()
+    cursor.execute(query)
+    tagged_items = cursor.fetchall()
+
+
+    # Generate and save search result.
+    objects = defaultdict(set)
+    for object_id, content_type_id, tag_id in tagged_items:
+        # Seperate tagged items by objects (get tags for each object)
+        objects[(object_id, content_type_id)].add(tag_id)
+
+    ids_set = set(tag_ids)
+
+    # Filter only those objects whose tags are subset of given set of tags
+    SearchCacheElement.objects.bulk_create([
+        SearchCacheElement(object_id=key[0], content_type_id=key[1], cache=cache)
+        for key, obj_tags in objects.iteritems()
+        if obj_tags.issubset(ids_set)])
+
+    return cache
