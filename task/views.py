@@ -13,7 +13,8 @@ from taggit.utils import parse_tags
 
 from activity import action as _action
 from folder.models import Folder
-from folder.utils import get_folder_template_data, get_task_folders
+from folder.utils import get_folder_template_data, get_task_folders,    \
+    invalidate_folder_cache_for_task, invalidate_cache_for_folders
 from permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS
 from permissions.models import ObjectPermission
 from recommend.utils import task_event
@@ -117,6 +118,7 @@ def advanced_new(request):
                         ObjectPermission.objects.create(content_object=task, group=x, permission_type=VIEW)
                         ObjectPermission.objects.create(content_object=task, group=x, permission_type=EDIT)
 
+            invalidate_cache_for_folders(Folder.objects.all())
 
             return HttpResponseRedirect('/task/new/finish/')
     else:
@@ -222,11 +224,13 @@ def new(request, task_id=None):
         edit = False
 
     if request.method == 'POST':
-        print request.POST
+        old_hidden = getattr(task, 'hidden', -1)
+
         task_form = TaskForm(request.POST, instance=task, user=request.user)
         math_content_form = MathContentForm(request.POST, instance=math_content)
 
         if task_form.is_valid() and math_content_form.is_valid():
+
             task = task_form.save(commit=False)
             math_content = math_content_form.save()
 
@@ -234,14 +238,39 @@ def new(request, task_id=None):
                 task.author = request.user
 
             task.content = math_content
+
+            # TODO: signals!
+            if edit:
+                tags = task.tags.values_list('name', flat=True)
+                old_tags_str = ','.join(sorted(old_tags))
+                new_tags_str = ','.join(sorted(list(tags)))
+            else:
+                old_tags_str = 'x'
+                new_tags_str = 'y'
+
+            # Not a perfect solution. When tags are changed, both old and new
+            # folders have to be invalidated.
+            # TODO: signals!
+            if edit and old_tags_str != new_tags_str:
+                invalidate_folder_cache_for_task(task)
+
             task.save()
 
             # Required for django-taggit:
             task_form.save_m2m()
-            update_search_cache(task, old_tags, task.tags.values_list('name', flat=True))
+
+            # TODO: signals!
+            if not edit or old_hidden != task.hidden or old_tags_str != new_tags_str:
+                invalidate_folder_cache_for_task(task)
+
+            # TODO: signals!
+            if old_tags_str != new_tags_str:
+                tags = task.tags.values_list('name', flat=True)
+                update_search_cache(task, old_tags, tags)
 
             # send action if creating a new nonhidden task
             if not edit and not task.hidden:
+                # TODO: signals!
                 _action.add(request.user, _action.TASK_ADD,
                     action_object=task, target=task)
 

@@ -74,6 +74,11 @@ def new(request, group_id=None):
             return (400, 'You can\'t edit your own private user-group (or there is some data error).')
 
         usergroup = group.data
+
+        # https://code.djangoproject.com/ticket/7190
+        # (fixed in later versions of Django...)
+        usergroup.hidden = bool(usergroup.hidden)
+
         perm = usergroup.get_user_permissions(request.user)
         if EDIT not in perm:
             return (403, 'You do not have permission to edit this group\'s details.')
@@ -85,12 +90,6 @@ def new(request, group_id=None):
         edit = False
 
     POST = request.POST if request.method == 'POST' else None
-
-    print 'hidden:', usergroup.hidden, type(usergroup.hidden)
-
-    # https://code.djangoproject.com/ticket/7190
-    # (fixed in later versions of Django...)
-    usergroup.hidden = bool(usergroup.hidden)
 
     group_form = GroupForm(POST, instance=group, prefix='x')
     usergroup_form = UserGroupForm(POST, instance=usergroup, prefix='y')

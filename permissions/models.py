@@ -89,6 +89,7 @@ class PermissionManager(models.Manager):
 
 
 # TODO: some better name please!
+# If necessary, put skoljka.utils.models.ModelEx here
 class BasePermissionsModel(models.Model):
     """
         Extension of Model with object-level permission API.

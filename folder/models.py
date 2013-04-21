@@ -21,7 +21,7 @@ import itertools, time
 
 FOLDER_TASKS_DB_TABLE = 'folder_folder_tasks'
 
-FOLDER_USER_CACHE_KEY = 'fo%du%d'
+FOLDER_NAMESPACE_FORMAT = 'Folder{0.pk}'
 
 class Folder(PermissionsModel):
     class Meta:
@@ -66,8 +66,14 @@ class Folder(PermissionsModel):
         return '/folder/{}/{}'.format(self.id, slugify(self.name))
 
     def _refresh_cache_tags(self, commit=True):
+        old = self.cache_tags
         self.cache_tags = ','.join(
             self.tags.order_by('name').values_list('name', flat=True))
+
+        # Should invalidate folder cache?
+        if old != self.cache_tags:
+            ncache.invalidate_namespace(FOLDER_NAMESPACE_FORMAT.format(self))
+
         if commit:
             self.save()
 
@@ -99,9 +105,7 @@ class Folder(PermissionsModel):
         if self._should_show_stats() and S and sum(S) - S[DETAILED_STATUS['blank']] > 0:
             total = self.get_user_visible_task_count(user)
             solved = S[DETAILED_STATUS['as_solved']]        \
-                + S[DETAILED_STATUS['submitted_not_rated']] \
                 + S[DETAILED_STATUS['solved']]
-
             todo = S[DETAILED_STATUS['todo']]
 
             percent = float(solved) / total
@@ -112,8 +116,11 @@ class Folder(PermissionsModel):
                 r, g, b = interpolate_three_colors(200, 200, 200,
                     100, 200, 100, percent, 230, 180, 92, todo_percent)
 
-            stats = '<span style="color:#%02X%02X%02X;">(%d%%)</span>' \
-                % (r, g, b, 100 * percent)
+            # Show extra + sign if there are any non rated solutions.
+            plus_sign = '+' if S[DETAILED_STATUS['submitted_not_rated']] else ''
+
+            stats = '<span style="color:#%02X%02X%02X;">(%s%d%%)</span>' \
+                % (r, g, b, plus_sign, 100 * percent)
             data_attr = ' data-task-count="%d" data-sol-stats="%s"' \
                 % (total, ','.join([str(x) for x in S]))
 
@@ -152,13 +159,13 @@ class Folder(PermissionsModel):
             return tasks.order_by('foldertask__position') if order else tasks
             #  .extra(select={'position': FOLDER_TASKS_DB_TABLE + '.position'}, order_by=['position'])
 
-    @cache_function(namespace_format='Folder{0.pk}')
+    @cache_function(namespace_format=FOLDER_NAMESPACE_FORMAT)
     def has_any_hidden_task(self):
         # No danger from infinite recursion here.
         return self.get_queryset(None, no_perm_check=True, order=False) \
             .filter(hidden=True).exists()
 
-    @cache_function(namespace_format='Folder{0.pk}')
+    @cache_function(namespace_format=FOLDER_NAMESPACE_FORMAT)
     def get_user_visible_task_count(self, user):
         return self.get_queryset(user, order=False).count()
 
@@ -208,7 +215,7 @@ class Folder(PermissionsModel):
 
         start_time = time.time()
 
-        namespaces = ['Folder{0.pk}'.format(x) for x in folders]
+        namespaces = [FOLDER_NAMESPACE_FORMAT.format(x) for x in folders]
         keys = ['User{}'.format(user.id)] * len(namespaces)
         cached, full_keys = ncache.get_many_for_update(namespaces, keys)
 

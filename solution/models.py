@@ -5,6 +5,7 @@ from mathcontent.models import MathContent
 from post.generic import PostGenericRelation
 from rating.fields import RatingField
 from task.models import Task
+from skoljka.utils.models import ModelEx
 
 
 # TODO: nekako drugacije ovo nazvati
@@ -78,7 +79,7 @@ SOLUTION_RATING_ATTRS = {
     'on_update': _solution_on_update,
 }
 
-class Solution(models.Model):
+class Solution(ModelEx):
     # TODO: replace status with what currently is called 'detailed status'?
     # Or add detailed_status? That would be much easier to implement, as it
     # can be just added to pre_save.
@@ -97,14 +98,8 @@ class Solution(models.Model):
     class Meta:
         unique_together=(('task', 'author'),)
 
-    def __init__(self, *args, **kwargs):
-        # Mechanism used to check whether a certain field has been changed.
-        # http://stackoverflow.com/a/1793323/2203044
-        super(Solution, self).__init__(*args, **kwargs)
-        self._original_detailed_status = self.get_detailed_status()
-
-    def save(self, *args, **kwargs):
-        super(Solution, self).save(*args, **kwargs)
+    def remember_original(self):
+        # ModelEx stuff
         self._original_detailed_status = self.get_detailed_status()
 
     def get_absolute_url(self):
@@ -124,7 +119,7 @@ class Solution(models.Model):
 
         # The only special case actually...
         if self.status == STATUS['submitted']:
-            if self.correctness_avg == 0.0:
+            if self.correctness_avg < 1e-6:
                 return 3 # DETAILED_STATUS['submitted_not_rated']
             elif self.correctness_avg < SOLUTION_CORRECT_SCORE:
                 return 4 # DETAILED_STATUS['wrong']
@@ -150,7 +145,7 @@ class Solution(models.Model):
         return self.status == STATUS['todo']
 
     def is_blank(self):
-        return self.status == STATUS['blank']   # postoji, ali blank
+        return self.status == STATUS['blank']   # exists, but it's blank
 
     def should_obfuscate(self, user, users_solution=0):
         """

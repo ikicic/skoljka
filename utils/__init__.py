@@ -36,7 +36,7 @@ def interpolate_colors(r1, g1, b1, r2, g2, b2, percent):
 def interpolate_three_colors(r1, g1, b1, r2, g2, b2, percent2, r3, g3, b3, percent3):
     """
         Triangle color interpolation.
-        percent2 and percent3 represent barycentric coordinates, e.g.
+        percent2 and percent3 represent barycentric coordinates, i.e.
             0 <= percent2, percent3 <= 1
             0 <= percent2 + percent3 <= 1
     """

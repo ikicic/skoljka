@@ -3,6 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from taggit import managers
 
+# TODO: signals!
 class TaggableManager(managers.TaggableManager):
     def __init__(self, verbose_name=_("Tags"),
         help_text=_("A comma-separated list of tags."), through=None, blank=False):

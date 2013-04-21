@@ -12,9 +12,11 @@ from permissions.constants import VIEW, EDIT, EDIT_PERMISSIONS
 from permissions.models import ObjectPermission
 from task.models import Task
 from search.utils import replace_with_original_tags
+from skoljka.utils import ncache
 from skoljka.utils.decorators import response
 
-from folder.models import Folder, FolderTask, FOLDER_TASKS_DB_TABLE
+from folder.models import Folder, FolderTask, FOLDER_TASKS_DB_TABLE,        \
+    FOLDER_NAMESPACE_FORMAT
 from folder.forms import FolderForm, FolderAdvancedCreateForm
 from folder.utils import refresh_cache_fields, get_folder_template_data
 
@@ -81,7 +83,7 @@ def select_task(request, task_id):
     folder = request.user.profile.selected_folder
     if not request.is_ajax() or folder is None:
         return HttpResponseBadRequest()
-    if not folder.user_has_perm(request.user, EDIT):
+    if not folder.editable or not folder.user_has_perm(request.user, EDIT):
         return HttpResponseForbidden('Not allowed to edit this folder.')
 
     task = get_object_or_404(Task, id=task_id)
@@ -90,21 +92,28 @@ def select_task(request, task_id):
 
     is_checked = request.POST['checked'] == 'true'
 
-    filter = FolderTask.objects.filter(folder=folder, task=task)
-    exists = filter.exists()
+    try:
+        foldertask = FolderTask.objects.get(folder=folder, task=task)
+        exists = True
+    except:
+        exists = False
 
-    if exists and is_checked:
-        filter.delete()
-        response = '0'
-    elif not exists and not is_checked:
+    changed = True
+    if exists and not is_checked:
+        foldertask.delete()
+    elif not exists and is_checked:
         info = FolderTask.objects.filter(folder=folder) \
             .aggregate(Max('position'), Count('id'))
 
         position = max(info['position__max'], info['id__count']) + 1
         FolderTask.objects.create(folder=folder, task=task, position=position)
-        response = '1'
+    else:
+        changed = False
 
-    return HttpResponse(response)
+    if changed:
+        ncache.invalidate_namespace(FOLDER_NAMESPACE_FORMAT.format(folder))
+
+    return HttpResponse('1' if is_checked else '0')
 
 
 @login_required
@@ -142,7 +151,6 @@ def view(request, id=None, description=u''):
 
     folder = data.get('folder')
     if folder and folder.editable and folder.user_has_perm(request.user, EDIT):
-
         data['edit_link'] = True
         if not data['tag_list']:
             data['select_link'] = True
@@ -218,7 +226,6 @@ def new(request, folder_id=None):
             # TODO: Optimize, update only necessary folders.
             if old_parent_id != folder.parent_id:
                 refresh_cache_fields(Folder.objects.all())
-
 
             # return HttpResponseRedirect(folder.get_absolute_url())
     else:

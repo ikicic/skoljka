@@ -1,15 +1,20 @@
+from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save, pre_delete,   \
+    m2m_changed
 from django.dispatch import receiver
 
 from permissions.constants import VIEW
+from permissions.signals import objectpermissions_changed
 from search.models import SearchCacheElement
 from search.utils import reverse_search
 from solution.models import Solution
 from tags.utils import get_object_tagged_items
+from task.models import Task
+from usergroup.models import UserGroup
 from skoljka.utils import ncache
 
-from folder.models import Folder, FolderTask
+from folder.models import Folder, FolderTask, FOLDER_NAMESPACE_FORMAT
 
 import re
 
@@ -125,13 +130,54 @@ def refresh_cache_fields(queryset):
         Folder.objects.filter(id=id).update(cache_ancestor_ids=f.ancestors[:-1])
 
 
+######################
 # Cache invalidation.
+######################
+
+# Here, and not in models.py, to avoid import cycles.
+
+def invalidate_cache_for_folders(folders):
+    """
+        Something to avoid, or be extremely careful with.
+    """
+    namespaces = [FOLDER_NAMESPACE_FORMAT.format(x) for x in folders]
+    ncache.invalidate_namespaces(namespaces)
+
+def invalidate_folder_cache_for_task(task):
+    print 'invalidating for: ', task
+    # One could replace .task with .task_id, but the problem is with the
+    # methoda get_task_folders is using.
+    folders = get_task_folders(task)
+    namespaces = [FOLDER_NAMESPACE_FORMAT.format(x) for x in folders]
+    ncache.invalidate_namespaces(namespaces)
+
+@receiver(objectpermissions_changed, sender=Folder)
+def _invalidate_on_folder_permissions_update(sender, **kwargs):
+    # Invalidate itself.
+    namespace = FOLDER_NAMESPACE_FORMAT.format(kwargs['instance'])
+    ncache.invalidate_namespace(namespace)
+
 @receiver(pre_save, sender=Solution)
-def _invalidate_by_solution(sender, **kwargs):
+def _invalidate_on_solution_update(sender, **kwargs):
     instance = kwargs['instance']
     if instance._original_detailed_status != instance.get_detailed_status():
-        # One could replace .task with .task_id, but the problem is with the
-        # method get_task_folders is using.
-        folders = get_task_folders(instance.task)
-        namespaces = ['Folder{0.pk}'.format(x) for x in folders]
-        ncache.invalidate_namespaces(namespaces)
+        invalidate_folder_cache_for_task(instance.task)
+
+@receiver(pre_delete, sender=Solution)
+def _invalidate_on_solution_delete(sender, **kwargs):
+    invalidate_folder_cache_for_task(kwargs['instance'].task)
+
+@receiver(objectpermissions_changed, sender=Task)
+def _invalidate_on_task_permissions_update(sender, **kwargs):
+    invalidate_folder_cache_for_task(kwargs['instance'])
+
+# For some reason User.groups.through.objects.get_or_create does not send
+# any signals. (?) Then have to catch the change via UserGroup model, which
+# updates member count and similar info.
+# This actually handles both add / remove with only one signal, independent of
+# number of users added / removed to the Group.
+@receiver(post_save, sender=UserGroup)
+def _invalidate_on_usergroup_update(sender, **kwargs):
+    folders = Folder.objects.filter(hidden=True,
+        permissions__group_id=kwargs['instance'].group_id).distinct()
+    invalidate_cache_for_folders(folders)

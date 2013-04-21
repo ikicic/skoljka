@@ -4,7 +4,7 @@
     Key used to save namespace counter is namespace string itself.
     
     Term full_key is used for final cache key generated from namespace, its
-    counter and given key (e.g. subkey). Note that you need the counter to
+    counter and given key (i.e. subkey). Note that you need the counter to
     access the final cached value (that's how the namespace mechanism works).
     
     TODO: details, usage etc.
@@ -60,14 +60,14 @@ def get(namespace, key, default=None):
 def get_full_key(namespace, key):
     """
         Returns full key for given (sub)key and namespace. If namespace not
-        used (e.g. counter doesn't exist), create it.
+        used (i.e. counter doesn't exist), create it.
     """
     counter = get_or_create_counter(namespace)
     return make_full_key(namespace, counter, key)
 
 def get_many_for_update(namespaces, keys):
     """
-        Get cached data together with full_keys used. Prepare for updating, e.g.
+        Get cached data together with full_keys used. Prepare for updating, i.e.
         automatically create namespace counters if necessary.
 
         Returns pair: cached_data, full_keys

@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError
@@ -9,10 +10,10 @@ from django.template import RequestContext
 from usergroup.forms import GroupEntryForm
 from skoljka.utils.decorators import response
 
-from permissions.constants import VIEW, EDIT_PERMISSIONS
-from permissions.constants import constants
-from permissions.models import ObjectPermission, has_group_perm
-from permissions.models import convert_permission_names_to_values
+from permissions.constants import VIEW, EDIT_PERMISSIONS, constants
+from permissions.models import ObjectPermission, has_group_perm,        \
+    convert_permission_names_to_values
+from permissions.signals import objectpermissions_changed
 
 # Model specific:
 from folder.models import Folder
@@ -56,8 +57,15 @@ def edit(request, type_id, id):
         if action == 'remove-permissions':
             group_id = request.POST.get('group-id')
             if group_id:
+                try:
+                    group = Group.objects.get(id=group_id)
+                except Group.DoesNotExist:
+                    return 403
+
                 ObjectPermission.objects.filter(object_id=id,
                     content_type_id=type_id, group_id=group_id).delete()
+                objectpermissions_changed.send(sender=model, instance=object,
+                    content_type=content_type)
         else:
             form = GroupEntryForm(request.POST)
             if form.is_valid():
@@ -68,7 +76,7 @@ def edit(request, type_id, id):
                 # delete all old selected permission for given groups
                 # (make sure there will be no duplicates...)
                 ObjectPermission.objects.filter(
-                    content_type=type_id, object_id=id,
+                    content_type_id=type_id, object_id=id,
                     permission_type__in=selected_types, group__in=groups).delete()
 
                 # add them back
@@ -79,6 +87,9 @@ def edit(request, type_id, id):
                             permission_type=x, group=y))
 
                 ObjectPermission.objects.bulk_create(perm)
+
+                objectpermissions_changed.send(sender=model, instance=object,
+                    content_type=content_type)
 
                 message = u'Promjene spremljene.'
 
@@ -100,7 +111,7 @@ def edit(request, type_id, id):
 
 
     # Model specific tuning:
-    menu_folder_tree = None
+    menu_folder_tree = ''
     if content_type.app_label == 'folder' and content_type.model == 'folder':
         tmp = object.get_template_data(request.user, Folder.DATA_MENU)
         menu_folder_tree = tmp['menu_folder_tree']

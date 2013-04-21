@@ -56,12 +56,13 @@
 /* Task status */
 
 /* Don't remove !important. Otherwise odd rows won't be affected. */
+/* TODO: brighter colors for odd rows */
 .task-solved td {
   background-color: #70FF70!important;
 }
 
 .task-submitted-not-rated td {
-  background-color: #FFC!important;
+  background-color: rgb(244, 255, 163)!important;
 }
 
 .task-as-solved td {
@@ -77,7 +78,11 @@
 }
 
 .task-hidden td {
-  background-color: #DDD!important;
+  background-color: #E0E0E0!important;
+}
+
+tr.task-hidden:nth-child(odd) td {
+  background-color: #E4E3E3!important;
 }
 
 /* End task table */
