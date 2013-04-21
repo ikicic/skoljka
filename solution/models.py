@@ -97,6 +97,16 @@ class Solution(models.Model):
     class Meta:
         unique_together=(('task', 'author'),)
 
+    def __init__(self, *args, **kwargs):
+        # Mechanism used to check whether a certain field has been changed.
+        # http://stackoverflow.com/a/1793323/2203044
+        super(Solution, self).__init__(*args, **kwargs)
+        self._original_detailed_status = self.get_detailed_status()
+
+    def save(self, *args, **kwargs):
+        super(Solution, self).save(*args, **kwargs)
+        self._original_detailed_status = self.get_detailed_status()
+
     def get_absolute_url(self):
         return '/solution/%d/' % self.id
 

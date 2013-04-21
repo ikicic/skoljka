@@ -11,11 +11,12 @@ from django.utils import simplejson
 from permissions.constants import VIEW, EDIT, EDIT_PERMISSIONS
 from permissions.models import ObjectPermission
 from task.models import Task
+from search.utils import replace_with_original_tags
 from skoljka.utils.decorators import response
 
 from folder.models import Folder, FolderTask, FOLDER_TASKS_DB_TABLE
 from folder.forms import FolderForm, FolderAdvancedCreateForm
-from folder.utils import refresh_cache, get_folder_template_data
+from folder.utils import refresh_cache_fields, get_folder_template_data
 
 import re
 
@@ -141,6 +142,7 @@ def view(request, id=None, description=u''):
 
     folder = data.get('folder')
     if folder and folder.editable and folder.user_has_perm(request.user, EDIT):
+
         data['edit_link'] = True
         if not data['tag_list']:
             data['select_link'] = True
@@ -181,7 +183,6 @@ def new(request, folder_id=None):
             .for_user(request.user, VIEW)                   \
             .filter(parent=folder).order_by('parent_index').distinct())
 
-
     if request.method == 'POST':
         folder_form = FolderForm(request.POST, instance=folder, user=request.user)
         if folder_form.is_valid():
@@ -202,12 +203,21 @@ def new(request, folder_id=None):
                 # Update order...
                 children.sort(key=lambda x: x.parent_index)
 
+                # Update tag cache
+                # If edit, immediately save m2m, to be able to refresh cache.
+                folder_form.save_m2m()
+                folder._refresh_cache_tags()
+
             folder.save()
+
+            if not edit:
+                # If new, first save folder (and define ID), and then save m2m
+                folder_form.save_m2m()
 
             # Refresh Folder cache.
             # TODO: Optimize, update only necessary folders.
             if old_parent_id != folder.parent_id:
-                refresh_cache(Folder.objects.all())
+                refresh_cache_fields(Folder.objects.all())
 
 
             # return HttpResponseRedirect(folder.get_absolute_url())
@@ -289,9 +299,14 @@ def _create_folders(author, parent, structure, p):
         # Create new folder
         folder = Folder(author=author, parent=parent, parent_index=index,
             hidden=False, editable=False, name=vars['name'],
-            short_name=vars['short'], tag_filter=vars['tags'],
+            short_name=vars['short'],
             slug=slugify(vars['short']))
+
         folder.save()
+
+        # Note that object has to exist to use this!
+        folder.tags.set(*replace_with_original_tags(vars['tags']))
+        folder._refresh_cache_tags()
 
         total += 1
 
@@ -383,7 +398,7 @@ def advanced_new(request):
             total = _create_folders(request.user, parent, structure, None)
 
             print 'Refreshing folder cache...'
-            refresh_cache(Folder.objects.all())
+            refresh_cache_fields(Folder.objects.all())
 
     else:
         form = FolderAdvancedCreateForm(request.user)

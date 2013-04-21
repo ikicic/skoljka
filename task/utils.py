@@ -1,6 +1,3 @@
-
-
-
 def task_similarity(first, second):
     a = set(first.tags.values_list('id', 'weight'))
     b = set(second.tags.values_list('id', 'weight'))
@@ -13,7 +10,6 @@ def task_similarity(first, second):
         diff_sim = 0.1
     else:
         diff_sim = 1. / (1 + (first.difficulty_rating_avg - second.difficulty_rating_avg) ** 2)
-    
+
     # total similarity
     return tag_sim * diff_sim
-    

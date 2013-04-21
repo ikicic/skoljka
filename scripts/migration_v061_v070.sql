@@ -1,3 +1,7 @@
+/*
+  Don't forget to run Folder Migration admin action! (or automate...)
+*/
+
 /* Structure */
 DROP TABLE folder_foldercollection;
 
@@ -12,6 +16,8 @@ ALTER TABLE folder_folder ADD COLUMN cache_ancestor_ids VARCHAR(255) NOT NULL;
 ALTER TABLE folder_folder ADD COLUMN author_id INT NOT NULL;
 ALTER TABLE folder_folder ADD INDEX folder_folder_45845435 (author_id);
 UPDATE folder_folder SET author_id = 1;
+
+ALTER TABLE folder_folder CHANGE COLUMN tag_filter cache_tags VARCHAR(256) NOT NULL;
 
 
 ALTER TABLE permissions_perobjectgrouppermission RENAME TO permissions_objectpermission;
@@ -36,4 +42,5 @@ ALTER TABLE search_searchcache CHANGE COLUMN tag_string `key` VARCHAR(100) NOT N
 /* Indices */
 
 ALTER TABLE folder_folder ADD INDEX folder_folder_editable (editable);
-ALTER TABLE search_searchcacheelement ADD INDEX search_searchcacheelement_tuple1 (cache_id, content_type_id, object_id);
+ALTER TABLE search_searchcacheelement ADD INDEX search_searchcacheelement_tuple1 (object_id, content_type_id, cache_id);
+ALTER TABLE search_searchcacheelement ADD INDEX search_searchcacheelement_tuple2 (cache_id, content_type_id);

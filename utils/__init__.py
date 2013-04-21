@@ -27,3 +27,19 @@ def get_referrer_path(request):
 
     # Return path
     return referrer[referrer.find('/'):]
+
+def interpolate_colors(r1, g1, b1, r2, g2, b2, percent):
+    return (r1 + (r2 - r1) * percent,
+            g1 + (g2 - g1) * percent,
+            b1 + (b2 - b1) * percent)
+
+def interpolate_three_colors(r1, g1, b1, r2, g2, b2, percent2, r3, g3, b3, percent3):
+    """
+        Triangle color interpolation.
+        percent2 and percent3 represent barycentric coordinates, e.g.
+            0 <= percent2, percent3 <= 1
+            0 <= percent2 + percent3 <= 1
+    """
+    return (r1 + (r2 - r1) * percent2 + (r3 - r1) * percent3,
+            g1 + (g2 - g1) * percent2 + (g3 - g1) * percent3,
+            b1 + (b2 - b1) * percent2 + (b3 - b1) * percent3)

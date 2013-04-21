@@ -49,9 +49,19 @@
 {% mathcontent_attachments task.content %}
 
 <div>
-  {% if task.source %}
-    <div class="task-source">Izvor: {{ task.source }}</div>
-  {% endif %}
+  <div class="task-info-right">
+    {% if task.source %}
+      <div class="task-source">Izvor: {{ task.source }}</div>
+    {% endif %}
+
+    {% if folders %}
+      <div class="task-folders">
+        {% for x in folders %}
+          <a href="{{ x.get_absolute_url }}">{{ x.name }}</a><br>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
 
   {% if user.is_authenticated %}
     {% if solution.is_submitted %}

@@ -66,7 +66,7 @@ def _do_mark(request, solution, task):
     if solution is None:
         solution, dummy = Solution.objects.get_or_create(task=task, author=request.user)
 
-    if solution.author != request.user and not request.user.is_staff:
+    if solution.author_id != request.user.id and not request.user.is_staff:
         return (403, 'Not allowed to modify this solution.')
 
 
@@ -86,6 +86,7 @@ def _do_mark(request, solution, task):
 
 
     # log the action
+    # TODO: use signals?
     if action in ['official1', 'as_solved', 'todo']:
         type_desc = {'official1': _action.SOLUTION_AS_OFFICIAL,
                      'as_solved': _action.SOLUTION_AS_SOLVED,
@@ -99,6 +100,7 @@ def _do_mark(request, solution, task):
 
 
     # update solved count if necessary
+    # TODO: use signals!
     delta = solution.is_solved() - was_solved
     if delta:
         _update_solved_count(delta, task, request.user.get_profile())
@@ -128,7 +130,8 @@ def edit_mark(request, solution_id):
     """
         Called from Solution view
     """
-    solution = get_object_or_404(Solution, id=solution_id)
+    solution = get_object_or_404(Solution.objects.select_related('task'),
+        id=solution_id)
 
     ret_value = _do_mark(request, solution, solution.task)
 

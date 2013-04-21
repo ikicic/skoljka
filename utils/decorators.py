@@ -1,32 +1,88 @@
-from functools import wraps
 from django.contrib.auth.decorators import login_required
+
+# Don't forget to use same cache as in ncache...
+from django.core.cache import cache
+from django.db import models
 from django.db.models.signals import pre_save
 from django.db.models.signals import post_save
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseRedirect, HttpResponsePermanentRedirect, HttpResponseNotAllowed
 from django.template import loader, RequestContext
 
+from skoljka.utils import ncache
+
+from functools import wraps
+from hashlib import sha1
+
+
+def _key_list(input):
+    """
+        Helper function. Replace models with their primary keys.
+    """
+    return [(x.pk if isinstance(x, models.Model) else x) for x in input]
+
+def _key_dict(input):
+    """
+        Helper function. Replace models with their primary keys.
+    """
+    return {key: str(value.pk if isinstance(value, models.Model) else value)
+        for key, value in input.iteritems()}
+
+def cache_function(namespace_format=None, seconds=300):
+    """
+        Cache the result of a function call.
+
+        Parameters:
+            namespace_format: Format of namespace used. E.g. 'Folder{0.pk}'
+                will be converted to Folder5 if function's first parameter
+                is a model with .pk == 5.
+            seconds: Specify how long this cache should be valid.
+    """
+    def decorator(func):
+        def inner(*args, **kwargs):
+            if namespace_format:
+                namespace = namespace_format.format(*args)
+                key = '{}{}{}'.format(func.__name__, _key_list(args),
+                    _key_dict(kwargs))
+                key = ncache.get_full_key(namespace, key)
+            else:
+                # If no namespace given, use some default one...
+                key = '{}{}{}{}'.format(func.__module__, func.__name__,
+                    _key_list(args), _key_dict(kwargs))
+
+            # Hash, so that the names are not too long...
+            key = sha1(key).hexdigest()
+
+            # Check if value cached. If not, retrieve and save it.
+            result = cache.get(key)
+            if result is None:
+                result = func(*args, **kwargs)
+                cache.set(key, result, seconds)
+            return result
+        return wraps(func)(inner)
+    return decorator
+
 # TODO: add login check
 def require(method=[], ajax=None, post=[], get=[], force_login=True):
     """
         TODO
-        
+
         If force_login is set to True, require will return ResponseForbidden
         if user not logged in.
     """
-    
+
     if isinstance(method, basestring):
         method = [method]
     if isinstance(post, basestring):
         post = [post]
     if isinstance(get, basestring):
         get = [get]
-        
+
     # default value of method
     if post and not method:
         method = ['POST']
     if not method:
         method = ['GET']
-        
+
     def decorator(func):
         def inner(request, *args, **kwargs):
             if ajax is not None:
@@ -34,16 +90,16 @@ def require(method=[], ajax=None, post=[], get=[], force_login=True):
                     return HttpResponseBadRequest('Ajax only!')
                 elif not ajax and request.is_ajax():
                     return HttpResponseBadRequest('Ajax not allowed!')
-                    
+
             if force_login is not None:
                 if force_login and not request.user.is_authenticated():
                     return HttpResponseForbidden('Login first!')
                 elif not force_login and request.user.is_authenticated():
                     return HttpResponseForbidden('No registered users allowed!')
-            
+
             if request.method not in method:
                 return HttpResponseNotAllowed(method)
-                
+
             if get:
                 for x in get:
                     if x not in request.GET:
@@ -53,7 +109,7 @@ def require(method=[], ajax=None, post=[], get=[], force_login=True):
                     if x not in request.POST:
                         return HttpResponseBadRequest('Missing POST "%s" field!' % x)
 
-                    
+
             output = func(request, *args, **kwargs)
             if isinstance(output, basestring):
                 return HttpResponse(output)
@@ -68,7 +124,7 @@ def ajax(*args, **kwargs):
             ajax=True
             force_login=True
     """
-    
+
     return require(ajax=True, force_login=kwargs.get('force_login', True), *args, **kwargs)
 
 
@@ -81,7 +137,7 @@ def response_update_cookie(request, name, value):
     if not hasattr(request, '_response_update_cookies'):
         request._response_update_cookies = {}
     request._response_update_cookies[name] = value
-    
+
 
 def _flush_cookie_update(request, response):
     if not hasattr(request, '_response_update_cookies'):
@@ -89,12 +145,12 @@ def _flush_cookie_update(request, response):
     for key, value in request._response_update_cookies.iteritems():
         response.set_cookie(str(key), str(value))
     return response
-    
+
 # this is a decorator
 class response:
     """
         Views helper and shortcut decorator.
-        
+
         Flushes cookie update, pushed by response_update_cookie!
         (only on status OK and redirects)
 
@@ -102,8 +158,8 @@ class response:
             return render_to_response(template, {
                 dictionary
             }, context_instance=RequestContext(request))
-        
-        
+
+
         Parameter:
             Takes an optional parameter template, path and filename to template.
             Response decorator must be initialized!
@@ -111,13 +167,13 @@ class response:
                 @response
                 def detail(request):
                     return 'This is response'
-            
+
             VALID:
                 @response()
                 def detail(request):
                     return 'This is response'
-                
-                
+
+
         Possible return values:
         - dict:
             Dictionary given to template renderer. Template parameter
@@ -135,11 +191,11 @@ class response:
             - (string, content) - Returns content with given template.
             - (int, string, content) - Returns content with given
                 template and status code.
-                
+
             Here `content` denotes string or dict.
                 If a string is given, just return it as is.
                 In case of a dict, it is passed to a template renderer.
-        
+
         Additional, template filename can be passed via dict as a 'TEMPLATE' element.
 
 
@@ -154,18 +210,18 @@ class response:
             if obj.hidden and obj.author != request.user:
                 # returns 403 Forbidden
                 return (403, 'Object %d is hidden' % id)
-              
+
             if (...something...):
                 # redirects to Edit page
                 return ('/obj/%d/edit/' % id, )
-                
+
             if (...something else...):
                 # everything OK, but use another template
                 return ('specific_template.html', {'obj': obj})
-              
+
             return {'obj': obj}
     """
-    
+
     OK = 200
     BAD_REQUEST = 400
     FORBIDDEN = 403
@@ -186,7 +242,7 @@ class response:
 
             status = None
             content = None
-            
+
             template = self.template
             # is any of special types
             if isinstance(x, dict):         # use default template
@@ -211,14 +267,14 @@ class response:
                         status = dummy
                 elif len(x) == 3:
                     status, template, content = x
-                
+
             # render to string if given a dict
             if isinstance(content, dict):
                 template = template or content.pop('TEMPLATE', None)
                 content = loader.render_to_string(template, content,
                     context_instance=RequestContext(request))
-                
-            if content is not None:                
+
+            if content is not None:
                 if status == response.REDIRECT:
                     rsp = HttpResponseRedirect(content)
                 elif status == response.MOVED:
@@ -228,8 +284,8 @@ class response:
             else:
                 # can't recognize data, return original
                 rsp = x
-                
-                
+
+
             if isinstance(rsp, HttpResponse) and status in (response.OK,
                     response.MOVED, response.REDIRECT):
                 return _flush_cookie_update(request, rsp)
@@ -239,8 +295,8 @@ class response:
 
 # http://djangosnippets.org/snippets/2124/
 def autoconnect(cls):
-    """ 
-    Class decorator that automatically connects pre_save / post_save signals on 
+    """
+    Class decorator that automatically connects pre_save / post_save signals on
     a model class to its pre_save() / post_save() methods.
 
     # Example usage
@@ -266,6 +322,6 @@ def autoconnect(cls):
 
     if hasattr(cls, 'post_save'):
         cls.post_save = connect(post_save, cls.post_save)
-    
-    return cls 
+
+    return cls
 

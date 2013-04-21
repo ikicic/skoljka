@@ -27,7 +27,7 @@ class FolderForm(forms.ModelForm):
 
     class Meta:
         model = Folder
-        fields = ['name', 'parent', 'tag_filter']
+        fields = ['name', 'parent', 'tags']
 
 class FolderAdvancedCreateForm(forms.Form):
     structure = forms.CharField(widget=forms.Textarea(), label='Struktura')

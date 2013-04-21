@@ -43,6 +43,10 @@
 
 /* End task action */
 
+.task-info-right {
+  float: right;
+  text-align: right;
+}
 
 /* Task table */
 .task-table td {
