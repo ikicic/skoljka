@@ -22,6 +22,7 @@ import itertools, time
 FOLDER_TASKS_DB_TABLE = 'folder_folder_tasks'
 
 FOLDER_NAMESPACE_FORMAT = 'Folder{0.pk}'
+FOLDER_NAMESPACE_FORMAT_ID = 'Folder{}'
 
 class Folder(PermissionsModel):
     class Meta:

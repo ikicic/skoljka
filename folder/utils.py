@@ -14,7 +14,8 @@ from task.models import Task
 from usergroup.models import UserGroup
 from skoljka.utils import ncache
 
-from folder.models import Folder, FolderTask, FOLDER_NAMESPACE_FORMAT
+from folder.models import Folder, FolderTask, FOLDER_NAMESPACE_FORMAT,  \
+    FOLDER_NAMESPACE_FORMAT_ID
 
 import re
 
@@ -38,12 +39,11 @@ def get_folder_template_data(path, user, flags):
     # Retrieve all necessary information
     return folder.get_template_data(user, flags)
 
-def get_task_folders(task, user=None, check_permissions=True, permission=VIEW):
+def get_task_folder_ids(task):
     """
-        Returns the list of all folders containing given task.
+        Returns the list of IDs of all folders containing given task.
         Combines result of many-to-many relation and folder-filters.
     """
-
     tags = [x.tag for x in get_object_tagged_items(task)]
 
     # One possible solution is:
@@ -69,7 +69,14 @@ def get_task_folders(task, user=None, check_permissions=True, permission=VIEW):
     ids = list(m2m_ids) + list(search_ids)
 
     # Remove duplicates (does not preserve order)
-    ids = list(set(ids))
+    return list(set(ids))
+
+def get_task_folders(task, user=None, check_permissions=True, permission=VIEW):
+    """
+        Extension to get_task_folder_ids. Returns folder instances instead
+        of IDs. Also, checks user permissions if required.
+    """
+    ids = get_task_folder_ids(task)
 
     if check_permissions:
         return Folder.objects.for_user(user, permission)    \
@@ -136,6 +143,13 @@ def refresh_cache_fields(queryset):
 
 # Here, and not in models.py, to avoid import cycles.
 
+def invalidate_cache_for_folder_ids(folder_ids):
+    """
+        Something to avoid, or be extremely careful with.
+    """
+    namespaces = [FOLDER_NAMESPACE_FORMAT_ID.format(x) for x in folder_ids]
+    ncache.invalidate_namespaces(namespaces)
+
 def invalidate_cache_for_folders(folders):
     """
         Something to avoid, or be extremely careful with.
@@ -146,10 +160,8 @@ def invalidate_cache_for_folders(folders):
 def invalidate_folder_cache_for_task(task):
     print 'invalidating for: ', task
     # One could replace .task with .task_id, but the problem is with the
-    # methoda get_task_folders is using.
-    folders = get_task_folders(task)
-    namespaces = [FOLDER_NAMESPACE_FORMAT.format(x) for x in folders]
-    ncache.invalidate_namespaces(namespaces)
+    # methods get_task_folder_ids is using.
+    invalidate_cache_for_folder_ids(get_task_folder_ids(task))
 
 @receiver(objectpermissions_changed, sender=Folder)
 def _invalidate_on_folder_permissions_update(sender, **kwargs):
@@ -178,6 +190,7 @@ def _invalidate_on_task_permissions_update(sender, **kwargs):
 # number of users added / removed to the Group.
 @receiver(post_save, sender=UserGroup)
 def _invalidate_on_usergroup_update(sender, **kwargs):
-    folders = Folder.objects.filter(hidden=True,
-        permissions__group_id=kwargs['instance'].group_id).distinct()
-    invalidate_cache_for_folders(folders)
+    folder_ids = Folder.objects    \
+        .filter(hidden=True, permissions__group_id=kwargs['instance'].group_id) \
+        .values_list('id', flat=True).distinct()
+    invalidate_cache_for_folder_ids(folder_ids)
