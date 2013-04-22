@@ -12,7 +12,7 @@
 
 /* Django & Ajax POST method */
 /* http://stackoverflow.com/questions/5100539/django-csrf-check-failing-with-an-ajax-post-request */
-$.ajaxSetup({ 
+$.ajaxSetup({
      beforeSend: function(xhr, settings) {
          function getCookie(name) {
              var cookieValue = null;
@@ -33,7 +33,7 @@ $.ajaxSetup({
              // Only send the token to relative URLs i.e. locally.
              xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
          }
-     } 
+     }
 });
 
 
@@ -65,7 +65,7 @@ $(function(){
 /* MathContent View source & quote link */
 function quote(mc) {
   var s = $.trim(mc.find('.mc_viewsource_text').text());
-  $('#id_text').val('\n\n[quote]' + s + '[/quote]');  
+  $('#id_text').val('\n\n[quote]' + s + '[/quote]');
 };
 
 function set_reply(id) {
@@ -100,7 +100,7 @@ $(function(){
     e.preventDefault();
     $(this).closest('.mc').find('.mc_viewsource_text').toggle();
   });
-  
+
   /* MathContent quote link */
   $('body').on('click', '.mc_viewsource_quote', function(e) {
     set_reply('');
@@ -141,12 +141,12 @@ $(function(){
     + '<span id="tt_info"></span><br>'
     + '<input type="text" id="tt_add" name="tt_add" placeholder="Dodaj tag" class="input-small"></div>'
   );
-  
+
   /* Add tag */
   $('#tt_add').keypress(function(event){
    var name = $(this).val()
    if (event.which != 13 || name.length == 0) return;
-   
+
    $(this).val('');
    $('#tt_info').html('Slanje...');
    $.post('/ajax/tag/add/', {
@@ -157,15 +157,15 @@ $(function(){
      $('#tt_info').html(ok ? 'Spremljeno' : 'Greška');
      if (ok) $('#tt_text').data('tag').parent().append(' | ' + name);
    });
-  });  
-  
+  });
+
   /* Delete tag */
   $('#tt_delete').click(function(e){
     e.preventDefault();
-    
+
     var tag = $('#tt_text').data('tag');
     $('#tt_info').html('...');
-    
+
     $.post('/ajax/tag/delete/', {
         name: tag.html(),
         task: tag.parent().attr('data-task')
@@ -185,10 +185,10 @@ $(function(){
   /* Tag tooltip */
   vote_func = function(e, value){
     e.preventDefault();
-    
+
     var tag = $('#tt_text').data('tag');
     $('#tt_info').html('...');
-    
+
     $.post('/ajax/tag/vote/', {
         value: value,
         tag: tag.html(),
@@ -198,7 +198,7 @@ $(function(){
         tag.attr('data-votes', vote_count);
         $('#tt_info').html('');
         $('#tt_text').html(vote_count); /* bug if response is delayed */
-        
+
         // TODO: use <= VOTE_WRONG instead of < 0
         tag.toggleClass('tag-wrong', parseInt(vote_count) < 0);
         refresh_tag_votes(tag);
@@ -234,7 +234,7 @@ $(function(){
     + '<a id="task_tt_todo" href="#" title="To Do" class="btn btn-mini"><i class="icon-tag"></i></a>'
     + '</div>'
   );
-  
+
   $('a.task').tooltip({
     tip: '#task_tooltip',
     position: 'bottom center'
@@ -269,7 +269,6 @@ jquery_rating_submit = function(name, url) {
   });
 };
 
-/* Email decode */
 /* email = even position characters + reversed(odd) (0-based) */
 function decode_email(e) {
   var output = '';
@@ -279,11 +278,18 @@ function decode_email(e) {
 };
 
 $(function() {
+  /* Decode emails */
   $('.imejl').each(function() {
     var a = $(this);
     var email = decode_email(a.attr('data-address'));
     if (a.html().length == 0)
       a.html(email);
     a.attr('href', 'mailto:' + email);
+  });
+
+  /* Search toggler */
+  $(".toggler").click(function(e){
+    e.preventDefault();
+    $(".toggle").toggle();
   });
 });

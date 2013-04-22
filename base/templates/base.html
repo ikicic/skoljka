@@ -1,4 +1,5 @@
 {% load compressed %}
+{% load tags_tags %}
 
 <!DOCTYPE html>
 
@@ -29,28 +30,28 @@
     </a>
   </h1>
 
-  {% if not user.is_authenticated or user.profile.selected_folder %}
-    <div style="float:right;margin-top:4px;">
-      <div class="row-fluid">
-        <div style="float:left;margin-right:5px;">
-          {# <h3><a href="/folder/zadatak-dana/?sort=id&dir=desc">Zadatak dana</a></h3> #}
-          {% if user.profile.selected_folder %}
-            Uređivanje mape <a href="/folder/{{ user.profile.selected_folder.id }}/">{{ user.profile.selected_folder.name }}</a>
-          {% endif %}
-        </div>
-        {% if not user.is_authenticated %}
-          <div style="float:left;">
-            <form class="form-inline" action="/accounts/login/" method="POST">
-              {% csrf_token %}
-              <input id="id_username" name="username" type="text" class="input-small" placeholder="Korisničko ime"{% if homepage %} autofocus{% endif %}>
-              <input id="id_password" name="password" type="password" class="input-small" placeholder="Lozinka">
-              <input type="submit" class="btn" value="Prijava">
-            </form>
-          </div>
+  <div id="header-bar">
+    <div class="row-fluid">
+      <div id="hbar-sel-folder">
+        {% if user.profile.selected_folder %}
+          Uređivanje mape <a href="/folder/{{ user.profile.selected_folder.id }}/">{{ user.profile.selected_folder.name }}</a>
         {% endif %}
       </div>
+      <div id="hbar-search">
+        {% include 'inc_search_inline.html' %}
+      </div>
+      {% if not user.is_authenticated %}
+        <div id="hbar-login">
+          <form class="form-inline" action="/accounts/login/" method="POST">
+            {% csrf_token %}
+            <input id="id_username" name="username" type="text" class="input-small" placeholder="Korisničko ime"{% if homepage %} autofocus{% endif %}>
+            <input id="id_password" name="password" type="password" class="input-small" placeholder="Lozinka">
+            <input type="submit" class="btn" value="Prijava">
+          </form>
+        </div>
+      {% endif %}
     </div>
-  {% endif %}
+  </div>
 </div>
 
 <div id="site-container">
@@ -113,5 +114,7 @@
   Školjka v0.6.1 © 2012 Ivica Kičić &amp; <a href="http://mnm.hr/">MNM</a>. &nbsp;
   Hosting by <a href="http://www.kset.org/"><img src="/static/images/kset_logo_white.png" style="vertical-align:-2px;" alt="KSET"></a>
 </div>
+
+<script src="{% tags_autocomplete_js_src %}"></script>
 </body>
 </html>

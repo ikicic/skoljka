@@ -5,6 +5,8 @@ import taggit
 
 from rating.fields import RatingField, SUM
 
+CACHE_TAGS_AUTOCOMPLETE_JS_SRC = 'tags_ac_js_src'
+
 VOTE_WRONG = -1
 
 class Tag(taggit.models.TagBase):
@@ -13,7 +15,7 @@ class Tag(taggit.models.TagBase):
     class Meta:
         verbose_name = _("Tag")
         verbose_name_plural = _("Tags")
-        
+
     def __unicode__(self):
         return '%s (%.1f)' % (self.name, self.weight)
 
@@ -22,9 +24,9 @@ class TaggedItemBase(taggit.models.ItemBase):
 
     class Meta:
         abstract = True
-        
-    # missing tags_for()    
-    
+
+    # missing tags_for()
+
 class TaggedItem(taggit.models.GenericTaggedItemBase, TaggedItemBase):
     votes = RatingField(type=SUM)
 

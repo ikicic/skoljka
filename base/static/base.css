@@ -225,6 +225,25 @@ h4 a {
   width: 225px;
 }
 
+#header-bar {
+  float: right;
+  margin-top: 4px;
+}
+
+#hbar-sel-folder {
+  float: left;
+  margin: 5px 5px 0 0;
+}
+
+#hbar-search {
+  float: left;
+  margin-right: 5px;
+}
+
+#hbar-login {
+  float: left;
+}
+
 .nav-hello-user {
   padding: 0 0 1em 12px;
 }

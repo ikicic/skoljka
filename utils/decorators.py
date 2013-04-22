@@ -10,8 +10,8 @@ from django.template import loader, RequestContext
 
 from skoljka.utils import ncache
 
-from functools import wraps
 from hashlib import sha1
+from functools import wraps
 
 
 def _key_list(input):
@@ -27,36 +27,49 @@ def _key_dict(input):
     return {key: str(value.pk if isinstance(value, models.Model) else value)
         for key, value in input.iteritems()}
 
-def cache_function(namespace_format=None, seconds=300):
+def cache_function(key=None, namespace_format=None, seconds=86400*7):
     """
         Cache the result of a function call.
 
         Parameters:
+            key: Cache key.
             namespace_format: Format of namespace used. E.g. 'Folder{0.pk}'
                 will be converted to Folder5 if function's first parameter
                 is a model with .pk == 5.
             seconds: Specify how long this cache should be valid.
+
+        Note that it is possible to set both namespace_format and key. In that
+        case, key is considered as a 'subkey'.
     """
     def decorator(func):
         def inner(*args, **kwargs):
+            # _key stands for final/full key
+            if key:
+                _key = key
+            else:
+                if namespace_format:
+                    # Don't unnecesarry put module name here.
+                    # If you need it for any reason, feel free to put it.
+                    _key = '{}.{}.{}'.format(func.__name__, _key_list(args),
+                        _key_dict(kwargs))
+                else:
+                    # If no namespace given, distinguish different modules.
+                    _key = '{}{}{}{}'.format(func.__module__, func.__name__,
+                        _key_list(args), _key_dict(kwargs))
+
+                # Memcached doesn't like ascii <= 32 and ascii == 127.
+                # Just hash it.
+                _key = sha1(_key).hexdigest()
+
             if namespace_format:
                 namespace = namespace_format.format(*args)
-                key = '{}{}{}'.format(func.__name__, _key_list(args),
-                    _key_dict(kwargs))
-                key = ncache.get_full_key(namespace, key)
-            else:
-                # If no namespace given, use some default one...
-                key = '{}{}{}{}'.format(func.__module__, func.__name__,
-                    _key_list(args), _key_dict(kwargs))
-
-            # Hash, so that the names are not too long...
-            key = sha1(key).hexdigest()
+                _key = ncache.get_full_key(namespace, _key)
 
             # Check if value cached. If not, retrieve and save it.
-            result = cache.get(key)
+            result = cache.get(_key)
             if result is None:
                 result = func(*args, **kwargs)
-                cache.set(key, result, seconds)
+                cache.set(_key, result, seconds)
             return result
         return wraps(func)(inner)
     return decorator

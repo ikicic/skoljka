@@ -2,10 +2,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count
 
-from tags.models import Tag
+from task.models import Task
 from skoljka.utils.decorators import response
 
-from task.models import Task
+from tags.models import Tag
 
 @login_required
 @response('tags_list.html')
@@ -21,7 +21,7 @@ def list(request):
         for k, v in request.POST.iteritems():
             if not v or not v.strip():
                 continue
-                
+
             # not a tag weight, skip
             if k[0] != 'w':
                 continue
@@ -31,16 +31,16 @@ def list(request):
                 id = int(k[1:])
             except ValueError:
                 return (response.BAD_REQUEST, 'Invalid input id %s' % k)
-                
+
             try:
                 weight = float(v)
             except ValueError:
                 invalid.append(id)
                 continue
-                
+
             Tag.objects.filter(id=id).update(weight=weight)
             updated.append(id)
-            
+
         if invalid:
             alert_class = 'alert-error'
             message = 'Neke vrijednosti su nevaljanje (%d).' % len(invalid)

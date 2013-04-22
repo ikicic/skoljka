@@ -22,12 +22,6 @@
       <div class="toggle"{% if not search_solved_count %} style="display:none;"{% endif %}>
         {{ advanced_form.as_p }}
       </div>
-      {# TODO: move to .js! #}
-      <script>
-        $(".toggler").click(function(){
-          $(".toggle").toggle();
-        });
-      </script>
     </td></tr>
     {% endif %}
     <tr><td colspan="2">
@@ -35,8 +29,6 @@
     </td></tr>
   </table>
 </form>
-
-{% tags_autocomplete_script %}
 
 
 {% if any %}

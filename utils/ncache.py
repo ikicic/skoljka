@@ -2,11 +2,11 @@
     Namespaced cache module. Cache module extension/wrapper.
 
     Key used to save namespace counter is namespace string itself.
-    
+
     Term full_key is used for final cache key generated from namespace, its
     counter and given key (i.e. subkey). Note that you need the counter to
     access the final cached value (that's how the namespace mechanism works).
-    
+
     TODO: details, usage etc.
 """
 
@@ -19,7 +19,7 @@ def make_full_key(namespace, counter, key):
     """
         Generate full key from namespace, counter and (sub)key.
     """
-    return '{}{}{}'.format(namespace, counter, key)
+    return '{}-{}-{}'.format(namespace, counter, key)
 
 def get_counter(namespace):
     """
@@ -39,6 +39,9 @@ def get_counters(namespaces):
 def get_or_create_counter(namespace):
     """
         Get counter for given namespace, or create it if it doesn't exist.
+
+        Returns pair:
+            counter, is_created
     """
     counter = cache.get(namespace)
     if counter:
@@ -62,7 +65,7 @@ def get_full_key(namespace, key):
         Returns full key for given (sub)key and namespace. If namespace not
         used (i.e. counter doesn't exist), create it.
     """
-    counter = get_or_create_counter(namespace)
+    counter, dummy = get_or_create_counter(namespace)
     return make_full_key(namespace, counter, key)
 
 def get_many_for_update(namespaces, keys):
