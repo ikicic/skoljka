@@ -1,7 +1,5 @@
 {% extends "base.html" %}
 
-{% load tags_tags %}
-
 {% block title %}
   {% if edit %}
     Uređivanje zadatka {{ task.name }}
@@ -25,7 +23,7 @@
 
 <div style="float:right;text-align:right;">
   {% if edit %}
-    <a href="/mathcontent/{{ task.content.id }}/attachments/" class="btn">Pregled datoteka</a><br><br>
+    <a href="/mathcontent/{{ task.content_id }}/attachments/" class="btn">Pregled datoteka</a><br><br>
   {% endif %}
   <a href="/tags/" target="_blank">Popis tagova</a>
 </div>
@@ -51,7 +49,5 @@
   <br>
   <input type="submit" class="btn btn-primary" value="Pošalji">
 </form>
-
-{% tags_autocomplete_script %}
 
 {% endblock content %}

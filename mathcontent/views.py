@@ -10,7 +10,7 @@ from mathcontent.models import MathContent, Attachment
 
 @login_required
 def delete_attachment(request, id):
-    attachment = get_object_or_404(Attachment.select_related('content'), id=id)
+    attachment = get_object_or_404(Attachment.objects.select_related('content'), id=id)
     
     # TODO: POST method!
     if not request.is_ajax():

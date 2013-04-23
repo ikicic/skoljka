@@ -10,29 +10,15 @@
   {{ content.render }}
 </div>
 
-<script>
-$(function(){
-  $('.attdel').click(function(){
-    var id = $(this).attr('data-id');
-    var name = $(this).attr('data-name');
-    if (confirm('Jeste li sigurni da želite izbrisati datoteku \'' + name + '\'?')) {
-      $.ajax({
-        url: '/attachment/' + id + '/delete/',
-        success: function(){window.location.reload();}
-      });
-    }
-  });
-});
-</script>
-
 <div class="well">
   <h4>Postojeće datoteke</h4>
   <table class="table-striped table-condensed" style="width: 40%">
+
   {% for x in content.attachments.all %}
     <tr>
       <td><a href="{{ x.get_url }}">{{ x.get_filename }}</a></td>
       <td>{{ x.file.size|filesizeformat }}</td>
-      <td><a class="attdel" data-id="{{ x.id }}" data-name="{{ x.get_filename }}" href="#" title="Izbiši">Izbriši</a><br></td>
+      <td><a class="mc-attachment-delete" data-id="{{ x.id }}" data-name="{{ x.get_filename }}" href="#" title="Izbiši">Izbriši</a></td>
     </tr>
   {% empty %}
     <tr><td><i>Nema datoteka.</i></td></tr>

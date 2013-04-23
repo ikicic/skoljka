@@ -242,6 +242,7 @@ h4 a {
 
 #hbar-login {
   float: left;
+  margin-left: 10px;
 }
 
 .nav-hello-user {

@@ -50,7 +50,7 @@ def cache_function(key=None, namespace_format=None, seconds=86400*7):
                 if namespace_format:
                     # Don't unnecesarry put module name here.
                     # If you need it for any reason, feel free to put it.
-                    _key = '{}.{}.{}'.format(func.__name__, _key_list(args),
+                    _key = '{}{}{}'.format(func.__name__, _key_list(args),
                         _key_dict(kwargs))
                 else:
                     # If no namespace given, distinguish different modules.

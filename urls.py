@@ -6,7 +6,6 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-
     # Uncomment the admin/doc line below to enable admin documentation:
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
@@ -19,7 +18,7 @@ urlpatterns = patterns('',
 
     (r'^', include('base.urls')),
 
-    ('^activity/', include('activity.urls')),
+    (r'^activity/', include('activity.urls')),
     (r'^folder/', include('folder.urls')),
     (r'^', include('mathcontent.urls')), # namjerno nije r'^mathcontent/'
     (r'^permissions/', include('permissions.urls')),
@@ -33,6 +32,5 @@ urlpatterns = patterns('',
     (r'^', include('userprofile.urls')), # namjerno nije r'^profile/'
     (r'^', include('solution.urls')), # namjerno nije r'^solution/'
 
-    (r'^sentry/', include('sentry.web.urls')),
-
+    # (r'^sentry/', include('sentry.web.urls')),
 )

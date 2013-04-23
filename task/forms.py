@@ -21,7 +21,7 @@ class TaskExportForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(TaskExportForm, self).__init__(*args, **kwargs)
         self.fields['format'].widget.attrs.update({'class': 'input-small'})
-    
+
 
 class TaskAdvancedForm(forms.ModelForm):
     _tags = forms.CharField(max_length=200)
@@ -35,8 +35,8 @@ class TaskForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
 
         super(TaskForm, self).__init__(*args, **kwargs)
-        
-        self.fields['tags'].widget.attrs.update({'class': 'ac_tags span6'})
+
+        self.fields['tags'].widget.attrs.update({'class': 'ac-tags span6'})
         for x in ['name', 'source']:
             self.fields[x].widget.attrs.update({'class': 'span6'})
 
@@ -46,8 +46,8 @@ class TaskForm(forms.ModelForm):
         if self.user and not self.user.is_staff:
             if any(('news' == x.strip().lower() for x in tags)):
                 raise forms.ValidationError("Tag 'news' nije dozvoljen!")
-        return tags    
-            
+        return tags
+
     class Meta:
         model = Task
         fields = ['name', 'tags', 'source', 'hidden']

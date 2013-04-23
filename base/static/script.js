@@ -292,4 +292,18 @@ $(function() {
     e.preventDefault();
     $(".toggle").toggle();
   });
+
+  /* Delete attachments */
+  $('.mc-attachment-delete').click(function() {
+    var id = $(this).attr('data-id');
+    var name = $(this).attr('data-name');
+    if (confirm('Jeste li sigurni da želite izbrisati datoteku \'' + name + '\'?')) {
+      $.ajax({
+        url: '/attachment/' + id + '/delete/',
+        success: function() {
+          window.location.reload();
+        }
+      });
+    }
+  });
 });

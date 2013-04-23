@@ -8,11 +8,11 @@ urlpatterns = patterns('',
 
     (r'^(?P<id>\d+)/$', 'task.views.detail'),
     (r'^(?P<id>\d+)/similar/$', 'task.views.similar'),
-    
+
     (r'^new/$', 'task.views.new'),
     (r'^new/advanced/$', 'task.views.advanced_new'),
     (r'^(?P<task_id>\d+)/edit/$', 'task.views.new'),
-    
+
     # this url format used to keep robots away with Disallow: /task/export/
     (r'^export/$', 'task.views.export'),
     (r'^export/(?P<format>\w+)/(?P<ids>[0-9,]+)/', 'task.views.export'),

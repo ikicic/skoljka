@@ -5,7 +5,7 @@
 {% load rating_tags %}
 {% load tags_tags %}
 
-{% block title %}Pregled zadatka{% endblock %}
+{% block title %}{{ task.name|default:"Pregled zadatka" }}{% endblock %}
 
 {% block content %}
 

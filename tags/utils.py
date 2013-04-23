@@ -1,6 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 
-from tags.models import Tag, TaggedItem
+from tags.models import TaggedItem
 
 def get_object_tagged_items(instance):
     if not hasattr(instance, '_cache_tagged_items'):
