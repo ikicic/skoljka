@@ -21,9 +21,11 @@ from recommend.utils import task_event
 from search.utils import update_search_cache
 from solution.models import Solution, STATUS as _SOLUTION_STATUS
 from solution.views import get_user_solved_tasks
-from mathcontent.forms import MathContentForm
+from mathcontent.forms import MathContentForm, AttachmentForm
 from mathcontent import latex
+from mathcontent.forms import AttachmentForm
 from mathcontent.models import MathContent, Attachment
+from mathcontent.utils import check_and_save_attachment
 from usergroup.forms import GroupEntryForm
 
 from skoljka.utils import get_referrer_path
@@ -205,19 +207,24 @@ def old_advanced_new(request):
 # kraj starog koda
 #########################################################
 
+def new_file(request):
+    return new(request, is_file=True)
+
 @login_required
 @response('task_new.html')
-def new(request, task_id=None):
+def new(request, task_id=None, is_file=None):
     """
         New Task and Edit Task
+        + New TaskFile and Edit TaskFile
     """
     if task_id:
-        task = get_object_or_404(Task, pk=task_id)
+        task = get_object_or_404(Task.objects.select_related('content'), pk=task_id)
+        if not task.user_has_perm(request.user, EDIT):
+            return 403
         math_content = task.content
         old_tags = list(task.tags.values_list('name', flat=True))
         edit = True
-        if not task.user_has_perm(request.user, EDIT):
-            return 403
+        is_file = task.is_file()
     else:
         task = math_content = None
         old_tags = []
@@ -228,11 +235,21 @@ def new(request, task_id=None):
 
         task_form = TaskForm(request.POST, instance=task, user=request.user)
         math_content_form = MathContentForm(request.POST, instance=math_content)
+        attachment_form = is_file and not edit \
+            and AttachmentForm(request.POST, request.FILES)
 
-        if task_form.is_valid() and math_content_form.is_valid():
+        if task_form.is_valid() and math_content_form.is_valid()    \
+                and (not attachment_form or attachment_form.is_valid()):
 
             task = task_form.save(commit=False)
             math_content = math_content_form.save()
+
+            if attachment_form:
+                attachment, attachment_form = check_and_save_attachment(
+                    request, math_content)
+                task.file_attachment = attachment   # This is a file.
+            else:
+                task.file_attachment = None         # This is a task.
 
             if not edit:
                 task.author = request.user
@@ -269,7 +286,8 @@ def new(request, task_id=None):
                 update_search_cache(task, old_tags, tags)
 
             # send action if creating a new nonhidden task
-            if not edit and not task.hidden:
+            # TODO: currently not sending any info if a file. finish with signals!
+            if not edit and not task.hidden and not is_file:
                 # TODO: signals!
                 _action.add(request.user, _action.TASK_ADD,
                     action_object=task, target=task)
@@ -280,13 +298,20 @@ def new(request, task_id=None):
     else:
         task_form = TaskForm(instance=task)
         math_content_form = MathContentForm(instance=math_content)
+        attachment_form = is_file and not edit and AttachmentForm()
+
+    forms = [task_form, math_content_form]
+    if attachment_form:
+        forms.append(attachment_form)
 
     return {
-        'forms': [task_form, math_content_form],
+        'forms': forms,
         'action_url': request.path,
         'edit': edit,
         'task': task,
+        'is_file': is_file,
     }
+
 
 @response('task_list.html')
 def task_list(request, user_id=None):

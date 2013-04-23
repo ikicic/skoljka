@@ -5,17 +5,20 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
+from skoljka.utils.decorators import response
+
 from mathcontent.forms import AttachmentForm
 from mathcontent.models import MathContent, Attachment
+from mathcontent.utils import check_and_save_attachment
 
 @login_required
 def delete_attachment(request, id):
     attachment = get_object_or_404(Attachment.objects.select_related('content'), id=id)
-    
+
     # TODO: POST method!
     if not request.is_ajax():
         return HttpResponseBadRequest()
-        
+
     # refresh HTML cache
     attachment.content.html = None
     attachment.content.save()
@@ -23,41 +26,21 @@ def delete_attachment(request, id):
     # TODO: permissions!!
     attachment.file.delete()
     attachment.delete()
-    
-    
+
+
     return HttpResponse('OK')
 
 @login_required
+@response('mathcontent_edit_attachments.html')
 def edit_attachments(request, id):
     content = get_object_or_404(MathContent, id=id)
-    
+
     if request.method == 'POST':
-        form = AttachmentForm(request.POST, request.FILES)
-        if form.is_valid():
-            attachment = Attachment(content=content)
-            attachment.save()
-            
-            # moram ovako tako da bi se mogao generirati pravilan filename
-            form = AttachmentForm(request.POST, request.FILES, instance=attachment)
-            attachment = form.save(commit=False)
-            name = attachment.file.name.replace(' ', '')
-            if '.' in name:
-                name, ext = name.rsplit('.', 1)
-                name = name.replace('.', '') + '.' + ext
-            attachment.file.name = name
-            attachment.cache_file_size = attachment.file.size
-            attachment.save()
-            
-            # refresh HTML cache
-            content.html = None
-            content.save()
-            
-            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+        attachment, form = check_and_save_attachment(request, content)
     else:
         form = AttachmentForm()
-    
-    return render_to_response('mathcontent_edit_attachments.html', {
-                'content': content,
-                'form': form,
-            }, context_instance=RequestContext(request),
-        )
+
+    return {
+        'content': content,
+        'form': form,
+    }

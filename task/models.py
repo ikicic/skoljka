@@ -5,7 +5,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.generic import GenericRelation
 from django.utils.safestring import mark_safe
 
-from mathcontent.models import MathContent
+from mathcontent.models import MathContent, Attachment
 from permissions.models import BasePermissionsModel
 from post.generic import PostGenericRelation
 from rating.fields import RatingField
@@ -64,6 +64,9 @@ class Task(BasePermissionsModel):
 
     solved_count = models.IntegerField(default=0, db_index=True)
 
+    # If not None, this Task is a file actually.
+    file_attachment = models.ForeignKey(Attachment, blank=True, null=True)
+
     class Meta(BasePermissionsModel.Meta):
         ordering = ['id']
 
@@ -75,6 +78,9 @@ class Task(BasePermissionsModel):
 
     def get_link(self):
         return mark_safe('<a href="/task/%d/" class="task">%s</a>' % (self.id, self.name))
+
+    def is_file(self):
+        return file_attachment is not None
 
     # deprecated?
     # TODO: preurediti, ovo je samo tmp

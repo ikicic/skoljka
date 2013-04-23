@@ -1,28 +1,38 @@
 {% extends "base.html" %}
 
 {% block title %}
-  {% if edit %}
-    Uređivanje zadatka {{ task.name }}
+  {% if is_file %}
+    {% if edit %}
+      Uređivanje datoteke {{ task.name }}
+    {% else %}
+      Nova datoteka
+    {% endif %}
   {% else %}
-    Novi zadatak
+    {% if edit %}
+      Uređivanje zadatka {{ task.name }}
+    {% else %}
+      Novi zadatak
+    {% endif %}
   {% endif %}
 {% endblock %}
 
 
 {% block content %}
 
-{% if advanced %}
-  <a href="/task/new/">Jednostavno</a><br><br>
-  Naprednim dodavanjem zadataka možete odjednom dodati više zadataka sličnog imena i sličnih tagova.<br>
-  Zadatke razdvajajte oznakom <pre>@@@@@</pre>.<br>
-  Ukoliko želite navesti broj zadatka u imenu ili tagovima, napišite <pre>[[#]]</pre>.<br>
-  Npr. Ime: <pre>IMO 2011</pre>, Tagovi: <pre>IMO, 2011, IMO</pre>.<br><br>
-{% else %}
-  {% if perms.task.add_advanced %}<a href="/task/new/advanced/">Napredno</a><br><br>{% endif %}
+{% if not is_file %}
+  {% if advanced %}
+    <a href="/task/new/">Jednostavno</a><br><br>
+    Naprednim dodavanjem zadataka možete odjednom dodati više zadataka sličnog imena i sličnih tagova.<br>
+    Zadatke razdvajajte oznakom <pre>@@@@@</pre>.<br>
+    Ukoliko želite navesti broj zadatka u imenu ili tagovima, napišite <pre>[[#]]</pre>.<br>
+    Npr. Ime: <pre>IMO 2011</pre>, Tagovi: <pre>IMO, 2011, IMO</pre>.<br><br>
+  {% else %}
+    {% if perms.task.add_advanced %}<a href="/task/new/advanced/">Napredno</a><br><br>{% endif %}
+  {% endif %}
 {% endif %}
 
 <div style="float:right;text-align:right;">
-  {% if edit %}
+  {% if edit and not is_file %}
     <a href="/mathcontent/{{ task.content_id }}/attachments/" class="btn">Pregled datoteka</a><br><br>
   {% endif %}
   <a href="/tags/" target="_blank">Popis tagova</a>
@@ -30,16 +40,20 @@
 
 <br>
 <div style="width: 70%; margin-left: 10px; font-style: italic;">
-  Napomena: Nemojte dodavati zadatke za koja nemate prava. Također, nemojte
-  dodavati zadatke s domaćih natjecanja (općinskih, županijskih, državnih,
-  izbornih) i s olimpijada (IMO, shortlist, MEMO, HMO), jer će to prije ili
-  poslije dodati mentori. Ukoliko dodajete zadatke s natjecanja, po mogućnosti
-  dodajte sve zadatke odjednom (svih, primjerice, pet zadataka).
+  {% if is_file %}
+    Napomena: Nemojte dodavati datoteke za čiji sadržaj nemate prava!
+  {% else %}
+    Napomena: Nemojte dodavati zadatke za koja nemate prava. Također, nemojte
+    dodavati zadatke s domaćih natjecanja (općinskih, županijskih, državnih,
+    izbornih) i s olimpijada (IMO, shortlist, MEMO, HMO), jer će to prije ili
+    poslije dodati mentori. Ukoliko dodajete zadatke s natjecanja, po mogućnosti
+    dodajte sve zadatke odjednom (svih, primjerice, pet zadataka).
+  {% endif %}
 </div>
 
 <br><br>
 
-<form action="{{ action_url }}" method="post">
+<form {% if is_file %}enctype="multipart/form-data"{% endif %} action="{{ action_url }}" method="post">
   {% csrf_token %}
   <table>
     {% for form in forms %}

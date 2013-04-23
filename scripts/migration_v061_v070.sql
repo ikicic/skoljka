@@ -25,6 +25,7 @@ ALTER TABLE mathcontent_attachment ADD COLUMN cache_file_size INT NOT NULL DEFAU
 
 ALTER TABLE permissions_perobjectgrouppermission RENAME TO permissions_objectpermission;
 
+ALTER TABLE task_task ADD COLUMN file_attachment_id INT NULL;
 
 ALTER TABLE userprofile_userprofile DROP COLUMN birthday;
 ALTER TABLE userprofile_userprofile DROP COLUMN city;

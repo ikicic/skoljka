@@ -1,7 +1,9 @@
 ﻿from skoljka.utils import xss
 
 from mathcontent import ERROR_DEPTH_VALUE
+from mathcontent.forms import AttachmentForm
 from mathcontent.latex import generate_png, generate_svg
+from mathcontent.models import Attachment
 
 # used for tag_open[tag][type]
 TYPE_HTML = 0
@@ -68,24 +70,24 @@ def parse_bb_code(S):
     """
         Split tag name and attributes.
         Returns tuple (name, attrs), where attrs is a dictionary.
-        
+
         Note:
             Doesn't support spaces in attribute values!
-        
+
         Example:
             S = 'img attachment=2 width=100px'
-            
+
             name = u'img'
             attrs = {u'attachment': u'2', u'width': u'100px'}
     """
-    
+
     # is there any shortcut for this in Python 2.7?
     tmp = S.split(' ')
     name = tmp[0]
     attrs = tmp[1:]
-    
+
     attrs = dict([x.split('=', 2) for x in attrs])
-    
+
     return name, attrs
 
 
@@ -95,14 +97,14 @@ def _convert(T, type, handle_latex_func, escape_table, content=None,
         attachment_path=None): # XSS danger!!! Be careful
     """
         Converts MathContent format to HTML (type 0) or LaTeX (type 1)
-        
-        To support features like [img], it must be called with a 
+
+        To support features like [img], it must be called with a
         a content instance.
     """
-    
+
     # force strip
     T = T.strip()
-    
+
     if type == TYPE_HTML:
         newline = '<br>'
     else:
@@ -147,7 +149,7 @@ def _convert(T, type, handle_latex_func, escape_table, content=None,
                     out.append('[%s]' % T[i+1:end])
                     i = end + 1
                     continue
-                    
+
                 if tag[0] == '/':
                     tag = tag[1:]
                     if not tag_stack or tag_stack[-1] != tag:
@@ -160,7 +162,7 @@ def _convert(T, type, handle_latex_func, escape_table, content=None,
                     # ask for close tag if there should be one
                     if tag_close.get(tag, None) is not None:
                         tag_stack.append(tag)
-                        
+
                     open = tag_open[tag][type]
 
                     # process attributes
@@ -173,7 +175,7 @@ def _convert(T, type, handle_latex_func, escape_table, content=None,
                                     extra += ' %s="%s"' % (key, xss.escape(attrs[key]))
                                 else:
                                     extra += ',%s=%s' % (key, xss.escape(attrs[key]))
-                    
+
                     if tag == 'img':
                         if not content:
                             open = u'{{ Slika nije dostupna u pregledu }}'
@@ -192,10 +194,10 @@ def _convert(T, type, handle_latex_func, escape_table, content=None,
                                     else:
                                         filename = file.get_full_path_and_filename()
                                     extra = '[%s]{%s}' % (extra[1:], filename)
-                                
+
                             except:
                                 open = u'{{ Greška pri preuzimanju img datoteke. (Nevaljan broj?) }}'
-                        
+
                     open %= {'extra': extra}
                     out.append(open)
                 i = end + 1
@@ -207,7 +209,7 @@ def _convert(T, type, handle_latex_func, escape_table, content=None,
                 i += 1
             if cnt > 3:
                 cnt = 3
-                
+
             # this should cover all weird cases with \\ and \$
             latex = []
             while i < n:
@@ -222,13 +224,13 @@ def _convert(T, type, handle_latex_func, escape_table, content=None,
                 else:
                     latex.append(T[i])
                     i += 1
-            
+
             # don't care how many $ are there, just skip them
             while i < n and T[i] == '$':
                 i += 1
 
             latex = u''.join(latex)
-            
+
             out.append(handle_latex_func(cnt, latex))
         else:
             out.append(escape_table.get(T[i], T[i]))
@@ -254,7 +256,7 @@ def _handle_latex_html(cnt, latex):
         format = block_format
     else:
         format = advanced_format
-    
+
     # FIXME: don't save error message to depth
     hash, depth = generate_png(latex, format)
     if depth == ERROR_DEPTH_VALUE:
@@ -280,11 +282,11 @@ def _handle_latex_html(cnt, latex):
     #         obj = '<object data="%s" type="image/svg+xml" alt="%s" class="latex_center"></object>' % (url, latex_escaped)
 
     #     # out.append(obj)
-    
+
 def convert_to_html(T, content=None):
     """
         Converts MathContent Format to HTML
-        
+
         Handles BBCode tags, converts LaTeX to images and escapes special chars.
     """
     return _convert(T, TYPE_HTML, _handle_latex_html, html_escape_table, content=content)
@@ -294,7 +296,7 @@ def _handle_latex_latex(cnt, text):
     """
         Converts dollar formatting to correct LaTeX formatting
     """
-    
+
     if cnt == 1:
         return u'$%s$' % text
     if cnt == 2:
@@ -305,12 +307,50 @@ def _handle_latex_latex(cnt, text):
 def convert_to_latex(T, content=None, attachment_path=None):
     """
         Converts MathContent Format to LaTeX
-        
+
         Replaces # % ^ & _ { } ~ \
         with \# \% \textasciicircum{} \& \_ \{ \} \~{} \textbackslash{},
         but keeps \$ as \$, because $ is a special char anyway
-        
+
         Handles BBCode [i], [b] etc.
     """
     return _convert(T, TYPE_LATEX, _handle_latex_latex, reserved,
         content=content, attachment_path=attachment_path)
+
+def check_and_save_attachment(request, content):
+    """
+        Check if AttachmentForm is valid and, if it is, automatically save
+        Attachment model. Moved to a separate util method, because it is quite
+        complex to repeat
+
+        Returns pair (attachment, form).
+    """
+
+    form = AttachmentForm(request.POST, request.FILES)
+
+    if form.is_valid():
+        # First generate attachment instance, so that file name generation works.
+        attachment = Attachment(content=content)
+        attachment.save()
+
+        # Generate path and file name etc.
+        form = AttachmentForm(request.POST, request.FILES, instance=attachment)
+        attachment = form.save(commit=False)
+
+        # Make file name compatible with LaTeX.
+        name = attachment.file.name.replace(' ', '')
+        if '.' in name:
+            name, ext = name.rsplit('.', 1)
+            name = name.replace('.', '') + '.' + ext
+        attachment.file.name = name
+        attachment.cache_file_size = attachment.file.size
+        attachment.save()
+
+        # Refresh HTML
+        # TODO: use signals!
+        content.html = None
+        content.save()
+    else:
+        attachment = None
+
+    return attachment, form
