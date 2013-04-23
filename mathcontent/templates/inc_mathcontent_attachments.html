@@ -2,7 +2,7 @@
   <span style="font-size:12px;">
   Datoteke:<br>
   {% for x in attachments %}
-    <i class="icon-download"></i> <i><a href="{{ x.get_url }}">{{ x.get_filename }}</a> {{ x.file.size|filesizeformat }}<br></i>
+    <i class="icon-download"></i> <i><a href="{{ x.get_url }}">{{ x.get_filename }}</a> {{ x.cache_file_size|filesizeformat }}<br></i>
   {% endfor %}
   </span>
 {% endif %}

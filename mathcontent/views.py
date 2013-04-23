@@ -45,6 +45,7 @@ def edit_attachments(request, id):
                 name, ext = name.rsplit('.', 1)
                 name = name.replace('.', '') + '.' + ext
             attachment.file.name = name
+            attachment.cache_file_size = attachment.file.size
             attachment.save()
             
             # refresh HTML cache

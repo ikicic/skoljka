@@ -1,5 +1,7 @@
 /*
-  Don't forget to run Folder Migration admin action! (or automate...)
+  Don't forget to: (or automate...)
+    1) run Folder migration admin action
+    2) reset attachment file size
 */
 
 /* Structure */
@@ -19,6 +21,7 @@ UPDATE folder_folder SET author_id = 1;
 
 ALTER TABLE folder_folder CHANGE COLUMN tag_filter cache_tags VARCHAR(256) NOT NULL;
 
+ALTER TABLE mathcontent_attachment ADD COLUMN cache_file_size INT NOT NULL DEFAULT 0;
 
 ALTER TABLE permissions_perobjectgrouppermission RENAME TO permissions_objectpermission;
 

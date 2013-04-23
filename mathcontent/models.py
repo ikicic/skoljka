@@ -29,17 +29,17 @@ class LatexElement(models.Model):
 class MathContent(models.Model):
     text = models.TextField(max_length=MAX_LENGTH, verbose_name='Tekst')
     html = models.TextField(blank=True, null=True)
-    
+
     def __unicode__(self):
         return self.short()
-        
+
     def short(self, length=50):
         return self.text[:length] + "..." if len(self.text) > length else self.text
-    
+
     def pre_save(self):
         if not hasattr(self, 'no_html_reset'):
             self.html = None
-    
+
     def render(self, quote=False):
         if self.html is None:
             from mathcontent.utils import convert_to_html
@@ -48,7 +48,7 @@ class MathContent(models.Model):
             self.no_html_reset = True
             self.save()
             print 'DONE!'
-        
+
         return render_to_string('inc_mathcontent_render.html', {
             'content': self,
             # TODO: make a template tag
@@ -56,7 +56,7 @@ class MathContent(models.Model):
             'view_source': True,
             'quote': quote,
         })
-        
+
     # TODO: template tag!
     def render_quote(self):
         return self.render(quote=True)
@@ -80,6 +80,14 @@ class Attachment(models.Model):
     content = models.ForeignKey(MathContent, related_name='attachments')
     date_created = models.DateTimeField(auto_now_add=True)
 
+    cache_file_size = models.IntegerField(default=0)
+
+    def __unicode__(self):
+        if self.cache_file_size >= 0:
+            return 'Attachment #{}'.format(self.id)
+        else:
+            return 'Attachment #{} <MISSING>'.format(self.id)
+
     def get_url(self):
         # FIXME: this is risky...
         # file.name includes path
@@ -87,6 +95,6 @@ class Attachment(models.Model):
 
     def get_filename(self):
         return os.path.basename(self.file.name)
-        
+
     def get_full_path_and_filename(self):
         return self.file.name
