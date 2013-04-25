@@ -42,3 +42,16 @@ EMAIL_PORT = 0
 EMAIL_USE_TLS = True
 SERVER_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+USERPROFILE_SCHOOL_CLASS_INFO = [
+    # Unique ID, Description, Tag
+    (4, 'Srednja škola 4. razred', 'ss4'),
+    (3, 'Srednja škola 3. razred', 'ss3'),
+    (2, 'Srednja škola 2. razred', 'ss2'),
+    (1, 'Srednja škola 1. razred', 'ss1'),
+]
+
+# + is replaced with the appropriate tag from school class info
+FOLDER_HOMEPAGE_SHORTCUTS = ['drz,+', 'zup,+', 'opc,+', 'IMO', 'shortlist', 'MEMO']
+FOLDER_HOMEPAGE_SHORTCUTS_OFFLINE = ['IMO', 'shortlist', 'MEMO']
+FOLDER_INLINE_YEAR_COUNT = 10

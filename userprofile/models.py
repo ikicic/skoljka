@@ -1,4 +1,5 @@
-﻿from django.contrib.auth.models import User, Group
+﻿from django.conf import settings
+from django.contrib.auth.models import User, Group
 from django.db import connection, models, transaction
 from django.db.models import Q
 from django.dispatch import receiver
@@ -13,6 +14,9 @@ from folder.models import Folder
 from task.models import Task, DIFFICULTY_RATING_ATTRS
 from solution.models import STATUS, SOLUTION_CORRECT_SCORE
 
+# Take unique ID and description
+USERPROFILE_SCHOOL_CLASS_CHOICES = [(0, '-------------')]       \
+    + [x[:2] for x in settings.USERPROFILE_SCHOOL_CLASS_INFO]
 
 @receiver(user_registered)
 def create_user_profile(sender, user, request, **kwargs):
@@ -93,6 +97,8 @@ class UserProfile(models.Model):
         'ispravljač.'))
     show_solution_task = models.BooleanField(default=True,
         verbose_name='Prikazuj tekst zadatka uz rješenje.')
+    school_class = models.IntegerField(default=0,
+        choices=USERPROFILE_SCHOOL_CLASS_CHOICES, verbose_name='Razred')
 
     # (any better name?)
     evaluator = models.BooleanField(default=False, verbose_name='Ispravljač',

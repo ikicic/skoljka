@@ -1,0 +1,10 @@
+<div>
+  {% for folder in main_folders %}
+    <a href="{{ folder.get_absolute_url }}">{{ folder.name }} {{ folder.t_percent_str }}</a><br>
+    <div>
+      {% for x in folder.t_year_children %}
+        <a href="{{ x.get_absolute_url }}" style="color:{{ x.t_color }};">{{ x.t_short_year_name }}</a>
+      {% endfor %}
+    <div>
+  {% endfor %}
+</div>

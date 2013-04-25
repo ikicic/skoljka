@@ -3,10 +3,13 @@
 {% block content %}
 
 {% load activity_tags %}
-{% load task_tags %}
 {% load base_tags %}
+{% load folder_tags %}
+{% load task_tags %}
 
 {% show_news 'well' 'Novosti' %}
+
+{% folder_inline_year_shortcuts folder_shortcut_desc %}
 
 {# TODO: DRY, napraviti tag ili nesto, ovo se ponavlja #}
 

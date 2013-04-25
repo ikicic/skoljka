@@ -77,10 +77,10 @@ class UserProfileEditForm(forms.ModelForm):
 
         if not data:
             data = 0
-        print 'ovdje asfadf', self, data
         return data
 
     class Meta:
         model = UserProfile
-        fields = ['gender', 'show_hidden_tags', 'show_unsolved_task_solutions',
-            'hide_solution_min_diff', 'show_solution_task', 'evaluator']
+        fields = ['gender', 'school_class', 'show_hidden_tags',
+            'show_unsolved_task_solutions', 'hide_solution_min_diff',
+            'show_solution_task', 'evaluator']
