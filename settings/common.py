@@ -114,21 +114,15 @@ LOGIN_URL = '/accounts/login/'
 # Where is a user redirected after a successful log in
 LOGIN_REDIRECT_URL = '/'
 
-######################################
-# Cache
-######################################
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    }
-}
 
 ######################################
 # Middleware
 ######################################
 
 MIDDLEWARE_CLASSES = (
+#    'johnny.middleware.LocalStoreClearMiddleware', # Do we need this?
+    'johnny.middleware.QueryCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -235,6 +229,37 @@ LOGGING = {
 #        },
     },
 }
+
+######################################
+# Cache
+######################################
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'OPTIONS': {
+            'MAX_ENTRIES': 10000,
+        },
+        'TIMEOUT': 7 * 86400,
+        'JOHNNY_CACHE': True,
+    }
+}
+
+######################################
+# johnny-cache
+######################################
+# Make sure all raw update/insert queries invalidate this cache!
+
+JOHNNY_MIDDLEWARE_KEY_PREFIX = 'jCS'
+
+# For some reason, cache did not work with the default value.
+JOHNNY_MIDDLEWARE_SECONDS = 7 * 86400
+
+# Looks like it is not smart to use blacklist at all, because johnny-cache
+# won't cache the query if any of its tables are in the blacklist. For example,
+# putting search_searchcacheelement into the blacklist would disable caching
+# of all queries like folder.get_queryset with permission check.
+# MAIN_IN_BLACKLIST = (...)
 
 ######################################
 # django-registration

@@ -6,13 +6,14 @@ from django.dispatch import receiver
 from django.template.loader import add_to_builtins
 from django.utils.html import mark_safe
 
+import johnny.cache
 from registration.signals import user_registered
 
-from tags.models import Tag
-
 from folder.models import Folder
+from tags.models import Tag
 from task.models import Task, DIFFICULTY_RATING_ATTRS
 from solution.models import STATUS, SOLUTION_CORRECT_SCORE
+
 
 # Take unique ID and description
 USERPROFILE_SCHOOL_CLASS_CHOICES = [(0, '-------------')]       \
@@ -38,6 +39,7 @@ def task_difficulty_on_update(task, field_name, old_value, new_value):
         If necessary, update all difficulty distribution counters
         for all users that solved given task.
     """
+    # TODO: use signals!
     old = diff_to_index(old_value)
     new = diff_to_index(new_value)
 
@@ -60,6 +62,8 @@ def task_difficulty_on_update(task, field_name, old_value, new_value):
     cursor.execute(base.format(-1, old))
     cursor.execute(base.format(1, new))
     transaction.commit_unless_managed()
+
+    johnny.cache.invalidate('userprofile_difficultydistribution')
 
 
 class DifficultyDistribution(models.Model):

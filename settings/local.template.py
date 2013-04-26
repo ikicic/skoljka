@@ -25,6 +25,7 @@ DATABASES = {
         'PASSWORD': '',             # enter password here
         'HOST': 'localhost',
         'PORT': '',
+        'JOHNNY_CACHE_KEY': 'default',
     }
 }
 

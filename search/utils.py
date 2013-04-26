@@ -4,14 +4,15 @@ from django.db import connection, transaction
 from django.db.models import Count
 from django.template.defaultfilters import slugify
 
-from search.models import SearchCache, SearchCacheElement, _normal_search_key, \
-    _reverse_search_key
+import johnny.cache
+from taggit.utils import parse_tags
 
 from permissions.constants import VIEW
 from task.models import Task
-
 from tags.models import Tag, TaggedItem
-from taggit.utils import parse_tags
+
+from search.models import SearchCache, SearchCacheElement, _normal_search_key, \
+    _reverse_search_key
 
 from collections import defaultdict
 
@@ -102,7 +103,21 @@ def _search_and_cache(tags):
     cursor.execute(query)
     transaction.commit_unless_managed()
 
+    johnny.cache.invalidate('search_searchcacheelement')
+
     return cache
+
+"""
+from johnny.signals import qc_hit, qc_miss
+from django.dispatch import receiver
+@receiver(qc_hit)
+def _hit(sender, **kwargs):
+    print 'HIT', sender, kwargs
+
+@receiver(qc_miss)
+def _miss(sender, **kwargs):
+    print 'MISS', sender, kwargs
+"""
 
 def search(tags):
     """

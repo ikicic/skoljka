@@ -29,7 +29,6 @@ def prepare_action_data(context, A):
     G1 = G('o', 'la', gender)
 
     ttype = (A.type, A.subtype)
-    print ttype, SOLUTION_AS_SOLVED
 
     S = ''
     if ttype == TASK_ADD:

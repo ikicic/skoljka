@@ -8,6 +8,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpRespons
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
+import johnny.cache
 from pagination.paginator import InfinitePaginator
 from taggit.utils import parse_tags
 
@@ -120,6 +121,8 @@ def advanced_new(request):
                         ObjectPermission.objects.create(content_object=task, group=x, permission_type=VIEW)
                         ObjectPermission.objects.create(content_object=task, group=x, permission_type=EDIT)
 
+            # Just in case... because we are using .commit_on_success
+            johnny.cache.invalidate(Folder, Task, ObjectPermission)
             invalidate_cache_for_folders(Folder.objects.all())
 
             return HttpResponseRedirect('/task/new/finish/')

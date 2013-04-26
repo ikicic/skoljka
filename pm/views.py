@@ -6,11 +6,14 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
+import johnny.cache
+
 from mathcontent.forms import MathContentForm
+
 from pm.models import MessageRecipient, MessageContent
 from pm.forms import NewMessageForm
 
-#TODO: optimizirati
+#TODO: optimize
 
 # subject and text are ignored if method is 'POST'
 @login_required
@@ -24,11 +27,10 @@ def new(request, rec='', subject='', text=''):
             message.content = content
             message.author = request.user
             message.save()
-            
+
             groups = message_form.cleaned_data['list']
             message.groups = groups
-            print groups
-            
+
             group_ids = ','.join([str(x.id) for x in groups])
             query1 = 'INSERT INTO pm_messagerecipient (recipient_id, message_id, deleted, `read`)'  \
                     ' SELECT DISTINCT B.user_id, %d, 0, 0 FROM auth_group AS A'    \
@@ -39,13 +41,14 @@ def new(request, rec='', subject='', text=''):
                     ' INNER JOIN auth_group AS A ON (A.id = B.group_id)'    \
                     ' SET C.unread_pms = C.unread_pms + 1'  \
                     ' WHERE A.id IN (%s) AND C.user_id != %d;' % (group_ids, request.user.id)
-            print query1
-            print query2
             cursor = connection.cursor()
             cursor.execute(query1)
             cursor.execute(query2)
             transaction.commit_unless_managed()
-            
+
+            johnny.cache.invalidate('pm_messagerecipient',
+                'userprofile_userprofile')
+
             # fix `read` for messages sent also to sender himself
             # or just delete this?
             MessageRecipient.objects.filter(recipient=request.user, message=message).update(read=1)
@@ -54,7 +57,7 @@ def new(request, rec='', subject='', text=''):
     else:
         message_form = NewMessageForm(initial={'list': rec, 'subject': subject})
         content_form = MathContentForm(initial={'text': text})
-        
+
     return render_to_response('pm_new.html', {
             'forms': [message_form, content_form],
         }, context_instance=RequestContext(request))
@@ -68,16 +71,16 @@ def pm_action(request, id):
         return HttpResponseBadRequest("Something's wrong with the url.")
 
     pm = get_object_or_404(MessageContent, id=id)
-    
+
     # TODO: replace with get_object_or_none()
     try:
         link = MessageRecipient.objects.get(recipient=request.user, message=pm, deleted=False)
     except MessageRecipient.DoesNotExist:
         link = None
-    
+
     if pm.author != request.user and link is None:
         return HttpResponseForbidden('This message was not sent to or by you.')
-        
+
     if action == 'delete':
         if pm.author == request.user:
             pm.deleted_by_author = True
@@ -90,48 +93,56 @@ def pm_action(request, id):
         subject = pm.subject if pm.subject.startswith('Re: ') else 'Re: ' + pm.subject
         text = "\n\n\n\nPoslao %s %s:[quote]%s[/quote]" % \
             (pm.author.username, pm.date_created.strftime('%d. %m. %Y. u %H:%M'), pm.content.text)
-        
+
         if action == 'reply':
             group_names = pm.author.username
         else:
             G = pm.groups.values_list('id', 'name')
             groups = [name for id, name in G]
-            
+
             # add author to the list if not already in some of the groups
             if not pm.author.groups.through.objects.filter(user=pm.author, group__in=[id for id, name in G]).exists():
                 groups.append(pm.author.username)
             if request.user.username in groups:
                 groups.remove(request.user.username)
             group_names = ', '.join(groups)
-            
+
         return new(request, rec=group_names, subject=subject, text=text)
     elif action == 'forward':
         subject = pm.subject if pm.subject.startswith('Fw: ') else 'Fw: ' + pm.subject
         group_names = ', '.join(['<%s>' % x for x in pm.groups.values_list('name', flat=True)])
         text = "\n\n\n\n[quote]Poslao/la <%s> dana %s za %s.\n\n%s[/quote]" % \
                (pm.author.username, pm.date_created.strftime('%d. %m. %Y. u %H:%M'), group_names, pm.content.text)
-        
+
         return new(request, subject=subject, text=text)
 
     # if action type not recognized
     raise Http404
-    
+
 
 #TODO: optimizirati
 @login_required
 def inbox(request):
-    #pm = request.user.messages.filter(messagerecipient__deleted=False).exclude(author=request.user).select_related('author', 'content', 'messagerecipient').order_by('-id')
-    pm = MessageRecipient.objects.filter(recipient=request.user, deleted=False).exclude(message__author=request.user).select_related('message', 'message__author', 'message__content').order_by('-message__id')
+    #pm = request.user.messages.filter(messagerecipient__deleted=False) \
+    #       .exclude(author=request.user)   \
+    #       .select_related('author', 'content', 'messagerecipient').order_by('-id')
+    pm = MessageRecipient.objects.filter(recipient=request.user, deleted=False) \
+            .exclude(message__author=request.user)  \
+            .select_related('message', 'message__author', 'message__content') \
+            .order_by('-message__id')
+
     return render_to_response('pm_inbox.html', {
             'pm': pm,
         }, context_instance=RequestContext(request))
 
 
-#TODO: optimizirati        
+#TODO: optimizirati
 @login_required
 def outbox(request):
     #pm = MessageContent.objects.filter(author=request.user).select_related().order_by('-id')
-    pm = request.user.my_messages.filter(deleted_by_author=False).select_related('content').order_by('-id')
+    pm = request.user.my_messages.filter(deleted_by_author=False)   \
+        .select_related('content').order_by('-id')
+
     return render_to_response('pm_outbox.html', {
             'pm': pm
         }, context_instance=RequestContext(request))
@@ -145,7 +156,10 @@ def group_inbox(request, group_id=None):
         raise Http404
 
     #pm = MessageContent.objects.filter(groups=group).select_related('author', 'content').order_by('-id').distinct()
-    pm = MessageContent.groups.through.objects.filter(group=group).select_related('messagecontent', 'messagecontent__author', 'messagecontent__content').order_by('-id')
+    pm = MessageContent.groups.through.objects.filter(group=group)  \
+            .select_related('messagecontent', 'messagecontent__author',
+                'messagecontent__content').order_by('-id')
+
     return render_to_response('pm_inbox.html', {
             'pm': pm,
             'group': group,
