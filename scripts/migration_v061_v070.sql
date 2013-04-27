@@ -2,6 +2,7 @@
   Don't forget to: (or automate...)
     1) run Folder migration admin action
     2) reset attachment file size
+    3) run Solution refresh_detailed_status admin action.
 */
 
 /* Structure */
@@ -44,8 +45,11 @@ ALTER TABLE folder_folder_tasks ADD COLUMN position INT NOT NULL DEFAULT 0;
 
 ALTER TABLE search_searchcache CHANGE COLUMN tag_string `key` VARCHAR(100) NOT NULL;
 
+ALTER TABLE solution_solution ADD COLUMN detailed_status iNT DEFAULT 0 NOT NULL AFTER status;
+
 /* Indices */
 
 ALTER TABLE folder_folder ADD INDEX folder_folder_editable (editable);
 ALTER TABLE search_searchcacheelement ADD INDEX search_searchcacheelement_tuple1 (object_id, content_type_id, cache_id);
 ALTER TABLE search_searchcacheelement ADD INDEX search_searchcacheelement_tuple2 (cache_id, content_type_id);
+ALTER TABLE solution_solution ADD INDEX solution_solution_tuple1 (detailed_status, last_edit_time);

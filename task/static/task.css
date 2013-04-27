@@ -57,7 +57,7 @@
 
 /* Don't remove !important. Otherwise odd rows won't be affected. */
 /* TODO: brighter colors for odd rows */
-.task-solved td {
+.task-correct td {
   background-color: #70FF70!important;
 }
 

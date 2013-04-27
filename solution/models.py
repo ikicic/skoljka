@@ -5,6 +5,7 @@ from mathcontent.models import MathContent
 from post.generic import PostGenericRelation
 from rating.fields import RatingField
 from task.models import Task
+from skoljka.utils.decorators import autoconnect
 from skoljka.utils.models import ModelEx
 
 
@@ -15,10 +16,10 @@ SOLUTION_CORRECT_SCORE = 2.6
 STATUS = {'blank': 0, 'as_solved': 1, 'todo': 2, 'submitted': 3}
 
 # Key names of detailed states.
-# For more info, look at Solution.get_detailed_status()
-# If you need to change the order, don't forget to update get_detailed_status()
+# For more info, look at Solution._calc_detailed_status()
+# If you need to change the order, don't forget to update _calc_detailed_status()
 DETAILED_STATUS_NAME = ['blank', 'as_solved', 'todo', 'submitted_not_rated',
-    'wrong', 'solved']
+    'wrong', 'correct']
 DETAILED_STATUS = {name: i for i, name in enumerate(DETAILED_STATUS_NAME)}
 
 # Each element of HTML_INFO is dict with keys from _HTML_INFO_KEYS and values
@@ -30,7 +31,7 @@ _HTML_INFO = {
     'todo': ('label-warning', u'To Do', 'task-todo'),
     'submitted_not_rated': ('label-info', u'Poslano', 'task-submitted-not-rated'),
     'wrong': ('label-important', u'Netočno', 'task-wrong'),
-    'solved': ('label-success', u'Točno', 'task-solved'),
+    'correct': ('label-success', u'Točno', 'task-correct'),
 }
 
 # status number -> dict(info_key -> value)
@@ -79,19 +80,22 @@ SOLUTION_RATING_ATTRS = {
     'on_update': _solution_on_update,
 }
 
+@autoconnect
 class Solution(ModelEx):
-    # TODO: replace status with what currently is called 'detailed status'?
-    # Or add detailed_status? That would be much easier to implement, as it
-    # can be just added to pre_save.
-
     task = models.ForeignKey(Task)
     author = models.ForeignKey(User)
-    content = models.ForeignKey(MathContent, blank=True, null=True) # a ipak sam stavio null...
+    content = models.ForeignKey(MathContent, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True, db_index=True)
     last_edit_time = models.DateTimeField(auto_now=True)  # only for submitted
     posts = PostGenericRelation()
 
     status = models.IntegerField(default=STATUS['blank']) # view STATUS for more info
+
+    # More like a cached value. Note that this value is automatically refreshed
+    # in pre_save, not before that.
+    detailed_status = models.IntegerField(default=DETAILED_STATUS['blank'],
+        db_index=True)
+
     is_official = models.BooleanField()
     correctness = RatingField(**SOLUTION_RATING_ATTRS)
 
@@ -100,7 +104,7 @@ class Solution(ModelEx):
 
     def remember_original(self):
         # ModelEx stuff
-        self._original_detailed_status = self.get_detailed_status()
+        self._original_detailed_status = self.detailed_status
 
     def get_absolute_url(self):
         return '/solution/%d/' % self.id
@@ -108,32 +112,35 @@ class Solution(ModelEx):
     # template helpers
     def get_html_info(self):
         # Get current detailed status, and then it's info...
-        return HTML_INFO[self.get_detailed_status()]
+        return HTML_INFO[self.detailed_status]
 
-    def get_detailed_status(self):
+    def _calc_detailed_status(self):
         """
             Detailed status, unlike normal .status, describes also the
             correctness of the solution.
         """
-        # Maybe just save that number in db, and set it in pre_save?
 
         # The only special case actually...
         if self.status == STATUS['submitted']:
             if self.correctness_avg < 1e-6:
-                return 3 # DETAILED_STATUS['submitted_not_rated']
+                return DETAILED_STATUS['submitted_not_rated']
             elif self.correctness_avg < SOLUTION_CORRECT_SCORE:
-                return 4 # DETAILED_STATUS['wrong']
+                return DETAILED_STATUS['wrong']
             else:
-                return 5 # DETAILED_STATUS['solved']
+                return DETAILED_STATUS['correct']
 
         # Otherwise, the order is the same...
         return self.status
+
+    def pre_save(self):
+        self.detailed_status = self._calc_detailed_status()
 
     def is_solved(self):
         return self.is_as_solved() or self.is_correct()
 
     def is_correct(self):
-        return self.is_submitted() and self.correctness_avg >= SOLUTION_CORRECT_SCORE
+        # return self.is_submitted() and self.correctness_avg >= SOLUTION_CORRECT_SCORE
+        return self.detailed_status == DETAILED_STATUS['correct']
 
     def is_submitted(self):
         return self.status == STATUS['submitted']

@@ -72,7 +72,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.media",
     "django.core.context_processors.static",
     "django.contrib.messages.context_processors.messages",
-    'django.core.context_processors.request',
+    "django.core.context_processors.request",
+    "userprofile.context_processors.userprofile",
 )
 
 # List of callables that know how to import templates from various sources.

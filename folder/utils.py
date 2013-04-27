@@ -263,7 +263,7 @@ def _invalidate_on_folder_permissions_update(sender, **kwargs):
 @receiver(pre_save, sender=Solution)
 def _invalidate_on_solution_update(sender, **kwargs):
     instance = kwargs['instance']
-    if instance._original_detailed_status != instance.get_detailed_status():
+    if instance._original_detailed_status != instance._calc_detailed_status():
         invalidate_folder_cache_for_task(instance.task)
 
 @receiver(pre_delete, sender=Solution)

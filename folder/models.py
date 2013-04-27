@@ -93,7 +93,7 @@ class Folder(PermissionsModel):
             return False, False, 0, (180, 180, 180)
 
         solved = S[DETAILED_STATUS['as_solved']]        \
-            + S[DETAILED_STATUS['solved']]
+            + S[DETAILED_STATUS['correct']]
         todo = S[DETAILED_STATUS['todo']]
 
         percent = float(solved) / total_task_count
@@ -194,8 +194,7 @@ class Folder(PermissionsModel):
             one element for each detailed status. E.g.
                 (50, [0, 3, 0, 1, 2 (...)])
 
-            For more info on detailed status, look at
-            Solution.get_detailed_status().
+            For more info on detailed status, look at Solution.
         """
         # Get all the tasks in this folder. Check for permission to get the
         # visible count immediately.
@@ -211,7 +210,7 @@ class Folder(PermissionsModel):
         # Count how many solutions with specific detailed status...
         stats = [0] * len(DETAILED_STATUS)
         for x in solutions:
-            stats[x.get_detailed_status()] += 1
+            stats[x.detailed_status] += 1
 
         return len(task_ids), stats
 
