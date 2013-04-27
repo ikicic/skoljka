@@ -41,7 +41,8 @@
   </ul>
 {% endif %}
 
-{% if has_subfolders %}
+{# Show different message depending on whether there are any subfolders or not. #}
+{% if folder.id in folder_children %}
   {% include 'inc_task_list.html' with tasks=tasks empty_message="Odaberite neku od podkategorija." %}
 {% else %}
   {% include 'inc_task_list.html' with tasks=tasks empty_message="Nema zadataka." %}

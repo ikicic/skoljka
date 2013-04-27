@@ -5,6 +5,7 @@ from django.db.models.signals import pre_save, post_save, pre_delete,   \
 from django.dispatch import receiver
 
 from permissions.constants import VIEW
+from permissions.utils import get_object_ids_with_exclusive_permission
 from permissions.signals import objectpermissions_changed
 from search.models import SearchCacheElement
 from search.utils import reverse_search
@@ -17,33 +18,21 @@ from skoljka.utils import ncache
 from folder.models import Folder, FolderTask, FOLDER_NAMESPACE_FORMAT,  \
     FOLDER_NAMESPACE_FORMAT_ID
 
-import re
+from collections import Counter, defaultdict
 
-def get_folder_template_data(path, user, flags):
-    """
-        Given URI path, finds related Folder and returns all necessary
-        template data, such as folder menu.
-        Used for parsing HTTP_REFERER.
-    """
-
-    if not re.match('^/folder/\d+/[-a-zA-Z0-9]*$', path):
-        return None
-
-    id = int(path[8:path.find('/', 8)])
-
-    try:
-        folder = Folder.objects.get(id=id)
-    except Folder.DoesNotExist:
-        return None
-
-    # Retrieve all necessary information
-    return folder.get_template_data(user, flags)
 
 def get_task_folder_ids(task):
     """
         Returns the list of IDs of all folders containing given task.
         Combines result of many-to-many relation and folder-filters.
+
+        Does not check permissions, and not supposed to do any checks.
     """
+    # Implementation of permission check is very complicated! Do not implement
+    # it here. prepare_folder_menu can be used if needed. If you really need
+    # permission check, without menu data, refactor / split prepare_folder_menu
+    # into separated utility methods, but do not change this method!
+
     tags = [x.tag for x in get_object_tagged_items(task)]
 
     # One possible solution is:
@@ -71,18 +60,120 @@ def get_task_folder_ids(task):
     # Remove duplicates (does not preserve order)
     return list(set(ids))
 
-def get_task_folders(task, user=None, check_permissions=True, permission=VIEW):
+def prepare_folder_menu(folders, user):
     """
-        Extension to get_task_folder_ids. Returns folder instances instead
-        of IDs. Also, checks user permissions if required.
-    """
-    ids = get_task_folder_ids(task)
+        Given list of folders, prepare folder menu showing all those folders
+        at once. Ignores from input all folder inaccessible for the given user.
 
-    if check_permissions:
-        return Folder.objects.for_user(user, permission)    \
-            .filter(id__in=ids).distinct()
-    else:
-        return Folder.objects.filter(id__in=ids)
+        Returns dict with following keys:
+            folder_children - dictionary {folder.id: list of children instances}
+            folder_tree - HTML of folder tree
+    """
+    # Note: This method calls Folder.many_get_user_stats, which makes it
+    # sometimes very slow. Actually, the method is relatively fast.
+    # Still, more optimizations are welcome here, because this method is called
+    # on almost every query...
+
+    # Pick all ancestor ids
+    ancestor_ids = sum([x.cache_ancestor_ids.split(',') for x in folders], [])
+    ancestor_ids = [int(x) for x in ancestor_ids if x]
+
+    # For permission check. Note that we put here only elements from
+    # .cache_ancestor_ids!
+    ancestor_counter = Counter(ancestor_ids)
+
+    # Now add original folders and remove duplicates
+    ancestor_ids.extend([x.id for x in folders])
+    ancestor_ids = set(ancestor_ids)
+
+    # Get all visible subfolders related to any of the folders on the path to
+    # the root.
+    all_folders = Folder.objects.for_user(user, VIEW) \
+        .filter(parent_id__in=ancestor_ids).distinct()
+    all_folders = {x.id: x for x in all_folders}
+
+    # Include also the root. Not the best solution... Still, cached always.
+    root = Folder.objects.get(parent__isnull=True)
+    all_folders[root.id] = root
+
+    visible_original_folder_ids = set()
+    to_check = []
+    for folder in folders:
+        # WARNING: manually checking Folder permissions here!
+        if folder.id in all_folders or not folder.hidden or folder.author == user:
+            # OK, accessible
+            # Use old instances where possible, as there is maybe some cached data.
+            all_folders[folder.id] = folder
+            visible_original_folder_ids.add(folder.id)
+        else:
+            # still not sure
+            to_check.append(folder.id)
+
+    if to_check:
+        # NOTE: .hidden and .author permission is already checked.
+        queryset = get_object_ids_with_exclusive_permission(user, VIEW,
+            model=Folder, filter_ids=to_check)
+        visible_original_folder_ids |= set(queryset)
+
+    # Check permission for original folders
+    for folder in folders:
+        # Check if this (main) folder is accessible / visible
+        chain_ids = [int(x) for x in folder.cache_ancestor_ids.split(',') if x]
+
+        # To have access to the folder, user has to have permission to view
+        # the folder itself and *all of its ancestors*.
+        if folder.id not in visible_original_folder_ids \
+                or not all(x in all_folders for x in chain_ids):
+            # Not visible, remove it from menu tree! I.e. do not just remove
+            # the original folder, remove whole chain to the root. (that's why
+            # we need the counter here)
+            ancestor_counter.subtract(chain_ids)
+
+    # Map folders to their parents
+    folder_children = defaultdict(list)
+    for x in all_folders.itervalues():
+        # Ignore inaccessible folders. None means it is not an ancestor, 0
+        # means no access.
+        if ancestor_counter.get(x.id) is not 0:
+            folder_children[x.parent_id].append(x)
+
+    try:
+        # Root folder is None's only subfolder.
+        root = folder_children[None][0]
+    except IndexError:
+        # No access to root, i.e. no access to any of the original folders.
+        return None # Bye
+
+    # Generate folder tree. This is probably the best way to
+    #   1) Ignore inaccessible folders
+    #   2) Sort folders, i.e. show in right order
+    stack = [root]
+    sorted_folders = []
+    while len(stack):
+        folder = stack.pop()
+        if folder.parent_id:
+            folder._depth = all_folders[folder.parent_id]._depth + 1
+            sorted_folders.append(folder)   # root not in sorted folders!
+        else:
+            folder._depth = 0   # root
+
+        children = folder_children[folder.id]
+
+        # Sort by parent_index in reverse order (note that we are using LIFO)!.
+        stack.extend(sorted(children, key=lambda x: -x.parent_index))
+
+    # Get user's solution statuses.
+    user_stats = Folder.many_get_user_stats(sorted_folders, user)
+
+    # Finally, generate menu HTML
+    menu = [x._html_menu_item(user, x.id in ancestor_ids, x._depth,
+        user_stats.get(x.id)) for x in sorted_folders]
+
+    return {
+        'folder_children': folder_children,
+        'folder_tree': u''.join(menu),
+#        'sorted_folders': sorted_folders, # Not used currently. Enable if needed.
+    }
 
 
 class FolderInfo:

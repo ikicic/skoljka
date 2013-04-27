@@ -1,5 +1,6 @@
 import re
 
+# DEPRECATED: not used anymore. Kept because it is relatively complicated.
 # name?
 def get_referrer_path(request):
     """

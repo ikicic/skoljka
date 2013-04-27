@@ -65,7 +65,7 @@
 
         <li><a href="/folder/"><i class="icon-book"></i>Arhiva</a></li>
         {% block menu_folder_container %}
-          {{ menu_folder_tree|safe }}
+          {{ folder_tree|safe }}
         {% endblock %}
         <li><br></li>
         {% if user.is_authenticated %}

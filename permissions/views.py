@@ -16,7 +16,7 @@ from permissions.models import ObjectPermission, has_group_perm,        \
 from permissions.signals import objectpermissions_changed
 
 # Model specific:
-from folder.models import Folder
+from folder.utils import prepare_folder_menu
 
 
 # TODO: permission to change permissions?
@@ -32,10 +32,22 @@ def edit(request, type_id, id):
 
     model = object.__class__
 
-    # Check if the user has to permission to edit permissions.
-    # Note that object has to be PermissionsModel.
+    # Model specific tuning:
+    folder_tree = ''
+    if content_type.app_label == 'folder' and content_type.model == 'folder':
+        data = prepare_folder_menu([object], request.user)
+
+        # When checking permissions for folders, one must chain whole path
+        # to the root. That's what prepare_folder_menu anyway does.
+        if not data:
+            return 403  # Sorry, no access
+        folder_tree = data['folder_tree']
+
+    # Check if the user has the permission to *edit permissions* (not just
+    # view it). Note that object has to be PermissionsModel.
     if not object.user_has_perm(request.user, EDIT_PERMISSIONS):
         return 403
+
 
     # Convert list of strings (permission names) to list of permission types
     object_permissions = getattr(model, 'object_permissions', ['default'])
@@ -110,12 +122,6 @@ def edit(request, type_id, id):
             groups[group.id]._cache_permissions = [perm.permission_type]
 
 
-    # Model specific tuning:
-    menu_folder_tree = ''
-    if content_type.app_label == 'folder' and content_type.model == 'folder':
-        tmp = object.get_template_data(request.user, Folder.DATA_MENU)
-        menu_folder_tree = tmp['menu_folder_tree']
-
     return {
         'object': object,
         'form': form,
@@ -123,5 +129,5 @@ def edit(request, type_id, id):
         'groups': groups.itervalues(),
         'applicable_permissions': applicable_permissions,
         'selected_types': selected_types,
-        'menu_folder_tree': menu_folder_tree
+        'folder_tree': folder_tree
     }

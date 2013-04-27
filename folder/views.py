@@ -18,9 +18,10 @@ from skoljka.utils.decorators import response
 from folder.models import Folder, FolderTask, FOLDER_TASKS_DB_TABLE,        \
     FOLDER_NAMESPACE_FORMAT
 from folder.forms import FolderForm, FolderAdvancedCreateForm
-from folder.utils import refresh_cache_fields, get_folder_template_data
+from folder.utils import prepare_folder_menu, refresh_cache_fields
 
 import re
+
 
 def _edit_tasks_tasks(folder, user):
     return folder.tasks.for_user(user, VIEW) \
@@ -74,7 +75,7 @@ def edit_tasks(request, folder_id):
         'updated': updated,
     }
 
-    data.update(folder.get_template_data(request.user, Folder.DATA_MENU))
+    data.update(prepare_folder_menu([folder], request.user))
 
     return data
 
@@ -142,15 +143,15 @@ def view(request, id=None, description=u''):
     else:
         folder = get_object_or_404(Folder, id=id)
 
-    data = folder.get_template_data(request.user, Folder.DATA_ALL)
+    data = prepare_folder_menu([folder], request.user)
     if not data:
-        raise Http404
+        raise Http404   # sorry, doesn't exist or not accessible
+    data.update(folder.get_details(request.user))
 
     # Some additional tuning
     data['tasks'] = data['tasks'].select_related('author')
 
-    folder = data.get('folder')
-    if folder and folder.editable and folder.user_has_perm(request.user, EDIT):
+    if folder.editable and folder.user_has_perm(request.user, EDIT):
         data['edit_link'] = True
         if not data['tag_list']:
             data['select_link'] = True
@@ -232,7 +233,8 @@ def new(request, folder_id=None):
         folder_form = FolderForm(instance=folder, user=request.user)
 
     if edit:
-        data.update(folder.get_template_data(request.user, Folder.DATA_MENU))
+        data.update(prepare_folder_menu([folder], request.user))
+        data['folder'] = folder
 
     data['form'] = folder_form
     data['edit'] = edit

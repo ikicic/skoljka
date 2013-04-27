@@ -14,8 +14,8 @@ from taggit.utils import parse_tags
 
 from activity import action as _action
 from folder.models import Folder
-from folder.utils import get_folder_template_data, get_task_folders,    \
-    invalidate_folder_cache_for_task, invalidate_cache_for_folders
+from folder.utils import get_task_folder_ids, prepare_folder_menu,  \
+    invalidate_cache_for_folders, invalidate_folder_cache_for_task
 from permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS
 from permissions.models import ObjectPermission
 from recommend.utils import task_event
@@ -29,7 +29,6 @@ from mathcontent.models import MathContent, Attachment
 from mathcontent.utils import check_and_save_attachment
 from usergroup.forms import GroupEntryForm
 
-from skoljka.utils import get_referrer_path
 from skoljka.utils.decorators import response
 from skoljka.utils.timeout import run_command
 
@@ -352,21 +351,34 @@ def detail(request, id):
 
     # used for recommendation system and similar
     if request.user.is_authenticated():
+        # TODO: use signals!
         task_event(request.user, task, 'view')
 
-    referrer = get_referrer_path(request)
-    folder_data = referrer and get_folder_template_data(referrer, request.user,
-        Folder.DATA_MENU) or {}
+    folder_ids = get_task_folder_ids(task)  # unsafe, no permission check!
+    folders = list(Folder.objects.filter(id__in=folder_ids))
+    folder_data = prepare_folder_menu(folders, request.user) # safe
 
-    return {
+    # For now, folder is not considered as the owner of the tasks, but just as
+    # a collection. Therefore, if the user has no access to any of the
+    # task's folders, he/she might still have the access to the task itself.
+
+    # True, automatically removing access to the task if the user has no
+    # access to its containers is a really great feature. But, it is
+    # too complicated - advanced permission check should be added to everything
+    # related to the task (e.g. editing, solutions, permissions editing etc.)
+
+    data = {
         'task': task,
         'can_edit': EDIT in perm,
         'can_edit_permissions': EDIT_PERMISSIONS in perm,
         'content_type': content_type,
         'solution': solution,
-        'menu_folder_tree': folder_data.get('menu_folder_tree', ''),
-        'folders': get_task_folders(task, request.user),
     }
+
+    if folder_data:
+        data.update(folder_data)
+
+    return data
 
 @response('task_similar.html')
 def similar(request, id):
