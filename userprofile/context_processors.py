@@ -77,7 +77,7 @@ def userprofile(request):
 
     result = {}
     if profile.evaluator:
-        result['t_unrated_solution_count'] = calc_unrated_solution_count(user)
+        result['unrated_solution_count'] = calc_unrated_solution_count(user)
 
     return result
 
