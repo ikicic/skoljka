@@ -260,10 +260,10 @@ def _invalidate_on_folder_permissions_update(sender, **kwargs):
     namespace = FOLDER_NAMESPACE_FORMAT.format(kwargs['instance'])
     ncache.invalidate_namespace(namespace)
 
-@receiver(pre_save, sender=Solution)
+@receiver(post_save, sender=Solution)
 def _invalidate_on_solution_update(sender, **kwargs):
     instance = kwargs['instance']
-    if instance._original_detailed_status != instance._calc_detailed_status():
+    if instance._original_detailed_status != instance.detailed_status:
         invalidate_folder_cache_for_task(instance.task)
 
 @receiver(pre_delete, sender=Solution)

@@ -18,11 +18,13 @@ def get_object_ids_with_exclusive_permission(user, permission_type,
     content_type_id = content_type_id   \
         or ContentType.objects.get_for_model(model).id
 
+    # TODO: Optimize (remove unnecessary JOIN)
     if not filter_ids:
         return ObjectPermission.objects.filter(content_type_id=content_type_id,
             group__user=user, permission_type=permission_type)  \
-            .values_list('object_id', flat=True)
+            .values_list('object_id', flat=True).distinct()
     else:
         return ObjectPermission.objects.filter(content_type_id=content_type_id,
             group__user=user, permission_type=permission_type,
-            object_id__in=filter_ids).values_list('object_id', flat=True)
+                object_id__in=filter_ids)   \
+            .values_list('object_id', flat=True).distinct()

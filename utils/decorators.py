@@ -27,27 +27,35 @@ def _key_dict(input):
     return {key: str(value.pk if isinstance(value, models.Model) else value)
         for key, value in input.iteritems()}
 
-def cache_function(key=None, namespace_format=None, seconds=86400*7):
+def cache_function(key=None, namespace=None, seconds=86400*7):
     """
         Cache the result of a function call.
 
         Parameters:
-            key: Cache key.
-            namespace_format: Format of namespace used. E.g. 'Folder{0.pk}'
+            key: Cache key format.
+            namespace: Format of namespace used. E.g. 'Folder{0.pk}'
                 will be converted to Folder5 if function's first parameter
                 is a model with .pk == 5.
             seconds: Specify how long this cache should be valid.
 
-        Note that it is possible to set both namespace_format and key. In that
-        case, key is considered as a 'subkey'.
+        Parameters are called 'key' & 'namespace', not 'key_format' &
+        'namespace_format' for DRY reasons.
+
+        Note that it is possible to set both namespace and key format.
+        In that case, key is considered as a 'subkey'.
+
+        There are no special option to define key and namespace independent
+        of function arguments. Just use key and namespace without any
+        curly brackets instead.
     """
+
     def decorator(func):
         def inner(*args, **kwargs):
             # _key stands for final/full key
             if key:
-                _key = key
+                _key = key.format(*args)
             else:
-                if namespace_format:
+                if namespace:
                     # Don't unnecesarry put module name here.
                     # If you need it for any reason, feel free to put it.
                     _key = '{}{}{}'.format(func.__name__, _key_list(args),
@@ -61,9 +69,9 @@ def cache_function(key=None, namespace_format=None, seconds=86400*7):
                 # Just hash it.
                 _key = sha1(_key).hexdigest()
 
-            if namespace_format:
-                namespace = namespace_format.format(*args)
-                _key = ncache.get_full_key(namespace, _key)
+            if namespace:
+                _namespace = namespace.format(*args)
+                _key = ncache.get_full_key(_namespace, _key)
 
             # Check if value cached. If not, retrieve and save it.
             result = cache.get(_key)

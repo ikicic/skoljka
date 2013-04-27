@@ -215,7 +215,7 @@ def solution_list(request, task_id=None, user_id=None, status=None):
         author = get_object_or_404(User, pk=user_id)
         L = L.filter(author=author)
 
-    L = L.select_related('author', 'content', 'task')
+    L = L.select_related('author', 'content', 'task').filter(detailed_status=3)
 
     return {
         'filter_by_status': status,

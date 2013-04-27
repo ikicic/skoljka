@@ -57,7 +57,7 @@
 <div id="site-container">
   <div id="sidebar">
       {% if user.is_authenticated %}
-        <div class="nav-hello-user">Zdravo, {{ user|userlink:"first_name" }}!</div>
+        <div id="nav-hello-user">Zdravo, {{ user|userlink:"first_name" }}!</div>
       {% endif %}
       <ul class="nav nav-list">
         <li class="nav-header">Izbornik</li>
@@ -84,7 +84,10 @@
         {% endif %}
         <li><br></li>
         <li><a href="/task/"><i class="icon-envelope"></i>Zadaci</a></li>
-        <li><a href="/solution/"><i class="icon-pencil"></i>Rješenja</a></li>
+        <li><a href="/solution/">
+          <i class="icon-pencil"></i>Rješenja
+          {% if t_unrated_solution_count %}<span id="nav-solution-status">({{ t_unrated_solution_count }})</span>{% endif %}
+        </a></li>
         <li><a href="/search/"><i class="icon-search"></i>Pretraživanje</a></li>
         <li><br></li>
         {% if user.is_authenticated %}

@@ -179,7 +179,7 @@ class Folder(PermissionsModel):
             return tasks.order_by('foldertask__position') if order else tasks
             #  .extra(select={'position': FOLDER_TASKS_DB_TABLE + '.position'}, order_by=['position'])
 
-    @cache_function(namespace_format=FOLDER_NAMESPACE_FORMAT)
+    @cache_function(namespace=FOLDER_NAMESPACE_FORMAT)
     def has_any_hidden_task(self):
         # No danger from infinite recursion here.
         return self.get_queryset(None, no_perm_check=True, order=False) \
