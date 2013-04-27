@@ -89,6 +89,6 @@ def userprofile(request):
 @receiver(post_save, sender=Task)           # task hidden/not hidden
 @receiver(post_save, sender=UserGroup)      # group m2m change
 @receiver(post_save, sender=UserProfile)    # detailed_status changes also!
-@receiver(post_delete, Solution)            # some weird case
+@receiver(post_delete, sender=Solution)     # some weird case
 def _invalidate_evaluator_namespace(sender, **kwargs):
     ncache.invalidate_namespace(EVALUATOR_NAMESPACE)

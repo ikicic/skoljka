@@ -72,7 +72,7 @@ def prepare_folder_menu(folders, user):
     # Note: This method calls Folder.many_get_user_stats, which makes it
     # sometimes very slow. Actually, the method is relatively fast.
     # Still, more optimizations are welcome here, because this method is called
-    # on almost every query...
+    # on almost every request...
 
     # Pick all ancestor ids
     ancestor_ids = sum([x.cache_ancestor_ids.split(',') for x in folders], [])

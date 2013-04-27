@@ -101,6 +101,8 @@ class Solution(ModelEx):
 
     class Meta:
         unique_together=(('task', 'author'),)
+        # TODO: Django 1.5. In the meantime list here all multi-indices.
+        # index_together = (('detailed_status', 'date_created'), )
 
     def remember_original(self):
         # ModelEx stuff
