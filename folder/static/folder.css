@@ -1,6 +1,7 @@
 .folder-ab-container {
-  float: right;
   display: table;
+  float: right;
+  margin-top: 5px;
 }
 
 .folder-ab-tag-list {
@@ -8,6 +9,12 @@
   vertical-align: middle;
   height: 100%;
   padding: 0 4px 4px 0;
+}
+
+#folder-name {
+  margin: 5px 0 5px 5px;
+  font-size: 22px;
+  font-weight: normal;
 }
 
 .folder-task-position {

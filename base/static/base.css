@@ -178,11 +178,7 @@ body {
   background-image: url('images/bg_pattern.png');
 }
 
-h2, h3, h4 {
-  text-shadow: 1px 1px 1px rgb(182, 182, 182);
-}
-
-h4 a {
+h2, h3, h4, h4 a {
   text-shadow: 1px 1px 1px rgb(210, 210, 210);
 }
 

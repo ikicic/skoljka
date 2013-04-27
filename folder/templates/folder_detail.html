@@ -6,6 +6,7 @@
 
 {% block content %}
 
+{# Action bar #}
 <div class="folder-ab-container">
   <div class="folder-ab-tag-list">
     {{ tag_list_html|safe }}
@@ -33,7 +34,8 @@
     {% endif %}
   </div>
 </div>
-<a href="javascript: history.go(-1)">« Vrati se</a><br><br>
+
+<h3 id="folder-name">{{ folder.name }}</h3><br>
 
 {% if breadcrumb %}
   <ul class="breadcrumb folder_breadcrumb">
