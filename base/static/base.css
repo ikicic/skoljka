@@ -245,8 +245,12 @@ h2, h3, h4, h4 a {
   padding: 0 0 1em 12px;
 }
 
-#nav-solution-status {
-  color: gray;
+.nav-sol-new-cnt {
+  color: red;
+}
+
+.nav-sol-old-cnt {
+  color: #BBBBBB;
 }
 
 #sitename {

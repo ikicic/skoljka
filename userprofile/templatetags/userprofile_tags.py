@@ -6,6 +6,8 @@ from skoljka.utils.decorators import response_update_cookie
 from skoljka.utils.templatetags.utils_tags import generate_get_query_string
 from skoljka.utils.xss import escape
 
+from datetime import datetime
+
 register = template.Library()
 
 # view inc_task_list.html and inc_solution_list.html
@@ -134,3 +136,15 @@ def userlink(user, what=None):
         name = user.username
 
     return mark_safe(u'<a href="/profile/%d/" title="%s">%s</a>' % (user.pk, escape(user.get_full_name()), escape(name)))
+
+@register.simple_tag(takes_context=True)
+def update_userprofile_evaluator_time(context):
+    new_count = context.get('unrated_solutions_new')
+    user = context['user']
+    if new_count and user.is_authenticated():
+        profile = user.get_profile()
+        profile._dummy_update = True
+        profile.eval_sol_last_view = datetime.now()
+        profile.save()
+
+    return ''

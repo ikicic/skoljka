@@ -20,3 +20,15 @@
 #solution-unhide-box:hover {
   background-color: #F4F4F4;
 }
+
+.sol-table td {
+  background-color: inherit !important;
+}
+
+.sol-unrated {
+  background-color: rgb(244, 252, 163);
+}
+
+.sol-unrated:nth-child(odd) {
+  background-color: rgb(247, 255, 166);
+}

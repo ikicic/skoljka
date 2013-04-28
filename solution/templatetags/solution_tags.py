@@ -1,9 +1,12 @@
 ﻿from django import template
 from django.utils.safestring import mark_safe
 
+from skoljka.utils import interpolate_colors
 from skoljka.utils.string_operations import obfuscate_text
 
-from solution.models import Solution, STATUS
+from solution.models import Solution, STATUS, HTML_INFO
+
+from datetime import datetime, timedelta
 
 register = template.Library()
 
@@ -34,8 +37,35 @@ def filter_solutions_by_status(context, solutions, filter_by_status):
         context['solutions'] = solutions.filter(status__in=[STATUS[x] for x in status])
     return ''
 
+@register.simple_tag()
+def solution_tr_bg_color_attr(solution, row_number):
+    """
+        Returns background-color (for style attribute) for given solution.
+    """
+    rgb = HTML_INFO[solution.detailed_status]['sol_rgb']
+    if not rgb:
+        return ''
+
+    r, g, b = rgb
+
+    days = (datetime.now() - solution.date_created).days
+    percent = 1 if days < 3 else (.6 if days < 90 else .2)
+
+    if row_number % 2 == 1:
+        r, g, b = interpolate_colors(240, 245, 244, # #content.color
+            r * 1.01, g * 1.01, b * 1.01, percent)
+        r = min(r, 255)
+        g = min(g, 255)
+        b = min(b, 255)
+    else:
+        r, g, b = interpolate_colors(244, 247, 246, # .table-striped odd-child
+            r, g, b, percent)
+
+    return "background-color:#%02X%02X%02X;" % (r, g, b)
+
 @register.simple_tag
 def solution_label(task):
+    # TODO: rename to _cache_solution
     cache = getattr(task, 'cache_solution', None)
     if not cache or cache.is_blank():
         return ''

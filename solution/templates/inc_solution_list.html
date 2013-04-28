@@ -18,7 +18,7 @@
 {% if solutions %}
   {% cache_solution_info solutions %}
 
-  <table width="100%" class="table-striped table-condensed" style="text-align: center;">
+  <table width="100%" class="table-striped table-condensed sol-table" style="text-align: center;">
     <tr>
       <th colspan="6">Lista rješenja</th>
     </tr>
@@ -32,7 +32,7 @@
     </tr>
     {% for s in solutions %}
       {% check_solution_for_obfuscation s s.content.short %}
-      <tr>
+      <tr style="{% solution_tr_bg_color_attr s forloop.counter %}">
         <td>{{ s.id }}
         <td>{{ s.date_created|timesince }}
         <td>{{ s.task.get_link }}
@@ -57,3 +57,6 @@
 {% else %}
   {% if empty_message %}{{ empty_message }}{% endif %}
 {% endif %}
+
+{# Easiest implementation... #}
+{% update_userprofile_evaluator_time %}

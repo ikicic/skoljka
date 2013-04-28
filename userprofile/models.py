@@ -108,6 +108,7 @@ class UserProfile(models.Model):
     evaluator = models.BooleanField(default=False, verbose_name='Ispravljač',
         help_text=icon_help_text('Kao ispravljač bit ćete obavještavani o '
         'poslanim rješenjima drugih korisnika.'))
+    eval_sol_last_view = models.DateTimeField(auto_now_add=True)
 
     # automatic options
     solution_status_filter = models.CharField(max_length=32, blank=True, default='')

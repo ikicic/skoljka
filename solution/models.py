@@ -1,5 +1,6 @@
 ﻿from django.db import models
 from django.contrib.auth.models import User
+from django.utils.html import mark_safe
 
 from mathcontent.models import MathContent
 from post.generic import PostGenericRelation
@@ -24,14 +25,15 @@ DETAILED_STATUS = {name: i for i, name in enumerate(DETAILED_STATUS_NAME)}
 
 # Each element of HTML_INFO is dict with keys from _HTML_INFO_KEYS and values
 # from _HTML_INFO
-_HTML_INFO_KEYS = ('label_class', 'label_text', 'tr_class')
+#                                               task label, solution tr
+_HTML_INFO_KEYS = ('label_class', 'label_text', 'tr_class', 'sol_rgb')
 _HTML_INFO = {
-    'blank': ('', '', ''),
-    'as_solved': ('label-success', u'Riješeno', 'task-as-solved'),
-    'todo': ('label-warning', u'To Do', 'task-todo'),
-    'submitted_not_rated': ('label-info', u'Poslano', 'task-submitted-not-rated'),
-    'wrong': ('label-important', u'Netočno', 'task-wrong'),
-    'correct': ('label-success', u'Točno', 'task-correct'),
+    'blank': ('', '', '', None),
+    'as_solved': ('label-success', u'Riješeno', 'task-as-solved', (170, 255, 170)),
+    'todo': ('label-warning', u'To Do', 'task-todo', None),
+    'submitted_not_rated': ('label-info', u'Poslano', 'task-submitted-not-rated', (255, 219, 76)),
+    'wrong': ('label-important', u'Netočno', 'task-wrong', (255, 150, 150)),
+    'correct': ('label-success', u'Točno', 'task-correct', (112, 255, 112)),
 }
 
 # status number -> dict(info_key -> value)
@@ -113,7 +115,6 @@ class Solution(ModelEx):
 
     # template helpers
     def get_html_info(self):
-        # Get current detailed status, and then it's info...
         return HTML_INFO[self.detailed_status]
 
     def _calc_detailed_status(self):
