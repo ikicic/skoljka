@@ -18,7 +18,6 @@ urlpatterns = patterns('',
 
     (r'^', include('base.urls')),
 
-    (r'^activity/', include('activity.urls')),
     (r'^folder/', include('folder.urls')),
     (r'^', include('mathcontent.urls')), # namjerno nije r'^mathcontent/'
     (r'^permissions/', include('permissions.urls')),
