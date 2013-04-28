@@ -223,6 +223,7 @@ def solution_list(request, task_id=None, user_id=None, status=None):
     task = None
     author = None   # 'user' is template reserved word
 
+    empty_message = u''
     if task_id is not None:
         task = get_object_or_404(Task, pk=task_id)
         L = L.filter(task=task)

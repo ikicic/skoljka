@@ -4,17 +4,16 @@
 
 {% block content %}
 
-<a href="javascript: history.go(-1)">« Vrati se</a><br>
+<a href="javascript: history.go(-1)">« Vrati se</a>
 
-<br>
 {% if task %}
-  Rješenja vezana uz zadatak: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br>
+  <br><br>
+  Rješenja zadatka: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br>
 {% endif %}
 {% if author %}
+  <br><br>
   Korisnik: {{ author|userlink }}<br>
 {% endif %}
-
-<br>
 
 {% include "inc_solution_list.html" with solutions=solutions %}
 
