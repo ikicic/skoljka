@@ -158,6 +158,11 @@ def view(request, id=None, description=u''):
         if request.user.get_profile().selected_folder == folder:
             data['this_folder_selected'] = True
 
+    try:
+        data['has_subfolders'] = bool(data['folder_children'][folder.id])
+    except:
+        pass    # No subfolders.
+
     return data
 
 @login_required

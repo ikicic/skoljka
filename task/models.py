@@ -86,9 +86,9 @@ class Task(BasePermissionsModel):
     def get_link(self):
         if self.file_attachment_id:
             url = self.cache_file_attachment_url
-            file = u'<a href="{}" title="{}">' \
-                    u'<i class="icon-file"></i>'            \
-                    u'</a>'.format(url, url[url.rfind('/') + 1:])
+            file = u'<a href="{}" title="{}">'      \
+                    u'<i class="icon-file"></i>'    \
+                    u'</a> '.format(url, url[url.rfind('/') + 1:])
         else:
             file = u''
 

@@ -28,10 +28,8 @@ def get_task_folder_ids(task):
 
         Does not check permissions, and not supposed to do any checks.
     """
-    # Implementation of permission check is very complicated! Do not implement
-    # it here. prepare_folder_menu can be used if needed. If you really need
-    # permission check, without menu data, refactor / split prepare_folder_menu
-    # into separated utility methods, but do not change this method!
+    # Implementation of permission check is very complicated, do not implement
+    # it here! Use get_visible_folder_tree instead.
 
     tags = [x.tag for x in get_object_tagged_items(task)]
 
@@ -60,19 +58,13 @@ def get_task_folder_ids(task):
     # Remove duplicates (does not preserve order)
     return list(set(ids))
 
-def prepare_folder_menu(folders, user):
+def get_visible_folder_tree(folders, user):
     """
-        Given list of folders, prepare folder menu showing all those folders
-        at once. Ignores from input all folder inaccessible for the given user.
+        Get whole visible folder tree containing selected folders.
 
-        Returns dict with following keys:
-            folder_children - dictionary {folder.id: list of children instances}
-            folder_tree - HTML of folder tree
+        Also returns some other useful data.
+        Fills returned folder instances with ._depth.
     """
-    # Note: This method calls Folder.many_get_user_stats, which makes it
-    # sometimes very slow. Actually, the method is relatively fast.
-    # Still, more optimizations are welcome here, because this method is called
-    # on almost every request...
 
     # Pick all ancestor ids
     ancestor_ids = sum([x.cache_ancestor_ids.split(',') for x in folders], [])
@@ -161,6 +153,32 @@ def prepare_folder_menu(folders, user):
 
         # Sort by parent_index in reverse order (note that we are using LIFO)!.
         stack.extend(sorted(children, key=lambda x: -x.parent_index))
+
+    return {
+        'ancestor_ids': ancestor_ids,
+        'folder_children': folder_children,
+        'sorted_folders': sorted_folders,
+    }
+
+def prepare_folder_menu(folders, user):
+    """
+        Given list of folders, prepare folder menu showing all those folders
+        at once. Ignores from input all folder inaccessible for the given user.
+
+        Returns dict with following keys:
+            folder_children - dictionary {folder.id: list of children instances}
+            folder_tree - HTML of folder tree
+    """
+    # Note: This method calls Folder.many_get_user_stats, which makes it
+    # sometimes very slow. Actually, the method is relatively fast.
+    # Still, more optimizations are welcome here, because this method is called
+    # on almost every request...
+
+    data = get_visible_folder_tree(folders, user)
+
+    ancestor_ids = data['ancestor_ids']
+    folder_children = data['folder_children']
+    sorted_folders = data['sorted_folders']
 
     # Get user's solution statuses.
     user_stats = Folder.many_get_user_stats(sorted_folders, user)
