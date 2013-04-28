@@ -10,8 +10,13 @@ class AttachmentForm(ModelForm):
 
 class MathContentForm(ModelForm):
     def __init__(self, *args, **kwargs):
+        blank = kwargs.pop('blank', False)
+        label = kwargs.pop('label', None)
         super(MathContentForm, self).__init__(*args, **kwargs)
-        
+
+        if label:
+            self.fields['text'].label = label
+        self.fields['text'].required = not blank
         self.fields['text'].widget.attrs.update({
             'rows': 10,
             'cols': 100,

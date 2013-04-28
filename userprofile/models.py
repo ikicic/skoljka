@@ -4,7 +4,6 @@ from django.db import connection, models, transaction
 from django.db.models import Q
 from django.dispatch import receiver
 from django.template.loader import add_to_builtins
-from django.utils.html import mark_safe
 
 import johnny.cache
 from registration.signals import user_registered
@@ -13,6 +12,7 @@ from folder.models import Folder
 from tags.models import Tag
 from task.models import Task, DIFFICULTY_RATING_ATTRS
 from solution.models import STATUS, SOLUTION_CORRECT_SCORE
+from skoljka.utils.models import icon_help_text
 
 
 # Take unique ID and description
@@ -70,10 +70,6 @@ class DifficultyDistribution(models.Model):
     user = models.ForeignKey(User, related_name='diff_distribution')
     difficulty = models.IntegerField(db_index=True)
     solved_count = models.IntegerField()
-
-def icon_help_text(text):
-    return mark_safe(
-        ' <i class="icon-question-sign" title="{}"></i>'.format(text))
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile')

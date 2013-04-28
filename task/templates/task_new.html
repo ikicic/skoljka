@@ -55,7 +55,7 @@
 
 <form {% if is_file %}enctype="multipart/form-data"{% endif %} action="{{ action_url }}" method="post">
   {% csrf_token %}
-  <table>
+  <table class="kill-br">
     {% for form in forms %}
       {{ form.as_table }}
     {% endfor %} 

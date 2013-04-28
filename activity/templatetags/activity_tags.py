@@ -33,6 +33,8 @@ def prepare_action_data(context, A):
     S = ''
     if ttype == TASK_ADD:
         S = u'je doda%s novi zadatak' % G1
+    elif ttype == FILE_ADD:
+        S = u'je doda%s novu datoteku' % G1
     elif ttype == SOLUTION_SUBMIT:
         S = u'je posla%s %s za zadatak' % (G1, A.A('solution', u'rješenje'))
     elif ttype == SOLUTION_AS_SOLVED:

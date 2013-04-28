@@ -33,7 +33,8 @@ from skoljka.utils.decorators import response
 from skoljka.utils.timeout import run_command
 
 from task.models import Task, SimilarTask
-from task.forms import TaskForm, TaskAdvancedForm, TaskExportForm, EXPORT_FORMAT_CHOICES
+from task.forms import TaskForm, TaskFileForm, TaskAdvancedForm,    \
+    TaskExportForm, EXPORT_FORMAT_CHOICES
 
 import os, sys, hashlib, codecs, datetime, zipfile
 
@@ -232,11 +233,16 @@ def new(request, task_id=None, is_file=None):
         old_tags = []
         edit = False
 
+    form_class = TaskFileForm if is_file else TaskForm
+    math_content_label = 'Opis' if is_file else None    # else default
+
     if request.method == 'POST':
         old_hidden = getattr(task, 'hidden', -1)
 
-        task_form = TaskForm(request.POST, instance=task, user=request.user)
-        math_content_form = MathContentForm(request.POST, instance=math_content)
+        # Files can have blank description (i.e. math content)
+        task_form = form_class(request.POST, instance=task, user=request.user)
+        math_content_form = MathContentForm(request.POST, instance=math_content,
+            blank=is_file, label=math_content_label)
         attachment_form = is_file and not edit \
             and AttachmentForm(request.POST, request.FILES)
 
@@ -246,12 +252,20 @@ def new(request, task_id=None, is_file=None):
             task = task_form.save(commit=False)
             math_content = math_content_form.save()
 
-            if attachment_form:
-                attachment, attachment_form = check_and_save_attachment(
-                    request, math_content)
-                task.file_attachment = attachment   # This is a file.
-            else:
-                task.file_attachment = None         # This is a task.
+            if not edit:
+                if attachment_form:
+                    attachment, attachment_form = check_and_save_attachment(
+                        request, math_content)
+                    task.file_attachment = attachment   # This is a file.
+
+                    # Immediately remember file url, so that we don't have to
+                    # access Attachment table to show the link.
+                    task.cache_file_attachment_url = attachment.get_url()
+                else:
+                    task.file_attachment = None         # This is a task.
+
+            if is_file:
+                task.cache_file_attachment_url = task.file_attachment.get_url()
 
             if not edit:
                 task.author = request.user
@@ -288,18 +302,19 @@ def new(request, task_id=None, is_file=None):
                 update_search_cache(task, old_tags, tags)
 
             # send action if creating a new nonhidden task
-            # TODO: currently not sending any info if a file. finish with signals!
-            if not edit and not task.hidden and not is_file:
+            if not edit and not task.hidden:
                 # TODO: signals!
-                _action.add(request.user, _action.TASK_ADD,
+                type = _action.FILE_ADD if is_file else _action.TASK_ADD
+                _action.add(request.user, type,
                     action_object=task, target=task)
 
             # TODO: izbrisati task_new_finish.html i url
             #return HttpResponseRedirect('/task/%d/' % task.id if edit else '/task/new/finish/')
             return HttpResponseRedirect(task.get_absolute_url())
     else:
-        task_form = TaskForm(instance=task)
-        math_content_form = MathContentForm(instance=math_content)
+        task_form = form_class(instance=task)
+        math_content_form = MathContentForm(instance=math_content,
+            blank=is_file, label=math_content_label)
         attachment_form = is_file and not edit and AttachmentForm()
 
     forms = [task_form, math_content_form]

@@ -50,4 +50,10 @@ class TaskForm(forms.ModelForm):
 
     class Meta:
         model = Task
-        fields = ['name', 'tags', 'source', 'hidden']
+        fields = ['name', 'tags', 'source', 'hidden', 'solvable']
+
+class TaskFileForm(TaskForm):
+    def __init__(self, *args, **kwargs):
+        super(TaskFileForm, self).__init__(*args, **kwargs)
+
+        self.fields['solvable'].initial = False

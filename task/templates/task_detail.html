@@ -37,16 +37,33 @@
 </div>
 
 <br><br>
-<div class="task-content well">
-  {# TODO: render tag! #}
-  {% if user.is_authenticated %}
-    {{ task.content.render_quote }}
-  {% else %}
-    {{ task.content.render }}
-  {% endif %}
-</div>
+{% if task.is_file %}
+  <a href="{{ task.cache_file_attachment_url }}">
+    <div id="task-file" class="well center-vertically">
+      <div>
+        <div>
+            {{ task.file_attachment.get_filename }}<br>
+            <span id="task-file-info">Kliknite ovdje kako biste otvorili datoteku.</span>
+        </div>
+      </div>
+    </div>
+  </a>
+{% endif %}
 
-{% mathcontent_attachments task.content %}
+{% if not task.content.is_empty %}
+  <div class="task-content well">
+    {# TODO: render tag! #}
+    {% if user.is_authenticated %}
+      {{ task.content.render_quote }}
+    {% else %}
+      {{ task.content.render }}
+    {% endif %}
+  </div>
+{% endif %}
+
+{% if not task.is_file %}
+  {% mathcontent_attachments task.content %}
+{% endif %}
 
 <div>
   <div class="task-info-right">
@@ -56,9 +73,10 @@
   </div>
 
   {% if user.is_authenticated %}
+    {# Show solution to the solution if it exists for some reason... #}
     {% if solution.is_submitted %}
       <a href="/solution/{{ solution.id }}/">Prikaži moje rješenje</a><br>
-    {% else %}
+    {% elif task.solvable %}
       <form action="/task/{{ task.id }}/mark/" method="post">
         {% csrf_token %}
         <div class="btn-group">
@@ -81,8 +99,10 @@
   {% endif %}
 </div>
 
-<a href="/solution/task/{{ task.id }}/">Pregledaj poslana rješenja</a><br>
-<a href="/task/{{ task.id }}/similar/">Slični zadaci</a><br>
+{% if task.solvable %}
+  <a href="/solution/task/{{ task.id }}/">Pregledaj poslana rješenja</a><br>
+{% endif %}
+<a href="/task/{{ task.id }}/similar/">Slični zadaci {{ task.file_attachment_id|yesno:"i datoteke,," }}</a><br>
 <br>
 <br>
 <br>

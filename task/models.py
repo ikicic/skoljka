@@ -11,6 +11,7 @@ from post.generic import PostGenericRelation
 from rating.fields import RatingField
 from search.models import SearchCacheElement
 from tags.managers import TaggableManager
+from skoljka.utils.models import icon_help_text
 
 import random
 
@@ -66,6 +67,12 @@ class Task(BasePermissionsModel):
 
     # If not None, this Task is a file actually.
     file_attachment = models.ForeignKey(Attachment, blank=True, null=True)
+    cache_file_attachment_url = models.CharField(max_length=150, blank=True,
+        null=True)
+
+    solvable = models.BooleanField(default=True, verbose_name=u'Zadatak',
+        help_text=icon_help_text(
+            'Rješivo ili ne, to jest mogu li se slati rješenja?'))
 
     class Meta(BasePermissionsModel.Meta):
         ordering = ['id']
@@ -77,10 +84,33 @@ class Task(BasePermissionsModel):
         return '/task/%d/' % self.id
 
     def get_link(self):
-        return mark_safe('<a href="/task/%d/" class="task">%s</a>' % (self.id, self.name))
+        if self.file_attachment_id:
+            url = self.cache_file_attachment_url
+            file = u'<a href="{}" title="{}">' \
+                    u'<i class="icon-file"></i>'            \
+                    u'</a>'.format(url, url[url.rfind('/') + 1:])
+        else:
+            file = u''
+
+        return mark_safe(u'{}<a href="/task/{}/" class="task">{}</a>'.format(
+            file, self.id, self.name))
 
     def is_file(self):
-        return file_attachment is not None
+        return self.file_attachment_id is not None
+
+    def get_tr_class(self):
+        """
+            Return tr class for task table.
+        """
+        solution = getattr(self, 'cache_solution', None)
+        if solution:
+            cls = solution.get_html_info()['tr_class']
+        elif self.hidden:
+            cls = 'task-hidden'
+        else:
+            cls = ''
+
+        return cls if self.solvable else cls + ' task-unsolvable' 
 
     # deprecated?
     # TODO: preurediti, ovo je samo tmp

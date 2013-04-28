@@ -8,7 +8,13 @@
   Zadatak uspješno dodan!<br><br>
 {% endif %}
 
-<a href="/task/new/">Dodaj novi zadatak</a><br><br>
+{% if user.is_authenticated %}
+  <div class="btn-group" style="float: right;">
+    <a href="/task/new/" class="btn"><i class="icon-pencil"></i> Dodaj zadatak</a>
+    <a href="/task/new/file/" class="btn"><i class="icon-file"></i> Dodaj datoteku</a>
+  </div>
+  <br><br>
+{% endif %}
 
 {% include "inc_task_list.html" %}
 

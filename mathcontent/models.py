@@ -27,7 +27,8 @@ class LatexElement(models.Model):
 
 @autoconnect
 class MathContent(models.Model):
-    text = models.TextField(max_length=MAX_LENGTH, verbose_name='Tekst')
+    text = models.TextField(blank=True, max_length=MAX_LENGTH,
+        verbose_name='Tekst')
     html = models.TextField(blank=True, null=True)
 
     def __unicode__(self):
@@ -35,6 +36,9 @@ class MathContent(models.Model):
 
     def short(self, length=50):
         return self.text[:length] + "..." if len(self.text) > length else self.text
+
+    def is_empty(self):
+        return not self.text or self.text.isspace()
 
     def pre_save(self):
         if not hasattr(self, 'no_html_reset'):

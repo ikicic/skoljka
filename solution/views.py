@@ -62,6 +62,9 @@ def _do_mark(request, solution, task):
             and not request.user.has_perm('mark_as_official_solution'):
         return (403, u'No permission to mark as official solution.')
 
+    if not task.solvable:
+        return (403, u'This task is not solvable!')
+
     # as_solved, todo, blank
     if solution is None:
         solution, dummy = Solution.objects.get_or_create(task=task, author=request.user)
@@ -149,10 +152,15 @@ def submit(request, task_id=None, solution_id=None):
         edit = True
     elif task_id:
         task = get_object_or_404(Task, pk=task_id)
-        solution, dummy = Solution.objects.get_or_create(task=task, author=request.user)
         edit = False
     else:
         return 404
+
+    if not task.solvable:
+        return (403, u'This task is not solvable!')
+
+    if not edit:
+        solution, dummy = Solution.objects.get_or_create(task=task, author=request.user)
 
     math_content = solution.content
 

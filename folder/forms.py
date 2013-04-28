@@ -16,6 +16,7 @@ class FolderForm(forms.ModelForm):
         # User can put his folder anywhere he wants (into any visible folder),
         # but that doesn't mean he can make it public!
 
+        # TODO: this check is not correct!! have to generate whole folder tree!
         q = Folder.objects.for_user(self.user, VIEW)
         if self.instance:
             q = q.exclude(id=self.instance.id)

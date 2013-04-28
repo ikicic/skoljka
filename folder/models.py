@@ -199,7 +199,7 @@ class Folder(PermissionsModel):
         # Get all the tasks in this folder. Check for permission to get the
         # visible count immediately.
         task_ids = self.get_queryset(user, order=False)    \
-            .values_list('id', flat=True)
+            .filter(solvable=True).values_list('id', flat=True)
         task_ids = list(task_ids)
 
         # TODO: Optimize! __in is also not the perfect solution.

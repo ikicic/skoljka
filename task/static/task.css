@@ -85,8 +85,26 @@ tr.task-hidden:nth-child(odd) td {
   background-color: #E4E3E3!important;
 }
 
+.task-unsolvable a {
+  color: rgb(132, 152, 162);
+}
+.task-unsolvable a:hover {
+  color: rgb(112, 125, 142);
+}
+
 /* End task table */
 
+#task-file {
+  text-align: center;
+}
+
+#task-file:hover {
+  background-color: #F4F4F4;
+}
+
+#task-file-info {
+  color: gray;
+}
 
 .task-text {
   padding: 10px 0px;

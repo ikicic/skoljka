@@ -27,6 +27,8 @@ ALTER TABLE mathcontent_attachment ADD COLUMN cache_file_size INT NOT NULL DEFAU
 ALTER TABLE permissions_perobjectgrouppermission RENAME TO permissions_objectpermission;
 
 ALTER TABLE task_task ADD COLUMN file_attachment_id INT NULL;
+ALTER TABLE task_task ADD COLUMN cache_file_attachment_url VARCHAR(150) NOT NULL AFTER file_attachment_id;
+ALTER TABLE task_task ADD COLUMN solvable TINYINT(1) NOT NULL DEFAULT 1;
 
 ALTER TABLE userprofile_userprofile DROP COLUMN birthday;
 ALTER TABLE userprofile_userprofile DROP COLUMN city;

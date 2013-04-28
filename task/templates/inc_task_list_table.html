@@ -20,7 +20,7 @@
 
   <tbody>
   {% for task in tasks %}
-    <tr class="{% if task.cache_solution %}{{ task.cache_solution.get_html_info.tr_class }}{% elif task.hidden %}task-hidden{% endif %}">
+    <tr class="{{ task.get_tr_class }}">
       {% if user.profile.selected_folder %}
         {# We duplicate id value here, so that js is independent of html structure... #}
         <td><input type="checkbox" class="folder-checkbox"{% if task.is_in_folder %}
