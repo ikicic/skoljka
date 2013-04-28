@@ -226,13 +226,18 @@ def solution_list(request, task_id=None, user_id=None, status=None):
     if task_id is not None:
         task = get_object_or_404(Task, pk=task_id)
         L = L.filter(task=task)
+        empty_message = u'Nema traženih rješenja za ovaj zadatak'
+
     if user_id is not None:
         author = get_object_or_404(User, pk=user_id)
         L = L.filter(author=author)
+        empty_message = u'Nema traženih rješenja za ovog korisnika'
 
     L = L.select_related('author', 'content', 'task')
 
+
     return {
+        'empty_message': empty_message,
         'filter_by_status': status,
         'solutions': L.order_by('-date_created'),
         'task': task,

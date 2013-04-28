@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 from skoljka.utils import interpolate_colors
 from skoljka.utils.string_operations import obfuscate_text
 
-from solution.models import Solution, STATUS, HTML_INFO
+from solution.models import Solution, STATUS, HTML_INFO, DETAILED_STATUS
 
 from datetime import datetime, timedelta
 
@@ -19,22 +19,24 @@ def filter_solutions_by_status(context, solutions, filter_by_status):
         pretrazuje po odredjenom statusu (filter_by_status-u)
     """
 
-    print 'FILTER_BY_STATUS', filter_by_status
-    print 'SOLUTION_STATUS_FILTER', context['solution_status_filter']
-    if filter_by_status is not None:
-        status = filter_by_status
-    else:
-        status = context['solution_status_filter']
-    status = status.split(',')
+    status =  filter_by_status or context['solution_status_filter']
 
-    print 'STATUS', status
+    # temporary... hack.
+    if status == 'unrated':
+        context['solutions'] = solutions.filter(
+            detailed_status=DETAILED_STATUS['submitted_not_rated'])
+        return ''
+
+    status = status.split(',')
 
     # pass by reference?
     if len(status) == 1:
         if status[0]:
-            context['solutions'] = solutions.filter(status=STATUS[status[0]])
+            context['solutions'] = solutions.filter(
+                status=STATUS.get(status[0], 0))
     else:
-        context['solutions'] = solutions.filter(status__in=[STATUS[x] for x in status])
+        context['solutions'] = solutions.filter(
+            status__in=[STATUS.get(x, 0) for x in status])
     return ''
 
 @register.simple_tag()

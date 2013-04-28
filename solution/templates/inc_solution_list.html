@@ -4,10 +4,13 @@
 {% load sorting_tags %}
 {% load userprofile_tags %}
 
-{% useroptions "solution_status_filter" %}
-  {% useroption "" "Sva rješenja" default %}
-  {% useroption "submitted" "Poslana" %}
-{% enduseroptions %}
+{% if not filter_by_status %}
+  {% useroptions "solution_status_filter" %}
+    {% useroption "" "Sva rješenja" default %}
+    {% useroption "submitted" "Poslana" %}
+    {% useroption "unrated" "Neocijenjena" %}
+  {% enduseroptions %}
+{% endif %}
 
 {# filter queryset if filter_status is not None #}
 {% filter_solutions_by_status solutions filter_by_status %}
@@ -55,7 +58,9 @@
   </table>
   {% paginate %}
 {% else %}
+  <br>
   {% if empty_message %}{{ empty_message }}{% endif %}
+  <br><br>
 {% endif %}
 
 {# Easiest implementation... #}

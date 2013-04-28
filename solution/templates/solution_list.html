@@ -14,8 +14,8 @@
   Korisnik: {{ author|userlink }}<br>
 {% endif %}
 
-<br>  
+<br>
 
-{% include "inc_solution_list.html" with solutions=solutions empty_message="Nema poslanih rješenja za ovaj zadatak." %}
+{% include "inc_solution_list.html" with solutions=solutions %}
 
 {% endblock content %}
