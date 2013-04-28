@@ -89,13 +89,17 @@ def _do_mark(request, solution, task):
 
 
     # log the action
-    # TODO: use signals?
+    # TODO: use signals!
     if action in ['official1', 'as_solved', 'todo']:
         type_desc = {'official1': _action.SOLUTION_AS_OFFICIAL,
                      'as_solved': _action.SOLUTION_AS_SOLVED,
                      'todo': _action.SOLUTION_TODO,
             }
         _action.replace_or_add(request.user, type_desc[action],
+            action_object=solution, target=task)
+    elif action == 'official0':
+        # temporary solution...
+        _action.remove(request.user, type=_action.SOLUTION_AS_OFFICIAL[0],
             action_object=solution, target=task)
     elif action == 'blank':
         _action.remove(request.user, type=_action.SOLUTION_SEND,
@@ -138,8 +142,11 @@ def edit_mark(request, solution_id):
 
     ret_value = _do_mark(request, solution, solution.task)
 
-    return ret_value or ('/task/%d/' % solution.task_id,)
-
+    if ret_value:
+        return ret_value
+    if request.POST['action'] in ['official0', 'official1']:
+        return (solution.get_absolute_url(), )
+    return (solution.task.get_absolute_url(), )
 
 #TODO: dogovoriti se oko imena ove funkcije, pa i template-a
 #TODO(ikicic): sto ako forma nije valid?

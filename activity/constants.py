@@ -1,4 +1,4 @@
-# (type, subtype)
+﻿# (type, subtype)
 
 TASK_ADD = (100, 1)                         # public    DONE
 FILE_ADD = (100, 2)                         # public    DONE
@@ -22,6 +22,7 @@ GROUP_LEAVE = (GROUP_CHANGE, 2)     # group     DONE
 action_label = {
     TASK_ADD: ('label-success', 'Novi zadatak'),
     FILE_ADD: ('label-success', 'Nova datoteka'),
+    SOLUTION_AS_OFFICIAL: ('label-info', u'Službeno rješenje'),
 }
 
 

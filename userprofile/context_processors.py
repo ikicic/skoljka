@@ -91,7 +91,7 @@ def userprofile(request):
 
         if unrated:
             _time = profile.eval_sol_last_view
-            new_count = sum(x.last_edit_time >= _time for x in unrated) \
+            new_count = sum(x.date_created >= _time for x in unrated) \
                 if _time else len(unrated)
             old_count = len(unrated) - new_count
 

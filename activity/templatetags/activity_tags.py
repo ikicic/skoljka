@@ -41,6 +41,9 @@ def prepare_action_data(context, A):
         S = u'je označi%s kao riješen zadatak' % G1
     elif ttype == SOLUTION_TODO:
         S = u'je označi%s s To Do zadatak' % G1
+    elif ttype == SOLUTION_AS_OFFICIAL:
+        S = u'je postavi%s službeno %s za zadatak' %    \
+            (G1, A.A('solution', u'rješenje'))
     elif ttype == GROUP_ADD:
         S = u'je dodao korisni%s %s u grupu %s' %   \
             (G('ka', 'cu', gender), A.A('profile'), A.T('usergroup'))
