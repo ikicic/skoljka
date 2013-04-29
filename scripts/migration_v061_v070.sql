@@ -34,6 +34,7 @@ ALTER TABLE userprofile_userprofile DROP COLUMN birthday;
 ALTER TABLE userprofile_userprofile DROP COLUMN city;
 ALTER TABLE userprofile_userprofile DROP COLUMN country;
 ALTER TABLE userprofile_userprofile DROP COLUMN quote;
+ALTER TABLE userprofile_userprofile DROP COLUMN score;
 ALTER TABLE userprofile_userprofile DROP COLUMN website;
 ALTER TABLE userprofile_userprofile ADD COLUMN show_unsolved_task_solutions TINYINT(1) NOT NULL DEFAULT 0;
 ALTER TABLE userprofile_userprofile ADD COLUMN evaluator TINYINT(1) NOT NULL DEFAULT 0;

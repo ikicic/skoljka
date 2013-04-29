@@ -117,8 +117,6 @@ class UserProfile(models.Model):
     private_group = models.OneToOneField(Group)
 
     solved_count = models.IntegerField(default=0)
-    # deprecated or to fix
-    score = models.FloatField(default=0)
 
     def __unicode__(self):
         return u'UserProfile for ' + self.user.username
