@@ -278,6 +278,8 @@ function decode_email(e) {
 };
 
 $(function() {
+  /* Please sort somehow! (e.g. alphabetically by description) */
+
   /* Decode emails */
   $('.imejl').each(function() {
     var a = $(this);
@@ -285,12 +287,6 @@ $(function() {
     if (a.html().length == 0)
       a.html(email);
     a.attr('href', 'mailto:' + email);
-  });
-
-  /* Search toggler */
-  $(".toggler").click(function(e){
-    e.preventDefault();
-    $(".toggle").toggle();
   });
 
   /* Delete attachments */
@@ -305,5 +301,11 @@ $(function() {
         }
       });
     }
+  });
+
+  /* Search toggler */
+  $(".toggler").click(function(e){
+    e.preventDefault();
+    $(".toggle").toggle();
   });
 });
