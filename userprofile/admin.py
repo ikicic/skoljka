@@ -1,8 +1,9 @@
 from django.contrib import admin
-from userprofile.models import UserProfile
+
+from userprofile.models import UserProfile, user_refresh_group_cache
 
 class UserProfileAdmin(admin.ModelAdmin):
-    actions = ['refresh_task_distribution']
+    actions = ['refresh_task_distribution', 'refresh_group_cache']
 
     def refresh_task_distribution(self, request, queryset):
         """
@@ -11,5 +12,9 @@ class UserProfileAdmin(admin.ModelAdmin):
         """
         for user in queryset:
             user.refresh_diff_distribution()
+
+    def refresh_group_cache(self, request, queryset):
+        user_ids = list(queryset.values_list('user_id', flat=True))
+        user_refresh_group_cache(user_ids)
 
 admin.site.register(UserProfile, UserProfileAdmin)

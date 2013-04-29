@@ -104,7 +104,8 @@ def activity_list(context, exclude_user=None, target=None, action_object=None):
     # SPEED: maknuti nepotrebni JOIN auth_group ON (auth_group.id = action.group_id)
     activity = Action.objects.distinct()
     if user.is_authenticated():
-        activity = activity.filter(Q(public=True) | Q(group__user=user))
+        activity = activity.filter(Q(public=True)
+            | Q(group_id__in=user.get_profile().get_group_ids()))
     else:
         activity = activity.filter(public=True)
     

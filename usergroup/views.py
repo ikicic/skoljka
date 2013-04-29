@@ -9,6 +9,8 @@ from activity import action as _action
 from mathcontent.forms import MathContentForm
 from permissions.constants import VIEW, EDIT, EDIT_PERMISSIONS, ADD_MEMBERS
 from permissions.models import ObjectPermission
+from userprofile.models import user_refresh_group_cache
+
 from usergroup.forms import GroupForm, UserGroupForm, UserEntryForm
 from usergroup.models import UserGroup, GroupExtended
 
@@ -30,6 +32,8 @@ def leave(request, group_id=None):
     if request.method == 'POST':
         if request.POST.get('confirm') == u'1':
             request.user.groups.remove(group)
+            # TODO: manually create function like 'group_members_update'
+            user_refresh_group_cache([request.user.id])
             group.data.member_count = User.groups.through.objects.filter(group=group).count()
             group.data.save(force_update=True)
             _action.add(request.user, _action.GROUP_LEAVE,
@@ -146,13 +150,17 @@ def members(request, group_id=None):
     if ADD_MEMBERS in perm and request.method == 'POST':
         form = UserEntryForm(request.POST)
         if form.is_valid():
+            created_user_ids = []
             users = form.cleaned_data['list']
             for user in users:
                 #user.groups.add(group)
                 dummy, created = User.groups.through.objects.get_or_create(user=user, group=group)
                 if created:
+                    created_user_ids.append(user.id)
                     _action.add(request.user, _action.GROUP_ADD,
                         action_object=user, target=group, public=False, group=group)
+            # TODO: manually create function like 'group_members_update'
+            user_refresh_group_cache(created_user_ids)
             group.data.member_count = group.data.get_users().count()
             group.data.save()
             form = UserEntryForm()

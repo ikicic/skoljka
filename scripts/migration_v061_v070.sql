@@ -3,6 +3,7 @@
     1) run Folder migration admin action
     2) reset attachment file size
     3) run Solution refresh_detailed_status admin action.
+    4) run UserProfile refresh_group_cache admin action.
 */
 
 /* Structure */
@@ -42,7 +43,7 @@ ALTER TABLE userprofile_userprofile ADD COLUMN eval_sol_last_view DATETIME NOT N
 ALTER TABLE userprofile_userprofile ADD COLUMN hide_solution_min_diff DOUBLE NOT NULL DEFAULT 0;
 ALTER TABLE userprofile_userprofile ADD COLUMN show_solution_task TINYINT(1) NOT NULL DEFAULT 1;
 ALTER TABLE userprofile_userprofile ADD COLUMN school_class INT NOT NULL DEFAULT 0;
-
+ALTER TABLE userprofile_userprofile ADD COLUMN cache_group_ids VARCHAR(255) NOT NULL;
 
 ALTER TABLE folder_folder_tasks ADD COLUMN position INT NOT NULL DEFAULT 0;
 

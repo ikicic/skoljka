@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.db.models.signals import pre_save, post_save, pre_delete,   \
-    m2m_changed
+from django.db.models.signals import pre_save, post_save, pre_delete
 from django.dispatch import receiver
 
 from permissions.constants import VIEW

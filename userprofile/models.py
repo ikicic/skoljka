@@ -14,6 +14,7 @@ from task.models import Task, DIFFICULTY_RATING_ATTRS
 from solution.models import STATUS, SOLUTION_CORRECT_SCORE
 from skoljka.utils.models import icon_help_text
 
+from collections import defaultdict
 
 # Take unique ID and description
 USERPROFILE_SCHOOL_CLASS_CHOICES = [(0, '-------------')]       \
@@ -71,6 +72,26 @@ class DifficultyDistribution(models.Model):
     difficulty = models.IntegerField(db_index=True)
     solved_count = models.IntegerField()
 
+def user_refresh_group_cache(user_ids):
+    """
+        Given the list of User ids (not UserProfiles!), refresh
+        cache_group_ids field.
+
+        Does NOT send signals!
+    """
+    user_group_ids = defaultdict(list)
+
+    m2m = User.groups.through.objects.filter(user_id__in=user_ids)  \
+        .values_list('user_id', 'group_id')
+    for user_id, group_id in m2m:
+        user_group_ids[user_id].append(group_id)
+
+    # Maybe use just one query from the following link?
+    # http://stackoverflow.com/questions/3935695/how-do-i-concatenate-strings-from-a-subquery-into-a-single-row-in-mysql
+    for user_id, group_ids in user_group_ids.iteritems():
+        UserProfile.objects.get(user_id=user_id)
+            .update(cache_group_ids=','.join(str(x) for x in group_ids))
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile')
 
@@ -116,7 +137,9 @@ class UserProfile(models.Model):
     selected_folder = models.ForeignKey(Folder, blank=True, null=True)
     private_group = models.OneToOneField(Group)
 
+    # cache
     solved_count = models.IntegerField(default=0)
+    cache_group_ids = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
         return u'UserProfile for ' + self.user.username
@@ -133,6 +156,11 @@ class UserProfile(models.Model):
             flat=True).order_by('difficulty')
 
         return distribution or [0] * DIFFICULTY_RATING_ATTRS['range']
+
+    def get_group_ids(self):
+        if not hasattr(self, '_group_ids'):
+            self._group_ids = [int(x) for x in self.cache_group_ids.split(',')]
+        return self._group_ids
 
     def refresh_diff_distribution(self, commit=True):
         """
@@ -172,7 +200,6 @@ class UserProfile(models.Model):
                     solved_count=(delta if x == diff else 0))
                 for x in range(0, DIFFICULTY_RATING_ATTRS['range'])]
             DifficultyDistribution.objects.bulk_create(bulk)
-
 
 
 # ovo navodno nije preporuceno, ali vjerujem da ce se

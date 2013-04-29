@@ -30,11 +30,10 @@ def has_group_perm(user, instance, type, content_type=None):
 
     content_type = content_type or ContentType.objects.get_for_model(instance)
 
-    # OPTIMIZE: radi join previse
     return ObjectPermission.objects.filter(
-            object_id = instance.id,
-            content_type = content_type,
-            group__user = user,
+            object_id=instance.id,
+            content_type=content_type,
+            group_id__in=user.get_profile().get_group_ids(),
             permission_type = type,
         ).exists()
 
@@ -43,7 +42,9 @@ def get_permissions_for_object_by_id(user, object_id, content_type):
     if not user.is_authenticated():
         return []
     return list(ObjectPermission.objects.filter(
-            object_id=object_id, content_type=content_type, group__user=user
+            object_id=object_id,
+            content_type=content_type,
+            group_id__in=user.get_profile().get_group_ids(),
         ).values_list('permission_type', flat=True))
 
 def get_permissions_for_object(user, obj):
@@ -65,7 +66,7 @@ def convert_permission_names_to_values(names):
 class PermissionManager(models.Manager):
     def for_user(self, user, permission_type):
         if user is not None and user.is_authenticated():
-            q = Q(permissions__group__user=user,
+            q = Q(permissions__group_id__in=user.get_profile().get_group_ids(),
                 permissions__permission_type=permission_type)
 
             try:

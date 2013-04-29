@@ -18,8 +18,9 @@ class GroupPermissionManager(models.Manager):
             # mora biti .distinct(), zbog svih tih silnih join-eva
             return self.filter(
                   Q(data__hidden=False)
-                | Q(data__author=user)
-                | Q(permissions__group__user=user, permissions__permission_type=permission_type)).distinct()
+                | Q(data__author_id=user.id)
+                | Q(permissions__group_id__in=user.get_profile().get_group_ids(),
+                    permissions__permission_type=permission_type)).distinct()
         else:
             return self.filter(data__hidden=False)
 
