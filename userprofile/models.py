@@ -86,10 +86,10 @@ def user_refresh_group_cache(user_ids):
     for user_id, group_id in m2m:
         user_group_ids[user_id].append(group_id)
 
-    # Maybe use just one query from the following link?
+    # Maybe just use this one query?
     # http://stackoverflow.com/questions/3935695/how-do-i-concatenate-strings-from-a-subquery-into-a-single-row-in-mysql
     for user_id, group_ids in user_group_ids.iteritems():
-        UserProfile.objects.get(user_id=user_id)
+        UserProfile.objects.filter(user_id=user_id)    \
             .update(cache_group_ids=','.join(str(x) for x in group_ids))
 
 class UserProfile(models.Model):
