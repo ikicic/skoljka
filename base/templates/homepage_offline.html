@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% load activity_tags %}
+{% load base_tags %}
+{% load folder_tags %}
+{% load task_tags %}
+
+<div class="outdiv">
+  <div id="homepage-registration">
+    <h3>Nemate račun?</h3>
+    {% small_registration_form %}
+  </div>
+
+  <h3>Što je Školjka?</h3>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis rutrum justo vel felis blandit sit amet mattis tortor luctus. Aliquam erat volutpat. Vivamus fringilla sem sed magna placerat id commodo justo laoreet.</p>
+
+  <h3>Kome je namijenjena?</h3>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis rutrum justo vel felis blandit sit amet mattis tortor luctus. Aliquam erat volutpat. Vivamus fringilla sem sed magna placera</p>
+
+  <h3>Odabrana natjecanja</h3>
+  {% folder_inline_year_shortcuts folder_shortcut_desc %}
+</div>
+
+{% show_news 'outdiv' 'Novosti' %}
+
+<div style="padding: 0 0px;">
+  {% if recent_tasks %}
+    <h2>Nedavno objavljeni zadaci</h2>
+    <div class="row-fluid">
+      {% for x in recent_tasks %}
+        {% task_small_box x 'span6' '' 'timesince' %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <br><br><br>
+  <h3>Nedavne aktivnosti:</h3>
+  {% activity_list user %}
+</div>
+
+{% endblock %}

@@ -169,6 +169,7 @@ def _flush_cookie_update(request, response):
 
 # this is a decorator
 class response:
+    # TODO: implement as function with self.(constants) ?
     """
         Views helper and shortcut decorator.
 

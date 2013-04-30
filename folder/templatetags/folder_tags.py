@@ -10,21 +10,32 @@ from collections import defaultdict
 register = template.Library()
 
 def _descriptors_to_folders(descriptors):
-    # Make sure tags are sorted by name.
+    # Make sure tags are sorted (by their name).
     descriptors = [','.join(sorted(x.split(','))) for x in descriptors]
-    folders = Folder.objects.filter(cache_tags__in=descriptors, hidden=False)
 
-    return list(folders[:len(descriptors)])
+    # Force author_id=1.
+    folders = Folder.objects.filter(cache_tags__in=descriptors, hidden=False,
+        author_id=1)
+
+    # Take only first N
+    folders = list(folders[:len(descriptors)])
+
+    # Put in the original order
+    descriptor_position = {key: value for value, key in enumerate(descriptors)}
+    return sorted(folders, key=lambda x: descriptor_position[x.cache_tags])
 
 @register.inclusion_tag('inc_folder_year_shortcuts.html', takes_context=True)
-def folder_inline_year_shortcuts(context, folder_descriptors):
+def folder_inline_year_shortcuts(context, folder_descriptors, split=1000):
     """
         Output links to folders and their (year-like) children in format:
             Parent folder with a long name          (main folder)
             '05 '06 '07 ... '12                     (year folders/children)
 
         folder_descriptors is a list of descriptions, one for each folder, where
-        a description is a human readable info that uniquely describes a folder.
+        a description is a human readable info that uniquely describes the
+        folder.
+        When `split` parameter is given, result will be divided into
+        `split`-sized results
 
         Currently, description is a string of comma-separated tags.
         For example: 'IMO' represent the main folder containing all IMO tasks.
@@ -92,5 +103,6 @@ def folder_inline_year_shortcuts(context, folder_descriptors):
         x.t_year_children = year_children[x.id]
 
     return {
-        'main_folders': main_folders
+        'main_folder_chunks': [main_folders[i:i + split]  \
+            for i in range(0, len(main_folders), split)],
     }

@@ -90,7 +90,7 @@ class Folder(PermissionsModel):
                 - 3-tuple of floats, color RGB
         """
         if not S or sum(S) - S[DETAILED_STATUS['blank']] <= 0:
-            return False, False, 0, (180, 180, 180)
+            return False, False, 0, (150, 150, 150)
 
         solved = S[DETAILED_STATUS['as_solved']]        \
             + S[DETAILED_STATUS['correct']]

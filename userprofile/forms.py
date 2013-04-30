@@ -2,10 +2,12 @@
 from django.contrib.admin import widgets
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User, Group
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from rating.widgets import RatingWidget
 from task.models import DIFFICULTY_RATING_ATTRS
+from skoljka.utils.models import icon_help_text
 
 from userprofile.models import UserProfile
 
@@ -26,11 +28,29 @@ class AuthenticationFormEx(AuthenticationForm):
 attrs_dict = {'class': 'required'}
 
 class UserCreationForm(forms.Form):
-    username = forms.RegexField(regex=r'^\w+$', max_length=30, widget=forms.TextInput(attrs=attrs_dict), label=_(u'Korisničko ime'),
-        help_text=_(u'Molimo koristite oblik <i>iprezime</i> ili <i>imeprezime</i>.'))
+    username = forms.RegexField(regex=r'^\w+$', max_length=30,
+        widget=forms.TextInput(attrs=attrs_dict), label=u'Korisničko ime')
     email = forms.EmailField(widget=forms.TextInput(attrs=dict(attrs_dict, maxlength=75)), label=_(u'Email'))
     password1 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict, render_value=False), label=_(u'Lozinka'))
-    password2 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict, render_value=False), label=_(u'Lozinka (ponovno)'))
+    password2 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict, render_value=False), label=_(u'Potvrda lozinke'))
+
+    def __init__(self, *args, **kwargs):
+        extra_class = kwargs.pop('extra_class', False)
+        placeholders = kwargs.pop('placeholders', False)
+
+        super(UserCreationForm, self).__init__(*args, **kwargs)
+
+        if extra_class:
+            for x in self.fields.itervalues():
+                x.widget.attrs['class'] =   \
+                    x.widget.attrs.get('class', '') + ' ' + extra_class
+
+        if placeholders:
+            for x in self.fields.itervalues():
+                x.widget.attrs['placeholder'] = x.label
+        else:
+            self.fields['username'].help_text = icon_help_text(
+                u'Molimo koristite oblik iprezime ili imeprezime.')
 
     def clean_username(self):
         username = self.cleaned_data['username']

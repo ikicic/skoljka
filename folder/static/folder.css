@@ -11,6 +11,28 @@
   padding: 0 4px 4px 0;
 }
 
+
+.folder-inline {
+  margin: 0 0 4px 4px;
+}
+
+.folder-inline-chunk {
+  display: inline-block;
+  margin-right: 20px;
+}
+
+.folder-inline-main {
+  color: rgb(36, 126, 168);
+  font-weight: bold;
+  margin-left: -5px;
+  text-shadow: 1px 1px 1px rgb(228, 226, 226);
+}
+
+.folder-inline-main > span {
+  font-weight: normal;
+  text-shadow: none;
+}
+
 #folder-name {
   margin: 5px 0 5px 5px;
   font-size: 22px;
@@ -22,6 +44,7 @@
   margin: 0px;
   padding: 0 4px;
 }
+
 
 .nav-folder, .nav-folder-hidden {
   color: gray;

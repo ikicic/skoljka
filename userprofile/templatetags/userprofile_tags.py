@@ -121,7 +121,14 @@ def useroptions(parser, token):
 
     return UserOptionsNode(nodelist, field_name, default_value[0].value, allowed_values, save_to)
 
+@register.inclusion_tag('registration/inc_small_registration_form.html')
+def small_registration_form():
+    from userprofile.forms import UserCreationForm
 
+    return {
+        'form': UserCreationForm(extra_class='input-block-level',
+            placeholders=True),
+    }
 
 @register.filter
 def userlink(user, what=None):
