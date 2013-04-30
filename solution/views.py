@@ -247,6 +247,9 @@ def solution_list(request, task_id=None, user_id=None, status=None):
     }
 
 def get_user_solved_tasks(user):
+    # TODO: delete this function and find some replacement. iterating over all
+    # solutions of a user is not a very smart thing to do
     if not user.is_authenticated():
         return None
-    return Solution.objects.values_list("task__id", flat=True).filter(author=user).distinct()
+    return Solution.objects.filter(author=user) \
+        .values_list("task_id", flat=True)

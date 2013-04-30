@@ -5,51 +5,17 @@ from django.db.models import Count
 from django.template.defaultfilters import slugify
 
 import johnny.cache
-from taggit.utils import parse_tags
 
 from permissions.constants import VIEW
 from task.models import Task
-from tags.models import Tag, TaggedItem
+from tags.models import TaggedItem
+from tags.utils import get_available_tags, replace_with_original_tags,  \
+    split_tags
 
 from search.models import SearchCache, SearchCacheElement, _normal_search_key, \
     _reverse_search_key
 
 from collections import defaultdict
-
-def split_tags(tags):
-    if type(tags) is unicode:
-        tags = parse_tags(tags)
-    if type(tags) is not list:
-        tags = []
-    return filter(None, [x.strip() for x in tags])
-
-def get_available_tags(tags):
-    """
-        Get the list of tag names and returns existing tags queryset.
-        Note that the order of tags might not be preserved.
-
-        Argument:
-            list or tag names, comma-separated string of tags...
-            (Passes the argument to split_tags)
-
-        Example:
-        tags = get_available_tags(['Memo', 'GEO', '2007', 'unknown_tag'])
-        tags.values_list('name', flat=True)
-        --> ['geo', 'MEMO', '2007']
-    """
-
-    return Tag.objects.filter(name__in=split_tags(tags))
-
-def replace_with_original_tags(tags):
-    """
-        Search for existing tags and fix cases.
-    """
-    available = list(get_available_tags(tags).values_list('name', flat=True))
-    lowercase = {x.lower(): x for x in available}
-
-    # If it exists, return original tag name. Otherwise, use as it is written.
-    return [lowercase.get(y.lower(), y) for y in tags]
-
 
 
 # TODO: optimize!
@@ -61,7 +27,6 @@ def update_search_cache(object, old_tags, new_tags):
 
     # this will delete SearchCacheElement rows as well
     SearchCache.objects.filter(tags__name__in=diff).delete()
-
 
 
 # recursive
@@ -107,40 +72,30 @@ def _search_and_cache(tags):
 
     return cache
 
-"""
-from johnny.signals import qc_hit, qc_miss
-from django.dispatch import receiver
-@receiver(qc_hit)
-def _hit(sender, **kwargs):
-    print 'HIT', sender, kwargs
-
-@receiver(qc_miss)
-def _miss(sender, **kwargs):
-    print 'MISS', sender, kwargs
-"""
 
 def search(tags):
     """
         Find all objects whose tags make superset of given tags.
 
-        Note: Unknown tags are ignored.
-
-        Returns SearchCache object if any (existing) tag given, otherwise None.
+        If any unknown tag given or none tags given at all, returns None.
+        Otherwise, returns SearchCache object.
     """
+    if not tags:
+        return None # if no tag given, don't just return all objects
 
     # what if an unknown tag is in the list?
-    tags = get_available_tags(tags)
+    tag_objects = list(get_available_tags(tags))
+
+    if len(tag_objects) != len(tags):
+        return None # unknown tag given
 
     # Sort before calling. (tag order does not matter, but it makes search
     # more efficient)
-    tags = sorted(tags, key=lambda x: x.id)
+    tag_objects = sorted(tag_objects, key=lambda x: x.id)
 
-    return _search_and_cache(tags) if tags else None
+    return _search_and_cache(tag_objects)
 
-# none_if_blank? zasto bi to bio posao ove funkcije
-def search_tasks(tags=[], none_if_blank=True, user=None, **kwargs):
-    # TODO: remove none_if_blank parameter!
-
+def search_tasks(tags=[], user=None, **kwargs):
     if kwargs.get('no_hidden_check'):
         tasks = Task.objects.all()
     elif kwargs.get('show_hidden'):
@@ -149,17 +104,25 @@ def search_tasks(tags=[], none_if_blank=True, user=None, **kwargs):
         tasks = Task.objects.filter(hidden=False)
 
     tags = split_tags(tags)
-    if none_if_blank and not tags:
-        return Task.objects.none()
 
     cache = search(tags)
-    if cache:
-        tasks = tasks.filter(search_cache_elements__cache=cache)
+    if not cache:
+        return Task.objects.none()
 
-    if kwargs.get('quality_min') is not None: tasks = tasks.filter(quality_rating_avg__gte=kwargs['quality_min'])
-    if kwargs.get('quality_max') is not None: tasks = tasks.filter(quality_rating_avg__lte=kwargs['quality_max'])
-    if kwargs.get('difficulty_min') is not None: tasks = tasks.filter(difficulty_rating_avg__gte=kwargs['difficulty_min'])
-    if kwargs.get('difficulty_max') is not None: tasks = tasks.filter(difficulty_rating_avg__lte=kwargs['difficulty_max'])
+    tasks = tasks.filter(search_cache_elements__cache=cache)
+
+    filters = {}
+    if kwargs.get('quality_min') is not None:
+        filters['quality_rating_avg__gte'] = kwargs['quality_min']
+    if kwargs.get('quality_max') is not None:
+        filters['quality_rating_avg__lte'] = kwargs['quality_max']
+    if kwargs.get('difficulty_min') is not None:
+        filters['difficulty_rating_avg__gte'] = kwargs['difficulty_min']
+    if kwargs.get('difficulty_max') is not None:
+        filters['difficulty_rating_avg__lte'] =kwargs['difficulty_max']
+
+    if filters:
+        tasks = tasks.filter(**filters)
 
     # TODO: perm
     if kwargs.get('groups'):
@@ -167,20 +130,19 @@ def search_tasks(tags=[], none_if_blank=True, user=None, **kwargs):
         group_ids = ','.join([str(x.id) for x in kwargs['groups']])
 
         # TODO: ispitati treba li LEFT ili INNER JOIN
-        # FIXME: why just these columns?
         tasks = Task.objects.raw(
-            'SELECT A.id, A.hidden, A.name, A.solved_count, A.quality_rating_avg, A.difficulty_rating_avg, COUNT(DISTINCT B.id) AS search_solved_count FROM task_task AS A \
-                LEFT JOIN solution_solution AS B ON (B.task_id = A.id) \
-                LEFT JOIN auth_user_groups AS C ON (C.user_id = B.author_id AND C.group_id IN (%s)) \
-                WHERE A.id IN (%s) \
-                GROUP BY A.id' % (group_ids, ids)
+            'SELECT A.*, COUNT(DISTINCT B.id) AS search_solved_count FROM task_task AS A'
+                ' LEFT JOIN solution_solution AS B ON (B.task_id = A.id)'
+                ' LEFT JOIN auth_user_groups AS C ON (C.user_id = B.author_id AND C.group_id IN (%s))'
+                ' WHERE A.id IN (%s)'
+                ' GROUP BY A.id' % (group_ids, ids)
             )
 
         tasks = list(tasks)
 
     return tasks
 
-def reverse_search(tags):
+def reverse_search(input):
     """
         Find all objects whose tags are a subset of given tags.
 
@@ -197,8 +159,11 @@ def reverse_search(tags):
             --> Folder with filter tag 'shortlist', '1997'
             --> Task with tags 'imo', '1997', 'geo'
     """
-    tags = get_available_tags(tags)
-    if len(tags) == 0:
+    if not input:
+        return None # if not tag given, don't just return all objects
+
+    tags = get_available_tags(input)
+    if len(tags) != len(input):
         return None
 
     key = _reverse_search_key(tags)
@@ -226,7 +191,6 @@ def reverse_search(tags):
     cursor = connection.cursor()
     cursor.execute(query)
     tagged_items = cursor.fetchall()
-
 
     # Generate and save search result.
     objects = defaultdict(set)

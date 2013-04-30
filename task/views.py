@@ -274,9 +274,10 @@ def new(request, task_id=None, is_file=None):
 
             # TODO: signals!
             if edit:
-                tags = task.tags.values_list('name', flat=True)
+                # Have to use .cleaned_data because m2m isn't saved yet.
                 old_tags_str = ','.join(sorted(old_tags))
-                new_tags_str = ','.join(sorted(list(tags)))
+                new_tags_str = ','.join(sorted(
+                    x.name for x in task_form.cleaned_data['tags']))
             else:
                 old_tags_str = 'x'
                 new_tags_str = 'y'

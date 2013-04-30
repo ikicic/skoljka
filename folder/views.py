@@ -11,7 +11,7 @@ from django.utils import simplejson
 from permissions.constants import VIEW, EDIT, EDIT_PERMISSIONS
 from permissions.models import ObjectPermission
 from task.models import Task
-from search.utils import replace_with_original_tags
+from tags.utils import replace_with_original_tags
 from skoljka.utils import ncache
 from skoljka.utils.decorators import response
 

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from search.utils import replace_with_original_tags
+from tags.utils import replace_with_original_tags
 
 from folder.models import Folder
 from folder.utils import refresh_cache_fields as _refresh_cache_fields

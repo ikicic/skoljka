@@ -1,7 +1,5 @@
 from django.contrib import admin
 
-from search.utils import replace_with_original_tags
-
 from mathcontent.models import Attachment
 
 class AttachmentAdmin(admin.ModelAdmin):

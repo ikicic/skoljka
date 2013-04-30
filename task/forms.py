@@ -44,7 +44,7 @@ class TaskForm(forms.ModelForm):
         tags = self.cleaned_data['tags']
         # temporary solution
         if self.user and not self.user.is_staff:
-            if any(('news' == x.strip().lower() for x in tags)):
+            if any(('news' == x.name.strip().lower() for x in tags)):
                 raise forms.ValidationError("Tag 'news' nije dozvoljen!")
         return tags
 
