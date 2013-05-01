@@ -4,7 +4,11 @@
     2) reset attachment file size
     3) run Solution refresh_detailed_status admin action.
     4) run UserProfile refresh_group_cache admin action.
+    5) Upgrade django-taggit (?)
 */
+
+/* Unnecessary / dangerous fixes ? */
+ALTER TABLE tags_tag ADD CONSTRAINT UNIQUE tags_tag_unique_name (name);
 
 /* Structure */
 DROP TABLE folder_foldercollection;
@@ -16,6 +20,7 @@ ALTER TABLE folder_folder ADD COLUMN editable TINYINT(1) NOT NULL DEFAULT 1 AFTE
 
 ALTER TABLE folder_folder ADD COLUMN parent_index INT NOT NULL DEFAULT 0 AFTER parent_id;
 ALTER TABLE folder_folder ADD COLUMN cache_ancestor_ids VARCHAR(255) NOT NULL;
+ALTER TABLE folder_folder ADD COLUMN cache_path VARCHAR(1000) NOT NULL;
 
 ALTER TABLE folder_folder ADD COLUMN author_id INT NOT NULL;
 ALTER TABLE folder_folder ADD INDEX folder_folder_45845435 (author_id);
@@ -55,6 +60,7 @@ ALTER TABLE solution_solution ADD COLUMN detailed_status iNT DEFAULT 0 NOT NULL 
 /* Indices */
 
 ALTER TABLE folder_folder ADD INDEX folder_folder_editable (editable);
+ALTER TABLE folder_folder ADD INDEX folder_folder_cache_path (cache_path);
 ALTER TABLE search_searchcacheelement ADD INDEX search_searchcacheelement_tuple1 (object_id, content_type_id, cache_id);
 ALTER TABLE search_searchcacheelement ADD INDEX search_searchcacheelement_tuple2 (cache_id, content_type_id);
 ALTER TABLE solution_solution ADD INDEX solution_solution_tuple1 (detailed_status, date_created);

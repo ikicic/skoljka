@@ -137,11 +137,14 @@ def select(request, id):
 
 
 @response('folder_detail.html')
-def view(request, id=None, description=u''):
-    if id is None:
+def view(request, id=None, path=u''):
+    if not id:
         folder = Folder.objects.get(parent_id__isnull=True)
     else:
         folder = get_object_or_404(Folder, id=id)
+        if path != folder.cache_path:
+            # Redirect to the correct URL. E.g. force / at the end etc.
+            return (folder.get_absolute_url(), )
 
     data = prepare_folder_menu([folder], request.user)
     if not data:

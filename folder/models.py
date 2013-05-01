@@ -15,7 +15,6 @@ from tags.managers import TaggableManager
 from skoljka.utils import interpolate_three_colors, ncache
 from skoljka.utils.decorators import cache_function
 from skoljka.utils.tags import tag_list_to_html
-from skoljka.utils.string_operations import slugify
 
 import itertools, time
 
@@ -52,6 +51,9 @@ class Folder(PermissionsModel):
     # Cache, comma-separated list of ancestors, from the root to the parent
     cache_ancestor_ids = models.CharField(max_length=255, blank=True)
 
+    # Cache, full path, used in URLs. E.g. '', 'dir/', 'dir/subdir/'
+    cache_path = models.CharField(max_length=1000, blank=True, db_index=True)
+
     tasks = models.ManyToManyField(Task, blank=True, through='FolderTask')
     search_cache_elements = GenericRelation(SearchCacheElement)
 
@@ -59,7 +61,8 @@ class Folder(PermissionsModel):
         return self.name
 
     def get_absolute_url(self):
-        return '/folder/{}/{}'.format(self.id, slugify(self.name))
+        #return '/folder/{}/{}'.format(self.id, slugify(self.name))
+        return '/folder/{}/{}'.format(self.id, self.cache_path)
 
     def _refresh_cache_tags(self, commit=True):
         old = self.cache_tags

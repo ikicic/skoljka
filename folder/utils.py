@@ -13,6 +13,7 @@ from tags.utils import get_object_tagged_items
 from task.models import Task
 from usergroup.models import UserGroup
 from skoljka.utils import ncache
+from skoljka.utils.string_operations import slugify
 
 from folder.models import Folder, FolderTask, FOLDER_NAMESPACE_FORMAT,  \
     FOLDER_NAMESPACE_FORMAT_ID
@@ -197,11 +198,13 @@ class FolderInfo:
     """
         Helper struct used in refresh_path_cache.
     """
-    def __init__(self, id):
+    def __init__(self, id, short_name):
         self.id = id
         self.parent = None
+        self.short_name = short_name
 
         self.ancestors = None
+        self.path = None
 
     def __repr__(self):
         return '#{} {}'.format(self.id, getattr(self.parent, 'id', None))
@@ -212,37 +215,38 @@ class FolderInfo:
 
         if self.parent is None: # if root
             self.ancestors = ''
+            self.path = ''
         else:
             if self.parent.ancestors is None:
                 self.parent.recursion(folders)
 
             self.ancestors = self.parent.ancestors + str(self.parent.id) + ','
+            self.path = self.parent.path + slugify(self.short_name) + '/'
 
 def refresh_cache_fields(queryset):
     """
         Refresh folder cache information as
-            cache_ancestor_ids.
+            cache_ancestor_ids, cache_path.
 
         Although it is possible to select only a subset of folders,
         please select all folders when using this action.
     """
-    # This code is a modification of the earlier one, where more info was
-    # saved (cache_path).
-    folder_list = queryset.values_list('id', 'parent_id')
+    folder_list = queryset.values_list('id', 'parent_id', 'short_name')
 
     # TODO: refresh .cache_tags!
 
-    folders = {id: FolderInfo(id)
-        for (id, parent_id) in folder_list}
+    folders = {id: FolderInfo(id, short_name)
+        for (id, parent_id, short_name) in folder_list}
 
-    for id, parent_id in folder_list:
+    for id, parent_id, short_name in folder_list:
         folders[id].parent = parent_id and folders[parent_id]
 
     for f in folders.itervalues():
         f.recursion(folders)
 
     for id, f in folders.iteritems():
-        Folder.objects.filter(id=id).update(cache_ancestor_ids=f.ancestors[:-1])
+        Folder.objects.filter(id=id).update(cache_ancestor_ids=f.ancestors[:-1],
+            cache_path=f.path)
 
 
 ######################
