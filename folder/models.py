@@ -171,8 +171,9 @@ class Folder(PermissionsModel):
             no_perm_check = True
 
         if self.cache_tags:
-            return search_tasks(tags=self.cache_tags, user=user,
+            tasks = search_tasks(tags=self.cache_tags, user=user,
                 show_hidden=True, no_hidden_check=no_perm_check)
+            return tasks.order_by('id') if order else tasks
         else:
             if no_perm_check:
                 tasks = self.tasks.for_user(user, VIEW).distinct()

@@ -74,9 +74,6 @@ class Task(BasePermissionsModel):
         help_text=icon_help_text(
             'Rješivo ili ne, to jest mogu li se slati rješenja?'))
 
-    class Meta(BasePermissionsModel.Meta):
-        ordering = ['id']
-
     def __unicode__(self):
         return '#%d %s' % (self.id, self.name)
 
