@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 
+{% load usergroup_tags %}
+
 {% block title %}Popis grupa{% endblock %}
 
 {% block content %}
 
+{{ user_group_ids }}
 <table width="60%" class="table-striped table-condensed" style="text-align: center;">
   <tr>
     <th width="30">#</th>
@@ -11,11 +14,7 @@
     <th>Broj korisnika</th>
   </tr>
 {% for g in groups %}
-  {% if g.data.hidden %}
-  <tr class="group_hidden">
-  {% else %}
-  <tr>
-  {% endif %}
+  <tr{% group_class_attr g %}>
     <td>{{ forloop.counter }}</td>
     <td>{{ g.data }}</td>
     <td>{{ g.data.member_count }}</td>

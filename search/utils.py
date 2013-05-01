@@ -163,7 +163,7 @@ def reverse_search(input):
     """
     input = split_tags(input)
     if not input:
-        return None # if not tag given, don't just return all objects
+        return None # if no tag given, don't just return all objects
 
     tags = get_available_tags(input)
     if len(tags) != len(input):
@@ -203,10 +203,11 @@ def reverse_search(input):
 
     ids_set = set(tag_ids)
 
-    # Filter only those objects whose tags are subset of given set of tags
-    SearchCacheElement.objects.bulk_create([
+    # Filter only those objects whose tags are subset of the given set of tags
+    SearchCacheElement.objects.bulk_create(
         SearchCacheElement(object_id=key[0], content_type_id=key[1], cache=cache)
         for key, obj_tags in objects.iteritems()
-        if obj_tags.issubset(ids_set)])
+        if obj_tags.issubset(ids_set)
+    )
 
     return cache

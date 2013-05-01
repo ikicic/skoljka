@@ -128,12 +128,17 @@ def new(request, group_id=None):
         'forms': [group_form, usergroup_form, description_form],
     })
 
-
 @login_required
 @response('usergroup_list.html')
-def list(request):
+def list_view(request):
+    groups = GroupExtended.objects.for_user(request.user, VIEW) \
+        .select_related('data')
+
+    user_group_ids = request.user.groups.values_list('id', flat=True)
+
     return {
-        'groups': GroupExtended.objects.for_user(request.user, VIEW).select_related('data'),
+        'groups': groups,
+        'user_group_ids': list(user_group_ids),
     }
 
 

@@ -5,7 +5,7 @@ from django.views.generic import DetailView
 from usergroup.models import UserGroup
 
 urlpatterns = patterns('',
-    (r'^$', 'usergroup.views.list'),
+    (r'^$', 'usergroup.views.list_view'),
     (r'^new/$', 'usergroup.views.new'),
     (r'^(?P<group_id>\d+)/$', 'usergroup.views.detail'),
     (r'^(?P<group_id>\d+)/edit/$', 'usergroup.views.new'),
