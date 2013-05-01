@@ -13,6 +13,11 @@ def split_tags(tags):
         tags = []
     return filter(None, [x.strip() for x in tags])
 
+def split_tag_ids(tag_ids):
+    if isinstance(tag_ids, list):
+        return tag_ids
+    return [int(x) for x in tag_ids.split(',')]
+
 def get_available_tags(tags):
     """
         Get the list of tag names and returns existing tags queryset.
@@ -34,6 +39,8 @@ def replace_with_original_tags(tags):
     """
         Search for existing tags and fix cases.
     """
+    # TODO: strictly define is `tags` a string or a list
+    tags = split_tags(tags)
     available = list(get_available_tags(tags).values_list('name', flat=True))
     lowercase = {x.lower(): x for x in available}
 

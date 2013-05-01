@@ -85,10 +85,10 @@ def folder_inline_year_shortcuts(context, folder_descriptors, split=1000):
         x.t_short_year_name = "'" + x.short_name[-2:]
 
         stats = user_stats.get(x.id)
-        x.t_task_count = stats and stats[0]
+        solvable_task_count = stats and stats[1]
 
         any, any_non_rated, percent, RGB =  \
-            Folder.parse_solution_stats(stats and stats[1], x.t_task_count)
+            Folder.parse_solution_stats(stats and stats[2], solvable_task_count)
 
         # Main folder
         if any and x.id in year_children:

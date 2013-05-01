@@ -26,7 +26,9 @@ ALTER TABLE folder_folder ADD COLUMN author_id INT NOT NULL;
 ALTER TABLE folder_folder ADD INDEX folder_folder_45845435 (author_id);
 UPDATE folder_folder SET author_id = 1;
 
-ALTER TABLE folder_folder CHANGE COLUMN tag_filter cache_tags VARCHAR(256) NOT NULL;
+ALTER TABLE folder_folder CHANGE COLUMN tag_filter cache_tags VARCHAR(255) NOT NULL;
+ALTER TABLE folder_folder ADD COLUMN cache_tag_ids VARCHAR(255) NOT NULL AFTER cache_tags;
+ALTER TABLE folder_folder ADD COLUMN cache_searchcache_id INT NULL DEFAULT NULL AFTER cache_tag_ids;
 
 ALTER TABLE mathcontent_attachment ADD COLUMN cache_file_size INT NOT NULL DEFAULT 0;
 

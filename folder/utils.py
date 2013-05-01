@@ -27,6 +27,10 @@ def get_task_folder_ids(task):
         Combines result of many-to-many relation and folder-filters.
 
         Does not check permissions, and not supposed to do any checks.
+
+        Note that even search results are copied into FolderTask for
+        folder-filters, there may still be some of those Folders whose m2m
+        is not refreshed (i.e. their .cache_searchcache is None).
     """
     # Implementation of permission check is very complicated, do not implement
     # it here! Use get_visible_folder_tree instead.
@@ -175,6 +179,9 @@ def prepare_folder_menu(folders, user):
     # on almost every request...
 
     data = get_visible_folder_tree(folders, user)
+
+    if not data:
+        return {'folder_children': {}, 'folder_tree': u''}
 
     ancestor_ids = data['ancestor_ids']
     folder_children = data['folder_children']

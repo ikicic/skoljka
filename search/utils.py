@@ -8,9 +8,9 @@ import johnny.cache
 
 from permissions.constants import VIEW
 from task.models import Task
-from tags.models import TaggedItem
+from tags.models import Tag, TaggedItem
 from tags.utils import get_available_tags, replace_with_original_tags,  \
-    split_tags
+    split_tags, split_tag_ids
 
 from search.models import SearchCache, SearchCacheElement, _normal_search_key, \
     _reverse_search_key
@@ -30,39 +30,40 @@ def update_search_cache(object, old_tags, new_tags):
 
 
 # recursive
-def _search_and_cache(tags):
+def _search_and_cache(tag_ids):
     """
         Arguments:
-            tags == list of Tag instances
+            tag_ids == list of Tag IDs
 
         Note:
             To make this method more efficient, tags should be sorted by some
-            of its attributes (e.g. id).
+            of its attributes (e.g. by id itself).
     """
-    key = _normal_search_key(tags)
+    key = _normal_search_key(tag_ids)
     try:
         return SearchCache.objects.get(key=key)
     except:
         cache = SearchCache(key=key)
         cache.save()
+        tags = Tag.objects.filter(id__in=tag_ids)
         cache.tags.set(*tags)
 
     cache_content_type = ContentType.objects.get_for_model(SearchCache)
 
-    tag = tags[-1]
-    if len(tags) > 1:
-        recursion = _search_and_cache(tags[:-1])
+    tag_id = tag_ids[-1]
+    if len(tag_ids) > 1:
+        recursion = _search_and_cache(tag_ids[:-1])
         query = 'INSERT INTO search_searchcacheelement (object_id, content_type_id, cache_id)'  \
                 ' SELECT A.object_id, A.content_type_id, %d FROM search_searchcacheelement AS A'    \
                 ' INNER JOIN tags_taggeditem AS B ON (A.object_id = B.object_id AND A.content_type_id = B.content_type_id)' \
                 ' WHERE A.cache_id=%d AND B.tag_id=%d;' \
-                % (cache.id, recursion.id, tag.id)
+                % (cache.id, recursion.id, tag_id)
     else:
         # search shouldn't include itself
         query = 'INSERT INTO search_searchcacheelement (object_id, content_type_id, cache_id)'  \
                 ' SELECT A.object_id, A.content_type_id, %d FROM tags_taggeditem AS A'  \
                 ' WHERE A.tag_id=%d AND A.content_type_id != %d;'   \
-                % (cache.id, tag.id, cache_content_type.id)
+                % (cache.id, tag_id, cache_content_type.id)
 
     cursor = connection.cursor()
     cursor.execute(query)
@@ -73,29 +74,32 @@ def _search_and_cache(tags):
     return cache
 
 
-def search(tags):
+def search(tags=None, tag_ids=None):
     """
         Find all objects whose tags make superset of given tags.
 
         If any unknown tag given or none tags given at all, returns None.
         Otherwise, returns SearchCache object.
     """
-    if not tags:
-        return None # if no tag given, don't just return all objects
+    if tags:
+        tags = split_tags(tags)
+        if not tags:
+            return None # if no tag given, don't just return all objects
 
-    # what if an unknown tag is in the list?
-    tag_objects = list(get_available_tags(tags))
+        # what if an unknown tag is in the list?
+        tag_ids = list(get_available_tags(tags).values_list('id', flat=True))
 
-    if len(tag_objects) != len(tags):
-        return None # unknown tag given
+        if len(tag_ids) != len(tags):
+            return None # unknown tag given
+    elif not tag_ids:
+        return None
+    else:
+        tag_ids = split_tag_ids(tag_ids)
 
-    # Sort before calling. (tag order does not matter, but it makes search
-    # more efficient)
-    tag_objects = sorted(tag_objects, key=lambda x: x.id)
+    # Sort by id before calling.
+    return _search_and_cache(sorted(tag_ids))
 
-    return _search_and_cache(tag_objects)
-
-def search_tasks(tags=[], user=None, **kwargs):
+def search_tasks(tags=[], tag_ids=None, user=None, **kwargs):
     if kwargs.get('no_hidden_check'):
         tasks = Task.objects.all()
     elif kwargs.get('show_hidden'):
@@ -103,9 +107,7 @@ def search_tasks(tags=[], user=None, **kwargs):
     else:
         tasks = Task.objects.filter(hidden=False)
 
-    tags = split_tags(tags)
-
-    cache = search(tags)
+    cache = search(tags=tags, tag_ids=tag_ids)
     if not cache:
         return Task.objects.none()
 
@@ -159,6 +161,7 @@ def reverse_search(input):
             --> Folder with filter tag 'shortlist', '1997'
             --> Task with tags 'imo', '1997', 'geo'
     """
+    input = split_tags(input)
     if not input:
         return None # if not tag given, don't just return all objects
 

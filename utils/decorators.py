@@ -82,6 +82,82 @@ def cache_function(key=None, namespace=None, seconds=86400*7):
         return wraps(func)(inner)
     return decorator
 
+def cache_many_function(namespace_format=None, key_format=None, pre_test=None):
+    """
+        Handles special case of multiple-get functions.
+
+        Wrapper around functions of type
+            def some_many_function(objects, *args)
+        where `objects` is a list of object instances(!), and the result is
+        a dictionary {object.id: some object info}.
+
+        Generates namespaces, keys and full keys for each object in the objects
+        list. Checks which results are already cached, and calls given function
+        for the rest, if any. Function will not be called if all results
+        are found in the cache.
+
+        Both namespace and key format can be dependend on the object and args
+        (in terms of str.format() method).
+        E.g. namespace = namespace_format.format(object.id, *args)
+
+        Additional optional parameters:
+
+        pre_test: Function to call with objects and *args before *any* work
+            is done. Must return pair
+                (should_continue, result_if_not_continuing)
+
+            Example:
+                pre_test=lambda objects, user: (user.is_authenticated(), {})
+                This method prevents accessing the cache and calling the
+                main function if user is not authenticated, in which case it
+                just returns {}.
+    """
+
+    def decorator(func):
+        def inner(objects, *args):
+            if pre_test:
+                ok, not_ok_value = pre_test(objects, *args)
+                if not ok:
+                    return not_ok_value
+
+            # Get all namespaces and keys and check cache
+            namespaces = [namespace_format.format(x, *args) for x in objects]
+            keys = [key_format.format(x, *args) for x in objects]
+            cached, full_keys = ncache.get_many_for_update(namespaces, keys)
+
+            # Most common case, handle immediately:
+            if len(keys) == len(cached):
+                return {x.id: cached[full_key]
+                    for x, full_key in zip(objects, full_keys)}
+
+            result = {}
+            eval = []
+            keys = []
+            for x, full_key in zip(objects, full_keys):
+                if full_key in cached:
+                    # ok, we have this result
+                    result[x.id] = cached[full_key]
+                else:
+                    # not ok, but we are going to ask for it.
+                    result[x.id] = full_key # temporary put key here
+                    eval.append(x)
+
+            # Evaluate function for objects whose function value not cached
+            values = func(eval, *args)
+
+            # Update cache. Here result[id] is the full_key. Not any special
+            # reason why we use the same dict `result` for full_keys.
+            cache.set_many({result[id]: value
+                for id, value in values.iteritems()})
+
+            # Finally, update result (replace those full_keys with results)
+            result.update(values)
+
+            return result
+
+        return wraps(func)(inner)
+    return decorator
+
 # TODO: add login check
 def require(method=[], ajax=None, post=[], get=[], force_login=True):
     """
