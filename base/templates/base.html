@@ -44,7 +44,8 @@
         <div id="hbar-login">
           <form class="form-inline" action="/accounts/login/" method="POST">
             {% csrf_token %}
-            <input id="id_username" name="username" type="text" class="input-small" placeholder="Korisničko ime"{% if homepage %} autofocus{% endif %}>
+            <input id="id_username" name="username" type="text" class="input-small"
+                placeholder="Korisničko ime" {% if homepage %} autofocus{% endif %} accesskey="l">
             <input id="id_password" name="password" type="password" class="input-small" placeholder="Lozinka">
             <input type="submit" class="btn" value="Prijava">
           </form>
