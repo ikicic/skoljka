@@ -8,7 +8,7 @@
   <table class="kill-br">
     {{ form.as_table }}
   </table>
-  {% if children|length > 1 %}
+  {% if children and children|length > 1 %}
     <h6>Poredak podkategorija</h6>
     {% for x in children %}
       <div>

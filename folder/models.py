@@ -1,5 +1,6 @@
-from django.db import connection, models, transaction
+﻿from django.db import connection, models, transaction
 from django.db.models import Count
+from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.generic import GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -8,7 +9,7 @@ from django.core.cache import cache
 import johnny.cache
 
 from permissions.constants import VIEW
-from permissions.models import PermissionsModel
+from permissions.models import BasePermissionsModel
 from permissions.utils import get_object_ids_with_exclusive_permission
 from tags.managers import TaggableManager
 from task.models import Task
@@ -18,6 +19,7 @@ from solution.models import Solution, DETAILED_STATUS
 from tags.managers import TaggableManager
 from skoljka.utils import interpolate_three_colors, ncache
 from skoljka.utils.decorators import cache_function, cache_many_function
+from skoljka.utils.models import icon_help_text
 from skoljka.utils.tags import tag_list_to_html
 
 import itertools, time
@@ -27,15 +29,22 @@ FOLDER_TASKS_DB_TABLE = 'folder_folder_tasks'
 FOLDER_NAMESPACE_FORMAT = 'Folder{0.pk}'
 FOLDER_NAMESPACE_FORMAT_ID = 'Folder{}'
 
-class Folder(PermissionsModel):
+class Folder(BasePermissionsModel):
     class Meta:
         permissions = (
             ("can_publish_folders", "Can publish folders"),
+            ("can_set_short_name", "Can set short name"),
             ("advanced_create", "Advanced folder create"),
         )
 
-    name = models.CharField(max_length=64)          # full name (shown in URL)
-    short_name = models.CharField(max_length=128)   # menu name
+    name = models.CharField(max_length=64, verbose_name='Ime')      # full name
+    short_name = models.CharField(max_length=128, verbose_name='Kratko ime',
+        help_text=icon_help_text('Ime prikazano u izborniku. Ukoliko se ne '
+            'razlikuje od punog imena, možete ostaviti prazno.'))   # menu name
+
+    # PermissionsModel
+    hidden = models.BooleanField(default=True, verbose_name='Sakriveno') # default True!
+    author = models.ForeignKey(User)
 
     # Sometimes there is no particular reason to edit a folder. (e.g. year
     # subfolders of some competition folder) Therefore, to keep it clean,

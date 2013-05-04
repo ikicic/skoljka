@@ -5,7 +5,6 @@ EDIT = 2
 DELETE = 3
 EDIT_PERMISSIONS = 4
 ADD_MEMBERS = 5     # for Group
-ALL = [1, 2, 3, 4, 5]
 
 # Default permissions related to a model.
 MODEL_DEFAULT = [VIEW, EDIT, DELETE, EDIT_PERMISSIONS]

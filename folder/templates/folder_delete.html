@@ -1,0 +1,22 @@
+{% extends "folder_edit_base.html" %}
+
+{% block inner_content %}
+
+{% if not has_subfolders_strict %}
+  Jeste li sigurni da želite izbrisati kolekciju <b>{{ folder.name }}</b>?<br>
+  <br>
+  Brisanje kolekcije neće utjecati na zadatke ili datoteke koje sadrži.<br><br>
+  <form action="{{ request.path }}" method="POST">
+    <input type="submit" value="Izbriši" class="btn btn-danger">
+    <input type="hidden" name="confirm" value="1">
+    {% csrf_token %}
+    <a href="{{ folder.get_absolute_url }}" class="btn btn-success">Odustani</a>
+  </form>
+{% else %}
+  <br>
+  <div class="alert alert-error">
+    Nije moguće izbrisati kolekciju <b>{{ folder.name }}</b> zato što sadrži podkolekcije!
+  </div>
+{% endif %}
+
+{% endblock %}

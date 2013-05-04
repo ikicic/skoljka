@@ -8,13 +8,14 @@ from django.template import RequestContext
 from django.template.defaultfilters import slugify
 from django.utils import simplejson
 
-from permissions.constants import VIEW, EDIT, EDIT_PERMISSIONS
+from permissions.constants import DELETE, EDIT, EDIT_PERMISSIONS, VIEW
 from permissions.models import ObjectPermission
 from task.models import Task
 from tags.utils import replace_with_original_tags
-from skoljka.utils import ncache
+from skoljka.utils import get_referrer_path, ncache
 from skoljka.utils.decorators import response
 
+from folder.decorators import folder_view
 from folder.models import Folder, FolderTask, FOLDER_TASKS_DB_TABLE,        \
     FOLDER_NAMESPACE_FORMAT
 from folder.forms import FolderForm, FolderAdvancedCreateForm
@@ -22,21 +23,26 @@ from folder.utils import prepare_folder_menu, refresh_cache_fields
 
 import re
 
+@folder_view(permission=DELETE)
+@response('folder_delete.html')
+def delete(request, folder, data):
+    if not data['has_subfolders_strict'] and request.POST:
+        if 'confirm' in request.POST:
+            parent = folder.parent
+            folder.delete()
+            return (parent.get_absolute_url(), )
+
+    return data
 
 def _edit_tasks_tasks(folder, user):
     return folder.tasks.for_user(user, VIEW) \
         .extra(select={'position': FOLDER_TASKS_DB_TABLE + '.position'},
             order_by=['position']).distinct()
 
-@login_required
+@folder_view(permission=EDIT)
 @response('folder_edit_tasks.html')
-def edit_tasks(request, folder_id):
-    folder = get_object_or_404(Folder, id=folder_id)
-
+def edit_tasks(request, folder, data):
     if not folder.editable:
-        return 403
-
-    if not folder.user_has_perm(request.user, EDIT):
         return 403
 
     # Not able to use FolderTask.objects.filter, as it is still required to
@@ -67,18 +73,16 @@ def edit_tasks(request, folder_id):
 
     tasks = _edit_tasks_tasks(folder, request.user)
 
-    data = {
-        'folder': folder,
+    data.update({
         'tasks': tasks,
         'invalid': invalid,
         'unknown': unknown,
         'updated': updated,
-    }
-
-    data.update(prepare_folder_menu([folder], request.user))
+    })
 
     return data
 
+# TODO: check ancestor VIEW permissions?
 @login_required
 def select_task(request, task_id):
     folder = request.user.profile.selected_folder
@@ -117,6 +121,7 @@ def select_task(request, task_id):
     return HttpResponse('1' if is_checked else '0')
 
 
+# TODO: check ancestor VIEW permissions?
 @login_required
 def select(request, id):
     folder = get_object_or_404(Folder, id=id)
@@ -136,19 +141,13 @@ def select(request, id):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 
+@folder_view()
 @response('folder_detail.html')
-def view(request, id=None, path=u''):
-    if not id:
-        folder = Folder.objects.get(parent_id__isnull=True)
-    else:
-        folder = get_object_or_404(Folder, id=id)
-        if path != folder.cache_path:
-            # Redirect to the correct URL. E.g. force / at the end etc.
-            return (folder.get_absolute_url(), )
+def view(request, folder, data, path=u''):
+    if path != folder.cache_path:
+        # Redirect to the correct URL. E.g. force / at the end etc.
+        return (folder.get_absolute_url(), )
 
-    data = prepare_folder_menu([folder], request.user)
-    if not data:
-        raise Http404   # sorry, doesn't exist or not accessible
     data.update(folder.get_details(request.user))
 
     # Some additional tuning
@@ -160,11 +159,6 @@ def view(request, id=None, path=u''):
             data['select_link'] = True
         if request.user.get_profile().selected_folder == folder:
             data['this_folder_selected'] = True
-
-    try:
-        data['has_subfolders'] = bool(data['folder_children'][folder.id])
-    except:
-        pass    # No subfolders.
 
     return data
 
@@ -183,6 +177,8 @@ def new(request, folder_id=None):
 
     data = {}
 
+    initial_parent_id = None
+
     if edit:
         if not folder.editable:
             return response.FORBIDDEN
@@ -200,12 +196,24 @@ def new(request, folder_id=None):
             .for_user(request.user, VIEW)                   \
             .filter(parent=folder).order_by('parent_index').distinct())
 
+        data['has_subfolders_strict'] = Folder.objects  \
+            .filter(parent_id=folder_id).exists()
+    else:
+        referrer = get_referrer_path(request)
+        if referrer and referrer.startswith('/folder/'):
+            try:
+                initial_parent_id = int(referrer[8:referrer.find('/', 8)])
+            except:
+                pass
+
     if request.method == 'POST':
         folder_form = FolderForm(request.POST, instance=folder, user=request.user)
         if folder_form.is_valid():
             folder = folder_form.save(commit=False)
 
-            folder.slug = slugify(folder.name)
+            # If short name not set, copy full name.
+            if not getattr(folder, 'short_name', None):
+                folder.short_name = folder.name
 
             if not edit:
                 folder.author = request.user
@@ -236,9 +244,17 @@ def new(request, folder_id=None):
             if old_parent_id != folder.parent_id:
                 refresh_cache_fields(Folder.objects.all())
 
+            if not edit:
+                return ('/folder/{}/edit/'.format(folder.id), )
             # return HttpResponseRedirect(folder.get_absolute_url())
     else:
-        folder_form = FolderForm(instance=folder, user=request.user)
+        folder_form = FolderForm(instance=folder, user=request.user,
+            initial_parent_id=initial_parent_id)
+
+        # If parent given and acceptable, show menu. (new mode)
+        initial_parent = getattr(folder_form, 'initial_parent', None)
+        if initial_parent:
+            data.update(prepare_folder_menu([initial_parent], request.user))
 
     if edit:
         data.update(prepare_folder_menu([folder], request.user))

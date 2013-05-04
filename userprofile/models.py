@@ -134,7 +134,8 @@ class UserProfile(models.Model):
 
     # utility
     unread_pms = models.IntegerField(default=0)
-    selected_folder = models.ForeignKey(Folder, blank=True, null=True)
+    selected_folder = models.ForeignKey(Folder, blank=True, null=True,
+        on_delete=models.SET_NULL) # WARNING: This SET_NULL is very important!!
     private_group = models.OneToOneField(Group)
 
     # cache

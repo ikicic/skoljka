@@ -21,6 +21,9 @@
   {% if folder and not folder.tag_filter and folder.editable %}
     <a href="/folder/{{ folder.id }}/edit/tasks/" class="btn">Poredak zadataka</a>
   {% endif %}
+  {% if folder and not has_subfolders_strict %}
+    <a href="/folder/{{ folder.id }}/delete/" class="btn">Izbriši</a>
+  {% endif %}
 </div>
 
 <a href="javascript: history.go(-1)">« Vrati se</a><br><br>
