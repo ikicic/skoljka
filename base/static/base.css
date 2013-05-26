@@ -312,11 +312,6 @@ a.register {
   background: -webkit-gradient(linear, left top, left bottom, from(rgb(246, 248, 250)), to(rgb(237, 242, 248)));
 }
 
-.outdiv p {
-  margin-bottom: 25px;
-  font-family: "Georgia";
-}
-
 .outdiv h3 {
   margin-bottom: 5px;
   margin-left: -5px;
@@ -368,6 +363,12 @@ a.register {
 
 
 /* Homepage */
+.homepage-info {
+  margin-bottom: 25px;
+  font-family: "Georgia", Arial, sans-serif;
+  color: #444;
+}
+
 #homepage-registration {
   float: right;
   margin: 0px 20px 20px 20px;
