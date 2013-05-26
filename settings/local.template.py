@@ -1,5 +1,9 @@
 # local.py is ignored by git!
 
+######################################
+# General
+######################################
+
 # Full path to project
 # Examples:
 #   PROJECT_ROOT = 'C:/dev/skoljka'
@@ -43,6 +47,27 @@ EMAIL_PORT = 0
 EMAIL_USE_TLS = True
 SERVER_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+######################################
+# Cache
+######################################
+
+CACHES = {
+    'default': {
+        # 'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+        'OPTIONS': {
+            'MAX_ENTRIES': 10000,
+        },
+        'TIMEOUT': 7 * 86400,
+        'JOHNNY_CACHE': True,
+    }
+}
+
+######################################
+# Folder shortcuts
+######################################
 
 USERPROFILE_SCHOOL_CLASS_INFO = [
     # Unique ID, Description, Tag

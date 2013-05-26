@@ -1,4 +1,8 @@
 /*
+  New dependencies:
+    1) python-memcached
+    2) johnny-cache
+
   Don't forget to: (or automate...)
     1) run Folder migration admin action
     2) reset attachment file size

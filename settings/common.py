@@ -232,21 +232,6 @@ LOGGING = {
 }
 
 ######################################
-# Cache
-######################################
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'OPTIONS': {
-            'MAX_ENTRIES': 10000,
-        },
-        'TIMEOUT': 7 * 86400,
-        'JOHNNY_CACHE': True,
-    }
-}
-
-######################################
 # johnny-cache
 ######################################
 # Make sure all raw update/insert queries invalidate this cache!
