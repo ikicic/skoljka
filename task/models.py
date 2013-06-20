@@ -52,7 +52,7 @@ class Task(BasePermissionsModel):
     author = models.ForeignKey(User)
     date_created = models.DateTimeField(auto_now_add=True)
     last_edit_date = models.DateTimeField(auto_now=True)
-    hidden = models.BooleanField(default=False, verbose_name='Sakriven')
+    hidden = models.BooleanField(default=False, verbose_name='Skriven')
     source = models.CharField(max_length=200, blank=True, verbose_name='Izvor')
 
     search_cache_elements = GenericRelation(SearchCacheElement)
@@ -107,7 +107,7 @@ class Task(BasePermissionsModel):
         else:
             cls = ''
 
-        return cls if self.solvable else cls + ' task-unsolvable' 
+        return cls if self.solvable else cls + ' task-unsolvable'
 
     # deprecated?
     # TODO: preurediti, ovo je samo tmp

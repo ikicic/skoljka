@@ -121,8 +121,8 @@ class BasePermissionsModel(models.Model):
         if user == getattr(self, 'author', None):
             return True
 
-        if getattr(self, 'hidden', None) is False:
-            return type == VIEW
+        if type == VIEW and getattr(self, 'hidden', None) is False:
+            return True
 
         return has_group_perm(user, self, type)
 

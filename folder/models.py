@@ -43,7 +43,7 @@ class Folder(BasePermissionsModel):
             'razlikuje od punog imena, možete ostaviti prazno.'))   # menu name
 
     # PermissionsModel
-    hidden = models.BooleanField(default=True, verbose_name='Sakriveno') # default True!
+    hidden = models.BooleanField(default=True, verbose_name='Skriveno') # default True!
     author = models.ForeignKey(User)
 
     # Sometimes there is no particular reason to edit a folder. (e.g. year
@@ -97,6 +97,7 @@ class Folder(BasePermissionsModel):
         # Should invalidate folder cache?
         if old != self.cache_tags:
             ncache.invalidate_namespace(FOLDER_NAMESPACE_FORMAT.format(self))
+            self.cache_searchcache = None
 
         if commit:
             self.save()

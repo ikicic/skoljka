@@ -6,7 +6,7 @@ from taggit.managers import TaggableManager as taggit_TaggableManager
 
 from skoljka.utils.models import icon_help_text
 
-from tags.utils import get_available_tags
+from tags.utils import replace_with_original_tags
 
 class CaseInsensitiveTagField(taggit_TagField):
     def clean(self, value):
@@ -16,7 +16,7 @@ class CaseInsensitiveTagField(taggit_TagField):
         """
         value = super(CaseInsensitiveTagField, self).clean(value)
 
-        return get_available_tags(value)
+        return replace_with_original_tags(value)
 
 
 # TODO: signals!

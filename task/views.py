@@ -83,7 +83,7 @@ def advanced_new(request):
                     print (u'Postavljam varijablu "%s" na "%s"' % (x.nodeName, value)).encode('utf-8')
 
                 if x.nodeName == 'content':
-                    print (u'Dodajem zadatak "%s" s tagovima "%s"' % (task_template.name % dictionary, task_form.cleaned_data['_tags'] % dictionary)).encode('utf-8')
+                    print (u'Dodajem zadatak "%s" s oznakama "%s"' % (task_template.name % dictionary, task_form.cleaned_data['_tags'] % dictionary)).encode('utf-8')
                     value = x.nodeValue or ''
                     if x.firstChild:
                         value += x.firstChild.nodeValue or ''
@@ -276,8 +276,7 @@ def new(request, task_id=None, is_file=None):
             if edit:
                 # Have to use .cleaned_data because m2m isn't saved yet.
                 old_tags_str = ','.join(sorted(old_tags))
-                new_tags_str = ','.join(sorted(
-                    x.name for x in task_form.cleaned_data['tags']))
+                new_tags_str = ','.join(sorted(task_form.cleaned_data['tags']))
             else:
                 old_tags_str = 'x'
                 new_tags_str = 'y'
@@ -584,7 +583,7 @@ def export(request, format=None, ids=None):
     # check for permissions
     tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=id_list).distinct()
     if len(tasks) != len(id_list):
-        raise Http404('Neki od navedenih zadataka ne postoje ili su sakriveni.')
+        raise Http404('Neki od navedenih zadataka ne postoje ili su skriveni.')
 
     # permission ok, use shortened query
     tasks = Task.objects.filter(id__in=id_list)

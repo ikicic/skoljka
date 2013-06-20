@@ -7,7 +7,7 @@ from usergroup.fields import GroupEntryField
 
 class SearchForm(forms.Form):
     q = forms.CharField(required=False, max_length=100, label='Tags')
-    show_hidden = forms.BooleanField(required=False, initial=False, label='Sakriveni')
+    show_hidden = forms.BooleanField(required=False, initial=False, label='Skriveni')
 
     # TODO: DRY!
     quality_min = forms.FloatField(required=False, widget=RatingWidget(attrs=QUALITY_RATING_ATTRS), label='Kvaliteta min.')

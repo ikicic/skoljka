@@ -22,6 +22,10 @@ NOT_RATED_STATUS = DETAILED_STATUS['submitted_not_rated']
 
 @cache_function(namespace=EVALUATOR_NAMESPACE, key=UNRATED_SOL_CNT_KEY_FORMAT)
 def find_unrated_solutions(user):
+    """
+        Returns the list of all unrated solutions visible and important
+        (not obfuscated) to the given user.
+    """
     profile = user.get_profile()
 
     # For some reason had to put detailed_status here...
@@ -34,7 +38,7 @@ def find_unrated_solutions(user):
     did_solve_task = set()  # check whether user solved the task
     maybe_check = set()     # check both permissions and user's solution
     to_check = set()        # check only permissions
-    result = []             # IDs of important unrated solutions
+    result = []             # instances of important unrated solutions
     unrated_solution_count = 0
 
     id_to_solution = {x.id: x for x in solutions}

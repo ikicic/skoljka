@@ -22,10 +22,10 @@
 {% if not is_file %}
   {% if advanced %}
     <a href="/task/new/">Jednostavno</a><br><br>
-    Naprednim dodavanjem zadataka možete odjednom dodati više zadataka sličnog imena i sličnih tagova.<br>
+    Naprednim dodavanjem zadataka možete odjednom dodati više zadataka sličnog imena i sličnih oznaka.<br>
     Zadatke razdvajajte oznakom <pre>@@@@@</pre>.<br>
     Ukoliko želite navesti broj zadatka u imenu ili tagovima, napišite <pre>[[#]]</pre>.<br>
-    Npr. Ime: <pre>IMO 2011</pre>, Tagovi: <pre>IMO, 2011, IMO</pre>.<br><br>
+    Npr. Ime: <pre>IMO 2011</pre>, Oznake: <pre>IMO, 2011, IMO</pre>.<br><br>
   {% else %}
     {% if perms.task.add_advanced %}<a href="/task/new/advanced/">Napredno</a><br><br>{% endif %}
   {% endif %}
@@ -35,15 +35,15 @@
   {% if edit and not is_file %}
     <a href="/mathcontent/{{ task.content_id }}/attachments/" class="btn">Pregled datoteka</a><br><br>
   {% endif %}
-  <a href="/tags/" target="_blank">Popis tagova</a>
+  <a href="/tags/" target="_blank">Popis oznaka</a>
 </div>
 
 <br>
 <div style="width: 70%; margin-left: 10px; font-style: italic;">
   {% if is_file %}
-    Napomena: Nemojte dodavati datoteke za čiji sadržaj nemate prava!
+    Napomena: Nemojte dodavati datoteke za čiji sadržaj nemate ovlasti!
   {% else %}
-    Napomena: Nemojte dodavati zadatke za koja nemate prava. Također, nemojte
+    Napomena: Nemojte dodavati zadatke za koja nemate ovlasti. Također, nemojte
     dodavati zadatke s domaćih natjecanja (općinskih, županijskih, državnih,
     izbornih) i s olimpijada (IMO, shortlist, MEMO, HMO), jer će to prije ili
     poslije dodati mentori. Ukoliko dodajete zadatke s natjecanja, po mogućnosti

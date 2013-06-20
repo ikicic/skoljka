@@ -139,7 +139,7 @@ $(function(){
     + '<a id="tt_minus" href="#" title="Nevaljan"><img src="/static/images/minus_circle.png"></a> '
     + '<a id="tt_delete" href="#" title="Izbriši"><img src="/static/images/cross.png"></a> '
     + '<span id="tt_info"></span><br>'
-    + '<input type="text" id="tt_add" name="tt_add" placeholder="Dodaj tag" class="input-small"></div>'
+    + '<input type="text" id="tt_add" name="tt_add" placeholder="Dodaj oznaku" class="input-small"></div>'
   );
 
   /* Add tag */
@@ -174,7 +174,7 @@ $(function(){
           $('#tt_text').data('tooltip').hide();
           tag.remove();
         } else {
-          var msg = data == '0' ? 'Nemaš prava.' : 'Greška!';
+          var msg = data == '0' ? 'Nemaš ovlasti.' : 'Greška!';
           $('#tt_info').html(msg);
         }
     });

@@ -108,7 +108,7 @@ class UserProfile(models.Model):
 
     # options
     show_hidden_tags = models.BooleanField(default=False,
-        verbose_name='Prikazuj skrivene tagove')
+        verbose_name='Prikazuj skrivene oznake')
     show_unsolved_task_solutions = models.BooleanField(default=False,
         verbose_name='Prikazuj rješenja neriješenih zadataka')
     hide_solution_min_diff = models.FloatField(default=0,

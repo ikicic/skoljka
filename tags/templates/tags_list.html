@@ -2,12 +2,12 @@
 
 {% load sorting_tags %}
 
-{% block title %}Popis tagova{% endblock %}
+{% block title %}Popis oznaka{% endblock %}
 
 {% block content %}
 <a href="javascript: history.go(-1)">« Vrati se</a><br><br>
 
-<h3>Popis tagova</h3>
+<h3>Popis oznaka</h3>
 
 <br>
 
@@ -26,7 +26,7 @@
 
 <table width="40%" class="table-striped table-condensed" style="text-align: center;">
   <tr>
-    <th>{% anchor name Tag %}</th>
+    <th>{% anchor name Oznaka %}</th>
     <th>{% anchor taggeditem_count "Broj zadataka" %}</th>
     <th>{% anchor weight Težina %}</th>
     {% if can_edit %}<th>Nova težina</th>{% endif %}

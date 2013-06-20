@@ -36,7 +36,7 @@ def cache_function(key=None, namespace=None, seconds=86400*7):
             namespace: Format of namespace used. E.g. 'Folder{0.pk}'
                 will be converted to Folder5 if function's first parameter
                 is a model with .pk == 5.
-            seconds: Specify how long this cache should be valid.
+            seconds: Specify for how long should this cache be valid.
 
         Parameters are called 'key' & 'namespace', not 'key_format' &
         'namespace_format' for DRY reasons.
@@ -44,7 +44,7 @@ def cache_function(key=None, namespace=None, seconds=86400*7):
         Note that it is possible to set both namespace and key format.
         In that case, key is considered as a 'subkey'.
 
-        There are no special option to define key and namespace independent
+        There is no special option to define key and namespace independent
         of function arguments. Just use key and namespace without any
         curly brackets instead.
     """
@@ -93,7 +93,7 @@ def cache_many_function(namespace_format=None, key_format=None, pre_test=None):
 
         Generates namespaces, keys and full keys for each object in the objects
         list. Checks which results are already cached, and calls given function
-        for the rest, if any. Function will not be called if all results
+        for the rest, if any. Function will not be called if all the results
         are found in the cache.
 
         Both namespace and key format can be dependend on the object and args
@@ -161,10 +161,20 @@ def cache_many_function(namespace_format=None, key_format=None, pre_test=None):
 # TODO: add login check
 def require(method=[], ajax=None, post=[], get=[], force_login=True):
     """
-        TODO
+        Add some restrictions to the query.
 
-        If force_login is set to True, require will return ResponseForbidden
-        if user not logged in.
+        Options / parameters:
+            method (*): accept only given methods
+                e.g. method == 'GET' accepts only GET method
+            ajax (boolean): if set, accept only AJAX requests
+            post (*): list of necessary POST fields (**)
+            get (*): list of necessary GET fields (**)
+            force_login (boolean): if set, require will return ResponseForbidden
+                if user not logged in.
+
+            (*) a string or a list of strings
+            (**) always necessary, independent of actual method
+                (feel free to change this...)
     """
 
     if isinstance(method, basestring):

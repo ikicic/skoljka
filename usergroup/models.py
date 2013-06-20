@@ -13,7 +13,6 @@ from mathcontent.models import MathContent
 
 class GroupPermissionManager(models.Manager):
     def for_user(self, user, permission_type):
-        # ovdje postoji ovaj if, iako je svugdje login_required
         if user is not None and user.is_authenticated():
             # mora biti .distinct(), zbog svih tih silnih join-eva
             return self.filter(
@@ -42,7 +41,7 @@ class UserGroup(models.Model):
     description = models.OneToOneField(MathContent)
     author = models.ForeignKey(User)
     date_created = models.DateTimeField(auto_now_add=True)
-    hidden = models.BooleanField(default=False, verbose_name='Sakriveno')
+    hidden = models.BooleanField(default=False, verbose_name='Skriveno')
 
     member_count = models.IntegerField(default=0)
 
