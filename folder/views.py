@@ -180,7 +180,6 @@ def folder_my(request):
 @folder_view()
 @response('folder_detail.html')
 def view(request, folder, data, path=u''):
-    print data
     if path != folder.cache_path:
         # Redirect to the correct URL. E.g. force / at the end etc.
         return (folder.get_absolute_url(), )
