@@ -24,8 +24,13 @@ def homepage_offline(request, recent_tasks):
         })
 
 def homepage_online(request, recent_tasks):
-    recommend = list(UserRecommendation.objects.filter(user=request.user)   \
-        .values_list('task_id', flat=True))
+    recommend = UserRecommendation.objects.raw(
+        'SELECT A.id, A.task_id FROM recommend_userrecommendation A'        \
+        '   LEFT JOIN solution_solution B'
+        '       ON (A.task_id = B.task_id AND A.user_id = B.author_id)'     \
+        '   WHERE A.user_id = {} AND (B.status IS NULL OR B.status = 0);'   \
+        .format(request.user.id));
+    recommend = list(x.task_id for x in recommend)
 
     if len(recommend) > 5:
         recommend = random.sample(recommend, 5)
