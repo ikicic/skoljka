@@ -42,11 +42,15 @@ def folder_view(permission=None):
             # If type is VIEW, do not check twice.
             if permission and permission != VIEW and \
                     not folder.user_has_perm(request.user, permission):
-                raise HttpResponseForbidden('No permission for this action!')
+                return HttpResponseForbidden('No permission for this action!')
 
             data = prepare_folder_menu([folder], request.user)
-            if not data:
-                raise HttpResponseForbidden('Not allowed to view this folder!')
+            # If you're the author, then you must have the access.
+            # TODO: do this check only for VIEW, if not directly given
+            # the permission?
+            if folder.author_id != request.user.id and \
+                    (not data or not data.get('folder_tree', None)):
+                return HttpResponseForbidden('Not allowed to view this folder!')
 
             data['folder'] = folder
             try:

@@ -19,7 +19,8 @@ from folder.decorators import folder_view
 from folder.models import Folder, FolderTask, FOLDER_TASKS_DB_TABLE,        \
     FOLDER_NAMESPACE_FORMAT
 from folder.forms import FolderForm, FolderAdvancedCreateForm
-from folder.utils import prepare_folder_menu, refresh_cache_fields
+from folder.utils import get_visible_folder_tree, prepare_folder_menu,      \
+    refresh_cache_fields
 
 import re
 
@@ -140,10 +141,46 @@ def select(request, id):
     #return HttpResponse(FOLDER_EDIT_LINK_CONTENT[response])
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
+@response('folder_list.html')
+@login_required
+def folder_my(request):
+    """
+        List all folders created by the user.
+    """
+    folders = list(Folder.objects.filter(author_id=request.user.id))
+    if not folders:
+        return {}
+
+    original_ids = set(x.id for x in folders)
+
+    data = get_visible_folder_tree(folders, request.user) or {}
+    ancestor_ids = data.get('ancestor_ids', [])
+    sorted_folders = data.get('sorted_folders', [])
+
+    accessible_ids = set()
+
+    folders_html = []
+    for x in sorted_folders:
+        if x.id in original_ids:
+            html = x._html_menu_item(True, x._depth, None,
+                cls='folder-list-my',
+                extra='<a href="/folder/{}/edit/" class="folder-list-my-edit"' \
+                    ' title="Uredi"> <i class="icon-edit"></i></a>'.format(x.id))
+            accessible_ids.add(x.id)
+        else:
+            html = x._html_menu_item(x.id in ancestor_ids, x._depth, None)
+        folders_html.append(html)
+
+    return {
+        'folders_html': u''.join(folders_html),
+        'inaccessible_folders': [x for x in folders
+            if x.parent_id and x.id not in accessible_ids],
+    }
 
 @folder_view()
 @response('folder_detail.html')
 def view(request, folder, data, path=u''):
+    print data
     if path != folder.cache_path:
         # Redirect to the correct URL. E.g. force / at the end etc.
         return (folder.get_absolute_url(), )

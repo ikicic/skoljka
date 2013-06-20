@@ -142,16 +142,17 @@ class Folder(BasePermissionsModel):
         """
         return self.short_name.isdigit()
 
-    def _html_menu_item(self, user, is_open, depth, stats):
+    def _html_menu_item(self, is_open, depth, stats, cls='', extra=''):
         """
             Parameters:
                 is_open - is folder open (is in chain?)
-                user - request.user
                 depth - folder depth
                 stats - stats from many_get_user_stats
+                cls - additional CSS class, optional
+                extra - extra HTML added between <li> and <a>, optional
         """
 
-        cls = 'nav-folder-hidden' if self.hidden else 'nav-folder'
+        cls += ' nav-folder-hidden' if self.hidden else ' nav-folder'
         if is_open:
             cls += ' nav-folder-open'
 
@@ -171,7 +172,7 @@ class Folder(BasePermissionsModel):
                     % (r, g, b, plus_sign, 100 * percent)
 
         return u'<li class="%s" style="margin-left:%dpx;"> '   \
-            '<a href="%s">%s %s</a></li>\n' % (cls, depth * 10 - 7,
+            '%s<a href="%s">%s %s</a></li>\n' % (cls, depth * 10 - 7, extra,
             self.get_absolute_url(), self.short_name, stats_str)
 
     def tag_list_html(self):

@@ -20,9 +20,10 @@ class FolderForm(forms.ModelForm):
         # User can put his folder anywhere he wants (into any visible folder),
         # but that doesn't mean he can make it public!
 
-        # Check all permissions. Remove inaccessible folders
+        # Check all permissions. Remove inaccessible folders.
+        # WARNING: Remove the subtree of the given folder!
         data = get_visible_folder_tree(Folder.objects.filter(editable=True),
-            self.user)
+            self.user, exclude_subtree=self.instance)
 
         # WARNING: Do not forget to remove self.instance from the list!
         exclude_id = self.instance.id if self.instance else None

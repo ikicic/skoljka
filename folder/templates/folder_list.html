@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {{ folder.name|default:"Arhiva" }}
+{% endblock %}
+
+{% block content %}
+
+<h3>Popis vlastitih kolekcija</h3>
+<br>
+
+{% if folders_html %}
+  <ul class="nav nav-list">
+    {{ folders_html|safe }}
+  </ul>
+  <br>
+  <br>
+  Vaše kolekcije oznakečene su podebljanim slovima. Kolekcije označene praznim
+  kružićem su skrivene, dok su one s punim kružićem javno dostupne.
+{% elif not inaccessible_folders %}
+  <i>Nemate vlastitih kolekcija</i><br>
+  <br>
+  Za više informacija o kolekcijama, pogledajte <a href="/help/folders/">ovdje</a>.
+{% endif %}
+
+{% if inaccessible_folders %}
+  <br><br>
+  <div class="alert alert-error">
+    Upozorenje: Neke vaše kolekcije nisu dostupne!
+  </div>
+  Sljedećim kolekcijama ne možete pristupiti putem menu-a:<br>
+
+  <ul>
+    {% for x in inaccessible_folders %}
+      <li>
+        <a href="{{ x.get_absolute_url }}">{{ x.short_name }}</a>
+        <a href="/folder/{{ x.id }}/edit/"><i class="icon-edit"></i></a>
+      </li>
+    {% endfor %}
+  </ul>
+  
+  <br>
+  Navedene kolekcije se nalaze u vama nedostupnim kolekcijama. <br>
+  Do greške je vjerojatno došlo tako što je u međuvremenu neka od roditeljskih kolekcija postala
+  privatna, ili su vama oduzete ovlasti pregleda. <br>
+  Kako bi vaše kolekcije postale dostupne (vama, a i drugim korisnicima, u slučaju da nisu skrivene),
+  premjestite ih u neke vidljive kolekcije.
+{% endif %}
+
+{% endblock content %}

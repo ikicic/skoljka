@@ -62,9 +62,13 @@ def get_task_folder_ids(task):
     # Remove duplicates (does not preserve order)
     return list(set(ids))
 
-def get_visible_folder_tree(folders, user):
+def get_visible_folder_tree(folders, user, exclude_subtree=None):
     """
         Get whole visible folder tree containing selected folders.
+
+        To remove a subtree of a specific folder, use exclude_subtree.
+            exclude_subtree = xyz would skip xyz's subtree, but it would
+            leave xyz itself.
 
         Also returns some other useful data.
         Fills returned folder instances with ._depth.
@@ -153,10 +157,11 @@ def get_visible_folder_tree(folders, user):
         else:
             folder._depth = 0   # root
 
-        children = folder_children[folder.id]
+        if not exclude_subtree or exclude_subtree.id != folder.id:
+            children = folder_children[folder.id]
 
-        # Sort by parent_index in reverse order (note that we are using LIFO)!.
-        stack.extend(sorted(children, key=lambda x: -x.parent_index))
+            # Sort by parent_index in reverse order (note that we are using LIFO)!.
+            stack.extend(sorted(children, key=lambda x: -x.parent_index))
 
     return {
         'ancestor_ids': ancestor_ids,
@@ -191,7 +196,7 @@ def prepare_folder_menu(folders, user):
     user_stats = Folder.many_get_user_stats(sorted_folders, user)
 
     # Finally, generate menu HTML
-    menu = [x._html_menu_item(user, x.id in ancestor_ids, x._depth,
+    menu = [x._html_menu_item(x.id in ancestor_ids, x._depth,
         user_stats.get(x.id)) for x in sorted_folders]
 
     return {

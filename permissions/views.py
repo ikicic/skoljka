@@ -39,7 +39,9 @@ def edit(request, type_id, id):
 
         # When checking permissions for folders, one must chain whole path
         # to the root. That's what prepare_folder_menu anyway does.
-        if not data:
+        # FIXME: is this necessarry? this check should be done only for VIEW.
+        if object.author_id != request.user.id and  \
+                (not data or not data.get('folder_tree', None)):
             return 403  # Sorry, no access
         folder_tree = data['folder_tree']
 
