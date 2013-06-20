@@ -22,8 +22,8 @@ def G(male, female, gender):
 @register.simple_tag(takes_context=True)
 def prepare_action_data(context, A):
     user = context['user']
-    
-    # TODO: finish this...
+
+    # TODO: refactor activity, such that (for example) gender can be cached.
     # gender = ????
     gender = ''
     G1 = G('o', 'la', gender)

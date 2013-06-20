@@ -45,6 +45,7 @@ ALTER TABLE task_task ADD COLUMN solvable TINYINT(1) NOT NULL DEFAULT 1;
 ALTER TABLE userprofile_userprofile DROP COLUMN birthday;
 ALTER TABLE userprofile_userprofile DROP COLUMN city;
 ALTER TABLE userprofile_userprofile DROP COLUMN country;
+ALTER TABLE userprofile_userprofile DROP COLUMN gender;
 ALTER TABLE userprofile_userprofile DROP COLUMN quote;
 ALTER TABLE userprofile_userprofile DROP COLUMN score;
 ALTER TABLE userprofile_userprofile DROP COLUMN website;

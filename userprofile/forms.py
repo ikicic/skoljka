@@ -87,7 +87,7 @@ class UserProfileEditForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(UserProfileEditForm, self).__init__(*args, **kwargs)
 
-        self.fields['gender'].widget.attrs['class'] = 'span2'
+        # self.fields['gender'].widget.attrs['class'] = 'span2'
         self.fields['hide_solution_min_diff'].required = False
         self.fields['hide_solution_min_diff'].widget = \
             RatingWidget(attrs=DIFFICULTY_RATING_ATTRS)
@@ -101,6 +101,6 @@ class UserProfileEditForm(forms.ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ['gender', 'school_class', 'show_hidden_tags',
+        fields = ['school_class', 'show_hidden_tags',
             'show_unsolved_task_solutions', 'hide_solution_min_diff',
             'show_solution_task', 'evaluator']
