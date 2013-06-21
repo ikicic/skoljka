@@ -8,7 +8,7 @@ class UserEntryForm(forms.Form):
     list = UserEntryField(label='Popis korisnika')
 
 class GroupEntryForm(forms.Form):
-    list = GroupEntryField(label='Popis grupa')
+    list = GroupEntryField(label='Popis korisnika i grupa')
 
 class UserAndGroupEntryForm(forms.Form):
     list = UserAndGroupEntryField(label='Popis korisnika i grupa')

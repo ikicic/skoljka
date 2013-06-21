@@ -1,0 +1,35 @@
+{% extends "help/help_base.html" %}
+
+{% block title %}Pomoć - Ovlasti{% endblock %}
+
+{% block inner_content %}
+
+<h4>Ovlasti</h4>
+<p>Osim javnog dodavanja sadržaja, moguće je ograničiti dostupnost samo na ciljanu skupinu, ili pak držati sadržaj nedostupan svim drugim korisnicima.</p>
+
+Školjka se tako može koristiti u razne svrhe:
+<ul>
+  <li>skladištenje neiskorištenih zadataka</li>
+  <li>pripremu natjecanja</li>
+  <li>stavljanje skripti i drugih materijala na recenziju drugih mentora, prije objavljivanja učenicima</li>
+  <li>...</li>
+</ul>
+
+<p>Sustav ovlaštenja se odnosi na <b>zadatke</b>, <b>datoteke</b>, ali i na <b>kolekcije</b>.
+Za uređivanje ovlasti, otvorite zadatak ili kolekciju, pritisnite na <i>Uredi</i> i zatim na <i>Privilegije</i>.</p>
+
+<p>Otvorit će vam se popis svih ovlasti koje ste već dodijelili te forma za dodavanje novih.
+Kako biste dodali korisnike i grupe na popis, odaberite koje ovlasti želite dodijeliti, napišete njihova imena i nazive te pritisnite <i>Dodaj</i>.</p>
+
+<p>Za brisanje ovlasti, kliknite na križić u odgovarajućem redu popisa.</p>
+
+
+<h4>Detalji</h4>
+<ul>
+  <li>Ukoliko zadatak ili kolekcija nije skrivena, svi korisnici automatski imaju <i>view</i> ovlasti, tj. mogu gledati sadržaj.</li>
+  <li><i>Posebno, kolekcija je vidljiva korisniku samo ako su mu vidljive i sve njene roditeljske kolekcije.</i></li>
+  <li><i>Kolekcija nikako ne utječe na zadatak. Ako se zadatak nalazi u skrivenoj kolekciji, to ne znači da je sam zadatak nedostupan!</i></li>
+  <li>Trenutačno nije omogućeno svim korisnicima objavljivati kolekcije, tj. držati ih neskrivenima. Ukoliko želite objaviti kolekciju, <a href="/about/">javite nam se</a>.</li>
+</ul>
+
+{% endblock %}
