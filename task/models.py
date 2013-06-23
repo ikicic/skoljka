@@ -65,10 +65,10 @@ class Task(BasePermissionsModel):
 
     solved_count = models.IntegerField(default=0, db_index=True)
 
-    # If not None, this Task is a file actually.
+    # If nonempty, this Task is a file actually.
     file_attachment = models.ForeignKey(Attachment, blank=True, null=True)
     cache_file_attachment_url = models.CharField(max_length=150, blank=True,
-        null=True)
+        default='')
 
     solvable = models.BooleanField(default=True, verbose_name=u'Zadatak',
         help_text=icon_help_text(
@@ -93,7 +93,7 @@ class Task(BasePermissionsModel):
             file, self.id, self.name))
 
     def is_file(self):
-        return self.file_attachment_id is not None
+        return self.file_attachment_id
 
     def get_tr_class(self):
         """

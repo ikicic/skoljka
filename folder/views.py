@@ -368,8 +368,7 @@ def _create_folders(author, parent, structure, p):
         # Create new folder
         folder = Folder(author=author, parent=parent, parent_index=index,
             hidden=False, editable=False, name=vars['name'],
-            short_name=vars['short'],
-            slug=slugify(vars['short']))
+            short_name=vars['short'])
 
         folder.save()
 
