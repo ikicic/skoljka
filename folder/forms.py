@@ -1,4 +1,4 @@
-from django import forms
+﻿from django import forms
 
 from permissions.constants import VIEW
 
@@ -16,6 +16,8 @@ class FolderForm(forms.ModelForm):
             del self.fields['hidden']
         if not self.user.has_perm('can_set_short_name'):
             del self.fields['short_name']
+        else:
+            self.fields['short_name'].required = False
 
         # User can put his folder anywhere he wants (into any visible folder),
         # but that doesn't mean he can make it public!
@@ -48,6 +50,19 @@ class FolderForm(forms.ModelForm):
         if not self.initial_parent:
             self.initial_parent_id = None
 
+        # If parent is inaccessible, notify user.
+        if self.instance and self.instance.parent_id:
+            parent_ok = next((x for x in self._parent_choices
+                if self.instance.parent_id == x.id), None)
+
+            if not parent_ok:
+                # hackish, is there any more formal way to do this?
+                if 'parent' not in self.errors:
+                    self.errors.update(parent=[])
+                self.errors['parent'].append('Trenutačna roditeljska kolekcija '
+                    'nije dostupna! Kako bi ova kolekcija bila dostupna iz '
+                    'izbornika, premjestite je u neku dostupnu kolekciju.')
+
         self.fields['parent'] = forms.ChoiceField(
             choices=choices, label='Roditelj', initial=self.initial_parent_id)
 
@@ -59,6 +74,14 @@ class FolderForm(forms.ModelForm):
             raise forms.ValidationError('Nevaljana kolekcija.')
 
         return folder
+
+    def clean_short_name(self):
+        # This method will not be called in the case user has no permission
+        # to change short_name.
+        short_name = self.cleaned_data.get('short_name', '')
+        short_name = short_name.strip() or self.cleaned_data.get('name')
+        self.cleaned_data['short_name'] = short_name
+        return short_name
 
     class Meta:
         model = Folder

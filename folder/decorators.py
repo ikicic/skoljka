@@ -9,7 +9,7 @@ from folder.utils import prepare_folder_menu
 
 from functools import wraps
 
-def folder_view(permission=None):
+def folder_view(permission=VIEW):
     """
         Decorator for folder views. Checks if the user has the access to the
         given folder and calls prepare_folder_menu.
@@ -20,8 +20,7 @@ def folder_view(permission=None):
             request, folder, data, (...)
 
         Decorator arguments:
-            permission - additionaly check given permission, default None
-                (VIEW is checked anyway)
+            permission - permission to check
 
         Additional info added to the data dictionary:
             folder - the folder itself
@@ -38,18 +37,30 @@ def folder_view(permission=None):
             else:
                 folder = get_object_or_404(Folder, id=folder_id)
 
-            # If type is VIEW, do not check twice.
-            if permission and permission != VIEW and \
-                    not folder.user_has_perm(request.user, permission):
-                return HttpResponseForbidden('No permission for this action!')
+            # If type is VIEW, wait, do not call expensive .user_has_perm.
+            if permission != VIEW:
+                explicit = folder.user_has_perm(request.user, permission)
+                if not explicit:
+                    # Reject immediately, do not waste time
+                    return HttpResponseForbidden('No permission for this action!')
+            else:
+                explicit = None
 
             data = prepare_folder_menu([folder], request.user)
-            # If you're the author, then you must have the access.
-            # TODO: do this check only for VIEW, if not directly given
-            # the permission?
-            if folder.author_id != request.user.id and \
-                    (not data or not data.get('folder_tree', None)):
-                return HttpResponseForbidden('Not allowed to view this folder!')
+            if not data or not data.get('folder_tree', None):
+                # Even if you are not able to see the folder's ancestors,
+                # you may still have explicit permission.
+                # (for example, if you are the author, or the author gave you
+                # the permission to update/view the folder)
+
+                # Note: This results in a small security problem. The URL,
+                # i.e. path of the folder contains short names of its ancestors.
+                if permission == VIEW:
+                    # ok, now check permissions... (can prepare_folder_menu
+                    # give me this same information?)
+                    explicit = folder.user_has_perm(request.user, permission)
+                if not explicit:
+                    return HttpResponseForbidden('No permission for this action!')
 
             data['folder'] = folder
             try:

@@ -339,11 +339,6 @@ def task_list(request, user_id=None):
 
     if user_id:
         tasks = tasks.filter(author_id=user_id)
-    print tasks.query
-    from time import time
-    start_time = time()
-    print tasks
-    print 'TIME:', time() - start_time
     return {
         'tasks' : tasks,
         'submitted_tasks' : get_user_solved_tasks(request.user),

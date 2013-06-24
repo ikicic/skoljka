@@ -16,40 +16,51 @@ from permissions.models import ObjectPermission, has_group_perm,        \
 from permissions.signals import objectpermissions_changed
 
 # Model specific:
-from folder.utils import prepare_folder_menu
+from folder.decorators import folder_view
 
-
-# TODO: permission to change permissions?
 
 @login_required
 @response('permissions_edit.html')
-def edit(request, type_id, id):
+def edit(request, id, type_id):
+    """
+        Check if there are any special requirements for given content type.
+
+        Currently, only Folders use special kind of permission check
+        (and data preparation).
+    """
     content_type = get_object_or_404(ContentType, id=type_id)
+
+    # Model specific tuning:
+    if content_type.app_label == 'folder' and content_type.model == 'folder':
+        # If folder, make sure to call folder_view first.
+        return _folder_edit(request, id, type_id, content_type)
+
     try:
         object = content_type.get_object_for_this_type(id=id)
     except:
         raise Http404
 
-    model = object.__class__
-
-    # Model specific tuning:
-    folder_tree = ''
-    if content_type.app_label == 'folder' and content_type.model == 'folder':
-        data = prepare_folder_menu([object], request.user)
-
-        # When checking permissions for folders, one must chain whole path
-        # to the root. That's what prepare_folder_menu anyway does.
-        # FIXME: is this necessarry? this check should be done only for VIEW.
-        if object.author_id != request.user.id and  \
-                (not data or not data.get('folder_tree', None)):
-            return 403  # Sorry, no access
-        folder_tree = data['folder_tree']
-
     # Check if the user has the permission to *edit permissions* (not just
-    # view it). Note that object has to be PermissionsModel.
+    # to view it). Note that object has to be PermissionsModel.
     if not object.user_has_perm(request.user, EDIT_PERMISSIONS):
         return 403
+    return _edit(request, {}, id, object, type_id, content_type)
 
+@folder_view(permission=EDIT_PERMISSIONS)
+def _folder_edit(request, folder, data, *args, **kwargs):
+    """
+        Wrapper for folders.
+    """
+    # Ok, user can really edit permissions. Continue with generated data.
+    return _edit(request, data, folder.id, folder, *args, **kwargs)
+
+
+def _edit(request, data, id, object, type_id, content_type):
+    """
+        Actual edit view.
+    """
+
+    model = object.__class__
 
     # Convert list of strings (permission names) to list of permission types
     object_permissions = getattr(model, 'object_permissions', ['default'])
@@ -124,12 +135,13 @@ def edit(request, type_id, id):
             groups[group.id]._cache_permissions = [perm.permission_type]
 
 
-    return {
+    data.update({
         'object': object,
         'form': form,
         'message': message,
         'groups': groups.itervalues(),
         'applicable_permissions': applicable_permissions,
         'selected_types': selected_types,
-        'folder_tree': folder_tree
-    }
+    })
+
+    return data

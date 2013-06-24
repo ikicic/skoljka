@@ -247,8 +247,8 @@ def new(request, folder_id=None):
         if folder_form.is_valid():
             folder = folder_form.save(commit=False)
 
-            # If short name not set, copy full name.
-            if not getattr(folder, 'short_name', None):
+            # If user can't edit short name, copy full name.
+            if 'short_name' not in folder_form.fields:
                 folder.short_name = folder.name
 
             if not edit:
