@@ -355,6 +355,8 @@ def detail(request, id):
     except (Solution.DoesNotExist, IndexError):
         solution = None
 
+    task.cache_solution = solution
+
     perm = task.get_user_permissions(request.user)
 
     if VIEW not in perm:

@@ -108,8 +108,16 @@ class UserProfile(models.Model):
     #     default='', verbose_name='Spol', help_text=icon_help_text(
     #         'Za gramatičke i pravopisne potrebe.'))
 
+    # constants
+    HIDDEN_TAGS_HIDE = 0
+    HIDDEN_TAGS_SHOW_IF_SOLVED = 1
+    HIDDEN_TAGS_SHOW_ALWAYS = 2
+    HIDDEN_TAGS_CHOICES = [(0, 'Ne'), (1, 'Samo za riješene zadatke'),
+        (2, 'Uvijek')]
+
     # options
-    show_hidden_tags = models.BooleanField(default=False,
+    show_hidden_tags = models.SmallIntegerField(default=False,
+        choices=HIDDEN_TAGS_CHOICES,
         verbose_name='Prikazuj skrivene oznake')
     show_unsolved_task_solutions = models.BooleanField(default=False,
         verbose_name='Prikazuj rješenja neriješenih zadataka')

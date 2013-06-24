@@ -6,6 +6,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.safestring import mark_safe
 
+from userprofile.models import UserProfile
 from skoljka.utils.decorators import cache_function
 
 from tags.models import Tag, TaggedItem, VOTE_WRONG, \
@@ -29,11 +30,16 @@ def tag_list(context, owner, plus_exclude=None):
         add = u''
         plus_exclude_lower = []
 
-    no_plus = u'<a href="/search/?q=%(tag)s"%(class)s data-votes="%(votes)s">%(tag)s</a>'
+    no_plus = u'<a href="/search/?q=%(fulltag)s"%(class)s data-votes="%(votes)s">%(tag)s</a>'
     plus = no_plus + u'<a href="/search/?q=' + add + ',%(tag)s"%(class)s>+</a>'
 
     user = context['user']
-    show_hidden = user.is_authenticated() and user.get_profile().show_hidden_tags
+    show_hidden_option = user.is_authenticated() and user.get_profile().show_hidden_tags
+    if show_hidden_option == UserProfile.HIDDEN_TAGS_SHOW_IF_SOLVED:
+        solution = getattr(owner, 'cache_solution', None)
+        show_hidden = solution and solution.is_solved()
+    else:
+        show_hidden = show_hidden_option == UserProfile.HIDDEN_TAGS_SHOW_ALWAYS
 
     v0 = []     # not hidden
     v1 = []     # hidden
@@ -41,7 +47,7 @@ def tag_list(context, owner, plus_exclude=None):
         name, votes = tagged_item.tag.name, tagged_item.votes_sum
 
         format = no_plus if (not plus_exclude or name.lower() in plus_exclude_lower) else plus
-        attr = {'votes': votes, 'class': ''}
+        attr = {'votes': votes, 'class': '', 'fulltag': name}
         if name[0] != '$':
             attr['tag'] = name
         elif show_hidden:
