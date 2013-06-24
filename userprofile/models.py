@@ -129,7 +129,8 @@ class UserProfile(models.Model):
     show_solution_task = models.BooleanField(default=True,
         verbose_name='Prikazuj tekst zadatka uz rješenje.')
     school_class = models.IntegerField(default=0,
-        choices=USERPROFILE_SCHOOL_CLASS_CHOICES, verbose_name='Razred')
+        choices=USERPROFILE_SCHOOL_CLASS_CHOICES, verbose_name='Razred',
+        help_text=icon_help_text('Za odabrane zadatke na naslovnoj stranici'))
 
     # (any better name?)
     evaluator = models.BooleanField(default=False, verbose_name='Ispravljač',

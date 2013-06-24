@@ -303,6 +303,12 @@ $(function() {
     }
   });
 
+  /* Replace "Cancel Rating" with translation */
+  $('.rating-cancel > a').each(function() {
+    /* This works only if the following code is evaluated after jquery.rating.js */
+    $(this).attr('title', 'Poništi ocjenu');
+  });
+
   /* Search toggler */
   $(".toggler").click(function(e){
     e.preventDefault();

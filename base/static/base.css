@@ -391,6 +391,21 @@ a.register {
   margin-top: 5px;
 }
 
+
+/* Split Form */
+.split-form th {
+  padding-left: 10px;
+}
+
+.split-form-row th {
+  color: gray;
+  font-size: 11px;
+  padding: 10px 0 0 0;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+
 /* Tags */
 .tag-list {
   display: inline;

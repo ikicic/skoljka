@@ -15,9 +15,18 @@
     <div class="alert alert-success">Promjene uspješno spremljene!</div>
   {% endif %}
   <table class="kill-br table-striped">
-    {% for form in forms %}
-      {{ form.as_table }}
-    {% endfor %}
+    <tr>
+      <th colspan="2">
+        Profil
+      </th>
+    </tr>
+    {{ forms.0.as_table }}
+    <tr>
+      <th colspan="2">
+        Postavke
+      </th>
+    </tr>
+    {{ forms.1.as_table }}
     <tr>
       <td colspan="2">
         <button class="btn btn-primary" name="submit">Pošalji</button>

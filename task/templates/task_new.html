@@ -55,10 +55,19 @@
 
 <form {% if is_file %}enctype="multipart/form-data"{% endif %} action="{{ action_url }}" method="post">
   {% csrf_token %}
-  <table class="kill-br">
-    {% for form in forms %}
-      {{ form.as_table }}
-    {% endfor %} 
+  <table class="kill-br split-form">
+    {# Any better solution to split a form? #}
+
+    <tr class="split-form-row"><th colspan="2">Osnovno</th></tr>
+    {% get_fieldset name,tags,source as first_part from forms.0 %}
+    {{ first_part.as_table }}
+
+    <tr class="split-form-row"><th colspan="2">Sadržaj</th></tr>
+    {{ forms.1.as_table }}
+
+    <tr class="split-form-row"><th colspan="2">Napredno</th></tr>
+    {% get_fieldset hidden,solvable as second_part from forms.0 %}
+    {{ second_part.as_table }}
   </table>
   <br>
   <input type="submit" class="btn btn-primary" value="Pošalji">
