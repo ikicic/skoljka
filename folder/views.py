@@ -19,8 +19,8 @@ from folder.decorators import folder_view
 from folder.models import Folder, FolderTask, FOLDER_TASKS_DB_TABLE,        \
     FOLDER_NAMESPACE_FORMAT
 from folder.forms import FolderForm, FolderAdvancedCreateForm
-from folder.utils import get_visible_folder_tree, prepare_folder_menu,      \
-    refresh_cache_fields
+from folder.utils import get_folder_descendant_ids, get_visible_folder_tree,  \
+    prepare_folder_menu, refresh_path_cache
 
 import re
 
@@ -276,9 +276,17 @@ def new(request, folder_id=None):
                 folder_form.save_m2m()
 
             # Refresh Folder cache.
-            # TODO: Optimize, update only necessary folders.
             if old_parent_id != folder.parent_id:
-                refresh_cache_fields(Folder.objects.all())
+                # The only folders that have to be refreshed are those in
+                # the folder's subtree, together with folder itself.
+                descendant_ids = get_folder_descendant_ids(folder.id)
+                descendant_ids.append(folder.id)
+                # refresh_path_cache also requires ancestors. Following code
+                # works, because you can't move a folder into its child folder.
+                descendant_ids.extend([int(x)
+                    for x in folder.parent.cache_ancestor_ids.split(',') if x])
+                descendant_ids.append(folder.parent_id)
+                refresh_path_cache(Folder.objects.filter(id__in=descendant_ids))
 
             if not edit:
                 return ('/folder/{}/edit/'.format(folder.id), )

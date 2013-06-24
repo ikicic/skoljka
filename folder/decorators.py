@@ -29,7 +29,6 @@ def folder_view(permission=None):
                 subfolder
             has_subfolders_strict = boolean, True if given folder has *any*
                 subfolder
-
     """
 
     def decorator(func):

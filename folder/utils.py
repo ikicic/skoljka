@@ -20,6 +20,19 @@ from folder.models import Folder, FolderTask, FOLDER_NAMESPACE_FORMAT,  \
 
 from collections import Counter, defaultdict
 
+def get_folder_descendant_ids(folder_id):
+    """
+        Given a folder ID, returns the list of IDs of all of its descendants.
+    """
+
+    result = []
+    last_level = [folder_id]
+    while last_level:
+        last_level = Folder.objects.filter(parent_id__in=last_level)   \
+            .values_list('id', flat=True)
+        result.extend(last_level)
+
+    return result
 
 def get_task_folder_ids(task):
     """
@@ -235,17 +248,15 @@ class FolderInfo:
             self.ancestors = self.parent.ancestors + str(self.parent.id) + ','
             self.path = self.parent.path + slugify(self.short_name) + '/'
 
-def refresh_cache_fields(queryset):
+def refresh_path_cache(queryset):
     """
-        Refresh folder cache information as
+        Refresh folder path cache information as
             cache_ancestor_ids, cache_path.
 
-        Although it is possible to select only a subset of folders,
-        please select all folders when using this action.
+        When updating folder hierarchy, please refresh all necessary folders.
+        *For each selected folder, all of its ancestor must also be selected!*
     """
     folder_list = queryset.values_list('id', 'parent_id', 'short_name')
-
-    # TODO: refresh .cache_tags!
 
     folders = {id: FolderInfo(id, short_name)
         for (id, parent_id, short_name) in folder_list}
@@ -282,7 +293,6 @@ def invalidate_cache_for_folders(folders):
     ncache.invalidate_namespaces(namespaces)
 
 def invalidate_folder_cache_for_task(task):
-    print 'invalidating for: ', task
     # One could replace .task with .task_id, but the problem is with the
     # methods get_task_folder_ids is using.
     invalidate_cache_for_folder_ids(get_task_folder_ids(task))
