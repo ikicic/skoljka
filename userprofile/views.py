@@ -61,16 +61,19 @@ def profile(request, pk):
     else:
         distribution = None
 
-    if not request.user.is_authenticated():
-        visible_groups = user.groups.exclude(name=user.username).filter(data__hidden=False).select_related('data')
-    elif request.user.id == pk:
-        visible_groups = user.groups.exclude(name=user.username).select_related('data')
+    if request.user.id == pk:
+        visible_groups = user.groups.select_related('data')
     else:
-        # TODO: staviti da se vide i zajednicke skrivene grupe
-        visible_groups = user.groups.exclude(name=user.username).filter(data__hidden=False).select_related('data')
+        where = '((SELECT id FROM auth_user_groups AG2 '            \
+                    'WHERE AG2.group_id = auth_group.id AND AG2.user_id = {} ' \
+                    'LIMIT 1)'                                      \
+                ' IS NOT NULL OR usergroup_usergroup.hidden != 0)'  \
+                .format(user.id)
+        visible_groups = user.groups.select_related('data').extra(where=[where])
+
+    visible_groups = visible_groups.exclude(id=user.get_profile().private_group_id)
 
     tags = UserTagScore.objects.filter(user=user).select_related('tag').order_by('-cache_score')[:10]
-
 
     # Task lists
     # TODO: permissions
@@ -91,7 +94,7 @@ def profile(request, pk):
     return render_to_response('profile_detail.html', {
         'profile': user,
         'distribution': distribution,
-        'visible_groups': visible_groups.distinct(),
+        'visible_groups': visible_groups,
         'tags': tags,
         'todo': todo,
         'task_added': task_added,
