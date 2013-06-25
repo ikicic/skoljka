@@ -27,6 +27,9 @@ def detail(request, solution_id):
     solution = get_object_or_404(Solution.objects.select_related('content',
         'author', 'task', *args), id=solution_id)
 
+    if not solution.task.user_has_perm(request.user, VIEW):
+        return (403, u'Zadatak nije dostupan.')
+
     if solution.correctness_avg:
         ratings = solution.correctness.select_related('user')
     else:
@@ -78,9 +81,12 @@ def _do_mark(request, solution, task):
 
     # as_solved, todo, blank
     if solution is None:
+        # Check if the task is visible to the user.
+        if not task.user_has_perm(request.user, VIEW):
+            return (403, u'Zadatak nije dostupan.')
         solution, dummy = Solution.objects.get_or_create(task=task, author=request.user)
 
-    if solution.author_id != request.user.id and not request.user.is_staff:
+    if solution.author_id != request.user.id:
         return (403, 'Not allowed to modify this solution.')
 
 
@@ -135,7 +141,8 @@ def mark(request, task_id):
     """
     task = get_object_or_404(Task, pk=task_id)
 
-    # _do_mark will create Solution if it doesn't exist
+    # _do_mark will create Solution if it doesn't exist, and check Task
+    # permissions
     ret_value = _do_mark(request, None, task)
 
     return ret_value or (response.REDIRECT, '/task/%d/' % int(task_id))
@@ -151,6 +158,8 @@ def edit_mark(request, solution_id):
     solution = get_object_or_404(Solution.objects.select_related('task'),
         id=solution_id)
 
+    # Not necessary to check Task permissions. If user was able to create
+    # Solution, then he/she is able to edit it.
     ret_value = _do_mark(request, solution, solution.task)
 
     if ret_value:
@@ -160,7 +169,6 @@ def edit_mark(request, solution_id):
     return (solution.task.get_absolute_url(), )
 
 
-#TODO(ikicic): sto ako forma nije valid?
 @login_required
 @response('solution_submit.html')
 def submit(request, task_id=None, solution_id=None):
@@ -178,6 +186,9 @@ def submit(request, task_id=None, solution_id=None):
         return (403, u'This task is not solvable!')
 
     if not edit:
+        # First check Task permissions.
+        if not task.user_has_perm(request.user, VIEW):
+            return (403, u'Zadatak nije dostupan.')
         solution, dummy = Solution.objects.get_or_create(task=task, author=request.user)
 
     math_content = solution.content
@@ -203,11 +214,13 @@ def submit(request, task_id=None, solution_id=None):
                 _update_solved_count(delta, task, request.user.get_profile())
 
             return ("/solution/%d/" % (solution.id,),)
+    else:
+        math_content_form = MathContentForm(instance=math_content)
 
     return {
-        'form': MathContentForm(instance=math_content),
-        'task': task,
         'action_url': request.path,
+        'form': math_content_form,
+        'task': task,
     }
 
 def _is_valid_status(status):
@@ -234,13 +247,19 @@ def solution_list(request, task_id=None, user_id=None, status=None):
         if status is not None and not _is_valid_status(status):
             return (response.BAD_REQUEST, 'Invalid status.')
 
-    L = Solution.objects.exclude(status=STATUS['blank'])
+    # detailed_status > 0 is also a possible solution (mysql could use an index)
+    # but there are too few blank solutions for this to have any effect
+    L = Solution.objects.filter_visible_tasks_for_user(request.user)    \
+        .exclude(status=STATUS['blank'])
+
     task = None
     author = None   # 'user' is a template reserved word
 
     empty_message = u''
     if task_id is not None:
         task = get_object_or_404(Task, pk=task_id)
+        if not task.user_has_perm(request.user, VIEW):
+            return (403, u'Zadatak nije dostupan.') # bye
         L = L.filter(task=task)
         empty_message = u'Nema traženih rješenja za ovaj zadatak'
 
@@ -251,7 +270,6 @@ def solution_list(request, task_id=None, user_id=None, status=None):
 
     L = L.select_related('author', 'content', 'task')
 
-
     return {
         'empty_message': empty_message,
         'filter_by_status': status,
@@ -260,11 +278,3 @@ def solution_list(request, task_id=None, user_id=None, status=None):
         'author': author,
         'submitted_active': 'active' if status == [u'submitted'] else '',
     }
-
-def get_user_solved_tasks(user):
-    # TODO: delete this function and find some replacement. iterating over all
-    # solutions of a user is not a very smart thing to do
-    if not user.is_authenticated():
-        return None
-    return Solution.objects.filter(author=user) \
-        .values_list("task_id", flat=True)

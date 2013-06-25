@@ -1,9 +1,10 @@
 ﻿from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import User
 from django.utils.html import mark_safe
 
 from mathcontent.models import MathContent
-from permissions.constants import VIEW_SOLUTIONS
+from permissions.constants import VIEW, VIEW_SOLUTIONS
 from post.generic import PostGenericRelation
 from rating.fields import RatingField
 from task.models import Task
@@ -83,6 +84,24 @@ SOLUTION_RATING_ATTRS = {
     'on_update': _solution_on_update,
 }
 
+class SolutionManager(models.Manager):
+    def filter_visible_tasks_for_user(self, user):
+        """
+            Filter tasks visible to the given user.
+            Does not check anything related to solution itself.
+        """
+        if user is not None and user.is_authenticated():
+            user_group_ids = user.get_profile().get_group_ids()
+            return self.filter(
+                Q(task__permissions__group_id__in=user_group_ids,
+                    task__permissions__permission_type=VIEW)    \
+                | Q(task__author_id=user.id)    \
+                | Q(task__hidden=False)).distinct()
+        elif permission_type == VIEW:
+            return self.filter(hidden=False)
+        else:
+            return self.none()
+
 @autoconnect
 class Solution(ModelEx):
     task = models.ForeignKey(Task)
@@ -101,6 +120,9 @@ class Solution(ModelEx):
 
     is_official = models.BooleanField()
     correctness = RatingField(**SOLUTION_RATING_ATTRS)
+
+    # Custom manager
+    objects = SolutionManager()
 
     class Meta:
         unique_together=(('task', 'author'),)

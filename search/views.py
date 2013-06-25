@@ -4,7 +4,6 @@ from django.template import RequestContext
 
 from search.forms import SearchForm, AdvancedSearchForm
 from search.utils import search_tasks
-from solution.views import get_user_solved_tasks
 from tags.models import Tag
 from tags.utils import get_available_tags, split_tags
 from task.models import Task
@@ -53,7 +52,6 @@ def view(request):
 
     return render_to_response('search.html', {
         'tasks': tasks,
-        'submitted_tasks' : get_user_solved_tasks(request.user),
         'tags': tags,
         'form': SearchForm(request.GET),
         'advanced_form': advanced_form,

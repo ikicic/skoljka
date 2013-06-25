@@ -32,6 +32,7 @@ def find_unrated_solutions(user):
 
     # For some reason had to put detailed_status here...
     solutions = Solution.objects  \
+        .filter_visible_tasks_for_user(user)    \
         .filter(detailed_status=NOT_RATED_STATUS) \
         .exclude(author_id=user.id) \
         .select_related('task', 'author')

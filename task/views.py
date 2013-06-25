@@ -21,7 +21,6 @@ from permissions.models import ObjectPermission
 from recommend.utils import task_event
 from search.utils import update_search_cache
 from solution.models import Solution, STATUS as _SOLUTION_STATUS
-from solution.views import get_user_solved_tasks
 from mathcontent.forms import MathContentForm, AttachmentForm
 from mathcontent import latex
 from mathcontent.forms import AttachmentForm
@@ -345,10 +344,8 @@ def task_list(request, user_id=None):
 
     if user_id:
         tasks = tasks.filter(author_id=user_id)
-    return {
-        'tasks' : tasks,
-        'submitted_tasks' : get_user_solved_tasks(request.user),
-    }
+
+    return {'tasks' : tasks}
 
 @response('task_detail.html')
 def detail(request, id):
