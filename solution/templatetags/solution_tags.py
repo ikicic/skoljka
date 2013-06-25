@@ -1,6 +1,8 @@
 ﻿from django import template
 from django.utils.safestring import mark_safe
 
+from permissions.constants import VIEW_SOLUTIONS
+from permissions.utils import get_object_ids_with_exclusive_permission
 from task.models import Task
 from skoljka.utils import interpolate_colors
 from skoljka.utils.string_operations import obfuscate_text
@@ -76,7 +78,6 @@ def solution_label(task):
 
 @register.simple_tag(takes_context=True)
 def cache_solution_info(context, solutions):
-    # TODO: ._cache_can_view_solution (can current user view given solution?)
     user = context['user']
 
     task_ids = [x.task_id for x in solutions]
@@ -86,8 +87,20 @@ def cache_solution_info(context, solutions):
     else:
         my_solutions = {}
 
+    # Can view solutions?
+    # First, ignore those with SOLUTIONS_VISIBLE setting, and remove duplicates.
+    explicit_ids = set([x.task_id for x in solutions    \
+        if x.task.solution_settings != Task.SOLUTIONS_VISIBLE])
+    if explicit_ids:
+        # Second, if any left, ask for permissions.
+        explicit_ids = get_object_ids_with_exclusive_permission(
+            user, VIEW_SOLUTIONS, model=Task, filter_ids=explicit_ids)
+    explicit_ids = set(explicit_ids)
+
     for y in solutions:
         y._cache_my_solution = my_solutions.get(y.task_id)
+        y.task._cache_can_view_solutions = y.task_id in explicit_ids    \
+            or y.task.solution_settings == Task.SOLUTIONS_VISIBLE
 
     return ''
 
@@ -105,7 +118,7 @@ def check_solution_for_accessibility(context, solution, text):
 
     if not can_view:
         if solution.task.solution_settings == Task.SOLUTIONS_NOT_VISIBLE:
-            context['no_access_explanation'] = u'Rješenje nedostupno' 
+            context['no_access_explanation'] = u'Rješenje nedostupno'
         else: # Task.SOLUTIONS_VISIBLE_IF_ACCEPTED
             context['no_access_explanation'] = u'Rješenje dostupno samo '    \
                 u'korisnicima s točnim vlastitim rješenjem'
