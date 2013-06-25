@@ -1,6 +1,7 @@
 ﻿from django import template
 from django.utils.safestring import mark_safe
 
+from task.models import Task
 from skoljka.utils import interpolate_colors
 from skoljka.utils.string_operations import obfuscate_text
 
@@ -75,6 +76,7 @@ def solution_label(task):
 
 @register.simple_tag(takes_context=True)
 def cache_solution_info(context, solutions):
+    # TODO: ._cache_can_view_solution (can current user view given solution?)
     user = context['user']
 
     task_ids = [x.task_id for x in solutions]
@@ -90,14 +92,25 @@ def cache_solution_info(context, solutions):
     return ''
 
 @register.simple_tag(takes_context=True)
-def check_solution_for_obfuscation(context, solution, text):
+def check_solution_for_accessibility(context, solution, text):
     my_solution = getattr(solution, '_cache_my_solution', None)
-    if solution.should_obfuscate(context['user'], my_solution):
+    can_view, should_obfuscate = solution.check_accessibility(
+        context['user'], my_solution)
+
+    if should_obfuscate:
         text = obfuscate_text(text)
         title = mark_safe(u'title="Niste riješili ovaj zadatak!"')
     else:
         title = u''
 
+    if not can_view:
+        if solution.task.solution_settings == Task.SOLUTIONS_NOT_VISIBLE:
+            context['no_access_explanation'] = u'Rješenje nedostupno' 
+        else: # Task.SOLUTIONS_VISIBLE_IF_ACCEPTED
+            context['no_access_explanation'] = u'Rješenje dostupno samo '    \
+                u'korisnicima s točnim vlastitim rješenjem'
+
+    context['can_view_solution'] = can_view
     context['obfuscation_text'] = text
     context['obfuscation_title'] = title
 

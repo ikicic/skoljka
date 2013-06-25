@@ -32,11 +32,22 @@ def detail(request, solution_id):
     else:
         ratings = []
 
+    can_view, obfuscate = solution.check_accessibility(request.user)
+
+    if not can_view:
+        if solution.task.solution_settings == Task.SOLUTIONS_NOT_VISIBLE:
+            return (403, u'Autor zadatka je onemogućio pristup rješenjima '  \
+                u'drugih korisnika.')
+        else: # Task.SOLUTIONS_VISIBLE_IF_ACCEPTED
+            return (403, u'Rješenje dostupno samo korisnicima s točnim '
+                u'vlastitim rješenjem.')
+
     return {
-        'solution': solution,
+        'can_view': can_view,
+        'obfuscate': obfuscate,
         'ratings': ratings,
-        'hidden': solution.should_obfuscate(request.user),
         'show_task': show_task,
+        'solution': solution,
     }
 
 
@@ -148,7 +159,7 @@ def edit_mark(request, solution_id):
         return (solution.get_absolute_url(), )
     return (solution.task.get_absolute_url(), )
 
-#TODO: dogovoriti se oko imena ove funkcije, pa i template-a
+
 #TODO(ikicic): sto ako forma nije valid?
 @login_required
 @response('solution_submit.html')
@@ -213,6 +224,10 @@ def solution_list(request, task_id=None, user_id=None, status=None):
         specific user if user_id is defined.
         If some ID is not defined, skips that condition.
     """
+    # Currently, even if the user can't view some of the solution (due to task
+    # settings), he/she may still view the correctness.
+    # If necessary, add new option to task.solution_settings, for example, to
+    # completely remove solutions from solution list etc.
 
     if status is None:
         status = request.GET.get('status', None)
@@ -221,7 +236,7 @@ def solution_list(request, task_id=None, user_id=None, status=None):
 
     L = Solution.objects.exclude(status=STATUS['blank'])
     task = None
-    author = None   # 'user' is template reserved word
+    author = None   # 'user' is a template reserved word
 
     empty_message = u''
     if task_id is not None:

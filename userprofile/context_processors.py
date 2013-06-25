@@ -26,6 +26,8 @@ def find_unrated_solutions(user):
         Returns the list of all unrated solutions visible and important
         (not obfuscated) to the given user.
     """
+    # TODO: check task.solution_settings!!
+
     profile = user.get_profile()
 
     # For some reason had to put detailed_status here...
@@ -119,7 +121,7 @@ def userprofile(request):
 # TODO: some detailed_status changes will call this method twice (because
 # some statistics in UserProfile are also being updated)
 @receiver(objectpermissions_changed, sender=Task)   # permissions
-@receiver(post_save, sender=Task)           # task hidden/not hidden
+@receiver(post_save, sender=Task)           # hidden, solution settings
 @receiver(post_save, sender=UserGroup)      # group m2m change
 @receiver(post_save, sender=UserProfile)    # options
 @receiver(post_delete, sender=Solution)     # some weird cases

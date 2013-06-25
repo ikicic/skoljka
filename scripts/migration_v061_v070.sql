@@ -41,6 +41,7 @@ ALTER TABLE permissions_perobjectgrouppermission RENAME TO permissions_objectper
 ALTER TABLE task_task ADD COLUMN file_attachment_id INT NULL;
 ALTER TABLE task_task ADD COLUMN cache_file_attachment_url VARCHAR(150) NOT NULL AFTER file_attachment_id;
 ALTER TABLE task_task ADD COLUMN solvable TINYINT(1) NOT NULL DEFAULT 1;
+ALTER TABLE task_task ADD COLUMN solution_settings SMALLINT NOT NULL DEFAULT 0;
 
 ALTER TABLE userprofile_userprofile DROP COLUMN birthday;
 ALTER TABLE userprofile_userprofile DROP COLUMN city;

@@ -75,7 +75,7 @@
 {% endif %}
 
 <div class="well" id="solution-container">
-  {% if hidden %}
+  {% if obfuscate %}
     <div id="solution-unhide-box">
       <div class="center-vertically">
         <div>
@@ -96,7 +96,7 @@
     {{ solution.content.render }}
   {% endif %}
 
-  {% if hidden %}
+  {% if obfuscate %}
     </div> {# solution-inner-container #}
   {% endif %}
 </div>

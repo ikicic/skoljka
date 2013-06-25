@@ -44,7 +44,8 @@ class SimilarTask(models.Model):
 
 
 class Task(BasePermissionsModel):
-    object_permissions = ['view', 'edit', 'edit_permissions'] # override
+    # BasePermissionsModel setting:
+    object_permissions = ['view', 'edit', 'edit_permissions', 'view_solutions']
 
     # napomena: cache za Solution POST_SEND activity ovisi o ovom max_length, nemojte previse povecavati
     name = models.CharField(max_length=120, verbose_name='Naslov')
@@ -73,6 +74,15 @@ class Task(BasePermissionsModel):
     solvable = models.BooleanField(default=True, verbose_name=u'Zadatak',
         help_text=icon_help_text(
             'Rješivo ili ne, to jest mogu li se slati rješenja?'))
+
+    SOLUTIONS_VISIBLE = 0
+    SOLUTIONS_VISIBLE_IF_ACCEPTED = 10
+    SOLUTIONS_NOT_VISIBLE = 20
+    SOLUTION_SETTINGS_CHOICES = [(0, 'Uvijek vidljiva'),
+        (10, 'Vidljiva samo korisnicima s prihvaćenim rješenjem'),
+        (20, 'Vidljiva samo ovlaštenim korisnicima')]
+    solution_settings = models.SmallIntegerField(default=0,
+        verbose_name=u'Postavke rješenja', choices=SOLUTION_SETTINGS_CHOICES)
 
     def __unicode__(self):
         return '#%d %s' % (self.id, self.name)

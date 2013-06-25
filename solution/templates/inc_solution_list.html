@@ -34,7 +34,7 @@
       <th>Točnost</th>
     </tr>
     {% for s in solutions %}
-      {% check_solution_for_obfuscation s s.content.short %}
+      {% check_solution_for_accessibility s s.content.short %}
       <tr style="{% solution_tr_bg_color_attr s forloop.counter %}">
         <td>{{ s.id }}
         <td>{{ s.date_created|timesince }}
@@ -43,7 +43,11 @@
         {% if s.is_submitted %}
           <td>
             {% if s.is_official %}<span class="label label-info">Službeno</span> {% endif %}
-            <a href="/solution/{{ s.id }}/" {{ obfuscation_title }}>{{ obfuscation_text }}</a>
+            {% if can_view_solution %}
+              <a href="/solution/{{ s.id }}/" {{ obfuscation_title }}>{{ obfuscation_text }}</a>
+            {% else %}
+              <span class="sol-not-accessible" title="{{ no_access_explanation }}">{{ obfuscation_text }}</span>
+            {% endif %}
           <td style="width:80px;">{% rating_stars s.correctness 2.7 %}
         {% else %}
           <td>

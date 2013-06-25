@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.utils.html import mark_safe
 
 from mathcontent.models import MathContent
+from permissions.constants import VIEW_SOLUTIONS
 from post.generic import PostGenericRelation
 from rating.fields import RatingField
 from task.models import Task
@@ -157,16 +158,64 @@ class Solution(ModelEx):
     def is_blank(self):
         return self.status == STATUS['blank']   # exists, but it's blank
 
-    def should_obfuscate(self, user, users_solution=0):
-        """
-            Check if the user should see the content of this solution.
-            If users_solution is not given, it will be manually retrieved.
-        """
-        if not user.is_authenticated():
-            return True # default options is to hide solutions
+    def _get_user_solution(self, user, users_solution):
+        # if user's solution not given, search for it
+        if users_solution is 0:
+            try:
+                users_solution = Solution.objects.get(author=user,
+                    task_id=self.task_id)
+            except Solution.DoesNotExist:
+                return None
+        return users_solution
 
-        if self.author == user:
-            return False # always show my own solutions
+    def check_accessibility(self, user, users_solution=0):
+        """
+            Checks if the user can view the solution, and if it should be
+            obfuscated.
+            Returns pair of booleans:
+                can_view, should_obfuscate
+
+            The result depends on:
+                Task solution settings  (can_view)
+                Explicit permission     (can_view)
+                Did user solve the task (can_view, should_obfuscate)
+                Profile preferences     (should_obfuscate)
+
+            If users_solution is not given, it will be manually retrieved.
+            As this method checks task.solution_settings, it is preferable that
+            task is already loaded.
+        """
+        # The implentation is quite complex, because there are millions of
+        # different cases. When updating, please make sure everything is
+        # correct.
+        task_settings = self.task.solution_settings
+
+        if not user.is_authenticated():
+            # obfuscate by default
+            return task_settings == Task.SOLUTIONS_VISIBLE, True
+
+        if self.author_id == user.id:
+            return True, False # always show my own solutions
+
+        if task_settings != Task.SOLUTIONS_VISIBLE:
+            # Currently, the task's author can't make solutions unavailable
+            # to himself/herself.
+            can_view = getattr(self.task, '_cache_can_view_solution', False)  \
+                or self.task.user_has_perm(user, VIEW_SOLUTIONS)
+
+            # Also, solution check may be done before the explicit permission
+            # check. Not a big performance difference, both are assumed to be
+            # preloaded anyway.
+            if not can_view:
+                if task_settings == Task.SOLUTIONS_NOT_VISIBLE:
+                    return False, True      # bye
+                elif task_settings == Task.SOLUTIONS_VISIBLE_IF_ACCEPTED:
+                    users_solution = self._get_user_solution(user, users_solution)
+                    if not users_solution or not users_solution.is_correct():
+                        return False, True     # can't view solution, bye
+
+        # Ok, now the user definitely has the right to view the solution.
+        # Now we have to check if he/she wants to view it.
 
         # check user settings
         profile = user.get_profile()
@@ -174,19 +223,14 @@ class Solution(ModelEx):
                 or self.task.difficulty_rating_avg < profile.hide_solution_min_diff:
             # Show always, or because it's too easy. Note that if the min_diff
             # option is not set, the comparison will always be False!
-            return False
+            return True, False
 
-        # if user's solution not given, search for it
-        if users_solution is 0:
-            try:
-                users_solution = Solution.objects.get(author=user,
-                    task_id=self.task_id)
-            except Solution.DoesNotExist:
-                return True
+        # Load, if not loaded yet.
+        users_solution = self._get_user_solution(user, users_solution)
 
         # if there is no solution -> obfuscate
         # if there is, check if it is solved
-        return not users_solution or not users_solution.is_solved()
+        return True, not users_solution or not users_solution.is_solved()
 
 
 # nuzno(?) da bi queryji koristili JOIN, a ne subqueryje

@@ -50,7 +50,8 @@ class TaskForm(forms.ModelForm):
 
     class Meta:
         model = Task
-        fields = ['name', 'tags', 'source', 'hidden', 'solvable']
+        fields = ['name', 'tags', 'source', 'hidden', 'solvable',
+            'solution_settings']
 
 class TaskFileForm(TaskForm):
     def __init__(self, *args, **kwargs):
