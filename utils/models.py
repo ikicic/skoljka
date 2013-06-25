@@ -1,10 +1,10 @@
-from django.db import models
+﻿from django.db import models
 from django.template.loader import add_to_builtins
 from django.utils.html import mark_safe
 
 def icon_help_text(text):
     return mark_safe(
-        ' <i class="icon-question-sign" title="{}"></i>'.format(text))
+        u' <i class="icon-question-sign" title="{}"></i>'.format(text))
 
 class ModelEx(models.Model):
     """

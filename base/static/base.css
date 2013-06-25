@@ -460,6 +460,10 @@ span.task_submitted a {
 
 
 /* MathContent */
+.mathcontent-preview {
+  margin-top: 10px;
+}
+
 .mc {
   position: relative;
 }

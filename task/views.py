@@ -220,15 +220,19 @@ def new(request, task_id=None, is_file=None):
         New Task and Edit Task
         + New TaskFile and Edit TaskFile
     """
+    content_type = ContentType.objects.get_for_model(Task)
+
     if task_id:
         task = get_object_or_404(Task.objects.select_related('content'), pk=task_id)
-        if not task.user_has_perm(request.user, EDIT):
+        perm = task.get_user_permissions(request.user)
+        if EDIT not in perm:
             return 403
         math_content = task.content
         old_tags = list(task.tags.values_list('name', flat=True))
         edit = True
         is_file = task.is_file()
     else:
+        perm = []
         task = math_content = None
         old_tags = []
         edit = False
@@ -322,11 +326,13 @@ def new(request, task_id=None, is_file=None):
         forms.append(attachment_form)
 
     return {
-        'forms': forms,
         'action_url': request.path,
+        'can_edit_permissions': EDIT_PERMISSIONS in perm,
+        'content_type': content_type,
         'edit': edit,
-        'task': task,
+        'forms': forms,
         'is_file': is_file,
+        'task': task,
     }
 
 
@@ -347,7 +353,6 @@ def task_list(request, user_id=None):
 @response('task_detail.html')
 def detail(request, id):
     task = get_object_or_404(Task, id=id)
-    content_type = ContentType.objects.get_for_model(Task)
 
     try:
         solution = request.user.is_authenticated() \
@@ -386,8 +391,6 @@ def detail(request, id):
     data = {
         'task': task,
         'can_edit': EDIT in perm,
-        'can_edit_permissions': EDIT_PERMISSIONS in perm,
-        'content_type': content_type,
         'solution': solution,
     }
 

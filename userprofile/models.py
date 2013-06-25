@@ -120,22 +120,22 @@ class UserProfile(models.Model):
         choices=HIDDEN_TAGS_CHOICES,
         verbose_name='Prikazuj skrivene oznake')
     show_unsolved_task_solutions = models.BooleanField(default=False,
-        verbose_name='Prikazuj rješenja neriješenih zadataka')
+        verbose_name=u'Prikazuj rješenja neriješenih zadataka')
     hide_solution_min_diff = models.FloatField(default=0,
-        verbose_name='Ili ako je je težina manja od', help_text=icon_help_text(
-        'Na ovaj način možete odabrati da vam se uvijek prikazuju rješenja '
-        'dovoljno laganih zadataka, što je pogotovo korisno ako ste '
-        'ispravljač.'))
+        verbose_name=u'Ili ako je je težina manja od', help_text=icon_help_text(
+        u'Na ovaj način možete odabrati da vam se uvijek prikazuju rješenja '
+        u'dovoljno laganih zadataka, što je pogotovo korisno ako ste '
+        u'ispravljač.'))
     show_solution_task = models.BooleanField(default=True,
-        verbose_name='Prikazuj tekst zadatka uz rješenje.')
+        verbose_name=u'Prikazuj tekst zadatka uz rješenje.')
     school_class = models.IntegerField(default=0,
         choices=USERPROFILE_SCHOOL_CLASS_CHOICES, verbose_name='Razred',
         help_text=icon_help_text('Za odabrane zadatke na naslovnoj stranici'))
 
     # (any better name?)
-    evaluator = models.BooleanField(default=False, verbose_name='Ispravljač',
-        help_text=icon_help_text('Kao ispravljač bit ćete obavještavani o '
-        'poslanim rješenjima drugih korisnika.'))
+    evaluator = models.BooleanField(default=False, verbose_name=u'Ispravljač',
+        help_text=icon_help_text(u'Kao ispravljač bit ćete obavještavani o '
+        u'poslanim rješenjima drugih korisnika.'))
     eval_sol_last_view = models.DateTimeField(auto_now_add=True)
 
     # automatic options

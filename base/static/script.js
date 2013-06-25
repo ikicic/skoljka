@@ -46,14 +46,14 @@ $(function(){
       ' <button type="button" class="btn mathcontent-preview-button">Pregled</button>'
     + ' <a href="/help/instructions/#format" title="Pomoć oko formata" target="_blank"><i class="icon-question-sign"></i></a>'
   )
-  f.append('<br><div class="mathcontent-preview well" style="display:none;"></div>')
+  f.append('<div class="mathcontent-preview well" style="display:none;"></div>')
 
   /* Preview button, send AJAX request to convert to html (and generate necessarry .png files) */
   $('.mathcontent-preview-button').click(function(){
     var t = $('.mathcontent-text').val();
     var p = $('.mathcontent-preview');
     p.html('Učitavanje...');
-    p.attr('style', 'block');
+    p.attr('style', '');
     $.get('/ajax/mathcontent/preview/', {text: t}, function(d){
       p.html(d);
     });

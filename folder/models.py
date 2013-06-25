@@ -39,8 +39,8 @@ class Folder(BasePermissionsModel):
 
     name = models.CharField(max_length=64, verbose_name='Ime')      # full name
     short_name = models.CharField(max_length=128, verbose_name='Kratko ime',
-        help_text=icon_help_text('Ime prikazano u izborniku. Ukoliko se ne '
-            'razlikuje od punog imena, možete ostaviti prazno.'))   # menu name
+        help_text=icon_help_text(u'Ime prikazano u izborniku. Ukoliko se ne '
+            u'razlikuje od punog imena, možete ostaviti prazno.'))   # menu name
 
     # PermissionsModel
     hidden = models.BooleanField(default=True, verbose_name='Skriveno') # default True!

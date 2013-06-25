@@ -9,8 +9,11 @@
 
 {% block content %}
 
-<a href="javascript: history.go(-1)">« Vrati se</a>
+<div style="float:right;">
+  {% if can_edit %}<a href="/task/{{ task.pk }}/edit/" class="btn">Uredi</a>{% endif %}
+</div>
 
+<a href="javascript: history.go(-1)">« Vrati se</a>
 
 
 <br><br>
@@ -29,11 +32,9 @@
 </div>
 
 <div style="text-align:right;">
-  Dodao: {{ task.author|userlink }}<br>
+  Dodao/la: {{ task.author|userlink }}<br>
   {{ task.date_created|date:"E j, Y" }}<br>
-  {% tag_list task %}<br>
-  {% if can_edit %}<a href="/task/{{ task.pk }}/edit/">Uredi tekst</a><br>{% endif %}
-  {% if can_edit_permissions %}<a href="/permissions/edit/{{ content_type.id }}/{{ task.id }}/">Privilegije</a>{% endif %}<br>
+  {% tag_list task %}
 </div>
 
 <br><br>

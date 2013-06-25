@@ -32,9 +32,15 @@
 {% endif %}
 
 <div style="float:right;text-align:right;">
-  {% if edit and not is_file %}
-    <a href="/mathcontent/{{ task.content_id }}/attachments/" class="btn">Pregled datoteka</a><br><br>
-  {% endif %}
+  <div class="btn-group">
+    {% if edit and not is_file %}
+      <a href="/mathcontent/{{ task.content_id }}/attachments/" class="btn">Pregled datoteka</a>
+    {% endif %}
+    {% if can_edit_permissions %}
+      <a href="/permissions/edit/{{ content_type.id }}/{{ task.id }}/" class="btn">Privilegije</a>
+    {% endif %}
+  </div>
+  <br>
   <a href="/tags/" target="_blank">Popis oznaka</a>
 </div>
 
@@ -56,7 +62,7 @@
 <form {% if is_file %}enctype="multipart/form-data"{% endif %} action="{{ action_url }}" method="post">
   {% csrf_token %}
   <table class="kill-br split-form">
-    {# Any better solution to split a form? #}
+    {# Any better way to split a form? #}
 
     <tr class="split-form-row"><th colspan="2">Osnovno</th></tr>
     {% get_fieldset name,tags,source as first_part from forms.0 %}

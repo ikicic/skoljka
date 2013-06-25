@@ -73,7 +73,7 @@ class Task(BasePermissionsModel):
 
     solvable = models.BooleanField(default=True, verbose_name=u'Zadatak',
         help_text=icon_help_text(
-            'Rješivo ili ne, to jest mogu li se slati rješenja?'))
+            u'Rješivo ili ne, to jest mogu li se slati rješenja?'))
 
     SOLUTIONS_VISIBLE = 0
     SOLUTIONS_VISIBLE_IF_ACCEPTED = 10
@@ -82,7 +82,9 @@ class Task(BasePermissionsModel):
         (10, 'Vidljiva samo korisnicima s prihvaćenim rješenjem'),
         (20, 'Vidljiva samo ovlaštenim korisnicima')]
     solution_settings = models.SmallIntegerField(default=0,
-        verbose_name=u'Postavke rješenja', choices=SOLUTION_SETTINGS_CHOICES)
+        verbose_name=u'Postavke rješenja', choices=SOLUTION_SETTINGS_CHOICES,
+        help_text=icon_help_text(u'Rješenja će biti prikazana na popisu, ali '
+            u'im tekst neće biti vidljiv.'))
 
     def __unicode__(self):
         return '#%d %s' % (self.id, self.name)
