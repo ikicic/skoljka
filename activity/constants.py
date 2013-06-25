@@ -22,6 +22,7 @@ GROUP_LEAVE = (GROUP_CHANGE, 2)     # group     DONE
 action_label = {
     TASK_ADD: ('label-success', 'Novi zadatak'),
     FILE_ADD: ('label-success', 'Nova datoteka'),
+    SOLUTION_SUBMIT: ('label-info', 'Rješenje'),
     SOLUTION_AS_OFFICIAL: ('label-info', u'Službeno rješenje'),
 }
 

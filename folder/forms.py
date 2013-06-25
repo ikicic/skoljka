@@ -12,6 +12,9 @@ class FolderForm(forms.ModelForm):
 
         super(FolderForm, self).__init__(*args, **kwargs)
 
+        # Enable autocomplete
+        self.fields['tags'].widget.attrs.update({'class': 'ac-tags'})
+
         if not self.user.has_perm('can_publish_folders'):
             del self.fields['hidden']
         if not self.user.has_perm('can_set_short_name'):
