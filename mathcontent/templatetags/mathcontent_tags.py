@@ -2,12 +2,6 @@
 
 register = template.Library()
 
-# @register.simple_tag
-# def mathcontent_form_extra():
-#     return  \
-#        '<button type="button" class="mathcontent_preview_button btn">Pregled</button><br><br>' \
-#        '<div class="mathcontent_preview well" style="display:none;"></div>'
-
 @register.inclusion_tag('inc_mathcontent_attachments.html')
 def mathcontent_attachments(content):
     return {'attachments': content.attachments.all()}

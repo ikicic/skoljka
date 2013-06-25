@@ -20,7 +20,7 @@ class MathContentForm(ModelForm):
         self.fields['text'].widget.attrs.update({
             'rows': 10,
             'cols': 100,
-            'class': 'uneditable-textarea',   # ...zbog bootstrapa
+            'class': 'uneditable-textarea mathcontent-text',   # ...zbog bootstrapa
         })
 
     class Meta:

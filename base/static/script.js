@@ -39,19 +39,19 @@ $.ajaxSetup({
 
 /* Automatically add preview button, help link and div after MathContentForm */
 $(function(){
-  var mc = $('.mathcontent_text');
+  var mc = $('.mathcontent-text');
   var f = mc.closest('form');
   /* Preview button and help link */
   f.children('input[type=submit]').after(
-      ' <button type="button" class="btn mathcontent_preview_button">Pregled</button>'
+      ' <button type="button" class="btn mathcontent-preview-button">Pregled</button>'
     + ' <a href="/help/instructions/#format" title="Pomoć oko formata" target="_blank"><i class="icon-question-sign"></i></a>'
   )
-  f.append('<br><div class="mathcontent_preview well" style="display:none;"></div>')
+  f.append('<br><div class="mathcontent-preview well" style="display:none;"></div>')
 
   /* Preview button, send AJAX request to convert to html (and generate necessarry .png files) */
-  $('.mathcontent_preview_button').click(function(){
-    var t = $('.mathcontent_text').val();
-    var p = $('.mathcontent_preview');
+  $('.mathcontent-preview-button').click(function(){
+    var t = $('.mathcontent-text').val();
+    var p = $('.mathcontent-preview');
     p.html('Učitavanje...');
     p.attr('style', 'block');
     $.get('/ajax/mathcontent/preview/', {text: t}, function(d){
@@ -64,7 +64,7 @@ $(function(){
 /* Reply link for comments, Used for inc_post_list_small.html */
 /* MathContent View source & quote link */
 function quote(mc) {
-  var s = $.trim(mc.find('.mc_viewsource_text').text());
+  var s = $.trim(mc.find('.mc-viewsource-text').text());
   $('#id_text').val('\n\n[quote]' + s + '[/quote]');
 };
 
@@ -96,13 +96,13 @@ $(function(){
   });
 
   /* MathContent view source link */
-  $('body').on('click', '.mc_viewsource_toggle', function(e) {
+  $('body').on('click', '.mc-viewsource-toggle', function(e) {
     e.preventDefault();
-    $(this).closest('.mc').find('.mc_viewsource_text').toggle();
+    $(this).closest('.mc').find('.mc-viewsource-text').toggle();
   });
 
   /* MathContent quote link */
-  $('body').on('click', '.mc_viewsource_quote', function(e) {
+  $('body').on('click', '.mc-viewsource-quote', function(e) {
     set_reply('');
     quote($(this).closest('.mc'));
   });
