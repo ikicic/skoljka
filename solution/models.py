@@ -203,6 +203,8 @@ class Solution(ModelEx):
                 Did user solve the task (can_view, should_obfuscate)
                 Profile preferences     (should_obfuscate)
 
+            It is assumed the task is visible to the user.
+
             If users_solution is not given, it will be manually retrieved.
             As this method checks task.solution_settings, it is preferable that
             task is already loaded.

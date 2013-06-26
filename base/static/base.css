@@ -454,7 +454,7 @@ a.register {
   display:none;
 }
 
-span.task_submitted a {
+.profile-task-submitted a {
   color: #00F;
 }
 
@@ -542,10 +542,10 @@ object.latex_center {
 }
 
 .profile-distribution > div > div {
-  width: 20px;
   background-color: #CCC;
-  position: absolute;
   bottom: 0px;
+  position: absolute;
+  width: 20px;
 }
 
 .profile-task-list {

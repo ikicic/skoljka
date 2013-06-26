@@ -241,19 +241,6 @@ $(function(){
   });
 });
 
-
-/* UserProfile solved task list, view solution link */
-$(function(){
-  $('span.task_submitted').hover(
-    function() {
-      var id = $(this).attr('data-solution');
-      $(this).append(' <a id="view_solution123" href="/solution/' + id + '/"><i class="icon-search"></i></a>');
-    }, function(){
-      $('#view_solution123').remove();
-    });
-});
-
-
 /* jQuery Rating Submit Function */
 jquery_rating_submit = function(name, url) {
   $(function() {

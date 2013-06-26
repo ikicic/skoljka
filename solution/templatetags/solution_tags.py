@@ -76,10 +76,11 @@ def solution_label(task):
         return ''
     return u'<span class="label %(label_class)s">%(label_text)s</span>' % cache.get_html_info()
 
-@register.simple_tag(takes_context=True)
-def cache_solution_info(context, solutions):
-    user = context['user']
+@register.simple_tag(takes_context=True, name='cache_solution_info')
+def _cache_solution_info(context, solutions):
+    cache_solution_info(context['user'], solutions)
 
+def cache_solution_info(user, solutions):
     task_ids = [x.task_id for x in solutions]
     if user.is_authenticated():
         my_solutions = Solution.objects.filter(author=user, task_id__in=task_ids)

@@ -5,11 +5,12 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 from activity import action as _action
-from task.models import Task
-from solution.models import Solution, STATUS, _update_solved_count
 from mathcontent.forms import MathContentForm
-
+from permissions.constants import VIEW
+from task.models import Task
 from skoljka.utils.decorators import response, require
+
+from solution.models import Solution, STATUS, _update_solved_count
 
 from datetime import datetime
 

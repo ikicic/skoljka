@@ -99,7 +99,8 @@ class BasePermissionsModel(models.Model):
 
         It is assumed that the author of the model (if defined) has immediately
         all permissions. Also, if hidden is defined, non-hidden instances
-        are always visible (everyone has VIEW permission granted).
+        are always visible (everyone has VIEW permission granted). Otherwise,
+        if hidden is not defined, no VIEW permission is given in advance.
 
         Use object_permissions list to specify which permissions are applicable
         to the model. You can use numbers or permission names (for more info,
@@ -121,7 +122,7 @@ class BasePermissionsModel(models.Model):
         if user.id == getattr(self, 'author_id', None):
             return True
 
-        if type == VIEW and getattr(self, 'hidden', None) is False:
+        if type == VIEW and not getattr(self, 'hidden', True):
             return True
 
         return has_group_perm(user, self, type)
@@ -132,7 +133,7 @@ class BasePermissionsModel(models.Model):
             return convert_permission_names_to_values(self.__class__.object_permissions)
 
         permissions = get_permissions_for_object(user, self)
-        if not self.hidden:
+        if not getattr(self, 'hidden', True):
             permissions.append(VIEW)
         return permissions
 

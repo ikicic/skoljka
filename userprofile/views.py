@@ -9,8 +9,10 @@ from django.template import RequestContext
 from userprofile.forms import UserCreationForm, UserEditForm, UserProfileEditForm
 from userprofile.models import UserProfile
 
+from permissions.constants import VIEW
 from recommend.models import UserTagScore
-from solution.models import STATUS
+from solution.models import Solution, STATUS
+from solution.templatetags.solution_tags import cache_solution_info
 from task.models import Task, DIFFICULTY_RATING_ATTRS
 
 def new_register(request):
@@ -44,10 +46,14 @@ def edit(request):
 
 @login_required
 def profile(request, pk):
-    if request.user.is_authenticated() and request.user.pk == pk:
+    if request.user.pk == pk:
         user = request.user
+        solutions = Solution.objects
+        tasks = Task.objects
     else:
         user = get_object_or_404(User.objects.select_related('profile'), pk=pk)
+        solutions = Solution.objects.filter_visible_tasks_for_user(request.user)
+        tasks = Task.objects.for_user(request.user, VIEW)
 
     # DEPRECATED. Distribution should be now updated automatically...
     # user.profile.refresh_diff_distribution()
@@ -75,21 +81,24 @@ def profile(request, pk):
 
     tags = UserTagScore.objects.filter(user=user).select_related('tag').order_by('-cache_score')[:10]
 
-    # Task lists
-    # TODO: permissions
-    kwargs = {} if request.user == user else {'task__hidden': False}
-    kwargs2 = {} if request.user == user else {'hidden': False}
 
-    todo = user.solution_set.filter(
-            status=STATUS['todo'],
-            **kwargs
-        ).select_related('task').order_by('-date_created')[:10]
-    solved = user.solution_set.filter(
-            status__in=[STATUS['as_solved'], STATUS['submitted']],
-            **kwargs
-        ).select_related('task').order_by('-date_created')[:10]
-    task_added = Task.objects.filter(author=user, **kwargs2).order_by('-id')[:10]
+    solutions = solutions.filter(author_id=pk)  \
+        .select_related('task')                 \
+        .order_by('-date_created')
+    todo = solutions.filter(status=STATUS['todo'])[:10]
+    solved = solutions.filter(
+        status__in=[STATUS['as_solved'], STATUS['submitted']])[:10]
 
+    if pk != request.user.pk:
+        # TODO: optimize, do not load unnecessary my_solution
+        # (separate check_accessibility should_obfuscate?)
+        cache_solution_info(request.user, solved)
+        for x in solved:
+            x.t_can_view, dummy = x.check_accessibility(
+                request.user, x._cache_my_solution)
+            print x.t_can_view, dummy
+
+    task_added = tasks.filter(author_id=pk).order_by('-id')[:10]
 
     return render_to_response('profile_detail.html', {
         'profile': user,
