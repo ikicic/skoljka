@@ -6,21 +6,27 @@
 
 <a href="javascript: history.go(-1)">« Vrati se</a><br>
 <br>
-{% ifequal user profile %}
-  <div style="float:right;" class="btn-group">
+<div style="float:right;" class="btn-group">
+  {% ifequal user profile %}
     <a href="/profile/edit/" class="btn"><i class="icon-user"></i> Uredi profil</a>
     <a href="/accounts/password/change/" class="btn"><i class="icon-barcode"></i> Promijeni zaporku</a>
-  </div>
-{% else %}
-  <a href="/pm/new/{{ profile.username }}/">Pošalji poruku</a><br><br>
-{% endifequal %}
+  {% else %}
+    <a href="/pm/new/{{ profile.username }}/" class="btn" ><i class="icon-envelope"></i> Pošalji poruku</a><br><br>
+  {% endifequal %}
+</div>
 
+<h3>
+  {% if profile.first_name or profile.last_name %}
+    {{ profile.first_name }} {{ profile.last_name }} ({{ profile.username }})
+  {% else %}
+    {{ profile.username }}
+  {% endif %}
+</h3>
+<br>
 <div class="row">
   <div class="span5">
+    <br>
     <table class="table table-striped table-condensed table-bordered">
-      <tr><th>Username:</th><td>{{ profile.username }}</td></tr>
-      <tr><th>Ime:</th><td>{{ profile.first_name }}</td></tr>
-      <tr><th>Prezime:</th><td>{{ profile.last_name }}</td></tr>
       <tr>
         <th>Grupe:</th>
         <td>
@@ -32,7 +38,7 @@
       </tr>
       {% if tags %}
         <tr>
-          <th>Preferirani tagovi:</th>
+          <th>Preferirane oznake:</th>
           <td>
             {% for x in tags %}
               <a href="/search/?q={{ x.tag.name }}">{{ x.tag.name }}</a>
