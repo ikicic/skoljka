@@ -51,7 +51,7 @@ def advanced_new(request):
     if request.method == 'POST':
         task_form = TaskAdvancedForm(request.POST)
         math_content_form = MathContentForm(request.POST)
-        group_form = GroupEntryForm(request.POST)
+        group_form = GroupEntryForm(request.POST, user=request.user)
 
         if task_form.is_valid() and math_content_form.is_valid() and group_form.is_valid():
             task_template = task_form.save(commit=False)
@@ -127,7 +127,7 @@ def advanced_new(request):
             return HttpResponseRedirect('/task/new/finish/')
     else:
         task_form = TaskAdvancedForm()
-        group_form = GroupEntryForm()
+        group_form = GroupEntryForm(user=request.user)
         math_content_form = MathContentForm()
 
     return render_to_response( 'task_new.html', {

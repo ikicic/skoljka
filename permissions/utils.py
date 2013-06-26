@@ -1,6 +1,30 @@
 from django.contrib.contenttypes.models import ContentType
 
+from permissions.constants import VIEW
 from permissions.models import ObjectPermission
+
+def filter_objects_with_permission(objects, user, permission_type,
+        content_type_id=None, model=None):
+    """
+        Returns the list of all objects for which the given user has
+        the specified permission.
+    """
+    # Filter hidden objects
+    if permission_type == VIEW:
+        to_check = set(x.id for x in objects            \
+            if getattr(x, 'author_id', -1) != user.id   \
+                or getattr(x, 'hidden', True))
+    else:
+        to_check = set(x.id for x in objects            \
+            if getattr(x, 'author_id', -1) != user.id)
+
+    # Check for direct permissions, if anything to check
+    ok = to_check and set(get_object_ids_with_exclusive_permission(user,
+        permission_type, content_type_id=content_type_id, model=model,
+        filter_ids=to_check))
+
+    # Filter objects with specified permission
+    return [x for x in objects if x.id not in to_check or x.id in ok]
 
 def get_object_ids_with_exclusive_permission(user, permission_type,
         content_type_id=None, model=None, filter_ids=None):

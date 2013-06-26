@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import Group
 
-from usergroup.fields import UserEntryField, GroupEntryField, UserAndGroupEntryField, SeperatedUserAndGroupEntryField
+from usergroup.fields import UserEntryField, GroupEntryField
 from usergroup.models import UserGroup
 
 class UserEntryForm(forms.Form):
@@ -10,11 +10,10 @@ class UserEntryForm(forms.Form):
 class GroupEntryForm(forms.Form):
     list = GroupEntryField(label='Popis korisnika i grupa')
 
-class UserAndGroupEntryForm(forms.Form):
-    list = UserAndGroupEntryField(label='Popis korisnika i grupa')
-
-class SeperatedUserAndGroupEntryForm(forms.Form):
-    list = SeperatedUserAndGroupEntryField(label='Popis')
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user') # user must be given!
+        super(GroupEntryForm, self).__init__(*args, **kwargs)
+        self.fields['list'].user = user
 
 class GroupForm(forms.ModelForm):
     class Meta:

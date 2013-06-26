@@ -35,10 +35,13 @@ def view(request):
         difficulty_max = request.GET.get('difficulty_max'),
     )
 
+    groups_error = False
     if request.user.has_perm('advanced_search'):
-        advanced_form = AdvancedSearchForm(request.GET)
+        advanced_form = AdvancedSearchForm(request.GET, user=request.user)
         if advanced_form.is_valid():
             kwargs['groups'] = advanced_form.cleaned_data['groups']
+        else:
+            groups_error = True
     else:
         advanced_form = None
 
@@ -51,11 +54,12 @@ def view(request):
 
 
     return render_to_response('search.html', {
-        'tasks': tasks,
-        'tags': tags,
-        'form': SearchForm(request.GET),
         'advanced_form': advanced_form,
-        'search_solved_count': bool(kwargs.get('groups')),
         'any': bool(request.GET),
         'errors': '<br>'.join(error),
+        'form': SearchForm(request.GET),
+        'groups_error': groups_error,
+        'search_solved_count': bool(kwargs.get('groups')),
+        'tasks': tasks,
+        'tags': tags,
         }, context_instance=RequestContext(request))

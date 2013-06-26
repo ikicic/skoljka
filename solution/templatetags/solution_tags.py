@@ -78,7 +78,7 @@ def solution_label(task):
 
 @register.simple_tag(takes_context=True, name='cache_solution_info')
 def _cache_solution_info(context, solutions):
-    cache_solution_info(context['user'], solutions)
+    return cache_solution_info(context['user'], solutions)
 
 def cache_solution_info(user, solutions):
     task_ids = [x.task_id for x in solutions]

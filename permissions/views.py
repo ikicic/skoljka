@@ -92,7 +92,7 @@ def _edit(request, data, id, object, type_id, content_type):
                 objectpermissions_changed.send(sender=model, instance=object,
                     content_type=content_type)
         else:
-            form = GroupEntryForm(request.POST)
+            form = GroupEntryForm(request.POST, user=request.user)
             if form.is_valid():
                 groups = form.cleaned_data['list']
                 selected_types = [x[1] for x in applicable_permissions
@@ -122,7 +122,7 @@ def _edit(request, data, id, object, type_id, content_type):
 
 
     if form is None:
-        form = GroupEntryForm()
+        form = GroupEntryForm(user=request.user)
 
     perms = ObjectPermission.objects.filter(object_id=id, content_type=content_type)
     groups = dict()

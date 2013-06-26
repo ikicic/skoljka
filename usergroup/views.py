@@ -119,6 +119,9 @@ def new(request, group_id=None):
             usergroup.save()
 
             return ('/usergroup/%d/' % group.id, )
+        else: # reset necessary instances...
+            group = get_object_or_404(Group.objects.select_related(
+                'data', 'data__description'), id=group_id)
 
     return ('usergroup_new.html', {
         'can_edit': True,

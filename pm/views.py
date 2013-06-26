@@ -13,13 +13,17 @@ from mathcontent.forms import MathContentForm
 from pm.models import MessageRecipient, MessageContent
 from pm.forms import NewMessageForm
 
-#TODO: optimize
+
+# TODO: What if you are in a hidden group and sending a message to the group,
+# and to someone outside the group?! Leaving the problem for now, but it
+# should be fixed somehow.
+# TODO: optimize
 
 # subject and text are ignored if method is 'POST'
 @login_required
 def new(request, rec='', subject='', text=''):
     if request.method == 'POST':
-        message_form = NewMessageForm(request.POST)
+        message_form = NewMessageForm(request.POST, user=request.user)
         content_form = MathContentForm(request.POST)
         if message_form.is_valid() and content_form.is_valid():
             content = content_form.save()
@@ -55,7 +59,8 @@ def new(request, rec='', subject='', text=''):
 
             return HttpResponseRedirect('/pm/outbox/')
     else:
-        message_form = NewMessageForm(initial={'list': rec, 'subject': subject})
+        message_form = NewMessageForm(initial={'list': rec, 'subject': subject},
+            user=request.user)
         content_form = MathContentForm(initial={'text': text})
 
     return render_to_response('pm_new.html', {
@@ -129,7 +134,7 @@ def inbox(request):
     pm = MessageRecipient.objects.filter(recipient=request.user, deleted=False) \
             .exclude(message__author=request.user)  \
             .select_related('message', 'message__author', 'message__content') \
-            .order_by('-message__id')
+            .order_by('-message_id')
 
     return render_to_response('pm_inbox.html', {
             'pm': pm,

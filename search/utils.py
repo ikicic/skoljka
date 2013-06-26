@@ -7,6 +7,7 @@ from django.template.defaultfilters import slugify
 import johnny.cache
 
 from permissions.constants import VIEW
+from solution.models import STATUS
 from task.models import Task
 from tags.models import Tag, TaggedItem
 from tags.utils import get_available_tags, replace_with_original_tags,  \
@@ -126,18 +127,18 @@ def search_tasks(tags=[], tag_ids=None, user=None, **kwargs):
     if filters:
         tasks = tasks.filter(**filters)
 
-    # TODO: perm
     if kwargs.get('groups'):
         ids = ','.join([str(x) for x in tasks.values_list('id', flat=True)])
         group_ids = ','.join([str(x.id) for x in kwargs['groups']])
+        statuses = '%d,%d' % (STATUS['as_solved'], STATUS['submitted'])
 
-        # TODO: ispitati treba li LEFT ili INNER JOIN
+        # TODO: can this be optimized? use SearchCache instead of IN?
         tasks = Task.objects.raw(
-            'SELECT A.*, COUNT(DISTINCT B.id) AS search_solved_count FROM task_task AS A'
-                ' LEFT JOIN solution_solution AS B ON (B.task_id = A.id)'
-                ' LEFT JOIN auth_user_groups AS C ON (C.user_id = B.author_id AND C.group_id IN (%s))'
-                ' WHERE A.id IN (%s)'
-                ' GROUP BY A.id' % (group_ids, ids)
+            'SELECT T.*, COUNT(DISTINCT S.id) AS search_solved_count FROM task_task AS T'
+                ' INNER JOIN solution_solution AS S ON (S.task_id = T.id)'
+                ' INNER JOIN auth_user_groups AS UG ON (UG.user_id = S.author_id AND UG.group_id IN (%s))'
+                ' WHERE T.id IN (%s) AND S.status IN (%s)'
+                ' GROUP BY T.id' % (group_ids, ids, statuses)
             )
 
         tasks = list(tasks)

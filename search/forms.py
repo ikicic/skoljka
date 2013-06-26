@@ -17,8 +17,13 @@ class SearchForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(SearchForm, self).__init__(*args, **kwargs)
-        
+
         self.fields['q'].widget.attrs.update({'class': 'ac-tags'})
 
 class AdvancedSearchForm(forms.Form):
-    groups = GroupEntryField()
+    groups = GroupEntryField(label='Grupe')
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user') # user must be given!
+        super(AdvancedSearchForm, self).__init__(*args, **kwargs)
+        self.fields['groups'].user = user
