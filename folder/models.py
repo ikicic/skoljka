@@ -29,6 +29,10 @@ FOLDER_TASKS_DB_TABLE = 'folder_folder_tasks'
 FOLDER_NAMESPACE_FORMAT = 'Folder{0.pk}'
 FOLDER_NAMESPACE_FORMAT_ID = 'Folder{}'
 
+IN_OUT_OFFSET = 12
+# The difference between 'inside' and 'outside' for list-style.
+# Look at folder.css for more info.
+
 class Folder(BasePermissionsModel):
     class Meta:
         permissions = (
@@ -172,8 +176,9 @@ class Folder(BasePermissionsModel):
                     % (r, g, b, plus_sign, 100 * percent)
 
         return u'<li class="%s" style="margin-left:%dpx;"> '   \
-            '%s<a href="%s">%s %s</a></li>\n' % (cls, depth * 10 - 7, extra,
-            self.get_absolute_url(), self.short_name, stats_str)
+            '%s<a href="%s">%s %s</a></li>\n' % (cls,
+            depth * 10 - 7 + IN_OUT_OFFSET, extra, self.get_absolute_url(),
+            self.short_name, stats_str)
 
     def tag_list_html(self):
         return tag_list_to_html(self.cache_tags)

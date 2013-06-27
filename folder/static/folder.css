@@ -57,19 +57,32 @@
 }
 
 
+/*
+  Please note there is a bug in/inconsistency with Firefox:
+  https://bugzilla.mozilla.org/show_bug.cgi?id=36854
+  http://stackoverflow.com/questions/1142314/css-rendering-inconsistency-on-ul-with-firefox-being-the-odd-ball-out
+  Thus, we have to use 'outside' instead of 'inside',
+  and list-style instead of list-style-type.
+*/
+
 .nav-folder, .nav-folder-hidden {
   color: gray;
   line-height: 13px;
-  list-style-position: inside;
   padding-left: -5px;
 }
 
+.nav-folder > a:hover, .nav-folder-hidden > a:hover {
+  /* background fix for 'inside'. decrease margin left and increase padding by 8px */
+  margin-left: -23px;
+  padding-left: 20px;
+}
+
 .nav-folder {
-  list-style-type: disc;
+  list-style: disc outside;
 }
 
 .nav-folder-hidden {
-  list-style-type: circle;
+  list-style: circle outside;
 }
 
 .nav-folder-open {
