@@ -97,16 +97,14 @@ class UserProfile(models.Model):
 
     # data
     # Don't ask for useless private(!) information!
-    # GENDER_CHOICES = (
-    #     ('', 'Neizjašnjeno'),
-    #     ('M', 'Momak'),
-    #     ('F', 'Djevojka'),
-    # )
-    # Not used currently, there is no simple way to add gender support to
-    # activity messages. Until then, don't ask for gender at all.
-    # gender = models.CharField(blank=True, max_length=1, choices=GENDER_CHOICES,
-    #     default='', verbose_name='Spol', help_text=icon_help_text(
-    #         'Za gramatičke i pravopisne potrebe.'))
+    GENDER_CHOICES = (
+        ('', 'Neizjašnjeno'),
+        ('M', 'Momak'),
+        ('F', 'Djevojka'),
+    )
+    gender = models.CharField(blank=True, max_length=1, choices=GENDER_CHOICES,
+        default='', verbose_name='Spol', help_text=icon_help_text(
+            u'Za gramatičke i pravopisne potrebe.'))
 
     # constants
     HIDDEN_TAGS_HIDE = 0

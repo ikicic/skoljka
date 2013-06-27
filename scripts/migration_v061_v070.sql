@@ -48,7 +48,6 @@ ALTER TABLE task_task ADD COLUMN solution_settings SMALLINT NOT NULL DEFAULT 0;
 ALTER TABLE userprofile_userprofile DROP COLUMN birthday;
 ALTER TABLE userprofile_userprofile DROP COLUMN city;
 ALTER TABLE userprofile_userprofile DROP COLUMN country;
-ALTER TABLE userprofile_userprofile DROP COLUMN gender;
 ALTER TABLE userprofile_userprofile DROP COLUMN quote;
 ALTER TABLE userprofile_userprofile DROP COLUMN score;
 ALTER TABLE userprofile_userprofile DROP COLUMN website;

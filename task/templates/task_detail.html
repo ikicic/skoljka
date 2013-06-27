@@ -32,7 +32,7 @@
 </div>
 
 <div style="text-align:right;">
-  Dodao/la: {{ task.author|userlink }}<br>
+  Dod{% gender 'ao' 'la' task.author.get_profile.gender %}: {{ task.author|userlink }}<br>
   {{ task.date_created|date:"E j, Y" }}<br>
   {% tag_list task %}
 </div>

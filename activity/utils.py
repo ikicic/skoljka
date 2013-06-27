@@ -13,6 +13,7 @@ def get_recent_activities(user, max_count, exclude_user=None, target=None,
         action_object=None):
     """
         Returns recent activities visible to the given user.
+        Selects also actors and actor profiles.
 
         Specifically, for SOLUTION_SUBMIT checks if the user can view the
         solution, and saves as ._hide_solution_link.
@@ -35,8 +36,8 @@ def get_recent_activities(user, max_count, exclude_user=None, target=None,
     if action_object:
         activity = Action.objects.filter(action_object=action_object)
 
-    activity = activity.select_related('actor', 'target_content_type')  \
-        .order_by('-id')[:max_count]
+    activity = activity.select_related('actor', 'actor__userprofile',
+        'target_content_type').order_by('-id')[:max_count]
     activity = list(activity)
     activity_by_id = {x.id: x for x in activity}
 

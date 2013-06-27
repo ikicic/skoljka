@@ -2,6 +2,7 @@
 from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
 
+from skoljka.utils.string_operations import G
 from skoljka.utils.xss import escape
 
 import copy
@@ -17,6 +18,8 @@ def encode_email(email):
 def email_link(email, html=''):
     return mark_safe(u'<a href="#" class="imejl" title="Pošalji email" data-address="{0}">{1}</a>'.format(encode_email(email), html))
 
+# G(male, female, gender)
+register.simple_tag(G, name='gender')
 
 # TODO: automatically add all user options (?)
 # context[GENERATE_URL_TMP_KEYS] = set of all GET keys to be removed in URLs

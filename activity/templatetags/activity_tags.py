@@ -2,30 +2,19 @@
 from django.utils.safestring import mark_safe
 
 from userprofile.templatetags.userprofile_tags import userlink
+from skoljka.utils.string_operations import G
 
 from activity.constants import *
 from activity.utils import get_recent_activities
 
 register = template.Library()
 
-def G(male, female, gender):
-    """
-        (gender) Returns string male if user is male, female if female.
-        If gender isn't given, returns both strings separated with '/'.
-    """
-    if gender == 'M':
-        return male
-    elif gender == 'F':
-        return female
-    return male + '/' + female
 
 @register.simple_tag(takes_context=True)
 def prepare_action_data(context, A):
     user = context['user']
 
-    # TODO: refactor activity, such that (for example) gender can be cached.
-    # gender = ????
-    gender = ''
+    gender = A.actor.get_profile().gender
     G1 = G('o', 'la', gender)
 
     ttype = (A.type, A.subtype)
@@ -50,7 +39,7 @@ def prepare_action_data(context, A):
         S = u'je doda%s korisni%s %s u grupu %s' %   \
             (G1, G('ka', 'cu', gender), A.A('profile'), A.T('usergroup'))
     elif ttype == GROUP_LEAVE:
-        S = u'je izašao/la iz grupe %s' % A.T('usergroup')
+        S = u'je izaš%s iz grupe %s' % (G('ao', 'la', gender), A.T('usergroup'))
     elif ttype == POST_SEND:
 
         # ovisno o tipu targeta (zadatak, rjesenje), onoga na sto je zakacen post
