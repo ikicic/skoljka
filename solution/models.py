@@ -99,10 +99,8 @@ class SolutionManager(models.Manager):
                     task__permissions__permission_type=VIEW)    \
                 | Q(task__author_id=user.id)    \
                 | Q(task__hidden=False)).distinct()
-        elif permission_type == VIEW:
-            return self.filter(hidden=False)
         else:
-            return self.none()
+            return self.filter(task__hidden=False)
 
 @autoconnect
 class Solution(ModelEx):

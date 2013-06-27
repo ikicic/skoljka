@@ -72,6 +72,9 @@ def get_object_ids_with_exclusive_permission(user, permission_type,
         If filter_ids is given, only objects with these IDs will be considered.
     """
 
+    if not user.is_authenticated():
+        return []
+
     content_type_id = content_type_id   \
         or ContentType.objects.get_for_model(model).id
 

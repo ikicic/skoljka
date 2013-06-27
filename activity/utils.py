@@ -29,12 +29,13 @@ def get_recent_activities(user, max_count, exclude_user=None, target=None,
     # anyway loading half of the data again? also, cache must be updated
     # together with the data...
 
+    activity = Action.objects
     if exclude_user and exclude_user.is_authenticated():
-        activity = Action.objects.exclude(actor=exclude_user)
+        activity = activity.exclude(actor=exclude_user)
     if target:
-        activity = Action.objects.filter(target=target)
+        activity = activity.filter(target=target)
     if action_object:
-        activity = Action.objects.filter(action_object=action_object)
+        activity = activity.filter(action_object=action_object)
 
     activity = activity.select_related('actor', 'actor__userprofile',
         'target_content_type').order_by('-id')[:max_count]

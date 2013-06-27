@@ -2,7 +2,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.html import mark_safe
 
-from permissions.constants import VIEW
+from permissions.constants import VIEW_SOLUTIONS
 from permissions.signals import objectpermissions_changed
 from permissions.utils import get_object_ids_with_exclusive_permission
 from solution.models import Solution, DETAILED_STATUS
@@ -18,7 +18,8 @@ from collections import defaultdict
 EVALUATOR_NAMESPACE = 'UsrPrEval'
 UNRATED_SOL_CNT_KEY_FORMAT = 'UnratedSolutions{0.pk}'
 
-NOT_RATED_STATUS = DETAILED_STATUS['submitted_not_rated']
+UNRATED = DETAILED_STATUS['submitted_not_rated']
+CORRECT = DETAILED_STATUS['correct']
 
 @cache_function(namespace=EVALUATOR_NAMESPACE, key=UNRATED_SOL_CNT_KEY_FORMAT)
 def find_unrated_solutions(user):
@@ -26,64 +27,82 @@ def find_unrated_solutions(user):
         Returns the list of all unrated solutions visible and important
         (not obfuscated) to the given user.
     """
-    # TODO: check task.solution_settings!!
-
     profile = user.get_profile()
 
-    # For some reason had to put detailed_status here...
+    # Get all unrated solutions. Remove nonvisible, remove my own solutions.
     solutions = Solution.objects  \
         .filter_visible_tasks_for_user(user)    \
-        .filter(detailed_status=NOT_RATED_STATUS) \
+        .filter(detailed_status=UNRATED) \
         .exclude(author_id=user.id) \
         .select_related('task', 'author')
 
-    # Maybe == before checked whether user solved this problem.
-    did_solve_task = set()  # check whether user solved the task
-    maybe_check = set()     # check both permissions and user's solution
-    to_check = set()        # check only permissions
-    result = []             # instances of important unrated solutions
-    unrated_solution_count = 0
-
-    id_to_solution = {x.id: x for x in solutions}
-    task_id_to_solutions = defaultdict(list)
-
+    # Solution is interesting iff task is interesting. So, we are checking
+    # tasks, not solutions.
+    tasks = {}
     for x in solutions:
-        task_id_to_solutions[x.task_id].append(x)
+        if x.task_id not in tasks:
+            tasks[x.task_id] = x.task
 
-        maybe_obfuscated = not profile.show_unsolved_task_solutions      \
-            and x.task.difficulty_rating_avg >= profile.hide_solution_min_diff
+    # Task is accepted if
+    #   a) we have permission to view other solutions (task, my solution?)
+    #   b) we want to view solutions (profile, my solution?)
 
-        # Yeah, a lot of cases...
-        if maybe_obfuscated:
-            did_solve_task.add(x.task_id)
-            if x.task.hidden and x.task.author_id != user.id:
-                maybe_check.add(x.task_id)
-        else:
-            if x.task.hidden and x.task.author_id != user.id:
-                to_check.add(x.task_id)
+    # List of task ids
+    get_my_solution = []     # solutions to get
+    maybe_check = []         # check solution, then if necessary permission
+    to_check = []            # check only permission (VIEW_SOLUTIONS)
+    # Maybe == before checked whether user solved this problem.
+
+    with_permission = []    # tasks with permission to view solutions
+
+    for id, x in tasks.iteritems():
+        if x.author_id != user.id:
+            if x.solution_settings == Task.SOLUTIONS_NOT_VISIBLE:
+                # Visible only with VIEW_SOLUTIONS permission
+                to_check.append(id)
+            elif x.solution_settings == Task.SOLUTIONS_VISIBLE_IF_ACCEPTED:
+                # Visible with VIEW_SOLUTIONS, or with correct solution
+                maybe_check.append(id)
+                get_my_solution.append(id)
             else:
-                # definitely visible
-                result.append(x)
+                with_permission.append(id)
+        else:
+            with_permission.append(id)
 
-    if did_solve_task:
-        my_solved_tasks = set(Solution.objects.filter(author_id=user.id,
-            task_id__in=did_solve_task).values_list('task_id', flat=True))
+        # Also, do we want to see the solution at all?
+        if not profile.show_unsolved_task_solutions     \
+                and x.difficulty_rating_avg >= profile.hide_solution_min_diff:
+            get_my_solution.append(id)
 
-        # Hidden (and not user's task):
-        # Even if user solved the problem, he/she might not have the permission
-        # to view other solutions. Weird case, handle as you wish.
-        to_check |= maybe_check & my_solved_tasks
-        # Non hidden:
-        diff = my_solved_tasks - maybe_check
-        result.extend([id_to_solution[id] for id in diff])
+    if get_my_solution:
+        # dict {task_id: detailed_status}
+        my_solutions = dict(Solution.objects                            \
+            .filter(author_id=user.id, task_id__in=get_my_solution)     \
+            .values_list('task_id', 'detailed_status'))
+
+        # Accept SOLUTIONS_VISIBLE_IF_ACCEPTED tasks if the solution is correct
+        with_permission.extend(
+            id for id, detailed_status in my_solutions.iteritems()  \
+                if detailed_status == CORRECT)
+
+        # Send other tasks to the VIEW_SOLUTIONS check.
+        to_check.extend(set(maybe_check) - set(with_permission))
+    else:
+        my_solutions = {}
 
     if to_check:
         # WARNING: checking permissions manually!
-        task_ids = get_object_ids_with_exclusive_permission(user, VIEW,
-            model=Task, filter_ids=to_check)
-        result.extend(sum([task_id_to_solutions[id] for id in task_ids], []))
+        with_permission.extend(get_object_ids_with_exclusive_permission(user,
+            VIEW_SOLUTIONS, model=Task, filter_ids=to_check))
 
-    return result
+    # Now when I know which tasks I'm able to see, filter those I want to see.
+    accepted_tasks = set(id for id in with_permission   \
+        if profile.show_unsolved_task_solutions         \
+            or tasks[id].difficulty_rating_avg < profile.hide_solution_min_diff \
+            or id in my_solutions)
+
+    # Finally, filter solutions with accepted tasks
+    return [x for x in solutions if x.task_id in accepted_tasks]
 
 def userprofile(request):
     user = request.user
