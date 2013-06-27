@@ -3,6 +3,39 @@ from django.contrib.contenttypes.models import ContentType
 from permissions.constants import VIEW
 from permissions.models import ObjectPermission
 
+from collections import defaultdict
+
+def get_objects_with_permissions(descriptors, user, permission_type):
+    """
+        Given list of (content_type_id, object_id) pairs, returns the
+        dictionary {pair: object}, containing only objects for which
+        given user has specified permission.
+
+        Ignores inexisting object ids.
+    """
+    # content_type_id -> list of
+    ids_dict = defaultdict(list)
+    for content_type_id, object_id in descriptors:
+        ids_dict[content_type_id].append(object_id)
+
+    result = dict()
+    for content_type_id, ids in ids_dict.iteritems():
+        model = ContentType.objects.get_for_id(content_type_id).model_class()
+
+        # Remove duplicates here
+        objects = model.objects.filter(id__in=set(ids))
+
+        # Due to mysql bug / missing feature, it is better to separately handle
+        # each content type.
+        # http://bugs.mysql.com/bug.php?id=31188
+        objects = filter_objects_with_permission(objects, user, VIEW,
+            content_type_id=content_type_id, model=model)
+
+        for x in objects:
+            result[(content_type_id, x.id)] = x
+
+    return result
+
 def filter_objects_with_permission(objects, user, permission_type,
         content_type_id=None, model=None):
     """
@@ -13,7 +46,7 @@ def filter_objects_with_permission(objects, user, permission_type,
     if permission_type == VIEW:
         to_check = set(x.id for x in objects            \
             if getattr(x, 'author_id', -1) != user.id   \
-                or getattr(x, 'hidden', True))
+                and getattr(x, 'hidden', True))
     else:
         to_check = set(x.id for x in objects            \
             if getattr(x, 'author_id', -1) != user.id)

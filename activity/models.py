@@ -22,10 +22,9 @@ class Action(models.Model):
     subtype = models.IntegerField()
     date_created = models.DateTimeField(auto_now_add=True, db_index=True)
 
-    # group can also act like user
-    # remove and completely replace with permissions?
-    group = models.ForeignKey(Group, db_index=True, blank=True, null=True, related_name='activities', help_text='To whom it may concern.')
-    public = models.BooleanField(db_index=True, default=True)
+    # Group can also act like user.
+    group = models.ForeignKey(Group, db_index=True, blank=True, null=True,
+        related_name='activities', help_text='To whom it may concern.')
 
     target_content_type = models.ForeignKey(ContentType, blank=True, related_name='target')
     target_id = models.IntegerField(blank=True)

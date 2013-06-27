@@ -305,7 +305,7 @@ def new(request, task_id=None, is_file=None):
                 update_search_cache(task, old_tags, tags)
 
             # send action if creating a new nonhidden task
-            if not edit and not task.hidden:
+            if not edit:
                 # TODO: signals!
                 type = _action.FILE_ADD if is_file else _action.TASK_ADD
                 _action.add(request.user, type,

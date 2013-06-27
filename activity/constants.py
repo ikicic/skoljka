@@ -1,23 +1,24 @@
 ﻿# (type, subtype)
 
-TASK_ADD = (100, 1)                         # public    DONE
-FILE_ADD = (100, 2)                         # public    DONE
+TASK_ADD = (100, 1)
+FILE_ADD = (100, 2)
 
 SOLUTION_SEND = 200
-SOLUTION_SUBMIT = (SOLUTION_SEND, 1)        # public    DONE
-SOLUTION_AS_SOLVED = (SOLUTION_SEND, 2)     # public    DONE
-SOLUTION_TODO = (SOLUTION_SEND, 3)          # public    DONE
+SOLUTION_SUBMIT = (SOLUTION_SEND, 1)
+SOLUTION_AS_SOLVED = (SOLUTION_SEND, 2)
+SOLUTION_TODO = (SOLUTION_SEND, 3)
 
-SOLUTION_AS_OFFICIAL = (210, 0)             # public    NOT DONE
+SOLUTION_AS_OFFICIAL = (210, 0)             # NOT DONE
 
-SOLUTION_RATE = (220, 0)    # public, solution.author   NOT DONE
+SOLUTION_RATE = (220, 0)                    # solution.author   NOT DONE
 
 # target=related_object, action_object=post, group=replied comment's author
-POST_SEND = (300, 1)        # DONE
+# TODO: split comments for Tasks and for Solutions
+POST_SEND = (300, 1)
 
 GROUP_CHANGE = 400
-GROUP_ADD = (GROUP_CHANGE, 1)       # group     DONE
-GROUP_LEAVE = (GROUP_CHANGE, 2)     # group     DONE
+GROUP_ADD = (GROUP_CHANGE, 1)       # group
+GROUP_LEAVE = (GROUP_CHANGE, 2)     # group
 
 action_label = {
     TASK_ADD: ('label-success', 'Novi zadatak'),
@@ -27,10 +28,8 @@ action_label = {
 }
 
 
-
 # Comments on solution have to cache more than one information:
 # Solution author_id > username > Task id > name > author_id.
-# Not really a best solution, but this it way
+# Not really a best solution, but this way it
 # will be easier to escape >, using skoljka.utils.xss
 POST_SEND_CACHE_SEPARATOR = u'>'
-

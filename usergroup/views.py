@@ -37,8 +37,7 @@ def leave(request, group_id=None):
             group.data.member_count = User.groups.through.objects.filter(group=group).count()
             group.data.save(force_update=True)
             _action.add(request.user, _action.GROUP_LEAVE,
-                action_object=request.user, target=group, public=False,
-                group=group)
+                action_object=request.user, target=group, group=group)
             return ('/usergroup/', )
 
     return {'group': group}
@@ -166,7 +165,7 @@ def members(request, group_id=None):
                 if created:
                     created_user_ids.append(user.id)
                     _action.add(request.user, _action.GROUP_ADD,
-                        action_object=user, target=group, public=False, group=group)
+                        action_object=user, target=group, group=group)
             # TODO: manually create function like 'group_members_update'
             user_refresh_group_cache(created_user_ids)
             group.data.member_count = group.data.get_users().count()

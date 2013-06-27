@@ -15,6 +15,8 @@
 ALTER TABLE tags_tag ADD CONSTRAINT UNIQUE tags_tag_unique_name (name);
 
 /* Structure */
+ALTER TABLE activity_action DROP COLUMN public;
+
 DROP TABLE folder_foldercollection;
 
 ALTER TABLE folder_folder CHANGE COLUMN slug short_name VARCHAR(128) NOT NULL;
