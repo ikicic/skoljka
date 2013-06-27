@@ -59,6 +59,7 @@ ALTER TABLE userprofile_userprofile ADD COLUMN show_solution_task TINYINT(1) NOT
 ALTER TABLE userprofile_userprofile ADD COLUMN school_class INT NOT NULL DEFAULT 0;
 ALTER TABLE userprofile_userprofile ADD COLUMN cache_group_ids VARCHAR(255) NOT NULL;
 ALTER TABLE userprofile_userprofile MODIFY COLUMN show_hidden_tags SMALLINT NOT NULL DEFAULT 0;
+UPDATE userprofile_userprofile SET eval_sol_last_view = NOW();
 
 ALTER TABLE folder_folder_tasks ADD COLUMN position INT NOT NULL DEFAULT 0;
 
