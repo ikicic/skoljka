@@ -60,7 +60,8 @@ def get_recent_activities(user, max_count, exclude_user=None, target=None,
         elif ttype in [GROUP_ADD, GROUP_LEAVE]:
             # check group
             to_check.append((x.target_content_type_id, x.target_id, x.id))
-        elif ttype == POST_SEND:
+        elif ttype in [POST_SEND, SOLUTION_RATE]:
+            # SOLUTION_RATE behaves as POST_SEND for Solution comments...
             # TODO: this is stupid, separate POST_SEND into two different
             # constants?
             if x.target_content_type_id == task_content_type_id:
@@ -104,15 +105,17 @@ def get_recent_activities(user, max_count, exclude_user=None, target=None,
 
         # Yes, this is the easiest way to do this...
         cache_solution_info(user, solutions)
-        for x in solutions:
+        solution_by_id = {x.id: x for x in solutions}
+        for solution_id, action_id in solutions_to_check_strict:
+            solution = solution_by_id[solution_id]
             # TODO: separate can_view and obfuscate into two different methods?
             # we don't need should_obfuscate here...
-            can_view, obfuscate = x.check_accessibility(user,
-                x._cache_my_solution)
+            can_view, obfuscate = solution.check_accessibility(user,
+                solution._cache_my_solution)
             if can_view:
                 continue
             action = activity_by_id[action_id]
-            if (action.type, action.subtype) == SOLUTION_SUBMIT:
+            if (action.type, action.subtype) in (SOLUTION_SUBMIT, SOLUTION_RATE):
                 # don't kill, just remove link
                 action._hide_solution_link = True
             else:

@@ -13,7 +13,7 @@
 <div style="float:left;">
   {% if user.is_authenticated %}
     {% if user == solution.author %}
-      Točnost: <div style="width:80px;display:inline-block;">{% rating_stars solution.correctness 2.0 %}</div>
+      Točnost: <div style="width:80px;display:inline-block;">{% rating_stars manager=solution.correctness red_if_lt=2.0 %}</div>
     {% else %}
       {% rating_box "Točnost" solution.correctness %}
     {% endif %}
@@ -109,7 +109,7 @@
     <tr>
       <td style="width:140px;">{{ x.date }}</td>
       <td>{{ x.user|userlink }}</td>
-      <td style="width:80px;">{% rating_stars solution.correctness 2.0 x.value %}</td>
+      <td style="width:80px;">{% rating_stars manager=solution.correctness red_if_lt=2.0 value=x.value %}</td>
     </tr>
   {% endfor %}
   </table>

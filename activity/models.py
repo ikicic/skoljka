@@ -4,8 +4,11 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.utils.safestring import mark_safe
 
-from activity.constants import *
+import solution
+from rating.templatetags.rating_tags import rating_stars
 from userprofile.templatetags.userprofile_tags import userlink
+
+from activity.constants import *
 
 # TODO: napraviti neki shortcut za ttype = (A.type, A.subtype)
 
@@ -65,6 +68,20 @@ class Action(models.Model):
         if not hasattr(self, '_label'):
             self._label = action_label.get((self.type, self.subtype))
         return self._label
+
+    def t_right_div_html(self):
+        if (self.type, self.subtype) == SOLUTION_RATE:
+            from solution.models import Solution
+            S = u'<br>%s' % rating_stars(field=solution.models.Solution.correctness,
+                red_if_lt=2.0, value=int(self.action_object_cache))
+        else:
+            label = self.get_label()
+            if not label:
+                return ''
+            S = '<span class="label %s">%s</span>' % label
+
+        return  mark_safe('<div style="float:right;">%s</div>' % S)
+
 
     def get_message(self):
         return getattr(self, '_message', u'')

@@ -4,6 +4,7 @@ from django.core.urlresolvers import get_callable
 
 from hashlib import md5
 
+from activity.action import replace_or_add, remove
 from rating.models import Score, Vote
 
 AVERAGE = 1
@@ -21,7 +22,6 @@ class RatingManager(models.Manager):
         self.field = field
         self.field_name = field.field_name
         self.content_type = None
-        self.on_update = None
 
     def get_query_set(self, *args, **kwargs):
         return Vote.objects.get_query_set(*args, **kwargs).filter(
@@ -98,6 +98,15 @@ class RatingManager(models.Manager):
             self.field.on_update = get_callable(self.field.on_update)
             self.field.on_update(self.instance, self.field_name, old_value, value)
 
+        if self.field.action_type:
+            authors_group_id = hasattr(self.instance, 'author_id') \
+                and self.instance.author.get_profile().private_group_id
+            if value == 0:
+                remove(user, self.field.action_type[0],
+                    target=self.instance, group_id=authors_group_id)
+            else:
+                replace_or_add(user, self.field.action_type, action_object=vote,
+                    target=self.instance, group_id=authors_group_id)
         return value
         
 
@@ -125,6 +134,7 @@ class RatingField(models.FloatField):
         self.range = kwargs.pop('range', 5)
         self.titles = kwargs.pop('titles', range(1, self.range + 1))
         self.type = kwargs.pop('type', AVERAGE)
+        self.action_type = kwargs.pop('action_type', None)
         self.on_update = kwargs.pop('on_update', None)
         if 'default' not in kwargs:
             kwargs['default'] = 0

@@ -48,6 +48,8 @@ def add(actor, type_desc, **kwargs):
             action.action_object_cache = action.action_object.name
         elif hasattr(action.action_object, "username"):
             action.action_object_cache = action.action_object.username
+        elif hasattr(action.action_object, "value"):    # rating
+            action.action_object_cache = str(action.action_object.value)
 
     if action.target:
         if hasattr(action.target, "name"):

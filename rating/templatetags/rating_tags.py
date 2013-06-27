@@ -15,12 +15,14 @@ def rating_box(context, text, manager):
     }
 
 @register.simple_tag
-def rating_stars(manager, red_if_lt=0.0, value=None):
+def rating_stars(manager=None, field=None, red_if_lt=0.0, value=None):
+    if not field:
+        field = manager.field
     if value is None:
-        value = getattr(manager.instance, '%s_avg' % manager.field.name)
-    left = int(80 * value / float(manager.field.range - 1))
+        value = getattr(manager.instance, '%s_avg' % field.name)
+    left = int(80 * value / float(field.range - 1))
 
-    title = manager.field.titles[int(value + 0.5)]
+    title = field.titles[int(value + 0.5)]
 
     # TODO: ako min ili max samo jedan div
     return mark_safe(

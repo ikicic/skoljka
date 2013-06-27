@@ -3,6 +3,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.utils.html import mark_safe
 
+from activity.constants import SOLUTION_RATE
 from mathcontent.models import MathContent
 from permissions.constants import VIEW, VIEW_SOLUTIONS
 from post.generic import PostGenericRelation
@@ -81,6 +82,7 @@ SOLUTION_RATING_ATTRS = {
     'range': 6,
     'titles': [u'Neocijenjeno', u'Netočno', u'Točno uz manje nedostatke.',
         u'Točno.', u'Točno i domišljato.', u'Genijalno! Neviđeno!'],
+    'action_type': SOLUTION_RATE,
     'on_update': _solution_on_update,
 }
 

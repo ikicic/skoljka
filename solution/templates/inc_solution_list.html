@@ -48,7 +48,7 @@
             {% else %}
               <span class="sol-not-accessible" title="{{ no_access_explanation }}">{{ obfuscation_text }}</span>
             {% endif %}
-          <td style="width:80px;">{% rating_stars s.correctness 2.7 %}
+          <td style="width:80px;">{% rating_stars manager=s.correctness red_if_lt=2.7 %}
         {% else %}
           <td>
             {% if s.author == user %}<a href="/task/{{ s.task_id }}/submit/">{% endif %}
