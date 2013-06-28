@@ -20,7 +20,8 @@
 
   <tbody>
   {% for task in tasks %}
-    <tr class="{{ task.get_tr_class }}">
+    {# JavaScript Task Tooltip assumes this is tr. task-container also used for div. #}
+    <tr class="{{ task.get_tr_class }} task-container" data-task-id="{{ task.id }}">
       {% if user.profile.selected_folder %}
         {# We duplicate id value here, so that js is independent of html structure... #}
         <td><input type="checkbox" class="folder-checkbox"{% if task.is_in_folder %}
@@ -28,7 +29,7 @@
       {% endif %}
 
       <td>{{ task.id }}</td>
-      <td>{{ task.get_link }}</td>
+      <td>{% task_link task tooltip=1 %}</td>
       <td>{% if plus_exclude %}{% tag_list task plus_exclude %}{% else %}{% tag_list task %}{% endif %}</td>
 
       {% if task.solved_count != 0 %}

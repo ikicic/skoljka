@@ -8,11 +8,12 @@ from activity import action as _action
 from mathcontent.forms import MathContentForm
 from permissions.constants import VIEW
 from task.models import Task
-from skoljka.utils.decorators import response, require
+from skoljka.utils.decorators import ajax, response, require
 
-from solution.models import Solution, STATUS, _update_solved_count
+from solution.models import HTML_INFO, Solution, STATUS, _update_solved_count
 
 from datetime import datetime
+import json
 
 # ... trenutacna implementacija rjesenja je dosta diskutabilna
 
@@ -64,7 +65,9 @@ def _do_mark(request, solution, task):
 
         Or mark / unmark official flag
 
-        Creates Solution if it doesn't exist (in that case Task is given)
+        Creates Solution if it doesn't exist (in that case Task is given).
+
+        Returns None if no error.
     """
 
     action = request.POST['action']
@@ -131,6 +134,24 @@ def _do_mark(request, solution, task):
         _update_solved_count(delta, task, request.user.get_profile())
 
     return None     # ok
+
+@ajax(post=['action'])
+@response()
+def task_ajax(request, task_id):
+    """
+        Called from task tooltip.
+    """
+    task = get_object_or_404(Task, pk=task_id)
+
+    ret_value = _do_mark(request, None, task)
+    if ret_value:
+        return ret_value
+
+    # Return html info for given action as JSON.
+    info = HTML_INFO[STATUS[request.POST['action']]]
+    if not info['tr_class'] and task.hidden:
+        info['tr_class'] = 'task-hidden'
+    return json.dumps(info)
 
 
 @require(post='action')

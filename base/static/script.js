@@ -177,9 +177,9 @@ $(function(){
           var msg = data == '0' ? 'Nemaš ovlasti.' : 'Greška!';
           $('#tt_info').html(msg);
         }
+    }).fail(function() {
+      $('#tt_info').html('Greška');
     });
-    // TODO: switch to JQuery 1.5+
-    // .error(function(){$('#tt_info').html('Error');});
   });
 
   /* Tag tooltip */
@@ -202,9 +202,9 @@ $(function(){
         // TODO: use <= VOTE_WRONG instead of < 0
         tag.toggleClass('tag-wrong', parseInt(vote_count) < 0);
         refresh_tag_votes(tag);
+    }).fail(function() {
+      $('#tt_info').html('Greška');
     });
-    // TODO: switch to JQuery 1.5+
-    // .error(function(){$('#tt_info').html('Error');});
   }
   $('#tt_plus').click(function(e){vote_func(e,1);});
   $('#tt_minus').click(function(e){vote_func(e,-1);});
@@ -224,20 +224,74 @@ $(function(){
 
 /* Task tooltip */
 $(function(){
-  /* NOT COMPLETED */
-  return;
   if (!( $('a.task').length )) return;
   $('body').append(
-      '<div id="task_tooltip" class="task_tooltip btn-group">'
-    + '<a id="task_tt_submit" href="#" title="Pošalji rješenje" class="btn btn-mini"><i class="icon-file"></i></a>'
-    + '<a id="task_tt_as_solved" href="#" title="Označi kao riješeno" class="btn btn-mini"><i class="icon-ok"></i></a>'
-    + '<a id="task_tt_todo" href="#" title="To Do" class="btn btn-mini"><i class="icon-tag"></i></a>'
+      '<div id="task-tooltip" class="btn-group">'
+    + '<a id="task-tt-submit" href="#" title="Pošalji rješenje" class="btn btn-mini"><i class="icon-file"></i></a>'
+    + '<a id="task-tt-as-solved" href="#" title="Označi kao riješeno" class="btn btn-mini"><i class="icon-ok"></i></a>'
+    + '<a id="task-tt-todo" href="#" title="To Do" class="btn btn-mini"><i class="icon-tag"></i></a>'
+    + '<a id="task-tt-blank" href="#" title="Izbriši" class="btn btn-mini"><i class="icon-remove"></i></a>'
     + '</div>'
   );
 
-  $('a.task').tooltip({
-    tip: '#task_tooltip',
-    position: 'bottom center'
+  var solution_action = function(e, action) {
+    e.preventDefault();
+    /* The same code is responsible for labels (small task view) and the table rows (table view) */
+
+    /* Find label and mark with '...' */
+    var container = $('#task-tooltip').data('container');
+    var label_container = container.find('.sol-label-container');
+    var label;
+    /* If small box, not a table. */
+    if (label_container.length > 0) {
+      label = label_container.children('.label');
+      if (label.length > 0) {
+        label.attr('class', 'label');
+      } else {
+        label_container.append('<span class="label">. . .</span>');
+        label = label_container.children('.label');
+      }
+    }
+
+    $.post('/ajax/task/' + container.attr('data-task-id') + '/', {
+        action: action,
+      }, function(json) {
+        info = $.parseJSON(json);
+        if (label) { /* small box */
+          if (action == 'blank') {
+            label.remove();
+          } else {
+            label.attr('class', 'label ' + info.label_class);
+            label.html(info.label_text);
+          }
+        } else {  /* table view */
+          /* container == tr */
+          container.attr('class', 'task-container ' + info.tr_class);
+        }
+    }).fail(function() {
+      if (label)
+        label.html('Greška');
+      else /* Table view */
+        container.children(':first-child').css('color', 'red').attr('title', 'Greška!');
+    });
+  };
+
+  $('#task-tt-as-solved').click(function(e) {solution_action(e, 'as_solved');});
+  $('#task-tt-todo').click(function(e) {solution_action(e, 'todo');});
+  $('#task-tt-blank').click(function(e) {solution_action(e, 'blank');});
+
+  /* Tooltip will be shown only for tasks with this marker. */
+  $('.task-tt-marker').tooltip({
+    tip: '#task-tooltip',
+    position: 'bottom center',
+    onBeforeShow: function() {
+      /* Save container and update submit href. */
+      /* Container can be both div and tr. */
+      var container = this.getTrigger().closest('.task-container');
+      var id = container.attr('data-task-id');
+      $('#task-tooltip').data('container', container);
+      $('#task-tt-submit').attr('href', '/task/' + id + '/submit/');
+    }
   });
 });
 

@@ -94,6 +94,14 @@ tr.task-hidden:nth-child(odd) td {
 
 /* End task table */
 
+/* Task tooltip */
+
+#task-tooltip {
+  display:none;
+}
+
+/* End task tooltip */
+
 #task-file {
   text-align: center;
 }
@@ -115,7 +123,6 @@ tr.task-hidden:nth-child(odd) td {
   font-size: 24px;
   font-weight: normal;
 }
-
 
 .task-source {
   float: right;

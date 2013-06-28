@@ -1,15 +1,18 @@
-{% load tags_tags %}
 {% load solution_tags %}
+{% load tags_tags %}
+{% load task_tags %}
 
-<div class="{{ div_class }}">
+{# Note that JavaScript task-tooltip makes some assumptions about the this structure. #}
+{# task-container also used for tr. #}
+<div class="{{ div_class }} task-container" data-task-id="{{ task.id }}">
   {% if well %}
   <div class="well">
   {% endif %}
     <div style="float:right;text-align:right;">
       {% tag_list task %}<br>
-      {% solution_label task %}
+      <span class="sol-label-container">{% solution_label task %}</class>
     </div>
-    <h4><a href="/task/{{ task.id }}/{{ url_suffix }}" class="task">{{ task.name }}</a></h4><br>
+    <h4>{% task_link task tooltip=1 url_suffix=url_suffix %}</h4><br>
 
     {{ task.content.render }}
 

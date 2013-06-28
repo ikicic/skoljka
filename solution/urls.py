@@ -4,6 +4,7 @@ from django.views.generic import DetailView, ListView, TemplateView
 from solution.models import Solution
 
 urlpatterns = patterns('',
+    (r'^ajax/task/(?P<task_id>\d+)/$', 'solution.views.task_ajax'),
     (r'^task/(?P<task_id>\d+)/submit/$', 'solution.views.submit'),
     (r'^task/(?P<task_id>\d+)/mark/$', 'solution.views.mark'),
     (r'^solution/$', 'solution.views.solution_list' ),

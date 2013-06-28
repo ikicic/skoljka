@@ -92,7 +92,7 @@ class Task(BasePermissionsModel):
     def get_absolute_url(self):
         return '/task/%d/' % self.id
 
-    def get_link(self):
+    def get_link(self, tooltip=False, url_suffix=''):
         if self.file_attachment_id:
             url = self.cache_file_attachment_url
             file = u'<a href="{}" title="{}">'      \
@@ -101,8 +101,11 @@ class Task(BasePermissionsModel):
         else:
             file = u''
 
-        return mark_safe(u'{}<a href="/task/{}/" class="task">{}</a>'.format(
-            file, self.id, self.name))
+        # If not solvable, automatically there is no tooltip.
+        return mark_safe(u'{}<a href="/task/{}/{}" class="task{}">{}</a>'.format(
+            file, self.id, url_suffix,
+            ' task-tt-marker' if tooltip and self.solvable else '',
+            self.name))
 
     def is_file(self):
         return self.file_attachment_id
