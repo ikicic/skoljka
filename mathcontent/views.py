@@ -5,12 +5,16 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
+from permissions.constants import EDIT
+from task.models import Task
+from task.utils import get_task_folder_data
 from skoljka.utils.decorators import response
 
 from mathcontent.forms import AttachmentForm
 from mathcontent.models import MathContent, Attachment
 from mathcontent.utils import check_and_save_attachment
 
+# TODO: ajax decorator etc. refactor
 @login_required
 def delete_attachment(request, id):
     attachment = get_object_or_404(Attachment.objects.select_related('content'), id=id)
@@ -40,7 +44,20 @@ def edit_attachments(request, id):
     else:
         form = AttachmentForm()
 
-    return {
+    data = {
         'content': content,
         'form': form,
     }
+
+    # Type-specific tuning and permissions:
+    try:
+        task = Task.objects.get(content_id=id)
+        if not task.user_has_perm(request.user, EDIT):
+            return 403
+        data['task'] = task
+        data.update(get_task_folder_data(task, request.user))
+    except Task.DoesNotExist:
+        # Only Task's MathContent can have attachments!
+        return 404
+
+    return data

@@ -5,7 +5,9 @@ from django.core.cache import cache
 from django.db import models
 from django.db.models.signals import pre_save
 from django.db.models.signals import post_save
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseRedirect, HttpResponsePermanentRedirect, HttpResponseNotAllowed
+from django.http import Http404, HttpResponse, HttpResponseBadRequest,      \
+    HttpResponseForbidden, HttpResponseRedirect, HttpResponseNotAllowed,    \
+    HttpResponsePermanentRedirect
 from django.template import loader, RequestContext
 
 from skoljka.utils import ncache

@@ -16,6 +16,7 @@ from skoljka.utils.models import ModelEx
 # TODO: nekako drugacije ovo nazvati
 SOLUTION_CORRECT_SCORE = 2.6
 
+# TODO: real constants, i.e. BLANK, AS_SOLVED etc.
 # solution.status
 STATUS = {'blank': 0, 'as_solved': 1, 'todo': 2, 'submitted': 3}
 

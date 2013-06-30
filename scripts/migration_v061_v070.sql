@@ -9,6 +9,7 @@
     3) run Solution refresh_detailed_status admin action.
     4) run UserProfile refresh_group_cache admin action.
     5) Upgrade django-taggit (?)
+    6) Set solvable=0 for all notext tasks.
 */
 
 /* Unnecessary / dangerous fixes ? */

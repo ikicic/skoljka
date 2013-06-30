@@ -19,18 +19,6 @@
 
 {% block content %}
 
-{% if not is_file %}
-  {% if advanced %}
-    <a href="/task/new/">Jednostavno</a><br><br>
-    Naprednim dodavanjem zadataka možete odjednom dodati više zadataka sličnog imena i sličnih oznaka.<br>
-    Zadatke razdvajajte oznakom <pre>@@@@@</pre>.<br>
-    Ukoliko želite navesti broj zadatka u imenu ili tagovima, napišite <pre>[[#]]</pre>.<br>
-    Npr. Ime: <pre>IMO 2011</pre>, Oznake: <pre>IMO, 2011, IMO</pre>.<br><br>
-  {% else %}
-    {% if perms.task.add_advanced %}<a href="/task/new/advanced/">Napredno</a><br><br>{% endif %}
-  {% endif %}
-{% endif %}
-
 <div style="float:right;text-align:right;">
   <div class="btn-group">
     {% if edit and not is_file %}
@@ -43,6 +31,20 @@
   <br>
   <a href="/tags/" target="_blank">Popis oznaka</a>
 </div>
+
+<a href="javascript: history.go(-1)">« Vrati se</a><br>
+
+{% if not is_file %}
+  {% if advanced %}
+    <a href="/task/new/">Jednostavno</a><br><br>
+    Naprednim dodavanjem zadataka možete odjednom dodati više zadataka sličnog imena i sličnih oznaka.<br>
+    Zadatke razdvajajte oznakom <pre>@@@@@</pre>.<br>
+    Ukoliko želite navesti broj zadatka u imenu ili tagovima, napišite <pre>[[#]]</pre>.<br>
+    Npr. Ime: <pre>IMO 2011</pre>, Oznake: <pre>IMO, 2011, IMO</pre>.<br><br>
+  {% else %}
+    {% if perms.task.add_advanced %}<a href="/task/new/advanced/">Napredno</a><br><br>{% endif %}
+  {% endif %}
+{% endif %}
 
 <br>
 <div style="width: 70%; margin-left: 10px; font-style: italic;">

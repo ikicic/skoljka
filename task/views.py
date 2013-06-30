@@ -14,8 +14,8 @@ from taggit.utils import parse_tags
 
 from activity import action as _action
 from folder.models import Folder
-from folder.utils import get_task_folder_ids, prepare_folder_menu,  \
-    invalidate_cache_for_folders, invalidate_folder_cache_for_task
+from folder.utils import invalidate_cache_for_folders, \
+    invalidate_folder_cache_for_task
 from permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS, VIEW_SOLUTIONS
 from permissions.models import ObjectPermission
 from recommend.utils import task_event
@@ -34,7 +34,7 @@ from skoljka.utils.timeout import run_command
 from task.models import Task, SimilarTask
 from task.forms import TaskForm, TaskFileForm, TaskAdvancedForm,    \
     TaskExportForm, EXPORT_FORMAT_CHOICES
-from task.utils import check_prerequisites_for_tasks
+from task.utils import check_prerequisites_for_tasks, get_task_folder_data
 
 import os, sys, hashlib, codecs, datetime, zipfile
 
@@ -242,6 +242,7 @@ def new(request, task_id=None, is_file=None):
 
     if request.method == 'POST':
         old_hidden = getattr(task, 'hidden', -1)
+        old_solvable = getattr(task, 'solvable', -1)
 
         # Files can have blank description (i.e. math content)
         task_form = form_class(request.POST, instance=task, user=request.user)
@@ -297,7 +298,9 @@ def new(request, task_id=None, is_file=None):
             task_form.save_m2m()
 
             # TODO: signals!
-            if not edit or old_hidden != task.hidden or old_tags_str != new_tags_str:
+            if not edit or old_hidden != task.hidden    \
+                    or old_solvable != task.solvable    \
+                    or old_tags_str != new_tags_str:
                 invalidate_folder_cache_for_task(task)
 
             # TODO: signals!
@@ -325,7 +328,9 @@ def new(request, task_id=None, is_file=None):
     if attachment_form:
         forms.append(attachment_form)
 
-    return {
+    data = get_task_folder_data(task, request.user)
+
+    data.update({
         'action_url': request.path,
         'can_edit_permissions': EDIT_PERMISSIONS in perm,
         'content_type': content_type,
@@ -333,7 +338,9 @@ def new(request, task_id=None, is_file=None):
         'forms': forms,
         'is_file': is_file,
         'task': task,
-    }
+    })
+
+    return data
 
 
 @response('task_list.html')
@@ -347,6 +354,7 @@ def task_list(request, user_id=None):
         tasks = tasks.filter(author_id=user_id)
 
     return {'tasks' : tasks}
+
 
 @response('task_detail.html')
 def detail(request, id):
@@ -387,24 +395,13 @@ def detail(request, id):
         # TODO: use signals!
         task_event(request.user, task, 'view')
 
-    folder_ids = get_task_folder_ids(task)  # unsafe, no permission check!
-    folders = list(Folder.objects.filter(id__in=folder_ids))
-    folder_data = prepare_folder_menu(folders, request.user) # safe
-
-    # For now, folder is not considered as the owner of the tasks, but just as
-    # a collection. Therefore, if the user has no access to any of the
-    # task's folders, he/she might still have the access to the task itself.
-
-    # True, automatically removing access to the task if the user has no
-    # access to its containers is a really great feature. But, it is
-    # too complicated - advanced permission check should be added to everything
-    # related to the task (e.g. editing, solutions, permissions editing etc.)
-
     data = {
         'task': task,
         'can_edit': EDIT in perm,
         'solution': solution,
     }
+
+    folder_data = get_task_folder_data(task, request.user)
 
     if folder_data:
         data.update(folder_data)

@@ -2,6 +2,9 @@ from permissions.constants import VIEW_SOLUTIONS
 from permissions.utils import get_object_ids_with_exclusive_permission
 from solution.models import DETAILED_STATUS, Solution
 
+from folder.models import Folder
+from folder.utils import get_task_folder_ids, prepare_folder_menu
+
 from task.models import Task
 
 CORRECT = DETAILED_STATUS['correct']
@@ -52,6 +55,23 @@ def check_prerequisites_for_tasks(tasks, user):
                 VIEW_SOLUTIONS, model=Task, filter_ids=ids))
             for x in another_check:
                 x.cache_prerequisites_met = x.id in accepted
+
+def get_task_folder_data(task, user):
+    folder_ids = get_task_folder_ids(task)  # unsafe, no permission check!
+    folders = list(Folder.objects.filter(id__in=folder_ids))
+    folder_data = prepare_folder_menu(folders, user) # safe
+
+    # For now, folder is not considered as the owner of the tasks, but just as
+    # a collection. Therefore, if the user has no access to any of the
+    # task's folders, he/she might still have the access to the task itself.
+
+    # True, automatically removing access to the task if the user has no
+    # access to its containers is a really great feature. But, it is
+    # too complicated - advanced permission check should be added to everything
+    # related to the task (e.g. editing, solutions, permissions editing etc.)
+
+    return folder_data
+
 
 
 def task_similarity(first, second):

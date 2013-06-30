@@ -97,7 +97,6 @@ def profile(request, pk):
         for x in solved:
             x.t_can_view, dummy = x.check_accessibility(
                 request.user, x._cache_my_solution)
-            print x.t_can_view, dummy
 
     task_added = tasks.filter(author_id=pk).order_by('-id')[:10]
 
