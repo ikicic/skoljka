@@ -29,6 +29,8 @@ def detail(request, solution_id):
     solution = get_object_or_404(Solution.objects.select_related('content',
         'author', 'task', *args), id=solution_id)
 
+    if not solution.status == STATUS['submitted']:
+        return (404, u'Rješenje nije dostupno.')
     if not solution.task.user_has_perm(request.user, VIEW):
         return (403, u'Zadatak nije dostupan.')
 

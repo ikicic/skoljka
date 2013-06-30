@@ -243,7 +243,8 @@ $(function(){
 
 /* Task tooltip */
 $(function(){
-  if (!( $('a.task').length )) return;
+  if (!is_authenticated) return;
+  if (!( $('a.task').length)) return;
   $('body').append(
       '<div id="task-tooltip" class="btn-group">'
     + '<a id="task-tt-submit" href="#" title="Pošalji rješenje" class="btn btn-mini"><i class="icon-file"></i></a>'
