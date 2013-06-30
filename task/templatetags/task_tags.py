@@ -66,10 +66,13 @@ def cache_task_info(context, tasks):
 
     # ----- solutions ------
     if user.is_authenticated():
-        solution = Solution.objects.filter(author=user, task__id__in=ids)
-        sol = dict([(x.task_id, x) for x in solution])
+        # All tasks for which solutions we are interested in.
+        all_tasks = sum([x._get_prerequisites() for x in tasks], ids)
+        solutions = Solution.objects.filter(author=user, task_id__in=all_tasks)
+        solutions = {x.task_id: x for x in solutions}
         for task in tasks:
-            task.cache_solution = sol.get(task.id)
+            task.cache_solution = solutions.get(task.id)
+            task._check_prerequisites(user, solutions)
 
     # ----- folder edit -----
     if user.is_authenticated():

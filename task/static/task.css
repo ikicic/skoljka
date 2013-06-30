@@ -85,6 +85,10 @@ tr.task-hidden:nth-child(odd) td {
   background-color: #E4E3E3!important;
 }
 
+.task-locked {
+  color: gray;
+}
+
 .task-unsolvable a {
   color: rgb(132, 152, 162);
 }

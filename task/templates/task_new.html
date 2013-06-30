@@ -73,7 +73,7 @@
     {{ forms.2.as_table }} {# if taskfile #}
 
     <tr class="split-form-row"><th colspan="2">Napredno</th></tr>
-    {% get_fieldset hidden,solvable,solution_settings as second_part from forms.0 %}
+    {% get_fieldset hidden,solvable,solution_settings,prerequisites as second_part from forms.0 %}
     {{ second_part.as_table }}
   </table>
   <br>

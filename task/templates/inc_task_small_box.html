@@ -14,7 +14,11 @@
     </div>
     <h4>{% task_link task tooltip=1 url_suffix=url_suffix %}</h4><br>
 
-    {{ task.content.render }}
+    {% if task.cache_prerequisites_met %}
+      {{ task.content.render }}
+    {% else %}
+      <i>Nište riješili neke od preduvjeta za ovaj zadatak!</i>
+    {% endif %}
 
     {% if 'timesince' in options %}
       <div style="text-align:right;color:gray;">{{ task.date_created|timesince }}</div>

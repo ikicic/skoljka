@@ -63,6 +63,7 @@ UPDATE userprofile_userprofile SET eval_sol_last_view = NOW();
 
 ALTER TABLE folder_folder_tasks ADD COLUMN position INT NOT NULL DEFAULT 0;
 
+ALTER TABLE task_task ADD COLUMN prerequisites VARCHAR(100) NOT NULL;
 
 ALTER TABLE search_searchcache CHANGE COLUMN tag_string `key` VARCHAR(100) NOT NULL;
 

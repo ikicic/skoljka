@@ -6,7 +6,6 @@ from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpRespon
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.template.defaultfilters import slugify
-from django.utils import simplejson
 
 from permissions.constants import DELETE, EDIT, EDIT_PERMISSIONS, VIEW
 from permissions.models import ObjectPermission

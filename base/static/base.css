@@ -361,6 +361,10 @@ a.register {
   color: #888
 }
 
+/* Django */
+.errorlist {
+  color: red;
+}
 
 /* Homepage */
 .homepage-info {

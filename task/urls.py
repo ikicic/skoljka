@@ -3,6 +3,8 @@ from django.views.generic import DetailView, ListView, TemplateView
 from task.models import Task
 
 urlpatterns = patterns('',
+    # TODO: this ajax url is different from the other ajax urls
+    (r'^ajax/prerequisites/', 'task.ajax.prerequisites'),
     (r'^$', 'task.views.task_list'),
     (r'^user/(?P<user_id>\d+)/$', 'task.views.task_list'),
 

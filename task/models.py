@@ -1,4 +1,5 @@
-﻿from django.db import models
+﻿from django.core.validators import RegexValidator
+from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
@@ -83,8 +84,24 @@ class Task(BasePermissionsModel):
         (20, 'Vidljiva samo ovlaštenim korisnicima')]
     solution_settings = models.SmallIntegerField(default=0,
         verbose_name=u'Postavke rješenja', choices=SOLUTION_SETTINGS_CHOICES,
-        help_text=icon_help_text(u'Rješenja će biti prikazana na popisu, ali '
-            u'im tekst neće biti vidljiv.'))
+        help_text=icon_help_text(u'Postavi li se ograničenje, rješenja će biti '
+            u'prikazana na popisu, ali im tekst neće biti vidljiv.'))
+
+    # Comma-separator list of task IDs that are prerequisites for this task.
+    # If prerequisites are set, solution_settings MUST NOT be SOLUTIONS_VISIBLE.
+    # This makes logically more sense, and also extremely simplifies
+    # the implementation. For example, we don't have to care anything about
+    # the solution visibility, because solution_settings will check it anyway.
+    # It is assumed that if the user already solved correctly the task itself,
+    # it automatically met all prerequisites. If the author wants to add
+    # new prerequisites at some point, that's his problem, it will have no
+    # effect on the users that already solved the task.
+    # Thus, just make sure not to show the task content in task view, list etc.
+    prerequisites = models.CharField(max_length=100, verbose_name='Preduvjeti',
+        blank=True, default='', help_text=icon_help_text(
+            u'Popis ID-eva zadataka, odvojenih zarezom, '
+            u'koji su preduvjet ovom zadatku. Korisnik će moći pristupiti '
+            u'zadatku samo uz poslana i točna rješenja navedenih zadataka.'))
 
     def __unicode__(self):
         return '#%d %s' % (self.id, self.name)
@@ -93,6 +110,15 @@ class Task(BasePermissionsModel):
         return '/task/%d/' % self.id
 
     def get_link(self, tooltip=False, url_suffix=''):
+        # If prerequisites not met, do not output link.
+        if self._get_prerequisites() and     \
+                not getattr(self, 'cache_prerequisites_met', False):
+            # Do not show if this is a file or not, it doesn't matter.
+            # Especially, don't put the link to the file itself!
+            return mark_safe(u'<i class="icon-lock" title="Nište riješili neke '
+                u'od preduvjeta za ovaj zadatak!"></i> '
+                u'<span class="task-locked">{}</span>'.format(self.name))
+
         if self.file_attachment_id:
             url = self.cache_file_attachment_url
             file = u'<a href="{}" title="{}">'      \
@@ -106,6 +132,22 @@ class Task(BasePermissionsModel):
             file, self.id, url_suffix,
             ' task-tt-marker' if tooltip and self.solvable else '',
             self.name))
+
+    def _check_prerequisites(self, user, solutions):
+        """
+            Given the user and the dictionary {task_id: solution},
+            check whether this task is unlocked.
+        """
+        # The task is always unlocked to the author.
+        self.cache_prerequisites_met = self.author_id == user.id \
+            or all(id in solutions and solutions[id].is_correct()
+                for id in self._get_prerequisites())
+
+    def _get_prerequisites(self):
+        try:
+            return [int(x) for x in self.prerequisites.split(',')]
+        except ValueError:
+            return []
 
     def is_file(self):
         return self.file_attachment_id

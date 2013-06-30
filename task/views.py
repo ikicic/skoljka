@@ -351,18 +351,29 @@ def task_list(request, user_id=None):
 def detail(request, id):
     task = get_object_or_404(Task, id=id)
 
-    try:
-        solution = request.user.is_authenticated() \
-            and Solution.objects.get(author=request.user, task=task)
-    except (Solution.DoesNotExist, IndexError):
-        solution = None
-
-    task.cache_solution = solution
-
     perm = task.get_user_permissions(request.user)
 
     if VIEW not in perm:
         return (response.FORBIDDEN, 'Not allowed to view this task!')
+
+    prerequisites = task._get_prerequisites()
+
+    # Get all necessary solutions at once.
+    if request.user.is_authenticated():
+        solutions = Solution.objects.filter(author_id=request.user.id,
+            task_id__in=prerequisites + [id])
+        solutions = {x.task_id: x for x in solutions}
+    else:
+        solutions = {}
+
+    task._check_prerequisites(request.user, solutions)
+
+    if not task.cache_prerequisites_met:
+        return (403, 'Neki preduvjeti za ovaj zadatak nisu ispunjeni!')
+
+    # Remember my solution.
+    solution = solutions.get(id)
+    task.cache_solution = solution
 
     # ovo ce ici preko C++ skripte za pocetak
     # task.update_similar_tasks(1)
