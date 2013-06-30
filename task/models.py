@@ -111,11 +111,10 @@ class Task(BasePermissionsModel):
 
     def get_link(self, tooltip=False, url_suffix=''):
         # If prerequisites not met, do not output link.
-        if self._get_prerequisites() and     \
-                not getattr(self, 'cache_prerequisites_met', False):
+        if not getattr(self, 'cache_prerequisites_met', False):
             # Do not show if this is a file or not, it doesn't matter.
             # Especially, don't put the link to the file itself!
-            return mark_safe(u'<i class="icon-lock" title="Nište riješili neke '
+            return mark_safe(u'<i class="icon-lock" title="Niste riješili neke '
                 u'od preduvjeta za ovaj zadatak!"></i> '
                 u'<span class="task-locked">{}</span>'.format(self.name))
 
@@ -132,16 +131,6 @@ class Task(BasePermissionsModel):
             file, self.id, url_suffix,
             ' task-tt-marker' if tooltip and self.solvable else '',
             self.name))
-
-    def _check_prerequisites(self, user, solutions):
-        """
-            Given the user and the dictionary {task_id: solution},
-            check whether this task is unlocked.
-        """
-        # The task is always unlocked to the author.
-        self.cache_prerequisites_met = self.author_id == user.id \
-            or all(id in solutions and solutions[id].is_correct()
-                for id in self._get_prerequisites())
 
     def _get_prerequisites(self):
         try:

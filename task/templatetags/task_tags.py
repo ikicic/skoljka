@@ -3,8 +3,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.safestring import mark_safe
 
 from tags.models import TaggedItem
-
 from solution.models import Solution
+
+from task.utils import check_prerequisites_for_tasks
 
 import collections
 
@@ -19,7 +20,8 @@ def task_link(task, tooltip=False, url_suffix=''):
 
 @register.inclusion_tag('inc_task_small_box.html', takes_context=True)
 def task_small_box(context, task, div_class='', url_suffix='', options='', well=True):
-    return {'user': context['user'], 'task': task, 'div_class': div_class, 'url_suffix': url_suffix, 'options': options, 'well': well}
+    return {'user': context['user'], 'task': task, 'div_class': div_class,
+        'url_suffix': url_suffix, 'options': options, 'well': well}
 
 @register.simple_tag(takes_context=True)
 def task_options_mode_check(context):
@@ -38,8 +40,12 @@ def cache_task_info_lite(context, tasks):
     """
     ids = [x.id for x in tasks]
 
+    check_prerequisites_for_tasks(tasks, context['user'])
+    unlocked_ids = [x.id for x in tasks if not x.cache_prerequisites_met]
+
     # ------ context variables --------
     context['task_ids'] = ids
+    context['unlocked_task_count'] = len(unlocked_ids)
     return ''
 
 
@@ -49,6 +55,7 @@ def cache_task_info(context, tasks):
         Prepares data (tags, solution status and similar) for task list.
         Usually just one page of tasks is considered.
     """
+    # TODO: cache_task_info util method that takes user, not context.
     user = context['user']
     task_content_type = ContentType.objects.get_by_natural_key(app_label="task", model="task")
     ids = [x.id for x in tasks]
@@ -66,13 +73,12 @@ def cache_task_info(context, tasks):
 
     # ----- solutions ------
     if user.is_authenticated():
-        # All tasks for which solutions we are interested in.
-        all_tasks = sum([x._get_prerequisites() for x in tasks], ids)
-        solutions = Solution.objects.filter(author=user, task_id__in=all_tasks)
+        solutions = Solution.objects.filter(author=user, task_id__in=ids)
         solutions = {x.task_id: x for x in solutions}
         for task in tasks:
             task.cache_solution = solutions.get(task.id)
-            task._check_prerequisites(user, solutions)
+
+    check_prerequisites_for_tasks(tasks, user)
 
     # ----- folder edit -----
     if user.is_authenticated():

@@ -16,7 +16,7 @@ from activity import action as _action
 from folder.models import Folder
 from folder.utils import get_task_folder_ids, prepare_folder_menu,  \
     invalidate_cache_for_folders, invalidate_folder_cache_for_task
-from permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS
+from permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS, VIEW_SOLUTIONS
 from permissions.models import ObjectPermission
 from recommend.utils import task_event
 from search.utils import update_search_cache
@@ -34,6 +34,7 @@ from skoljka.utils.timeout import run_command
 from task.models import Task, SimilarTask
 from task.forms import TaskForm, TaskFileForm, TaskAdvancedForm,    \
     TaskExportForm, EXPORT_FORMAT_CHOICES
+from task.utils import check_prerequisites_for_tasks
 
 import os, sys, hashlib, codecs, datetime, zipfile
 
@@ -366,7 +367,10 @@ def detail(request, id):
     else:
         solutions = {}
 
-    task._check_prerequisites(request.user, solutions)
+    if VIEW_SOLUTIONS in perm:
+        task.cache_prerequisites_met = True
+    else:
+        check_prerequisites_for_tasks([task], request.user)
 
     if not task.cache_prerequisites_met:
         return (403, 'Neki preduvjeti za ovaj zadatak nisu ispunjeni!')
@@ -577,7 +581,6 @@ def export(request, format=None, ids=None):
         format = POST.get('format')
         ids  = POST.get('ids')
 
-    print POST
 
     available_formats = dict(EXPORT_FORMAT_CHOICES)
     if not ids or format not in available_formats:
@@ -589,9 +592,18 @@ def export(request, format=None, ids=None):
         raise Http404
 
     # check for permissions
+    # TODO: use some permissions util method
     tasks = Task.objects.for_user(request.user, VIEW).filter(id__in=id_list).distinct()
     if len(tasks) != len(id_list):
         raise Http404('Neki od navedenih zadataka ne postoje ili su skriveni.')
+
+    check_prerequisites_for_tasks(tasks, request.user)
+    removed_tasks = [x for x in tasks if not x.cache_prerequisites_met]
+
+    if removed_tasks:
+        # Remove them for the list.
+        id_list = [x.id for x in tasks if x.cache_prerequisites_met]
+        ids = ','.join(str(x) for x in id_list)
 
     # permission ok, use shortened query
     tasks = Task.objects.filter(id__in=id_list)
@@ -600,6 +612,9 @@ def export(request, format=None, ids=None):
     task_position = {id: position for position, id in enumerate(id_list)}
     sorted_tasks = list(tasks)
     sorted_tasks.sort(key=lambda task: task_position[task.id])
+
+    for x in sorted_tasks:
+        x.cache_prerequisites_met = True
 
     # force queryset evaluation and prepare all attachments...
     content_to_task = {}
@@ -640,8 +655,10 @@ def export(request, format=None, ids=None):
         form.fields['create_archive'].widget = forms.HiddenInput()
 
     return {
-        'format': available_formats[format],
-        'form': form,
-        'tasks': sorted_tasks,
+        'all_tasks': removed_tasks + sorted_tasks,
         'attachments': attachments,
+        'form': form,
+        'format': available_formats[format],
+        'removed_tasks': removed_tasks,
+        'tasks': sorted_tasks,
     }

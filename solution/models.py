@@ -198,10 +198,11 @@ class Solution(ModelEx):
                 can_view, should_obfuscate
 
             The result depends on:
-                Task solution settings  (can_view)
-                Explicit permission     (can_view)
-                Did user solve the task (can_view, should_obfuscate)
-                Profile preferences     (should_obfuscate)
+                Task prerequisites settings (can_view)
+                Task solution settings      (can_view)
+                Explicit permission         (can_view)
+                Did user solve the task     (can_view, should_obfuscate)
+                Profile preferences         (should_obfuscate)
 
             It is assumed the task is visible to the user.
 
@@ -220,6 +221,10 @@ class Solution(ModelEx):
 
         if self.author_id == user.id:
             return True, False # always show my own solutions
+
+        # This value must be already determined!
+        if not self.task.cache_prerequisites_met:
+            return False, True
 
         if task_settings != Task.SOLUTIONS_VISIBLE:
             # Currently, the task's author can't make solutions unavailable

@@ -6,6 +6,7 @@ from django.template import RequestContext
 from activity.models import Action
 from task.models import Task
 from task.templatetags.task_tags import cache_task_info
+from task.utils import check_prerequisites_for_tasks
 from permissions.constants import VIEW
 #from recommend.utils import refresh_user_information
 from recommend.models import UserRecommendation
@@ -55,8 +56,14 @@ def homepage(request):
     recent_tasks = list(Task.objects.for_user(request.user, VIEW).distinct() \
         .order_by('-id')[:10])
 
+    check_prerequisites_for_tasks(recent_tasks, request.user)
+
+    # Filter visible tasks
+    recent_tasks = [x for x in recent_tasks if x.cache_prerequisites_met]
+
     if len(recent_tasks) > 2:
         recent_tasks = random.sample(recent_tasks, 2)
+
 
     if request.user.is_authenticated():
         return homepage_online(request, recent_tasks)

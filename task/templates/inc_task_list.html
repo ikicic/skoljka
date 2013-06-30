@@ -73,7 +73,13 @@
     <div>
       <br>
       Ukupno odabranih zadataka: {{ tasks|length }}<br>
-      Na ovaj način možete napraviti jedan LaTeX, odnosno PDF sa svim odabranim zadacima.
+      Na ovaj način možete napraviti jedan LaTeX, odnosno PDF sa svim odabranim zadacima.<br>
+      {% if unlocked_task_count %}
+        <br>
+        <span style="color:red;">
+          <b>Upozorenje:</b> Neki odabrani zadaci su neotključani ({{ unlocked_task_count }}).
+        </span>
+      {% endif %}
     </div>
   {% else %} {# ... no options #}
     {# value must be unicode #}
