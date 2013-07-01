@@ -46,6 +46,7 @@ tag_open = {
 
 # img accepts attachment attribute, index of attachment to use as a src (1-based)
     'img': ('<img alt="Attachment image"%(extra)s>', '\\includegraphics%(extra)s'),
+    'url': ('<a href="%(url)s" rel="nofollow">', '%(url)s'),   # TODO: LaTeX links
 }
 
 # automatically converted attributes as %(extra)s
@@ -63,6 +64,7 @@ tag_close = {
     'u': ('</u>', '}'),
     'quote': ('</div>', ''),
     'img': None,
+    'url': ('</a>', ''),
 }
 
 
@@ -87,6 +89,11 @@ def parse_bb_code(S):
     attrs = tmp[1:]
 
     attrs = dict([x.split('=', 2) for x in attrs])
+
+    # Additionally, check if the name is an attribute (e.g. [url=(...)][/url])
+    if '=' in name:
+        name, value = S.split('=', 1)
+        attrs[name] = value
 
     return name, attrs
 
@@ -127,6 +134,7 @@ def _convert(T, type, handle_latex_func, escape_table, content=None,
             out.append(newline)
             i += 1
         elif T[i] == '[':   # BBCode
+            # TODO: [url] can't contain ]
             end = T.find(']', i)
             if end == -1:
                 out.append('[')     # no error messages for now
@@ -197,8 +205,19 @@ def _convert(T, type, handle_latex_func, escape_table, content=None,
 
                             except:
                                 open = u'{{ Greška pri preuzimanju img datoteke. (Nevaljan broj?) }}'
+                    elif tag == 'url':
+                        # TODO: show icon for external URLs
+                        # Manually get the URL if not given.
+                        if 'url' not in attrs:
+                            url_end = T.find('[/url]', i)
+                            if url_end == -1:
+                                open = u'{{ Nedostaje [/url] }}'
+                            else:
+                                attrs['url'] = T[i + 5:url_end]
+                        attrs['url'] = xss.escape(attrs.get('url', ''))
 
-                    open %= {'extra': extra}
+                    attrs.update({'extra': extra})
+                    open %= attrs
                     out.append(open)
                 i = end + 1
         elif T[i] == '$':
