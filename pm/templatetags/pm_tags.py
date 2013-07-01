@@ -32,7 +32,6 @@ def _cache_pm_info(pms, type, user):         # ...
     for x in pairs:
         pm_groups[x.messagecontent_id].append(x.group)
         
-    print pm_groups
     if type in ['inbox', 'group_inbox']:
         for pm in pms:
             pm.message.cache_recipients = sorted(pm_groups[pm.message_id])

@@ -13,6 +13,7 @@
 # For performance reasons, ncache is implemented as a module, not as a class.
 # (is it faster that way?)
 
+from django.conf import settings
 from django.core.cache import cache
 
 def make_full_key(namespace, counter, key):
@@ -107,7 +108,8 @@ def invalidate_namespace(namespace):
         Invalidate given namespace. Fails silently if namespace doesn't exist.
     """
     try:
-        print 'Invalidating namespace "%s"' % namespace
+        if settings.DEBUG:
+            print 'Invalidating namespace "%s"' % namespace
         cache.incr(namespace)
     except ValueError:
         # Cache does not even exist. Ignore.

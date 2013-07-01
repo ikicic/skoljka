@@ -28,7 +28,6 @@ def leave(request, group_id=None):
     if not is_member:
         return (403, 'You are not member of this group.')
 
-    print request.POST
     if request.method == 'POST':
         if request.POST.get('confirm') == u'1':
             request.user.groups.remove(group)

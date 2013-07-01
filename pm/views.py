@@ -134,7 +134,7 @@ def inbox(request):
     pm = MessageRecipient.objects.filter(recipient=request.user, deleted=False) \
             .exclude(message__author=request.user)  \
             .select_related('message', 'message__author', 'message__content') \
-            .order_by('-message_id')
+            .order_by('-message__id')
 
     return render_to_response('pm_inbox.html', {
             'pm': pm,

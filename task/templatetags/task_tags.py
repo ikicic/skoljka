@@ -47,6 +47,7 @@ def task_view_type_check(context):
         # 0 is list, 1 is with content, 2 is with context (two tasks per row)
         if get_useroption(context['request'], field_name) != 0:
             context['tasks'] = tasks.select_related('content')
+    return ''
 
 @register.simple_tag(takes_context=True)
 def cache_task_info_lite(context, tasks):

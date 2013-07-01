@@ -241,11 +241,12 @@ JOHNNY_MIDDLEWARE_KEY_PREFIX = 'jCS'
 # For some reason, cache did not work with the default value.
 JOHNNY_MIDDLEWARE_SECONDS = 7 * 86400
 
-# Looks like it is not smart to use blacklist at all, because johnny-cache
-# won't cache the query if any of its tables are in the blacklist. For example,
-# putting search_searchcacheelement into the blacklist would disable caching
-# of all queries like folder.get_queryset with permission check.
-# MAIN_IN_BLACKLIST = (...)
+# Looks like it is not smart to put anything except django_session into
+# blacklist at all. Johnny-cache won't cache the query if any of its tables are
+# in the blacklist. For example, putting search_searchcacheelement into the
+# blacklist would disable caching of all queries like folder.get_queryset
+# with permission check.
+MAIN_IN_BLACKLIST = ('django_session')
 
 ######################################
 # django-registration
