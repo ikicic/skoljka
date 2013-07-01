@@ -9,6 +9,8 @@ from task.models import Task
 from activity.constants import *
 from activity.models import Action
 
+from django.db import connection
+
 def get_recent_activities(user, max_count, exclude_user=None, target=None,
         action_object=None):
     """
@@ -37,7 +39,7 @@ def get_recent_activities(user, max_count, exclude_user=None, target=None,
     if action_object:
         activity = activity.filter(action_object=action_object)
 
-    activity = activity.select_related('actor', 'actor__userprofile',
+    activity = activity.select_related('actor', 'actor__profile',
         'target_content_type').order_by('-id')[:max_count]
     activity = list(activity)
     activity_by_id = {x.id: x for x in activity}

@@ -95,7 +95,8 @@ def cache_solution_info(user, solutions):
     # Can view solutions?
     # First, ignore those with SOLUTIONS_VISIBLE setting, and remove duplicates.
     explicit_ids = set([x.task_id for x in solutions    \
-        if x.task.solution_settings != Task.SOLUTIONS_VISIBLE])
+        if x.task.solution_settings != Task.SOLUTIONS_VISIBLE   \
+        and x.task.author_id != user.id])
     if explicit_ids:
         # Second, if any left, ask for permissions.
         explicit_ids = get_object_ids_with_exclusive_permission(
@@ -105,7 +106,8 @@ def cache_solution_info(user, solutions):
     for y in solutions:
         y._cache_my_solution = my_solutions.get(y.task_id)
         y.task._cache_can_view_solutions = y.task_id in explicit_ids    \
-            or y.task.solution_settings == Task.SOLUTIONS_VISIBLE
+            or y.task.solution_settings == Task.SOLUTIONS_VISIBLE       \
+            or y.task.author_id == user.id
 
     return ''
 

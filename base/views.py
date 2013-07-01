@@ -37,10 +37,13 @@ def homepage_online(request, recent_tasks):
         recommend = random.sample(recommend, 5)
 
     if recommend:
-        recommend = Task.objects.filter(id__in=recommend)
+        recommend = Task.objects.filter(id__in=recommend)   \
+            .select_related('content')
 
-        # context, tasks
-        cache_task_info({'user': request.user}, recommend)
+    recommend = list(recommend)
+
+    # context, tasks
+    cache_task_info({'user': request.user}, recommend + recent_tasks)
 
     return ('homepage_online.html', {
         'recent_tasks': recent_tasks,
@@ -53,8 +56,8 @@ def homepage_online(request, recent_tasks):
 
 @response()
 def homepage(request):
-    recent_tasks = list(Task.objects.for_user(request.user, VIEW).distinct() \
-        .order_by('-id')[:10])
+    recent_tasks = list(Task.objects.for_user(request.user, VIEW)   \
+        .select_related('content').order_by('-id')[:10])
 
     check_prerequisites_for_tasks(recent_tasks, request.user)
 
@@ -63,7 +66,6 @@ def homepage(request):
 
     if len(recent_tasks) > 2:
         recent_tasks = random.sample(recent_tasks, 2)
-
 
     if request.user.is_authenticated():
         return homepage_online(request, recent_tasks)

@@ -6,10 +6,13 @@ from skoljka.utils.decorators import response_update_cookie
 from skoljka.utils.templatetags.utils_tags import generate_get_query_string
 from skoljka.utils.xss import escape
 
+from userprofile.utils import get_useroption
+
 from datetime import datetime
 
 register = template.Library()
 
+# TODO: refactor UserOptions!
 # view inc_task_list.html and inc_solution_list.html
 
 class UserOptionNode(template.Node):
@@ -61,10 +64,8 @@ class UserOptionsNode(template.Node):
                 user.get_profile().save()
             else:
                 response_update_cookie(context['request'], field_name, value)
-        elif user.is_authenticated():
-            value = getattr(user.get_profile(), field_name)
         else:
-            value = context['request'].COOKIES.get(field_name, self.default_value)
+            value = get_useroption(context['request'], field_name)
 
         context._useroptions_field_name = field_name
         context._useroptions_value = unicode(value)

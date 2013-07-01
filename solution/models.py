@@ -230,8 +230,9 @@ class Solution(ModelEx):
         if task_settings != Task.SOLUTIONS_VISIBLE:
             # Currently, the task's author can't make solutions unavailable
             # to himself/herself.
-            can_view = getattr(self.task, '_cache_can_view_solutions', False)  \
-                or self.task.user_has_perm(user, VIEW_SOLUTIONS)
+            can_view = getattr(self.task, '_cache_can_view_solutions', None)
+            if can_view is None:
+                can_view = self.task.user_has_perm(user, VIEW_SOLUTIONS)
 
             # Also, solution check may be done before the explicit permission
             # check. Not a big performance difference, both are assumed to be

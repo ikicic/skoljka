@@ -4,6 +4,7 @@ from django.utils.safestring import mark_safe
 
 from tags.models import TaggedItem
 from solution.models import Solution
+from userprofile.utils import get_useroption
 
 from task.utils import check_prerequisites_for_tasks
 
@@ -31,6 +32,21 @@ def task_options_mode_check(context):
     if context['user'].is_staff:
         context['options_mode'] = 'options' in context['request'].GET
     return ''
+
+@register.simple_tag(takes_context=True)
+def task_view_type_check(context):
+    """
+        Used for inc_task_list.html. Use select_related('content') if showing
+        the content. Checks the user options and if the 'tasks' is the queryset.
+    """
+    # TODO: This is temporary solution. Refactor UserOptions!
+    # Takes the old value if the current request updates it.
+    tasks = context['tasks']
+    if hasattr(tasks, 'select_related'):
+        field_name = context.get('view_type', "task_view_type")
+        # 0 is list, 1 is with content, 2 is with context (two tasks per row)
+        if get_useroption(context['request'], field_name) != 0:
+            context['tasks'] = tasks.select_related('content')
 
 @register.simple_tag(takes_context=True)
 def cache_task_info_lite(context, tasks):

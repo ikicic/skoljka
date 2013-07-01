@@ -39,6 +39,12 @@ def detail(request, solution_id):
     else:
         ratings = []
 
+    # If I can view the solution, it means I can view the Task.
+    # Note that I might not even met the actual prerequisites, but it means
+    # I do have the solution, or I have VIEW_SOLUTION permission.
+    # (look at the docs of .prerequisites in task/models.py)
+    solution.task.cache_prerequisites_met = True
+
     can_view, obfuscate = solution.check_accessibility(request.user)
 
     if not can_view:
@@ -48,12 +54,6 @@ def detail(request, solution_id):
         else: # Task.SOLUTIONS_VISIBLE_IF_ACCEPTED
             return (403, u'Rješenje dostupno samo korisnicima s točnim '
                 u'vlastitim rješenjem.')
-
-    # If I can view the solution, it means I can view the Task.
-    # Note that I might not even met the actual prerequisites, but it means
-    # I do have the solution, or I have VIEW_SOLUTION permission.
-    # (look at the docs of .prerequisites in task/models.py)
-    solution.task.cache_prerequisites_met = True
 
     return {
         'can_view': can_view,
