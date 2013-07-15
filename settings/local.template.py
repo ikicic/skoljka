@@ -66,6 +66,14 @@ CACHES = {
 }
 
 ######################################
+# Extra base URLs
+######################################
+
+# List of pairs (URL regex, template path). Look at base/urls.py for more info.
+# E.g. google verification code
+EXTRA_BASE_URLS = []
+
+######################################
 # Folder shortcuts
 ######################################
 
