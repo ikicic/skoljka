@@ -472,8 +472,8 @@ def advanced_new(request):
             print 'Creating folders...'
             total = _create_folders(request.user, parent, structure, None)
 
-            print 'Refreshing folder cache...'
-            refresh_cache_fields(Folder.objects.all())
+            # print 'Refreshing folder cache...'
+            # refresh_cache_fields(Folder.objects.all())
 
     else:
         form = FolderAdvancedCreateForm(request.user)

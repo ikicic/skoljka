@@ -65,7 +65,8 @@ class UserOptionsNode(template.Node):
             else:
                 response_update_cookie(context['request'], field_name, value)
         else:
-            value = get_useroption(context['request'], field_name)
+            value = get_useroption(context['request'], field_name,
+                self.default_value)
 
         context._useroptions_field_name = field_name
         context._useroptions_value = unicode(value)

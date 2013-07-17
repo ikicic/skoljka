@@ -328,7 +328,7 @@ def new(request, task_id=None, is_file=None):
     if attachment_form:
         forms.append(attachment_form)
 
-    data = get_task_folder_data(task, request.user)
+    data = get_task_folder_data(task, request.user) if task else {}
 
     data.update({
         'action_url': request.path,
