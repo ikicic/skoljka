@@ -170,7 +170,8 @@ def reverse_search(input):
     if len(tags) != len(input):
         return None
 
-    key = _reverse_search_key(tags)
+    tag_ids = [x.id for x in tags]
+    key = _reverse_search_key(tag_ids)
 
     try:
         return SearchCache.objects.get(key=key)
