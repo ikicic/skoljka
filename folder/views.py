@@ -2,7 +2,7 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Max, Count
-from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.template.defaultfilters import slugify
@@ -22,6 +22,17 @@ from folder.utils import get_folder_descendant_ids, get_visible_folder_tree,  \
     prepare_folder_menu, refresh_path_cache
 
 import re
+
+# TODO: check ancestor VIEW permissions?
+def redirect_by_path(request, path):
+    folder = get_object_or_404(Folder, cache_path=path)
+    if not folder.user_has_perm(request.user, VIEW):
+        raise Http404
+    url = folder.get_absolute_url()
+    parameters = request.GET.urlencode()
+    if parameters:
+        url += '?' + parameters
+    return HttpResponsePermanentRedirect(url)
 
 @folder_view(permission=DELETE)
 @response('folder_delete.html')
