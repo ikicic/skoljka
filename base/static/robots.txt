@@ -6,3 +6,5 @@ Disallow: /task/new/
 Disallow: /task/multiple/
 Disallow: /task/edit/
 Disallow: /task/export/
+Disallow: /*sort=
+Disallow: /*task_view_type=
