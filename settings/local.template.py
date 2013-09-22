@@ -89,3 +89,12 @@ USERPROFILE_SCHOOL_CLASS_INFO = [
 FOLDER_HOMEPAGE_SHORTCUTS = ['drz,+', 'zup,+', 'opc,+', 'IMO', 'shortlist', 'MEMO']
 FOLDER_HOMEPAGE_SHORTCUTS_OFFLINE = ['IMO', 'shortlist', 'MEMO']
 FOLDER_INLINE_YEAR_COUNT = 10
+
+######################################
+# Other
+######################################
+
+# Old path -> new path
+FOLDER_PATH_MIGRATIONS = [
+    # ('oldpath', 'newpath'),
+]

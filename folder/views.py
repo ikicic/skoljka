@@ -1,4 +1,5 @@
-﻿from django.contrib.admin.models import LogEntry, CHANGE
+﻿from django.conf import settings
+from django.contrib.admin.models import LogEntry, CHANGE
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Max, Count
@@ -25,8 +26,19 @@ import re
 
 # TODO: check ancestor VIEW permissions?
 def redirect_by_path(request, path):
-    folder = get_object_or_404(Folder, cache_path=path)
-    if not folder.user_has_perm(request.user, VIEW):
+    migrations = [('', '')] + settings.FOLDER_PATH_MIGRATIONS
+
+    folder = None
+    for old, new in migrations:
+        new_path = path.replace(old, new)
+        if new_path == path and old and new:
+            continue
+        folder = list(Folder.objects.filter(cache_path=new_path))
+        if folder:
+            folder = folder[0]
+            break
+
+    if not folder or not folder.user_has_perm(request.user, VIEW):
         raise Http404
     url = folder.get_absolute_url()
     parameters = request.GET.urlencode()
