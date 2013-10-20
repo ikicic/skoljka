@@ -20,12 +20,11 @@ def get_recent_activities(user, max_count, exclude_user=None, target=None,
         Specifically, for SOLUTION_SUBMIT checks if the user can view the
         solution, and saves as ._hide_solution_link.
     """
-    # Currently, we load recent N activities, manually iterate and
-    # remove hidden activities. So, the number of shown activities is not
-    # constant. This can be easily (partially) fixed, if we just load more than
-    # N activities at the beginning, and then truncate to N.
-    # Also, good thing about this implementation is that we can preload all
-    # necessary data about those activities.
+    # Currently, to show recent N activities, we load 2 * N and then manually
+    # iterate and remove those that are not visible to the current user. So,
+    # the number of shown activities might not be constant. Also, the good
+    # thing about this implementation is that we can preload all necessary data
+    # about these activities.
 
     # TODO: refactor activities. for what do we need the cache, as we are
     # anyway loading half of the data again? also, cache must be updated
@@ -40,7 +39,7 @@ def get_recent_activities(user, max_count, exclude_user=None, target=None,
         activity = activity.filter(action_object=action_object)
 
     activity = activity.select_related('actor', 'actor__profile',
-        'target_content_type').order_by('-id')[:max_count]
+        'target_content_type').order_by('-id')[:int(max_count * 2)]
     activity = list(activity)
     activity_by_id = {x.id: x for x in activity}
 
@@ -141,6 +140,6 @@ def get_recent_activities(user, max_count, exclude_user=None, target=None,
             else:
                 kill.add(action_id)
 
-    # And, finally, remove them.
+    # And, finally, remove hidden activities and limit the size of the output.
     activity = [x for x in activity if x.id not in kill]
-    return activity
+    return activity[:max_count]

@@ -100,6 +100,6 @@ def activity_list(context, exclude_user=None, target=None, action_object=None):
         Output recent activities. Takes care of permissions and similar.
     """
     user = context['user']
-    activity = get_recent_activities(user, 40, exclude_user=exclude_user,
+    activity = get_recent_activities(user, 30, exclude_user=exclude_user,
         target=target, action_object=action_object)
     return {'activity': activity, 'user': user, 'request': context['request']}
