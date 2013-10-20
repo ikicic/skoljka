@@ -53,6 +53,12 @@ def get_recent_activities(user, max_count, exclude_user=None, target=None,
     for x in activity:
         ttype = (x.type, x.subtype)
 
+        # Hide 'marked as official' messages.
+        # TODO: create a general way to hide solutions.
+        if ttype == SOLUTION_AS_OFFICIAL:
+            kill.add(x.id)
+            continue
+
         if ttype in [TASK_ADD, FILE_ADD, SOLUTION_SUBMIT, SOLUTION_AS_SOLVED,
                 SOLUTION_TODO, SOLUTION_AS_OFFICIAL]:
             # check task permissions...
@@ -90,8 +96,19 @@ def get_recent_activities(user, max_count, exclude_user=None, target=None,
             kill.add(action_id)
 
     # Now, check solution accessibility...
+    # Also, remove anything related to the official solutions.
     solutions_to_check_strict = []
+    solution_ids = [id for id, task_id, action_id in solutions_to_check]
+    solutions = dict(Solution.objects \
+                             .filter(id__in=solution_ids) \
+                             .values_list('id', 'is_official'))
     for solution_id, task_id, action_id in solutions_to_check:
+        is_official = solutions.get(solution_id)
+        # Remove if not found or official (first case should never happen).
+        if is_official is None or is_official is True:
+            kill.add(action_id)
+            continue
+
         task = visible_objects.get((task_content_type_id, task_id))
         if not task:
             # kill.add(action_id) # already added
