@@ -85,7 +85,7 @@ def _do_mark(request, solution, task):
         return (403, u'Action "%s" not valid.' % action)
 
     if action in ['official0', 'official1'] and task.author != request.user \
-            and not request.user.has_perm('mark_as_official_solution'):
+            and not request.user.has_perm('solution.mark_as_official_solution'):
         return (403, u'No permission to mark as official solution.')
 
     if not task.solvable:
