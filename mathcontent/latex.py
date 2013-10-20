@@ -159,7 +159,12 @@ def generate_png(eq, format):
         cmd = "%s -bg Transparent --gamma 1.5 -D 120 --depth* -T tight --strict -o %s.png %s" % (latex_full_filename('dvipng'), filename, filename)
         svgcmd = "%s -p 1 -n -o %s.svg %s" % (latex_full_filename('dvisvgm'), filename, filename)
         status, stdout = getstatusoutput(cmd)
-    
+
+    # Fixing $\newline$ bug. dvipng would return depth=2^31-1.
+    # In case we get something like this, do not output weird html, rather mark
+    # the latex as invalid.
+    MAX_DEPTH = 10000
+
     depth = ERROR_DEPTH_VALUE
     if not error and status == 0:
         depth_re = re.compile(r'.*\[\d+ depth=(-?\d+)\]')
@@ -168,6 +173,8 @@ def generate_png(eq, format):
             if m:
                 depth = int(m.group(1))
                 break
+        if depth > MAX_DEPTH:
+            depth = ERROR_DEPTH_VALUE
         if depth == ERROR_DEPTH_VALUE:
             print 'ERROR stdout:', stdout
 
