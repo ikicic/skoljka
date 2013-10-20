@@ -17,6 +17,9 @@ class Post(models.Model):
     last_edit_by = models.ForeignKey(User, related_name='+')
     last_edit_time = models.DateTimeField(auto_now=True)
 
+    def __unicode__(self):
+        return u'Post #{}'.format(self.id)
+
     def can_edit(self, user, container=None):
         if container is None:
             container = self.content_object
