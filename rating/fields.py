@@ -84,30 +84,32 @@ class RatingManager(models.Manager):
         score.save()
 
         if self.field.type == AVERAGE:
-            value = 0 if score.count == 0 else float(score.sum) / score.count
+            field_value = 0 if score.count == 0 \
+                            else float(score.sum) / score.count
         else: # SUM
-            value = score.sum
+            field_value = score.sum
 
-        old_value = getattr(self.instance, self.field_name, value)
-        setattr(self.instance, self.field_name, value)
+        old_field_value = getattr(self.instance, self.field_name, 0)
+        setattr(self.instance, self.field_name, field_value)
         self.instance.save()
         
         if self.field.on_update:
             # automatically cache the function pointer itself, don't search
             # for the function every time
             self.field.on_update = get_callable(self.field.on_update)
-            self.field.on_update(self.instance, self.field_name, old_value, value)
+            self.field.on_update(self.instance, self.field_name,
+                old_field_value, field_value)
 
         if self.field.action_type:
             authors_group_id = hasattr(self.instance, 'author_id') \
                 and self.instance.author.get_profile().private_group_id
             if value == 0:
-                remove(user, self.field.action_type[0],
+                remove(user, self.field.action_type[0], action_object=vote,
                     target=self.instance, group_id=authors_group_id)
             else:
                 replace_or_add(user, self.field.action_type, action_object=vote,
                     target=self.instance, group_id=authors_group_id)
-        return value
+        return field_value
         
 
 
