@@ -384,7 +384,7 @@ def detail(request, id):
         return (403, 'Neki preduvjeti za ovaj zadatak nisu ispunjeni!')
 
     # Remember my solution.
-    solution = solutions.get(id)
+    solution = solutions.get(int(id))
     task.cache_solution = solution
 
     # ovo ce ici preko C++ skripte za pocetak
