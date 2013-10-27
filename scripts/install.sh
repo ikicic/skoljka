@@ -1,83 +1,32 @@
 #!/bin/bash
 
-# This script pulls all the packages needed for this project for
-# a Debian based system. You can run it from any path.
+# Run this from the skoljka's root folder!
 
-function assert {
-    if [[ $1 -ne 0 ]]
-    then
-        echo "Error!!! Aborting."
-        exit 0
-    fi
-}
+sudo apt-get install python2.7 python-setuptools python-pip mysql-client-core-5.5 mysql-server-5.5 texlive-full memcached
+sudo pip install -r requirements.txt
 
-echo "Installing packages..."
-sudo apt-get install python2.7 python-setuptools wget git-core xclip openssh-client
-assert $?
+# Configure local folders
+mkdir -p local
+mkdir -p local/media
+mkdir -p local/media/attachment
+mkdir -p local/media/export
+mkdir -p local/media/m
 
-echo "Downloading django..."
-wget http://www.djangoproject.com/download/1.3.1/tarball/ -O Django-1.3.1.tar.gz
-assert $?
-
-echo "Making django dir..."
-sudo mkdir -p "/usr/local/src/Django-1.3.1"
-assert $?
-
-echo "Unzipping django..."
-sudo tar -xf "Django-1.3.1.tar.gz" -C "/usr/local/src/"
-assert $?
-
-echo "Removing downloaded file..."
-rm -rf "Django-1.3.1.tar.gz"
-assert $?
-
-echo "Installing django..."
-cd "/usr/local/src/Django-1.3.1"
+# django-template-preprocessor cannot be installed using pip.
+mkdir -p local/modules
+# TODO: do not reinstall (or reinstall...)
+cd local/modules
+git clone https://github.com/citylive/django-template-preprocessor.git
+cd django-template-preprocessor
 sudo python setup.py install
-assert $?
+cd ../../..
 
-echo "Installing django sentry..."
-sudo easy_install -U django-sentry
-assert $?
+# Make a copy of local settings
+cp -n settings/local.template.py settings/local.py
 
-echo -n "Username: "
-read username
-
-echo -n "Email: "
-read email
-
-read -p "Do you need a ssh key for github [Y/n]? " sshkey
-if [[ $sshkey != "n" ]]
-then
-    echo "Creating ssh-keys..."
-    ssh-keygen -t rsa -C $email
-    assert $?
-
-    xclip ~/.ssh/id_rsa.pub
-    assert $?
-
-    echo "Open https://github.com/account/ssh, press Add another public key"
-    echo "    then paste the string from ~/.ssh/id_rsa.pub in the Key field."
-    echo "    That value should be in your clipboard."
-    read -p "Press Enter to continue..."
-else
-    echo "Skipping ssh key generation..."
-fi
-
-read -p "Do want me to set up git [y/N]? " setup
-if [[ $setup != "y" ]]
-then
-    echo "Skipping git setup!"
-    echo "Done!"
-    exit 0
-fi
-
-echo "Cloning the repository..."
-git clone git@github.com:fpavetic/skoljka.git
-assert $?
-
-echo "Configuring git..."
-git config --global user.name $username
-git config --global user.email $email
-
-echo "Done!"
+echo
+echo ==============================================================
+echo Now create an empty database and fill out the settings/local.py
+echo After that, run following commands:
+echo python manage.py syncdb --noinput
+echo python b.py

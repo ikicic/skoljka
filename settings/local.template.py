@@ -81,10 +81,10 @@ EXTRA_BASE_URLS = []
 
 USERPROFILE_SCHOOL_CLASS_INFO = [
     # Unique ID, Description, Tag
-    (4, u'Srednja škola 4. razred', 'ss4'),
-    (3, u'Srednja škola 3. razred', 'ss3'),
-    (2, u'Srednja škola 2. razred', 'ss2'),
-    (1, u'Srednja škola 1. razred', 'ss1'),
+    (4, u'Srednja \u0161kola 4. razred', 'ss4'),
+    (3, u'Srednja \u0161kola 3. razred', 'ss3'),
+    (2, u'Srednja \u0161kola 2. razred', 'ss2'),
+    (1, u'Srednja \u0161kola 1. razred', 'ss1'),
 ]
 
 # + is replaced with the appropriate tag from school class info
