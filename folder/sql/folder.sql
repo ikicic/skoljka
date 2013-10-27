@@ -1,11 +1,10 @@
-INSERT INTO `folder_folder` VALUES 
-    (1,'root','root',NULL,'',0),
-      (2,'Natjecanja','natjecanja',1,'',0),
-         (3,'Olimpijade','olimpijade',2,'',0),
-         (4,'Hrvatska','hrvatska',2,'HRV',0),
-      (5,'Kategorije','kategorije',1,'',0),
-         (6,'Algebra','algebra',5,'algebra',0),
-         (7,'Kombinatorika','kombinatorika',5,'kombinatorika',0),
-         (8,'Geometrija','geometrija',5,'geometrija',0),
-         (9,'Teorija brojeva','teorija-brojeva',5,'teorija brojeva',0),
-      (10,'Zadatak dana','zadatak-dana',1,'',0);
+INSERT INTO `folder_folder` (`id`, `name`, `short_name`, `parent_id`) VALUES
+    (1, 'root', 'root', NULL),
+      (2, 'Natjecanja', 'Natjecanja', 1),
+         (3, 'Olimpijade', 'Olimpijade', 2),
+         (4, 'Hrvatska', 'Hrvatska', 2),
+      (5, 'Kategorije', 'Kategorije', 1),
+         (6, 'Algebra', 'Algebra', 5),
+         (7, 'Kombinatorika', 'Kombinatorika', 5),
+         (8, 'Geometrija', 'Geometrija', 5),
+         (9, 'Teorija brojeva', 'Teorija brojeva', 5);

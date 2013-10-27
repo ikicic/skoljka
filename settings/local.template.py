@@ -1,3 +1,5 @@
+# coding=utf-8
+
 # local.py is ignored by git!
 
 ######################################
@@ -79,14 +81,14 @@ EXTRA_BASE_URLS = []
 
 USERPROFILE_SCHOOL_CLASS_INFO = [
     # Unique ID, Description, Tag
-    (4, 'Srednja škola 4. razred', 'ss4'),
-    (3, 'Srednja škola 3. razred', 'ss3'),
-    (2, 'Srednja škola 2. razred', 'ss2'),
-    (1, 'Srednja škola 1. razred', 'ss1'),
+    (4, u'Srednja škola 4. razred', 'ss4'),
+    (3, u'Srednja škola 3. razred', 'ss3'),
+    (2, u'Srednja škola 2. razred', 'ss2'),
+    (1, u'Srednja škola 1. razred', 'ss1'),
 ]
 
 # + is replaced with the appropriate tag from school class info
-FOLDER_HOMEPAGE_SHORTCUTS = ['drz,+', 'zup,+', 'opc,+', 'IMO', 'shortlist', 'MEMO']
+FOLDER_HOMEPAGE_SHORTCUTS_ONLINE = ['drz,+', 'zup,+', 'opc,+', 'IMO', 'shortlist', 'MEMO']
 FOLDER_HOMEPAGE_SHORTCUTS_OFFLINE = ['IMO', 'shortlist', 'MEMO']
 FOLDER_INLINE_YEAR_COUNT = 10
 
