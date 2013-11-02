@@ -14,6 +14,7 @@ urlpatterns = patterns('',
     (r'^new/$', 'task.views.new'),
     (r'^new/advanced/$', 'task.views.advanced_new'),
     (r'^new/file/$', 'task.views.new_file'),
+    (r'^new/json/$', 'task.views.json_new'),
     (r'^(?P<task_id>\d+)/edit/$', 'task.views.new'),
 
     # this url format used to keep robots away with Disallow: /task/export/

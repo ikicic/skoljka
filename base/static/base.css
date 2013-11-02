@@ -494,6 +494,11 @@ pre {
   background-color: #DDD;
 }
 
+pre.multi-line {
+  border: none;
+  background-color: transparent;
+}
+
 img.latex,
 img.latex_center,
 object.latex,

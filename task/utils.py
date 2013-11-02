@@ -1,9 +1,16 @@
-from permissions.constants import VIEW_SOLUTIONS
-from permissions.utils import get_object_ids_with_exclusive_permission
-from solution.models import DETAILED_STATUS, Solution
+import johnny.cache
+from taggit.utils import parse_tags
 
 from folder.models import Folder
-from folder.utils import get_task_folder_ids, prepare_folder_menu
+from folder.utils import get_task_folder_ids, invalidate_cache_for_folders, \
+        prepare_folder_menu
+from mathcontent.models import MathContent
+from permissions.constants import VIEW_SOLUTIONS
+from permissions.models import ObjectPermission
+from permissions.utils import get_object_ids_with_exclusive_permission
+from search.utils import update_search_cache
+from solution.models import DETAILED_STATUS, Solution
+from tags.models import Tag, TaggedItem
 
 from task.models import Task
 
@@ -89,3 +96,82 @@ def task_similarity(first, second):
 
     # total similarity
     return tag_sim * diff_sim
+
+
+def create_tasks_from_json(description, common):
+    """
+    Given a list of Task description dictionaries, create Task instances,
+    together with other related objects.
+
+    Currently supported related objects:
+        MathContent - given as a string 'content',
+        Tags - given as a string 'tags'
+        Difficulty - given as a number 'difficulty'
+        Group permissions - given as a list of {"type": int, "group_ids": []}
+
+    Params:
+        description (list): list of dict object, describing the tasks
+        common (dict): dict object to be merged into all of the given tasks
+    """
+    common_items = common.items()
+
+    # Approx.
+    task_fields = set(Task._meta.get_all_field_names())
+    task_fields |= set(x + '_id' for x in task_fields)
+    reserved_fields = set(['content', 'difficulty', 'permissions', 'tags'])
+
+    created_objects = []
+
+    try:
+        for desc in description:
+            # Fill out default data.
+            for key, value in common_items:
+                if key not in desc:
+                    desc[key] = value
+
+            # First, prepare data to be able to create Task.
+            # --- math content ---
+            math_content = MathContent()
+            math_content.text = desc['content']
+            math_content.save()
+            created_objects.append(math_content)
+
+            # Second, create Task.
+            task = Task()
+            task.content = math_content
+            for key, value in desc.iteritems():
+                if key in task_fields and key not in reserved_fields:
+                    setattr(task, key, value)
+            task.save()
+            created_objects.append(task)
+
+            # Third, save other data.
+
+            # --- tags ---
+            # WARNING: .set is case-sensitive!
+            tags = parse_tags(desc.get('tags', ''))
+            task.tags.set(*tags)
+            update_search_cache(task, [], tags)
+
+            # --- difficulty ---
+            difficulty = desc.get('difficulty')
+            if difficulty:
+                task.difficulty_rating.update(task.author, int(difficulty))
+
+            # --- group permissions ---
+            for perm in desc.get('permissions', []):
+                for group_id in perm['group_ids']:
+                    ObjectPermission.objects.create(
+                            content_object=task,
+                            group_id=group_id,
+                            permission_type=perm['type'])
+
+    except:
+        # This should remove all dependend objects.
+        for obj in created_objects:
+            obj.delete()
+        raise
+    finally:
+        # Just in case... because we are using .commit_on_success
+        johnny.cache.invalidate(Folder, Task, ObjectPermission, Tag, TaggedItem)
+        invalidate_cache_for_folders(Folder.objects.all())

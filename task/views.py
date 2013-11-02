@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import Min
-from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseServerError
+from django.http import Http404, HttpResponse, HttpResponseRedirect, \
+        HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
@@ -15,33 +16,55 @@ from taggit.utils import parse_tags
 from activity import action as _action
 from folder.models import Folder
 from folder.utils import invalidate_cache_for_folders, \
-    invalidate_folder_cache_for_task
+        invalidate_folder_cache_for_task
+from mathcontent import latex
+from mathcontent.forms import MathContentForm
+from mathcontent.models import MathContent, Attachment
+from mathcontent.utils import check_and_save_attachment
 from permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS, VIEW_SOLUTIONS
 from permissions.models import ObjectPermission
 from recommend.utils import task_event
 from search.utils import update_search_cache
 from solution.models import Solution, STATUS as _SOLUTION_STATUS
-from mathcontent.forms import MathContentForm, AttachmentForm
-from mathcontent import latex
-from mathcontent.forms import AttachmentForm
-from mathcontent.models import MathContent, Attachment
-from mathcontent.utils import check_and_save_attachment
 from usergroup.forms import GroupEntryForm
 
 from skoljka.utils.decorators import response
 from skoljka.utils.timeout import run_command
 
 from task.models import Task, SimilarTask
-from task.forms import TaskForm, TaskFileForm, TaskAdvancedForm,    \
-    TaskExportForm, EXPORT_FORMAT_CHOICES
-from task.utils import check_prerequisites_for_tasks, get_task_folder_data
+from task.forms import TaskForm, TaskFileForm, TaskAdvancedForm, \
+        TaskExportForm, EXPORT_FORMAT_CHOICES, TaskJSONForm
+from task.utils import check_prerequisites_for_tasks, create_tasks_from_json, \
+        get_task_folder_data
 
-import os, sys, hashlib, codecs, datetime, zipfile
+import codecs, datetime, hashlib, json, os, sys, traceback, zipfile
 
 # TODO: promijeniti nacin na koji se Task i MathContent generiraju.
 # vrijednosti koje ne ovise o samom formatu se direktno trebaju
-# postaviti na vrijednosti iz forme
 
+
+@response('task_json_new.html')
+@permission_required('task.add_advanced')
+def json_new(request):
+    message = ''
+    if request.method == 'POST':
+        form = TaskJSONForm(request.POST)
+        if form.is_valid():
+            description = json.loads(form.cleaned_data['description'])
+            common = json.loads(form.cleaned_data['common'])
+            try:
+                create_tasks_from_json(description, common)
+            except:
+                message = "Something's wrong.\n\n" + traceback.format_exc()
+            else:
+                message = "Created {} task(s).".format(len(description))
+    else:
+        form = TaskJSONForm()
+
+    return {'form': form, 'message': message}
+
+
+# DEPRECATED
 @transaction.commit_on_success
 @permission_required('task.add_advanced')
 def advanced_new(request):
@@ -138,80 +161,10 @@ def advanced_new(request):
             }, context_instance=RequestContext(request),
         )
 
-################################################
-# ovo je stara verzija, sa starim formatom
-
-# TODO: maknuti debug s vremenom
-def _advanced_new_parse(s, dictionary):
-    print 'primio', s
-    s = s % dictionary
-    print 'vracam', s
-    return s
-
-@permission_required('task.add_advanced')
-def old_advanced_new(request):
-    if request.method == 'POST':
-        task_form = TaskAdvancedForm(request.POST)
-        math_content_form = MathContentForm(request.POST)
-
-        if task_form.is_valid() and math_content_form.is_valid():
-            task_template = task_form.save(commit=False)
-            math_content_template = math_content_form.save(commit=False)
-
-            contents = math_content_template.text.split('@@@@@')
-            contents = [x.strip() for x in contents]
-
-            dictionary = dict()
-
-            print contents
-            print len(contents)
-            for k in xrange(len(contents)):
-                print 'k=%d' % k
-                content = contents[k].strip()
-                new_vars = content.find('###')
-                if new_vars != -1:
-                    for key, var in [x.split('=') for x in content[:new_vars].split('|')]:
-                        dictionary[key.strip()] = var
-                        print u'Postavljam varijablu "%s" na "%s"' % (key.strip(), var)
-                    content = content[new_vars + 3:].strip()
-
-                if not content:     # skip empty tasks
-                    continue
-
-                math_content = MathContent()
-                math_content.text = content
-                math_content.save()
-                print 'uspio dodati math_content'
-
-                task = Task()
-                task.name = _advanced_new_parse(task_template.name, dictionary)
-                task.author = request.user
-                task.content = math_content
-# TODO: automatizirati .hidden: (vidi TODO na vrhu funkcije)
-                task.hidden = task_template.hidden
-                task.save()
-
-                tags = parse_tags(_advanced_new_parse(task_form.cleaned_data['_tags'], dictionary))
-                task.tags.set(*tags)
-                update_search_cache(task, [], tags)
-
-            return HttpResponseRedirect('/task/new/finish/')
-    else:
-        task_form = TaskAdvancedForm()
-        math_content_form = MathContentForm()
-
-    return render_to_response( 'task_new.html', {
-                'forms': [task_form, math_content_form],
-                'action_url': request.path,
-                'advanced': True,
-            }, context_instance=RequestContext(request),
-        )
-
-# kraj starog koda
-#########################################################
 
 def new_file(request):
     return new(request, is_file=True)
+
 
 @login_required
 @response('task_new.html')

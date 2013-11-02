@@ -25,6 +25,20 @@ class TaskExportForm(forms.Form):
         super(TaskExportForm, self).__init__(*args, **kwargs)
         self.fields['format'].widget.attrs.update({'class': 'input-small'})
 
+class TaskJSONForm(forms.Form):
+    description = forms.CharField(widget=forms.Textarea)
+    common = forms.CharField(widget=forms.Textarea)
+
+    def __init__(self, *args, **kwargs):
+        super(TaskJSONForm, self).__init__(*args, **kwargs)
+
+        for x in ['description', 'common']:
+            self.fields[x].widget.attrs.update({
+                'rows': 10,
+                'cols': 100,
+                'class': 'uneditable-textarea', # bootstrap...
+            })
+
 
 class TaskAdvancedForm(forms.ModelForm):
     _tags = forms.CharField(max_length=200)

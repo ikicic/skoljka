@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form action="/task/new/json/" method="POST">
+  {% csrf_token %}
+  <table class="kill-br">
+    {{ form.as_table }}
+  </table>
+  <br>
+  <input type="submit" class="btn btn-primary" value="Pošalji">
+  <pre class="multi-line">{{ message }}</pre>
+</form>
+
+{% endblock %}

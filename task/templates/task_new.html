@@ -42,7 +42,11 @@
     Ukoliko želite navesti broj zadatka u imenu ili tagovima, napišite <pre>[[#]]</pre>.<br>
     Npr. Ime: <pre>IMO 2011</pre>, Oznake: <pre>IMO, 2011, IMO</pre>.<br><br>
   {% else %}
-    {% if perms.task.add_advanced %}<a href="/task/new/advanced/">Napredno</a><br><br>{% endif %}
+    {% if perms.task.add_advanced %}
+      <a href="/task/new/advanced/">Napredno</a>
+      <a href="/task/new/json/">JSON</a>
+      <br><br>
+    {% endif %}
   {% endif %}
 {% endif %}
 
