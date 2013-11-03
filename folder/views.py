@@ -278,6 +278,7 @@ def new(request, folder_id=None):
             else:
                 for x in children:
                     parent_index = request.POST.get('child-{}'.format(x.id))
+                    parent_index = int(parent_index)
                     if parent_index is not None \
                             and x.parent_index != parent_index:
                         x.parent_index = parent_index
