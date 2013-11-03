@@ -1,7 +1,7 @@
 import johnny.cache
 from taggit.utils import parse_tags
 
-from folder.models import Folder
+from folder.models import Folder, FolderTask
 from folder.utils import get_task_folder_ids, invalidate_cache_for_folders, \
         prepare_folder_menu
 from mathcontent.models import MathContent
@@ -105,6 +105,8 @@ def create_tasks_from_json(description):
 
     Supported special data:
         _content (string) - the text of the task, MathContent text
+        _folder_id (int) - ID of the folder where to add the task
+        _folder_position (int) - position in that folder
         _tags (string) - a comma-separated list of tags
         _difficulty (int) - difficulty rating to be assigned by the author
         _permissions (list {"type": int, "group_ids": []}) - group permission
@@ -124,6 +126,10 @@ def create_tasks_from_json(description):
 
     created_objects = []
     message_list = []
+
+    # List of objects to create
+    folder_tasks = []
+    object_permissions = []
 
     try:
         for k, desc in enumerate(description):
@@ -159,14 +165,27 @@ def create_tasks_from_json(description):
             if difficulty:
                 task.difficulty_rating.update(task.author, int(difficulty))
 
+            # --- folder ids ---
+            folder_id = desc.get('_folder_id')
+            if folder_id is not None:
+                folder_tasks.append(
+                        FolderTask(
+                            folder_id=folder_id,
+                            task=task,
+                            position=desc.get('_folder_position', 0)))
+
             # --- group permissions ---
             for perm in desc.get('_permissions', []):
                 for group_id in perm['group_ids']:
-                    ObjectPermission.objects.create(
-                            content_object=task,
-                            group_id=group_id,
-                            permission_type=perm['type'])
+                    object_permissions.append(
+                            ObjectPermission(
+                                content_object=task,
+                                group_id=group_id,
+                                permission_type=perm['type']))
 
+
+        FolderTask.objects.bulk_create(folder_tasks)
+        ObjectPermission.objects.bulk_create(object_permissions)
     except Exception, e:
         # This should remove all dependend objects.
         for obj in created_objects:
