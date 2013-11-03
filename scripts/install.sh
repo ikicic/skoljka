@@ -26,7 +26,8 @@ cp -n settings/local.template.py settings/local.py
 
 echo
 echo ==============================================================
-echo Now create an empty database and fill out the settings/local.py
-echo After that, run following commands:
-echo python manage.py syncdb --noinput
-echo python b.py
+echo Now, do the following steps:
+echo 1. Create an empty database, USE UTF8!!
+echo 2. Fill out settings/local.py
+echo 3. python manage.py syncdb --noinput
+echo 4. python b.py

@@ -29,7 +29,8 @@ def getstatusoutput(cmd):
     return status, text
 
 def latex_full_filename(filename):
-    return ('"%s%s"' if mswindows else '%s%s') % (settings.LATEX_BIN_DIR, filename)
+    path = os.path.join(getattr(settings, 'LATEX_BIN_DIR', ''), filename)
+    return ('"%s"' if mswindows else '%s') % path
 
 
 # ur' ' won't work well, because each \u would have to be escaped
