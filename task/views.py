@@ -51,11 +51,11 @@ def json_new(request):
         form = TaskJSONForm(request.POST)
         if form.is_valid():
             description = json.loads(form.cleaned_data['description'])
-            common = json.loads(form.cleaned_data['common'])
             try:
-                create_tasks_from_json(description, common)
-            except:
-                message = "Something's wrong.\n\n" + traceback.format_exc()
+                create_tasks_from_json(description)
+            except Exception, e:
+                message = e._json_tasks_debug
+                message += "\n\n" + traceback.format_exc()
             else:
                 message = "Created {} task(s).".format(len(description))
     else:

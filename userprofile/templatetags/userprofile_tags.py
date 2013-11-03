@@ -60,8 +60,9 @@ class UserOptionsNode(template.Node):
         value = context['request'].GET.get(field_name, None)
         if value is not None and value in self.allowed_values:
             if user.is_authenticated():
-                setattr(user.get_profile(), field_name, value)
-                user.get_profile().save()
+                profile = user.get_profile()
+                setattr(profile, field_name, value)
+                profile.save()
             else:
                 response_update_cookie(context['request'], field_name, value)
         else:

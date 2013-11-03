@@ -98,41 +98,42 @@ def task_similarity(first, second):
     return tag_sim * diff_sim
 
 
-def create_tasks_from_json(description, common):
+def create_tasks_from_json(description):
     """
     Given a list of Task description dictionaries, create Task instances,
     together with other related objects.
 
-    Currently supported related objects:
-        MathContent - given as a string 'content',
-        Tags - given as a string 'tags'
-        Difficulty - given as a number 'difficulty'
-        Group permissions - given as a list of {"type": int, "group_ids": []}
+    Supported special data:
+        _content (string) - the text of the task, MathContent text
+        _tags (string) - a comma-separated list of tags
+        _difficulty (int) - difficulty rating to be assigned by the author
+        _permissions (list {"type": int, "group_ids": []}) - group permission
+            to automatically assign.
+
+    All other elements with an underscore are ignored.
 
     Params:
         description (list): list of dict object, describing the tasks
-        common (dict): dict object to be merged into all of the given tasks
-    """
-    common_items = common.items()
 
+    If an exception is thrown, additional debug information will be saved into
+    e._json_tasks_debug.
+    """
     # Approx.
     task_fields = set(Task._meta.get_all_field_names())
     task_fields |= set(x + '_id' for x in task_fields)
-    reserved_fields = set(['content', 'difficulty', 'permissions', 'tags'])
 
     created_objects = []
+    message_list = []
 
     try:
-        for desc in description:
-            # Fill out default data.
-            for key, value in common_items:
-                if key not in desc:
-                    desc[key] = value
+        for k, desc in enumerate(description):
+            message_list.append('Creating {}. task...'.format(k + 1))
 
             # First, prepare data to be able to create Task.
             # --- math content ---
             math_content = MathContent()
-            math_content.text = desc['content']
+            math_content.text = desc['_content']
+            message_list.append(desc['_content'])
             math_content.save()
             created_objects.append(math_content)
 
@@ -140,7 +141,7 @@ def create_tasks_from_json(description, common):
             task = Task()
             task.content = math_content
             for key, value in desc.iteritems():
-                if key in task_fields and key not in reserved_fields:
+                if key[0] != '_' and key in task_fields:
                     setattr(task, key, value)
             task.save()
             created_objects.append(task)
@@ -149,27 +150,30 @@ def create_tasks_from_json(description, common):
 
             # --- tags ---
             # WARNING: .set is case-sensitive!
-            tags = parse_tags(desc.get('tags', ''))
+            tags = parse_tags(desc.get('_tags', ''))
             task.tags.set(*tags)
             update_search_cache(task, [], tags)
 
             # --- difficulty ---
-            difficulty = desc.get('difficulty')
+            difficulty = desc.get('_difficulty')
             if difficulty:
                 task.difficulty_rating.update(task.author, int(difficulty))
 
             # --- group permissions ---
-            for perm in desc.get('permissions', []):
+            for perm in desc.get('_permissions', []):
                 for group_id in perm['group_ids']:
                     ObjectPermission.objects.create(
                             content_object=task,
                             group_id=group_id,
                             permission_type=perm['type'])
 
-    except:
+    except Exception, e:
         # This should remove all dependend objects.
         for obj in created_objects:
             obj.delete()
+
+        message_list.append('Reverting changes...')
+        e._json_tasks_debug = '\n'.join(message_list)
         raise
     finally:
         # Just in case... because we are using .commit_on_success
