@@ -98,7 +98,8 @@ def new(request, group_id=None):
     description_form = MathContentForm(POST, instance=description, prefix='z')
 
     if request.method == 'POST':
-        if group_form.is_valid() and usergroup_form.is_valid() and description_form.is_valid():
+        if group_form.is_valid() and usergroup_form.is_valid() \
+                and description_form.is_valid():
             group = group_form.save()
             description = description_form.save();
 

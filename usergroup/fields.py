@@ -5,6 +5,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from permissions.constants import VIEW
 from permissions.utils import filter_objects_with_permission
 
+from usergroup.models import UserGroup
+
 class UserEntryField(forms.CharField):
     widget = forms.Textarea(attrs={'rows':3})
 
@@ -43,18 +45,15 @@ class GroupEntryField(forms.CharField):
         # Do not immediately reject if len(error) > 0. List *all* invalid
         # inaccessible groups.
 
-        # Check permissions. First, skip user private groups.
-        usernames = User.objects.filter(username__in=groups_lowercase) \
-            .values_list('username', flat=True)
-        usernames = set(x.lower() for x in usernames)
-        real_groups = [x for x in groups if x.name not in usernames]
+        # Check permissions. Skip user private groups.
+        usergroups = [x.data for x in groups if x.data]
+        visible = filter_objects_with_permission(usergroups, self.user,
+            VIEW, model=UserGroup)
 
-        visible = filter_objects_with_permission(real_groups, self.user,
-            VIEW, model=Group)
-
-        if len(visible) != len(real_groups):
-            error |= set(x.name.lower() for x in real_groups)   \
-                - set(x.name.lower() for x in visible)
+        if len(visible) != len(usergroups):
+            hidden_ids = set(x.group_id for x in usergroups) \
+                       - set(x.group_id for x in visible)
+            error |= set(x.name.lower() for x in groups if x.id in hidden_ids)
 
         if error:
             raise forms.ValidationError(

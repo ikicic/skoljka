@@ -31,6 +31,7 @@ def create_user_profile(sender, user, request, **kwargs):
     profile.save()
 
     user.groups.add(group)
+    user_refresh_group_cache([user.id])
 
 def diff_to_index(diff):
     return int(diff + 0.5)
