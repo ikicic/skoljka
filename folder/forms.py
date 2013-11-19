@@ -25,7 +25,7 @@ class FolderForm(forms.ModelForm):
         self._prepare_parent_field()
 
     def _prepare_parent_field(self):
-        if self.instance.parent_id is None:
+        if self.instance.id is not None and self.instance.parent_id is None:
             del self.fields['parent']
             return
 
