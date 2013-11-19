@@ -87,16 +87,14 @@ def get_visible_folder_tree(folders, user, exclude_subtree=None):
         Fills returned folder instances with ._depth.
     """
 
-    # Pick all ancestor ids
+    # Pick all ancestors, together with the original folders. Used for
+    # permission check.
     ancestor_ids = sum([x.cache_ancestor_ids.split(',') for x in folders], [])
     ancestor_ids = [int(x) for x in ancestor_ids if x]
-
-    # For permission check. Note that we put here only elements from
-    # .cache_ancestor_ids!
+    ancestor_ids.extend([x.id for x in folders])
     ancestor_counter = Counter(ancestor_ids)
 
-    # Now add original folders and remove duplicates
-    ancestor_ids.extend([x.id for x in folders])
+    # Now remove duplicates
     ancestor_ids = set(ancestor_ids)
 
     # Get all visible subfolders related to any of the folders on the path to
@@ -114,8 +112,8 @@ def get_visible_folder_tree(folders, user, exclude_subtree=None):
     for folder in folders:
         # WARNING: manually checking Folder permissions here!
         if folder.id in all_folders or not folder.hidden or folder.author == user:
-            # OK, accessible
-            # Use old instances where possible, as there is maybe some cached data.
+            # OK, accessible. Use old instances where possible, as there is
+            # maybe some cached data.
             all_folders[folder.id] = folder
             visible_original_folder_ids.add(folder.id)
         else:
@@ -133,14 +131,15 @@ def get_visible_folder_tree(folders, user, exclude_subtree=None):
         # Check if this (main) folder is accessible / visible
         chain_ids = [int(x) for x in folder.cache_ancestor_ids.split(',') if x]
 
-        # To have access to the folder, user has to have permission to view
-        # the folder itself and *all of its ancestors*.
+        # To have access to the folder, user has to have permission to view the
+        # folder itself and *all of its ancestors*.
         if folder.id not in visible_original_folder_ids \
                 or not all(x in all_folders for x in chain_ids):
             # Not visible, remove it from menu tree! I.e. do not just remove
             # the original folder, remove whole chain to the root. (that's why
             # we need the counter here)
             ancestor_counter.subtract(chain_ids)
+            ancestor_counter.subtract([folder.id])
 
     # Map folders to their parents
     folder_children = defaultdict(list)
@@ -173,7 +172,8 @@ def get_visible_folder_tree(folders, user, exclude_subtree=None):
         if not exclude_subtree or exclude_subtree.id != folder.id:
             children = folder_children[folder.id]
 
-            # Sort by parent_index in reverse order (note that we are using LIFO)!.
+            # Sort by parent_index in reverse order (note that we are using
+            # LIFO)!.
             stack.extend(sorted(children, key=lambda x: -x.parent_index))
 
     return {
@@ -192,9 +192,9 @@ def prepare_folder_menu(folders, user):
             folder_tree - HTML of folder tree
     """
     # Note: This method calls Folder.many_get_user_stats, which makes it
-    # sometimes very slow. Actually, the method is relatively fast.
-    # Still, more optimizations are welcome here, because this method is called
-    # on almost every request...
+    # sometimes very slow. Actually, the method is relatively fast. Still, more
+    # optimizations are welcome here, because this method is called on almost
+    # every request...
 
     data = get_visible_folder_tree(folders, user)
 
