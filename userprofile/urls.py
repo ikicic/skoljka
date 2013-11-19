@@ -5,11 +5,7 @@ from django.views.generic import DetailView, ListView, TemplateView
 from userprofile.forms import AuthenticationFormEx
 
 urlpatterns = patterns('',
-    (r'^memberlist/$', ListView.as_view(
-        queryset=User.objects.select_related('profile').exclude(username='arhiva'),
-        context_object_name="user_list",
-        template_name="memberlist.html",
-    )),
+    (r'^memberlist/$', 'userprofile.views.member_list'),
 
     (r'^profile/(?P<pk>\d+)/', 'userprofile.views.profile'),
     (r'^profile/edit/', 'userprofile.views.edit'),

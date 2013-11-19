@@ -16,11 +16,31 @@ from solution.templatetags.solution_tags import cache_solution_info
 from task.models import Task, DIFFICULTY_RATING_ATTRS
 from task.utils import check_prerequisites_for_tasks
 
+from skoljka.utils.decorators import response
+
+
 def new_register(request):
     if request.user.is_authenticated():
         return HttpResponseRedirect('/')
     from registration.views import register as _register
-    return _register(request, 'registration.backends.default.DefaultBackend', form_class=UserCreationForm)
+    return _register(request, 'registration.backends.default.DefaultBackend',
+                     form_class=UserCreationForm)
+
+
+@login_required
+@response('memberlist.html')
+def member_list(request):
+    """
+    Show the list of all members. Hide inactive users, as well as the
+    main admin.
+    """
+    user_list = User.objects.filter(is_active=1)    \
+                .select_related('profile').order_by('id')
+
+    # TODO: do not hardcode the username
+    user_list = [user for user in user_list if user.username != 'arhiva']
+
+    return {'user_list': user_list}
 
 
 @login_required
