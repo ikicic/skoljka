@@ -22,6 +22,13 @@ class FolderForm(forms.ModelForm):
         else:
             self.fields['short_name'].required = False
 
+        self._prepare_parent_field()
+
+    def _prepare_parent_field(self):
+        if self.instance.parent_id is None:
+            del self.fields['parent']
+            return
+
         # User can put his folder anywhere he wants (into any visible folder),
         # but that doesn't mean he can make it public!
 
