@@ -5,7 +5,6 @@ from django.db.models import Q
 from django.dispatch import receiver
 from django.template.loader import add_to_builtins
 
-import johnny.cache
 from registration.signals import user_registered
 
 from folder.models import Folder
@@ -64,8 +63,6 @@ def task_difficulty_on_update(task, field_name, old_value, new_value):
     cursor.execute(base.format(-1, old))
     cursor.execute(base.format(1, new))
     transaction.commit_unless_managed()
-
-    johnny.cache.invalidate('userprofile_difficultydistribution')
 
 
 class DifficultyDistribution(models.Model):

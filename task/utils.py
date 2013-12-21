@@ -1,4 +1,3 @@
-import johnny.cache
 from taggit.utils import parse_tags
 
 from folder.models import Folder, FolderTask
@@ -195,6 +194,4 @@ def create_tasks_from_json(description):
         e._json_tasks_debug = '\n'.join(message_list)
         raise
     finally:
-        # Just in case... because we are using .commit_on_success
-        johnny.cache.invalidate(Folder, Task, ObjectPermission, Tag, TaggedItem)
         invalidate_cache_for_folders(Folder.objects.all())

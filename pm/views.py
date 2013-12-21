@@ -6,8 +6,6 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
-import johnny.cache
-
 from mathcontent.forms import MathContentForm
 
 from pm.models import MessageRecipient, MessageContent
@@ -49,9 +47,6 @@ def new(request, rec='', subject='', text=''):
             cursor.execute(query1)
             cursor.execute(query2)
             transaction.commit_unless_managed()
-
-            johnny.cache.invalidate('pm_messagerecipient',
-                'userprofile_userprofile')
 
             # fix `read` for messages sent also to sender himself
             # or just delete this?

@@ -4,8 +4,6 @@ from django.db import connection, transaction
 from django.db.models import Count
 from django.template.defaultfilters import slugify
 
-import johnny.cache
-
 from permissions.constants import VIEW
 from solution.models import STATUS
 from task.models import Task
@@ -69,8 +67,6 @@ def _search_and_cache(tag_ids):
     cursor = connection.cursor()
     cursor.execute(query)
     transaction.commit_unless_managed()
-
-    johnny.cache.invalidate('search_searchcacheelement')
 
     return cache
 

@@ -31,7 +31,6 @@ DATABASES = {
         'PASSWORD': '',             # enter password here
         'HOST': 'localhost',
         'PORT': '',
-        'JOHNNY_CACHE_KEY': 'default',
     }
 }
 
@@ -63,7 +62,6 @@ CACHES = {
             'MAX_ENTRIES': 10000,
         },
         'TIMEOUT': 7 * 86400,
-        'JOHNNY_CACHE': True,
     }
 }
 

@@ -6,8 +6,6 @@ from django.contrib.contenttypes.generic import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 
-import johnny.cache
-
 from permissions.constants import VIEW
 from permissions.models import BasePermissionsModel
 from permissions.utils import get_object_ids_with_exclusive_permission
@@ -216,9 +214,6 @@ class Folder(BasePermissionsModel):
             cursor.execute(query)
 
         transaction.commit_unless_managed()
-
-        johnny.cache.invalidate('search_searchcacheelement', 'folder_folder',
-            'folder_folder_tasks')
 
     def get_queryset(self, user, no_perm_check=False, order=True):
         """
