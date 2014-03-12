@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Run this from the skoljka's root folder!
+# Run this from the skoljka's (repository) root folder!
 
 sudo apt-get install python2.7 python-setuptools python-pip mysql-client-core-5.5 mysql-server-5.5 texlive-full memcached
-sudo pip install -r requirements.txt
+pip install -r requirements.txt
 
 # Configure local folders
 mkdir -p local
@@ -14,20 +14,14 @@ mkdir -p local/media/m
 
 # django-template-preprocessor cannot be installed using pip.
 mkdir -p local/modules
-# TODO: do not reinstall (or reinstall...)
+# TODO: do not reinstall (or do reinstall if it already exists...)
 cd local/modules
 git clone https://github.com/citylive/django-template-preprocessor.git
 cd django-template-preprocessor
-sudo python setup.py install
+python setup.py install
 cd ../../..
 
 # Make a copy of local settings
 cp -n settings/local.template.py settings/local.py
 
-echo
-echo ==============================================================
-echo Now, do the following steps:
-echo 1. Create an empty database, USE UTF8!!
-echo 2. Fill out settings/local.py
-echo 3. python manage.py syncdb --noinput
-echo 4. python b.py
+echo DONE!

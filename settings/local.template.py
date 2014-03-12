@@ -12,7 +12,7 @@
 #   PROJECT_ROOT = '/home/user/skoljka/'
 
 ADMINS = (
-    ('Pajo Patak', 'pajopatak@gmail.com'),
+#    ('Pajo Patak', 'pajopatak@gmail.com'),
 )
 
 MANAGERS = ADMINS
