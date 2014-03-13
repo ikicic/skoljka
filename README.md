@@ -42,7 +42,7 @@ http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supe
   cd ..
   ```
 
-# Configuring gunicorn.
+# Configuring gunicorn
 
 You should now be in `~/projects/skoljka/`.
 

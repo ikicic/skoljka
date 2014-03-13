@@ -56,23 +56,14 @@
 
 <br><br>
 
-{% if show_task %}
-  <div class="well" id="solution-task">
-    {# TODO: DRY? render conditionally tag? #}
-    {% if user.is_authenticated %}
-      {{ solution.task.content.render_quote }}
-    {% else %}
-      {{ solution.task.content.render }}
-    {% endif %}
-  </div>
-{% else %}
-  {# Note: JS code reads data-content-id to check if the text is loaded. #}
-  {# After loading, the info is removed! #}
-  <div class="well" id="solution-task" style="display: none;"
-    data-content-id="{{ solution.task.content_id }}"
-    data-quote="{{ user.is_authenticated|yesno:'1,0' }}">
-  </div>
-{% endif %}
+<div class="well" id="solution-task">
+  {# TODO: DRY? render conditionally tag? #}
+  {% if user.is_authenticated %}
+    {{ solution.task.content.render_quote }}
+  {% else %}
+    {{ solution.task.content.render }}
+  {% endif %}
+</div>
 
 <div class="well" id="solution-container">
   {% if obfuscate %}

@@ -20,14 +20,8 @@ import json
 # TODO: task permissions (?)
 @response('solution_detail.html')
 def detail(request, solution_id):
-    # default is True
-    show_task = not request.user.is_authenticated() \
-        or request.user.get_profile().show_solution_task
-
-    args = ['task.content'] if show_task else []
-
     solution = get_object_or_404(Solution.objects.select_related('content',
-        'author', 'task', *args), id=solution_id)
+        'author', 'task', 'task.content'), id=solution_id)
 
     if not solution.status == STATUS['submitted']:
         return (404, u'Rješenje nije dostupno.')
@@ -59,7 +53,7 @@ def detail(request, solution_id):
         'can_view': can_view,
         'obfuscate': obfuscate,
         'ratings': ratings,
-        'show_task': show_task,
+        'show_task': True,
         'solution': solution,
     }
 

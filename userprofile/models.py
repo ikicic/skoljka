@@ -122,8 +122,6 @@ class UserProfile(models.Model):
         u'Na ovaj način možete odabrati da vam se uvijek prikazuju rješenja '
         u'dovoljno laganih zadataka, što je pogotovo korisno ako ste '
         u'ispravljač.'))
-    show_solution_task = models.BooleanField(default=True,
-        verbose_name=u'Prikazuj tekst zadatka uz rješenje.')
     school_class = models.IntegerField(default=0,
         choices=USERPROFILE_SCHOOL_CLASS_CHOICES, verbose_name='Razred',
         help_text=icon_help_text('Za odabrane zadatke na naslovnoj stranici'))
