@@ -6,10 +6,9 @@
 # General
 ######################################
 
-# Full path to project
-# Examples:
-#   PROJECT_ROOT = 'C:/dev/skoljka'
-#   PROJECT_ROOT = '/home/user/skoljka/'
+# (REQUIRED) Full project (repository) path. For example:
+#   PROJECT_ROOT = 'C:/dev/skoljka/skoljka'
+#   PROJECT_ROOT = '/home/user/projects/skoljka/skoljka/'
 
 ADMINS = (
 #    ('Pajo Patak', 'pajopatak@gmail.com'),
@@ -17,7 +16,7 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-SECRET_KEY = ''     # secret key here
+SECRET_KEY = ''     # (REQUIRED) secret key here
 
 DATABASES = {
     'default': {
@@ -26,9 +25,9 @@ DATABASES = {
         # Different engines for different tables might cause problems to
         # foreign key relations.
         'OPTIONS': { 'init_command': 'SET storage_engine=MyISAM;' },
-        'NAME': '',                 # enter database name here
-        'USER': '',                 # enter mysql username here
-        'PASSWORD': '',             # enter password here
+        'NAME': '',                 # (REQUIRED) enter database name here
+        'USER': '',                 # (REQUIRED) enter mysql username here
+        'PASSWORD': '',             # (REQUIRED) enter password here
         'HOST': 'localhost',
         'PORT': '',
     }
