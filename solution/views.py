@@ -53,7 +53,6 @@ def detail(request, solution_id):
         'can_view': can_view,
         'obfuscate': obfuscate,
         'ratings': ratings,
-        'show_task': True,
         'solution': solution,
     }
 
