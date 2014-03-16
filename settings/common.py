@@ -10,14 +10,19 @@ from local import *
 ######################################
 
 SITE_NAME = os.path.basename(PROJECT_ROOT)
-LIB_ROOT = os.path.normpath(os.path.join(PROJECT_ROOT, 'lib'))
+APPS_DIR = os.path.normpath(os.path.join(PROJECT_ROOT, 'apps'))
 LOCAL_DIR = os.path.normpath(os.path.join(PROJECT_ROOT, 'local'))
 SECRET_FILE = os.path.normpath(os.path.join(LOCAL_DIR, 'SECRET'))
-DEBUG_TOOLBAR_ROOT = os.path.normpath(
-    os.path.join(LIB_ROOT, 'django_debug_toolbar'))
 
-sys.path.append(LIB_ROOT)
-sys.path.append(DEBUG_TOOLBAR_ROOT)
+sys.path.append(APPS_DIR)
+
+
+# LIB_ROOT = os.path.normpath(os.path.join(PROJECT_ROOT, 'lib'))
+# DEBUG_TOOLBAR_ROOT = os.path.normpath(
+#     os.path.join(LIB_ROOT, 'django_debug_toolbar'))
+# 
+# sys.path.append(LIB_ROOT)
+# sys.path.append(DEBUG_TOOLBAR_ROOT)
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -156,6 +161,8 @@ INSTALLED_APPS = (
     'taggit',
     'template_preprocessor',
 
+    'libs',
+
     'activity',
     'base',
     'folder',
@@ -171,7 +178,6 @@ INSTALLED_APPS = (
     'solution',
     'usergroup',
     'userprofile',
-    'utils',
 )
 
 ######################################
@@ -288,7 +294,7 @@ TEMPLATE_PREPROCESSOR_OPTIONS = {
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
 # TODO: fix /*! */ comments, they should be uncompressed
-PIPELINE_CSS_COMPRESSOR = 'utils.csscompressor.CSSCompressor'
+PIPELINE_CSS_COMPRESSOR = 'libs.csscompressor.CSSCompressor'
 PIPELINE_CSS = {
     'bootstrap': {
         'source_filenames': (
@@ -308,7 +314,7 @@ PIPELINE_CSS = {
 }
 
 # TODO: fix /*! */ comments, they should be preserved
-PIPELINE_JS_COMPRESSOR = 'utils.jscompressor.JSCompressor'
+PIPELINE_JS_COMPRESSOR = 'libs.jscompressor.JSCompressor'
 PIPELINE_JS = {
     'jquerystuff': {
         'source_filenames': (

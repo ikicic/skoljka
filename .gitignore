@@ -1,8 +1,8 @@
-# FIXME: ovaj ignore ce izostaviti i same foldere, koji se onda moraju rucno napraviti
-
 # This stores local settings and data, so we don't want it in our repos
-base/templates/local/
-local/
+apps/base/templates/local/
+build
+local
+node_modules
 settings/local.py
 
 # These files are either temporary, or backups, so we don't want them either
