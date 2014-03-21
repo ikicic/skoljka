@@ -6,11 +6,8 @@
 <html>
   <head>
     <script>is_authenticated={{ user.is_authenticated|lower }};</script>
-    <script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
-    {% compressed_css 'bootstrap' %}
-    {% compressed_css 'skoljka' %}
-    {% compressed_js 'jquerystuff' %}
-    {% compressed_js 'skoljka' %}
+    {% compressed_css 'style' %}
+    {% compressed_js 'scripts' %}
 
     {# TODO: move to /favicon.ico. More a server configuration problem, but still... #}
     <link href="/static/images/favicon.ico" rel="shortcut icon">

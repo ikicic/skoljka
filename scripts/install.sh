@@ -2,10 +2,13 @@
 
 # Run this from the skoljka's (repository) root folder!
 
-sudo apt-get install python2.7 python-setuptools python-pip mysql-client-core-5.5 mysql-server-5.5 texlive-full memcached
+# subversion (svn): used to instal jquery-star-rating-plugin
+sudo apt-get install python2.7 python-setuptools python-pip mysql-client-core-5.5 mysql-server-5.5 texlive-full memcached subversion
 pip install -r requirements.txt
 
-# Configure local folders
+gem install sass
+
+# Make local folders
 mkdir -p local
 mkdir -p local/media
 mkdir -p local/media/attachment

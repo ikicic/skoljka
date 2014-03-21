@@ -1,0 +1,17 @@
+{
+  "name": "skoljka",
+  "version": "0.8.0",
+  "homepage": "https://github.com/ikicic/skoljka",
+  "authors": [
+    "Ivica Kicic <ivicakicic@gmail.com>"
+  ],
+  "description": "Educational web page",
+  "dependencies": {
+    "jquery": "1.8.3",
+    "jquery-form": "~3.46.0",
+    "jquery.autocomplete": "*",
+    "jquery.metadata": "*",
+    "jquery-star-rating-plugin": "svn+http://jquery-star-rating-plugin.googlecode.com/svn/",
+    "bootstrap-sass": "twbs/bootstrap-sass#v2.0.3"
+  }
+}

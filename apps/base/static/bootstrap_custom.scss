@@ -1,0 +1,9 @@
+// Load main variables
+@import "main";
+
+// Override variables
+$iconSpritePath:      url("images/glyphicons-halflings.png");
+$iconWhiteSpritePath: url("images/glyphicons-halflings-white.png");
+
+// For now, import everything
+@import "bootstrap";

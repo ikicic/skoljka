@@ -61,6 +61,9 @@ MEDIA_URL = '/media/'
 # anything in this directory yourself; store your static files in apps' static/
 # subdirectories and in STATICFILES_DIRS.
 STATIC_ROOT = os.path.normpath(os.path.join(LOCAL_DIR, 'static'))
+STATICFILES_DIRS = (
+    os.path.join(PROJECT_ROOT, 'build', 'static'),
+)
 
 # URL prefix for static files.
 STATIC_URL = '/static/'
@@ -296,44 +299,26 @@ STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 # TODO: fix /*! */ comments, they should be uncompressed
 PIPELINE_CSS_COMPRESSOR = 'libs.csscompressor.CSSCompressor'
 PIPELINE_CSS = {
-    'bootstrap': {
+    'style': {
         'source_filenames': (
-          'bootstrap.css',
+            'bootstrap_custom.css',
+            '*.css',
         ),
-        'output_filename': 'bootstrap.min.css',
-    },
-    'skoljka': {
-        'source_filenames': (
-          'base.css',
-          'folder.css',
-          'task.css',
-          'solution.css',
-        ),
-        'output_filename': 'skoljka.min.css',
+        'output_filename': 'style.min.css',
     },
 }
 
 # TODO: fix /*! */ comments, they should be preserved
 PIPELINE_JS_COMPRESSOR = 'libs.jscompressor.JSCompressor'
 PIPELINE_JS = {
-    'jquerystuff': {
+    'scripts': {
         'source_filenames': (
-#          'jquery.min.js', # using cdn now
-          'jquery.autocomplete.min.js',
-          'jquery.form.min.js',
-          'jquery.MetaData.js',
-          'jquery.tools.min.js',
-          'jquery.rating.pack.js',  # rating/static/
+            'jquery.min.js',
+            '*.js',
+            '**/*.js',
+            '**/**/*.js',
         ),
-        'output_filename': 'jquerystuff.min.js',
-    },
-    'skoljka': {
-        'source_filenames': {
-            'script.js',
-            'folder.js',
-            'solution.js',
-        },
-        'output_filename': 'skoljka.min.js',
+        'output_filename': 'scripts.min.js',
     },
 }
 
