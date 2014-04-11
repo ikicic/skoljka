@@ -23,7 +23,9 @@ def filter_solutions_by_status(context, solutions, filter_by_status):
         pretrazuje po odredjenom statusu (filter_by_status-u)
     """
 
-    status =  filter_by_status or context['solution_status_filter']
+    status = filter_by_status or context.get('solution_status_filter')
+    if not status:
+        return ''
 
     # temporary... hack.
     if status == 'unrated':
@@ -31,16 +33,8 @@ def filter_solutions_by_status(context, solutions, filter_by_status):
             detailed_status=DETAILED_STATUS['submitted_not_rated'])
         return ''
 
-    status = status.split(',')
-
-    # pass by reference?
-    if len(status) == 1:
-        if status[0]:
-            context['solutions'] = solutions.filter(
-                status=STATUS.get(status[0], 0))
-    else:
-        context['solutions'] = solutions.filter(
-            status__in=[STATUS.get(x, 0) for x in status])
+    context['solutions'] = solutions.filter(
+        status__in=[STATUS.get(x, 0) for x in status.split(',')])
     return ''
 
 @register.simple_tag()

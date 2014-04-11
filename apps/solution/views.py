@@ -33,9 +33,9 @@ def detail(request, solution_id):
     else:
         ratings = []
 
-    # If I can view the solution, it means I can view the Task.
-    # Note that I might not even met the actual prerequisites, but it means
-    # I do have the solution, or I have VIEW_SOLUTION permission.
+    # If I can view the solution, it means I can view the Task. Note that I
+    # might not even have met the actual prerequisites, but it means that I do
+    # have the solution, or that I have VIEW_SOLUTION permission.
     # (look at the docs of .prerequisites in task/models.py)
     solution.task.cache_prerequisites_met = True
 
@@ -265,15 +265,24 @@ def solution_list(request, task_id=None, user_id=None, status=None):
     # If necessary, add new option to task.solution_settings, for example, to
     # completely remove solutions from solution list etc.
 
-    if status is None:
-        status = request.GET.get('status', None)
-        if status is not None and not _is_valid_status(status):
-            return (response.BAD_REQUEST, 'Invalid status.')
+    # If status filtering is enabled in this view?
+    # As a single task will probably have very few solutions at all, it is a
+    # much better information if there are any solutions at all.
+    is_status_filterable = task_id is None
+
+    if is_status_filterable:
+        if status is None:
+            status = request.GET.get('status', None)
+            if status is not None and not _is_valid_status(status):
+                return (response.BAD_REQUEST, 'Invalid status.')
+    else:
+        status = None
 
     # detailed_status > 0 is also a possible solution (mysql could use an index)
     # but there are too few blank solutions for this to have any effect
-    L = Solution.objects.filter_visible_tasks_for_user(request.user)    \
-        .exclude(status=STATUS['blank'])
+    L = Solution.objects    \
+            .filter_visible_tasks_for_user(request.user)    \
+            .exclude(status=STATUS['blank'])
 
     task = None
     author = None   # 'user' is a template reserved word
@@ -296,6 +305,7 @@ def solution_list(request, task_id=None, user_id=None, status=None):
     return {
         'empty_message': empty_message,
         'filter_by_status': status,
+        'is_status_filterable': is_status_filterable,
         'solutions': L.order_by('-date_created'),
         'task': task,
         'author': author,

@@ -4,7 +4,8 @@
 {% load sorting_tags %}
 {% load userprofile_tags %}
 
-{% if not filter_by_status %}
+{# Don't show if option not enabled or already defined #}
+{% if is_status_filterable and not filter_by_status %}
   {% useroptions "solution_status_filter" %}
     {% useroption "" "Sva rješenja" default %}
     {% useroption "submitted" "Poslana" %}
@@ -36,26 +37,41 @@
     {% for s in solutions %}
       {% check_solution_for_accessibility s s.content.short %}
       <tr style="{% solution_tr_bg_color_attr s forloop.counter %}">
-        <td>{{ s.id }}
-        <td>{{ s.date_created|timesince }}
-        <td>{{ s.task.get_link }}
-        <td>{{ s.author|userlink }}</a>
+        <td>{{ s.id }}</td>
+        <td>{{ s.date_created|timesince }}</td>
+        <td>{{ s.task.get_link }}</td>
+        <td>{{ s.author|userlink }}</td>
         {% if s.is_submitted %}
           <td>
-            {% if s.is_official %}<span class="label label-info">Službeno</span> {% endif %}
-            {% if can_view_solution %}
-              <a href="/solution/{{ s.id }}/" {{ obfuscation_title }}>{{ obfuscation_text }}</a>
-            {% else %}
-              <span class="sol-not-accessible" title="{{ no_access_explanation }}">{{ obfuscation_text }}</span>
+            {% if s.is_official %}
+              <span class="label label-info">Službeno</span>
             {% endif %}
-          <td style="width:80px;">{% rating_stars manager=s.correctness red_if_lt=2.7 %}
+            {% if can_view_solution %}
+              <a href="/solution/{{ s.id }}/" {{ obfuscation_title }}>
+                {{ obfuscation_text }}
+              </a>
+            {% else %}
+              <span class="sol-not-accessible"
+                    title="{{ no_access_explanation }}">
+                {{ obfuscation_text }}
+              </span>
+            {% endif %}
+          </td>
+          <td style="width:80px;">
+            {% rating_stars manager=s.correctness red_if_lt=2.7 %}
+          </td>
         {% else %}
           <td>
-            {% if s.author == user %}<a href="/task/{{ s.task_id }}/submit/">{% endif %}
-              {% if s.is_as_solved %}<i>prazno</i>{% endif %}
-              {% if s.is_todo %}<i>to do</i>{% endif %}
-            {% if s.author == user %}</a>{% endif %}
-          <td style="width:80px;">&nbsp;
+            {% if s.author == user %}
+              <a href="/task/{{ s.task_id }}/submit/">
+            {% endif %}
+            {% if s.is_as_solved %}<i>prazno</i>{% endif %}
+            {% if s.is_todo %}<i>to do</i>{% endif %}
+            {% if s.author == user %}
+              </a>
+            {% endif %}
+          </td>
+          <td style="width:80px;">&nbsp;</td>
         {% endif %}
       </tr>
     {% endfor %}
