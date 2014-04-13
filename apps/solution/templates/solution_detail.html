@@ -7,9 +7,6 @@
 
 {% block content %}
 
-<a href="javascript: history.go(-1)">« Vrati se</a><br>
-
-<br>
 <div style="float:left;">
   {% if user.is_authenticated %}
     {% if user == solution.author %}

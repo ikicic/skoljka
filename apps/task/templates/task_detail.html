@@ -13,10 +13,7 @@
   {% if can_edit %}<a href="/task/{{ task.pk }}/edit/" class="btn">Uredi</a>{% endif %}
 </div>
 
-<a href="javascript: history.go(-1)">« Vrati se</a>
 
-
-<br><br>
 <h3 class="task-title">{{ task.name }}</h3>
 <div style="float:left;">
   {% if solution and not solution.is_blank %}
@@ -31,7 +28,7 @@
   <a href="/task/export/pdf/{{ task.id }}/"><img src="/static/images/pdf16.png" alt="PDF" title="Export to PDF"></a>
 </div>
 
-<div style="text-align:right;">
+<div style="text-align:right;margin-top:1em;">
   Dod{% gender 'ao' 'la' task.author.get_profile.gender %}: {{ task.author|userlink }}<br>
   {{ task.date_created|date:"E j, Y" }}<br>
   {% tag_list task %}

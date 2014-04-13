@@ -4,14 +4,10 @@
 
 {% block content %}
 
-<a href="javascript: history.go(-1)">« Vrati se</a>
-
 {% if task %}
-  <br><br>
   Rješenja zadatka: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br>
 {% endif %}
 {% if author %}
-  <br><br>
   Korisnik: {{ author|userlink }}<br>
 {% endif %}
 

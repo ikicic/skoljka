@@ -8,8 +8,6 @@
 
 {% block content %}
 
-<a href="javascript: history.go(-1)">« Vrati se</a><br>
-
 <h2>Pretraživanje</h2>
 <form action="/search/" method="get" class="well">
   {% if errors %}<div class="alert alert-error">{{ errors }}</div>{% endif %}
