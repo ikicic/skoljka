@@ -475,9 +475,11 @@ a.register {
   bottom: 0px;
   right: 0px;
   margin-left: 2px;
+  visibility: hidden;
 }
 
-.mc-viewsource a i {
+.mc:hover .mc-viewsource {
+  visibility: visible;
   opacity: 0.15;
 }
 
