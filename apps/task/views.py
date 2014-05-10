@@ -8,6 +8,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect, \
         HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
+from django.template.loader import render_to_string
 
 from pagination.paginator import InfinitePaginator
 from taggit.utils import parse_tags
@@ -401,37 +402,32 @@ def similar(request, id):
 # final filename is 'attachments/task_id/attachment index/filename.ext'
 ZIP_ATTACHMENT_DIR = 'attachments'
 
-def _convert_to_latex(sorted_tasks, has_title, has_url, has_source, has_index,
-        has_id, *args, **kwargs):
+def _convert_to_latex(sorted_tasks, **kwargs):
     """
-        Attachments go to attachments/task_id/attachment_index/filename.ext.
+    Attachments go to attachments/task_id/attachment_index/filename.ext.
     """
     is_latex = kwargs['format'] == 'latex'
 
-    content = [latex.export_header]
+    tasks = []
     for k, x in enumerate(sorted_tasks):
-        # DRY?
-        export_title = latex.export_title % x.name if has_title else ''
-        export_url = latex.export_url % x.get_absolute_url() if has_url else ''
-        export_source = latex.export_source % ('\\textbf{Izvor:} ' + x.source if x.source else '') if has_source else ''
-        export_index = latex.export_index % (k + 1) if has_index else ''
-        export_id = ('(%d)' % x.id if has_index else '%d.' % x.id) if has_id else ''
-
         # no / at the end
         attachment_path = is_latex and '{}/{}'.format(ZIP_ATTACHMENT_DIR, x.id)
+        content = x.content.convert_to_latex(attachment_path=attachment_path)
+        data = {
+            'title': x.name,
+            'url': x.get_absolute_url(),
+            'source': x.source,
+            'index': k + 1,
+            'id': x.id,
+            'content': content,
+        }
 
-        content.append(latex.export_task % {
-            'export_title': export_title,
-            'export_url': export_url,
-            'export_source': export_source,
-            'export_index': export_index,
-            'export_id': export_id,
-            'content': x.content.convert_to_latex(
-                attachment_path=attachment_path),
-        })
-    content.append(latex.export_footer)
+        tasks.append(data)
 
-    return u''.join(content)
+    return render_to_string(
+        'latex_task_export.tex',
+        dict(tasks=tasks, **kwargs)
+    )
 
 def _export(ids, sorted_tasks, tasks, form):
     """
@@ -459,11 +455,16 @@ def _export(ids, sorted_tasks, tasks, form):
 
     # TODO: check if archive exists (currently, it is not trivially possible
     # to check if there were some changes to attachments)
-    if not create_archive and os.path.exists(filename + fext):
-        oldest_file_mtime = tasks.aggregate(Min('last_edit_date'))['last_edit_date__min']
-        if datetime.datetime.fromtimestamp(os.path.getmtime(filename + fext)) > oldest_file_mtime:
+    if not settings.DEBUG \
+            and not create_archive \
+            and os.path.exists(filename + fext):
+        oldest_file_mtime = \
+                tasks.aggregate(Min('last_edit_date'))['last_edit_date__min']
+        full_path = os.path.getmtime(filename + fext)
+        if datetime.datetime.fromtimestamp(full_path) > oldest_file_mtime:
             # already up-to-date
-            return HttpResponseRedirect('/media/export/task{}{}'.format(hash, fext))
+            return HttpResponseRedirect(
+                    '/media/export/task{}{}'.format(hash, fext))
 
     latex = _convert_to_latex(sorted_tasks, **form.cleaned_data)
 

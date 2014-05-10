@@ -1,5 +1,7 @@
-﻿from django.conf import settings
-import os, sys, hashlib, re, codecs
+﻿import os, sys, hashlib, re, codecs
+
+from django.conf import settings
+from django.template.loader import render_to_string
 
 from mathcontent import ERROR_DEPTH_VALUE
 from mathcontent.models import LatexElement
@@ -33,98 +35,6 @@ def latex_full_filename(filename):
     return ('"%s"' if mswindows else '%s') % path
 
 
-# ur' ' won't work well, because each \u would have to be escaped
-export_header = u'''
-\\documentclass[10pt,a4paper,oneside,final]{article}
-
-\\usepackage[margin=2cm]{geometry}
-
-\\usepackage{graphicx}
-
-\\usepackage{cmap}
-\\usepackage[utf8]{inputenc}
-\\usepackage[T1]{fontenc}
-\\usepackage[croatian]{babel}
-\\usepackage[centertags,intlimits,namelimits,sumlimits]{amsmath}
-\\usepackage{amsfonts}
-\\usepackage{amssymb}
-\\usepackage{enumitem}
-\\usepackage[normalem]{ulem}
-
-\\usepackage[HTML]{xcolor}
-\\definecolor{btn_primary}{HTML}{0055CC}
-\\definecolor{css_gray}{HTML}{808080}
-
-\\usepackage{fancyhdr}
-\\fancypagestyle{empty}{
-    \\fancyhf{}
-    \\renewcommand{\\headrulewidth}{0pt}
-    \\renewcommand{\\footrulewidth}{0pt}
-}
-\\fancypagestyle{plain}{
-    \\fancyhf{}
-    \\fancyfoot[R]{\\footnotesize\\bf\\thepage}
-    \\renewcommand{\\headrulewidth}{0pt}
-    \\renewcommand{\\footrulewidth}{0pt}
-    \\renewcommand{\\footrule}{\\vskip-\\footrulewidth \\hrule width\\headwidth height\\footrulewidth}
-}
-
-\\usepackage{hyperref}
-\\hypersetup{
-    unicode=true,
-    colorlinks=true,
-    pdfborder={0 0 0},
-    linkcolor=btn_primary,
-    citecolor=btn_primary,
-    filecolor=btn_primary,
-    urlcolor=btn_primary,
-    pdfstartpage=1,
-    pdfstartview=FitH,
-    pdfnewwindow=true
-}
-
-\\setlength{\\parindent}{0pt}
-\\setlength{\\parskip}{6pt}
-
-\\DeclareMathOperator{\\tg}{tg}
-\\DeclareMathOperator{\\ctg}{ctg}
-
-\\pagestyle{plain}
-
-
-\\begin{document}
-'''
-
-# TODO: change to .format, not %
-export_title = u'\\subsection*{\\color{btn_primary}%s}'
-export_url = u'\\url{http://www.skoljka.org%s}'
-export_source = u'\\par\\footnotesize\\color{css_gray}%s'
-export_index = u'%d.'
-export_task = u'''
-    %(export_title)s
-    \\begin{flushright}%(export_url)s%(export_source)s\\end{flushright}
-    %(export_index)s %(export_id)s %(content)s
-'''
-
-export_footer = u'''
-\\end{document}
-'''
-
-tex_preamble = r'''
-\documentclass{article}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage[centertags,intlimits,namelimits,sumlimits]{amsmath}
-\usepackage{amsthm}
-\usepackage{amssymb}
-\usepackage[active]{preview}
-\pagestyle{empty}
-\DeclareMathOperator{\tg}{tg}
-\DeclareMathOperator{\ctg}{ctg}
-\begin{document}
-\begin{preview}
-'''
-
 # TODO: enable client-side caching
 # TODO: join depth queries
 def generate_png(eq, format):
@@ -137,17 +47,18 @@ def generate_png(eq, format):
     except:
         pass
 
-    path = os.path.normpath(os.path.join(settings.MEDIA_ROOT, 'm', eq_hash[0], eq_hash[1], eq_hash[2]))
+    path = os.path.normpath(os.path.join(
+        settings.MEDIA_ROOT, 'm', eq_hash[0], eq_hash[1], eq_hash[2]))
     if not os.path.exists(path):
         os.makedirs(path)
 
     filename = os.path.normpath(os.path.join(path, eq_hash))
 
-    
     f = codecs.open(filename + '.tex', 'w', encoding='utf-8')
-    f.write(tex_preamble)
-    f.write(unicode(format) % eq)
-    f.write('\end{preview}\end{document}')
+    data = {
+        'equation': unicode(format) % eq,
+    }
+    f.write(render_to_string('latex_inline.tex', data))
     f.close()
     
     # TODO: handle errors
@@ -185,7 +96,8 @@ def generate_png(eq, format):
         os.remove(filename + '.aux')
         os.remove(filename + '.dvi')
 
-    latex_element = LatexElement(hash=eq_hash, text=eq, format=format, depth=depth)
+    latex_element = LatexElement(
+            hash=eq_hash, text=eq, format=format, depth=depth)
     latex_element.save(force_insert=True)
     
     return eq_hash, depth
