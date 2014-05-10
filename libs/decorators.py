@@ -368,7 +368,8 @@ class response:
                 # len == 2 -> status (int), content (string / dict)
                 # len == 3 -> status (int), template (string), content (string / dict)
                 if len(x) == 1:
-                    return _flush_cookie_update(request, HttpResponseRedirect(x[0]))
+                    return _flush_cookie_update(
+                            request, HttpResponseRedirect(x[0]))
                 elif len(x) == 2:
                     dummy, content = x
                     if isinstance(dummy, basestring):

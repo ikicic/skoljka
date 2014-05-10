@@ -22,30 +22,34 @@
 </h3>
 <br>
 <div class="row">
-  <div class="span5">
-    <br>
-    <table class="table table-striped table-condensed table-bordered">
-      <tr>
-        <th>Grupe:</th>
-        <td>
-          {% for group in visible_groups %}
-            {% if not forloop.first %}|{% endif %}
-            {{ group.data }}
-          {% endfor %}
-        </td>
-      </tr>
-      {% if tags %}
-        <tr>
-          <th>Preferirane oznake:</th>
-          <td>
-            {% for x in tags %}
-              <a href="/search/?q={{ x.tag.name }}">{{ x.tag.name }}</a>
-            {% endfor %}
-          </td>
-        </tr>
-      {% endif %}
-    </table>
-  </div>
+  {% if visible_groups or tags %}
+    <div class="span5">
+      <br>
+      <table class="table table-striped table-condensed table-bordered">
+        {% if visible_groups %}
+          <tr>
+            <th>Grupe:</th>
+            <td>
+              {% for group in visible_groups %}
+                {% if not forloop.first %}|{% endif %}
+                {{ group.data }}
+              {% endfor %}
+            </td>
+          </tr>
+        {% endif %}
+        {% if tags %}
+          <tr>
+            <th>Preferirane oznake:</th>
+            <td>
+              {% for x in tags %}
+                <a href="/search/?q={{ x.tag.name }}">{{ x.tag.name }}</a>
+              {% endfor %}
+            </td>
+          </tr>
+        {% endif %}
+      </table>
+    </div>
+  {% endif %}
   <div class="span5">
     {% if distribution %}
       Distribucija:
