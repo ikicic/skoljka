@@ -1,9 +1,10 @@
 from django.contrib.auth import authenticate, login
+from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import User, Group
 from django.db.models import Max, Q
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 
 from userprofile.forms import UserCreationForm, UserEditForm, UserProfileEditForm
@@ -18,6 +19,12 @@ from task.utils import check_prerequisites_for_tasks
 
 from skoljka.libs.decorators import response
 
+def logout(request):
+    """
+    Logout and redirect to the home page.
+    """
+    auth_logout(request)
+    return redirect('/')
 
 def new_register(request):
     if request.user.is_authenticated():

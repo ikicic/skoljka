@@ -13,6 +13,8 @@ urlpatterns = patterns('',
     (r'^accounts/login/$', 'django.contrib.auth.views.login', {
         'template_name': 'registration/login.html',
         'authentication_form': AuthenticationFormEx}),
-    url(r'^accounts/register/$', 'userprofile.views.new_register', name='registration_register'),
+    (r'^accounts/logout/$', 'userprofile.views.logout'),
+    url(r'^accounts/register/$', 'userprofile.views.new_register',
+        name='registration_register'),
     (r'^accounts/', include('registration.backends.default.urls')),
 )
