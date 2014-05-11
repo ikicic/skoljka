@@ -17,7 +17,6 @@ import json
 
 # ... trenutacna implementacija rjesenja je dosta diskutabilna
 
-# TODO: task permissions (?)
 @response('solution_detail.html')
 def detail(request, solution_id):
     solution = get_object_or_404(Solution.objects.select_related('content',
@@ -25,7 +24,11 @@ def detail(request, solution_id):
 
     if not solution.status == STATUS['submitted']:
         return (404, u'Rješenje nije dostupno.')
-    if not solution.task.user_has_perm(request.user, VIEW):
+
+    # You are not allowed to view solution (including your own) if the task is
+    # not accessible to you. It would be a very rare case for someone to send a
+    # solution and then later lose his accessibilty permission.
+    if not solution.task.is_allowed_to_solve(request.user):
         return (403, u'Zadatak nije dostupan.')
 
     if solution.correctness_avg:
@@ -35,9 +38,8 @@ def detail(request, solution_id):
 
     # If I can view the solution, it means I can view the Task. Note that I
     # might not even have met the actual prerequisites, but it means that I do
-    # have the solution, or that I have VIEW_SOLUTION permission.
-    # (look at the docs of .prerequisites in task/models.py)
-    solution.task.cache_prerequisites_met = True
+    # have VIEW_SOLUTION permission or am the author of the task itself.
+    # (look at the docs of is_allowed_to_solve in task/models.py)
 
     can_view, obfuscate = solution.check_accessibility(request.user)
 
@@ -50,6 +52,7 @@ def detail(request, solution_id):
                 u'vlastitim rješenjem.')
 
     return {
+        'can_edit': solution.can_edit(request.user),
         'can_view': can_view,
         'obfuscate': obfuscate,
         'ratings': ratings,
@@ -84,20 +87,18 @@ def _do_mark(request, solution, task):
     if not task.solvable:
         return (403, u'This task is not solvable!')
 
+    if not task.is_allowed_to_solve(request.user):
+        return (403, u'Not allowed to view the task or send solutions.')
+
     # as_solved, todo, blank
     if solution is None:
-        # Check if the task is visible to the user.
-        if not task.user_has_perm(request.user, VIEW):
-            return (403, u'Zadatak nije dostupan.')
-        solution, dummy = Solution.objects.get_or_create(task=task, author=request.user)
-
-    if solution.author_id != request.user.id:
+        solution, dummy = Solution.objects.get_or_create(
+                task=task, author=request.user)
+    elif not solution.can_edit(request.user):
         return (403, 'Not allowed to modify this solution.')
-
 
     # keep track of the number of solutions for the task
     was_solved = solution.is_solved()
-
 
     # update
     if action in ['official0', 'official1']:
@@ -197,6 +198,8 @@ def edit_mark(request, solution_id):
 def submit(request, task_id=None, solution_id=None):
     if solution_id:
         solution = get_object_or_404(Solution, pk=solution_id)
+        if not solution.can_edit(request.user):
+            return (403, u'Not allowed to edit the solution!')
         task = solution.task
         edit = True
     elif task_id:
@@ -208,11 +211,12 @@ def submit(request, task_id=None, solution_id=None):
     if not task.solvable:
         return (403, u'This task is not solvable!')
 
+    if not task.is_allowed_to_solve(request.user):
+        return (403, u'You are not allowed to send solutions for this task.')
+
     if not edit:
-        # First check Task permissions.
-        if not task.user_has_perm(request.user, VIEW):
-            return (403, u'Zadatak nije dostupan.')
-        solution, dummy = Solution.objects.get_or_create(task=task, author=request.user)
+        solution, dummy = Solution.objects.get_or_create(
+                task=task, author=request.user)
 
     math_content = solution.content
 
@@ -255,10 +259,10 @@ def _is_valid_status(status):
 @response('solution_list.html')
 def solution_list(request, task_id=None, user_id=None, status=None):
     """
-        Outputs list of solutions related to
+    Outputs list of solutions related to
         specific task if task_id is defined,
         specific user if user_id is defined.
-        If some ID is not defined, skips that condition.
+    If some ID is not defined, skips that condition.
     """
     # Currently, even if the user can't view some of the solution (due to task
     # settings), he/she may still view the correctness.

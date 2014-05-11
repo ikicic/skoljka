@@ -7,7 +7,8 @@ from django.contrib.contenttypes.generic import GenericRelation
 from django.utils.safestring import mark_safe
 
 from mathcontent.models import MathContent, Attachment
-from permissions.models import BasePermissionsModel
+from permissions.constants import VIEW, VIEW_SOLUTIONS
+from permissions.models import BasePermissionsModel, convert_permission_names_to_values
 from post.generic import PostGenericRelation
 from rating.fields import RatingField
 from search.models import SearchCacheElement
@@ -108,6 +109,23 @@ class Task(BasePermissionsModel):
 
     def get_absolute_url(self):
         return '/task/%d/' % self.id
+
+    def is_allowed_to_solve(self, user):
+        """
+        Check if the user is allowed to solve current problem.
+
+        User is allowed to solve the task if it is solvable, visible and all
+        the prerequisites are met.
+        """
+        if not self.solvable:
+            return False
+
+        perm = self.get_user_permissions(user)
+        if VIEW not in perm:
+            return False
+
+        from task.utils import check_prerequisites_for_task
+        return check_prerequisites_for_task(self, user, perm)
 
     def get_link(self, tooltip=False, url_suffix=''):
         # If prerequisites not met, do not output link.

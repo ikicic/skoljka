@@ -34,7 +34,8 @@ from skoljka.libs.timeout import run_command
 from task.models import Task, SimilarTask
 from task.forms import TaskForm, TaskFileForm, TaskAdvancedForm, \
         TaskExportForm, EXPORT_FORMAT_CHOICES, TaskJSONForm
-from task.utils import check_prerequisites_for_tasks, create_tasks_from_json, \
+from task.utils import check_prerequisites_for_task, \
+        check_prerequisites_for_tasks, create_tasks_from_json, \
         get_task_folder_data
 
 import codecs, datetime, hashlib, json, os, sys, traceback, zipfile
@@ -312,30 +313,18 @@ def detail(request, id):
     task = get_object_or_404(Task, id=id)
 
     perm = task.get_user_permissions(request.user)
-
     if VIEW not in perm:
-        return (response.FORBIDDEN, 'Not allowed to view this task!')
+        return (403, 'Not allowed to view this task!')
 
-    prerequisites = task._get_prerequisites()
-
-    # Get all necessary solutions at once.
-    if request.user.is_authenticated():
-        solutions = Solution.objects.filter(author_id=request.user.id,
-            task_id__in=prerequisites + [id])
-        solutions = {x.task_id: x for x in solutions}
-    else:
-        solutions = {}
-
-    if VIEW_SOLUTIONS in perm:
-        task.cache_prerequisites_met = True
-    else:
-        check_prerequisites_for_tasks([task], request.user)
-
-    if not task.cache_prerequisites_met:
-        return (403, 'Neki preduvjeti za ovaj zadatak nisu ispunjeni!')
+    if not check_prerequisites_for_task(task, request.user, perm):
+        return (403, 'Prerequisites not met, not allowed to view the task!')
 
     # Remember my solution.
-    solution = solutions.get(int(id))
+    try:
+        solution = Solution.objects.get(
+                author_id=request.user.id, task_id=task.id)
+    except:
+        solution = None
     task.cache_solution = solution
 
     # ovo ce ici preko C++ skripte za pocetak

@@ -15,15 +15,63 @@ from task.models import Task
 
 CORRECT = DETAILED_STATUS['correct']
 
+# TODO: does EDIT imply VIEW_SOLUTIONS?
+
+def check_prerequisites_for_task(task, user, perm=None):
+    """
+    Slighty optimized version of check_prerequisites_for_tasks for a single
+    task. Uses already loaded list of permissions `perm`, if given.
+
+    Saves the result in:
+        task.cache_prerequisites_met (Boolean)
+
+    Return value:
+        task.cache_prerequisites_met (Boolean)
+
+    Does not check visibility!
+    """
+
+    # Cheap tests first, expensive last.
+    if task.author_id == user.id:
+        task.cache_prerequisites_met = True
+    else:
+        prerequisites = task._get_prerequisites()
+        if not prerequisites:
+            task.cache_prerequisites_met = True
+        elif not user.is_authenticated():
+            task.cache_prerequisites_met = False
+        elif (perm is not None and VIEW_SOLUTIONS in perm) \
+                or (perm is None and task.user_has_perm(user, VIEW_SOLUTIONS)):
+            task.cache_prerequisites_met = True
+        else:
+            solved_tasks = Solution.objects.filter(author_id=user.id,
+                    task_id__in=prerequisites, detailed_status=CORRECT) \
+                .values_list('task_id', flat=True)
+
+            task.cache_prerequisites_met = \
+                    set(solved_tasks) == set(prerequisites)
+
+    return task.cache_prerequisites_met
+
+
 def check_prerequisites_for_tasks(tasks, user):
     """
-        Checks if all of the prerequisite tasks have been solved for each of
-        the given task.
-        Prerequisites are met if:
-            a) there are no prerequisites at all
-            b) the user is the author of the task
-            c) user solved all of the necessary tasks
-            d) user has VIEW_SOLUTIONS permission.
+    Checks if all of the prerequisite tasks have been solved for each of the
+    given task.
+
+    Saves the result in:
+        task.cache_prerequisites_met
+
+    Return value:
+        None
+
+    Does not check visibility!
+
+    Prerequisites are met if:
+        a) user is the author of the task
+        b) there are no task prerequisites at all
+        c) user solved all of the prerequisites
+        d) user has the VIEW_SOLUTION permission
     """
     to_check = [] # for solutions or VIEW_SOLUTIONS
     for x in tasks:
@@ -42,13 +90,13 @@ def check_prerequisites_for_tasks(tasks, user):
         # All tasks for which solutions we are interested in.
         all_tasks = sum([x._cache_prerequisites for x in tasks], [])
 
-        solutions = set(Solution.objects.filter(author_id=user.id,
+        solved_tasks = set(Solution.objects.filter(author_id=user.id,
                 task_id__in=all_tasks, detailed_status=CORRECT) \
             .values_list('task_id', flat=True))
 
         another_check = [] # VIEW_SOLUTIONS check
         for x in to_check:
-            if set(x._cache_prerequisites).issubset(solutions):
+            if set(x._cache_prerequisites).issubset(solved_tasks):
                 x.cache_prerequisites_met = True
             else:
                 another_check.append(x)
@@ -67,7 +115,7 @@ def get_task_folder_data(task, user):
     folders = list(Folder.objects.filter(id__in=folder_ids))
     folder_data = prepare_folder_menu(folders, user) # safe
 
-    # For now, folder is not considered as the owner of the tasks, but just as
+    # For now, folder is not considered to be the owner of the tasks, but only
     # a collection. Therefore, if the user has no access to any of the
     # task's folders, he/she might still have the access to the task itself.
 

@@ -191,29 +191,39 @@ class Solution(ModelEx):
                 return None
         return users_solution
 
+    def can_edit(self, user):
+        """
+        Determine if given user is allowed to edit the existing solution.
+
+        Currently, only authors themselves and staff can edit the solution.
+        Note that staff won't be able to edit solutions of inaccessible tasks.
+        """
+        return self.author_id == user.id or user.is_staff
+
     def check_accessibility(self, user, users_solution=0):
         """
-            Checks if the user can view the solution, and if it should be
-            obfuscated.
-            Returns pair of booleans:
-                can_view, should_obfuscate
+        Checks if the user can view the solution, and if it should be
+        obfuscated.
+        Returns pair of booleans:
+            can_view, should_obfuscate
 
-            The result depends on:
-                Task prerequisites settings (can_view)
-                Task solution settings      (can_view)
-                Explicit permission         (can_view)
-                Did user solve the task     (can_view, should_obfuscate)
-                Profile preferences         (should_obfuscate)
+        The result depends on:
+            Task prerequisites settings (can_view)
+            Task solution settings      (can_view)
+            Explicit permission         (can_view)
+            Did user solve the task     (can_view, should_obfuscate)
+            Profile preferences         (should_obfuscate)
 
-            It is assumed the task is visible to the user.
+        It is assumed that accessibility check has already been performed!
 
-            If users_solution is not given, it will be manually retrieved.
-            As this method checks task.solution_settings, it is preferable that
-            task is already loaded.
+        If users_solution is not given, it will be manually retrieved.
+        As this method checks task.solution_settings, it is preferable that
+        task is already loaded.
         """
         # The implentation is quite complex, because there are millions of
         # different cases. When updating, please make sure everything is
         # correct.
+        # TODO: for example, write tests...
         task_settings = self.task.solution_settings
 
         if not user.is_authenticated():
@@ -223,7 +233,7 @@ class Solution(ModelEx):
         if self.author_id == user.id:
             return True, False # always show my own solutions
 
-        # This value must be already determined!
+        # This value must be already determined! Throw except if not.
         if not self.task.cache_prerequisites_met:
             return False, True
 
@@ -244,6 +254,7 @@ class Solution(ModelEx):
                     users_solution = self._get_user_solution(user, users_solution)
                     if not users_solution or not users_solution.is_correct():
                         return False, True     # can't view solution, bye
+                    # Otherwise, fine, can_view is actually True
 
         # Ok, now the user definitely has the right to view the solution.
         # Now we have to check if he/she wants to view it.

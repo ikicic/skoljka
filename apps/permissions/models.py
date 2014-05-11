@@ -119,7 +119,7 @@ class BasePermissionsModel(models.Model):
         """
             Check if given user has permission 'type'.
         """
-        if user.id == getattr(self, 'author_id', None):
+        if user.id == getattr(self, 'author_id', -1):
             return True
 
         if type == VIEW and not getattr(self, 'hidden', True):
@@ -128,7 +128,7 @@ class BasePermissionsModel(models.Model):
         return has_group_perm(user, self, type)
 
     def get_user_permissions(self, user):
-        if user.id == getattr(self, 'author_id', None):
+        if user.id == getattr(self, 'author_id', -1):
             # TODO: cache result?
             return convert_permission_names_to_values(self.__class__.object_permissions)
 
