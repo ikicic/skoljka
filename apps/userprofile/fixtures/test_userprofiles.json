@@ -1,0 +1,102 @@
+[
+  {
+    "pk": 1,
+    "model": "auth.group",
+    "fields": {
+      "name": "testuser1",
+      "permissions": []
+    }
+  },
+  {
+    "pk": 2,
+    "model": "auth.group",
+    "fields": {
+      "name": "testuser2",
+      "permissions": []
+    }
+  },
+  {
+    "pk": 1,
+    "model": "auth.user",
+    "fields": {
+      "username": "testuser1",
+      "first_name": "First",
+      "last_name": "User",
+      "is_active": true,
+      "is_superuser": true,
+      "is_staff": true,
+      "last_login": "2014-05-11T17:41:52",
+      "groups": [
+        1
+      ],
+      "user_permissions": [],
+      "password": "pbkdf2_sha256$10000$yMWdq1JG0YYR$2pAO7cu1RzhFMXrms0GSp5Y0gUJdc5/GV1kSQWMUg00=",
+      "email": "first@example.com",
+      "date_joined": "2014-03-13T16:06:06"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "auth.user",
+    "fields": {
+      "username": "testuser2",
+      "first_name": "Second",
+      "last_name": "User",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": "2014-05-11T17:42:48",
+      "groups": [
+        2
+      ],
+      "user_permissions": [],
+      "password": "pbkdf2_sha256$10000$y9itbwpyNscP$DYaDlY4ANdKgWgmJg+b36fdByQB0dTz3Z6USOLXQUWY=",
+      "email": "second@example.com",
+      "date_joined": "2014-05-11T17:42:17"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "userprofile.userprofile",
+    "fields": {
+      "hide_solution_min_diff": 0.0,
+      "solved_count": 2,
+      "unread_pms": 0,
+      "show_hidden_tags": 0,
+      "gender": "",
+      "cache_group_ids": "1,2",
+      "school_class": 0,
+      "similar_task_view_type": 0,
+      "selected_folder": null,
+      "user": 1,
+      "task_view_type": 0,
+      "private_group": 1,
+      "evaluator": false,
+      "solution_status_filter": "submitted",
+      "eval_sol_last_view": "2014-04-11T19:46:22",
+      "show_unsolved_task_solutions": false
+    }
+  },
+  {
+    "pk": 2,
+    "model": "userprofile.userprofile",
+    "fields": {
+      "hide_solution_min_diff": 0.0,
+      "solved_count": 0,
+      "unread_pms": 0,
+      "show_hidden_tags": 0,
+      "gender": "",
+      "cache_group_ids": "3",
+      "school_class": 0,
+      "similar_task_view_type": 2,
+      "selected_folder": null,
+      "user": 2,
+      "task_view_type": 0,
+      "private_group": 2,
+      "evaluator": false,
+      "solution_status_filter": "",
+      "eval_sol_last_view": "2014-05-11T17:42:21",
+      "show_unsolved_task_solutions": false
+    }
+  }
+]

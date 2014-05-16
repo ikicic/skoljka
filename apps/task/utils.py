@@ -38,7 +38,7 @@ def check_prerequisites_for_task(task, user, perm=None):
         prerequisites = task._get_prerequisites()
         if not prerequisites:
             task.cache_prerequisites_met = True
-        elif not user.is_authenticated():
+        elif user.is_anonymous():
             task.cache_prerequisites_met = False
         elif (perm is not None and VIEW_SOLUTIONS in perm) \
                 or (perm is None and task.user_has_perm(user, VIEW_SOLUTIONS)):
