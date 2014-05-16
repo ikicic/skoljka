@@ -23,7 +23,6 @@ from mathcontent.models import MathContent, Attachment
 from mathcontent.utils import check_and_save_attachment
 from permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS, VIEW_SOLUTIONS
 from permissions.models import ObjectPermission
-from recommend.utils import task_event
 from search.utils import update_search_cache
 from solution.models import Solution, STATUS as _SOLUTION_STATUS
 from usergroup.forms import GroupEntryForm
@@ -327,14 +326,6 @@ def detail(request, id):
         solution = None
     task.cache_solution = solution
 
-    # ovo ce ici preko C++ skripte za pocetak
-    # task.update_similar_tasks(1)
-
-    # used for recommendation system and similar
-    if request.user.is_authenticated():
-        # TODO: use signals!
-        task_event(request.user, task, 'view')
-
     data = {
         'task': task,
         'can_edit': EDIT in perm,
@@ -351,11 +342,6 @@ def detail(request, id):
 @response('task_similar.html')
 def similar(request, id):
     task = get_object_or_404(Task, pk=id)
-
-    # TODO: dovrsiti, ovo je samo tmp
-    # task.update_similar_tasks(1)
-    if request.user.is_authenticated():
-        task_event(request.user, task, 'view')
 
     # SPEED: read main task together with the rest
     # no need to sort here

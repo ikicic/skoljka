@@ -19,14 +19,9 @@ class UserTagScore(models.Model):
     mean = models.FloatField(default=0)
     last_update = models.DateTimeField(auto_now=True)
 
-    cache_score = models.FloatField(default=0, db_index=True, help_text='Equals to interest * tag.weight, used for prefered tags for UserProfile')
-    
-    def get_interest(self):
-        return self.interest * math.exp(INTEREST_TIME_FACTOR * (datetime.now() - self.last_update).total_seconds())
+    cache_score = models.FloatField(default=0, db_index=True,
+            help_text='Equals to interest * tag.weight, used for prefered tags for UserProfile')
 
-    def get_score(self, diff):
-        return math.exp(-(diff - self.mean)**2 / (2 * self.variance))
-    
     class Meta:
         unique_together = (('user', 'tag'),)
 

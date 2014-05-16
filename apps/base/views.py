@@ -8,7 +8,6 @@ from task.models import Task
 from task.templatetags.task_tags import cache_task_info
 from task.utils import check_prerequisites_for_tasks
 from permissions.constants import VIEW
-#from recommend.utils import refresh_user_information
 from recommend.models import UserRecommendation
 
 from skoljka.libs.decorators import response
@@ -27,7 +26,7 @@ def homepage_offline(request, recent_tasks):
 def homepage_online(request, recent_tasks):
     recommend = UserRecommendation.objects.raw(
         'SELECT A.id, A.task_id FROM recommend_userrecommendation A'        \
-        '   LEFT JOIN solution_solution B'
+        '   LEFT JOIN solution_solution B'                                  \
         '       ON (A.task_id = B.task_id AND A.user_id = B.author_id)'     \
         '   WHERE A.user_id = {} AND (B.status IS NULL OR B.status = 0);'   \
         .format(request.user.id));
