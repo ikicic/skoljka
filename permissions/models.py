@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 
-from permissions.constants import VIEW, MODEL_DEFAULT, constants_names
+from permissions.constants import EDIT, VIEW, MODEL_DEFAULT, constants_names
 
 class ObjectPermission(models.Model):
     object_id = models.PositiveIntegerField()
@@ -135,6 +135,8 @@ class BasePermissionsModel(models.Model):
         permissions = get_permissions_for_object(user, self)
         if not getattr(self, 'hidden', True):
             permissions.append(VIEW)
+            if user.is_staff:
+                permissions.append(EDIT)
         return permissions
 
 
