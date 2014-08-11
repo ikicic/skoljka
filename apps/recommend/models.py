@@ -4,8 +4,6 @@ from django.contrib.auth.models import User
 from tags.models import Tag
 from task.models import Task
 
-from recommend.constants import *
-
 from datetime import datetime
 import math
 

@@ -307,11 +307,12 @@ a.register {
 
 /* outdiv */
 .outdiv {
-  padding: 15px 25px;
-  margin: 5px 5px 25px 5px;
   border-radius: 5px;
   box-shadow: 0 1px 2px rgba(128, 128, 128, 0.35);
   background: -webkit-gradient(linear, left top, left bottom, from(rgb(246, 248, 250)), to(rgb(237, 242, 248)));
+  margin: 5px 5px 25px 5px;
+  overflow: auto;
+  padding: 15px 25px;
 }
 
 .outdiv h3 {
@@ -377,16 +378,18 @@ a.register {
 
 #homepage-registration {
   float: right;
-  margin: 0px 20px 20px 20px;
+  margin: 0px 20px 0px 20px;
   width: 30%;
   min-width: 205px;
 }
 
 #homepage-registration input {
+  display: block;
   font-size: 15px;
   height: auto;
   margin-bottom: 7px;
   padding: 7px 9px;
+  width: 100%;
 }
 
 #homepage-registration h3 {
