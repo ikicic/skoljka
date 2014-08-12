@@ -29,10 +29,21 @@ attrs_dict = {'class': 'required'}
 
 class UserCreationForm(forms.Form):
     username = forms.RegexField(regex=r'^\w+$', max_length=30,
-        widget=forms.TextInput(attrs=attrs_dict), label=u'Korisničko ime')
-    email = forms.EmailField(widget=forms.TextInput(attrs=dict(attrs_dict, maxlength=75)), label=_(u'Email'))
-    password1 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict, render_value=False), label=_(u'Lozinka'))
-    password2 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict, render_value=False), label=_(u'Potvrda lozinke'))
+        widget=forms.TextInput(attrs=attrs_dict), label=_(u'Korisničko ime'))
+    email = forms.EmailField(
+            widget=forms.TextInput(attrs=dict(attrs_dict, maxlength=75)),
+            label=_(u'Email'))
+    password1 = forms.CharField(
+            widget=forms.PasswordInput(attrs=attrs_dict, render_value=False),
+            label=_(u'Lozinka'))
+    password2 = forms.CharField(
+            widget=forms.PasswordInput(attrs=attrs_dict, render_value=False),
+            label=_(u'Potvrda lozinke'))
+    tou = forms.BooleanField(required=True,
+            label=mark_safe(_(u'Prihvaćam <a href="/tou/">uvjete korištenja</a>')),
+            error_messages={
+                'required': 'Ako ne prihvaćate uvjete korištenja, ne možete koristiti Školjku.'
+            })
 
     def __init__(self, *args, **kwargs):
         extra_class = kwargs.pop('extra_class', False)
@@ -47,7 +58,8 @@ class UserCreationForm(forms.Form):
 
         if placeholders:
             for x in self.fields.itervalues():
-                x.widget.attrs['placeholder'] = x.label
+                if isinstance(x, forms.CharField):
+                    x.widget.attrs['placeholder'] = x.label
         else:
             self.fields['username'].help_text = icon_help_text(
                 u'Molimo koristite oblik iprezime ili imeprezime.')
