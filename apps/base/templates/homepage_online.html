@@ -19,12 +19,20 @@
 {% if recommend %}
   <h2>Preporuke</h2>
   <div class="row-fluid">
-    {% task_small_box best_recommend %}
-  </div>
-  <div class="row-fluid">
-    {% for t in recommend %}
+    {% for task in recommend %}
       {% cycle '<div class="row-fluid">' '' %}
-      {% task_small_box t 'span6' '' %}
+      {% task_small_box task 'span6' '' %}
+      {% cycle '' '</div>' %}
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if todo %}
+  <h2>To Do Popis</h2>
+  <div class="row-fluid">
+    {% for task in todo %}
+      {% cycle '<div class="row-fluid">' '' %}
+      {% task_small_box task 'span6' '' %}
       {% cycle '' '</div>' %}
     {% endfor %}
   </div>

@@ -4,11 +4,12 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 from activity.models import Action
+from permissions.constants import VIEW
+from recommend.models import UserRecommendation
+from solution.models import Solution, STATUS
 from task.models import Task
 from task.templatetags.task_tags import cache_task_info
 from task.utils import check_prerequisites_for_tasks
-from permissions.constants import VIEW
-from recommend.models import UserRecommendation
 
 from skoljka.libs.decorators import response
 
@@ -18,9 +19,9 @@ def homepage_offline(request, recent_tasks):
     folder_shortcuts = settings.FOLDER_HOMEPAGE_SHORTCUTS_OFFLINE
 
     return ('homepage_offline.html', {
-        'recent_tasks': recent_tasks,
         'homepage': True,
         'folder_shortcut_desc': settings.FOLDER_HOMEPAGE_SHORTCUTS_OFFLINE,
+        'recent_tasks': recent_tasks,
         })
 
 def homepage_online(request, recent_tasks):
@@ -31,25 +32,41 @@ def homepage_online(request, recent_tasks):
         '   WHERE A.user_id = {} AND (B.status IS NULL OR B.status = 0);'   \
         .format(request.user.id));
     recommend = list(x.task_id for x in recommend)
+    if len(recommend) > 4:
+        recommend = random.sample(recommend, 4)
+    else:
+        recommend = [] # Simplify design, accept only if there are 4 tasks.
 
-    if len(recommend) > 5:
-        recommend = random.sample(recommend, 5)
+    todo = Solution.objects.filter(author=request.user, status=STATUS['todo']) \
+            .values_list('task_id', flat=True)[:20]
+    if len(todo) > 2:
+        todo = random.sample(todo, 2)
+    else:
+        todo = [] # Simplify design, ignore if only one to do task.
 
-    if recommend:
-        recommend = Task.objects.filter(id__in=recommend)   \
-            .select_related('content')
+    all_tasks_to_read = todo + recommend
+    if all_tasks_to_read:
+        all_tasks = Task.objects.select_related('content') \
+                .in_bulk(all_tasks_to_read)
 
-    recommend = list(recommend)
+        # Just in case something went wrong (probably with recommendations).
+        check_prerequisites_for_tasks(all_tasks.itervalues(), request.user)
+        all_tasks = {id: task \
+                for id, task in all_tasks.iteritems() \
+                if task.cache_prerequisites_met}
+
+        recommend = [all_tasks[id] for id in recommend]
+        todo = [all_tasks[id] for id in todo]
 
     # context, tasks
     cache_task_info({'user': request.user}, recommend + recent_tasks)
 
     return ('homepage_online.html', {
-        'recent_tasks': recent_tasks,
-        'recommend': recommend[1:],
-        'best_recommend': None if len(recommend) < 1 else recommend[0],
         'homepage': True,
         'folder_shortcut_desc': settings.FOLDER_HOMEPAGE_SHORTCUTS_ONLINE,
+        'recent_tasks': recent_tasks,
+        'recommend': recommend,
+        'todo': todo,
         })
 
 
