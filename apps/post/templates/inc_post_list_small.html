@@ -8,18 +8,24 @@
     {% if user.is_authenticated %}
       <div style="float:right;">
         <a href="#post" class="post_reply" id="pr{{ post.pk }}">Odgovori</a>
-        {% if post.cache_can_edit %}<br><a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">Uredi</a>{% endif %}
+        {% if post.cache_can_edit %}
+          <br>
+          <a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">Uredi</a>
+        {% endif %}
       </div>
     {% endif %}
 
-    <div class="post_info">{{ post.author|userlink }}, {{ post.date_created }}</div>
+    <div class="post_info">
+      {{ post.author|userlink }}, {{ post.date_created }}
+    </div>
 
     {{ post.content.render }}
 
     {% if post.date_created != post.last_edit_time %}
       <br><br>
       <span class="last_edit">
-        Zadnja promjena: {{ post.last_edit_by|userlink }}, {{ post.last_edit_time }}
+        Zadnja promjena:
+        {{ post.last_edit_by|userlink }}, {{ post.last_edit_time }}
       </span>
     {% endif %}
   </div>
@@ -30,7 +36,8 @@
     <form action="/post/add/" method="post">
       {% csrf_token %}
       <input type="hidden" name="object_id" value="{{ container.pk }}">
-      <input type="hidden" name="content_type_id" value="{{ container.posts.get_content_type_id }}">
+      <input type="hidden" name="content_type_id"
+             value="{{ container.posts.get_content_type_id }}">
       <input type="hidden" name="post_reply_id" value="">
       <input type="hidden" name="post_redirect" value="{{ request.path }}">
       {{ container.posts.get_post_form.as_p }}

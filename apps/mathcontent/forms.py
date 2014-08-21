@@ -19,8 +19,7 @@ class MathContentForm(ModelForm):
         self.fields['text'].required = not blank
         self.fields['text'].widget.attrs.update({
             'rows': 10,
-            'cols': 100,
-            'class': 'uneditable-textarea mathcontent-text',   # ...zbog bootstrapa
+            'class': 'mathcontent-text',
         })
 
     class Meta:
@@ -32,7 +31,4 @@ class MathContentSmallForm(MathContentForm):
         super(MathContentSmallForm, self).__init__(*args, **kwargs)
 
         self.fields['text'].label = ''
-        self.fields['text'].widget.attrs.update({
-            'rows': 6,
-            'cols': 90,
-        })
+        self.fields['text'].widget.attrs['rows'] = 5

@@ -88,13 +88,17 @@
 
 {% if solution.correctness_avg %}
   <br>
-  <h5><a href="#" id="solution-ratings-toggle">Ocjene: ({{ ratings|length }})</a></h5>
-  <table class="table-striped table-condensed" style="text-align:center;width:400px;display:none;" id="solution-ratings">
+  <h5>
+    <a href="#" id="solution-ratings-toggle">Ocjene: ({{ ratings|length }})</a>
+  </h5>
+  <table class="table-striped table-condensed"
+         style="text-align:center;width:400px;display:none;"
+         id="solution-ratings">
   {% for x in ratings %}
     <tr>
-      <td style="width:140px;">{{ x.date }}</td>
+      <td>{{ x.date }}</td>
       <td>{{ x.user|userlink }}</td>
-      <td style="width:70px;">
+      <td>
         {% rating_display_bool manager=solution.correctness red_if_lt=SOLUTION_CORRECT_SCORE value=x.value %}
       </td>
     </tr>

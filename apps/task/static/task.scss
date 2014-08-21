@@ -128,7 +128,17 @@ tr.task-hidden:nth-child(odd) td {
   font-weight: normal;
 }
 
+#task-bottom-left-info {
+  float: left;
+}
+
 .task-source {
-  float: right;
-  display: inline;
+  color: #A0A0A0;
+}
+
+#task-bottom-right-info {
+  text-align: right;
+  > form {
+    margin: 0px;
+  }
 }
