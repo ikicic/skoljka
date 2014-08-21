@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.safestring import mark_safe
 
 import solution
-from rating.templatetags.rating_tags import rating_stars
+from rating.templatetags.rating_tags import rating_display_bool
 from userprofile.templatetags.userprofile_tags import userlink
 
 from activity.constants import *
@@ -71,9 +71,11 @@ class Action(models.Model):
 
     def t_right_div_html(self):
         if (self.type, self.subtype) == SOLUTION_RATE:
-            from solution.models import Solution
-            S = u'<br>%s' % rating_stars(field=solution.models.Solution.correctness,
-                red_if_lt=2.0, value=int(self.action_object_cache))
+            from solution.models import Solution, SOLUTION_CORRECT_SCORE
+            S = u'<br>%s' % rating_display_bool(
+                    field=Solution.correctness,
+                    red_if_lt=SOLUTION_CORRECT_SCORE,
+                    value=int(self.action_object_cache))
         else:
             label = self.get_label()
             if not label:

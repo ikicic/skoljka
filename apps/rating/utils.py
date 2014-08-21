@@ -16,9 +16,7 @@ def do_vote(user, object_id, content_type_id, name, value):
             return HttpResponseForbidden("Not allowed")
 
     manager = getattr(instance, name)
-    print 'old value', value
     value = manager.update(user, value)
-    print 'new value', value
     return value
 
 def rating_check_request(request):

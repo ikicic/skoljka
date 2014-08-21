@@ -32,7 +32,6 @@ def vote(request, object_id, content_type_id, name):
         raise Http404
 
     value = request.POST[name]
-    print request.POST, value
     value = do_vote(request.user, object_id, content_type_id, name, value)
 
     if isinstance(value, (int, float)):
