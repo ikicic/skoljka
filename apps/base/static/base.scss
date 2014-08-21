@@ -328,30 +328,32 @@ a.register {
 
 
 /* Activity */
-.activity, .act_day {
-  border-top: thin solid #CCC;
+.activity-container > hr {
+  margin: 5px 0px;
+  border-top: thin solid #D4D4D4;
 }
+
 .activity {
   padding: 6px 5px 3px 5px;
 }
 
-.activity .time {
+.activity > .time {
   font-size: 12px;
   color: rgb(141, 144, 162);
 }
 
-.activity .act_message1 {
+.activity > .act_message1 {
   margin: 0px 0px 0px 25px;
 }
 
-.activity .act_message2 {
+.activity > .act_message2 {
   margin: 6px 0px 6px 45px;
 }
 
-.act_day {
-  font-size: 18px;
-  padding: 4px;
+.activity-day {
   color: #666;
+  font-size: 16px;
+  padding: 4px;
 }
 
 .quote {

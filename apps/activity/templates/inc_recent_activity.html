@@ -1,9 +1,11 @@
 {% load activity_tags %}
 
+<div class="activity-container">
 {% if activity %}
   {% for x in activity %}
     {% ifchanged x.date_created|date:"j_E" %}
-      <div class="act_day">
+      <hr>
+      <div class="activity-day">
         {{ x.date_created|date:"j. E" }}
       </div>
     {% endifchanged %}
@@ -18,3 +20,4 @@
 {% else %}
   <div><i>Nema aktivnosti u zadnje vrijeme.</i></div>
 {% endif %}
+</div>

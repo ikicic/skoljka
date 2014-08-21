@@ -72,10 +72,14 @@ class Action(models.Model):
     def t_right_div_html(self):
         if (self.type, self.subtype) == SOLUTION_RATE:
             from solution.models import Solution, SOLUTION_CORRECT_SCORE
-            S = u'<br>%s' % rating_display_bool(
-                    field=Solution.correctness,
-                    red_if_lt=SOLUTION_CORRECT_SCORE,
-                    value=int(self.action_object_cache))
+            if int(self.action_object_cache) == 1:
+                S = '<br><img src="/static/images/cross_circle.png">'
+            else:
+                S = '<br><img src="/static/images/tick_circle.png">'
+            # S = u'<br>%s' % rating_display_bool(
+            #         field=Solution.correctness,
+            #         red_if_lt=SOLUTION_CORRECT_SCORE,
+            #         value=int(self.action_object_cache))
         else:
             label = self.get_label()
             if not label:
