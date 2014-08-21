@@ -1,6 +1,7 @@
 # coding=utf-8
-
 # local.py is ignored by git!
+
+import os
 
 ######################################
 # General
@@ -38,6 +39,10 @@ TEMPLATE_DEBUG = DEBUG
 
 # Set this if latex is not in PATH
 # LATEX_BIN_DIR = 'C:\\Program Files\\texlive\\2011\\bin\\win32\\'
+
+# Use this for development:
+# EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+# EMAIL_FILE_PATH = os.path.join(PROJECT_ROOT, "local", "email")
 
 EMAIL_HOST = ''
 EMAIL_HOST_USER = ''
@@ -85,7 +90,8 @@ USERPROFILE_SCHOOL_CLASS_INFO = [
 ]
 
 # + is replaced with the appropriate tag from school class info
-FOLDER_HOMEPAGE_SHORTCUTS_ONLINE = ['drz,+', 'zup,+', 'opc,+', 'IMO', 'shortlist', 'MEMO']
+FOLDER_HOMEPAGE_SHORTCUTS_ONLINE = ['drz,+', 'zup,+', 'opc,+', 'IMO',
+    'shortlist', 'MEMO']
 FOLDER_HOMEPAGE_SHORTCUTS_OFFLINE = ['IMO', 'shortlist', 'MEMO']
 FOLDER_INLINE_YEAR_COUNT = 10
 
