@@ -1,0 +1,15 @@
+findicons.com (Fast Icon)
+shell32.png (logo) - http://findicons.com/icon/38001/shell
+
+findicons.com (Yusuke Kamiyamane)
+cross.png - http://findicons.com/icon/118036/cross
+cross_circle.png - http://findicons.com/icon/117430/cross_circle
+minus_circle.png - http://findicons.com/icon/119048/minus_circle
+plus_circle.png - http://findicons.com/icon/117110/plus_circle?id=332967
+tick_circle.png - http://findicons.com/icon/118976/tick_circle
+
+findicons.com (YellowIcon)
+pdf16.png - http://findicons.com/icon/169307/pdf_document?id=416032
+
+findicons.com (Oxygen Team)
+tex16.png - http://findicons.com/icon/238048/text_x_bibtex

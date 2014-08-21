@@ -5,7 +5,7 @@ from permissions.constants import VIEW, EDIT, EDIT_PERMISSIONS, VIEW_SOLUTIONS
 from permissions.models import ObjectPermission
 
 from mathcontent.models import MathContent
-from solution.models import Solution, STATUS, SOLUTION_CORRECT_SCORE
+from solution.models import Solution, SolutionStatus, SOLUTION_CORRECT_SCORE
 from task.models import Task
 from task.utils import check_prerequisites_for_task, \
         check_prerequisites_for_tasks
@@ -61,7 +61,7 @@ class TaskUtilsTestCase(TestCase):
     def test_prerequisites_submitted(self):
         content = MathContent.objects.create(text="Test text for the solution")
         solution = Solution.objects.create(task=self.task1, author=self.user1,
-            content=content, status=STATUS['submitted'],
+            content=content, status=SolutionStatus.SUBMITTED,
             correctness_avg=SOLUTION_CORRECT_SCORE) # Solved
         self.assertTrue(CHECK_ONE(self.task2, self.user1))
 

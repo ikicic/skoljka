@@ -57,8 +57,8 @@
               </span>
             {% endif %}
           </td>
-          <td style="width:80px;">
-            {% rating_stars manager=s.correctness red_if_lt=2.7 %}
+          <td style="width:70px;">
+            {% rating_display_bool manager=s.correctness red_if_lt=SOLUTION_CORRECT_SCORE empty_if_no_votes=1 %}
           </td>
         {% else %}
           <td>

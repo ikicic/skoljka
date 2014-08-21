@@ -8,13 +8,7 @@
 {% block content %}
 
 <div style="float:left;">
-  {% if user.is_authenticated %}
-    {% if user == solution.author %}
-      Točnost: <div style="width:80px;display:inline-block;">{% rating_stars manager=solution.correctness red_if_lt=2.0 %}</div>
-    {% else %}
-      {% rating_box "Točnost" solution.correctness %}
-    {% endif %}
-  {% endif %}
+  {% rating_display_bool manager=solution.correctness red_if_lt=SOLUTION_CORRECT_SCORE %}
 </div>
 <div style="float:right;text-align:right;">
   {{ solution.date_created }} ({{ solution.date_created|timesince }})<br>
@@ -40,6 +34,9 @@
   {% endif %}
   {% if solution.is_official %}
     <span class="label label-info">Službeno rješenje</span>
+  {% endif %}
+  {% if user.is_authenticated and user != solution.author %}
+      {% rating_box "Točnost" solution.correctness 1 %}
   {% endif %}
 </div>
 
@@ -97,7 +94,9 @@
     <tr>
       <td style="width:140px;">{{ x.date }}</td>
       <td>{{ x.user|userlink }}</td>
-      <td style="width:80px;">{% rating_stars manager=solution.correctness red_if_lt=2.0 value=x.value %}</td>
+      <td style="width:70px;">
+        {% rating_display_bool manager=solution.correctness red_if_lt=SOLUTION_CORRECT_SCORE value=x.value %}
+      </td>
     </tr>
   {% endfor %}
   </table>

@@ -13,7 +13,8 @@ from tags.managers import TaggableManager
 from task.models import Task
 from search.models import SearchCache, SearchCacheElement
 from search.utils import search, search_tasks
-from solution.models import Solution, DETAILED_STATUS
+from solution.models import Solution, SolutionDetailedStatus, \
+        SOLUTION_DETAILED_STATUS_MAX
 from tags.managers import TaggableManager
 from skoljka.libs import interpolate_three_colors, ncache
 from skoljka.libs.decorators import cache_function, cache_many_function
@@ -120,22 +121,22 @@ class Folder(BasePermissionsModel):
                 - float, percent solved
                 - 3-tuple of floats, color RGB
         """
-        if not S or sum(S) - S[DETAILED_STATUS['blank']] <= 0:
+        if not S or sum(S) - S[SolutionDetailedStatus.BLANK] <= 0:
             return False, False, 0, (150, 150, 150)
 
-        solved = S[DETAILED_STATUS['as_solved']]        \
-            + S[DETAILED_STATUS['correct']]
-        todo = S[DETAILED_STATUS['todo']]
+        solved = S[SolutionDetailedStatus.AS_SOLVED] \
+                + S[SolutionDetailedStatus.SUBMITTED_CORRECT]
+        todo = S[SolutionDetailedStatus.TODO]
 
         percent = float(solved) / total_solvable_count
         todo_percent = float(todo) / total_solvable_count
-        if S[DETAILED_STATUS['wrong']]:
+        if S[SolutionDetailedStatus.SUBMITTED_INCORRECT]:
             r, g, b = 255, 0, 0
         else:
             r, g, b = interpolate_three_colors(180, 180, 180,
                 100, 220, 100, percent, 230, 180, 92, todo_percent)
 
-        non_rated = bool(S[DETAILED_STATUS['submitted_not_rated']])
+        non_rated = bool(S[SolutionDetailedStatus.SUBMITTED_NOT_RATED])
         return True, non_rated, percent, (r, g, b)
 
     def _should_show_stats(self):
@@ -275,7 +276,7 @@ class Folder(BasePermissionsModel):
         folder_task_ids = {}
 
         # {folder_id: [visible task count, solution statistics]}
-        result = {x.id: [0, 0, [0] * len(DETAILED_STATUS)] for x in folders}
+        result = {x.id: [0, 0, [0] * (SOLUTION_DETAILED_STATUS_MAX + 1)] for x in folders}
 
         query = 'SELECT FT.folder_id, T.id, T.author_id, T.hidden, T.solvable, S.detailed_status FROM folder_folder_tasks FT'  \
             ' INNER JOIN task_task T ON (FT.task_id = T.id)'   \

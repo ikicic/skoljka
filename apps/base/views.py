@@ -6,7 +6,7 @@ from django.template import RequestContext
 from activity.models import Action
 from permissions.constants import VIEW
 from recommend.models import UserRecommendation
-from solution.models import Solution, STATUS
+from solution.models import Solution, SolutionStatus
 from task.models import Task
 from task.templatetags.task_tags import cache_task_info
 from task.utils import check_prerequisites_for_tasks
@@ -37,7 +37,8 @@ def homepage_online(request, recent_tasks):
     else:
         recommend = [] # Simplify design, accept only if there are 4 tasks.
 
-    todo = Solution.objects.filter(author=request.user, status=STATUS['todo']) \
+    todo = Solution.objects \
+            .filter(author=request.user, status=SolutionStatus.TODO) \
             .values_list('task_id', flat=True)[:20]
     if len(todo) > 2:
         todo = random.sample(todo, 2)

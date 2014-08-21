@@ -10,7 +10,8 @@ from registration.signals import user_registered
 from folder.models import Folder
 from tags.models import Tag
 from task.models import Task, DIFFICULTY_RATING_ATTRS
-from solution.models import STATUS, SOLUTION_CORRECT_SCORE
+from solution.models import SolutionStatus, SolutionDetailedStatus, \
+        SOLUTION_CORRECT_SCORE
 from skoljka.libs.models import icon_help_text
 
 from collections import defaultdict
@@ -37,8 +38,8 @@ def diff_to_index(diff):
 
 def task_difficulty_on_update(task, field_name, old_value, new_value):
     """
-        If necessary, update all difficulty distribution counters
-        for all users that solved given task.
+    If necessary, update all difficulty distribution counters for all users
+    that solved given task.
     """
     # TODO: use signals!
     old = diff_to_index(old_value)
@@ -55,7 +56,7 @@ def task_difficulty_on_update(task, field_name, old_value, new_value):
         " SET D.solved_count = D.solved_count + ({{0}})"        \
         " WHERE S.task_id = {0} AND D.difficulty = {{1}} AND"   \
         " (S.status = {1} OR S.status = {2} AND S.correctness_avg >= {3});".format(
-            task.id, STATUS['as_solved'], STATUS['submitted'],
+            task.id, SolutionStatus.AS_SOLVED, SolutionStatus.SUBMITTED,
             SOLUTION_CORRECT_SCORE
         )
 
@@ -170,14 +171,14 @@ class UserProfile(models.Model):
 
     def refresh_diff_distribution(self, commit=True):
         """
-            Refresh solved task difficulty distribution manually.
-            Not really meant to be called (but callable from admin), because
-            distribution should be automatically updated on any change...
+        Refresh solved task counter and difficulty distribution manually.
+        Not really meant to be called (but callable from admin), because
+        distribution should be automatically updated on any change...
         """
         tasks = Task.objects.filter(
-            Q(solution__status=STATUS['as_solved'])
-                | Q(solution__correctness_avg__gte=SOLUTION_CORRECT_SCORE)
-                & Q(solution__status=STATUS['submitted']),
+            Q(solution__detailed_status=SolutionDetailedStatus.AS_SOLVED)
+            | Q(solution__detailed_status=
+                SolutionDetailedStatus.SUBMITTED_CORRECT),
             hidden=False,
             solution__author=self
         ).values('id', 'difficulty_rating_avg').distinct().order_by()
@@ -192,6 +193,7 @@ class UserProfile(models.Model):
             DifficultyDistribution(user=self.user, difficulty=D, solved_count=C)
             for D, C in enumerate(distribution)])
 
+        self.solved_count = len(tasks)
         if commit:
             self.save()
 

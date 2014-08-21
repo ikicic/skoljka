@@ -24,7 +24,7 @@ from mathcontent.utils import check_and_save_attachment
 from permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS, VIEW_SOLUTIONS
 from permissions.models import ObjectPermission
 from search.utils import update_search_cache
-from solution.models import Solution, STATUS as _SOLUTION_STATUS
+from solution.models import Solution, SolutionStatus
 from usergroup.forms import GroupEntryForm
 
 from skoljka.libs.decorators import response
@@ -347,7 +347,8 @@ def similar(request, id):
     # no need to sort here
     similar = list(SimilarTask.objects.filter(task=task)[:50].values_list('similar_id', 'score'))
     if request.user.is_authenticated():
-        solutions = Solution.objects.filter(task__similar_backward=task, author=request.user).exclude(status=_SOLUTION_STATUS['blank'])
+        solutions = Solution.objects.filter(task__similar_backward=task,
+                author=request.user).exclude(status=SolutionStatus.BLANK)
         solutions = solutions.only('status', 'correctness_avg', 'task')
     else:
         solutions = []

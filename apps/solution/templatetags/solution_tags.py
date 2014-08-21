@@ -8,7 +8,8 @@ from task.utils import check_prerequisites_for_tasks
 from skoljka.libs import interpolate_colors
 from skoljka.libs.string_operations import obfuscate_text
 
-from solution.models import Solution, STATUS, HTML_INFO, DETAILED_STATUS
+from solution.models import HTML_INFO, Solution, SolutionStatus, \
+        SolutionDetailedStatus, SOLUTION_STATUS_BY_NAME
 
 from datetime import datetime, timedelta
 
@@ -17,10 +18,10 @@ register = template.Library()
 @register.simple_tag(takes_context=True)
 def filter_solutions_by_status(context, solutions, filter_by_status):
     """
-        Ukratko:
-        problem je u tome sto useroptions update-a tek u renderu.
-        zato ova funkcija dodaje potrebne filtere, ali pazi na slucaj kada se vec
-        pretrazuje po odredjenom statusu (filter_by_status-u)
+    Ukratko:
+    problem je u tome sto useroptions update-a tek u renderu.
+    zato ova funkcija dodaje potrebne filtere, ali pazi na slucaj kada se vec
+    pretrazuje po odredjenom statusu (filter_by_status-u)
     """
 
     status = filter_by_status or context.get('solution_status_filter')
@@ -30,17 +31,17 @@ def filter_solutions_by_status(context, solutions, filter_by_status):
     # temporary... hack.
     if status == 'unrated':
         context['solutions'] = solutions.filter(
-            detailed_status=DETAILED_STATUS['submitted_not_rated'])
+                detailed_status=SolutionDetailedStatus.SUBMITTED_NOT_RATED)
         return ''
 
     context['solutions'] = solutions.filter(
-        status__in=[STATUS.get(x, 0) for x in status.split(',')])
+        status__in=[SOLUTION_STATUS_BY_NAME.get(x, 0) for x in status.split(',')])
     return ''
 
 @register.simple_tag()
 def solution_tr_bg_color_attr(solution, row_number):
     """
-        Returns background-color (for style attribute) for given solution.
+    Returns background-color (for style attribute) for given solution.
     """
     rgb = HTML_INFO[solution.detailed_status]['sol_rgb']
     if not rgb:

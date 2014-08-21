@@ -5,7 +5,7 @@ from django.utils.html import mark_safe
 from permissions.constants import VIEW_SOLUTIONS
 from permissions.signals import objectpermissions_changed
 from permissions.utils import get_object_ids_with_exclusive_permission
-from solution.models import Solution, DETAILED_STATUS
+from solution.models import Solution, SolutionDetailedStatus
 from task.models import Task
 from usergroup.models import UserGroup
 from skoljka.libs import ncache
@@ -18,8 +18,8 @@ from collections import defaultdict
 EVALUATOR_NAMESPACE = 'UsrPrEval'
 UNRATED_SOL_CNT_KEY_FORMAT = 'UnratedSolutions{0.pk}'
 
-UNRATED = DETAILED_STATUS['submitted_not_rated']
-CORRECT = DETAILED_STATUS['correct']
+UNRATED = SolutionDetailedStatus.SUBMITTED_NOT_RATED
+CORRECT = SolutionDetailedStatus.SUBMITTED_CORRECT
 
 @cache_function(namespace=EVALUATOR_NAMESPACE, key=UNRATED_SOL_CNT_KEY_FORMAT)
 def find_unrated_solutions(user):

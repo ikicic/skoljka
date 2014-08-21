@@ -315,21 +315,6 @@ $(function(){
   });
 });
 
-/* jQuery Rating Submit Function */
-jquery_rating_submit = function(name, url) {
-  $(function() {
-    $('.' + name + '-star').rating({
-      callback: function(value, link) {
-        var data = {};
-        data[name] = typeof value == 'undefined' ? 0 : value;
-        $.post(url, data, function(x) {
-          $('#' + name + '-value').html(x);
-        });
-      }
-    });
-  });
-};
-
 /* email = even position characters + reversed(odd) (0-based) */
 function decode_email(e) {
   var output = '';

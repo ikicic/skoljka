@@ -8,12 +8,12 @@ from permissions.constants import VIEW_SOLUTIONS
 from permissions.models import ObjectPermission
 from permissions.utils import get_object_ids_with_exclusive_permission
 from search.utils import update_search_cache
-from solution.models import DETAILED_STATUS, Solution
+from solution.models import Solution, SolutionDetailedStatus
 from tags.models import Tag, TaggedItem
 
 from task.models import Task
 
-CORRECT = DETAILED_STATUS['correct']
+CORRECT = SolutionDetailedStatus.SUBMITTED_CORRECT
 
 # TODO: does EDIT imply VIEW_SOLUTIONS?
 

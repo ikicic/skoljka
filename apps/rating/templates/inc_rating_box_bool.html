@@ -1,0 +1,27 @@
+<form class="rating-bool-container"
+    action=""
+    method="POST">
+  <input type="hidden" name="rating-instance-id" value="{{ m.instance.id }}">
+  <input type="hidden" name="rating-content-type-id" value="{{ m.content_type.id }}">
+  <input type="hidden" name="rating-field-name" value="{{ m.field.name }}">
+  {% csrf_token %}
+  <div class="btn-group">
+    {% for x in m.get_range_and_titles %}
+      <button value="{{ x.0 }}" title="{{ x.1 }}" name="rating-vote"
+          class="btn btn-mini{% ifequal user_vote x.0 %} rating-bool-selected{% endifequal %}">
+        {% if x.0 == 1 %}
+          <img src="/static/images/cross_circle.png">
+        {% else %}
+          <img src="/static/images/tick_circle.png">
+        {% endif %}
+        {{ x.1 }}
+      </button>
+    {% endfor %}
+    {% if user_vote %}
+      <button value="0" name="rating-vote" class="btn btn-mini">
+        <img src="/static/images/cross.png">
+        Izbriši ocjenu
+      </button>
+    {% endif %}
+  </div>
+</form>

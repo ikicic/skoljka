@@ -7,10 +7,12 @@ from django.template import RequestContext
 from activity import action as _action
 from mathcontent.forms import MathContentForm
 from permissions.constants import VIEW
+from rating.utils import rating_check_request
 from task.models import Task
 from skoljka.libs.decorators import ajax, response, require
 
-from solution.models import HTML_INFO, Solution, STATUS, _update_solved_count
+from solution.models import HTML_INFO, Solution, SolutionStatus, \
+        SOLUTION_STATUS_BY_NAME, _update_solved_count
 
 from datetime import datetime
 import json
@@ -19,10 +21,11 @@ import json
 
 @response('solution_detail.html')
 def detail(request, solution_id):
+    rating_check_request(request);
     solution = get_object_or_404(Solution.objects.select_related('content',
         'author', 'task', 'task.content'), id=solution_id)
 
-    if not solution.status == STATUS['submitted']:
+    if not solution.status == SolutionStatus.SUBMITTED:
         return (404, u'Rješenje nije dostupno.')
 
     # You are not allowed to view solution (including your own) if the task is
@@ -106,7 +109,7 @@ def _do_mark(request, solution, task):
     elif action in ['blank', 'as_solved', 'todo']:
         if action != 'blank':
             solution.date_created = datetime.now()
-        solution.status = STATUS[action]
+        solution.status = SOLUTION_STATUS_BY_NAME[action]
 
     solution.save()
 
@@ -150,7 +153,7 @@ def task_ajax(request, task_id):
         return ret_value
 
     # Return html info for given action as JSON.
-    info = HTML_INFO[STATUS[request.POST['action']]]
+    info = HTML_INFO[SOLUTION_STATUS_BY_NAME[request.POST['action']]]
     if not info['tr_class'] and task.hidden:
         info['tr_class'] = 'task-hidden'
     return json.dumps(info)
@@ -228,7 +231,7 @@ def submit(request, task_id=None, solution_id=None):
             was_solved = solution.is_solved()
 
             solution.content = math_content
-            solution.status = STATUS['submitted']
+            solution.status = SolutionStatus.SUBMITTED
             solution.date_created = datetime.now()
             solution.save()
             if not edit:
@@ -254,7 +257,7 @@ def _is_valid_status(status):
     if not status:
         return True
     L = status.split(',')
-    return 'blank' not in L and all((x in STATUS for x in L))
+    return 'blank' not in L and all((x in SOLUTION_STATUS_BY_NAME for x in L))
 
 @response('solution_list.html')
 def solution_list(request, task_id=None, user_id=None, status=None):
@@ -286,7 +289,7 @@ def solution_list(request, task_id=None, user_id=None, status=None):
     # but there are too few blank solutions for this to have any effect
     L = Solution.objects    \
             .filter_visible_tasks_for_user(request.user)    \
-            .exclude(status=STATUS['blank'])
+            .exclude(status=SolutionStatus.BLANK)
 
     task = None
     author = None   # 'user' is a template reserved word

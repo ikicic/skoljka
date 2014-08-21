@@ -14,42 +14,65 @@ from skoljka.libs.models import ModelEx
 
 
 # TODO: nekako drugacije ovo nazvati
-SOLUTION_CORRECT_SCORE = 2.6
+# 0 = unrated, 1 = incorrect, 2 = correct... tehnical details...
+SOLUTION_CORRECT_SCORE = 1.6 # 'incorrect' has preference over 'correct'
 
-# TODO: real constants, i.e. BLANK, AS_SOLVED etc.
-# solution.status
-STATUS = {'blank': 0, 'as_solved': 1, 'todo': 2, 'submitted': 3}
+class SolutionStatus:
+    BLANK = 0
+    AS_SOLVED = 1
+    TODO = 2
+    SUBMITTED = 3
+
+
+SOLUTION_STATUS_BY_NAME = {
+    'blank': SolutionStatus.BLANK,
+    'as_solved': SolutionStatus.AS_SOLVED,
+    'todo': SolutionStatus.TODO,
+    'submitted': SolutionStatus.SUBMITTED,
+}
 
 # Key names of detailed states.
 # For more info, look at Solution._calc_detailed_status()
 # If you need to change the order, don't forget to update _calc_detailed_status()
-DETAILED_STATUS_NAME = ['blank', 'as_solved', 'todo', 'submitted_not_rated',
-    'wrong', 'correct']
-DETAILED_STATUS = {name: i for i, name in enumerate(DETAILED_STATUS_NAME)}
+class SolutionDetailedStatus:
+    BLANK = 0
+    AS_SOLVED = 1
+    TODO = 2
+    SUBMITTED_NOT_RATED = 3
+    SUBMITTED_INCORRECT = 4
+    SUBMITTED_CORRECT = 5
+
+SOLUTION_DETAILED_STATUS_MAX = 5    # Max value
 
 # Each element of HTML_INFO is dict with keys from _HTML_INFO_KEYS and values
 # from _HTML_INFO
 #                                               task label, solution tr
 _HTML_INFO_KEYS = ('label_class', 'label_text', 'tr_class', 'sol_rgb')
 _HTML_INFO = {
-    'blank': ('', '', '', None),
-    'as_solved': ('label-success', u'Riješeno', 'task-as-solved', (170, 255, 170)),
-    'todo': ('label-warning', u'To Do', 'task-todo', None),
-    'submitted_not_rated': ('label-info', u'Poslano', 'task-submitted-not-rated', (255, 219, 76)),
-    'wrong': ('label-important', u'Netočno', 'task-wrong', (255, 150, 150)),
-    'correct': ('label-success', u'Točno', 'task-correct', (112, 255, 112)),
+    SolutionDetailedStatus.BLANK:
+        ('', '', '', None),
+    SolutionDetailedStatus.AS_SOLVED:
+        ('label-success', u'Riješeno', 'task-as-solved', (170, 255, 170)),
+    SolutionDetailedStatus.TODO:
+        ('label-warning', u'To Do', 'task-todo', None),
+    SolutionDetailedStatus.SUBMITTED_NOT_RATED:
+        ('label-info', u'Poslano', 'task-submitted-not-rated', (255, 219, 76)),
+    SolutionDetailedStatus.SUBMITTED_INCORRECT:
+        ('label-important', u'Netočno', 'task-wrong', (255, 150, 150)),
+    SolutionDetailedStatus.SUBMITTED_CORRECT:
+        ('label-success', u'Točno', 'task-correct', (112, 255, 112)),
 }
 
 # status number -> dict(info_key -> value)
-HTML_INFO = {DETAILED_STATUS[key]: dict(zip(_HTML_INFO_KEYS, value))
+HTML_INFO = {key: dict(zip(_HTML_INFO_KEYS, value))
     for key, value in _HTML_INFO.iteritems()}
 
 
 def _update_solved_count(delta, task, profile, save_task=True, save_profile=True):
     """
-        Update solution counter for given Task and UserProfile.
+    Update solution counter for given Task and UserProfile.
 
-        To disable automatic saving, set save_task and/or save_profile to False.
+    To disable automatic saving, set save_task and/or save_profile to False.
     """
     if delta == 0:
         return
@@ -65,10 +88,10 @@ def _update_solved_count(delta, task, profile, save_task=True, save_profile=True
 
 def _solution_on_update(solution, field_name, old_value, new_value):
     """
-        Updates statistics (number of correct solution for Task and UserProfile)
-        in case solution correctness is changed.
+    Updates statistics (number of correct solution for Task and UserProfile)
+    in the case solution correctness is changed.
     """
-    if solution.status != STATUS['submitted']:
+    if solution.status != SolutionStatus.SUBMITTED:
         return # not interesting
 
     old = old_value >= SOLUTION_CORRECT_SCORE
@@ -80,9 +103,8 @@ def _solution_on_update(solution, field_name, old_value, new_value):
 
 
 SOLUTION_RATING_ATTRS = {
-    'range': 6,
-    'titles': [u'Neocijenjeno', u'Netočno', u'Točno uz manje nedostatke.',
-        u'Točno.', u'Točno i domišljato.', u'Genijalno! Neviđeno!'],
+    'range': 3,
+    'titles': [u'Neocijenjeno', u'Netočno', u'Točno'],
     'action_type': SOLUTION_RATE,
     'on_update': _solution_on_update,
 }
@@ -90,8 +112,8 @@ SOLUTION_RATING_ATTRS = {
 class SolutionManager(models.Manager):
     def filter_visible_tasks_for_user(self, user):
         """
-            Filter tasks visible to the given user.
-            Does not check anything related to solution itself.
+        Filter tasks visible to the given user.
+        Does not check anything related to solution itself.
         """
         if user is not None and user.is_authenticated():
             user_group_ids = user.get_profile().get_group_ids()
@@ -112,11 +134,11 @@ class Solution(ModelEx):
     last_edit_time = models.DateTimeField(auto_now=True)  # only for submitted
     posts = PostGenericRelation()
 
-    status = models.IntegerField(default=STATUS['blank']) # view STATUS for more info
+    status = models.IntegerField(default=SolutionStatus.BLANK)
 
     # More like a cached value. Note that this value is automatically refreshed
     # in pre_save, not before that.
-    detailed_status = models.IntegerField(default=DETAILED_STATUS['blank'],
+    detailed_status = models.IntegerField(default=SolutionDetailedStatus.BLANK,
         db_index=True)
 
     is_official = models.BooleanField()
@@ -143,18 +165,18 @@ class Solution(ModelEx):
 
     def _calc_detailed_status(self):
         """
-            Detailed status, unlike normal .status, describes also the
-            correctness of the solution.
+        Detailed status, unlike normal .status, describes also the correctness
+        of the solution.
         """
 
         # The only special case actually...
-        if self.status == STATUS['submitted']:
+        if self.status == SolutionStatus.SUBMITTED:
             if self.correctness_avg < 1e-6:
-                return DETAILED_STATUS['submitted_not_rated']
+                return SolutionDetailedStatus.SUBMITTED_NOT_RATED
             elif self.correctness_avg < SOLUTION_CORRECT_SCORE:
-                return DETAILED_STATUS['wrong']
+                return SolutionDetailedStatus.SUBMITTED_INCORRECT
             else:
-                return DETAILED_STATUS['correct']
+                return SolutionDetailedStatus.SUBMITTED_CORRECT
 
         # Otherwise, the order is the same...
         return self.status
@@ -167,19 +189,19 @@ class Solution(ModelEx):
 
     def is_correct(self):
         # return self.is_submitted() and self.correctness_avg >= SOLUTION_CORRECT_SCORE
-        return self.detailed_status == DETAILED_STATUS['correct']
+        return self.detailed_status == SolutionDetailedStatus.SUBMITTED_CORRECT
 
     def is_submitted(self):
-        return self.status == STATUS['submitted']
+        return self.status == SolutionStatus.SUBMITTED
 
     def is_as_solved(self):
-        return self.status == STATUS['as_solved']
+        return self.status == SolutionStatus.AS_SOLVED
 
     def is_todo(self):
-        return self.status == STATUS['todo']
+        return self.status == SolutionStatus.TODO
 
     def is_blank(self):
-        return self.status == STATUS['blank']   # exists, but it's blank
+        return self.status == SolutionStatus.BLANK
 
     def _get_user_solution(self, user, users_solution):
         # if user's solution not given, search for it
@@ -277,4 +299,6 @@ class Solution(ModelEx):
 
 # nuzno(?) da bi queryji koristili JOIN, a ne subqueryje
 # TODO: neki prikladniji naziv za related_name
-User.add_to_class('solutions', models.ManyToManyField(Task, through=Solution, related_name='solutions_by'))
+User.add_to_class('solutions',
+        models.ManyToManyField(Task, through=Solution,
+            related_name='solutions_by'))

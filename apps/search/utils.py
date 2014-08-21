@@ -5,7 +5,7 @@ from django.db.models import Count
 from django.template.defaultfilters import slugify
 
 from permissions.constants import VIEW
-from solution.models import STATUS
+from solution.models import SolutionStatus
 from task.models import Task
 from tags.models import Tag, TaggedItem
 from tags.utils import get_available_tags, replace_with_original_tags,  \
@@ -126,7 +126,8 @@ def search_tasks(tags=[], tag_ids=None, user=None, **kwargs):
     if kwargs.get('groups'):
         ids = ','.join([str(x) for x in tasks.values_list('id', flat=True)])
         group_ids = ','.join([str(x.id) for x in kwargs['groups']])
-        statuses = '%d,%d' % (STATUS['as_solved'], STATUS['submitted'])
+        statuses = "{},{}".format(SolutionStatus.AS_SOLVED,
+                SolutionStatus.SUBMITTED)
 
         # TODO: can this be optimized? use SearchCache instead of IN?
         tasks = Task.objects.raw(

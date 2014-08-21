@@ -12,7 +12,7 @@ from userprofile.models import UserProfile
 
 from permissions.constants import VIEW
 from recommend.models import UserTagScore
-from solution.models import Solution, STATUS
+from solution.models import Solution, SolutionStatus
 from solution.templatetags.solution_tags import cache_solution_info
 from task.models import Task, DIFFICULTY_RATING_ATTRS
 from task.utils import check_prerequisites_for_tasks
@@ -113,9 +113,9 @@ def profile(request, pk):
     solutions = solutions.filter(author_id=pk)  \
         .select_related('task')                 \
         .order_by('-date_created')
-    todo = solutions.filter(status=STATUS['todo'])[:10]
+    todo = solutions.filter(status=SolutionStatus.TODO)[:10]
     solved = solutions.filter(
-        status__in=[STATUS['as_solved'], STATUS['submitted']])[:10]
+        status__in=[SolutionStatus.AS_SOLVED, SolutionStatus.SUBMITTED])[:10]
 
     if pk != request.user.pk:
         # TODO: optimize, do not load unnecessary my_solution
