@@ -1,0 +1,28 @@
+.profile-distribution:after {
+  content: " ";
+  display: block;
+  height: 0;
+  clear: both;
+}
+
+.profile-distribution > div {
+  width: 20px;
+  height: 100px;
+  float: left;
+  background-color: #EEE;
+  position: relative;
+}
+
+.profile-distribution > div > div {
+  background-color: #CCC;
+  bottom: 0px;
+  position: absolute;
+  width: 20px;
+}
+
+.profile-task-list {
+  margin: 1.5em 0;
+}
+.profile-task-list > h3 {
+  display: inline;
+}

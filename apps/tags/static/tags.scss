@@ -1,0 +1,47 @@
+/* Tags */
+.tag-list {
+  display: inline;
+  font-size: 12px;
+  color: #CCC;
+}
+
+.tag-hidden {
+  color: #999;
+}
+
+.tag-wrong {
+  color: #A98;
+}
+
+.tag-hidden.tag-wrong {
+  color: #CCC;
+}
+
+.tag-votes {
+  color: #C8C8C8;
+}
+
+
+/* for jquery tools tooltip */
+/* cannot use `tooltip`, as it is already used by bootstrap.css */
+.tag-tooltip {
+  background: rgb(239, 241, 228);
+  border: 1px solid #CCC;
+  border-radius: 3px;
+  box-shadow: 1px 1px 3px rgb(201, 201, 201);
+  color: #444;
+  display: none;
+  padding: 5px 6px 0px 6px;
+}
+
+.tag-tooltip img {
+  vertical-align:-3px;
+}
+
+.tag-tooltip input {
+  margin-top:3px;
+}
+
+.profile-task-submitted a {
+  color: #00F;
+}

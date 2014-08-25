@@ -1,3 +1,5 @@
+@import "main";
+
 /* Task action */
 
 .task-action-bar {
@@ -40,13 +42,8 @@
 .task-action-bar-right {
   float: right;
 }
-
 /* End task action */
 
-.task-info-right {
-  float: right;
-  text-align: right;
-}
 
 /* Task table */
 .task-table td {
@@ -122,10 +119,27 @@ tr.task-hidden:nth-child(odd) td {
   padding: 10px 0px;
 }
 
-.task-title {
+#task-title {
   text-align: center;
   font-size: 24px;
   font-weight: normal;
+}
+
+#task-top-info {
+  overflow: auto;
+}
+#task-top-left-info {
+  float: left;
+}
+
+#task-top-right-info {
+  float: right;
+  margin-top: 1em;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.task-date-created {
 }
 
 #task-bottom-left-info {
@@ -140,5 +154,14 @@ tr.task-hidden:nth-child(odd) td {
   text-align: right;
   > form {
     margin: 0px;
+  }
+}
+
+@media (max-width: $screen-xs-min - 1px) {
+  #task-title {
+    font-size: 20px;
+  }
+
+  #task-top-left-info {
   }
 }

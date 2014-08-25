@@ -8,9 +8,17 @@
 {% load task_tags %}
 
 <div class="outdiv">
-  <div id="homepage-registration">
+  <div id="homepage-registration" class="hidden-xs-phone">
     <h3>Registracija</h3>
-    {% small_registration_form %}
+    {% registration_form %}
+  </div>
+  <div id="homepage-auth-xs-phone" class="visible-xs-phone">
+    <a class="homepage-auth" href="{% url django.contrib.auth.views.login %}">
+      Prijava
+    </a>
+    <a class="homepage-auth" href="{% url registration_register %}">
+      Registracija
+    </a>
   </div>
 
   <h3>Što je Školjka?</h3>

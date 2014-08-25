@@ -2,3 +2,24 @@
 @import "bootstrap/variables";
 @import "bootstrap/mixins";
 
+/* Same variable names as in Bootstrap3. */
+$screen-xs-min:   480px;
+$screen-sm-min:   768px;
+$screen-md-min:   980px; /* 992px in Bootstrap 3 */
+$screen-lg-min:   1200px;
+
+$screen-xs-max:   $screen-sm-min - 1px;
+$screen-sm-max:   $screen-md-min - 1px;
+$screen-md-max:   $screen-lg-min - 1px;
+
+@media (max-width: $screen-xs-min - 1px) {
+  .hidden-xs-phone {
+    display: none !important;
+  }
+}
+
+@media (min-width: $screen-xs-min) {
+  .visible-xs-phone {
+    display: none !important;
+  }
+}

@@ -1,0 +1,111 @@
+@import "main";
+/* General CSS */
+
+
+/* Hacks */
+/*   Anything that should or could have a better solution. */
+
+.kill-br br {
+  /* as_table inserts unwanted <br> between field and its help_text */
+  /* This is the easiest way to remove its effect */
+  display: none;
+}
+
+/* Vertical align solution taken from: http://emergentweb.com/test/valign.html */
+.center-vertically {
+  height: 100%;
+}
+
+.center-vertically > div {
+  display: table;
+  height: 100%;
+  width: 100%;
+}
+
+.center-vertically > div > div {
+  display: table-cell;
+  vertical-align: middle;
+  margin: 0;
+  padding: 0;
+}
+
+.center-vertically > div > div > div {
+  margin: 0 auto;
+}
+/* Hacks End */
+
+
+/* Usually buttons containing only an image/icon. */
+button.blank {
+  border: 0px;
+  background: transparent;
+  margin: 0px;
+  padding: 0px;
+}
+
+/* Form that doesn't use .as_table, but uses {{ field }} instead. */
+form.no-table {
+  button, input[type=submit], input[type=text], input[type=password] {
+    display: block;
+  }
+
+  label {
+    display: inline-block;
+  }
+}
+
+h2, h3, h4 {
+  color: #333;
+}
+
+h2, h3, h4, h4 a {
+  text-shadow: 1px 1px 1px rgb(210, 210, 210);
+}
+
+/* outdiv */
+.outdiv {
+  border-radius: 5px;
+  box-shadow: 0 1px 2px rgba(128, 128, 128, 0.35);
+  background: -webkit-gradient(linear, left top, left bottom, from(rgb(246, 248, 250)), to(rgb(237, 242, 248)));
+  margin: 5px 5px 25px 5px;
+  overflow: auto;
+  padding: 15px 25px;
+}
+
+@media (max-width: $screen-xs-min - 1px) {
+  .outdiv {
+    padding: 12px 18px;
+    margin: 3px 3px 20px 3px;
+  }
+}
+
+.outdiv h3 {
+  margin-bottom: 5px;
+  margin-left: -5px;
+}
+
+/* Small Page (e.g. page with only one form) */
+.small-page {
+  margin: 5px;
+  > h3 {
+    margin-bottom: 10px;
+  }
+
+  input[type=text], input[type=password] {
+    padding: 5px;
+    margin-bottom: 7px;
+  }
+}
+
+/* Split Form */
+.split-form th {
+  padding-left: 10px;
+}
+
+.split-form-row th {
+  color: gray;
+  font-size: 11px;
+  padding: 10px 0 0 0;
+  text-align: left;
+  text-transform: uppercase;
+}

@@ -5,40 +5,43 @@
 {% load rating_tags %}
 {% load tags_tags %}
 
-{% block title %}{{ task.name|default:"Pregled zadatka" }}{% endblock %}
+{% block title %}{{ task.name }}{% endblock %}
 
 {% block content %}
 
-<div style="float:right;">
-  {% if can_edit %}<a href="/task/{{ task.pk }}/edit/" class="btn">Uredi</a>{% endif %}
-</div>
+{% if can_edit %}
+  <div style="float:right;">
+    <a href="/task/{{ task.pk }}/edit/" class="btn">Uredi</a>
+  </div>
+{% endif %}
 
+<h3 id="task-title">{{ task.name }}</h3>
+<div id="task-top-info">
+  <div id="task-top-left-info">
+    {% if solution and not solution.is_blank %}
+      <span class="label {{ solution.get_html_info.label_class }}">
+        {{ solution.get_html_info.label_text }}
+      </span>
+    {% endif %}
+    <br>
+    {% if user.is_authenticated %}
+      {% rating_box "Kvaliteta" task.quality_rating %}
+      {% rating_box "Težina" task.difficulty_rating %}
+    {% endif %}
+  </div>
 
-<h3 class="task-title">{{ task.name }}</h3>
-<div style="float:left;">
-  {% if solution and not solution.is_blank %}
-    <span class="label {{ solution.get_html_info.label_class }}">
-      {{ solution.get_html_info.label_text }}
-    </span>
-  {% endif %}
-  <br>
-  {% if user.is_authenticated %}
-    {% rating_box "Kvaliteta" task.quality_rating %}
-    {% rating_box "Težina" task.difficulty_rating %}
-  {% endif %}
-</div>
-
-<div style="text-align:right;margin-top:1em;">
-  Dod{% gender 'ao' 'la' task.author.get_profile.gender %}: {{ task.author|userlink }}<br>
-  {{ task.date_created|date:"E j, Y" }}<br>
-  {% tag_list task %}
-  <div>
-    <a href="/task/export/latex/{{ task.id }}/">
-      <img src="/static/images/tex16.png" alt="LaTeX" title="Export to LaTeX">
-    </a>
-    <a href="/task/export/pdf/{{ task.id }}/">
-      <img src="/static/images/pdf16.png" alt="PDF" title="Export to PDF">
-    </a>
+  <div id="task-top-right-info">
+    Dod{% gender 'ao' 'la' task.author.get_profile.gender %}: {{ task.author|userlink }}<br>
+    <span class="task-date-created">{{ task.date_created|date:"E j, Y" }}</span><br>
+    {% tag_list task %}
+    <div>
+      <a href="/task/export/latex/{{ task.id }}/">
+        <img src="/static/images/tex16.png" alt="LaTeX" title="Export to LaTeX">
+      </a>
+      <a href="/task/export/pdf/{{ task.id }}/">
+        <img src="/static/images/pdf16.png" alt="PDF" title="Export to PDF">
+      </a>
+    </div>
   </div>
 </div>
 
@@ -114,7 +117,7 @@
   {% endif %}
 
   {% if task.solvable %}
-    <a href="/solution/task/{{ task.id }}/">Pregledaj poslana rješenja</a><br>
+    <a href="/solution/task/{{ task.id }}/">Poslana rješenja</a><br>
   {% endif %}
   <a href="/task/{{ task.id }}/similar/">
     Slični zadaci {{ task.file_attachment_id|yesno:"i datoteke,," }}

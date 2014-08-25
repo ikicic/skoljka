@@ -18,10 +18,11 @@ from registration.models import RegistrationProfile
 class AuthenticationFormEx(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super(AuthenticationFormEx, self).__init__(*args, **kwargs)
-        self.fields['username'].label = 'Korisničko ime'
-        self.fields['username'].widget.attrs['autofocus'] = 'autofocus'
-        self.fields['password'].label = 'Lozinka'
 
+        self.fields['username'].widget.attrs['placeholder'] = 'Korisničko ime'
+        self.fields['password'].widget.attrs['placeholder'] = 'Lozinka'
+        for x in self.fields.itervalues():
+            x.label = ''
 
 # na temelju django-registration/forms.py RegistrationForm
 

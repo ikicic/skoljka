@@ -1,205 +1,31 @@
 @import "main";
 
-/* TODO: replace _ with - */
+/* CSS for base.html (page structure) */
+
 /* TODO: Sass! Most of the colors are closely related. */
 /*   Changing the color now requires changing all the colors manually. */
-
-/* ================================= */
-/* jquery.autocomplete.css */
-
-.ac_results {
-	padding: 0px;
-	border: 1px solid black;
-	background-color: white;
-	overflow: hidden;
-	z-index: 99999;
-}
-
-.ac_results ul {
-	width: 100%;
-	list-style-position: outside;
-	list-style: none;
-	padding: 0;
-	margin: 0;
-}
-
-.ac_results li {
-	margin: 0px;
-	padding: 2px 5px;
-	cursor: default;
-	display: block;
-	/*
-	if width will be 100% horizontal scrollbar will apear
-	when scroll mode will be used
-	*/
-	/*width: 100%;*/
-	font: menu;
-	font-size: 12px;
-	/*
-	it is very important, if line-height not setted or setted
-	in relative units scroll will be broken in firefox
-	*/
-	line-height: 16px;
-	overflow: hidden;
-}
-
-.ac_loading {
-
-}
-
-.ac_odd {
-	background-color: #eee;
-}
-
-.ac_over {
-	background-color: #0A246A;
-	color: white;
-}
-
-
-/* end of jquery.autocomplete.css */
-/* ================================= */
-
-
-/* ================================= */
-/* NOTE: width:17px has been changed to 16px!
-/* jQuery.Rating Plugin CSS - http://www.fyneworks.com/jquery/star-rating/ */
-div.rating-cancel,div.star-rating{float:left;width:16px;height:15px;text-indent:-999em;cursor:pointer;display:block;background:transparent;overflow:hidden}
-div.rating-cancel,div.rating-cancel a{background:url(delete.gif) no-repeat 0 -16px}
-div.star-rating,div.star-rating a{background:url(star.gif) no-repeat 0 0px}
-div.rating-cancel a,div.star-rating a{display:block;width:16px;height:100%;background-position:0 0px;border:0}
-div.star-rating-on a{background-position:0 -16px!important}
-div.star-rating-hover a{background-position:0 -32px}
-/* Read Only CSS */
-div.star-rating-readonly a{cursor:default !important}
-/* Partial Star CSS */
-div.star-rating{background:transparent!important;overflow:hidden!important}
-/* END jQuery.Rating Plugin CSS */
-/* ================================= */
-
-/* jQuery Rating fix */
-div.readonly-star {
-  float: left;
-  height: 15px;
-  text-indent: -999em;
-  display: block;
-  background: transparent;
-  overflow: hidden;
-  background: url(star.gif) repeat-x 0 0px;
-}
-
-/* ================================= */
-/* skoljka css: */
-
-
-/* changes to Bootstrap */
-.nav .nav-header {
-  padding: 3px 12px;
-}
-
-.nav-list > li > a {
-  padding: 3px 12px;
-}
-
-.nav-list > li > a > span {
-  font-size: 12px;
-}
-
-.label {
-  box-shadow: 1px 1px 3px black;
-}
-
-tr.group_hidden td {
-  background-color: #DDD!important;
-}
-
-.table-striped tbody tr:nth-child(odd) td,
-.table-striped tbody tr:nth-child(odd) th {
-  background-color: rgb(244, 247, 246);
-}
-
-.thin {
-  line-height: normal;
-  margin: 0px;
-  padding: 0px;
-  border-width: 0px;
-}
-
-.well {
-  /* background-color: rgb(248, 245, 243); rgb(246, 250, 244)*/
-  background-color: rgb(250, 252, 252);
-  border: 0px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.5);
-  padding: 15px;
-}
-
-/* this is kind of tricky, please find a better solution! */
-#content .btn-group,
-#content .row,
-#content .row-fluid {
-  display: inline-block;
-}
-
-
-/* Hacks */
-/*   Anything that should or could have a better solution. */
-
-.kill-br br {
-  /* as_table inserts unwanted <br> between field and its help_text */
-  /* This is the easiest way to remove its effect */
-  display: none;
-}
-
-/* Vertical align solution taken from: http://emergentweb.com/test/valign.html */
-.center-vertically {
-  height: 100%;
-}
-
-.center-vertically > div {
-  display: table;
-  height: 100%;
-  width: 100%;
-}
-
-.center-vertically > div > div {
-  display: table-cell;
-  vertical-align: middle;
-  margin: 0;
-  padding: 0;
-}
-
-.center-vertically > div > div > div {
-  margin: 0 auto;
-}
-
-/* Hacks End */
 
 
 /* General */
 body {
   background-image: url('images/bg_pattern.png');
-}
-
-h2, h3, h4 {
-  color: #333;
-}
-
-h2, h3, h4, h4 a {
-  text-shadow: 1px 1px 1px rgb(210, 210, 210);
+  padding: 0px; /* change to bootstrap */
 }
 
 #header {
   background-color: rgb(206, 216, 214);
   /* background: -webkit-gradient(linear, left top, left bottom, from(rgb(216, 213, 206)), to(rgb(231, 227, 219))); */
-  background: -webkit-gradient(linear, left top, left bottom, from(rgb(206, 216, 214)), to(rgb(219, 229, 231)));
+  background: -webkit-gradient(
+    linear, left top, left bottom,
+    from(rgb(206, 216, 214)), to(rgb(219, 229, 231)));
   box-shadow: 0 1px 4px #333;
   margin-bottom: 3px;
   padding: 5px!important;
-}
 
-#header form {
-  padding: 0px!important;
-  margin: 0px!important;
+  form {
+    padding: 0px!important;
+    margin-bottom: 0px!important;
+  }
 }
 
 #site-container {
@@ -212,7 +38,6 @@ h2, h3, h4, h4 a {
 }
 
 #content {
-  margin: 0 0 0 249px;
   /* background-color: rgb(235, 231, 229); rgb(232, 236, 235) */
   background-color: rgb(240, 245, 244);
   padding: 10px;
@@ -221,10 +46,8 @@ h2, h3, h4, h4 a {
 #sidebar {
   /* background-color: rgb(245, 242, 240); */
   background-color: rgb(246, 250, 249);
-  float: left;
   margin-bottom: 10px;
   padding: 15px 5px;
-  width: 225px;
 }
 
 #header-bar {
@@ -240,11 +63,23 @@ h2, h3, h4, h4 a {
 #hbar-search {
   float: left;
   margin-right: 5px;
+
+  input.ac-tags {
+    width: 90px!important;
+  }
 }
 
 #hbar-login {
   float: left;
-  margin-left: 10px;
+  margin-left: 20px;
+
+  > input {
+    margin: 0px 2px;
+  }
+}
+
+#hbar-collapse-sidebar {
+  display: none;
 }
 
 #nav-hello-user {
@@ -262,22 +97,22 @@ h2, h3, h4, h4 a {
 #sitename {
   float: left;
   padding-left: 20px;
-}
 
-#sitename img {
-  vertical-align: -0.2em;
-}
+  img {
+    vertical-align: -0.2em;
+  }
 
-#sitename a {
-  color: black;
-  font-family: Georgia, Arial, serif;
-  font-style: italic;
-  text-shadow: 1px 1px 1px rgb(182, 182, 182);
-}
+  a {
+    color: black;
+    font-family: Georgia, Arial, serif;
+    font-style: italic;
+    text-shadow: 1px 1px 1px rgb(182, 182, 182);
+  }
 
-#sitename a:hover {
-  color: black;
-  text-decoration: none;
+  a:hover {
+    color: black;
+    text-decoration: none;
+  }
 }
 
 #footer {
@@ -303,302 +138,78 @@ a.register {
 }
 
 .unread_pms_count {
+  /* should this be here? */
   color: red;
 }
 
-.unread,
-.post_reply_to {
+.unread, .post_reply_to {
+  /* should this be here? */
   background-color: #EFC;
 }
 
-/* outdiv */
-.outdiv {
-  border-radius: 5px;
-  box-shadow: 0 1px 2px rgba(128, 128, 128, 0.35);
-  background: -webkit-gradient(linear, left top, left bottom, from(rgb(246, 248, 250)), to(rgb(237, 242, 248)));
-  margin: 5px 5px 25px 5px;
-  overflow: auto;
-  padding: 15px 25px;
+
+@media (min-width: $screen-md-min) {
+  #content {
+    margin: 0 0 0 225px + 24px;
+  }
+
+  #sidebar {
+    float: left;
+    width: 225px;
+  }
 }
 
-.outdiv h3 {
-  margin-bottom: 5px;
-  margin-left: -5px;
+@media (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+  #content {
+    margin: 0 0 0 205px + 24px;
+  }
+
+  #sidebar {
+    float: left;
+    width: 205px;
+  }
 }
 
+@media (max-width: $screen-xs-min - 1px) {
+  h2 {
+    font-size: 22px;
+  }
 
-/* Activity */
-.activity-container > hr {
-  margin: 5px 0px;
-  border-top: thin solid #D4D4D4;
+  #content {
+    padding: 7px;
+  }
+
+  #footer {
+    text-align: center;
+    > span {
+      white-space: nowrap;
+    }
+  }
+
+  #site-container {
+    padding: 7px;
+  }
 }
 
-.activity {
-  padding: 6px 5px 3px 5px;
-}
+@media (max-width: $screen-xs-max) {
+  #hbar-login {
+    margin-left: 0px;
 
-.activity > .time {
-  font-size: 12px;
-  color: rgb(141, 144, 162);
-}
+    > input {
+      margin: 0px 1px;
+    }
+    > input[type=text], > input[type=password] {
+      width: 87px;
+    }
+  }
 
-.activity > .act_message1 {
-  margin: 0px 0px 0px 25px;
-}
-
-.activity > .act_message2 {
-  margin: 6px 0px 6px 45px;
-}
-
-.activity-day {
-  color: #666;
-  font-size: 16px;
-  padding: 4px;
-}
-
-.quote {
-  border-left: 1px solid #CDF;
-  background-color: rgb(238, 245, 238);
-  padding: 6px;
-}
-
-.post_list_small .post_info {
-  color: #666;
-  margin-bottom: 12px;
-}
-
-.post_list_small .last_edit {
-  font-size: 11px;
-  color: #888
-}
-
-/* Django */
-.errorlist {
-  color: red;
-}
-
-/* Homepage */
-.homepage-info {
-  margin-bottom: 25px;
-  font-family: "Georgia", Arial, sans-serif;
-  color: #444;
-}
-
-#homepage-registration {
-  float: right;
-  margin: 0px 20px 0px 20px;
-  width: 30%;
-  min-width: 205px;
-}
-
-#homepage-registration {
-  button {
+  #hbar-collapse-sidebar {
+    float: left;
     display: block;
+    margin-left: 5px;
   }
 
-  input {
-    font-size: 15px;
-    height: auto;
-    margin-bottom: 7px;
-    padding: 7px 9px;
+  #sidebar {
+    display: none;
   }
-
-  label {
-    display: inline-block;
-  }
-
-  input[type=checkbox] {
-    vertical-align: bottom;
-  }
-
-  input[type=text], input[type=password] {
-    width: 100%;
-  }
-}
-
-#homepage-registration h3 {
-  margin-bottom: 10px;
-}
-
-.registration-small button {
-  margin-top: 5px;
-}
-
-
-/* Split Form */
-.split-form th {
-  padding-left: 10px;
-}
-
-.split-form-row th {
-  color: gray;
-  font-size: 11px;
-  padding: 10px 0 0 0;
-  text-align: left;
-  text-transform: uppercase;
-}
-
-
-/* Tags */
-.tag-list {
-  display: inline;
-  font-size: 12px;
-  color: #CCC;
-}
-
-.tag-hidden {
-  color: #999;
-}
-
-.tag-wrong {
-  color: #A98;
-}
-
-.tag-hidden.tag-wrong {
-  color: #CCC;
-}
-
-.tag-votes {
-  color: #C8C8C8;
-}
-
-
-/* for jquery tools tooltip */
-/* cannot use `tooltip`, as it is already used by bootstrap.css */
-.tag-tooltip {
-  background: rgb(239, 241, 228);
-  border: 1px solid #CCC;
-  border-radius: 3px;
-  box-shadow: 1px 1px 3px rgb(201, 201, 201);
-  color: #444;
-  display: none;
-  padding: 5px 6px 0px 6px;
-}
-
-.tag-tooltip img {
-  vertical-align:-3px;
-}
-
-.tag-tooltip input {
-  margin-top:3px;
-}
-
-.profile-task-submitted a {
-  color: #00F;
-}
-
-
-/* MathContent */
-.mathcontent-preview {
-  margin-top: 10px;
-}
-
-.mathcontent-text {
-  box-sizing: border-box;
-  width: 100%;
-}
-
-.mc {
-  position: relative;
-}
-
-.mc-viewsource {
-  position: absolute;
-  bottom: 0px;
-  right: 0px;
-  margin-left: 2px;
-  visibility: hidden;
-}
-
-.mc:hover .mc-viewsource {
-  visibility: visible;
-  opacity: 0.15;
-}
-
-div.mc-viewsource-text {
-  margin-top: 10px;
-  color: #666;
-  white-space: pre-line;
-}
-
-a.mc-viewsource-clipboard {
-  margin-top: 7px;
-}
-
-pre {
-  display: inline;
-  background-color: #DDD;
-}
-
-pre.multi-line {
-  border: none;
-  background-color: transparent;
-}
-
-img.latex,
-img.latex_center,
-object.latex,
-object.latex_center {
-  max-width: 100%;
-}
-
-img.latex_center,
-object.latex_center {
-  display: block;
-  margin: 6pt auto;
-}
-
-
-/* News */
-.news .mc {
-  padding-left: 5px;
-}
-
-.news .title {
-  font-weight: bold;
-  color: #0080DD;
-  padding: 5px 0px;
-}
-
-.news .added-by {
-  color: #AAAAAA;
-  padding: 10px 0px;
-  font-size: 12px;
-}
-
-/* Profile */
-.profile-distribution:after {
-  content: " ";
-  display: block;
-  height: 0;
-  clear: both;
-}
-
-.profile-distribution > div {
-  width: 20px;
-  height: 100px;
-  float: left;
-  background-color: #EEE;
-  position: relative;
-}
-
-.profile-distribution > div > div {
-  background-color: #CCC;
-  bottom: 0px;
-  position: absolute;
-  width: 20px;
-}
-
-.profile-task-list {
-  margin: 1.5em 0;
-}
-.profile-task-list > h3 {
-  display: inline;
-}
-
-button.blank {
-  border: 0px;
-  background: transparent;
-  margin: 0px;
-  padding: 0px;
 }

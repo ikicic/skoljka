@@ -17,6 +17,7 @@
 
     <meta name="content-language" content="hr">
     <meta name="description" content="Web arhiva zadataka iz matematike. Sadrži zadatke s prijašnjih državnih, županijskih, općinskih natjecanja te Međunarodnih i Srednjoeuropskih olimpijada. Školjka može poslužiti svakom učeniku koji se želi pripremati za natjecanja iz matematike.">
+    <meta name="viewport" content="width=device-width">
   </head>
 <body>
 
@@ -31,23 +32,31 @@
     <div class="row-fluid">
       <div id="hbar-sel-folder">
         {% if user.profile.selected_folder %}
-          Uređivanje mape <a href="/folder/{{ user.profile.selected_folder.id }}/">{{ user.profile.selected_folder.name }}</a>
+          Uređivanje mape
+          <a href="/folder/{{ user.profile.selected_folder.id }}/">
+            {{ user.profile.selected_folder.name }}
+          </a>
         {% endif %}
       </div>
-      <div id="hbar-search">
+      <div id="hbar-search" class="hidden-phone">
         {% include 'inc_search_inline.html' %}
       </div>
       {% if not user.is_authenticated %}
-        <div id="hbar-login">
-          <form class="form-inline" action="/accounts/login/" method="POST">
-            {% csrf_token %}
-            <input id="id_username" name="username" type="text" class="input-small"
-                placeholder="Korisničko ime" {% if homepage %} autofocus{% endif %} accesskey="l">
-            <input id="id_password" name="password" type="password" class="input-small" placeholder="Lozinka">
-            <input type="submit" class="btn" value="Prijava">
-          </form>
-        </div>
+        <form action="/accounts/login/" method="POST" id="hbar-login"
+              class="form-inline hidden-xs-phone">
+          {% csrf_token %}
+          {# No whitespace between inline-block elements, CSS used instead. #}
+          <input id="id_username" name="username" type="text"
+              class="input-small" placeholder="Korisničko ime" accesskey="l"
+              {% if homepage %} autofocus{% endif %}
+          ><input id="id_password" name="password" type="password"
+              class="input-small" placeholder="Lozinka"
+          ><input type="submit" class="btn" value="Prijava">
+        </form>
       {% endif %}
+      <a id="hbar-collapse-sidebar" class="collapse-button btn"
+          data-target="sidebar" href="#">
+      </a>
     </div>
   </div>
 </div>

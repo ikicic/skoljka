@@ -1,0 +1,90 @@
+/* CSS for and changes to the CSS of plugins and libraries. */
+
+
+/* Bootstrap Changes */
+.label {
+  box-shadow: 1px 1px 3px black;
+}
+
+.nav .nav-header {
+  padding: 3px 12px;
+}
+
+.nav-list > li > a {
+  padding: 3px 12px;
+}
+
+.nav-list > li > a > span {
+  font-size: 12px;
+}
+
+.row {
+  margin-left: -20px !important; /* independent of browser size */
+}
+
+tr.group_hidden td { /* not really a bootstrap change... */
+  background-color: #DDD!important;
+}
+
+.table-striped tbody tr:nth-child(odd) td,
+.table-striped tbody tr:nth-child(odd) th {
+  background-color: rgb(244, 247, 246);
+}
+
+.thin {
+  line-height: normal;
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+}
+
+.well {
+  /* background-color: rgb(248, 245, 243); rgb(246, 250, 244)*/
+  background-color: rgb(250, 252, 252);
+  border: 0px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.5);
+  padding: 15px;
+}
+
+/* this is kind of tricky, please find a better solution! */
+#content .btn-group,
+#content .row,
+#content .row-fluid {
+  display: inline-block;
+}
+
+/* Bootstrap Changes End */
+
+
+/* Django Changes */
+.errorlist {
+  color: red;
+}
+/* Django Changes End */
+
+
+/* jQuery.Rating Plugin CSS - http://www.fyneworks.com/jquery/star-rating/ */
+/* NOTE: width:17px has been changed to 16px! */
+div.rating-cancel,div.star-rating{float:left;width:16px;height:15px;text-indent:-999em;cursor:pointer;display:block;background:transparent;overflow:hidden}
+div.rating-cancel,div.rating-cancel a{background:url(delete.gif) no-repeat 0 -16px}
+div.star-rating,div.star-rating a{background:url(star.gif) no-repeat 0 0px}
+div.rating-cancel a,div.star-rating a{display:block;width:16px;height:100%;background-position:0 0px;border:0}
+div.star-rating-on a{background-position:0 -16px!important}
+div.star-rating-hover a{background-position:0 -32px}
+/* Read Only CSS */
+div.star-rating-readonly a{cursor:default !important}
+/* Partial Star CSS */
+div.star-rating{background:transparent!important;overflow:hidden!important}
+/* END jQuery.Rating Plugin CSS */
+
+/* jQuery Rating Fix */
+div.readonly-star {
+  float: left;
+  height: 15px;
+  text-indent: -999em;
+  display: block;
+  background: transparent;
+  overflow: hidden;
+  background: url(star.gif) repeat-x 0 0px;
+}
+/* jQuery Rating Fix End */

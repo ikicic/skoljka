@@ -1,0 +1,58 @@
+.mathcontent-preview {
+  margin-top: 10px;
+}
+
+.mathcontent-text {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.mc {
+  position: relative;
+}
+
+.mc-viewsource {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  margin-left: 2px;
+  visibility: hidden;
+}
+
+.mc:hover .mc-viewsource {
+  visibility: visible;
+  opacity: 0.15;
+}
+
+div.mc-viewsource-text {
+  margin-top: 10px;
+  color: #666;
+  white-space: pre-line;
+}
+
+a.mc-viewsource-clipboard {
+  margin-top: 7px;
+}
+
+pre {
+  display: inline;
+  background-color: #DDD;
+}
+
+pre.multi-line {
+  border: none;
+  background-color: transparent;
+}
+
+img.latex,
+img.latex_center,
+object.latex,
+object.latex_center {
+  max-width: 100%;
+}
+
+img.latex_center,
+object.latex_center {
+  display: block;
+  margin: 6pt auto;
+}
