@@ -247,6 +247,7 @@ def submit(request, task_id=None, solution_id=None):
     else:
         math_content_form = MathContentForm(instance=math_content)
 
+    math_content_form.fields['text'].widget.attrs['placeholder'] = 'Rješenje'
     return {
         'action_url': request.path,
         'form': math_content_form,

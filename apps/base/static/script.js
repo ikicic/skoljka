@@ -65,7 +65,7 @@ $(function(){
       ' <button type="button" class="btn mathcontent-preview-button">Pregled</button>'
     + ' <a href="/help/instructions/#format" title="Pomoć oko formata" target="_blank"><i class="icon-question-sign"></i></a>'
   )
-  f.append('<div class="mathcontent-preview well" style="display:none;"></div>')
+  f.append('<div class="mathcontent-preview outset" style="display:none;"></div>')
 
   /* Preview button, send AJAX request to convert to html (and generate necessarry .png files) */
   $('.mathcontent-preview-button').click(function(){
@@ -88,29 +88,29 @@ function quote(mc) {
 };
 
 function set_reply(id) {
-  $('.post_reply_to').removeClass('post_reply_to');
+  $('.post-reply-to').removeClass('post-reply-to');
   if (id)
-    $('#post' + id).addClass('post_reply_to');
+    $('#post' + id).addClass('post-reply-to');
 
   $('input[name="post_reply_id"]').val(id);
-  $('#reply_to_info').attr('style', id ? 'display:inline;' : 'display:none;');
+  $('#reply-to-info').attr('style', id ? 'display:inline;' : 'display:none;');
 };
 
 $(function(){
   /* Post reply */
-  $('.post_reply').click(function(){
+  $('.post-reply').click(function(){
     var id = $(this).attr('id').substr(2)
 
     set_reply(id);
     quote($(this).closest('.post').find('.mc'));
 
-    var a = $('#reply_to_info a:first')
+    var a = $('#reply-to-info a:first')
     a.html('komentar #' + id)
     a.attr('href', '#post' + id)
   });
 
   /* Cancel post reply */
-  $('#reply_to_info a:last').click(function(){
+  $('#reply-to-info a:last').click(function(){
     set_reply('');
   });
 

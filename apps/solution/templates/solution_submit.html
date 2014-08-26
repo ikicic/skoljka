@@ -4,15 +4,14 @@
 
 {% block content %}
 
-<br>
-Zadatak: {{ task.get_link }}<br><br>
-<div class="task-content well">
+Zadatak: {{ task.get_link }}
+<div class="task-container outset">
   {{ task.content.render }}
 </div>
 
-<form action="{{ action_url }}" method="post">
+<form id="solution-submit-form" action="{{ action_url }}" method="post">
   {% csrf_token %}
-  {{ form.as_p }}
+  {{ form.text }}
   <input type="submit" class="btn btn-primary" value="Submit" />
 </form>
 

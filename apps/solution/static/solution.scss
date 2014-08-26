@@ -4,6 +4,14 @@
   position: relative;
 }
 
+#solution-info-left {
+  margin: 2.5em 0 1em 0em;
+}
+
+#solution-task {
+  margin-bottom: 15px;
+}
+
 #solution-toggle-task {
   font-weight: bold;
 }
@@ -37,4 +45,8 @@
 
 .sol-unrated:nth-child(odd) {
   background-color: rgb(247, 255, 166);
+}
+
+#solution-submit-form {
+  margin: 15px 5px 5px 5px;
 }

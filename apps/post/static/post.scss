@@ -1,17 +1,39 @@
 /* Posts */
 .quote {
-  border-left: 1px solid #CDF;
-  background-color: rgb(238, 245, 238);
+  background-color: #FAFAFA;
+  border-left: 1px solid #95C5F8;
+  color: #753A88;
   padding: 6px;
 }
 
-.post_list_small .post_info {
-  color: #666;
+.post {
+  padding: 12px;
   margin-bottom: 12px;
 }
 
-.post_list_small .last_edit {
-  font-size: 11px;
-  color: #888
+.post-action {
+  float: right;
+  text-align: right;
 }
 
+.post-info {
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.post-list-small {
+  > h4 {
+    margin-bottom: 0.5em;
+  }
+}
+
+.post-last-edit {
+  color: #999;
+  font-size: 11px;
+  margin-top: 1em;
+}
+
+.unread, .post-reply-to {
+  /* should this be here? */
+  background-color: #EFC;
+}

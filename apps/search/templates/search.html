@@ -9,7 +9,7 @@
 {% block content %}
 
 <h2>Pretraživanje</h2>
-<form action="/search/" method="get" class="well">
+<form action="/search/" method="get" class="outset">
   {% if errors %}<div class="alert alert-error">{{ errors }}</div>{% endif %}
   <table>
     {{ form.as_table }}

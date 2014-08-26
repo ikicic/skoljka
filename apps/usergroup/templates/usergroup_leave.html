@@ -7,7 +7,7 @@
 <div style="text-align:center;font-size:24px;">{{ group.name }}</div>
 <br><br>
 
-<div class="well">
+<div class="outset">
   Jeste li sigurni da želite izaći iz grupe <a href="/usergroup/{{ group.id }}/">{{ group.name }}</a>?<br><br><br>
   <form action="/usergroup/{{ group.id }}/leave/" method="POST" class="btn-group">
     <input type="submit" value="Izađi" class="btn btn-danger">
@@ -17,6 +17,4 @@
   </form>
 </div>
 
-
 {% endblock %}
-    

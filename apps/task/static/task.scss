@@ -44,12 +44,8 @@
 /* End task action */
 
 .task-container {
-  background: white;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(128, 128, 128, 0.55);
   margin: 5px 5px 5px 5px;
   overflow: auto;
-  padding: 15px 17px;
 }
 
 .task-detail {
@@ -139,6 +135,10 @@ tr.task-hidden:nth-child(odd) td {
 
 /* End task tooltip */
 
+#task-detail-top-action {
+  float: right;
+}
+
 #task-file {
   text-align: center;
 }
@@ -171,6 +171,8 @@ tr.task-hidden:nth-child(odd) td {
 
 #task-top-info {
   overflow: auto;
+  /* otherwise, task-top-info-bottom would shift to the left */
+  margin-top: 3px;
 }
 #task-top-left-info {
   float: left;
@@ -178,7 +180,7 @@ tr.task-hidden:nth-child(odd) td {
 
 #task-top-right-info {
   float: right;
-  margin-top: 1em;
+  margin-top: 0.5em;
   text-align: right;
   white-space: nowrap;
 }

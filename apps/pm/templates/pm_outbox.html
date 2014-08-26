@@ -19,7 +19,7 @@
 {% autopaginate pm %}
 
 {% for m in pm|cache_outbox_info %}
-  <div class="well">
+  <div class="pm outset">
     <div style="float:right;" class="btn-group">
       <a class="btn btn-mini" href="/pm/{{ m.id }}/replyall/" title="Odgovori svima"><i class="icon-forward"></i></a>
       <a class="btn btn-mini" href="/pm/{{ m.id }}/forward/" title="Proslijedi"><i class="icon-share-alt"></i></a>

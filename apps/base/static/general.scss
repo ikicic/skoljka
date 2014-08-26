@@ -84,6 +84,13 @@ h2, h3, h4, h4 a {
   margin-left: -5px;
 }
 
+.outset {
+  background: #fafcfc;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(128, 128, 128, 0.55);
+  padding: 15px 17px;
+}
+
 /* Small Page (e.g. page with only one form) */
 .small-page {
   margin: 5px;

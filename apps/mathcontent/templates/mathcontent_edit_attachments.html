@@ -7,11 +7,11 @@
 {% if task %}
   <h4>{{ task.name }}</h4>
 {% endif %}
-<div class="well">
+<div class="outset">
   {{ content.render }}
 </div>
 
-<div class="well">
+<div class="outset">
   <h4>Postojeće datoteke</h4>
   <table class="table-striped table-condensed" style="width: 40%">
 
@@ -27,7 +27,7 @@
   </table>
 </div>
 
-<div class="well">
+<div class="outset">
   <h4>Dodavanje novih datoteka</h4>
   <form enctype="multipart/form-data" method="post" action="/mathcontent/{{ content.id }}/attachments/">
     {% csrf_token %}

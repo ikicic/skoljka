@@ -40,17 +40,15 @@
   {% endif %}
 </div>
 
+<div id="solution-info-left">
+  <i>Korisnik: {{ solution.author|userlink }}</i><br>
+  <i>Zadatak: {{ solution.task.get_link }}</i>
+  <a href="#" id="solution-toggle-task">
+    (Sakrij tekst zadatka)
+  </a>
+</div>
 
-<br><br>
-<i>Korisnik: {{ solution.author|userlink }}</i><br>
-<i>Zadatak: {{ solution.task.get_link }}</i>
-<a href="#" id="solution-toggle-task">
-  (Sakrij tekst zadatka)
-</a>
-
-<br><br>
-
-<div class="well" id="solution-task">
+<div class="outset" id="solution-task">
   {# TODO: DRY? render conditionally tag? #}
   {% if user.is_authenticated %}
     {{ solution.task.content.render_quote }}
@@ -59,7 +57,7 @@
   {% endif %}
 </div>
 
-<div class="well" id="solution-container">
+<div class="outset" id="solution-container">
   {% if obfuscate %}
     <div id="solution-unhide-box">
       <div class="center-vertically">

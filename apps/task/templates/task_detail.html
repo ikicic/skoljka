@@ -10,7 +10,7 @@
 {% block content %}
 
 {% if can_edit %}
-  <div style="float:right;">
+  <div id="task-detail-top-action">
     <a href="/task/{{ task.pk }}/edit/" class="btn">Uredi</a>
   </div>
 {% endif %}
@@ -47,7 +47,7 @@
 
 {% if task.is_file %}
   <a href="{{ task.cache_file_attachment_url }}">
-    <div id="task-file" class="well center-vertically">
+    <div id="task-file" class="outset center-vertically">
       <div>
         <div>
             {{ task.file_attachment.get_filename }}<br>
@@ -59,7 +59,7 @@
 {% endif %}
 
 {% if not task.content.is_empty %}
-  <div class="task-container task-detail">
+  <div class="task-container task-detail outset">
     {# TODO: render tag! #}
     {% if user.is_authenticated %}
       {{ task.content.render_quote }}

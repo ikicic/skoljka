@@ -142,12 +142,6 @@ a.register {
   color: red;
 }
 
-.unread, .post_reply_to {
-  /* should this be here? */
-  background-color: #EFC;
-}
-
-
 @media (min-width: $screen-md-min) {
   #content {
     margin: 0 0 0 225px + 24px;

@@ -31,7 +31,7 @@
 {% cache_inbox_info pm %}
 
 {% for x in pm %}
-  <div class="well{% if x.read == 0 %} unread{% endif %}">
+  <div class="pm outset{% if x.read == 0 %} unread{% endif %}">
     <div style="float:right;" class="btn-group">
       {% ifnotequal user x.message.author %}
         <a class="btn btn-mini" href="/pm/{{ x.message.id }}/reply/" title="Odgovori"><i class="icon-play"></i></a>
