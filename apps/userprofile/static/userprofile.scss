@@ -22,7 +22,12 @@
 
 .profile-task-list {
   margin: 1.5em 0;
+
+  > h3 {
+    display: inline;
+  }
 }
-.profile-task-list > h3 {
-  display: inline;
+
+.profile-task-submitted > a {
+  color: #13F;
 }

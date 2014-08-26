@@ -45,7 +45,6 @@
   </div>
 </div>
 
-<br><br>
 {% if task.is_file %}
   <a href="{{ task.cache_file_attachment_url }}">
     <div id="task-file" class="well center-vertically">
@@ -60,7 +59,7 @@
 {% endif %}
 
 {% if not task.content.is_empty %}
-  <div class="task-content well">
+  <div class="task-container task-detail">
     {# TODO: render tag! #}
     {% if user.is_authenticated %}
       {{ task.content.render_quote }}

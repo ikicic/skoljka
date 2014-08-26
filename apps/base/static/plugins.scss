@@ -1,3 +1,4 @@
+@import "main";
 /* CSS for and changes to the CSS of plugins and libraries. */
 
 
@@ -53,6 +54,12 @@ tr.group_hidden td { /* not really a bootstrap change... */
   display: inline-block;
 }
 
+@media (max-width: $screen-sm-max) {
+  /* hack for task list spacing */
+  .row-fluid .span6:first-child {
+    margin-bottom: 15px;
+  }
+}
 /* Bootstrap Changes End */
 
 

@@ -12,6 +12,7 @@ $screen-xs-max:   $screen-sm-min - 1px;
 $screen-sm-max:   $screen-md-min - 1px;
 $screen-md-max:   $screen-lg-min - 1px;
 
+
 @media (max-width: $screen-xs-min - 1px) {
   .hidden-xs-phone {
     display: none !important;

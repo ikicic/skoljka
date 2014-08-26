@@ -20,9 +20,9 @@ def task_link(task, tooltip=False, url_suffix=''):
     return task.get_link(tooltip=tooltip, url_suffix=url_suffix)
 
 @register.inclusion_tag('inc_task_small_box.html', takes_context=True)
-def task_small_box(context, task, div_class='', url_suffix='', options='', well=True):
+def task_small_box(context, task, div_class='', url_suffix='', options=''):
     return {'user': context['user'], 'task': task, 'div_class': div_class,
-        'url_suffix': url_suffix, 'options': options, 'well': well}
+        'url_suffix': url_suffix, 'options': options}
 
 @register.simple_tag(takes_context=True)
 def task_options_mode_check(context):

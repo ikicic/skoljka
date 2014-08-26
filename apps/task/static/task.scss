@@ -1,7 +1,6 @@
 @import "main";
 
 /* Task action */
-
 .task-action-bar {
   background-color: rgb(246, 248, 247);
   overflow:auto;
@@ -44,6 +43,43 @@
 }
 /* End task action */
 
+.task-container {
+  background: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(128, 128, 128, 0.55);
+  margin: 5px 5px 5px 5px;
+  overflow: auto;
+  padding: 15px 17px;
+}
+
+.task-detail {
+  margin: 15px 0px;
+}
+
+.task-small-info {
+  margin: -1px -2px 0.6em -2px;
+
+  &:after {
+    clear: both;
+    content: "";
+    display: block;
+  }
+}
+
+.task-small-info-right {
+  float: right;
+  text-align: right;
+
+  > .sol-label-container {
+    > .label {
+      margin-left: 3px;
+    }
+  }
+}
+
+h4.task-small-title {
+  display: inline-block;
+}
 
 /* Task table */
 .task-table td {
@@ -115,8 +151,16 @@ tr.task-hidden:nth-child(odd) td {
   color: gray;
 }
 
+
 .task-text {
-  padding: 10px 0px;
+  padding: 5px 0px;
+}
+
+.task-timesince {
+  color: #AAA;
+  float: right;
+  font-size: 12px;
+  margin: 5px -1px -5px 0px;
 }
 
 #task-title {

@@ -79,7 +79,11 @@
 {# TODO: include/tag for this #}
 
 <div class="profile-task-list">
-  <h3>Riješeni i poslani zadaci</h3> <a href="/solution/user/{{ profile.id }}/as_solved,submitted/">(otvori sve)</a><br>
+  <h3>Riješeni i poslani zadaci</h3>
+  <a href="/solution/user/{{ profile.id }}/as_solved,submitted/">
+    (otvori sve)
+  </a>
+  <br>
   {% for x in solved %}
     {% if not forloop.first %}|{% endif %}
     {% if x.is_submitted %}

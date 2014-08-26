@@ -4,15 +4,19 @@
 
 {# Note that JavaScript task-tooltip makes some assumptions about the this structure. #}
 {# task-container also used for tr. #}
-<div class="{{ div_class }} task-container" data-task-id="{{ task.id }}">
-  {% if well %}
-  <div class="well">
-  {% endif %}
-    <div style="float:right;text-align:right;">
-      {% tag_list task %}<br>
-      <span class="sol-label-container">{% solution_label task %}</class>
+<div class="{{ div_class }}">
+  <div class="task-container" data-task-id="{{ task.id }}">
+    <div class="task-small-info">
+      <h4 class="task-small-title">
+        {% task_link task tooltip=1 url_suffix=url_suffix %}
+      </h4>
+      <div class="task-small-info-right">
+        {% tag_list task %}
+        <span class="sol-label-container">
+          {% solution_label task %}
+        </span>
+      </div>
     </div>
-    <h4>{% task_link task tooltip=1 url_suffix=url_suffix %}</h4><br>
 
     {% if task.cache_prerequisites_met %}
       {{ task.content.render }}
@@ -21,9 +25,7 @@
     {% endif %}
 
     {% if 'timesince' in options %}
-      <div style="text-align:right;color:gray;">{{ task.date_created|timesince }}</div>
+      <div class="task-timesince">{{ task.date_created|timesince }}</div>
     {% endif %}
-  {% if well %}
   </div>
-  {% endif %}
 </div>

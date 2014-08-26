@@ -1,16 +1,37 @@
-.folder-ab-container {
-  display: table;
+@import "main";
+
+#folder-info {
+  margin: 5px 0px 1em 0px;
+  display: block;
+  overflow: hidden;
+}
+
+#folder-name {
+  display: inline-block;
+  font-size: 22px;
+  font-weight: normal;
+  line-height: 26px;
+  margin-bottom: 4px;
+}
+
+@media (max-width: $screen-xs-max) {
+  #folder-name {
+    font-size: 20px;
+  }
+}
+
+
+#folder-info-right {
   float: right;
-  margin-top: 5px;
+  > div {
+    display: inline-block;
+    vertical-align: middle;
+  }
 }
 
-.folder-ab-tag-list {
-  display: table-cell;
-  vertical-align: middle;
-  height: 100%;
-  padding: 0 4px 4px 0;
+#folder-info-tag-list {
+  margin: 0px 3px;
 }
-
 
 .folder-inline {
   margin: 0 0 4px 4px;
@@ -42,12 +63,6 @@
 .folder-list-my-edit {
   position: absolute !important;
   right: 20px;
-}
-
-#folder-name {
-  margin: 5px 0 5px 5px;
-  font-size: 22px;
-  font-weight: normal;
 }
 
 .folder-task-position {

@@ -7,36 +7,45 @@
 {% block content %}
 
 {# Action bar #}
-<div class="folder-ab-container">
-  <div class="folder-ab-tag-list">
-    {{ tag_list_html|safe }}
-  </div>
-  <div class="btn-group">
-    {% if select_link %}
-      <form action="/folder/select/{{ folder.id }}/" method="POST" style="display: inline;">
-        {% if not this_folder_selected %}
-          <button class="btn" type="submit" id="select_folder" title="Aktivirajte kako biste mogli dodavati i brisati zadatke iz kolekcije">
-            <i class="icon-check"></i> Odaberi
-          </button>
-        {% else %}
-          <button class="btn" type="submit" id="select_folder">
-            <i class="icon-check"></i> Zatvori
-          </button>
-        {% endif %}
-        {% csrf_token %}
-      </form>
-    {% endif %}
-    {% if edit_link %}
-      <a href="/folder/{{ folder.id }}/edit/" class="btn"><i class="icon-edit"></i> Uredi</a>
-    {% endif %}
-    {% if user.is_authenticated %}
-      <a href="/folder/new/" class="btn"><i class="icon-plus"></i> Napravi kolekciju</a>
-      <a href="/folder/my/" class="btn"><i class="icon-list-alt"></i> Moje kolekcije</a>
-    {% endif %}
+<div id="folder-info">
+  <h2 id="folder-name">{{ folder.name }}</h2>
+  <div id="folder-info-right">
+    <div id="folder-info-tag-list">
+      {{ tag_list_html|safe }}
+    </div>
+    <div class="btn-group">
+      {% if select_link %}
+        <form action="/folder/select/{{ folder.id }}/" method="POST"
+            style="display: inline;">
+          {% if not this_folder_selected %}
+            <button class="btn" type="submit" id="select_folder"
+                title="Aktivirajte kako biste mogli dodavati i brisati zadatke iz kolekcije">
+              <i class="icon-check"></i> Odaberi
+            </button>
+          {% else %}
+            <button class="btn" type="submit" id="select_folder">
+              <i class="icon-check"></i> Zatvori
+            </button>
+          {% endif %}
+          {% csrf_token %}
+        </form>
+      {% endif %}
+      {% if edit_link %}
+        <a href="/folder/{{ folder.id }}/edit/" class="btn">
+          <i class="icon-edit"></i> Uredi
+        </a>
+      {% endif %}
+      {% if user.is_authenticated %}
+        <a href="/folder/new/" class="btn">
+          <i class="icon-plus"></i> Napravi kolekciju
+        </a>
+        <a href="/folder/my/" class="btn">
+          <i class="icon-list-alt"></i> Moje kolekcije
+        </a>
+      {% endif %}
+    </div>
   </div>
 </div>
-
-<h3 id="folder-name">{{ folder.name }}</h3><br>
 
 {% if breadcrumb %}
   <ul class="breadcrumb folder_breadcrumb">
