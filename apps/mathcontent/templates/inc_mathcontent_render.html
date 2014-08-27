@@ -1,16 +1,23 @@
 <div class="mc">
-  {{ content.html|safe }}
-  {% if view_source %}
-    <div class="mc-viewsource">
-      {% if quote %}
-        <a href="#post" class="mc-viewsource-quote" title="Citiraj">
-          <i class="icon-edit"></i>
+  {# You might wonder why is view source using position absolute instead of #}
+  {# the float property. The problem is quote div, which moves the view #}
+  {# source link outside of the mc div. #}
+  <div class="mc-inner">
+    {{ content.html|safe }}
+    {% if view_source %}
+      <div class="mc-viewsource">
+        {% if quote %}
+          <a href="#post" class="mc-viewsource-quote" title="Citiraj">
+            <i class="icon-edit"></i>
+          </a>
+        {% endif %}
+        <a href="#" class="mc-viewsource-toggle" title="Pogledaj tekst">
+          <i class="icon-share"></i>
         </a>
-      {% endif %}
-      <a href="#" class="mc-viewsource-toggle" title="Pogledaj tekst">
-        <i class="icon-share"></i>
-      </a>
-    </div>
+      </div>
+    {% endif %}
+  </div>
+  {% if view_source %}
     <div class="mc-viewsource-text" style="display:none;">
       {{ content.text }}
     </div>

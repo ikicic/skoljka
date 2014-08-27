@@ -48,7 +48,7 @@
   </a>
 </div>
 
-<div class="outset" id="solution-task">
+<div class="outset mc-hover-area" id="solution-task">
   {# TODO: DRY? render conditionally tag? #}
   {% if user.is_authenticated %}
     {{ solution.task.content.render_quote }}
@@ -57,7 +57,7 @@
   {% endif %}
 </div>
 
-<div class="outset" id="solution-container">
+<div class="outset mc-hover-area" id="solution-container">
   {% if obfuscate %}
     <div id="solution-unhide-box">
       <div class="center-vertically">

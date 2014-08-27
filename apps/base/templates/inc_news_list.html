@@ -3,7 +3,7 @@
     {% if title %}<h3>{{ title }}</h3>{% endif %}
 
     {% for x in news %}
-      <div class="news">
+      <div class="news mc-hover-area">
         <div class="title">
           {% if user.is_staff %}
             <a href="/task/{{ x.id }}/">{{ x.name }}</a>
@@ -12,7 +12,9 @@
           {% endif %}
         </div>
         {{ x.content.render }}
-        <div class="added-by">Dodao/la {{ x.author|userlink }} {{ x.date_created }}</div>
+        <div class="added-by">
+          Dodao/la {{ x.author|userlink }} {{ x.date_created }}
+        </div>
       </div>
     {% endfor %}
   </div>

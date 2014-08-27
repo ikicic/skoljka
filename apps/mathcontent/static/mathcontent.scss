@@ -7,21 +7,24 @@
   width: 100%;
 }
 
-.mc {
+.mc-inner {
   position: relative;
 }
 
 .mc-viewsource {
-  position: absolute;
   bottom: 0px;
   right: 0px;
   margin-left: 2px;
+  position: absolute;
   visibility: hidden;
 }
 
-.mc:hover .mc-viewsource {
-  visibility: visible;
-  opacity: 0.15;
+/* Expand hover area by using mc-hover-area class */
+.mc-hover-area:hover, .mc:hover {
+  .mc-viewsource {
+    visibility: visible;
+    opacity: 0.15;
+  }
 }
 
 div.mc-viewsource-text {
