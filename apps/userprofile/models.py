@@ -71,6 +71,7 @@ class DifficultyDistribution(models.Model):
     difficulty = models.IntegerField(db_index=True)
     solved_count = models.IntegerField()
 
+
 def user_refresh_group_cache(user_ids):
     """
         Given the list of User ids (not UserProfiles!), refresh
@@ -208,6 +209,17 @@ class UserProfile(models.Model):
                     solved_count=(delta if x == diff else 0))
                 for x in range(0, DIFFICULTY_RATING_ATTRS['range'])]
             DifficultyDistribution.objects.bulk_create(bulk)
+
+    def check_solution_obfuscation_preference(self, task_difficulty_avg):
+        """
+        Returns True if the user wouldn't like to see the solution of a
+        task with the given difficulty rating.
+        """
+        if self.show_unsolved_task_solutions:
+            return False
+        if task_difficulty_avg == 0:
+            return True # Rating unknown, don't show.
+        return self.hide_solution_min_diff <= task_difficulty_avg
 
 
 # ovo navodno nije preporuceno, ali vjerujem da ce se

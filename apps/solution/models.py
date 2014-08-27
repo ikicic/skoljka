@@ -226,7 +226,7 @@ class Solution(ModelEx):
         """
         Checks if the user can view the solution, and if it should be
         obfuscated.
-        Returns pair of booleans:
+        Returns a pair of booleans:
             can_view, should_obfuscate
 
         The result depends on:
@@ -236,11 +236,9 @@ class Solution(ModelEx):
             Did user solve the task     (can_view, should_obfuscate)
             Profile preferences         (should_obfuscate)
 
-        It is assumed that accessibility check has already been performed!
+        It is assumed that the prerequisites check has already been performed!
 
         If users_solution is not given, it will be manually retrieved.
-        As this method checks task.solution_settings, it is preferable that
-        task is already loaded.
         """
         # The implentation is quite complex, because there are millions of
         # different cases. When updating, please make sure everything is
@@ -281,12 +279,10 @@ class Solution(ModelEx):
         # Ok, now the user definitely has the right to view the solution.
         # Now we have to check if he/she wants to view it.
 
-        # check user settings
         profile = user.get_profile()
-        if profile.show_unsolved_task_solutions     \
-                or self.task.difficulty_rating_avg < profile.hide_solution_min_diff:
-            # Show always, or because it's too easy. Note that if the min_diff
-            # option is not set, the comparison will always be False!
+        if not profile.check_solution_obfuscation_preference(
+                self.task.difficulty_rating_avg):
+            # User is fine with seeing the solution.
             return True, False
 
         # Load, if not loaded yet.
