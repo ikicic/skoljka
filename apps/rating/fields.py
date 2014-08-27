@@ -76,7 +76,7 @@ class RatingManager(models.Manager):
         # TODO: pametnije ovo napraviti
         if value == 0:
             score.count -= 1
-            vote.delete()
+            # vote.delete() # don't delete yet, first remove the Activity
         else:
             score.sum += vote.value
             vote.save()
@@ -109,6 +109,10 @@ class RatingManager(models.Manager):
             else:
                 replace_or_add(user, self.field.action_type, action_object=vote,
                     target=self.instance, group_id=authors_group_id)
+
+        if value == 0:
+            vote.delete() # ok, now delete
+
         return field_value
         
 

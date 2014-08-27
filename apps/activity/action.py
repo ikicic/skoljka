@@ -25,8 +25,8 @@ def _filter(**kwargs):
 
 def remove(actor, type, **kwargs):
     """
-        Removes SINGLE action. Throws except in case multiple activities
-        match given data.
+    Removes SINGLE action. Throws except in the case multiple activities match
+    given data.
     """
     try:
         filter = _filter(actor=actor, type=type, **kwargs)
@@ -76,19 +76,19 @@ def add(actor, type_desc, **kwargs):
 
 def replace_or_add(actor, type_desc, **kwargs):
     """
-        Replace old activity with same actor, type and other parameters.
-        Note that new activity may have different subtype that older one.
+    Replace old activity with same actor, type and other parameters.
+    Note that the new activity may have different subtype than the existing one.
 
-        If there is no matching activity, new one will be created.
+    If there is no matching activity, new one will be created.
 
-        In the case there are multiple activities matching the given conditions,
-        exception will be thrown.
+    In the case there are multiple activities matching the given conditions,
+    exception will be thrown.
 
-        Implementation:
-            Basically just calls 'remove' and 'add'.
+    Implementation:
+        Basically just calls 'remove' and 'add'.
 
-        Example:
-            To Do activity is replaced with As Solved.
+    Example:
+        To Do activity is replaced with As Solved.
     """
 
     remove(actor, type_desc[0], **kwargs)
