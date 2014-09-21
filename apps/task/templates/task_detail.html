@@ -32,7 +32,7 @@
 
   <div id="task-top-right-info">
     Dod{% gender 'ao' 'la' task.author.get_profile.gender %}: {{ task.author|userlink }}<br>
-    <span class="task-date-created">{{ task.date_created|date:"E j, Y" }}</span><br>
+    <span class="task-date-created">{{ task.date_created|localdate }}</span><br>
     {% tag_list task %}
     <div>
       <a href="/task/export/latex/{{ task.id }}/">

@@ -18,7 +18,7 @@
       <td>{{ x|userlink }}</td>
       <td>{{ x.first_name }}</td>
       <td>{{ x.last_name }}</td>
-      <td>{{ x.date_joined|date }}</td>
+      <td>{{ x.date_joined|localdate }}</td>
     </tr>
   {% empty %}
     <tr>

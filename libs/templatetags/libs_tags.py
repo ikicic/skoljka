@@ -1,5 +1,6 @@
 ﻿from django import forms, template
 from django.utils.datastructures import SortedDict
+from django.utils.formats import date_format
 from django.utils.safestring import mark_safe
 
 from skoljka.libs.string_operations import G
@@ -57,6 +58,15 @@ def generate_get_query_string(context, *args, **kwargs):
     for key, value in kwargs.iteritems():
         get[key] = value
     return escape(get.urlencode())
+
+
+@register.filter(expects_localtime=True, is_safe=False)
+def localdate(value):
+    """
+    Replacement for Django's date filter, which doesn't check locale, but uses
+    settings.DATE_FORMAT.
+    """
+    return date_format(value)
 
 #############################################
 # Form splitting/Fieldset templatetag
