@@ -33,11 +33,12 @@
 
     <div class="task-action-bar-right">
       {% useroptions view_type|default:"task_view_type" as view %}
-        {% useroption 0 "<i class=icon-list></i> Lista" default %}
-        {% useroption 1 "<i class=icon-align-justify></i> Tekst" %}
-        {% useroption 2 "<i class=icon-th-large></i> Dva stupca" %}
+        {% useroption 0 "<i class="icon-list"></i> Lista" default %}
+        {% useroption 1 "<i class="icon-align-justify"></i> Tekst" %}
+        {% useroption 2 "<i class="icon-th-large"></i> Dva stupca" '' "hidden-phone" %}
         {% if user.is_staff %}
-          <a href="?{% generate_get_query_string options='' %}" class="btn btn-mini{% if options_mode %} active{% endif %}">
+          <a href="?{% generate_get_query_string options='' %}"
+             class="btn btn-mini{% if options_mode %} active{% endif %}">
             <i class="icon-cog"></i> Opcije
           </a>
         {% endif %}
@@ -59,7 +60,7 @@
       </div>
     </div>
 
-    <div class="task-action-bar-header center-vertically">
+    <div class="task-action-bar-header center-vertically visible-desktop">
       <div> {# vertical center fix #}
         <div>
           <div>

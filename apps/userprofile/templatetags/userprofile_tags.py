@@ -15,21 +15,34 @@ register = template.Library()
 # TODO: refactor UserOptions!
 # view inc_task_list.html and inc_solution_list.html
 
+def _remove_quotations(s):
+    """
+    Remove " or ' from the beginning and the end of the string, if present on
+    both sides of the string.
+    """
+    if s[0] == s[-1] and s[0] in ('"', "'"):
+        return s[1:-1]
+    return s
+
 class UserOptionNode(template.Node):
-    def __init__(self, value, text, is_default):
+    def __init__(self, value, text, is_default, class_attr):
         self.value = unicode(value)
         self.text = text
         self.is_default = is_default
+        self.class_attr = class_attr
 
     def render(self, context):
         field_name = context._useroptions_field_name
         value = unicode(context._useroptions_value)
 
         kwargs = dict([(field_name, self.value)])
+        class_attr = self.class_attr
+        if value == self.value:
+            class_attr += ' active'
 
-        return mark_safe(u'<a href="?{0}" class="btn btn-mini{1}">{2}</a>\n'.format(
+        return mark_safe(u'<a href="?{}" class="btn btn-mini {}">{}</a>\n'.format(
             generate_get_query_string(context, **kwargs),
-            ' active' if value == self.value else '',
+            class_attr,
             self.text,
         ))
 
@@ -82,15 +95,16 @@ class UserOptionsNode(template.Node):
 @register.tag
 def useroption(parser, token):
     bits = token.split_contents()
-    if len(bits) not in (3, 4):
-        raise TemplateSyntaxError("Two or three parameters expected for 'useroption'.")
-    is_default = len(bits) == 4 and bits[-1] == 'default'
+    if len(bits) not in (3, 4, 5):
+        raise TemplateSyntaxError("Two, three or four parameters expected for 'useroption'.")
 
-    value = bits[1]
-    if value[0] == value[-1] and value[0] in ('"', "'"):
-        value = value[1:-1]
+    value = _remove_quotations(bits[1])
+    is_default = len(bits) >= 4 and bits[3] == 'default'
+    class_attr = _remove_quotations(bits[4]) if len(bits) == 5 else ''
 
-    return UserOptionNode(value, bits[2][1:-1], is_default)
+    print 'CLASS_ATTR', class_attr, len(bits), bits
+
+    return UserOptionNode(value, bits[2][1:-1], is_default, class_attr)
 
 
 @register.tag
