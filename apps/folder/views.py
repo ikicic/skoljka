@@ -209,6 +209,7 @@ def view(request, folder, data, path=u''):
     data.update(folder.get_details(request.user))
 
     # Some additional tuning
+    data['dont_hide_sidebar'] = True
     data['tasks'] = data['tasks'].select_related('author')
 
     if folder.editable and folder.user_has_perm(request.user, EDIT):

@@ -2,7 +2,12 @@ $ ->
   # ".collapse" reserved by Bootstrap
   $('.collapse-button').each ->
     # Add toggle icon
-    $(@).html '<i class="icon-chevron-down"></i>'
+    target_id = $(@).attr 'data-target'
+    $(@).html(
+      if $('#' + target_id).is(':hidden') \
+        then '<i class="icon-chevron-down"></i>'
+        else '<i class="icon-chevron-up"></i>'
+    )
 
   $('.collapse-button').click (event) ->
     event.preventDefault()

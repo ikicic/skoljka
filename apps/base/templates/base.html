@@ -62,51 +62,52 @@
 </div>
 
 <div id="site-container">
-  <div id="sidebar">
-      {% if user.is_authenticated %}
-        <div id="nav-hello-user">Zdravo, {{ user|userlink:"first_name" }}!</div>
-      {% endif %}
-      <ul class="nav nav-list">
-        <li class="nav-header">Izbornik</li>
-        <li><a href="/"><i class="icon-home"></i>Početna</a></li>
+  <div id="sidebar"
+      {% if dont_hide_sidebar %}style="display: block;"{% endif %}>
+    {% if user.is_authenticated %}
+      <div id="nav-hello-user">Zdravo, {{ user|userlink:"first_name" }}!</div>
+    {% endif %}
+    <ul class="nav nav-list">
+      <li class="nav-header">Izbornik</li>
+      <li><a href="/"><i class="icon-home"></i>Početna</a></li>
 
-        <li><a href="/folder/"><i class="icon-book"></i>Arhiva</a></li>
-        {% block menu_folder_container %}
-          {{ folder_tree|safe }}
-        {% endblock %}
+      <li><a href="/folder/"><i class="icon-book"></i>Arhiva</a></li>
+      {% block menu_folder_container %}
+        {{ folder_tree|safe }}
+      {% endblock %}
+      <li><br></li>
+      {% if user.is_authenticated %}
+        <li><a href="/pm/"><i class="icon-inbox"></i>Inbox
+          {% if user.get_profile.unread_pms %}
+            <span class="unread_pms_count">({{ user.get_profile.unread_pms }})</span>
+          {% endif %}
+        </a></li>
         <li><br></li>
-        {% if user.is_authenticated %}
-          <li><a href="/pm/"><i class="icon-inbox"></i>Inbox
-            {% if user.get_profile.unread_pms %}
-              <span class="unread_pms_count">({{ user.get_profile.unread_pms }})</span>
-            {% endif %}
-          </a></li>
-          <li><br></li>
-          <li><a href="/memberlist/"><i class="icon-user"></i>Korisnici</a></li>
-          {# <li><a href="/ranks/"><i class="icon-list"></i>Rang lista</a></li> #}
-          <li><a href="/usergroup/"><i class="icon-glass"></i>Grupe</a></li>
-        {% else %}
-          <li><a href="/accounts/register/" class="register"><i class="icon-arrow-right"></i>Registracija</a></li>
-          <li><a href="/accounts/login/"><i class="icon-arrow-right"></i>Prijava</a></li>
-        {% endif %}
+        <li><a href="/memberlist/"><i class="icon-user"></i>Korisnici</a></li>
+        {# <li><a href="/ranks/"><i class="icon-list"></i>Rang lista</a></li> #}
+        <li><a href="/usergroup/"><i class="icon-glass"></i>Grupe</a></li>
+      {% else %}
+        <li><a href="/accounts/register/" class="register"><i class="icon-arrow-right"></i>Registracija</a></li>
+        <li><a href="/accounts/login/"><i class="icon-arrow-right"></i>Prijava</a></li>
+      {% endif %}
+      <li><br></li>
+      <li><a href="/task/"><i class="icon-envelope"></i>Zadaci</a></li>
+      <li><a href="/solution/"><i class="icon-pencil"></i>Rješenja {{ unrated_solutions_html }}</a></li>
+      <li><a href="/search/"><i class="icon-search"></i>Pretraživanje</a></li>
+      <li><br></li>
+      {% if user.is_authenticated %}
+        <li><a href="/accounts/logout/"><i class="icon-off"></i>Odjava</a></li>
         <li><br></li>
-        <li><a href="/task/"><i class="icon-envelope"></i>Zadaci</a></li>
-        <li><a href="/solution/"><i class="icon-pencil"></i>Rješenja {{ unrated_solutions_html }}</a></li>
-        <li><a href="/search/"><i class="icon-search"></i>Pretraživanje</a></li>
+      {% endif %}
+      <li><br></li>
+      <li><a href="/help/"><i class="icon-question-sign"></i> Pomoć</a></li>
+      <li><a href="/about/"><i class="icon-flag"></i> O nama</a></li>
+      {% if user.is_staff %}
         <li><br></li>
-        {% if user.is_authenticated %}
-          <li><a href="/accounts/logout/"><i class="icon-off"></i>Odjava</a></li>
-          <li><br></li>
-        {% endif %}
-        <li><br></li>
-        <li><a href="/help/"><i class="icon-question-sign"></i> Pomoć</a></li>
-        <li><a href="/about/"><i class="icon-flag"></i> O nama</a></li>
-        {% if user.is_staff %}
-          <li><br></li>
-          <li class="nav-header">Admin</li>
-          <li><a href="/admin/"><i class="icon-lock"></i> Admin</a></li>
-        {% endif %}
-      </ul>
+        <li class="nav-header">Admin</li>
+        <li><a href="/admin/"><i class="icon-lock"></i> Admin</a></li>
+      {% endif %}
+    </ul>
   </div>
 
   <div id="content">
