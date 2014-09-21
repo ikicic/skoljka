@@ -22,13 +22,13 @@
 {% if solutions %}
   {% cache_solution_info solutions %}
 
-  <table width="100%" class="table-striped table-condensed sol-table" style="text-align: center;">
+  <table width="100%" class="table-condensed sol-table" style="text-align: center;">
     <tr>
       <th colspan="6">Lista rješenja</th>
     </tr>
     <tr>
-      <th width="30">#</th>
-      <th>{% anchor date_created Vrijeme %}</th>
+      <th class="hidden-xs-phone" width="30">#</th>
+      <th class="hidden-xs-phone">{% anchor date_created Vrijeme %}</th>
       <th>Zadatak</th>
       <th>Korisnik</th>
       <th>Rješenje</th>
@@ -37,8 +37,8 @@
     {% for s in solutions %}
       {% check_solution_for_accessibility s s.content.short %}
       <tr style="{% solution_tr_bg_color_attr s forloop.counter %}">
-        <td>{{ s.id }}</td>
-        <td>{{ s.date_created|timesince }}</td>
+        <td class="hidden-xs-phone">{{ s.id }}</td>
+        <td class="hidden-xs-phone">{{ s.date_created|timesince }}</td>
         <td>{{ s.task.get_link }}</td>
         <td>{{ s.author|userlink }}</td>
         {% if s.is_submitted %}
