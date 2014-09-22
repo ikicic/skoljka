@@ -1,7 +1,8 @@
 # jQuery Rating Submit Function
-window.jquery_rating_submit = (name, url) ->
+window.jquery_rating_submit = (name, url, read_only) ->
   $ ->
     $('.' + name + '-star').rating
+      readOnly: read_only
       callback: (value, link) ->
         data = {}
         data[name] = value or 0

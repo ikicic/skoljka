@@ -24,10 +24,8 @@
       </span>
     {% endif %}
     <br>
-    {% if user.is_authenticated %}
-      {% rating_box "Kvaliteta" task.quality_rating %}
-      {% rating_box "Težina" task.difficulty_rating %}
-    {% endif %}
+    {% rating_box "Kvaliteta" task.quality_rating %}
+    {% rating_box "Težina" task.difficulty_rating %}
   </div>
 
   <div id="task-top-right-info">

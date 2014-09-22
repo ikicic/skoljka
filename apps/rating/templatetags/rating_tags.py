@@ -4,10 +4,16 @@ from django.contrib.contenttypes.models import ContentType
 
 register = template.Library()
 
-# TODO: readonly parameter (view solution)
+# TODO: readonly parameter for inc_rating_box_bool.html
 @register.simple_tag(takes_context=True)
 def rating_box(context, text, manager, use_bool_design=False):
-    user_vote = manager.get_vote_for_user(context['request'].user)
+    user = context['request'].user
+    if user.is_authenticated():
+        read_only = False
+        user_vote = manager.get_vote_for_user(user)
+    else:
+        read_only = True
+        user_vote = None
 
     _template = template.loader.get_template(
             'inc_rating_box_bool.html' if use_bool_design else
@@ -15,6 +21,7 @@ def rating_box(context, text, manager, use_bool_design=False):
 
     context.push()
     context.update({
+        'read_only': read_only,
         'text': text,
         'm': manager,
         'user_vote': None if user_vote is None else user_vote.value
