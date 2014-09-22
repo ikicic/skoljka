@@ -5,7 +5,7 @@
 {% block content %}
 
 {% if task %}
-  <h4>{{ task.name }}</h4>
+  <h4>{{ task.get_link }}</h4>
 {% endif %}
 <div class="outset outset-margin">
   {{ content.render }}

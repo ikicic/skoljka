@@ -52,7 +52,7 @@ def edit_attachments(request, id):
     # Type-specific tuning and permissions:
     try:
         task = Task.objects.get(content_id=id)
-        if not task.user_has_perm(request.user, EDIT):
+        if not task.is_allowed_to_edit(request.user):
             return 403
         data['task'] = task
         data.update(get_task_folder_data(task, request.user))

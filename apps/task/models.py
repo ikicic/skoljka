@@ -7,7 +7,7 @@ from django.contrib.contenttypes.generic import GenericRelation
 from django.utils.safestring import mark_safe
 
 from mathcontent.models import MathContent, Attachment
-from permissions.constants import VIEW, VIEW_SOLUTIONS
+from permissions.constants import EDIT, VIEW, VIEW_SOLUTIONS
 from permissions.models import BasePermissionsModel, convert_permission_names_to_values
 from post.generic import PostGenericRelation
 from rating.fields import RatingField
@@ -110,6 +110,22 @@ class Task(BasePermissionsModel):
     def get_absolute_url(self):
         return '/task/%d/' % self.id
 
+    def is_allowed_to_edit(self, user, perm=None):
+        """
+        Check if the user is allowed to solve current problem.
+
+        Saves the result to the object for internal usage.
+
+        If 'perm' not given, it will be retrieved automatically.
+        """
+        if perm is None:
+            if hasattr(self, '_cache_perm'):
+                perm = self._cache_perm
+            else:
+                perm = self.get_user_permissions(user)
+        self._cache_perm = perm
+        return EDIT in perm
+
     def is_allowed_to_solve(self, user):
         """
         Check if the user is allowed to solve current problem.
@@ -128,8 +144,12 @@ class Task(BasePermissionsModel):
         return check_prerequisites_for_task(self, user, perm)
 
     def get_link(self, tooltip=False, url_suffix=''):
+        # TODO: EDIT permission should immediatelly imply view permission
+        # everywhere, not only here.
+
         # If prerequisites not met, do not output link.
-        if not getattr(self, 'cache_prerequisites_met', False):
+        if EDIT not in getattr(self, '_cache_perm', []) \
+                and not getattr(self, 'cache_prerequisites_met', False):
             # Do not show if this is a file or not, it doesn't matter.
             # Especially, don't put the link to the file itself!
             return mark_safe(u'<i class="icon-lock" title="Niste riješili neke '
