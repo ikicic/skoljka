@@ -1,4 +1,5 @@
 ﻿from django import template
+from django.conf import settings
 from django.template.base import TemplateSyntaxError
 from django.utils.safestring import mark_safe
 
@@ -76,7 +77,7 @@ class UserOptionsNode(template.Node):
                 profile = user.get_profile()
                 setattr(profile, field_name, value)
                 profile.save()
-            else:
+            elif not settings.DISABLE_PREF_COOKIES:
                 response_update_cookie(context['request'], field_name, value)
         else:
             value = get_useroption(context['request'], field_name,

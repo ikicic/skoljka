@@ -103,3 +103,5 @@ FOLDER_INLINE_YEAR_COUNT = 10
 FOLDER_PATH_MIGRATIONS = [
     # ('oldpath', 'newpath'),
 ]
+
+DISABLE_PREF_COOKIES = True
