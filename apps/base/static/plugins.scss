@@ -50,10 +50,15 @@
   display: inline-block;
 }
 
-@media (max-width: $screen-sm-max) {
+@media (max-width: $screen-xs-max) {
   /* hack for task list spacing */
   .row-fluid .span6:first-child {
     margin-bottom: 15px;
+  }
+}
+@media (min-width: $screen-lg-min) {
+  .row-fluid {
+    margin-bottom: 5px;
   }
 }
 /* Bootstrap Changes End */
