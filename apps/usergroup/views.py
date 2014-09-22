@@ -11,59 +11,45 @@ from permissions.constants import VIEW, EDIT, EDIT_PERMISSIONS, ADD_MEMBERS
 from permissions.models import ObjectPermission
 from userprofile.models import user_refresh_group_cache
 
+from usergroup.decorators import group_view
 from usergroup.forms import GroupForm, UserGroupForm, UserEntryForm
 from usergroup.models import UserGroup, GroupExtended
 
 from skoljka.libs.decorators import response
 
 @login_required
+@group_view()
 @response('usergroup_leave.html')
-def leave(request, group_id=None):
-    group = get_object_or_404(Group.objects.select_related('data'), id=group_id)
+def leave(request, group, context_dict):
     if group.data is None:
         return (403, 'Can\'t leave your private user-group.')
 
-    # TODO: ovaj query vjerojatno radi nepotreban JOIN
-    is_member = request.user.groups.filter(id=group_id).exists()
-    if not is_member:
-        return (403, 'You are not member of this group.')
+    if not context_dict['is_member']:
+        return (403, 'You are not a member of this group.')
 
     if request.method == 'POST':
         if request.POST.get('confirm') == u'1':
             request.user.groups.remove(group)
-            # TODO: manually create function like 'group_members_update'
+
             user_refresh_group_cache([request.user.id])
-            group.data.member_count = User.groups.through.objects.filter(group=group).count()
+            group.data.cache_member_count = group.data.get_members().count()
             group.data.save(force_update=True)
             _action.add(request.user, _action.GROUP_LEAVE,
                 action_object=request.user, target=group, group=group)
             return ('/usergroup/', )
 
-    return {'group': group}
+    return context_dict
 
 #TODO: optimizirati ako je moguce
 @login_required
+@group_view()
 @response('usergroup_detail.html')
-def detail(request, group_id=None):
-    group = get_object_or_404(Group.objects.select_related('data'), id=group_id)
-
+def detail(request, group, context_dict):
     # FIXME: pipkavo
     if group.data is None:
         return ('/profile/%d/' % group.user_set.all()[0].id,)
 
-    perm = group.data.get_user_permissions(request.user)
-    is_member = group.data.is_member(request.user)
-
-    if VIEW not in perm:
-        return (403, 'You are not member of this group, and you cannot view it\'s details.')
-
-
-    return {
-        'group': group,
-        'is_member': is_member,
-        'can_edit': EDIT in perm,
-        'can_add_members': ADD_MEMBERS in perm,
-    }
+    return context_dict
 
 
 # TODO: perm!!
@@ -71,7 +57,9 @@ def detail(request, group_id=None):
 @response()
 def new(request, group_id=None):
     if group_id:
-        group = get_object_or_404(Group.objects.select_related('data', 'data__description'), id=group_id)
+        group = get_object_or_404(
+                Group.objects.select_related('data', 'data__description'),
+                id=group_id)
         if not group.data:
             return (400, 'You can\'t edit your own private user-group (or there is some data error).')
 
@@ -81,7 +69,8 @@ def new(request, group_id=None):
         # (fixed in later versions of Django...)
         usergroup.hidden = bool(usergroup.hidden)
 
-        perm = usergroup.get_user_permissions(request.user)
+        perm = group.get_user_permissions(request.user)
+        is_member = group.data.is_member(request.user)
         if EDIT not in perm:
             return (403, 'You do not have permission to edit this group\'s details.')
 
@@ -89,6 +78,7 @@ def new(request, group_id=None):
         edit = True
     else:
         group = usergroup = description = None
+        is_member = False
         edit = False
 
     POST = request.POST if request.method == 'POST' else None
@@ -110,8 +100,8 @@ def new(request, group_id=None):
                 usergroup.group = group
                 usergroup.author = request.user
 
-                # permissions assigned to whole group (each member)
-                # every group member has perm to view it
+                # Permissions assigned to the whole group (each member).
+                # Every group member has perm to view the group itself.
                 ObjectPermission.objects.create(content_object=group,
                     group=group, permission_type=VIEW)
 
@@ -126,6 +116,7 @@ def new(request, group_id=None):
         'can_edit': True,
         'group': group,
         'edit': edit,
+        'is_member': is_member,
         'new_group': not edit,
         'forms': [group_form, usergroup_form, description_form],
     })
@@ -145,41 +136,29 @@ def list_view(request):
 
 
 @login_required
+@group_view()
 @response('usergroup_members.html')
-def members(request, group_id=None):
-    group = get_object_or_404(Group.objects.select_related('data'), id=group_id)
-    perm = group.data.get_user_permissions(request.user)
-    is_member = group.data.is_member(request.user)
-
-    if VIEW not in perm:
-        return (403, 'You do not have permission to edit this group\'s details.')
-
-    if ADD_MEMBERS in perm and request.method == 'POST':
+def members(request, group, context_dict):
+    if context_dict['can_add_members'] and request.method == 'POST':
         form = UserEntryForm(request.POST)
         if form.is_valid():
             created_user_ids = []
             users = form.cleaned_data['list']
             for user in users:
                 #user.groups.add(group)
-                dummy, created = User.groups.through.objects.get_or_create(user=user, group=group)
+                dummy, created = User.groups.through.objects.get_or_create(
+                        user=user, group=group)
                 if created:
                     created_user_ids.append(user.id)
                     _action.add(request.user, _action.GROUP_ADD,
                         action_object=user, target=group, group=group)
             # TODO: manually create function like 'group_members_update'
             user_refresh_group_cache(created_user_ids)
-            group.data.member_count = group.data.get_users().count()
+            group.data.cache_member_count = group.data.get_members().count()
             group.data.save()
             form = UserEntryForm()
     else:
         form = UserEntryForm()
 
-
-    return {
-        'group': group,
-        'form': form,
-        'is_member': is_member,
-        'can_view_perm': EDIT_PERMISSIONS in perm,
-        'can_edit': EDIT in perm,
-        'can_add_members': ADD_MEMBERS in perm,
-    }
+    context_dict['form'] = form
+    return context_dict

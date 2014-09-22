@@ -3,6 +3,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError
+from django.db.models import Q
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -87,8 +88,15 @@ def _edit(request, data, id, object, type_id, content_type):
                 except Group.DoesNotExist:
                     return 403
 
-                ObjectPermission.objects.filter(object_id=id,
-                    content_type_id=type_id, group_id=group_id).delete()
+                to_delete = ObjectPermission.objects.filter(object_id=id,
+                    content_type_id=type_id, group_id=group_id)
+                if content_type.app_label == 'auth' \
+                        and content_type.model == 'group' \
+                        and id == group_id:
+                    # Don't delete group's permission to view itself.
+                    to_delete = to_delete.exclude(permission_type=VIEW)
+                to_delete.delete()
+
                 objectpermissions_changed.send(sender=model, instance=object,
                     content_type=content_type)
         else:

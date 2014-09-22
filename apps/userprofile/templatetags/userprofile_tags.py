@@ -102,8 +102,6 @@ def useroption(parser, token):
     is_default = len(bits) >= 4 and bits[3] == 'default'
     class_attr = _remove_quotations(bits[4]) if len(bits) == 5 else ''
 
-    print 'CLASS_ATTR', class_attr, len(bits), bits
-
     return UserOptionNode(value, bits[2][1:-1], is_default, class_attr)
 
 

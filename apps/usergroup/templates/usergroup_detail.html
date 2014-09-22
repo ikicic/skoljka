@@ -12,13 +12,13 @@
     </tr>
     <tr>
       <th>Broj članova</th>
-      <td>{{ group.data.member_count }}</td>
+      <td>{{ group.data.cache_member_count }}</td>
     </tr>
   </table>
   <br>
   {{ group.data.description.render }}<br><br><br>
   Korisnici: 
-  {% for x in group.data.get_users %}
+  {% for x in group.data.get_members %}
     {% if not forloop.first %}|{% endif %}
     {{ x|userlink }}
   {% empty %}

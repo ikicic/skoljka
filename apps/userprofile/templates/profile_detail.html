@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load usergroup_tags %}
+
 {% block title %}Profil {{ profile.username }}{% endblock %}
 
 {% block content %}
@@ -39,7 +41,7 @@
             <td>
               {% for group in visible_groups %}
                 {% if not forloop.first %}|{% endif %}
-                {{ group.data }}
+                {{ group|grouplink }}
               {% endfor %}
             </td>
           </tr>

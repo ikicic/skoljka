@@ -28,3 +28,5 @@ UPDATE rating_score S
 UPDATE activity_action
   SET action_object_cache = IF(action_object_cache >= 3, 2, 1)
   WHERE type=220 AND subtype=0;
+
+ALTER TABLE usergroup_usergroup CHANGE member_count cache_member_count INT;

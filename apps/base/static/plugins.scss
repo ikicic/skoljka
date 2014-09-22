@@ -23,10 +23,6 @@
   margin-left: -20px !important; /* independent of browser size */
 }
 
-tr.group_hidden td { /* not really a bootstrap change... */
-  background-color: #DDD!important;
-}
-
 .table-striped tbody tr:nth-child(odd) td,
 .table-striped tbody tr:nth-child(odd) th {
   background-color: rgb(244, 247, 246);

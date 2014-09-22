@@ -12,11 +12,11 @@
     <th>Ime</th>
     <th>Broj korisnika</th>
   </tr>
-{% for g in groups %}
-  <tr{% group_class_attr g %}>
+{% for group in groups %}
+  <tr{% group_class_attr group %}>
     <td>{{ forloop.counter }}</td>
-    <td>{{ g.data }}</td>
-    <td>{{ g.data.member_count }}</td>
+    <td>{{ group|grouplink }}</td>
+    <td>{{ group.data.cache_member_count }}</td>
   </tr>
 {% empty %}
   <tr>

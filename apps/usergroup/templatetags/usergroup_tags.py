@@ -12,10 +12,10 @@ def group_class_attr(context, group):
     user = context['user']
 
     if group.data.hidden:
-        cls = 'group_hidden'
+        cls = 'group-hidden'
     elif group.id in context['user_group_ids']:
         # TODO: create another css class
-        cls = 'task-as-solved'
+        cls = 'group-is-member-of'
     else:
         cls = ''
 
