@@ -6,8 +6,9 @@
 
 {% block content %}
 
-{% if new_folder_count %}
-  Napravljeno/e {{ new_folder_count }} kategorija/e.
+{% if created_folder_count or existing_folder_count %}
+  Napravljeno/e {{ created_folder_count }} kategorija/e,
+  iskorištene/o {{ existing_folder_count }} postojeće/ih.
 {% endif %}
 
 <form action="{{ request.path }}" method="post">

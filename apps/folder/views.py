@@ -385,8 +385,8 @@ def _create_folders(author, parent, structure, p):
             # Child definition: var_value1/var_value2/.../var_valueN
             children.append(left)
 
-    # Total number of created folders.
-    total = 0
+    created = 0
+    existing = 0
     for index, x in enumerate(children):
         # Update vars with child var values. (values are stripped!)
         vars.update({k: v.strip() for k, v in zip(var_names, x.split('/'))})
@@ -397,25 +397,31 @@ def _create_folders(author, parent, structure, p):
             # why order matters
             vars[var[0]] = var[1].format(**vars)
 
-        # Create new folder
-        folder = Folder(author=author, parent=parent, parent_index=index,
-            hidden=False, editable=False, name=vars['name'],
-            short_name=vars['short'])
+        try:
+            # Check if folder with the same name, short name and parent exists.
+            folder = Folder.objects.get(parent=parent, name=vars['name'],
+                    short_name=vars['short'])
+            existing += 1
+        except:
+            # If not, create new folder.
+            folder = Folder(author=author, parent=parent, parent_index=index,
+                hidden=False, editable=False, name=vars['name'],
+                short_name=vars['short'])
+            folder.save()
+            created += 1
 
-        folder.save()
-
-        # Note that object has to exist to use this!
+        # Note that the object has to exist to use this!
         folder.tags.set(*replace_with_original_tags(vars['tags']))
         folder._refresh_cache_tags()
-
-        total += 1
 
         # Call recursion if there is any level left
         if rest:
             # Note that parent changed!
-            total += _create_folders(author, folder, rest, _dict_to_object(vars))
+            _c, _e = _create_folders(author, folder, rest, _dict_to_object(vars))
+            created += _c
+            existing += _e
 
-    return total
+    return created, existing
 
 # stored as object_repr in django_admin_log
 ADVANCED_NEW_OBJECT_REPR = u'<advanced new>'
@@ -425,6 +431,8 @@ ADVANCED_NEW_OBJECT_REPR = u'<advanced new>'
 def advanced_new(request):
     """
         Create folders defined by structure and the parent.
+        Existing folder (folders with matching short, full name and parent)
+        will be used instead of creating new ones.
 
         Structure format:
             level1 [ | level2 [ | level3 ... ] ]
@@ -481,7 +489,8 @@ def advanced_new(request):
 
     content_type = ContentType.objects.get_for_model(Folder)
 
-    total = 0
+    created = 0
+    existing = 0
     if request.POST:
         form = FolderAdvancedCreateForm(request.user, request.POST)
         if form.is_valid():
@@ -495,7 +504,8 @@ def advanced_new(request):
                 change_message=structure)
 
             print 'Creating folders...'
-            total = _create_folders(request.user, parent, structure, None)
+            created, existing = \
+                _create_folders(request.user, parent, structure, None)
 
             # print 'Refreshing folder cache...'
             # refresh_cache_fields(Folder.objects.all())
@@ -509,7 +519,8 @@ def advanced_new(request):
 
     return {
         'form': form,
-        'new_folder_count': total,
+        'created_folder_count': created,
+        'existing_folder_count': existing,
         'structure_history': structure_history,
         'history_array': history_array,
     }
