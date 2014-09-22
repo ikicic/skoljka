@@ -159,10 +159,17 @@ class Folder(BasePermissionsModel):
         if is_open:
             cls += ' nav-folder-open'
 
+        title = ""
         stats_str = ''
+
         if stats and self._should_show_stats():
             # Extract statistics
             total, total_solvable, S = stats
+
+            # TODO: Show this info everywhere. Requires correct calculation of
+            # task count. (currently, it only works properly for folders
+            # without subfolders).
+            title = "Ukupno zadataka: {}".format(stats[0])
 
             any, any_non_rated, percent, (r, g, b) =    \
                 Folder.parse_solution_stats(S, total_solvable)
@@ -174,10 +181,11 @@ class Folder(BasePermissionsModel):
                 stats_str = '<span style="color:#%02X%02X%02X;">(%s%d%%)</span>' \
                     % (r, g, b, plus_sign, 100 * percent)
 
-        return u'<li class="%s" style="margin-left:%dpx;"> '   \
+        title = "" if not title else ' title="{}"'.format(title)
+        return u'<li class="%s" style="margin-left:%dpx;"%s> '   \
             '%s<a href="%s">%s %s</a></li>\n' % (cls,
-            depth * 10 - 7 + IN_OUT_OFFSET, extra, self.get_absolute_url(),
-            self.short_name, stats_str)
+            depth * 10 - 7 + IN_OUT_OFFSET, title, extra,
+            self.get_absolute_url(), self.short_name, stats_str)
 
     def tag_list_html(self):
         return tag_list_to_html(self.cache_tags)

@@ -7,9 +7,9 @@ from mathcontent.models import MathContent
 from permissions.constants import VIEW_SOLUTIONS
 from permissions.models import ObjectPermission
 from permissions.utils import get_object_ids_with_exclusive_permission
-from search.utils import update_search_cache
 from solution.models import Solution, SolutionDetailedStatus
 from tags.models import Tag, TaggedItem
+from tags.signals import send_task_tags_changed_signal
 
 from task.models import Task
 
@@ -205,7 +205,7 @@ def create_tasks_from_json(description):
             # WARNING: .set is case-sensitive!
             tags = parse_tags(desc.get('_tags', ''))
             task.tags.set(*tags)
-            update_search_cache(task, [], tags)
+            send_task_tags_changed_signal(task, old_tags, new_tags)
 
             # --- difficulty ---
             difficulty = desc.get('_difficulty')

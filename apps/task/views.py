@@ -23,8 +23,8 @@ from mathcontent.models import MathContent, Attachment
 from mathcontent.utils import check_and_save_attachment
 from permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS, VIEW_SOLUTIONS
 from permissions.models import ObjectPermission
-from search.utils import update_search_cache
 from solution.models import Solution, SolutionStatus
+from tags.signals import send_task_tags_changed_signal
 from usergroup.forms import GroupEntryForm
 
 from skoljka.libs.decorators import response
@@ -132,7 +132,7 @@ def advanced_new(request):
                     # WARNING: .set is case-sensitive!
                     tags = parse_tags(task_form.cleaned_data['_tags'] % dictionary)
                     task.tags.set(*tags)
-                    update_search_cache(task, [], tags)
+                    send_task_tags_changed_signal(task, [], tags)
 
                     # --- difficulty ---
                     difficulty = task_form.cleaned_data['_difficulty'] % dictionary
@@ -228,7 +228,6 @@ def new(request, task_id=None, is_file=None):
 
             task.content = math_content
 
-            # TODO: signals!
             if edit:
                 # Have to use .cleaned_data because m2m isn't saved yet.
                 old_tags_str = ','.join(sorted(old_tags))
@@ -237,12 +236,6 @@ def new(request, task_id=None, is_file=None):
                 old_tags_str = 'x'
                 new_tags_str = 'y'
 
-            # Not a perfect solution. When tags are changed, both old and new
-            # folders have to be invalidated.
-            # TODO: signals!
-            if edit and old_tags_str != new_tags_str:
-                invalidate_folder_cache_for_task(task)
-
             task.save()
 
             # Required for django-taggit:
@@ -250,14 +243,13 @@ def new(request, task_id=None, is_file=None):
 
             # TODO: signals!
             if not edit or old_hidden != task.hidden    \
-                    or old_solvable != task.solvable    \
-                    or old_tags_str != new_tags_str:
+                    or old_solvable != task.solvable:   \
                 invalidate_folder_cache_for_task(task)
 
-            # TODO: signals!
             if old_tags_str != new_tags_str:
-                tags = task.tags.values_list('name', flat=True)
-                update_search_cache(task, old_tags, tags)
+                new_tags = task.tags.values_list('name', flat=True)
+                # TODO: call this automatically when tags are changed
+                send_task_tags_changed_signal(task, [], new_tags)
 
             # send action if creating a new nonhidden task
             if not edit:

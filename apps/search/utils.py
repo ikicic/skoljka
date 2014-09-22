@@ -2,6 +2,7 @@ from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.db import connection, transaction
 from django.db.models import Count
+from django.dispatch import receiver
 from django.template.defaultfilters import slugify
 
 from permissions.constants import VIEW
@@ -10,6 +11,7 @@ from task.models import Task
 from tags.models import Tag, TaggedItem
 from tags.utils import get_available_tags, replace_with_original_tags,  \
     split_tags, split_tag_ids
+from tags.signals import task_tags_changed_high_priority
 
 from search.models import SearchCache, SearchCacheElement, _normal_search_key, \
     _reverse_search_key
@@ -17,14 +19,13 @@ from search.models import SearchCache, SearchCacheElement, _normal_search_key, \
 from collections import defaultdict
 
 
-# TODO: optimize!
-# old_tags and new_tags are list of strings, not objects!
-def update_search_cache(object, old_tags, new_tags):
-    diff = set(new_tags) ^ set(old_tags)
-    if not diff:
-        return
+# Any better way to implement priority?
+@receiver(task_tags_changed_high_priority, sender=Task)
+def update_search_cache(instance, old_tags, new_tags, **kwargs):
+    # old_tags and new_tags are list of strings, not objects!
+    diff = set(old_tags) ^ set(new_tags)
 
-    # this will delete SearchCacheElement rows as well
+    # This will delete SearchCacheElement rows as well
     SearchCache.objects.filter(tags__name__in=diff).delete()
 
 

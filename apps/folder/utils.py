@@ -7,9 +7,10 @@ from permissions.constants import VIEW
 from permissions.utils import get_object_ids_with_exclusive_permission
 from permissions.signals import objectpermissions_changed
 from search.models import SearchCacheElement
-from search.utils import reverse_search
+from search.utils import search, reverse_search
 from solution.models import Solution
 from tags.utils import get_object_tagged_items
+from tags.signals import task_tags_changed
 from task.models import Task
 from usergroup.models import UserGroup
 from skoljka.libs import ncache
@@ -327,4 +328,22 @@ def _invalidate_on_usergroup_update(sender, **kwargs):
     folder_ids = Folder.objects    \
         .filter(hidden=True, permissions__group_id=kwargs['instance'].group_id) \
         .values_list('id', flat=True).distinct()
+    invalidate_cache_for_folder_ids(folder_ids)
+
+@receiver(task_tags_changed, sender=Task)
+def _invalidate_on_task_tags_change(sender, old_tags, new_tags, **kwargs):
+    content_type = ContentType.objects.get_for_model(Folder)
+
+    # TODO: Optimize. Filter only those folders that really need invalidation...
+    search_cache_ids = []
+    diff = set(old_tags) ^ set(new_tags)
+    for tag in diff:
+        search_cache = search([tag])
+        search_cache_ids.append(search_cache.id)
+
+    folder_ids = SearchCacheElement.objects.filter(
+            cache_id__in=search_cache_ids, content_type=content_type)
+    folder_ids = list(set(folder_ids.values_list('object_id', flat=True)))
+
+    FolderTask.objects.filter(folder_id__in=folder_ids).delete()
     invalidate_cache_for_folder_ids(folder_ids)

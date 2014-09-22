@@ -6,7 +6,8 @@ from django.shortcuts import get_object_or_404
 from tags.models import Tag, TaggedItem
 from task.models import Task
 from permissions.constants import VIEW, EDIT
-from search.utils import update_search_cache
+
+from tags.signals import send_task_tags_changed_signal
 
 from skoljka.libs.decorators import ajax
 
@@ -29,7 +30,8 @@ def delete(request):
     TaggedItem.objects.filter(
             tag=tag, object_id=task.id, content_type=task_ct).delete()
     new_tags = [x for x in old_tags if x != tag_name]
-    update_search_cache(task, old_tags, new_tags)
+
+    send_task_tags_changed_signal(task, old_tags, new_tags)
 
     return '1'
 
@@ -59,8 +61,10 @@ def add(request):
         tag = Tag.objects.create(name=request.POST['name'])
 
     old_tags = list(task.tags.values_list('name', flat=True))
-    taggeditem, created = TaggedItem.objects.get_or_create(object_id=task.id, content_type=task_ct, tag=tag)
+    taggeditem, created = TaggedItem.objects.get_or_create(
+            object_id=task.id, content_type=task_ct, tag=tag)
     if created:
-        update_search_cache(task, old_tags, task.tags.values_list('name', flat=True))
+        new_tags = task.tags.values_list('name', flat=True)
+        send_task_tags_changed_signal(task, old_tags, new_tags)
 
     return '1' if created else '-1'
