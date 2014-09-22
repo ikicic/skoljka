@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 
 from tags.models import Tag, TaggedItem
 from task.models import Task
-from permissions.constants import VIEW
+from permissions.constants import VIEW, EDIT
 from search.utils import update_search_cache
 
 from skoljka.libs.decorators import ajax
@@ -17,17 +17,19 @@ from skoljka.libs.decorators import ajax
 
 @ajax(post=['name', 'task'])
 def delete(request):
-    # TODO: DRY
-    if not request.user.has_perm('delete_tag'):
-        return '0'
-
-    tag = get_object_or_404(Tag, name=request.POST['name'])
     task = get_object_or_404(Task, id=request.POST['task'])
-    if not task.user_has_perm(request.user, VIEW):
-        return HttpResponseForbidden('Not allowed to view or edit this task.')
+    if not task.user_has_perm(request.user, EDIT):
+        return '0' # HttpResponseForbidden("Not allowed to edit this task.")
     task_ct = ContentType.objects.get_for_model(Task)
 
-    TaggedItem.objects.filter(tag=tag, object_id=task.id, content_type=task_ct).delete()
+    tag_name = request.POST['name']
+    tag = get_object_or_404(Tag, name=tag_name)
+
+    old_tags = list(task.tags.values_list('name', flat=True))
+    TaggedItem.objects.filter(
+            tag=tag, object_id=task.id, content_type=task_ct).delete()
+    new_tags = [x for x in old_tags if x != tag_name]
+    update_search_cache(task, old_tags, new_tags)
 
     return '1'
 
@@ -36,15 +38,16 @@ def add(request):
     # TODO: DRY
     name = request.POST['name'].strip()
     if len(name) == 0:
-        return HttpResponseBadRequest('Tag name has to be at least one character long.')
+        return HttpResponseBadRequest(
+                "Tag name has to be at least one character long.")
 
     # 'news' is used to mark task as news
     if name.lower() in ['news', 'oldnews']:
-        return HttpResponseForbidden('Nedozvoljena oznaka.')
+        return '00' # HttpResponseForbidden("Nedozvoljena oznaka.")
 
     task = get_object_or_404(Task, id=request.POST['task'])
-    if not task.user_has_perm(request.user, VIEW):
-        return HttpResponseForbidden('Not allowed to view or edit this task.')
+    if not task.user_has_perm(request.user, EDIT):
+        return '0' # HttpResponseForbidden("Not allowed to edit this task.")
 
     task_ct = ContentType.objects.get_for_model(Task)
 
@@ -60,4 +63,4 @@ def add(request):
     if created:
         update_search_cache(task, old_tags, task.tags.values_list('name', flat=True))
 
-    return '1' if created else '0'
+    return '1' if created else '-1'

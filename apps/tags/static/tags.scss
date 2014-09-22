@@ -2,7 +2,14 @@
 .tag-list {
   display: inline;
   font-size: 11px;
-  color: #CCC;
+
+  > a {
+    padding: 0 4px;
+    border-left: 1px solid #DDD;
+  }
+  > a:first-child {
+    border-left: none;
+  }
 }
 
 .tag-hidden {

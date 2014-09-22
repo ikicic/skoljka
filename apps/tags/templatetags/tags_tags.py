@@ -63,7 +63,8 @@ def tag_list(context, owner, plus_exclude=None):
         (v0 if name[0] != '$' else v1).append(format % attr)
 
     # TODO: do not use model-specific names
-    return mark_safe(u'<div class="tag-list" data-task="%d">%s</div>' % (owner.id, u' | '.join(v0 + v1)))
+    return mark_safe(u'<div class="tag-list" data-task="%d">%s</div>' % (
+        owner.id, u"".join(v0 + v1)))
 
 
 ###################

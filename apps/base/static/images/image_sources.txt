@@ -13,3 +13,6 @@ pdf16.png - http://findicons.com/icon/169307/pdf_document?id=416032
 
 findicons.com (Oxygen Team)
 tex16.png - http://findicons.com/icon/238048/text_x_bibtex
+
+findicons.com (jg-visuals)
+recycle_bin_full.png - http://findicons.com/icon/92368/recycle_bin_full
