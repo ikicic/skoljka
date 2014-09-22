@@ -38,13 +38,11 @@ def group_view(permission=VIEW):
                     Group.objects.select_related('data'), id=group_id)
 
             perm = group.get_user_permissions(request.user)
-            print perm
             if VIEW not in perm:
                 return HttpResponseForbidden("You are not a member of this "
                         "group, and you cannot view it's details.")
             if permission not in perm:
                 return HttpResponseForbidden("Not allowed for this action.")
-
 
             context_dict = {}
             context_dict['group'] = group
@@ -52,7 +50,7 @@ def group_view(permission=VIEW):
                     ContentType.objects.get_for_model(Group)
             context_dict['can_edit'] = EDIT in perm
             context_dict['can_add_members'] = ADD_MEMBERS in perm
-            context_dict['can_edit_permissions'] = EDIT_PERMISSIONS in perm,
+            context_dict['can_edit_permissions'] = EDIT_PERMISSIONS in perm
 
             # Author of the group might not be a member.
             context_dict['is_member'] = group.data.is_member(request.user)
