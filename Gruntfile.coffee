@@ -47,6 +47,7 @@ module.exports = (grunt) ->
             'jquery-star-rating-plugin/*.gif'
             'jquery.autocomplete/jquery.autocomplete.min.js'
             'jquery.autocomplete/jquery.autocomplete.css'
+            'jquery.autocomplete/indicator.gif'
             'jquery.metadata/jquery.metadata.js'
             'jquery/jquery.min.js'
           ]

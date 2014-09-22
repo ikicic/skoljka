@@ -316,8 +316,12 @@ PIPELINE_JS = {
         'source_filenames': (
             'jquery.min.js',
             '*.js',
-            '**/*.js',
-            '**/**/*.js',
+            '[!a]*/*.js',
+            '[!a]*/*/*.js',
+            'a[!d]*/*.js',
+            'a[!d]*/*/*.js',
+            'ad[!m]*/*.js', # exclude admin js files
+            'ad[!m]*/*/*.js',
         ),
         'output_filename': 'scripts.min.js',
     },
