@@ -10,7 +10,7 @@
 <div style="float:left;">
   {% rating_display_bool manager=solution.correctness red_if_lt=SOLUTION_CORRECT_SCORE %}
 </div>
-<div style="float:right;text-align:right;">
+<div id="solution-action-bar-right">
   {{ solution.date_created }} ({{ solution.date_created|timesince }})<br>
   {% if can_edit %}
     <form action="/solution/{{ solution.pk }}/edit/mark/" method="post">

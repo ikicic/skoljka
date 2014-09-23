@@ -1,5 +1,14 @@
 @import "main";
 
+#solution-action-bar-right {
+  float: right;
+  text-align: right;
+
+  > form {
+    margin: 0px; /* Fix */
+  }
+}
+
 #solution-container {
   position: relative;
 }

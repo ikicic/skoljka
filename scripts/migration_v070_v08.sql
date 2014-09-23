@@ -25,6 +25,13 @@ UPDATE rating_score S
     WHERE V.object_id = S.object_id AND V.content_type_id = S.content_type_id
   )
   WHERE S.content_type_id = @solution_content_type;
+UPDATE solution_solution S
+  SET correctness_avg = IFNULL((
+      SELECT SUM(value) / COUNT(*)
+      FROM rating_vote V
+      WHERE V.object_id = S.object_id AND V.content_type_id = S.content_type_id
+    ), 0)
+  WHERE S.status = 3;
 UPDATE activity_action
   SET action_object_cache = IF(action_object_cache >= 3, 2, 1)
   WHERE type=220 AND subtype=0;

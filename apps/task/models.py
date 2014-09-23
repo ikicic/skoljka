@@ -144,7 +144,7 @@ class Task(BasePermissionsModel):
         return check_prerequisites_for_task(self, user, perm)
 
     def get_link(self, tooltip=False, url_suffix=''):
-        # TODO: EDIT permission should immediatelly imply view permission
+        # TODO: EDIT permission should immediately imply view permission
         # everywhere, not only here.
 
         # If prerequisites not met, do not output link.

@@ -70,7 +70,7 @@ class PermissionManager(models.Manager):
                 permissions__permission_type=permission_type)
 
             try:
-                self.model._meta.get_field_by_name('author_id')
+                self.model._meta.get_field_by_name('author')
                 q |= Q(author_id=user.id)
             except models.FieldDoesNotExist:
                 pass
