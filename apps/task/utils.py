@@ -205,7 +205,7 @@ def create_tasks_from_json(description):
             # WARNING: .set is case-sensitive!
             tags = parse_tags(desc.get('_tags', ''))
             task.tags.set(*tags)
-            send_task_tags_changed_signal(task, old_tags, new_tags)
+            send_task_tags_changed_signal(task, [], tags)
 
             # --- difficulty ---
             difficulty = desc.get('_difficulty')
