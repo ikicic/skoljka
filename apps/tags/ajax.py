@@ -8,6 +8,7 @@ from task.models import Task
 from permissions.constants import VIEW, EDIT
 
 from tags.signals import send_task_tags_changed_signal
+from tags.utils import add_task_tags
 
 from skoljka.libs.decorators import ajax
 
@@ -51,20 +52,6 @@ def add(request):
     if not task.user_has_perm(request.user, EDIT):
         return '0' # HttpResponseForbidden("Not allowed to edit this task.")
 
-    task_ct = ContentType.objects.get_for_model(Task)
-
-    # https://code.djangoproject.com/ticket/13492
-    # (mozda vezana rasprava: https://code.djangoproject.com/ticket/7789)
-    try:
-        tag = Tag.objects.get(name__iexact=request.POST['name'])
-    except Tag.DoesNotExist:
-        tag = Tag.objects.create(name=request.POST['name'])
-
-    old_tags = list(task.tags.values_list('name', flat=True))
-    taggeditem, created = TaggedItem.objects.get_or_create(
-            object_id=task.id, content_type=task_ct, tag=tag)
-    if created:
-        new_tags = task.tags.values_list('name', flat=True)
-        send_task_tags_changed_signal(task, old_tags, new_tags)
+    created = add_task_tags(request.POST['name'], task)
 
     return '1' if created else '-1'

@@ -4,6 +4,38 @@ from taggit.utils import parse_tags
 
 from tags.models import Tag, TaggedItem
 
+def add_task_tags(tags, task, content_type=None):
+    """
+    Adds given tags (a list or a string of comma-separated tags) to the given
+    task. Returns the total number of new tags added (number of new TaggedItem
+    instances).
+    """
+    from tags.signals import send_task_tags_changed_signal
+    if not content_type:
+        content_type = ContentType.objects.get_for_model(task)
+
+    total_created = 0
+    old_tags = list(task.tags.values_list('name', flat=True))
+    for tag in split_tags(tags):
+        # https://code.djangoproject.com/ticket/13492
+        # (mozda vezana rasprava: https://code.djangoproject.com/ticket/7789)
+        try:
+            tag = Tag.objects.get(name__iexact=tag)
+        except Tag.DoesNotExist:
+            tag = Tag.objects.create(name=tag)
+
+        taggeditem, created = TaggedItem.objects.get_or_create(
+                object_id=task.id, content_type=content_type, tag=tag)
+        if created:
+            total_created += 1
+
+    if total_created:
+        new_tags = task.tags.values_list('name', flat=True)
+        send_task_tags_changed_signal(task, old_tags, new_tags)
+
+    return total_created
+
+
 def split_tags(tags):
     if isinstance(tags, basestring):
         # Force comma between tags. If no commas are given, assume one multiword

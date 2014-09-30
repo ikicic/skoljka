@@ -1,0 +1,44 @@
+{% extends "competition_base.html" %}
+
+{% block content %}
+
+<h3 class="comp-header">Bodovna lista</h3>
+
+{% if not has_started %}
+  <div class="alert">
+    Natjecanje još nije počelo!
+  </div>
+{% endif %}
+
+{% if not has_started and is_admin %}
+  <div class="alert">
+    Trenutačno vidljivo samo administratorima!
+  </div>
+{% endif %}
+
+{% if has_started or is_admin %}
+  <div class="row">
+    <table class="span6 table-striped" id="comp-scoreboard-table">
+      <tr>
+        <th>#</th>
+        <th>Tim</th>
+        <th>Ukupno bodova</th>
+      </tr>
+      {% for t in teams %}
+        <tr class="
+            {% if t.id == team.id and forloop.counter == 3 %}comp-my-team{% endif %}
+            {% if t.is_test %}comp-test-team{% endif %}
+            ">
+          <td>
+            {{ t.t_position }}{{ t.is_test|yesno:"*," }}
+          </td>
+          <td>{{ t.name }}</td>
+          <td>{{ t.cache_score }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+{% endif %}
+
+{% endblock content %}
+

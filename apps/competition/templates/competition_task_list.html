@@ -1,0 +1,42 @@
+{% extends "competition_base.html" %}
+
+{% block content %}
+<h3 class="comp-header">Zadaci</h3>
+
+{% if not has_started %}
+  <div class="alert">
+    Natjecanje još nije počelo!
+  </div>
+
+  {% if is_admin %}
+    <div class="alert">
+      Trenutačno vidljivo samo administratorima!
+    </div>
+  {% endif %}
+{% endif %}
+
+{% if has_started or is_admin %}
+
+  <table id="comp-tasks">
+    {% for name, category in categories.iteritems %}
+      <tr class="comp-task-category">
+        <td colspan="2">
+          {{ name }}
+        </td>
+      </tr>
+      {% for chain in category.chains %}
+        <tr class="comp-chain">
+          <td class="comp-chain-name">{{ chain.name }}</td>
+          <td class="comp-chain-tasks">
+            {% for ctask in chain.ctasks %}
+              <a class="comp-chain-task"
+                href="{{ ctask.get_absolute_url }}">{{ ctask.score }}</a>
+            {% endfor %}
+          </td>
+        </tr>
+      {% endfor %}
+    {% endfor %}
+  </table>
+{% endif %}
+
+{% endblock content %}

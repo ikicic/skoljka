@@ -1,0 +1,96 @@
+{% load compressed %}
+{% load competition_tags %}
+{% load tags_tags %}
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <script>is_authenticated={{ user.is_authenticated|lower }};</script>
+    {% compressed_css 'style' %}
+    {% compressed_js 'scripts' %}
+
+    {# TODO: move to /favicon.ico. More a server configuration problem, but still... #}
+    <link href="/static/images/favicon.ico" rel="shortcut icon">
+
+    <title>{% block title %}Školjka - Web arhiva zadataka iz matematike{% endblock %}</title>
+
+    <meta name="content-language" content="hr">
+    <meta name="viewport" content="width=device-width">
+  </head>
+<body>
+
+<div id="header" class="row">
+  <h1 id="sitename">
+    <a href="/">
+      <img src="/static/images/shell32.png" alt="Školjka"> Školjka
+    </a>
+    -
+    <a href="{% comp_url '' %}" id="competition-name">
+      {{ competition.name }}
+    </a>
+  </h1>
+
+  <div id="header-bar">
+    <div class="row-fluid">
+      <a id="hbar-collapse-sidebar" class="collapse-button btn"
+          data-target="sidebar" href="#">
+      </a>
+    </div>
+  </div>
+</div>
+
+<div id="site-container">
+  <div id="sidebar">
+    {% if user.is_authenticated %}
+      <div id="nav-hello-user">
+        Zdravo, {{ user|userlink:"first_name" }}!
+        {% if team %}
+          <br>
+          Tim: <a href="{% comp_url 'registration' %}">{{ team.name }}</a>
+        {% endif %}
+      </div>
+    {% endif %}
+    <ul class="nav nav-list">
+      <li class="nav-header">Izbornik</li>
+      <li><a href="{% comp_url '' %}">Početna</a></li>
+      {% if not team %}
+        <li><a href="{% comp_url 'registration' %}">Registracija</a></li>
+      {% endif %}
+      <li><a href="{% comp_url 'task' %}">Zadaci</a></li>
+      <li><a href="{% comp_url 'scoreboard' %}">Statistika</a></li>
+      {% if is_admin %}
+        <li class="nav-header">Admin</li>
+        <li><a href="{% comp_url 'chain' %}">Lanci</a></li>
+      {% endif %}
+    </ul>
+  </div>
+
+  <div id="content">
+      {% block content %}
+        <br><br><br>
+      {% endblock content %}
+  </div>
+</div>
+
+
+<div id="footer">
+  <span>
+    Školjka v0.8.1 © 2014 Ivica Kičić &amp; <a href="http://mnm.hr/">MNM</a>.
+  </span>
+  <span>
+    Hosting by
+    <a href="http://www.kset.org/">
+      <img src="/static/images/kset_logo_white.png" alt="KSET">
+    </a>
+  </span>
+  <span>
+    <a href="/tou/">Uvjeti korištenja</a>
+  </span>
+  <span>
+    <a href="{% comp_url 'rules' %}">Pravila natjecanja</a>
+  </span>
+</div>
+
+</body>
+</html>

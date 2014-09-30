@@ -63,10 +63,14 @@ def generate_get_query_string(context, *args, **kwargs):
 @register.filter(expects_localtime=True, is_safe=False)
 def localdate(value):
     """
-    Replacement for Django's date filter, which doesn't check locale, but uses
-    settings.DATE_FORMAT.
+    Replacement for Django's date filter. Uses locale setting, not
+    setting.DATE_FORMAT.
     """
     return date_format(value)
+
+@register.filter(expects_localtime=True, is_safe=False)
+def localdatetime(value):
+    return date_format(value, "DATETIME_FORMAT")
 
 #############################################
 # Form splitting/Fieldset templatetag

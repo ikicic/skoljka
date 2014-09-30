@@ -1,0 +1,42 @@
+{% extends "competition_base.html" %}
+
+{% load competition_tags %}
+
+{% block content %}
+
+<form action="{{ request.get_full_path }}" method="POST" id="comp-chain-edit">
+  {% csrf_token %}
+  {{ formset.management_form }}
+  <table class="kill-br split-form">
+    <tr class="split-form-row"><th colspan="2">Lanac</th></tr>
+    {{ chain_form.as_table }}
+
+    {% for form in formset %}
+      <tr class="split-form-row">
+        <th colspan="2">Zadatak #{{ forloop.counter }}</th>
+      </tr>
+      {{ form.as_table }}
+      <tr>
+        <td colspan="2">
+          <div class="outset">
+            {% if form.instance.pk %}
+              {{ form.instance.task.content.render }}
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <button type="button" class="btn comp-chain-edit-preview"
+              data-source="{{ form.text.auto_id }}">
+            Pregled
+          </button>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  <input type="submit" value="Pošalji" class="btn btn-primary">
+</form>
+
+{% endblock content %}
+

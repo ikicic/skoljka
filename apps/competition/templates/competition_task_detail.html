@@ -1,0 +1,25 @@
+{% extends "competition_base.html" %}
+
+{% block content %}
+
+{% if not has_started %}
+  <div class="alert">
+    Natjecanje još nije počelo!
+  </div>
+
+  {% if is_admin %}
+    <div class="alert">
+      Trenutačno vidljivo samo administratorima!
+    </div>
+  {% endif %}
+{% endif %}
+
+{% if has_started or is_admin %}
+  <div class="outset">
+    {{ task.content.render }}
+  </div>
+{% endif %}
+
+{% endblock content %}
+
+

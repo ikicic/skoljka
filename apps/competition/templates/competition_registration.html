@@ -1,0 +1,64 @@
+{% extends "competition_base.html" %}
+
+{% load competition_tags %}
+
+{% block content %}
+
+{% if not team and team_invitations %}
+  <h4>Pozivnice</h4>
+  <form action="{{ requst.get_full_path }}" method="POST" class="row">
+    {% csrf_token %}
+    <table id="comp-reg-invitations-table" class="span6">
+      <tr>
+        <th>Tim</th>
+        <th>Osnivač</th>
+        <th>&nbsp;</th>
+      </tr>
+      {% for team in team_invitations %}
+        <tr>
+          <td>{{ team.name }}</td>
+          <td>{{ team.author|userlink }}</td>
+          <td>
+            <button type="submit" name="invitation-accept" class="btn"
+                value="{{ team.id }}">
+              Prihvati
+            </button>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  </form>
+{% endif %}
+
+{% if team_form %}
+  {% if team %}
+    <h4>Uređivanje tima</h4>
+  {% else %}
+    <h4>Registracija tima</h4>
+  {% endif %}
+
+  {% reg_available_users %}
+
+  <form action="{{ request.get_full_path }}" method="POST" id="comp-reg-form">
+    {% csrf_token %}
+    <table id="comp-reg-table">
+      <tr>
+        <td>Ime tima:</td>
+        <td>{{ team_form.name }}</td>
+        <td>&nbsp;</td>
+      </tr>
+    </table>
+    {% reg_add_member_fields %}
+    <script>
+      reg_add_listeners();
+    </script>
+    <br>
+    <input type="submit" class="btn btn-primary" value="Pošalji">
+  </form>
+{% else %}
+  <div>
+    Team {{ team.name }}
+  </div>
+{% endif %}
+
+{% endblock content %}

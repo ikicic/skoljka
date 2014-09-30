@@ -1,0 +1,11 @@
+{% extends "competition_base.html" %}
+
+{% block content %}
+
+Serversko vrijeme: {{ current_time|localdatetime }}<br>
+<br>
+Registracija: {{ competition.registration_open_date|localdatetime }}<br>
+Početak: {{ competition.start_date|localdatetime }}<br>
+Kraj: {{ competition.end_date|localdatetime }}<br>
+
+{% endblock content %}

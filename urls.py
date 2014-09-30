@@ -18,6 +18,7 @@ urlpatterns = patterns('',
 
     (r'^', include('base.urls')),
 
+    (r'^', include('competition.urls')),
     (r'^folder/', include('folder.urls')),
     (r'^', include('mathcontent.urls')), # namjerno nije r'^mathcontent/'
     (r'^permissions/', include('permissions.urls')),

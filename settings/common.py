@@ -169,6 +169,7 @@ INSTALLED_APPS = (
 
     'activity',
     'base',
+    'competition',
     'folder',
     'mathcontent',
     'permissions',

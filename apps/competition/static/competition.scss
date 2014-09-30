@@ -1,0 +1,91 @@
+h3.comp-header {
+  margin-bottom: 10px;
+}
+
+textarea.comp-mathcontent-text {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+#chain-action-bar-right {
+  float: right;
+}
+
+#comp-reg-invitations-table {
+  text-align: center;
+}
+
+#comp-reg-form {
+  input, select {
+    margin: 3px;
+  }
+
+  margin: 0px;
+
+  > table {
+    margin-left: 10px;
+  }
+
+  .comp-reg-invitation-accepted {
+    background-color: #DFD;
+  }
+}
+
+#comp-scoreboard-table {
+  text-align: center;
+
+  th {
+    background-color: #f4f7f6 * 0.95;
+  }
+
+  td {
+    padding: 5px;
+  }
+
+  td:last-child {
+    font-weight: bold;
+  }
+}
+
+.comp-test-team {
+  color: #AAA;
+}
+
+.comp-my-team {
+  td {
+    background-color: #DDFFDF !important;
+  }
+}
+
+
+#comp-tasks {
+  td {
+    margin: 6px;
+  }
+}
+
+.comp-task-category {
+  font-size: 16px;
+  font-weight: bold;
+  color: #555;
+}
+
+$task-bubble-size: 26px;
+$task-bubble-distance: 30px;
+
+.comp-chain-name {
+  padding: 4px;
+  border-radius: $task-bubble-size / 2;
+  box-shadow: 0 1px 6px #777;
+}
+
+.comp-chain-task {
+  margin: 0px $task-bubble-distance;
+  border-radius: $task-bubble-size / 2;
+  line-height: $task-bubble-size;
+  height: $task-bubble-size;
+  width: $task-bubble-size;
+  box-shadow: 0 1px 6px #777;
+  display: inline-block;
+  text-align: center;
+}
