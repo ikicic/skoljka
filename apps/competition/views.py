@@ -14,7 +14,7 @@ from competition.decorators import competition_view
 from competition.forms import ChainForm, CompetitionTask, \
         BaseCompetitionTaskFormSet, TeamForm
 from competition.models import Chain, Competition, CompetitionTask, Team, \
-        TeamMember
+        TeamMember, Submission
 
 from datetime import datetime
 
@@ -120,15 +120,35 @@ def scoreboard(request, competition, data):
     data['teams'] = teams
     return data
 
-
 @competition_view()
 @response('competition_task_list.html')
 def task_list(request, competition, data):
-    all_ctasks = CompetitionTask.objects.filter(competition=competition) \
-            .select_related('task__content')
-    # TODO: time!
-    _all_chains = Chain.objects.filter(competition=competition)
-    all_chains_dict = {chain.id: chain for chain in _all_chains}
+    all_ctasks = list(CompetitionTask.objects.filter(competition=competition) \
+            .select_related('task__content'))
+    all_ctasks_dict = {ctask.id: ctask for ctask in all_ctasks}
+    all_chains = list(Chain.objects.filter(competition=competition))
+    all_chains_dict = {chain.id: chain for chain in all_chains}
+
+    for chain in all_chains:
+        chain.ctasks = []
+
+    # Use preloaded data for competition and chains
+    for ctask in all_ctasks:
+        chain = all_chains_dict[ctask.chain_id]
+        ctask.competition = competition
+        ctask.chain = chain
+        ctask.t_submission_count = 0
+        ctask.t_is_solved = False
+
+        chain.ctasks.append(ctask)
+
+    all_my_submissions = list(Submission.objects.filter(team=data['team']) \
+            .values_list('ctask_id', 'cache_is_correct'))
+    for ctask_id, is_correct in all_my_submissions:
+        ctask = all_ctasks_dict[ctask_id]
+        ctask.t_submission_count += 1
+        ctask.t_is_solved |= is_correct
+
 
     class Category(object):
         def __init__(self, name):
@@ -137,40 +157,75 @@ def task_list(request, competition, data):
 
     categories = {}
 
-    # Use preloaded data
-    for ctask in all_ctasks:
-        chain = all_chains_dict[ctask.chain_id]
-        ctask.competition = competition
-        ctask.chain = chain
-
-        if not hasattr(chain, 'ctasks'):
-            chain.ctasks = []
-        chain.ctasks.append(ctask)
-
-    for chain_id, chain in all_chains_dict.iteritems():
-        chain.competition = competition
+    for chain in all_chains:
+        chain.competition = competition # use preloaded object
 
         if chain.category not in categories:
             categories[chain.category] = Category(chain.category)
         categories[chain.category].chains.append(chain)
 
-    data.update({
-        'categories': categories
-    })
+        chain.ctasks.sort(key=lambda ctask: ctask.chain_position)
+        locked = False
+        for ctask in chain.ctasks:
+            ctask.t_is_locked = locked
+            if not ctask.t_is_solved \
+                    and ctask.t_submission_count < ctask.max_submissions:
+                locked = True
+
+    data['categories'] = categories
     return data
 
 
-@competition_view(registered=True)
+@competition_view()
 @response('competition_task_detail.html')
 def task_detail(request, competition, data, ctask_id):
     ctask = get_object_or_404(
-            CompetitionTask.objects.select_related('task', 'task__content'),
+            CompetitionTask.objects.select_related('chain', 'task',
+                'task__content'),
             competition=competition, id=ctask_id)
+    team = data['team']
+    if not data['is_admin']:
+        if not team or not data['has_started'] \
+                or ctask.unlock_minutes > data['minutes_passed']:
+            raise Http404
 
-    data.update({
-        'ctask': ctask,
-        'task': ctask.task
-    })
+    if team:
+        submissions = list(Submission.objects \
+                .filter(ctask=ctask, team=team) \
+                .order_by('date') \
+                .only('id', 'result', 'cache_is_correct'))
+        was_solved = any(x.cache_is_correct for x in submissions)
+
+        if request.method == 'POST':
+            if data['is_admin'] and 'delete-submission' in request.POST:
+                submission_id = int(request.POST['delete-submission'])
+                Submission.objects.filter(id=submission_id).delete()
+                submissions = filter(lambda x: x.id != submission_id,
+                        submissions) # Remove the deleted submission.
+
+            if 'result' in request.POST:
+                result = request.POST['result']
+                if result and len(submissions) < ctask.max_submissions:
+                    is_correct = ctask.check_result(result)
+                    submission = Submission(ctask=ctask, team=team,
+                            result=result, cache_is_correct=is_correct)
+                    submission.save()
+                    submissions.append(submission)
+
+            is_solved = any(x.cache_is_correct for x in submissions)
+            if was_solved != is_solved:
+                delta = int(is_solved) - int(was_solved)
+                team.cache_score += delta * ctask.score
+                team.save()
+        else:
+            is_solved = was_solved
+
+        data['submissions'] = submissions
+        data['is_solved'] = is_solved
+        data['submissions_left'] = ctask.max_submissions - len(submissions)
+
+
+    data['ctask'] = ctask
     return data
 
 
@@ -256,7 +311,7 @@ def chain_new(request, competition, data, chain_id=None):
                 instance.save()
 
             # Problems with existing formset... ahh, just refresh
-            return (request.get_full_path(), )
+            return (chain.get_absolute_url(), )
 
 
 

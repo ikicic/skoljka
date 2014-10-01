@@ -2,24 +2,87 @@
 
 {% block content %}
 
-{% if not has_started %}
-  <div class="alert">
-    Natjecanje još nije počelo!
-  </div>
+<div class="ctask-container">
+<h4 class="ctask-title">{{ ctask.chain.name }} #{{ ctask.chain_position }}</h4>
 
-  {% if is_admin %}
-    <div class="alert">
-      Trenutačno vidljivo samo administratorima!
+{% if ctask.unlock_minutes > minutes_passed and is_admin %}
+  <div class="alert">
+    Trenutačno vidljivo samo administratorima!
+  </div>
+{% endif %}
+
+{% if has_started and ctask.unlock_minutes <= minutes_passed or is_admin %}
+  <div class="outset ctask-content">
+    {{ ctask.task.content.render }}
+  </div>
+{% endif %}
+
+{% if team %} {# admins are able to see this page without having an team #}
+  {% if submissions %}
+    <h4>Poslana rješenja</h4>
+    {% if is_admin %}
+      <form action="{{ request.get_full_path }}" method="POST">
+      {% csrf_token %}
+    {% endif %}
+    <div class="row row-fix">
+      <div class="span5">
+        <table class="ctask-submissions-table table-striped">
+          {% for x in submissions %}
+            <tr class="{{ x.cache_is_correct|yesno:"ctask-correct," }}">
+              <td class="ctask-sub-number">#{{ forloop.counter }}</td>
+              <td class="ctask-sub-result">{{ x.result }}</td>
+              <td class="ctask-sub-correctness">
+                {% if x.cache_is_correct %}
+                  <span class="label label-success">Točno</span>
+                {% else %}
+                  <span class="label label-important">Netočno</span>
+                {% endif %}
+              </td>
+              {% if is_admin %}
+                <td>
+                  <button type="submit" name="delete-submission"
+                      value="{{ x.id }}" class="btn" title="Za administratore">
+                    X
+                  </button>
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </table>
+      </div>
     </div>
+    {% if is_admin %}
+      </form>
+    {% endif %}
+  {% endif %}
+
+  {% if submissions|length >= ctask.max_submissions and not is_solved %}
+    <div class="ctask-submissions-count">
+      Iskoristili ste sve pokušaje.
+    </div>
+  {% endif %}
+
+  {% if submissions|length < ctask.max_submissions and not is_solved %}
+    {% if not has_finished %}
+      <h4 class="ctask-submit">Slanje rješenja</h4>
+      <form action="{{ request.get_full_path }}" method="POST"
+          class="form-inline">
+        {% csrf_token %}
+        <div class="ctask-submissions-count">
+          Preostalo pokušaja: {{ submissions_left }}
+        </div>
+        <input type="text" name="result">
+        <input type="submit" value="Pošalji" class="btn btn-primary">
+      </form>
+    {% else %}
+      <div class="ctask-submit-already-finished">
+        Natjecanje je završilo!
+      </div>
+    {% endif %}
   {% endif %}
 {% endif %}
 
-{% if has_started or is_admin %}
-  <div class="outset">
-    {{ task.content.render }}
-  </div>
-{% endif %}
-
+</div>
 {% endblock content %}
 
 

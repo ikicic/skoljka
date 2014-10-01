@@ -37,6 +37,7 @@ def competition_view(permission=VIEW, registered=False, started=False):
             is_admin = EDIT in perm
             current_time = datetime.now()
             has_started = competition.start_date < current_time
+            has_finished = competition.end_date < current_time
 
             if started and not has_started: # sorry for weird naming...
                 return HttpResponseRedirect(competition.get_absolute_url())
@@ -61,9 +62,13 @@ def competition_view(permission=VIEW, registered=False, started=False):
             if registered and not team:
                 return HttpResponseRedirect(competition.get_absolute_url())
 
+            minutes_passed = \
+                    (current_time - competition.start_date).total_seconds() / 60
             data = {'competition': competition, 'team': team,
                     'team_invitations': team_invitations, 'is_admin': is_admin,
-                    'has_started': has_started, 'current_time': current_time}
+                    'has_started': has_started, 'has_finished': has_finished,
+                    'current_time': current_time,
+                    'minutes_passed': minutes_passed}
 
             return func(request, competition, data, *args, **kwargs)
 

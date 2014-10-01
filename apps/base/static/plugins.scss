@@ -20,8 +20,11 @@
 }
 
 .row {
+  /* FIXME: This causes conflict with normal usage of row class...
+      See .row-fix-margin class */
   margin-left: -20px !important; /* independent of browser size */
 }
+
 
 .table-striped tbody tr:nth-child(odd) td,
 .table-striped tbody tr:nth-child(odd) th {
@@ -44,11 +47,21 @@
 }
 
 /* this is kind of tricky, please find a better solution! */
+/* FIXME: what is this used for? don't modify default bootstrap behavior.
+ *        Look at .row-fix. */
 #content .btn-group,
 #content .row,
 #content .row-fluid {
   display: inline-block;
 }
+
+@media (max-width: $screen-xs-max) {
+  .row-fix {
+    margin: 0px!important;
+    display: block!important;
+  }
+}
+
 
 @media (max-width: $screen-xs-max) {
   /* hack for task list spacing */

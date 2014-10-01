@@ -54,3 +54,15 @@ def reg_add_member_fields(context):
             int(status == TeamMember.INVITATION_ACCEPTED)))
 
     return "<script>{}</script>".format(u''.join(output))
+
+@register.simple_tag()
+def ctask_bubble_class(ctask):
+    if ctask.t_is_locked:
+        return "ctask-bubble-locked"
+    if ctask.t_is_solved:
+        return "ctask-bubble-solved"
+    if ctask.t_submission_count == 0:
+        return "ctask-bubble-open"
+    if ctask.t_submission_count >= ctask.max_submissions:
+        return "ctask-bubble-failed"
+    return "ctask-bubble-tried"

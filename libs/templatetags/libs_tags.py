@@ -64,7 +64,7 @@ def generate_get_query_string(context, *args, **kwargs):
 def localdate(value):
     """
     Replacement for Django's date filter. Uses locale setting, not
-    setting.DATE_FORMAT.
+    settings.DATE_FORMAT.
     """
     return date_format(value)
 

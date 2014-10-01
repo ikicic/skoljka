@@ -53,7 +53,7 @@ class TeamMember(models.Model):
 class Chain(models.Model):
     competition = models.ForeignKey(Competition)
     name = models.CharField(max_length=40)
-    unlock_time = models.DateTimeField(blank=True, null=True, db_index=True)
+    unlock_minutes = models.IntegerField(default=0)
     category = models.CharField(blank=True, db_index=True, max_length=32)
 
     def __unicode__(self):
@@ -61,6 +61,7 @@ class Chain(models.Model):
 
     def get_absolute_url(self):
         return self.competition.get_absolute_url() + 'chain/{}/'.format(self.id)
+
 
 
 class CompetitionTask(models.Model):
@@ -77,8 +78,18 @@ class CompetitionTask(models.Model):
     def get_absolute_url(self):
         return self.competition.get_absolute_url() + 'task/{}/'.format(self.id)
 
+    def check_result(self, result):
+        return result == self.correct_result
+
+
+
 class Submission(models.Model):
-    competition = models.ForeignKey(Competition)
-    task = models.ForeignKey(Task)
+    ctask = models.ForeignKey(CompetitionTask)
     team = models.ForeignKey(Team)
+    date = models.DateTimeField(auto_now_add=True)
     result = models.CharField(max_length=255)
+    cache_is_correct = models.BooleanField()
+
+    def __unicode__(self):
+        return "ctask={} team={} {}".format(
+                self.ctask_id, self.team_id, self.date)

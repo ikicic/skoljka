@@ -1,3 +1,5 @@
+@import "main";
+
 h3.comp-header {
   margin-bottom: 10px;
 }
@@ -60,7 +62,7 @@ textarea.comp-mathcontent-text {
 
 #comp-tasks {
   td {
-    margin: 6px;
+    padding: 6px;
   }
 }
 
@@ -79,13 +81,82 @@ $task-bubble-distance: 30px;
   box-shadow: 0 1px 6px #777;
 }
 
-.comp-chain-task {
+.ctask-bubble {
   margin: 0px $task-bubble-distance;
   border-radius: $task-bubble-size / 2;
   line-height: $task-bubble-size;
   height: $task-bubble-size;
   width: $task-bubble-size;
-  box-shadow: 0 1px 6px #777;
   display: inline-block;
   text-align: center;
+}
+
+@mixin ctask-bubble-color($color) {
+  // box-shadow: 0 1px 6px (#777 * 0.8 + $color * 0.2);
+  box-shadow: 0 1px 6px $color / 2;
+  border: 2px $color * 0.8;
+  background-color: $color;
+  background: -webkit-gradient(linear, left top, left bottom,
+    from($color), to($color * 0.95 + white * 0.05));
+}
+
+.ctask-bubble-locked {
+  @include ctask-bubble-color(#CCC);
+}
+.ctask-bubble-open {
+  @include ctask-bubble-color(#FFF);
+}
+.ctask-bubble-tried {
+  @include ctask-bubble-color(#FD0);
+}
+.ctask-bubble-failed {
+  @include ctask-bubble-color(#D88);
+}
+.ctask-bubble-solved {
+  @include ctask-bubble-color(#AFA);
+}
+
+@media (min-width: $screen-sm-min) {
+  .ctask-container {
+    margin: 10px 15px;
+  }
+}
+
+.ctask-content {
+  margin: 8px 0px 23px 0px;
+}
+
+.ctask-submissions-count {
+  font-size: 12px;
+  color: gray;
+}
+
+.ctask-submissions-table {
+  width: 100%;
+
+  td {
+    padding: 8px;
+    line-height: 18px;
+  }
+  td.ctask-sub-number {
+    text-align: left;
+  }
+  td.ctask-sub-result {
+    text-align: center;
+  }
+  td.ctask-sub-correctness {
+    text-align: right;
+  }
+}
+
+.ctask-submit-already-finished {
+  color: gray;
+}
+
+h4.ctask-submit {
+  margin: 8px 0px;
+}
+
+tr.ctask-correct > td {
+  background-color: #dff0d8!important;
 }

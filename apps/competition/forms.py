@@ -37,7 +37,7 @@ class CompetitionTaskForm(ModelForm):
 class ChainForm(forms.ModelForm):
     class Meta:
         model = Chain
-        fields = ['name', 'category', 'unlock_time']
+        fields = ['name', 'category', 'unlock_minutes']
 
 class TeamForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

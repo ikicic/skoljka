@@ -7,7 +7,7 @@
 <form action="{{ request.get_full_path }}" method="POST" id="comp-chain-edit">
   {% csrf_token %}
   {{ formset.management_form }}
-  <table class="kill-br split-form">
+  <table class="split-form">
     <tr class="split-form-row"><th colspan="2">Lanac</th></tr>
     {{ chain_form.as_table }}
 
