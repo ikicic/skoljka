@@ -43,7 +43,7 @@ class UserCreationForm(forms.Form):
     tou = forms.BooleanField(required=True,
             label=mark_safe(_(u'Prihvaćam <a href="/tou/">uvjete korištenja</a>')),
             error_messages={
-                'required': 'Ako ne prihvaćate uvjete korištenja, ne možete koristiti Školjku.'
+                'required': 'Ukoliko ne prihvaćate uvjete korištenja, ne možete koristiti Školjku.'
             })
 
     def __init__(self, *args, **kwargs):
@@ -52,18 +52,24 @@ class UserCreationForm(forms.Form):
 
         super(UserCreationForm, self).__init__(*args, **kwargs)
 
+        self._set_extra_class(extra_class)
+
+        if placeholders:
+            self._set_placeholders()
+        else:
+            self.fields['username'].help_text = icon_help_text(
+                u'Molimo koristite oblik iprezime ili imeprezime.')
+
+    def _set_extra_class(self, extra_class):
         if extra_class:
             for x in self.fields.itervalues():
                 x.widget.attrs['class'] =   \
                     x.widget.attrs.get('class', '') + ' ' + extra_class
 
-        if placeholders:
-            for x in self.fields.itervalues():
-                if isinstance(x, forms.CharField):
-                    x.widget.attrs['placeholder'] = x.label
-        else:
-            self.fields['username'].help_text = icon_help_text(
-                u'Molimo koristite oblik iprezime ili imeprezime.')
+    def _set_placeholders(self):
+        for x in self.fields.itervalues():
+            if isinstance(x, forms.CharField):
+                x.widget.attrs['placeholder'] = x.label
 
     def clean_username(self):
         username = self.cleaned_data['username']

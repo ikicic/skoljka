@@ -1,8 +1,10 @@
 <form method="post" action="/accounts/register/" class="no-table">
   {% csrf_token %}
+  {{ form.non_field_errors }}
   {% for field in form %}
     {% if field.html_name != 'tou' %}
       {{ field }}
+      {{ field.errors }}
     {% endif %}
   {% endfor %}
 
@@ -10,5 +12,6 @@
     {{ form.tou.label|safe }}:
   </label>
   <input type="checkbox" id="id-tou" name="tou">
+  {{ form.tou.errors }}
   <button class="btn btn-primary" type="submit">Registriraj</button>
 </form>
