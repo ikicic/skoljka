@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count
 from django.forms.models import modelformset_factory
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 
 from mathcontent.models import MathContent
@@ -192,7 +193,7 @@ def task_detail(request, competition, data, ctask_id):
     team = data['team']
     if not data['is_admin']:
         if not team or not data['has_started'] \
-                or ctask.unlock_minutes > data['minutes_passed']:
+                or ctask.chain.unlock_minutes > data['minutes_passed']:
             raise Http404
 
     if team:
@@ -235,6 +236,7 @@ def task_detail(request, competition, data, ctask_id):
         data['submissions_left'] = ctask.max_submissions - len(submissions)
 
     data['ctask'] = ctask
+    data['chain'] = ctask.chain
     return data
 
 

@@ -5,25 +5,22 @@
 <div class="ctask-container">
 <h4 class="ctask-title">{{ ctask.chain.name }} #{{ ctask.chain_position }}</h4>
 
-{% if ctask.unlock_minutes > minutes_passed and is_admin %}
+{% if minutes_passed < chain.unlock_minutes and is_admin %}
   <div class="alert">
     Trenutačno vidljivo samo administratorima!
   </div>
 {% endif %}
 
-{% if task.t_is_locked %}
+{% if ctask.t_is_locked %}
   {# if not admin, the request would be rejected anyway #}
   <div class="alert">
     Nisu riješeni preduvjeti za ovaj zadatak, ali imate administratska prava.
   </div>
 {% endif %}
 
-
-{% if has_started and ctask.unlock_minutes <= minutes_passed or is_admin %}
-  <div class="outset ctask-content">
-    {{ ctask.task.content.render }}
-  </div>
-{% endif %}
+<div class="outset ctask-content">
+  {{ ctask.task.content.render }}
+</div>
 
 {% if team %} {# admins are able to see this page without having an team #}
   {% if submissions %}

@@ -79,6 +79,10 @@ class CompetitionTask(models.Model):
     chain = models.ForeignKey(Chain)
     chain_position = models.IntegerField(default=0)
 
+    def __unicode__(self):
+        return "CompetitionTask #{} comp={} task={}".format(
+                self.id, self.competition_id, self.task_id)
+
     def get_absolute_url(self):
         return self.competition.get_absolute_url() + 'task/{}/'.format(self.id)
 

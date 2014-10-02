@@ -2,7 +2,7 @@ from competition.models import Chain, CompetitionTask, Submission
 
 from collections import defaultdict
 
-def refresh_cache_score_for_teams(teams):
+def refresh_teams_cache_score(teams):
     teams = list(teams)
     if not teams:
         return
@@ -76,3 +76,19 @@ def check_single_chain(chain, team, preloaded_ctask=None):
     lock_ctasks_in_chain(ctasks)
 
     return ctasks
+
+def refresh_submissions_cache_is_correct(submissions, ctasks=None):
+    if ctasks is None:
+        ctask_ids = set(submission.ctask_id for submission in submissions)
+        ctasks = CompetitionTask.objects.filter(id__in=ctask_ids)
+
+    ctasks = list(ctasks)
+    ctasks_dict = {ctask.id: ctask for ctask in ctasks}
+
+    for submission in submissions:
+        ctask = ctasks_dict[submission.ctask_id]
+        old = submission.cache_is_correct
+        new = ctask.check_result(submission.result)
+        if old != new:
+            submission.cache_is_correct = new
+            submission.save()
