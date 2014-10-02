@@ -2,6 +2,7 @@ from django.contrib.auth.models import User, Group
 from django.db import models
 
 from permissions.models import BasePermissionsModel
+from post.generic import PostGenericRelation
 from task.models import Task
 
 class Competition(BasePermissionsModel):
@@ -18,6 +19,8 @@ class Competition(BasePermissionsModel):
     rules_template_filename = models.CharField(blank=True, max_length=255)
     url_path_prefix = models.CharField(blank=True, max_length=64)
 
+    posts = PostGenericRelation(placeholder="Poruka")
+
     def __unicode__(self):
         return self.name
 
@@ -32,6 +35,8 @@ class Team(models.Model):
     competition = models.ForeignKey(Competition)
     cache_score = models.IntegerField(default=0)
     is_test = models.BooleanField(default=False)
+
+    posts = PostGenericRelation(placeholder="Poruka")
 
     def __unicode__(self):
         return self.name

@@ -102,7 +102,7 @@ def rules(request, competition, data):
     return data
 
 
-@login_required()
+@login_required
 @competition_view()
 @response('competition_scoreboard.html')
 def scoreboard(request, competition, data):
@@ -336,3 +336,23 @@ def chain_new(request, competition, data, chain_id=None):
 
 def chain_edit(request, competition_id, chain_id):
     return chain_new(request, competition_id, chain_id=chain_id)
+
+
+@competition_view()
+@response('competition_notifications.html')
+def notifications(request, competition, data):
+    team = data['team']
+
+    posts = list(competition.posts.select_related('author', 'content'))
+    if team:
+        posts += list(team.posts.select_related('author', 'content'))
+
+    if data['is_admin']:
+        for post in posts:
+            post.cache_can_edit = True
+
+    posts.sort(key=lambda post: post.date_created, reverse=True)
+
+    data['posts'] = posts
+    data['target_container'] = team
+    return data

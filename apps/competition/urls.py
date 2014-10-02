@@ -24,14 +24,15 @@ def _make_patterns(*patterns):
 
 _patterns = _make_patterns(
     (r'$', 'homepage'),
+    (r'chain/$', 'chain_list'),
+    (r'chain/(?P<chain_id>\d+)/$', 'chain_edit'),
+    (r'chain/new/$', 'chain_new'),
+    (r'notifications/$', 'notifications'),
     (r'registration/$', 'registration'),
     (r'rules/$', 'rules'),
     (r'scoreboard/$', 'scoreboard'),
     (r'task/$', 'task_list'),
     (r'task/(?P<ctask_id>\d+)/$', 'task_detail'),
-    (r'chain/$', 'chain_list'),
-    (r'chain/new/$', 'chain_new'),
-    (r'chain/(?P<chain_id>\d+)/$', 'chain_edit'),
 )
 
 urlpatterns = patterns('competition.views', *_patterns)
