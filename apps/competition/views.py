@@ -135,9 +135,12 @@ def task_list(request, competition, data):
 
     for chain in all_chains:
         chain.ctasks = []
+        chain.competition = competition # use preloaded object
 
     for ctask in all_ctasks:
         chain = all_chains_dict[ctask.chain_id]
+        ctask.competition = competition # use preloaded object
+        ctask.chain = chain
         ctask.t_submission_count = 0
         ctask.t_is_solved = False
         chain.ctasks.append(ctask)
@@ -238,7 +241,10 @@ def task_detail(request, competition, data, ctask_id):
 @competition_view(permission=EDIT)
 @response('competition_chain_list.html')
 def chain_list(request, competition, data):
-    data['chains'] = Chain.objects.annotate(num_tasks=Count('competitiontask'))
+    chains = Chain.objects.annotate(num_tasks=Count('competitiontask'))
+    for chain in chains:
+        chain.competition = competition
+    data['chains'] = chains
     return data
 
 def _create_or_update_task(instance, user, competition, chain, index, text):

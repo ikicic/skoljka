@@ -138,7 +138,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 #    'sentry.client.middleware.Sentry404CatchMiddleware',
-#    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django_sorting.middleware.SortingMiddleware',
     'pagination.middleware.PaginationMiddleware',
 )
@@ -156,7 +156,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-#    'debug_toolbar',
+    'debug_toolbar',
     'django_sorting',
     'pagination',
     'pipeline',
