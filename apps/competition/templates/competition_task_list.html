@@ -28,7 +28,8 @@
       </tr>
       {% for chain in category.chains %}
         {# hidden visible only if admin #}
-        <tr class="comp-chain {{ chain.t_is_hidden|yesno:"comp-chain-hidden," }}">
+        <tr class="comp-chain
+            {% if chain.t_is_hidden and has_started %}comp-chain-hidden{% endif %}">
           <td class="comp-chain-name">{{ chain.name }}</td>
           <td class="comp-chain-tasks">
             {% comment %}
