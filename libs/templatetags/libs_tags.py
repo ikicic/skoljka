@@ -69,6 +69,10 @@ def localdate(value):
     return date_format(value)
 
 @register.filter(expects_localtime=True, is_safe=False)
+def localtime(value):
+    return date_format(value, "TIME_FORMAT")
+
+@register.filter(expects_localtime=True, is_safe=False)
 def localdatetime(value):
     return date_format(value, "DATETIME_FORMAT")
 
@@ -103,3 +107,7 @@ class FieldSetNode(template.Node):
 
 # Form splitting/Fieldset templatetag {END}
 #############################################
+
+@register.simple_tag
+def percentage(part, total):
+    return "{}%".format(100. * part / total)

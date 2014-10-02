@@ -66,6 +66,9 @@
   </div>
 
   <div id="content">
+      <div id="server-time">
+        Vrijeme: {{ current_time|date:"H:i" }}
+      </div>
       {% block content %}
         <br><br><br>
       {% endblock content %}

@@ -15,6 +15,7 @@ from competition.forms import ChainForm, CompetitionTask, \
         BaseCompetitionTaskFormSet, TeamForm
 from competition.models import Chain, Competition, CompetitionTask, Team, \
         TeamMember, Submission
+from competition.utils import check_single_chain, lock_ctasks_in_chain
 
 from datetime import datetime
 
@@ -132,11 +133,8 @@ def task_list(request, competition, data):
     for chain in all_chains:
         chain.ctasks = []
 
-    # Use preloaded data for competition and chains
     for ctask in all_ctasks:
         chain = all_chains_dict[ctask.chain_id]
-        ctask.competition = competition
-        ctask.chain = chain
         ctask.t_submission_count = 0
         ctask.t_is_solved = False
 
@@ -154,26 +152,30 @@ def task_list(request, competition, data):
         def __init__(self, name):
             self.name = name
             self.chains = []
+            self.t_is_hidden = None
 
     categories = {}
 
     for chain in all_chains:
-        chain.competition = competition # use preloaded object
+        chain.t_is_hidden = data['minutes_passed'] < chain.unlock_minutes
 
-        if chain.category not in categories:
-            categories[chain.category] = Category(chain.category)
-        categories[chain.category].chains.append(chain)
+        if not chain.t_is_hidden or data['is_admin']:
+            if chain.category not in categories:
+                categories[chain.category] = Category(chain.category)
+            categories[chain.category].chains.append(chain)
 
-        chain.ctasks.sort(key=lambda ctask: ctask.chain_position)
-        locked = False
-        for ctask in chain.ctasks:
-            ctask.t_is_locked = locked
-            if not ctask.t_is_solved \
-                    and ctask.t_submission_count < ctask.max_submissions:
-                locked = True
+        chain.ctasks.sort(key=lambda ctask: (ctask.chain_position, ctask.id))
+        lock_ctasks_in_chain(chain.ctasks)
+
+    if data['is_admin']:
+        for category in categories.itervalues():
+            category.t_is_hidden = \
+                    all(chain.t_is_hidden for chain in category.chains)
 
     data['categories'] = categories
+    data['max_chain_length'] = max(len(chain.ctasks) for chain in all_chains)
     return data
+
 
 
 @competition_view()
@@ -195,6 +197,10 @@ def task_detail(request, competition, data, ctask_id):
                 .order_by('date') \
                 .only('id', 'result', 'cache_is_correct'))
         was_solved = any(x.cache_is_correct for x in submissions)
+        ctasks = check_single_chain(ctask.chain, team, preloaded_ctask=ctask)
+
+        if ctask.t_is_locked and not data['is_admin']:
+            raise Http404 # Bye
 
         if request.method == 'POST':
             if data['is_admin'] and 'delete-submission' in request.POST:
@@ -217,6 +223,7 @@ def task_detail(request, competition, data, ctask_id):
                 delta = int(is_solved) - int(was_solved)
                 team.cache_score += delta * ctask.score
                 team.save()
+
         else:
             is_solved = was_solved
 
@@ -246,7 +253,7 @@ def _create_or_update_task(instance, user, competition, chain, index, text):
         task.content.text = text
         task.content.save()
 
-    task.name = "{} - {} #{}".format(competition.name, chain.name, index + 1)
+    task.name = u"{} - {} #{}".format(competition.name, chain.name, index + 1)
     task.source = competition.name
     task.save()
 
@@ -278,7 +285,7 @@ def chain_new(request, competition, data, chain_id=None):
     from competition.forms import CompetitionTaskForm
     CompetitionTaskFormSet = modelformset_factory(CompetitionTask,
             form=CompetitionTaskForm, formset=BaseCompetitionTaskFormSet,
-            extra=3, can_order=True, can_delete=True)
+            extra=5, can_order=True, can_delete=True)
 
     POST = request.POST if request.method == 'POST' else None
     chain_form = ChainForm(data=POST, instance=chain)

@@ -20,19 +20,46 @@
 {% if has_started or is_admin %}
   <table id="comp-tasks">
     {% for name, category in categories.iteritems %}
-      <tr class="comp-task-category">
+      {# hidden visible only if admin #}
+      <tr class="comp-category {{ category.t_is_hidden|yesno:"comp-category-hidden," }}">
         <td colspan="2">
           {{ name }}
         </td>
       </tr>
       {% for chain in category.chains %}
-        <tr class="comp-chain">
+        {# hidden visible only if admin #}
+        <tr class="comp-chain {{ chain.t_is_hidden|yesno:"comp-chain-hidden," }}">
           <td class="comp-chain-name">{{ chain.name }}</td>
           <td class="comp-chain-tasks">
+            {% comment %}
             {% for ctask in chain.ctasks %}
               <a class="ctask-bubble {% ctask_bubble_class ctask %}"
                 href="{{ ctask.get_absolute_url }}"></a>
             {% endfor %}
+            {% endcomment %}
+            <div class="progress"
+                style="width: {% percentage chain.ctasks|length max_chain_length %}">
+              {% for ctask in chain.ctasks %}
+                {% if not ctask.t_is_locked or is_admin %}
+                  <a class="ctask {% ctask_class ctask %}"
+                      style="width: {% percentage 1 chain.ctasks|length %}"
+                      href="{{ ctask.get_absolute_url }}"></a>
+                {% else %}
+                  <div class="ctask {% ctask_class ctask %}"
+                      style="width: {% percentage 1 chain.ctasks|length %}">
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </td>
+          <td class="comp-chain-bonus">
+            {% if chain.bonus_score %}
+              <div class="badge {% chain_badge_class chain %}">
+                +{{ chain.bonus_score }}
+              </div>
+            {% else %}
+              &nbsp;
+            {% endif %}
           </td>
         </tr>
       {% endfor %}

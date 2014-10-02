@@ -4,6 +4,13 @@ h3.comp-header {
   margin-bottom: 10px;
 }
 
+#server-time {
+  // padding: 0 0 1em 12px;
+  color: gray;
+  font-size: 12px;
+  float: right;
+}
+
 textarea.comp-mathcontent-text {
   box-sizing: border-box;
   width: 100%;
@@ -35,6 +42,7 @@ textarea.comp-mathcontent-text {
 
 #comp-scoreboard-table {
   text-align: center;
+  width: 100%;
 
   th {
     background-color: #f4f7f6 * 0.95;
@@ -62,59 +70,74 @@ textarea.comp-mathcontent-text {
 
 #comp-tasks {
   td {
-    padding: 6px;
+    padding: 8px;
   }
 }
 
-.comp-task-category {
+.comp-category {
   font-size: 16px;
   font-weight: bold;
   color: #555;
 }
 
-$task-bubble-size: 26px;
+.comp-category-hidden {
+  opacity: .5;
+}
+
+$task-bubble-size: 30px;
 $task-bubble-distance: 30px;
 
-.comp-chain-name {
-  padding: 4px;
-  border-radius: $task-bubble-size / 2;
-  box-shadow: 0 1px 6px #777;
+tr.comp-chain-hidden {
+  opacity: .5;
 }
 
-.ctask-bubble {
-  margin: 0px $task-bubble-distance;
-  border-radius: $task-bubble-size / 2;
-  line-height: $task-bubble-size;
-  height: $task-bubble-size;
-  width: $task-bubble-size;
-  display: inline-block;
-  text-align: center;
+td.comp-chain-name {
+  color: gray;
+  font-weight: bold;
+  text-align: right;
+  white-space: nowrap;
 }
 
-@mixin ctask-bubble-color($color) {
-  // box-shadow: 0 1px 6px (#777 * 0.8 + $color * 0.2);
-  box-shadow: 0 1px 6px $color / 2;
-  border: 2px $color * 0.8;
-  background-color: $color;
-  background: -webkit-gradient(linear, left top, left bottom,
-    from($color), to($color * 0.95 + white * 0.05));
+td.comp-chain-tasks {
+  width: 100%;
+
+  .progress {
+    margin-bottom: 0px;
+  }
+
+  .ctask {
+    display: block;
+    float: left;
+    height: 18px;
+  }
 }
 
-.ctask-bubble-locked {
-  @include ctask-bubble-color(#CCC);
+td.comp-chain-bonus {
+  text-align: right;
 }
-.ctask-bubble-open {
-  @include ctask-bubble-color(#FFF);
+
+.progress .bar + .bar {
+  box-shadow: inset 1px 0 0 rgba(0,0,0,.15), inset 0 -1px 0 rgba(0,0,0,.15);
 }
-.ctask-bubble-tried {
-  @include ctask-bubble-color(#FD0);
+
+.progress .ctask-failed {
+  @include gradient-vertical(#ee5f5b, #c43c35);
 }
-.ctask-bubble-failed {
-  @include ctask-bubble-color(#D88);
+.progress .ctask-solved {
+  @include gradient-vertical(#62c462, #57a957);
 }
-.ctask-bubble-solved {
-  @include ctask-bubble-color(#AFA);
+.progress .ctask-open {
+  @include gradient-vertical(#5bc0de, #339bb9);
+  // @include gradient-vertical(white, white);
 }
+.progress .ctask-tried {
+  @include gradient-vertical(lighten($orange, 15%), $orange);
+}
+.progress .ctask-locked {
+}
+
+
+
 
 @media (min-width: $screen-sm-min) {
   .ctask-container {

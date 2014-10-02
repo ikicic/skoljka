@@ -55,6 +55,7 @@ class Chain(models.Model):
     name = models.CharField(max_length=40)
     unlock_minutes = models.IntegerField(default=0)
     category = models.CharField(blank=True, db_index=True, max_length=32)
+    bonus_score = models.IntegerField(default=1)
 
     def __unicode__(self):
         return self.name

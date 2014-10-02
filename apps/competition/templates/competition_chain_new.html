@@ -4,6 +4,28 @@
 
 {% block content %}
 
+<div>
+  <h4>Upute</h4><br>
+  <p>Kategorija je bilo kakav string. Po unesenim kategorijama automatski će se
+    grupirati lanci u pregledu zadataka.</p>
+  <p><i>Unlock minutes</i> predstavlja broj minuta nakon početka natjecanja
+    nakon kojih lanac postaje vidljiv. Npr. ako želite da se zadatak vidi tek
+    nakon 2 sata, stavite 120. Administratorima će takvi lanci biti prikazani
+    uvijek, ali transparentno.</p>
+
+  <p><i>Bonus score</i> predstavlja dodatne bodove koje natjecateljski tim
+    dobije ako u potpunosti riješi sve zadatke iz lanca.</p>
+
+  <p>Za mijenjenje rasporeda, unesite odgovarajuće redne brojeve u polja
+    <i>Redoslijed</i>. Napomena: Postavljanje redoslijeda je trenutačno bugovito.
+    Dodavanje novih zadataka u postojeći lanac će vjerojatno poremetiti poredak.
+    </p>
+
+  <p>Za brisanje, označite odgovarajuće polje <i>Izbriši</i>, te pritisnite
+    <i>Pošalji</i>.</p>
+  </p>
+</div>
+
 <form action="{{ request.get_full_path }}" method="POST" id="comp-chain-edit">
   {% csrf_token %}
   {{ formset.management_form }}

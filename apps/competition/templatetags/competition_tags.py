@@ -66,3 +66,24 @@ def ctask_bubble_class(ctask):
     if ctask.t_submission_count >= ctask.max_submissions:
         return "ctask-bubble-failed"
     return "ctask-bubble-tried"
+
+@register.simple_tag()
+def ctask_class(ctask):
+    if ctask.t_is_locked:
+        return "ctask-locked"
+    if ctask.t_is_solved:
+        return "bar ctask-solved"
+    if ctask.t_submission_count == 0:
+        return "bar ctask-open"
+    if ctask.t_submission_count >= ctask.max_submissions:
+        return "bar ctask-failed"
+    return "bar ctask-tried"
+
+@register.simple_tag()
+def chain_badge_class(chain):
+    if all(ctask.t_is_solved for ctask in chain.ctasks):
+        return "badge-success"
+    if any(ctask.t_submission_count >= ctask.max_submissions \
+            for ctask in chain.ctasks):
+        return ""
+    return "badge-info"

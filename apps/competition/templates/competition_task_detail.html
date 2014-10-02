@@ -11,6 +11,14 @@
   </div>
 {% endif %}
 
+{% if task.t_is_locked %}
+  {# if not admin, the request would be rejected anyway #}
+  <div class="alert">
+    Nisu riješeni preduvjeti za ovaj zadatak, ali imate administratska prava.
+  </div>
+{% endif %}
+
+
 {% if has_started and ctask.unlock_minutes <= minutes_passed or is_admin %}
   <div class="outset ctask-content">
     {{ ctask.task.content.render }}
