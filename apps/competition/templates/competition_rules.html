@@ -1,0 +1,12 @@
+{% extends "competition_base.html" %}
+
+{% block content %}
+
+<h3 class="comp-header">Pravila natjecanja</h3>
+
+{% if competition.rules_template_filename %}
+  {% include competition.rules_template_filename %}
+{% endif %}
+
+{% endblock content %}
+

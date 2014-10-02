@@ -46,7 +46,7 @@ def competition_view(permission=VIEW, registered=False, started=False):
             team_member_entries = list(TeamMember.objects   \
                     .select_related('team', 'team__author') \
                     .filter(team__competition_id=competition.id,
-                        member=request.user))
+                        member_id=request.user.id))
             if team_member_entries:
                 accepted = [x for x in team_member_entries
                     if x.invitation_status == TeamMember.INVITATION_ACCEPTED]

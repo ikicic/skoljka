@@ -18,3 +18,8 @@ $ ->
     else
       icon.attr 'class', 'icon-chevron-up'
     $('#' + target_id).toggle()
+
+  $('.auto-toggler').click (event) ->
+    event.preventDefault()
+    target_id = $(@).attr 'data-target'
+    $('#' + target_id).toggle()

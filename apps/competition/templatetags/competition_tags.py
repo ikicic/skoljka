@@ -4,6 +4,7 @@ from django.utils.html import mark_safe
 
 from competition.models import TeamMember
 
+
 register = template.Library()
 
 @register.simple_tag(takes_context=True)
@@ -25,6 +26,7 @@ def reg_available_users(context):
     available = list(User.objects.filter(is_active=True) \
             .exclude(id__in=in_teams) \
             .values_list('username', 'id'))
+    available.sort()
 
     return mark_safe(u'<script>reg_available_users={{{}}};</script>'.format(
             u','.join(u'"{}":{}'.format(username, user_id) for
@@ -53,7 +55,7 @@ def reg_add_member_fields(context):
             k + 2, member_name, member_id or 0,
             int(status == TeamMember.INVITATION_ACCEPTED)))
 
-    return "<script>{}</script>".format(u''.join(output))
+    return u"<script>{}</script>".format(u''.join(output))
 
 @register.simple_tag()
 def ctask_bubble_class(ctask):
@@ -87,3 +89,21 @@ def chain_badge_class(chain):
             for ctask in chain.ctasks):
         return ""
     return "badge-info"
+
+@register.simple_tag()
+def legend_ctask(_class, text):
+    return mark_safe(
+            u'<tr>' \
+                u'<td width="100%">' \
+                    u'<div class="progress"><div class="{}"></div></div>' \
+                u'</td>' \
+                u'<td>{}</td>' \
+            u'</tr>'.format(_class, text))
+
+@register.simple_tag()
+def legend_chain(_class, text):
+    return mark_safe(
+            u'<tr>' \
+                u'<td width="100%"><span class="badge {}">+1</span></td>' \
+                u'<td>{}</td>' \
+            u'</tr>'.format(_class, text))

@@ -105,3 +105,7 @@ FOLDER_PATH_MIGRATIONS = [
 ]
 
 DISABLE_PREF_COOKIES = True
+
+COMPETITION_URLS = { # no leading slashes!
+    # 1: 'marinada/',
+}

@@ -66,6 +66,28 @@
       {% endfor %}
     {% endfor %}
   </table>
+
+  <div id="ctask-legend-container">
+    <a href="#" title="Prikaži/sakrij legendu" class="auto-toggler"
+        data-target="ctask-legend">Legenda</a>
+    <br>
+    <div id="ctask-legend" style="display: none;">
+      <div class="row row-fix">
+        <div class="span5">
+          <table>
+            {% legend_ctask "bar ctask-solved" "Uspješno riješen zadatak" %}
+            {% legend_ctask "bar ctask-failed" "Iskorišteni svi pokušaji" %}
+            {% legend_ctask "bar ctask-open" "Otvoren zadatak" %}
+            {% legend_ctask "bar ctask-tried" "Zadatak s neuspjelim pokušajem" %}
+            {% legend_ctask "ctask-locked" "Zaključan zadatak" %}
+            {% legend_chain "badge-success" "Osvojen bonus" %}
+            {% legend_chain "" "Bonus više nije dostupan" %}
+            {% legend_chain "badge-info" "Bonus dostupan, ali nije osvojen" %}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endif %}
 
 {% endblock content %}

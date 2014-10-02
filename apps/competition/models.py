@@ -14,12 +14,15 @@ class Competition(BasePermissionsModel):
     max_team_size = models.IntegerField(default=3)
     admin_group = models.ForeignKey(Group, blank=True, null=True)
     automatic_task_tags = models.CharField(blank=True, max_length=64)
+    description_template_filename = models.CharField(blank=True, max_length=255)
+    rules_template_filename = models.CharField(blank=True, max_length=255)
+    url_path_prefix = models.CharField(blank=True, max_length=64)
 
     def __unicode__(self):
         return self.name
 
     def get_absolute_url(self):
-        return '/competition/{}/'.format(self.id)
+        return self.url_path_prefix or '/competition/{}/'.format(self.id)
 
 
 

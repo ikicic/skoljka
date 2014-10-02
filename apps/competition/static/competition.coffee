@@ -20,7 +20,7 @@ _reg_member_field_tr = (index, username, user_id, accepted) ->
       </td>
       <td>
         <button type="button" class="btn comp-reg-cancel-invitation">
-          Cancel
+          Odustani
         </button>
       </td>
     """
@@ -33,9 +33,7 @@ _reg_member_field_tr = (index, username, user_id, accepted) ->
           id="member#{index}_manual" name="member#{index}_manual">
       </td>
       <td>
-        <button type="button" class="btn comp-reg-invite">
-          Invite
-        </button>
+        <button type="button" class="btn comp-reg-invite">Pozovi</button>
       </td>
     """
 

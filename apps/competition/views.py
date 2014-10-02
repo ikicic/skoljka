@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count
 from django.forms.models import modelformset_factory
@@ -50,13 +51,11 @@ def _update_team_invitations(team, team_form):
             TeamMember.objects.create(team=team, member=user, member_name=name,
                     invitation_status=status)
 
+
+@login_required
 @competition_view()
 @response('competition_registration.html')
 def registration(request, competition, data):
-    if not data['is_admin'] \
-            and datetime.now() < competition.registration_open_date:
-        return HttpResponseRedirect(competition.get_absolute_url())
-
     team = data.get('team', None)
     edit = team is not None
     team_form = None
@@ -80,6 +79,8 @@ def registration(request, competition, data):
             if not edit:
                 team.competition = competition
                 team.author = request.user
+                if data['is_admin']:
+                    team.is_test = True
             team.save()
 
             _update_team_invitations(team, team_form)
@@ -100,6 +101,7 @@ def rules(request, competition, data):
     return data
 
 
+@login_required()
 @competition_view()
 @response('competition_scoreboard.html')
 def scoreboard(request, competition, data):
@@ -121,6 +123,7 @@ def scoreboard(request, competition, data):
     data['teams'] = teams
     return data
 
+
 @competition_view()
 @response('competition_task_list.html')
 def task_list(request, competition, data):
@@ -137,7 +140,6 @@ def task_list(request, competition, data):
         chain = all_chains_dict[ctask.chain_id]
         ctask.t_submission_count = 0
         ctask.t_is_solved = False
-
         chain.ctasks.append(ctask)
 
     all_my_submissions = list(Submission.objects.filter(team=data['team']) \
@@ -175,7 +177,6 @@ def task_list(request, competition, data):
     data['categories'] = categories
     data['max_chain_length'] = max(len(chain.ctasks) for chain in all_chains)
     return data
-
 
 
 @competition_view()
@@ -223,14 +224,12 @@ def task_detail(request, competition, data, ctask_id):
                 delta = int(is_solved) - int(was_solved)
                 team.cache_score += delta * ctask.score
                 team.save()
-
         else:
             is_solved = was_solved
 
         data['submissions'] = submissions
         data['is_solved'] = is_solved
         data['submissions_left'] = ctask.max_submissions - len(submissions)
-
 
     data['ctask'] = ctask
     return data
@@ -319,8 +318,6 @@ def chain_new(request, competition, data, chain_id=None):
 
             # Problems with existing formset... ahh, just refresh
             return (chain.get_absolute_url(), )
-
-
 
     data.update({
         'chain_form': chain_form,

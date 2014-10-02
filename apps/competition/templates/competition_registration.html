@@ -4,61 +4,85 @@
 
 {% block content %}
 
-{% if not team and team_invitations %}
-  <h4>Pozivnice</h4>
-  <form action="{{ requst.get_full_path }}" method="POST" class="row">
-    {% csrf_token %}
-    <table id="comp-reg-invitations-table" class="span6">
-      <tr>
-        <th>Tim</th>
-        <th>Osnivač</th>
-        <th>&nbsp;</th>
-      </tr>
-      {% for team in team_invitations %}
-        <tr>
-          <td>{{ team.name }}</td>
-          <td>{{ team.author|userlink }}</td>
-          <td>
-            <button type="submit" name="invitation-accept" class="btn"
-                value="{{ team.id }}">
-              Prihvati
-            </button>
-          </td>
-        </tr>
-      {% endfor %}
-    </table>
-  </form>
+{% if competition.registration_open_date > current_time %}
+  <h3 class="comp-header">Registracija</h3>
+  <div class="alert">
+    Registracije još nisu otvorene!
+  </div>
+
+  {% if is_admin %}
+    <div class="alert">
+      Trenutačno vidljivo samo administratorima!
+    </div>
+  {% endif %}
 {% endif %}
 
-{% if team_form %}
-  {% if team %}
-    <h4>Uređivanje tima</h4>
-  {% else %}
-    <h4>Registracija tima</h4>
+{% if competition.registration_open_date <= current_time or is_admin %}
+  {% if not team and team_invitations %}
+    <h3 class="comp-header">Pozivnice</h3>
+    <form action="{{ requst.get_full_path }}" method="POST" class="row">
+      {% csrf_token %}
+      <table id="comp-reg-invitations-table" class="span6">
+        <tr>
+          <th>Tim</th>
+          <th>Osnivač</th>
+          <th>&nbsp;</th>
+        </tr>
+        {% for team in team_invitations %}
+          <tr>
+            <td>{{ team.name }}</td>
+            <td>{{ team.author|userlink }}</td>
+            <td>
+              <button type="submit" name="invitation-accept" class="btn"
+                  value="{{ team.id }}">
+                Prihvati
+              </button>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    </form>
   {% endif %}
 
-  {% reg_available_users %}
+  {% if team_form %}
+    {% if team %}
+      <h3 class="comp-header">Uređivanje tima</h3>
+    {% else %}
+      <h3 class="comp-header">Registracija tima</h3>
+    {% endif %}
 
-  <form action="{{ request.get_full_path }}" method="POST" id="comp-reg-form">
-    {% csrf_token %}
-    <table id="comp-reg-table">
-      <tr>
-        <td>Ime tima:</td>
-        <td>{{ team_form.name }}</td>
-        <td>&nbsp;</td>
-      </tr>
-    </table>
-    {% reg_add_member_fields %}
-    <script>
-      reg_add_listeners();
-    </script>
-    <br>
-    <input type="submit" class="btn btn-primary" value="Pošalji">
-  </form>
-{% else %}
-  <div>
-    Team {{ team.name }}
-  </div>
-{% endif %}
+    <div class="instructions">
+      <p>Unesite željeno ime tima te imena članova ako postoje.</p>
+      <p>Ukoliko za druge članove želite povezati njihove korisničke račune,
+        pritisnite <i>Pozovi</i> i odaberite odgovarajuće korisničko ime.
+        Pozvani korisnici će se morati prijaviti na svoj račun te prihvatiti
+        pozivnicu (na ovom mjestu).</p>
+      <p>Na kraju pritisnite <i>Pošalji</i>.</p>
+    </div>
+
+    {% reg_available_users %}
+
+    <form action="{{ request.get_full_path }}" method="POST" id="comp-reg-form">
+      {% csrf_token %}
+      <table id="comp-reg-table">
+        <tr>
+          <td>Ime tima:</td>
+          <td>{{ team_form.name }}</td>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      {% reg_add_member_fields %}
+      <script>
+        reg_add_listeners();
+      </script>
+      <br>
+      <input type="submit" class="btn btn-primary" value="Pošalji">
+    </form>
+  {% else %}
+    <div>
+      Team {{ team.name }}
+    </div>
+  {% endif %}
+{% endif %} {# registration open or is_admin #}
 
 {% endblock content %}
