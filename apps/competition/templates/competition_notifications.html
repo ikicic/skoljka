@@ -1,0 +1,61 @@
+{% extends "competition_base.html" %}
+
+{% load competition_tags %}
+
+{% block content %}
+
+<h3 class="comp-header">Obavijesti</h3>
+
+<div class="instructions">
+  <p>Ovdje su prikazane obavijesti u vezi zadataka ili samog natjecanja.</p>
+  <p>Također, odavde možete poslati svoja pitanja ili poruke administatorima.
+    Vaše poruke neće biti vidljive drugim timovima.</p>
+</div>
+
+{% for post in posts %}
+  <div class="outset outset-margin post mc-hover-area" id="post{{ post.pk }}">
+    {% if user.is_authenticated %}
+      <div class="post-action">
+        {# Again... no whitespace here... #}
+        <a href="#post" class="post-reply" id="pr{{ post.pk }}">Odgovori</a>{% if post.cache_can_edit %}<br>
+          <a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">Uredi</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="post-info">
+      {{ post.author|userlink }}, {{ post.date_created }}
+    </div>
+
+    {{ post.content.render }}
+
+    {% if post.date_created != post.last_edit_time %}
+      <div class="post-last-edit">
+        Zadnja promjena: {{ post.last_edit_time }}
+      </div>
+    {% endif %}
+  </div>
+{% empty %}
+  <i>Nema obavijesti.</i><br><br>
+{% endfor %}
+
+{% if user.is_authenticated %}
+  <div id="post">
+    <form action="/post/add/" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="object_id" value="{{ target_container.pk }}">
+      <input type="hidden" name="content_type_id"
+             value="{{ target_container.posts.get_content_type_id }}">
+      <input type="hidden" name="post_reply_id" value="">
+      <input type="hidden" name="post_redirect" value="{{ request.path }}">
+      {{ target_container.posts.get_post_form.as_p }}
+      <input type="submit" class="btn btn-primary" value="Pošalji poruku">
+      <span id="reply-to-info" style="display:none;">
+        Odgovor na <a href="#">poruku</a>.
+        <a href="#post" class="icon-remove"></a>
+      </span>
+    </form>
+  </div>
+{% endif %}
+
+{% endblock content %}
