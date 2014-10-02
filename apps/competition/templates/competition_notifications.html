@@ -8,8 +8,10 @@
 
 <div class="instructions">
   <p>Ovdje su prikazane obavijesti u vezi zadataka ili samog natjecanja.</p>
-  <p>Također, odavde možete poslati svoja pitanja ili poruke administatorima.
-    Vaše poruke neće biti vidljive drugim timovima.</p>
+  {% if team %}
+    <p>Također, odavde možete poslati svoja pitanja ili poruke administatorima.
+      Vaše poruke neće biti vidljive drugim timovima.</p>
+  {% endif %}
 </div>
 
 {% for post in posts %}
@@ -39,7 +41,7 @@
   <i>Nema obavijesti.</i><br><br>
 {% endfor %}
 
-{% if user.is_authenticated %}
+{% if team %}
   <div id="post">
     <form action="/post/add/" method="post">
       {% csrf_token %}
