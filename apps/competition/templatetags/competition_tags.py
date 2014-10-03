@@ -22,7 +22,8 @@ def reg_available_users(context):
             .exclude(member_id__isnull=True) \
             .values_list('member_id', flat=True)
 
-    in_teams = list(in_teams) + [1] # exclude 'arhiva' account
+    # exclude 'arhiva' account and the current user
+    in_teams = list(in_teams) + [1, context['user'].id]
     available = list(User.objects.filter(is_active=True) \
             .exclude(id__in=in_teams) \
             .values_list('username', 'id'))

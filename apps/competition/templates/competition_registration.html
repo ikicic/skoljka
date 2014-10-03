@@ -26,6 +26,11 @@
   </div>
 {% endif %}
 
+{% if 'created' in request.GET %}
+  <div class="alert alert-success">
+    Registracija uspješna!
+  </div>
+{% endif %}
 
 {% if competition.registration_open_date <= current_time or is_admin %}
   {% if not has_finished and not team and team_invitations %}
@@ -73,6 +78,7 @@
 
     <form action="{{ request.get_full_path }}" method="POST" id="comp-reg-form">
       {% csrf_token %}
+      {{ team_form.name.errors }}
       <table id="comp-reg-table">
         <tr>
           <td>Ime tima:</td>

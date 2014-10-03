@@ -75,6 +75,8 @@ def registration(request, competition, data):
                 member=request.user)
         team_member.invitation_status = TeamMember.INVITATION_ACCEPTED
         team_member.save()
+        TeamMember.objects.filter(member=request.user) \
+                .exclude(id=team_member.id).delete()
         data['team'] = team
         data['team_invitations'] = []
 
@@ -82,6 +84,7 @@ def registration(request, competition, data):
         team_form = TeamForm(request.POST, instance=team,
                 max_team_size=competition.max_team_size)
         if team_form.is_valid():
+            old_team = team
             team = team_form.save(commit=False)
             if not edit:
                 team.competition = competition
@@ -93,6 +96,8 @@ def registration(request, competition, data):
             _update_team_invitations(team, team_form)
 
             # Need to refresh data from the decorator...
+            if not old_team:
+                return (request.get_full_path() + '?created=1', )
             return (request.get_full_path(), )
 
     if team_form is None and (not team or team.author_id == request.user.id):
@@ -226,7 +231,7 @@ def task_detail(request, competition, data, ctask_id):
                         submissions) # Remove the deleted submission.
 
             if 'result' in request.POST:
-                result = request.POST['result']
+                result = request.POST['result'].strip()
                 if result and len(submissions) < ctask.max_submissions:
                     is_correct = ctask.check_result(result)
                     submission = Submission(ctask=ctask, team=team,

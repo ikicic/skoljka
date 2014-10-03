@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.forms.models import BaseModelFormSet, ModelForm
 
 from competition.models import Chain, CompetitionTask, Team, TeamMember
@@ -77,6 +78,9 @@ class TeamForm(forms.ModelForm):
         for key, value in extra_fields:
             self.fields[key] = value
 
+        self.fields['name'].error_messages['required'] = \
+                u"Ime tima ne mo\u017ee biti prazno."
+
 
     def _clean_member(self, index):
         manual = self.cleaned_data.get('member{}_manual'.format(index))
@@ -88,6 +92,14 @@ class TeamForm(forms.ModelForm):
         if manual and manual.strip():
             return (manual.strip(), None)
         return None
+
+    def clean_name(self):
+        name = self.cleaned_data['name'].strip()
+        if Team.objects.filter(name__iexact=name) \
+                .exclude(id=self.instance.id).exists():
+            raise ValidationError(
+                    u"Uneseno ime tima ve\u0107 iskori\u0161teno!")
+        return name
 
     def clean(self):
         members = []
