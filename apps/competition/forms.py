@@ -78,6 +78,7 @@ class TeamForm(forms.ModelForm):
         for key, value in extra_fields:
             self.fields[key] = value
 
+        self.fields['name'].widget.attrs['class'] = 'span3'
         self.fields['name'].error_messages['required'] = \
                 u"Ime tima ne mo\u017ee biti prazno."
 

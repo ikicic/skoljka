@@ -6,38 +6,34 @@
 
 {% if competition.registration_open_date > current_time %}
   <h3 class="comp-header">Registracija</h3>
-  <div class="alert">
-    Registracije još nisu otvorene!
-  </div>
+  <div class="alert">Registracije još nisu otvorene! </div>
 
   {% if is_admin %}
-    <div class="alert">
-      Trenutačno vidljivo samo administratorima!
-    </div>
+    <div class="alert">Trenutačno vidljivo samo administratorima! </div>
   {% endif %}
 {% endif %}
 
 {% if has_finished %}
   <div class="alert">
     Natjecanje je završilo!
-    {% if not team %}
-      Registracije su zatvorene!
-    {% endif %}
+    {% if not team %}Registracije su zatvorene! {% endif %}
   </div>
 {% endif %}
 
 {% if 'created' in request.GET %}
-  <div class="alert alert-success">
-    Registracija uspješna!
-  </div>
+  <div class="alert alert-success">Registracija uspješna! </div>
+{% endif %}
+
+{% if 'changes' in request.GET %}
+  <div class="alert alert-success">Izmjene spremljene!</div>
 {% endif %}
 
 {% if competition.registration_open_date <= current_time or is_admin %}
   {% if not has_finished and not team and team_invitations %}
     <h3 class="comp-header">Pozivnice</h3>
-    <form action="{{ requst.get_full_path }}" method="POST" class="row">
+    <form action="{{ requst.get_full_path }}" method="POST" class="row row-fix">
       {% csrf_token %}
-      <table id="comp-reg-invitations-table" class="span6">
+      <table id="creg-invitations-table" class="span6">
         <tr>
           <th>Tim</th>
           <th>Osnivač</th>
@@ -67,25 +63,29 @@
     {% endif %}
 
     <div class="instructions">
-      <p>Unesite željeno ime tima te imena članova ako postoje.</p>
-      <p>Ukoliko za druge članove želite povezati njihove korisničke račune,
-        pritisnite <i>Pozovi</i> i odaberite odgovarajuće korisničko ime.
-        Nakon što pritisnite <i>Pošalji</i>, pozvani korisnici će se morati
-        prijaviti na svoj račun te prihvatiti pozivnicu (na ovom mjestu).</p>
+      <p>U prvo polje unesite željeno ime tima.</p>
+      <p>Drugi i treće polje predstavljaju imena drugih članova tima. Ukoliko
+        želite samo navesti njihova imena, unesite ih u ta polja.</p>
+      <p>Ako pak oni imaju korisnički račun, možete ih povezati pritiskom na
+        tipku <i>Pozovi</i>. Nakon što odaberete odgovarajuća korisnička imena
+        i pritisnite <i>Pošalji</i>, odabranim korisnicima će se poslati
+        pozivnice za priključivanje vašem timu.</p>
+      <p>Ti korisnici prihvaćaju pozivnice na način da se prijave na vlastiti
+        račun te na istoj ovoj stranici pritisnu na <i>Prihvati</i>.</p>
     </div>
 
     {% reg_available_users %}
 
-    <form action="{{ request.get_full_path }}" method="POST" id="comp-reg-form">
+    <form action="{{ request.get_full_path }}" method="POST" id="creg-form">
       {% csrf_token %}
       {{ team_form.name.errors }}
-      <table id="comp-reg-table">
-        <tr>
-          <td>Ime tima:</td>
-          <td>{{ team_form.name }}</td>
-          <td>&nbsp;</td>
-        </tr>
-      </table>
+      <div id="creg-table">
+        <div>
+          <div>Ime tima:</div>
+          <div>{{ team_form.name }}</div>
+          {# <div>&nbsp;</div> #}
+        </div>
+      </div>
       {% reg_add_member_fields %}
       <script>
         reg_add_listeners();

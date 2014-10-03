@@ -1,0 +1,22 @@
+{% extends "competition_base.html" %}
+
+{% block content %}
+
+<h3 class="comp-header">Registracija</h3>
+
+<div class="alert alert-success">
+  Registracija tima uspješna!
+</div>
+
+{% if has_started %}
+  <p>Zadaci i bodovna lista su dostupni u izborniku lijevo. Ugodno rješavanje
+    zadataka!</p>
+{% else %}
+  <p>Nakon što započne natjecanje, zadaci i bodovna lista će biti dostupni u
+    izborniku lijevo.</p>
+{% endif %}
+
+<p>Ukoliko želite naknadno uređivati tim, kliknite na ime tima u izborniku
+  lijevo.</p>
+
+{% endblock content %}

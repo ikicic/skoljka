@@ -83,6 +83,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.request",
     "solution.context_processors.solution_constants",
     "userprofile.context_processors.userprofile",
+    "base.context_processors.add_constants",
 )
 
 # List of callables that know how to import templates from various sources.

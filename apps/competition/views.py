@@ -95,10 +95,13 @@ def registration(request, competition, data):
 
             _update_team_invitations(team, team_form)
 
-            # Need to refresh data from the decorator...
             if not old_team:
-                return (request.get_full_path() + '?created=1', )
-            return (request.get_full_path(), )
+                TeamMember.objects.filter(member=request.user) \
+                        .exclude(team=team).delete()
+                data['team'] = team
+                return ('competition_registration_complete.html', data)
+            # Need to refresh data from the decorator...
+            return (request.get_full_path() + '?changes=1', )
 
     if team_form is None and (not team or team.author_id == request.user.id):
         team_form = TeamForm(instance=team,

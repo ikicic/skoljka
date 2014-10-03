@@ -1,51 +1,53 @@
 window.reg_add_member_field = ->
-  $('#comp-reg-table').append(
-    _reg_member_field_tr arguments...
+  $('#creg-table').append(
+    _reg_member_field_row arguments...
   )
 
 
-_reg_member_field_tr = (index, username, user_id, accepted) ->
-  accepted = if accepted \
-    then 'class="comp-reg-invitation-accepted" title="Prihvaćeno"' \
-    else ''
+_reg_member_field_row = (index, username, user_id, accepted) ->
+  if accepted
+    extra = 'class="span3 creg-invitation-accepted" title="Prihvaćeno"'
+  else
+    extra = 'class="span3"'
+  cancel_or_delete = if accepted then "Izbriši" else "Odustani"
 
-  output = """<td>Član ##{index}</td>"""
+  output = """<div>Član ##{index}:</div>"""
   if user_id
     output += """
-      <td>
+      <div>
         <input type="hidden" value="#{user_id}"
           id="member#{index}_user_id" name="member#{index}_user_id">
-        <input type="text" value="#{username}" disabled="disabled" #{accepted}
+        <input type="text" value="#{username}" disabled="disabled" #{extra}
           id="member#{index}_manual" name="member#{index}_manual">
-      </td>
-      <td>
-        <button type="button" class="btn comp-reg-cancel-invitation">
-          Odustani
+      </div>
+      <div>
+        <button type="button" class="btn creg-cancel-invitation">
+          #{cancel_or_delete}
         </button>
-      </td>
+      </div>
     """
   else
     output += """
-      <td>
+      <div>
         <input type="hidden" value=""
           id="member#{index}_user_id" name="member#{index}_user_id">
-        <input type="text" value="#{username}"
+        <input type="text" value="#{username}" #{extra}
           id="member#{index}_manual" name="member#{index}_manual">
-      </td>
-      <td>
-        <button type="button" class="btn comp-reg-invite">Pozovi</button>
-      </td>
+      </div>
+      <div>
+        <button type="button" class="btn creg-invite">Pozovi</button>
+      </div>
     """
 
-  return """<tr data-index="#{index}">#{output}</tr>"""
+  """<div class="creg-table-row" data-index="#{index}">#{output}</div>"""
 
 
 window.reg_add_listeners = ->
-  $('#comp-reg-form').on 'click', '.comp-reg-cancel-invitation', ->
-    tr = $(@).closest 'tr'
-    tr.replaceWith _reg_member_field_tr tr.attr('data-index'), '', '', false
+  $('#creg-form').on 'click', '.creg-cancel-invitation', ->
+    row = $(@).closest '.creg-table-row'
+    row.replaceWith _reg_member_field_row row.attr('data-index'), '', '', false
 
-  $('#comp-reg-form').on 'click', '.comp-reg-invite', ->
+  $('#creg-form').on 'click', '.creg-invite', ->
     options = [
       '<option value="">Odaberite korisnika</option>'
       '<option value="">---------</option>'
@@ -54,32 +56,33 @@ window.reg_add_listeners = ->
       options.push """<option value="#{value}">#{key}</option>"""
     options = options.join()
 
-    tr = $(@).closest 'tr'
-    index = tr.attr 'data-index'
+    row = $(@).closest '.creg-table-row'
+    index = row.attr 'data-index'
     username_field = $ "#member#{index}_manual"
     username_field.val ""
     username_field.prop 'disabled', true
 
     $(@).replaceWith """
-      <select class="comp-reg-select-member">#{options}</select>
+      <select class="creg-select-member span3">#{options}</select>
+      <button type="button" class="btn creg-cancel-invitation">Odustani</button>
     """
 
-  $('#comp-reg-form').on 'change', '.comp-reg-select-member', ->
-    tr = $(@).closest 'tr'
-    index = tr.attr 'data-index'
+  $('#creg-form').on 'change', '.creg-select-member', ->
+    row = $(@).closest '.creg-table-row'
+    index = row.attr 'data-index'
     selected = $(@).find 'option:selected'
 
     return unless selected.val()
 
-    tr.replaceWith _reg_member_field_tr(
-      tr.attr('data-index'), selected.html(), selected.val(), false
+    row.replaceWith _reg_member_field_row(
+      row.attr('data-index'), selected.html(), selected.val(), false
     )
 
 $ ->
   $('#comp-chain-edit').on 'click', '.comp-chain-edit-preview', ->
-    tr = $(@).closest 'tr'
+    row = $(@).closest '.creg-table-row'
     text = $('#' + $(@).attr('data-source')).val()
-    target = tr.prev().find 'div.outset'
+    target = row.prev().find 'div.outset'
     $.get(
       '/ajax/mathcontent/preview/'
       text: text

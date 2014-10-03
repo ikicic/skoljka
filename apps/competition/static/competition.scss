@@ -62,11 +62,11 @@ textarea.comp-mathcontent-text {
   background-color: #f8f6f4 !important;
 }
 
-#comp-reg-invitations-table {
+#creg-invitations-table {
   text-align: center;
 }
 
-#comp-reg-form {
+#creg-form {
   input, select {
     margin: 3px;
   }
@@ -77,8 +77,36 @@ textarea.comp-mathcontent-text {
     margin-left: 10px;
   }
 
-  .comp-reg-invitation-accepted {
+  .creg-invitation-accepted {
     background-color: #DFD;
+  }
+}
+
+#creg-table {
+  display: table;
+
+  > div {
+    display: table-row;
+
+    > div:first-child {
+      text-align: right;
+    }
+
+    > div {
+      display: table-cell;
+    }
+  }
+}
+
+@media (max-width: $screen-xs-max) {
+  #creg-table {
+    > div {
+      margin-bottom: 10px;
+    }
+    &, div {
+      display: block !important;
+      text-align: left !important;
+    }
   }
 }
 
