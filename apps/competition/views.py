@@ -64,7 +64,6 @@ def registration(request, competition, data):
     edit = team is not None
     team_form = None
 
-
     if not team and request.method == 'POST' \
             and 'invitation-accept' in request.POST:
         team = get_object_or_404(Team, id=request.POST['invitation-accept'])
@@ -89,13 +88,14 @@ def registration(request, competition, data):
 
             _update_team_invitations(team, team_form)
 
+            # Need to refresh data from the decorator...
+            return (request.get_full_path(), )
+
     if team_form is None and (not team or team.author_id == request.user.id):
         team_form = TeamForm(instance=team,
                 max_team_size=competition.max_team_size)
 
-    data.update({
-        'team_form': team_form,
-    })
+    data['team_form'] = team_form
     return data
 
 
