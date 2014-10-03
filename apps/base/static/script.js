@@ -95,6 +95,7 @@ function set_reply(id) {
   $('input[name="post_reply_id"]').val(id);
   $('#reply-to-info').attr('style', id ? 'display:inline;' : 'display:none;');
 };
+window.set_reply = set_reply;
 
 $(function(){
   /* Post reply */
@@ -105,7 +106,7 @@ $(function(){
     quote($(this).closest('.post').find('.mc'));
 
     var a = $('#reply-to-info a:first')
-    a.html('komentar #' + id)
+    a.html(a.html().split(' ')[0] + ' #' + id)
     a.attr('href', '#post' + id)
   });
 

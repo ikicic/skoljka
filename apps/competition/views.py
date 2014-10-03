@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404
 from mathcontent.models import MathContent
 from permissions.constants import VIEW, EDIT
 from permissions.models import ObjectPermission
+from post.forms import PostsForm
+from post.models import Post
 from skoljka.libs.decorators import response
 from tags.utils import add_task_tags
 from task.models import Task
@@ -17,7 +19,8 @@ from competition.forms import ChainForm, CompetitionTask, \
         BaseCompetitionTaskFormSet, TeamForm
 from competition.models import Chain, Competition, CompetitionTask, Team, \
         TeamMember, Submission
-from competition.utils import check_single_chain, lock_ctasks_in_chain
+from competition.utils import check_single_chain, get_teams_for_user_ids, \
+        lock_ctasks_in_chain
 
 from datetime import datetime
 
@@ -343,16 +346,45 @@ def chain_edit(request, competition_id, chain_id):
 def notifications(request, competition, data):
     team = data['team']
 
+    # This could return None as a member, but that's not a problem.
+    member_ids = set(TeamMember.objects.filter(team=team) \
+            .values_list('member_id', flat=True))
+
     posts = list(competition.posts.select_related('author', 'content'))
     if team:
-        posts += list(team.posts.select_related('author', 'content'))
-
-    if data['is_admin']:
-        for post in posts:
-            post.cache_can_edit = True
+        team_posts = list(team.posts.select_related('author', 'content'))
+        for post in team_posts:
+            post.t_team = team
+        posts += team_posts
 
     posts.sort(key=lambda post: post.date_created, reverse=True)
 
     data['posts'] = posts
     data['target_container'] = team
+    data['team_member_ids'] = member_ids
+    return data
+
+@competition_view(permission=EDIT)
+@response('competition_notifications_admin.html')
+def notifications_admin(request, competition, data):
+    team_ct = ContentType.objects.get_for_model(Team)
+
+    posts = list(competition.posts.select_related('author', 'content'))
+    team_posts = list(Post.objects.filter(content_type=team_ct) \
+            .select_related('author', 'content'))
+    user_id_to_team = \
+            get_teams_for_user_ids([post.author_id for post in team_posts])
+    for post in team_posts:
+        post.t_team = user_id_to_team[post.author_id]
+
+    posts += team_posts
+    posts.sort(key=lambda post: post.date_created, reverse=True)
+
+    data.update({
+        'competition_ct': ContentType.objects.get_for_model(Competition),
+        'post_form': PostsForm(placeholder="Poruka"),
+        'posts': posts,
+        'team_ct': team_ct,
+        'teams': Team.objects.all(),
+    })
     return data

@@ -1,5 +1,12 @@
 @import "main";
 
+div.comp-post {
+  // This could be also used for #post
+  button, select {
+    margin-bottom: 0px;
+  }
+}
+
 h3.comp-header {
   margin-bottom: 10px;
 }
@@ -49,6 +56,10 @@ textarea.comp-mathcontent-text {
 
 #chain-action-bar-right {
   float: right;
+}
+
+.comp-global-notification {
+  background-color: #f8f6f4 !important;
 }
 
 #comp-reg-invitations-table {

@@ -59,7 +59,7 @@ class Task(BasePermissionsModel):
     source = models.CharField(max_length=200, blank=True, verbose_name='Izvor')
 
     search_cache_elements = GenericRelation(SearchCacheElement)
-    posts = PostGenericRelation()
+    posts = PostGenericRelation(placeholder="Komentar")
     tags = TaggableManager(blank=True)
     quality_rating = RatingField(**QUALITY_RATING_ATTRS)
     difficulty_rating = RatingField(**DIFFICULTY_RATING_ATTRS)

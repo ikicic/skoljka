@@ -28,6 +28,7 @@ _patterns = _make_patterns(
     (r'chain/(?P<chain_id>\d+)/$', 'chain_edit'),
     (r'chain/new/$', 'chain_new'),
     (r'notifications/$', 'notifications'),
+    (r'notifications/admin/$', 'notifications_admin'),
     (r'registration/$', 'registration'),
     (r'rules/$', 'rules'),
     (r'scoreboard/$', 'scoreboard'),

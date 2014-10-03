@@ -1,0 +1,68 @@
+{% extends "competition_base.html" %}
+
+{% load competition_tags %}
+
+{% block content %}
+
+<h3 class="comp-header">Obavijesti - admin</h3>
+
+{% for post in posts %}
+  <div class="outset outset-margin post mc-hover-area
+          {% if not post.t_team %}comp-global-notification{% endif %}"
+      id="post{{ post.pk }}">
+    <div class="post-action">
+      {% if post.t_team %}
+        <a href="#post" class="post-reply" id="pr{{ post.pk }}"
+            data-team-id="{{ post.t_team.id }}">Odgovori</a><br>
+      {% endif %}
+      <a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">Uredi</a>
+    </div>
+
+    <div class="post-info">
+      {{ post.author|userlink }}{% if post.t_team %}
+        (Tim: {{ post.t_team.name }}){% endif %}, {{ post.date_created }}
+    </div>
+
+    {{ post.content.render }}
+
+    {% if post.date_created != post.last_edit_time %}
+      <div class="post-last-edit">
+        Zadnja promjena: {{ post.last_edit_time }}
+      </div>
+    {% endif %}
+  </div>
+{% empty %}
+  <i>Nema obavijesti.</i><br><br>
+{% endfor %}
+
+<div id="post" class="comp-post">
+  <script>
+    competition_id = {{ competition.id }};
+    competition_ct = {{ competition_ct.id }};
+    team_ct = {{ team_ct.id }};
+  </script>
+  <form action="/post/add/" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="object_id" id="post-object-id"
+        value="{{ competition.id }}">
+    <input type="hidden" name="content_type_id" id="post-content-type-id"
+        value="{{ competition_ct.id }}">
+    <input type="hidden" name="post_reply_id" value="">
+    <input type="hidden" name="post_redirect" value="{{ request.path }}">
+    {{ post_form.as_p }}
+    <input type="submit" class="btn btn-primary" value="Pošalji poruku">
+    <select name="comp-post-target" id="comp-post-target">
+      <option value="">Globalno</option>
+      {% for team in teams %}
+        <option value="{{ team.id }}">{{ team.name }}</option>
+      {% endfor %}
+    </select>
+    <span id="reply-to-info" style="display:none;">
+      Odgovor na <a href="#">poruku</a>.
+      <a href="#post" class="icon-remove"></a>
+    </span>
+  </form>
+</div>
+
+{% endblock content %}
+

@@ -15,18 +15,14 @@
 </div>
 
 {% for post in posts %}
-  <div class="outset outset-margin post mc-hover-area" id="post{{ post.pk }}">
-    {% if user.is_authenticated %}
-      <div class="post-action">
-        {# Again... no whitespace here... #}
-        <a href="#post" class="post-reply" id="pr{{ post.pk }}">Odgovori</a>{% if post.cache_can_edit %}<br>
-          <a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">Uredi</a>
-        {% endif %}
-      </div>
-    {% endif %}
-
+  <div class="outset outset-margin post mc-hover-area
+          {% if not post.t_team %}comp-global-notification{% endif %}"
+      id="post{{ post.pk }}">
     <div class="post-info">
-      {{ post.author|userlink }}, {{ post.date_created }}
+      {% if post.t_team and post.author_id in team_member_ids %}
+        {{ post.author|userlink }},
+      {% endif %}
+      {{ post.date_created }}
     </div>
 
     {{ post.content.render }}

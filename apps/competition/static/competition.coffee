@@ -87,5 +87,16 @@ $ ->
         target.html html
     )
 
+  $('#comp-post-target').change ->
+    # value == 0 stands for competition (global), value != 0 for team
+    value = $(@).val()
+    $('#post-content-type-id').val if value then team_ct else competition_ct
+    $('#post-object-id').val if value then value else competition_id
+    set_reply ''
 
+  $('.post-reply').click ->
+    team_id = $(@).attr 'data-team-id'
+    $('#post-content-type-id').val team_ct
+    $('#post-object-id').val team_id
+    $('#comp-post-target').val team_id # This won't trigger change event
 

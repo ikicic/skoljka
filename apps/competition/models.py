@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User, Group
 from django.db import models
 
+from permissions.constants import EDIT
 from permissions.models import BasePermissionsModel
 from post.generic import PostGenericRelation
 from task.models import Task
@@ -27,6 +28,9 @@ class Competition(BasePermissionsModel):
     def get_absolute_url(self):
         return self.url_path_prefix or '/competition/{}/'.format(self.id)
 
+    def can_send_post(self, user): # PostGenericRelation
+        return self.user_has_perm(user, EDIT)
+
 
 
 class Team(models.Model):
@@ -40,6 +44,12 @@ class Team(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def can_send_post(self, user): # PostGenericRelation
+        # Only members and and admins can post messages to team.posts.
+        if TeamMember.objects.filter(member=user, team=self).exists():
+            return True
+        return self.competition.user_has_perm(user, EDIT)
 
 
 

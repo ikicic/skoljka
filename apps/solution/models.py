@@ -132,7 +132,7 @@ class Solution(ModelEx):
     content = models.ForeignKey(MathContent, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True, db_index=True)
     last_edit_time = models.DateTimeField(auto_now=True)  # only for submitted
-    posts = PostGenericRelation()
+    posts = PostGenericRelation(placeholder="Komentar")
 
     status = models.IntegerField(default=SolutionStatus.BLANK)
 

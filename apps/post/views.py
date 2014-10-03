@@ -10,28 +10,33 @@ from activity import action as _action
 from mathcontent.forms import MathContentForm
 from post.models import Post
 
+from skoljka.libs.decorators import require
+
 import sys
 
 #TODO: bad request
 @login_required
+@require(post=['post_reply_id', 'post_redirect', 'object_id',
+        'content_type_id'])
 def add_post(request):
-    if request.method != 'POST':
-        raise Http404
-    if any(x not in request.POST for x in ['post_reply_id', 'post_redirect',
-            'object_id', 'content_type_id']):
-        raise Http404
-
     reply_to_id = request.POST['post_reply_id']
     reply_to = None if not reply_to_id else get_object_or_404(
         Post.objects.select_related('author'), pk=reply_to_id)
 
     math_content_form = MathContentForm(request.POST)
     if math_content_form.is_valid():
-        content_type = get_object_or_404(ContentType, pk=request.POST['content_type_id'])
+        content_type = get_object_or_404(ContentType,
+                pk=request.POST['content_type_id'])
         try:
-            object = content_type.get_object_for_this_type(pk=request.POST['object_id'])
+            object = content_type.get_object_for_this_type(
+                    pk=request.POST['object_id'])
         except:
             raise Http404('Object does not exist.')
+
+        if hasattr(object, 'can_send_post'):
+            if not object.can_send_post(request.user):
+                return HttpResponseForbidden(
+                        "You are not allowed to send messages to this object!")
 
         object_author = getattr(object, 'author', None)
         object_author_id = None
@@ -39,18 +44,15 @@ def add_post(request):
         if object_author:
             object_author_id = object_author.id
             try:
-                object_author_group = Group.objects.get(name=object_author.username)
+                object_author_group = Group.objects.get(
+                        name=object_author.username)
             except Group.DoesNotExist:
                 pass
                 # TODO: report error
 
         content = math_content_form.save()
-        post = Post.objects.create(
-                content_object = object,
-                author = request.user,
-                last_edit_by = request.user,
-                content = content
-            )
+        post = Post.objects.create(content_object=object, author=request.user,
+                last_edit_by=request.user, content=content)
         post.save()
 
         if reply_to:
