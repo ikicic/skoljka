@@ -8,7 +8,7 @@ from competition.models import Competition, TeamMember
 from datetime import datetime
 from functools import wraps
 
-def competition_view(permission=VIEW, registered=False, started=False):
+def competition_view(permission=VIEW):
     """
     Decorator for competition views. Reads the Competition object and checks if
     the given user has the permission to view it.
@@ -39,28 +39,26 @@ def competition_view(permission=VIEW, registered=False, started=False):
             has_started = competition.start_date < current_time
             has_finished = competition.end_date < current_time
 
-            if started and not has_started: # sorry for weird naming...
-                return HttpResponseRedirect(competition.get_absolute_url())
-
             team = team_invitations = None
-            team_member_entries = list(TeamMember.objects   \
-                    .select_related('team', 'team__author') \
-                    .filter(team__competition_id=competition.id,
-                        member_id=request.user.id))
-            if team_member_entries:
-                accepted = [x for x in team_member_entries
-                    if x.invitation_status == TeamMember.INVITATION_ACCEPTED]
-                if len(accepted) > 1:
-                    raise Exception("User accepted more than one invitation.")
-                if len(accepted) == 1:
-                    team = accepted[0].team
-                else:
-                    team_invitations = [x.team for x in team_member_entries
-                        if x.invitation_status ==
-                            TeamMember.INVITATION_UNANSWERED]
+            if request.user.is_authenticated():
+                team_member_entries = list(TeamMember.objects   \
+                        .select_related('team', 'team__author') \
+                        .filter(team__competition_id=competition.id,
+                            member_id=request.user.id))
 
-            if registered and not team:
-                return HttpResponseRedirect(competition.get_absolute_url())
+                if team_member_entries:
+                    accepted = [x for x in team_member_entries
+                        if x.invitation_status ==
+                                TeamMember.INVITATION_ACCEPTED]
+                    if len(accepted) > 1:
+                        raise Exception(
+                                "User accepted more than one invitation.")
+                    if len(accepted) == 1:
+                        team = accepted[0].team
+                    else:
+                        team_invitations = [x.team for x in team_member_entries
+                            if x.invitation_status ==
+                                TeamMember.INVITATION_UNANSWERED]
 
             minutes_passed = \
                     (current_time - competition.start_date).total_seconds() / 60
