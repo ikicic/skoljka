@@ -13,6 +13,7 @@ from post.models import Post
 from skoljka.libs.decorators import response
 from tags.utils import add_task_tags
 from task.models import Task
+from userprofile.forms import AuthenticationFormEx
 
 from competition.decorators import competition_view
 from competition.forms import ChainForm, CompetitionTask, \
@@ -56,10 +57,13 @@ def _update_team_invitations(team, team_form):
                     invitation_status=status)
 
 
-@login_required
 @competition_view()
 @response('competition_registration.html')
 def registration(request, competition, data):
+    if not request.user.is_authenticated():
+        data['form'] = AuthenticationFormEx()
+        return 'competition_registration_login.html', data
+
     team = data.get('team', None)
     edit = team is not None
     team_form = None
@@ -96,6 +100,8 @@ def registration(request, competition, data):
                 max_team_size=competition.max_team_size)
 
     data['team_form'] = team_form
+    data['team_members'] = \
+            TeamMember.objects.filter(team=team).select_related('member')
     return data
 
 
@@ -128,6 +134,7 @@ def scoreboard(request, competition, data):
     return data
 
 
+@login_required
 @competition_view()
 @response('competition_task_list.html')
 def task_list(request, competition, data):
@@ -205,7 +212,8 @@ def task_detail(request, competition, data, ctask_id):
                 .order_by('date') \
                 .only('id', 'result', 'cache_is_correct'))
         was_solved = any(x.cache_is_correct for x in submissions)
-        ctasks = check_single_chain(ctask.chain, team, preloaded_ctask=ctask)
+        ctasks = check_single_chain(ctask.chain, team, preloaded_ctask=ctask,
+                competition=competition)
 
         if ctask.t_is_locked and not data['is_admin']:
             raise Http404 # Bye

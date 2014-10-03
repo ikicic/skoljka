@@ -56,9 +56,11 @@
       {% if not team %}
         <li><a href="{% comp_url 'registration' %}" class="register">Registracija</a></li>
       {% endif %}
-      <li><a href="{% comp_url 'task' %}">Zadaci</a></li>
-      <li><a href="{% comp_url 'scoreboard' %}">Statistika</a></li>
-      <li><a href="{% comp_url 'notifications' %}">Obavijesti</a></li>
+      {% if user.is_authenticated %}
+        <li><a href="{% comp_url 'task' %}">Zadaci</a></li>
+        <li><a href="{% comp_url 'scoreboard' %}">Statistika</a></li>
+        <li><a href="{% comp_url 'notifications' %}">Obavijesti</a></li>
+      {% endif %}
       {% if is_admin %}
         <li class="nav-header">Admin</li>
         <li><a href="{% comp_url 'chain' %}">Lanci</a></li>

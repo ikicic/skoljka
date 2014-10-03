@@ -1,5 +1,7 @@
 {% extends "competition_base.html" %}
 
+{% load competition_tags %}
+
 {% block content %}
 
 <div class="ctask-container">
@@ -22,7 +24,7 @@
   {{ ctask.task.content.render }}
 </div>
 
-{% if team %} {# admins are able to see this page without having an team #}
+{% if team %} {# admins are able to see this page without having a team #}
   {% if submissions %}
     <h4>Poslana rješenja</h4>
     {% if is_admin %}
@@ -83,6 +85,17 @@
       <div class="ctask-submit-already-finished">
         Natjecanje je završilo!
       </div>
+    {% endif %}
+  {% endif %}
+
+  {% if submissions|length >= ctask.max_submissions or is_solved %}
+    <br><br>
+    {% if ctask.t_next %}
+      <a href="{{ ctask.t_next.get_absolute_url }}"
+        class="btn btn-primary"> Sljedeći zadatak</a>
+    {% else %}
+      <a href="{% comp_url 'task' %}" class="btn btn-primary"
+          title="Zadnji zadatak u lancu">Povratak na popis zadataka</a>
     {% endif %}
   {% endif %}
 {% endif %}

@@ -17,8 +17,18 @@
   {% endif %}
 {% endif %}
 
+{% if has_finished %}
+  <div class="alert">
+    Natjecanje je završilo!
+    {% if not team %}
+      Registracije su zatvorene!
+    {% endif %}
+  </div>
+{% endif %}
+
+
 {% if competition.registration_open_date <= current_time or is_admin %}
-  {% if not team and team_invitations %}
+  {% if not has_finished and not team and team_invitations %}
     <h3 class="comp-header">Pozivnice</h3>
     <form action="{{ requst.get_full_path }}" method="POST" class="row">
       {% csrf_token %}
@@ -44,7 +54,7 @@
     </form>
   {% endif %}
 
-  {% if team_form %}
+  {% if team_form and not has_finished %}
     {% if team %}
       <h3 class="comp-header">Uređivanje tima</h3>
     {% else %}
@@ -55,9 +65,8 @@
       <p>Unesite željeno ime tima te imena članova ako postoje.</p>
       <p>Ukoliko za druge članove želite povezati njihove korisničke račune,
         pritisnite <i>Pozovi</i> i odaberite odgovarajuće korisničko ime.
-        Pozvani korisnici će se morati prijaviti na svoj račun te prihvatiti
-        pozivnicu (na ovom mjestu).</p>
-      <p>Na kraju pritisnite <i>Pošalji</i>.</p>
+        Nakon što pritisnite <i>Pošalji</i>, pozvani korisnici će se morati
+        prijaviti na svoj račun te prihvatiti pozivnicu (na ovom mjestu).</p>
     </div>
 
     {% reg_available_users %}
@@ -79,9 +88,23 @@
       <input type="submit" class="btn btn-primary" value="Pošalji">
     </form>
   {% else %}
-    <div>
-      Team {{ team.name }}
-    </div>
+    <h3 class="comp-header">Tim {{ team.name }}</h3>
+
+    Članovi:
+    <table class="table table-striped table-bordered">
+      {% for team_member in team_members %}
+        <tr>
+          <td>{{ forloop.counter }}.</td>
+          <td>
+            {% if team_member.member_id %}
+              {{ team_member.member|userlink }}
+            {% else %}
+              {{ team_member.member_name }}
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
   {% endif %}
 {% endif %} {# registration open or is_admin #}
 

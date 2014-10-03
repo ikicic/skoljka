@@ -27,7 +27,7 @@
         </tr>
         {% for t in teams %}
           <tr class="
-              {% if t.id == team.id and forloop.counter == 3 %}comp-my-team{% endif %}
+              {% if t.id == team.id %}comp-my-team{% endif %}
               {% if t.is_test %}comp-test-team{% endif %}
               ">
             <td>

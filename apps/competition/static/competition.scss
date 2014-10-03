@@ -88,6 +88,7 @@ textarea.comp-mathcontent-text {
 
   th {
     background-color: #f4f7f6 * 0.95;
+    padding: 5px;
   }
 
   td {
@@ -104,8 +105,9 @@ textarea.comp-mathcontent-text {
 }
 
 .comp-my-team {
+  font-weight: bold;
   td {
-    background-color: #DDFFDF !important;
+    background-color: #dff0d8 !important;
   }
 }
 
@@ -137,7 +139,12 @@ td.comp-chain-name {
   color: gray;
   font-weight: bold;
   text-align: right;
-  white-space: nowrap;
+}
+
+@media (min-width: $screen-sm-min) {
+  td.comp-chain-name {
+    white-space: nowrap;
+  }
 }
 
 td.comp-chain-tasks {

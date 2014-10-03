@@ -51,7 +51,7 @@ def lock_ctasks_in_chain(ctasks):
                 and ctask.t_submission_count < ctask.max_submissions:
             locked = True
 
-def check_single_chain(chain, team, preloaded_ctask=None):
+def check_single_chain(chain, team, preloaded_ctask=None, competition=None):
     ctasks = list(CompetitionTask.objects.filter(chain=chain) \
             .order_by('chain_position', 'id') \
             .only('id', 'max_submissions'))
@@ -64,9 +64,16 @@ def check_single_chain(chain, team, preloaded_ctask=None):
             .filter(ctask_id__in=ctasks_dict.keys(), team=team) \
             .values_list('ctask_id', 'cache_is_correct')
 
+    prev_ctask = None
     for ctask in ctasks:
         ctask.t_submission_count = 0
         ctask.t_is_solved = False
+        if competition:
+            ctask.competition = competition
+        if prev_ctask:
+            prev_ctask.t_next = ctask
+        prev_ctask = ctask
+    ctask.t_next = None
 
     for ctask_id, cache_is_correct in submissions:
         ctask = ctasks_dict[ctask_id]
