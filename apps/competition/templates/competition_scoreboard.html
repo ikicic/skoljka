@@ -10,37 +10,29 @@
   </div>
 {% endif %}
 
-{% if not has_started and is_admin %}
-  <div class="alert">
-    Trenutačno vidljivo samo administratorima!
-  </div>
-{% endif %}
-
-{% if has_started or is_admin %}
-  <div class="row row-fix">
-    <div class="span6">
-      <table class="table-striped" id="comp-scoreboard-table">
-        <tr>
-          <th>#</th>
-          <th>Tim</th>
-          <th>Ukupno bodova</th>
+<div class="row row-fix">
+  <div class="span6">
+    <table class="table-striped" id="comp-scoreboard-table">
+      <tr>
+        <th>#</th>
+        <th>Tim</th>
+        <th>Ukupno bodova</th>
+      </tr>
+      {% for t in teams %}
+        <tr class="
+            {% if t.id == team.id %}comp-my-team{% endif %}
+            {% if t.is_test %}comp-test-team{% endif %}
+            ">
+          <td>
+            {{ t.t_position }}{{ t.is_test|yesno:"*," }}
+          </td>
+          <td><a href="{{ t.get_absolute_url }}">{{ t.name }}</a></td>
+          <td>{{ t.cache_score }}</td>
         </tr>
-        {% for t in teams %}
-          <tr class="
-              {% if t.id == team.id %}comp-my-team{% endif %}
-              {% if t.is_test %}comp-test-team{% endif %}
-              ">
-            <td>
-              {{ t.t_position }}{{ t.is_test|yesno:"*," }}
-            </td>
-            <td>{{ t.name }}</td>
-            <td>{{ t.cache_score }}</td>
-          </tr>
-        {% endfor %}
-      </table>
-    </div>
+      {% endfor %}
+    </table>
   </div>
-{% endif %}
+</div>
 
 {% endblock content %}
 

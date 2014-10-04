@@ -94,23 +94,7 @@
       <input type="submit" class="btn btn-primary" value="Pošalji">
     </form>
   {% else %}
-    <h3 class="comp-header">Tim {{ team.name }}</h3>
-
-    Članovi:
-    <table class="table table-striped table-bordered">
-      {% for team_member in team_members %}
-        <tr>
-          <td>{{ forloop.counter }}.</td>
-          <td>
-            {% if team_member.member_id %}
-              {{ team_member.member|userlink }}
-            {% else %}
-              {{ team_member.member_name }}
-            {% endif %}
-          </td>
-        </tr>
-      {% endfor %}
-    </table>
+    {% include 'inc_competition_team_detail.html' with preview_team=team preview_team_members=team_members %}
   {% endif %}
 {% endif %} {# registration open or is_admin #}
 

@@ -25,11 +25,11 @@ class Competition(BasePermissionsModel):
     def __unicode__(self):
         return self.name
 
-    def get_absolute_url(self):
-        return self.url_path_prefix or '/competition/{}/'.format(self.id)
-
     def can_send_post(self, user): # PostGenericRelation
         return self.user_has_perm(user, EDIT)
+
+    def get_absolute_url(self):
+        return self.url_path_prefix or '/competition/{}/'.format(self.id)
 
 
 
@@ -50,6 +50,9 @@ class Team(models.Model):
         if TeamMember.objects.filter(member=user, team=self).exists():
             return True
         return self.competition.user_has_perm(user, EDIT)
+
+    def get_absolute_url(self):
+        return self.competition.get_absolute_url() + 'team/{}/'.format(self.id)
 
 
 

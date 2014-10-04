@@ -34,6 +34,7 @@ _patterns = _make_patterns(
     (r'scoreboard/$', 'scoreboard'),
     (r'task/$', 'task_list'),
     (r'task/(?P<ctask_id>\d+)/$', 'task_detail'),
+    (r'team/(?P<team_id>\d+)/$', 'team_detail'),
 )
 
 urlpatterns = patterns('competition.views', *_patterns)

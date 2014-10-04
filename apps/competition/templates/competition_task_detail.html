@@ -2,6 +2,13 @@
 
 {% load competition_tags %}
 
+{% block float_right_extra %}
+  {% if is_admin %}
+    <br>
+    Autor: {{ ctask.task.author|userlink }}
+  {% endif %}
+{% endblock float_right_extra %}
+
 {% block content %}
 
 <div class="ctask-container">

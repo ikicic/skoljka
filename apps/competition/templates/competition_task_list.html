@@ -17,7 +17,14 @@
   {% endif %}
 {% endif %}
 
-{% if has_started or is_admin %}
+{% if not team %}
+  <div class="alert">
+    Molimo vas, registrirajte tim za natjecanje, kako biste mogli vidjeti
+    zadatke.
+  </div>
+{% endif %}
+
+{% if team and has_started or is_admin %}
   <table id="comp-tasks">
     {% for name, category in categories.iteritems %}
       {# hidden visible only if admin #}
@@ -32,12 +39,6 @@
             {% if chain.t_is_hidden and has_started %}comp-chain-hidden{% endif %}">
           <td class="comp-chain-name">{{ chain.name }}</td>
           <td class="comp-chain-tasks">
-            {% comment %}
-            {% for ctask in chain.ctasks %}
-              <a class="ctask-bubble {% ctask_bubble_class ctask %}"
-                href="{{ ctask.get_absolute_url }}"></a>
-            {% endfor %}
-            {% endcomment %}
             <div class="progress"
                 style="width: {% percentage chain.ctasks|length max_chain_length %}">
               {% for ctask in chain.ctasks %}

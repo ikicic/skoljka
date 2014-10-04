@@ -42,8 +42,7 @@ table.comp-dates-table {
   }
 }
 
-#server-time {
-  // padding: 0 0 1em 12px;
+#comp-float-right {
   color: gray;
   font-size: 12px;
   float: right;
@@ -126,6 +125,14 @@ textarea.comp-mathcontent-text {
   td:last-child {
     font-weight: bold;
   }
+}
+
+.team-score-container {
+  margin-bottom: 15px;
+}
+
+.team-score {
+  font-weight: bold;
 }
 
 .comp-test-team {

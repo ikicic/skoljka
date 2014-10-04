@@ -58,6 +58,18 @@ def _update_team_invitations(team, team_form):
 
 
 @competition_view()
+@response('competition_team_detail.html')
+def team_detail(request, competition, data, team_id):
+    data['preview_team'] = get_object_or_404(Team, id=team_id)
+    data['preview_team_members'] = TeamMember.objects.filter(team_id=team_id,
+            invitation_status=TeamMember.INVITATION_ACCEPTED) \
+                    .select_related('member')
+    data['show_member_links'] = team_id == data['team'].id \
+            or data['has_finished']
+    return data
+
+
+@competition_view()
 @response('competition_registration.html')
 def registration(request, competition, data):
     if not request.user.is_authenticated():
@@ -107,6 +119,7 @@ def registration(request, competition, data):
         team_form = TeamForm(instance=team,
                 max_team_size=competition.max_team_size)
 
+    data['show_member_links'] = True
     data['team_form'] = team_form
     data['team_members'] = \
             TeamMember.objects.filter(team=team).select_related('member')
@@ -124,13 +137,14 @@ def rules(request, competition, data):
 @response('competition_scoreboard.html')
 def scoreboard(request, competition, data):
     teams = list(Team.objects.filter(competition=competition) \
-            .order_by('-cache_score') \
+            .order_by('-cache_score', 'name') \
             .only('id', 'name', 'cache_score', 'is_test'))
 
     last_score = -1
     last_position = 1
     position = 1
     for team in teams:
+        team.competition = competition
         if not team.is_test and team.cache_score != last_score:
             last_position = position
         team.t_position = last_position
@@ -204,9 +218,10 @@ def task_list(request, competition, data):
 @competition_view()
 @response('competition_task_detail.html')
 def task_detail(request, competition, data, ctask_id):
+    extra = ['task__author'] if data['is_admin'] else []
     ctask = get_object_or_404(
             CompetitionTask.objects.select_related('chain', 'task',
-                'task__content'),
+                'task__content', *extra),
             competition=competition, id=ctask_id)
     team = data['team']
     if not data['is_admin']:
