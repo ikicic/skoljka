@@ -1,8 +1,6 @@
 # coding=utf-8
 # local.py is ignored by git!
 
-from django.utils.html import mark_safe
-
 import os
 
 ######################################
@@ -112,4 +110,4 @@ COMPETITION_URLS = { # no leading slashes!
     # 1: 'marinada/',
 }
 
-EXTRA_HEADER_TOP = mark_safe("")
+EXTRA_HEADER_TOP = ""
