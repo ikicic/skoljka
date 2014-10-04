@@ -1,9 +1,11 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count
 from django.forms.models import modelformset_factory
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.utils.safestring import mark_safe
 
 from mathcontent.models import MathContent
 from permissions.constants import VIEW, EDIT
@@ -136,8 +138,9 @@ def rules(request, competition, data):
 @competition_view()
 @response('competition_scoreboard.html')
 def scoreboard(request, competition, data):
-    teams = list(Team.objects.filter(competition=competition) \
-            .order_by('-cache_score', 'name') \
+    extra = {} if data['is_admin'] else {'is_test': False}
+    teams = list(Team.objects.filter(competition=competition, **extra) \
+            .order_by('-cache_score', 'id') \
             .only('id', 'name', 'cache_score', 'is_test'))
 
     last_score = -1
@@ -163,7 +166,8 @@ def task_list(request, competition, data):
     all_ctasks = list(CompetitionTask.objects.filter(competition=competition) \
             .select_related('task__content'))
     all_ctasks_dict = {ctask.id: ctask for ctask in all_ctasks}
-    all_chains = list(Chain.objects.filter(competition=competition))
+    all_chains = list(Chain.objects.filter(competition=competition) \
+            .order_by('category', 'name'))
     all_chains_dict = {chain.id: chain for chain in all_chains}
 
     for chain in all_chains:
@@ -277,9 +281,29 @@ def task_detail(request, competition, data, ctask_id):
 @competition_view(permission=EDIT)
 @response('competition_chain_list.html')
 def chain_list(request, competition, data):
-    chains = Chain.objects.annotate(num_tasks=Count('competitiontask'))
+    chains = Chain.objects.filter(competition=competition) \
+            .order_by('category', 'name')
+    chain_dict = {chain.id: chain for chain in chains}
+    ctasks = CompetitionTask.objects.filter(competition=competition) \
+            .values_list('chain_id', 'task__author_id')
+    author_ids = zip(*ctasks)[1]
+    authors = User.objects.in_bulk(author_ids)
+
     for chain in chains:
         chain.competition = competition
+        chain.t_ctask_count = 0
+        chain._author_ids = set()
+
+    for chain_id, author_id in ctasks:
+        chain = chain_dict[chain_id]
+        chain.t_ctask_count += 1
+        chain._author_ids.add(author_id)
+
+    from userprofile.templatetags.userprofile_tags import userlink
+    for chain in chains:
+        chain.t_authors = mark_safe(u", ".join(userlink(authors[author_id])
+                for author_id in chain._author_ids))
+
     data['chains'] = chains
     return data
 

@@ -3,6 +3,7 @@
 {% load competition_tags %}
 
 {% block content %}
+
 <div class="alert">
   Vidljivo samo administratorima!
 </div>
@@ -11,13 +12,26 @@
   <a href="{% comp_url 'chain/new' %}" class="btn">Novi lanac</a>
 </div>
 
-<h4>Lanci</h4>
-{% for chain in chains %}
-  <div>
-    <a href="{{ chain.get_absolute_url }}">{{ chain.name }}</a>
-    ({{ chain.num_tasks }})
-  </div>
-{% empty %}
-  <i>Prazno...</i>
-{% endfor %}
+<h3 class="comp-header">Lanci</h3>
+
+<table class="table table-striped">
+  <tr>
+    <th>Kategorija</th>
+    <th>Lanac</th>
+    <th>Duljina</th>
+    <th title="Vrijeme otključavanja">Minute</th>
+    <th>Autor(i)</th>
+  </tr>
+  {% for chain in chains %}
+    <tr>
+      <td>{{ chain.category }}</td>
+      <td><a href="{{ chain.get_absolute_url }}">{{ chain.name }}</a></td>
+      <td>{{ chain.t_ctask_count }}</td>
+      <td>{{ chain.unlock_minutes }}</td>
+      <td>{{ chain.t_authors }}</td>
+    </div>
+  {% empty %}
+    <tr><td colspan="3"><i>Prazno...</i></td> </tr>
+  {% endfor %}
+</table>
 {% endblock content %}
