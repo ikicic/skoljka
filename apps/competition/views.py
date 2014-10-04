@@ -64,7 +64,7 @@ def team_detail(request, competition, data, team_id):
     data['preview_team_members'] = TeamMember.objects.filter(team_id=team_id,
             invitation_status=TeamMember.INVITATION_ACCEPTED) \
                     .select_related('member')
-    data['show_member_links'] = team_id == data['team'].id \
+    data['show_member_links'] = data['team'] and team_id == data['team'].id \
             or data['has_finished']
     return data
 
