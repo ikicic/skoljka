@@ -226,13 +226,14 @@ def task_list(request, competition, data):
 @competition_view()
 @response('competition_task_detail.html')
 def task_detail(request, competition, data, ctask_id):
-    extra = ['task__author'] if data['is_admin'] else []
+    is_admin = data['is_admin']
+    extra = ['task__author'] if is_admin else []
     ctask = get_object_or_404(
             CompetitionTask.objects.select_related('chain', 'task',
                 'task__content', *extra),
             competition=competition, id=ctask_id)
     team = data['team']
-    if not data['is_admin']:
+    if not is_admin:
         if not team or not data['has_started'] \
                 or ctask.chain.unlock_minutes > data['minutes_passed']:
             raise Http404
@@ -249,11 +250,11 @@ def task_detail(request, competition, data, ctask_id):
         if data['has_finished']:
             ctask.t_is_locked = False
 
-        if ctask.t_is_locked and not data['is_admin']:
+        if ctask.t_is_locked and not is_admin:
             raise Http404 # Bye
 
-        if request.method == 'POST':
-            if data['is_admin'] and 'delete-submission' in request.POST:
+        if request.method == 'POST' and (not data['has_finished'] or is_admin):
+            if is_admin and 'delete-submission' in request.POST:
                 submission_id = int(request.POST['delete-submission'])
                 Submission.objects.filter(id=submission_id).delete()
                 submissions = filter(lambda x: x.id != submission_id,
