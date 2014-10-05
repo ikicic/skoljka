@@ -103,3 +103,26 @@ $ ->
     $('#post-object-id').val team_id
     $('#comp-post-target').val team_id # This won't trigger change event
 
+  STATUS_CLASS = {
+    'S': 'bar ctask-solved'
+    'F': 'bar ctask-failed'
+    'T': 'bar ctask-tried'
+  }
+
+  $('#ctask-admin-panel select').change ->
+    is_test = $('#id_filter_by_is_test').val()
+    status = $('#id_filter_by_status').val()
+    prefix = is_test + status
+
+    stats = {}
+    for key, value of ctask_statistics
+      if key.substr(0, 2) == prefix
+        stats[key.substr(2)] = value
+    show_ctask_statistics stats, STATUS_CLASS[status], 'ctask-locked'
+
+window.show_ctask_statistics = (stats, status_class, empty_class) ->
+  $('.ctask').each ->
+    _this = $(@)
+    count = stats[_this.attr('data-id')]
+    _this.attr 'class', 'ctask ' + (if count then status_class else empty_class)
+    _this.html count or ''

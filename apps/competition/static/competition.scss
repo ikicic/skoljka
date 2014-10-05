@@ -165,9 +165,6 @@ textarea.comp-mathcontent-text {
   opacity: .5;
 }
 
-$task-bubble-size: 30px;
-$task-bubble-distance: 30px;
-
 tr.comp-chain-hidden {
   opacity: .5;
 }
@@ -246,8 +243,12 @@ div#ctask-legend-container {
   }
 }
 
-
-
+#ctask-admin-panel {
+  label {
+    margin-left: 5px;
+    display: inline-block;
+  }
+}
 
 @media (min-width: $screen-sm-min) {
   .ctask-container {

@@ -19,7 +19,7 @@ from userprofile.forms import AuthenticationFormEx
 
 from competition.decorators import competition_view
 from competition.forms import ChainForm, CompetitionTask, \
-        BaseCompetitionTaskFormSet, TeamForm
+        BaseCompetitionTaskFormSet, TeamForm, TaskListAdminPanelForm
 from competition.models import Chain, Competition, CompetitionTask, Team, \
         TeamMember, Submission
 from competition.utils import check_single_chain, get_teams_for_user_ids, \
@@ -210,13 +210,13 @@ def task_list(request, competition, data):
         lock_ctasks_in_chain(chain.ctasks)
 
     if data['is_admin']:
+        data['admin_panel_form'] = TaskListAdminPanelForm()
         for category in categories.itervalues():
             category.t_is_hidden = \
                     all(chain.t_is_hidden for chain in category.chains)
 
     data['categories'] = sorted(categories.values(), key=lambda x: x.name)
     data['max_chain_length'] = max(len(chain.ctasks) for chain in all_chains)
-    # data['ctask_stats'] = get_ctask_statistics(competition)
     return data
 
 
@@ -431,7 +431,7 @@ def notifications_admin(request, competition, data):
     user_id_to_team = \
             get_teams_for_user_ids([post.author_id for post in team_posts])
     for post in team_posts:
-        post.t_team = user_id_to_team[post.author_id]
+        post.t_team = user_id_to_team.get(post.author_id)
 
     posts += team_posts
     posts.sort(key=lambda post: post.date_created, reverse=True)

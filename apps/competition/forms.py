@@ -123,3 +123,10 @@ class TeamForm(forms.ModelForm):
     class Meta:
         model = Team
         fields = ['name']
+
+
+class TaskListAdminPanelForm(forms.Form):
+    filter_by_is_test = forms.ChoiceField([('0', "Natjecatelji"),
+        ('1', "Administratori")])
+    filter_by_status = forms.ChoiceField([('S', "Solved"), ('F', "Failed"),
+        ('T', "Tried")])

@@ -61,22 +61,9 @@ def reg_add_member_fields(context):
     return u"<script>{}</script>".format(u''.join(output))
 
 @register.simple_tag(takes_context=True)
-def ctask_statistics_js(context):
+def ctask_statistics_json(context):
     stats = get_ctask_statistics(context['competition'])
     return json.dumps(stats)
-
-
-@register.simple_tag()
-def ctask_bubble_class(ctask):
-    if ctask.t_is_locked:
-        return "ctask-bubble-locked"
-    if ctask.t_is_solved:
-        return "ctask-bubble-solved"
-    if ctask.t_submission_count == 0:
-        return "ctask-bubble-open"
-    if ctask.t_submission_count >= ctask.max_submissions:
-        return "ctask-bubble-failed"
-    return "ctask-bubble-tried"
 
 @register.simple_tag()
 def ctask_class(ctask):
@@ -94,7 +81,7 @@ def ctask_class(ctask):
 def chain_badge_class(chain):
     if all(ctask.t_is_solved for ctask in chain.ctasks):
         return "badge-success"
-    if any(ctask.t_submission_count >= ctask.max_submissions \
+    if any(ctask.t_submission_count > ctask.max_submissions \
             for ctask in chain.ctasks):
         return ""
     return "badge-info"

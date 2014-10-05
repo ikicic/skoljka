@@ -24,6 +24,15 @@
   </div>
 {% endif %}
 
+{% if is_admin %}
+  <script>
+    ctask_statistics = {% ctask_statistics_json %};
+  </script>
+  <div id="ctask-admin-panel">
+    {{ admin_panel_form.as_p }}
+  </div>
+{% endif %}
+
 {% if team and has_started or is_admin %}
   <table id="comp-tasks">
     {% for category in categories %}
@@ -43,7 +52,7 @@
                 style="width: {% percentage chain.ctasks|length max_chain_length %}">
               {% for ctask in chain.ctasks %}
                 {% if not ctask.t_is_locked or is_admin %}
-                  <a id="ctask{{ ctask.id }}"
+                  <a data-id="{{ ctask.id }}"
                       class="ctask {% ctask_class ctask %}"
                       style="width: {% percentage 1 chain.ctasks|length %}"
                       href="{{ ctask.get_absolute_url }}"></a>
