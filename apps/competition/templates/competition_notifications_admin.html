@@ -20,7 +20,8 @@
 
     <div class="post-info">
       {{ post.author|userlink }}{% if post.t_team %}
-        (Tim: {{ post.t_team.name }}){% endif %}, {{ post.date_created }}
+      (Tim: <a href="{{ post.t_team.get_absolute_url }}">
+        {{ post.t_team.name }}</a>){% endif %}, {{ post.date_created }}
     </div>
 
     {{ post.content.render }}

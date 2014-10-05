@@ -62,9 +62,12 @@ def competition_view(permission=VIEW):
 
             minutes_passed = \
                     (current_time - competition.start_date).total_seconds() / 60
+            nearly_finished = not has_finished and \
+                    (competition.end_date - current_time).total_seconds() < 1800
             data = {'competition': competition, 'team': team,
                     'team_invitations': team_invitations, 'is_admin': is_admin,
                     'has_started': has_started, 'has_finished': has_finished,
+                    'nearly_finished': nearly_finished,
                     'current_time': current_time,
                     'minutes_passed': minutes_passed}
 

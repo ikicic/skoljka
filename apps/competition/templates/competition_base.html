@@ -71,7 +71,9 @@
 
   <div id="content">
       <div id="comp-float-right">
-        Vrijeme: {{ current_time|date:"H:i" }}
+        <span class="{{ nearly_finished|yesno:"nearly-finished," }}">
+          Vrijeme: {{ current_time|date:"H:i" }}
+        </span>
         {% block float_right_extra %}{% endblock %}
       </div>
       {% block content %}

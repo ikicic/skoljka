@@ -48,6 +48,10 @@ table.comp-dates-table {
   float: right;
 }
 
+.nearly-finished {
+  color: red;
+}
+
 textarea.comp-mathcontent-text {
   box-sizing: border-box;
   width: 100%;
@@ -136,6 +140,8 @@ textarea.comp-mathcontent-text {
 }
 
 .comp-test-team {
+  color: #AAA;
+
   a {
     color: #AAA;
   }

@@ -24,6 +24,12 @@
   </div>
 {% endif %}
 
+{% if has_finished %}
+  <div class="alert">
+    Natjecanje je završilo!
+  </div>
+{% endif %}
+
 {% if is_admin %}
   <script>
     ctask_statistics = {% ctask_statistics_json %};

@@ -262,10 +262,15 @@ def task_detail(request, competition, data, ctask_id):
                     submission.save()
                     submissions.append(submission)
 
+            chain_was_solved = all(ctask.t_is_solved for ctask in ctasks)
             is_solved = any(x.cache_is_correct for x in submissions)
             if was_solved != is_solved:
-                delta = int(is_solved) - int(was_solved)
-                team.cache_score += delta * ctask.score
+                ctask.t_is_solved = is_solved
+                chain_is_solved = all(ctask.t_is_solved for ctask in ctasks)
+                delta = (int(is_solved) - int(was_solved)) * ctask.score
+                delta += (int(chain_is_solved) - int(chain_was_solved)) \
+                        * ctask.chain.bonus_score
+                team.cache_score += delta
                 team.save()
         else:
             is_solved = was_solved
@@ -432,6 +437,7 @@ def notifications_admin(request, competition, data):
             get_teams_for_user_ids([post.author_id for post in team_posts])
     for post in team_posts:
         post.t_team = user_id_to_team.get(post.author_id)
+        post.t_team.competition = competition
 
     posts += team_posts
     posts.sort(key=lambda post: post.date_created, reverse=True)
