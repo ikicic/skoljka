@@ -6,6 +6,8 @@ from permissions.models import BasePermissionsModel
 from post.generic import PostGenericRelation
 from task.models import Task
 
+import re
+
 class Competition(BasePermissionsModel):
     name = models.CharField(max_length=64)
     hidden = models.BooleanField(default=True)
@@ -105,7 +107,9 @@ class CompetitionTask(models.Model):
         return self.competition.get_absolute_url() + 'task/{}/'.format(self.id)
 
     def check_result(self, result):
-        return result == self.correct_result
+        correct_result = re.sub(r'\s+', '', self.correct_result).lower()
+        return re.sub(r'\s+', '', result).lower() == correct_result
+        # return result == self.correct_result
 
 
 
