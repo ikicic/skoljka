@@ -53,12 +53,14 @@
     <ul class="nav nav-list">
       <li class="nav-header">Izbornik</li>
       <li><a href="{% comp_url '' %}">Početna</a></li>
-      {% if not team %}
+      {% if not team and not has_finished %}
         <li><a href="{% comp_url 'registration' %}" class="register">Registracija</a></li>
       {% endif %}
       {% if user.is_authenticated %}
         <li><a href="{% comp_url 'task' %}">Zadaci</a></li>
-        <li><a href="{% comp_url 'scoreboard' %}">Statistika</a></li>
+      {% endif %}
+      <li><a href="{% comp_url 'scoreboard' %}">Rezultati</a></li>
+      {% if user.is_authenticated %}
         <li><a href="{% comp_url 'notifications' %}">Obavijesti</a></li>
       {% endif %}
       {% if is_admin %}

@@ -66,8 +66,8 @@ def team_detail(request, competition, data, team_id):
     data['preview_team_members'] = TeamMember.objects.filter(team_id=team_id,
             invitation_status=TeamMember.INVITATION_ACCEPTED) \
                     .select_related('member')
-    data['show_member_links'] = data['team'] and team_id == data['team'].id \
-            or data['has_finished']
+    data['show_member_links'] = request.user.is_authenticated() and (
+            data['team'] and team_id == data['team'].id or data['has_finished'])
     return data
 
 
@@ -134,7 +134,6 @@ def rules(request, competition, data):
     return data
 
 
-@login_required
 @competition_view()
 @response('competition_scoreboard.html')
 def scoreboard(request, competition, data):
