@@ -207,7 +207,11 @@ def task_list(request, competition, data):
             categories[chain.category].chains.append(chain)
 
         chain.ctasks.sort(key=lambda ctask: (ctask.chain_position, ctask.id))
-        lock_ctasks_in_chain(chain.ctasks)
+        if not data['has_finished']:
+            lock_ctasks_in_chain(chain.ctasks)
+        else:
+            for ctask in chain.ctasks:
+                ctask.t_is_locked = False
 
     if data['is_admin']:
         data['admin_panel_form'] = TaskListAdminPanelForm()
@@ -242,6 +246,9 @@ def task_detail(request, competition, data, ctask_id):
         was_solved = any(x.cache_is_correct for x in submissions)
         ctasks = check_single_chain(ctask.chain, team, preloaded_ctask=ctask,
                 competition=competition)
+
+        if data['has_finished']:
+            ctask.t_is_locked = False
 
         if ctask.t_is_locked and not data['is_admin']:
             raise Http404 # Bye
