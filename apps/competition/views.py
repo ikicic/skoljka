@@ -437,7 +437,8 @@ def notifications_admin(request, competition, data):
             get_teams_for_user_ids([post.author_id for post in team_posts])
     for post in team_posts:
         post.t_team = user_id_to_team.get(post.author_id)
-        post.t_team.competition = competition
+        if post.t_team:
+            post.t_team.competition = competition
 
     posts += team_posts
     posts.sort(key=lambda post: post.date_created, reverse=True)
