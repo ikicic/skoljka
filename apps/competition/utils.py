@@ -1,4 +1,5 @@
-from competition.models import Chain, CompetitionTask, Submission, TeamMember
+from competition.models import Chain, CompetitionTask, Submission, Team, \
+        TeamMember
 
 from collections import defaultdict
 
@@ -106,3 +107,40 @@ def get_teams_for_user_ids(user_ids):
             .only('member', 'team'))
 
     return {x.member_id: x.team for x in team_members}
+
+def get_ctask_statistics(competition):
+    """
+    # TODO: documentation
+    """
+    max_submissions_dict = dict(CompetitionTask.objects \
+            .filter(competition=competition) \
+            .values_list('id', 'max_submissions'))
+    test_teams = Team.objects.filter(competition=competition, is_test=True) \
+            .values_list('id', flat=True)
+    correct_submissions = Submission.objects.filter(
+            ctask__competition_id=competition.id) \
+                    .values_list('team_id', 'ctask_id', 'cache_is_correct')
+
+    submission_count_dict = defaultdict(int)
+    is_solved_dict = defaultdict(bool)
+    for team_id, ctask_id, cache_is_correct in correct_submissions:
+        key = (team_id, ctask_id)
+        submission_count_dict[key] += 1
+        is_solved_dict[key] |= cache_is_correct
+
+    result = defaultdict(int)
+    for key, submission_count in submission_count_dict.iteritems():
+        is_solved = is_solved_dict[key]
+        is_test = key[0] in test_teams
+
+        if is_solved:
+            _key = 'S' # solved
+        elif submission_count >= max_submissions_dict[key[1]]:
+            _key = 'F' # failed
+        else:
+            _key = 'T' # tried
+
+        _key = str(int(is_test)) + _key + str(key[1])
+        result[_key] += 1
+
+    return result

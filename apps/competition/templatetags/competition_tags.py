@@ -3,7 +3,9 @@ from django.contrib.auth.models import User
 from django.utils.html import mark_safe
 
 from competition.models import TeamMember
+from competition.utils import get_ctask_statistics
 
+import json
 
 register = template.Library()
 
@@ -57,6 +59,12 @@ def reg_add_member_fields(context):
             int(status == TeamMember.INVITATION_ACCEPTED)))
 
     return u"<script>{}</script>".format(u''.join(output))
+
+@register.simple_tag(takes_context=True)
+def ctask_statistics_js(context):
+    stats = get_ctask_statistics(context['competition'])
+    return json.dumps(stats)
+
 
 @register.simple_tag()
 def ctask_bubble_class(ctask):

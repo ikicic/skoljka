@@ -26,11 +26,11 @@
 
 {% if team and has_started or is_admin %}
   <table id="comp-tasks">
-    {% for name, category in categories.iteritems %}
+    {% for category in categories %}
       {# hidden visible only if admin #}
       <tr class="comp-category {{ category.t_is_hidden|yesno:"comp-category-hidden," }}">
         <td colspan="2">
-          {{ name }}
+          {{ category.name }}
         </td>
       </tr>
       {% for chain in category.chains %}
@@ -43,7 +43,8 @@
                 style="width: {% percentage chain.ctasks|length max_chain_length %}">
               {% for ctask in chain.ctasks %}
                 {% if not ctask.t_is_locked or is_admin %}
-                  <a class="ctask {% ctask_class ctask %}"
+                  <a id="ctask{{ ctask.id }}"
+                      class="ctask {% ctask_class ctask %}"
                       style="width: {% percentage 1 chain.ctasks|length %}"
                       href="{{ ctask.get_absolute_url }}"></a>
                 {% else %}

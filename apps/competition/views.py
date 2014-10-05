@@ -23,7 +23,7 @@ from competition.forms import ChainForm, CompetitionTask, \
 from competition.models import Chain, Competition, CompetitionTask, Team, \
         TeamMember, Submission
 from competition.utils import check_single_chain, get_teams_for_user_ids, \
-        lock_ctasks_in_chain
+        lock_ctasks_in_chain, get_ctask_statistics
 
 from datetime import datetime
 
@@ -214,8 +214,9 @@ def task_list(request, competition, data):
             category.t_is_hidden = \
                     all(chain.t_is_hidden for chain in category.chains)
 
-    data['categories'] = categories
+    data['categories'] = sorted(categories.values(), key=lambda x: x.name)
     data['max_chain_length'] = max(len(chain.ctasks) for chain in all_chains)
+    # data['ctask_stats'] = get_ctask_statistics(competition)
     return data
 
 
