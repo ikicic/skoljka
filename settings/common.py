@@ -139,10 +139,12 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 #    'sentry.client.middleware.Sentry404CatchMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django_sorting.middleware.SortingMiddleware',
     'pagination.middleware.PaginationMiddleware',
 )
+
+if DEBUG:
+    MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware', )
 
 ######################################
 # Installed apps
@@ -157,7 +159,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-    'debug_toolbar',
     'django_sorting',
     'pagination',
     'pipeline',
@@ -186,6 +187,9 @@ INSTALLED_APPS = (
     'usergroup',
     'userprofile',
 )
+
+if DEBUG:
+    INSTALLED_APPS += ('debug_toolbar', )
 
 ######################################
 # Logging
