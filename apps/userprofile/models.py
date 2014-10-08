@@ -181,7 +181,7 @@ class UserProfile(models.Model):
             | Q(solution__detailed_status=
                 SolutionDetailedStatus.SUBMITTED_CORRECT),
             hidden=False,
-            solution__author=self
+            solution__author=self.user
         ).values('id', 'difficulty_rating_avg').distinct().order_by()
 
         distribution = [0] * DIFFICULTY_RATING_ATTRS['range']
