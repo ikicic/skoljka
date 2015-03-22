@@ -38,15 +38,18 @@ http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supe
 6. Initialize database and build:
   ```sh
   python manage.py syncdb --noinput
+  python manage.py loaddata folders userprofiles
   python b.py
-  cd ..
   ```
+  You can now use Django test server by running `python manage.py runserver`. The database is pre-filled with superuser `arhiva` whose password is `a`. Note that by default, `DEBUG` is `False`, so static files won't be loaded correctly.
 
 # Configuring gunicorn
 
-You should now be in `~/projects/skoljka/`.
+You should now be in `~/projects/skoljka/skoljka/`.
 
-7. Create file `runserver.sh`. (fill out **user** and **group** variables)
+1. Run `cd ..` to move to `~/projects/skoljka/`.
+
+2. Create file `runserver.sh`. (fill out **user** and **group** variables)
   ```sh
   #!/bin/bash
   set -e
@@ -66,7 +69,7 @@ You should now be in `~/projects/skoljka/`.
     --log-file=$LOGFILE -b localhost:$PORT
   ```
 
-8. Set up `gunicorn`.
+3. Set up `gunicorn`.
   ```sh
   chmod +x runserver.sh
   pip install gunicorn
@@ -75,14 +78,14 @@ You should now be in `~/projects/skoljka/`.
 
 # Configuring supervisor
 
-9. Run following commands:
+1. Run following commands:
   ```sh
   sudo apt-get install supervisor
   mkdir -p logs
   touch logs/gunicorn_supervisor.log
   ```
 
-10. Create file `/etc/supervisor/conf.d/skoljka.conf` (use `sudo`, and change these paths)
+2. Create file `/etc/supervisor/conf.d/skoljka.conf` (use `sudo`, and change these paths)
   ```
   [program:skoljka]
   directory = /home/username/projects/skoljka/
@@ -92,7 +95,7 @@ You should now be in `~/projects/skoljka/`.
   stderr_logfile = /home/username/projects/skoljka/logs/gunicorn_supervisor.log
   ```
 
-11. Run `skoljka` Django webserver:
+3. Run `skoljka` Django webserver:
   ```sh
   sudo supervisorctl reread
   sudo supervisorctl update
@@ -101,15 +104,15 @@ You should now be in `~/projects/skoljka/`.
 
 # Configuring nginx
 
-12. Install and start `nginx`:
+4. Install and start `nginx`:
   ```sh
   sudo apt-get install nginx
   sudo service nginx start
   ```
 
-13. Create `/etc/nginx/sites-available/skoljka` and the symlink `/etc/nginx/sites-enabled/skoljka` to the first file. Use e.g. `8080` as the main port and remember to redirect `/` to the port `8079`. Look at the tutorial for the details.
+5. Create `/etc/nginx/sites-available/skoljka` and the symlink `/etc/nginx/sites-enabled/skoljka` to the first file. Use e.g. `8080` as the main port and remember to redirect `/` to the port `8079`. Look at the tutorial for the details.
 
-14. Restart `nginx`
+6. Restart `nginx`
   ```sh
   sudo service nginx restart
   ```

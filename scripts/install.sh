@@ -3,10 +3,14 @@
 # Run this from the skoljka's (repository) root folder!
 
 # subversion (svn): used to instal jquery-star-rating-plugin
-sudo apt-get install python2.7 python-setuptools python-pip mysql-client-core-5.5 mysql-server-5.5 texlive-full memcached subversion
+sudo apt-get install python2.7 python-setuptools python-pip mysql-client-core-5.5 mysql-server-5.5 texlive-full memcached subversion libmysqlclient-dev npm nodejs-legacy
 pip install -r requirements.txt
 
 gem install sass
+npm install
+sudo npm install -g grunt-cli
+./node_modules/bower/bin/bower install
+grunt
 
 # Make local folders
 mkdir -p local
