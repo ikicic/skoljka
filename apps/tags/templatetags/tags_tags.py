@@ -97,12 +97,18 @@ def generate_tags_autocomplete_js():
         $(function() {
             $(".ac-tags").autocomplete(
                 ["%s"],
-                {multiple: true, autoFill: true}
+                {
+                    autoFill: true,
+                    multiple: true,
+                    multipleSeparator: ",[[SPACE]]",
+                    noRecord: ""
+                }
             );
         });'''
+    # script = 'tmp="%s";'
 
     # Remove whitespace (output file doesn't have to be pretty) and put names.
-    content = re.sub(r'\s+', '', script) % names
+    content = re.sub(r'\s+', '', script).replace('[[SPACE]]', ' ') % names
 
     hash = sha1(content.encode('utf-8')).hexdigest()
 

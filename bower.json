@@ -9,7 +9,7 @@
   "dependencies": {
     "jquery": "1.8.3",
     "jquery-form": "~3.46.0",
-    "jquery.autocomplete": "*",
+    "jquery.autocomplete": "https://github.com/ikicic/jQueryAutocompletePlugin.git",
     "jquery.metadata": "*",
     "jquery-star-rating-plugin": "svn+http://jquery-star-rating-plugin.googlecode.com/svn/",
     "bootstrap-sass": "twbs/bootstrap-sass#v2.0.3"

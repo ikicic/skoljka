@@ -143,7 +143,7 @@ MIDDLEWARE_CLASSES = (
     'pagination.middleware.PaginationMiddleware',
 )
 
-if DEBUG:
+if DEBUG and ENABLE_DEBUG_TOOLBAR:
     MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware', )
 
 ######################################
@@ -188,7 +188,7 @@ INSTALLED_APPS = (
     'userprofile',
 )
 
-if DEBUG:
+if DEBUG and ENABLE_DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar', )
 
 ######################################

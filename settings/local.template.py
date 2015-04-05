@@ -36,6 +36,7 @@ DATABASES = {
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
+ENABLE_DEBUG_TOOLBAR = True # Works only if DEBUG is True
 
 # Set this if latex is not in PATH
 # LATEX_BIN_DIR = 'C:\\Program Files\\texlive\\2011\\bin\\win32\\'
