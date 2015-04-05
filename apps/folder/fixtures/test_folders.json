@@ -1,0 +1,75 @@
+
+[
+  {
+    "pk": 1,
+    "model": "folder.folder",
+    "fields": {
+      "cache_searchcache": null,
+      "short_name": "root",
+      "name": "root",
+      "parent": null,
+      "author": 0,
+      "cache_tags": "",
+      "editable": false,
+      "parent_index": 0,
+      "cache_path": "",
+      "cache_ancestor_ids": "",
+      "hidden": false,
+      "cache_tag_ids": ""
+    }
+  },
+  {
+    "pk": 2,
+    "model": "folder.folder",
+    "fields": {
+      "cache_searchcache": null,
+      "short_name": "Natjecanja",
+      "name": "Natjecanja",
+      "parent": 1,
+      "author": 0,
+      "cache_tags": "",
+      "editable": false,
+      "parent_index": 0,
+      "cache_path": "natjecanja/",
+      "cache_ancestor_ids": "1",
+      "hidden": false,
+      "cache_tag_ids": ""
+    }
+  },
+  {
+    "pk": 3,
+    "model": "folder.folder",
+    "fields": {
+      "cache_searchcache": null,
+      "short_name": "Olimpijade",
+      "name": "Olimpijade",
+      "parent": 2,
+      "author": 0,
+      "cache_tags": "",
+      "editable": false,
+      "parent_index": 0,
+      "cache_path": "natjecanja/olimpijade/",
+      "cache_ancestor_ids": "1,2",
+      "hidden": false,
+      "cache_tag_ids": ""
+    }
+  },
+  {
+    "pk": 4,
+    "model": "folder.folder",
+    "fields": {
+      "cache_searchcache": null,
+      "short_name": "Hrvatska",
+      "name": "Hrvatska",
+      "parent": 2,
+      "author": 0,
+      "cache_tags": "",
+      "editable": false,
+      "parent_index": 0,
+      "cache_path": "natjecanja/hrvatska/",
+      "cache_ancestor_ids": "1,2",
+      "hidden": false,
+      "cache_tag_ids": ""
+    }
+  }
+]

@@ -28,6 +28,9 @@ def delete(request):
     tag = get_object_or_404(Tag, name=tag_name)
 
     old_tags = list(task.tags.values_list('name', flat=True))
+
+    # If task not tagged with this tag, ignore. (Although, we throw 404 if the
+    # tag doesn't exist. Consistency?)
     TaggedItem.objects.filter(
             tag=tag, object_id=task.id, content_type=task_ct).delete()
     new_tags = [x for x in old_tags if x != tag_name]

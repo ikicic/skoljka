@@ -50,7 +50,9 @@ def list(request):
 
 
     task_content_type = ContentType.objects.get_for_model(Task)
-    tags = Tag.objects.filter(tags_taggeditem_items__content_type=task_content_type).annotate(taggeditem_count=Count('tags_taggeditem_items'))
+    tags = Tag.objects \
+            .filter(tags_taggeditem_items__content_type=task_content_type) \
+            .annotate(taggeditem_count=Count('tags_taggeditem_items'))
 
     return {
         'tags': tags,

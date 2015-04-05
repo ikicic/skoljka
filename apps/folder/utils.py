@@ -23,7 +23,7 @@ from collections import Counter, defaultdict
 
 def get_folder_descendant_ids(folder_id):
     """
-        Given a folder ID, returns the list of IDs of all of its descendants.
+    Given a folder ID, returns the list of IDs of all of its descendants.
     """
 
     result = []
@@ -37,14 +37,14 @@ def get_folder_descendant_ids(folder_id):
 
 def get_task_folder_ids(task):
     """
-        Returns the list of IDs of all folders containing given task.
-        Combines result of many-to-many relation and folder-filters.
+    Returns the list of IDs of all folders containing given task.
+    Combines result of many-to-many relation and folder-filters.
 
-        Does not check permissions, and not supposed to do any checks.
+    Does not check permissions, and not supposed to do any checks.
 
-        Note that even search results are copied into FolderTask for
-        folder-filters, there may still be some of those Folders whose m2m
-        is not refreshed (i.e. their .cache_searchcache is None).
+    Note that even search results are copied into FolderTask for
+    folder-filters, there may still be some of those Folders whose m2m is not
+    refreshed (i.e. their .cache_searchcache is None).
     """
     # Implementation of permission check is very complicated, do not implement
     # it here! Use get_visible_folder_tree instead.
