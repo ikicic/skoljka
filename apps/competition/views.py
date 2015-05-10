@@ -27,6 +27,14 @@ from competition.utils import check_single_chain, get_teams_for_user_ids, \
 
 from datetime import datetime
 
+
+@response('competition_list.html')
+def competition_list(request):
+    competitions = Competition.objects \
+            .for_user(request.user, VIEW).distinct().order_by('-start_date')
+
+    return {'competitions': competitions, 'current_time': datetime.now()}
+
 @competition_view()
 @response('competition_homepage.html')
 def homepage(request, competition, data):
@@ -219,7 +227,8 @@ def task_list(request, competition, data):
                     all(chain.t_is_hidden for chain in category.chains)
 
     data['categories'] = sorted(categories.values(), key=lambda x: x.name)
-    data['max_chain_length'] = max(len(chain.ctasks) for chain in all_chains)
+    data['max_chain_length'] = 0 if not all_chains \
+            else max(len(chain.ctasks) for chain in all_chains)
     return data
 
 
@@ -234,7 +243,7 @@ def task_detail(request, competition, data, ctask_id):
             competition=competition, id=ctask_id)
     team = data['team']
     if not is_admin:
-        if not team or not data['has_started'] \
+        if (not team and not data['has_finished']) or not data['has_started'] \
                 or ctask.chain.unlock_minutes > data['minutes_passed']:
             raise Http404
 
@@ -299,7 +308,7 @@ def chain_list(request, competition, data):
     chain_dict = {chain.id: chain for chain in chains}
     ctasks = CompetitionTask.objects.filter(competition=competition) \
             .values_list('chain_id', 'task__author_id')
-    author_ids = zip(*ctasks)[1]
+    author_ids = [] if not ctasks else zip(*ctasks)[1]
     authors = User.objects.in_bulk(author_ids)
 
     for chain in chains:

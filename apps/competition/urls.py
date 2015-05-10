@@ -1,27 +1,23 @@
 from django.conf import settings
 from django.conf.urls.defaults import patterns, include, url
 
-def _join_urls(a, b):
-    if not a or not b:
-        return a + b
-    if a[-1] == '/': a = a[:-1]
-    if b[0] == '/': b = b[1:]
-    return a + '/' + b
+from libs.string_operations import join_urls
 
 def _make_patterns(*patterns):
     result = []
     shorthands = settings.COMPETITION_URLS
     for competition_id, url_path_prefix in shorthands.iteritems():
         for _regex, view in patterns:
-            regex = '^' + _join_urls(url_path_prefix, _regex)
+            regex = '^' + join_urls(url_path_prefix, _regex)
             result.append(url(regex, view, {'competition_id': competition_id}))
 
     for _regex, view in patterns:
-        regex = _join_urls(r'^competition/(?P<competition_id>\d+)/', _regex)
+        regex = join_urls(r'^competition/(?P<competition_id>\d+)/', _regex)
         result.append(url(regex, view))
 
     return result
 
+# Competition-related URLs, prefixed with competition/<id>/
 _patterns = _make_patterns(
     (r'$', 'homepage'),
     (r'chain/$', 'chain_list'),
@@ -37,4 +33,8 @@ _patterns = _make_patterns(
     (r'team/(?P<team_id>\d+)/$', 'team_detail'),
 )
 
-urlpatterns = patterns('competition.views', *_patterns)
+_extra_urls = [
+    (r'competition/$', 'competition_list'),
+]
+
+urlpatterns = patterns('competition.views', *(_patterns + _extra_urls))

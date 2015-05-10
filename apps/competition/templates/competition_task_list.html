@@ -17,7 +17,7 @@
   {% endif %}
 {% endif %}
 
-{% if not team %}
+{% if not team and not has_finished %}
   <div class="alert">
     Molimo vas, registrirajte tim za natjecanje, kako biste mogli vidjeti
     zadatke.
@@ -39,7 +39,7 @@
   </div>
 {% endif %}
 
-{% if team and has_started or is_admin %}
+{% if team and has_started or has_finished or is_admin %}
   <table id="comp-tasks">
     {% for category in categories %}
       {# hidden visible only if admin #}

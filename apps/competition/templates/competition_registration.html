@@ -39,13 +39,13 @@
           <th>Osnivač</th>
           <th>&nbsp;</th>
         </tr>
-        {% for team in team_invitations %}
+        {% for tm in team_invitations %}
           <tr>
-            <td>{{ team.name }}</td>
-            <td>{{ team.author|userlink }}</td>
+            <td>{{ tm.name }}</td>
+            <td>{{ tm.author|userlink }}</td>
             <td>
               <button type="submit" name="invitation-accept" class="btn"
-                  value="{{ team.id }}">
+                  value="{{ tm.id }}">
                 Prihvati
               </button>
             </td>
@@ -93,7 +93,7 @@
       <br>
       <input type="submit" class="btn btn-primary" value="Pošalji">
     </form>
-  {% else %}
+  {% elif team %}
     {% include 'inc_competition_team_detail.html' with preview_team=team preview_team_members=team_members %}
   {% endif %}
 {% endif %} {# registration open or is_admin #}

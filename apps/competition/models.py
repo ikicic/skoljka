@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User, Group
 from django.db import models
 
+from libs.string_operations import join_urls
+
 from permissions.constants import EDIT
 from permissions.models import BasePermissionsModel
 from post.generic import PostGenericRelation
@@ -9,6 +11,14 @@ from task.models import Task
 import re
 
 class Competition(BasePermissionsModel):
+    """
+    Instruction:
+        If using url_path_prefix, you also have to add ID and url prefix to
+        COMPETITION_URLS in settings/local.py.
+        url_path_prefix must have leading / if used.
+        admin_group must have VIEW and EDIT permissions for the competition
+        object.
+    """
     name = models.CharField(max_length=64)
     hidden = models.BooleanField(default=True)
     registration_open_date = models.DateTimeField()
@@ -32,6 +42,14 @@ class Competition(BasePermissionsModel):
 
     def get_absolute_url(self):
         return self.url_path_prefix or '/competition/{}/'.format(self.id)
+
+    def get_registration_url(self):
+        # Can this be achieved with Django's URL reversing?
+        # (self.url_path_prefix is the problem here...)
+        return join_urls(self.get_absolute_url(), 'registration')
+
+    def get_scoreboard_url(self):
+        return join_urls(self.get_absolute_url(), 'scoreboard')
 
 
 

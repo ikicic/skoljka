@@ -18,6 +18,17 @@ def G(male, female, gender):
         return female
     return male + '/' + female
 
+def join_urls(a, b):
+    """
+    Join two URLs making sure there is exactly one slash between them.
+    urlparse.urljoin doesn't work well with regex URLs user for views.
+    """
+    if not a or not b:
+        return a + b
+    if a[-1] == '/': a = a[:-1]
+    if b[0] == '/': b = b[1:]
+    return a + '/' + b
+
 def obfuscate_text(text):
     return re.sub('\\S', '?', text)
 
