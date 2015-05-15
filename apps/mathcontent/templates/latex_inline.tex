@@ -1,3 +1,4 @@
+{% autoescape off %}
 \documentclass{article}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -12,8 +13,8 @@
 \begin{document}
 \begin{preview}
 
-{{ equation|safe }}
+{{ equation }}
 
 \end{preview}
 \end{document}
-
+{% endautoescape %}

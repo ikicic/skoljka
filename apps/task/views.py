@@ -18,7 +18,7 @@ from folder.models import Folder
 from folder.utils import invalidate_cache_for_folders, \
         invalidate_folder_cache_for_task
 from mathcontent import latex
-from mathcontent.forms import MathContentForm
+from mathcontent.forms import AttachmentForm, MathContentForm
 from mathcontent.models import MathContent, Attachment
 from mathcontent.utils import check_and_save_attachment
 from permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS, VIEW_SOLUTIONS
