@@ -32,8 +32,13 @@ from datetime import datetime
 def competition_list(request):
     competitions = Competition.objects \
             .for_user(request.user, VIEW).distinct().order_by('-start_date')
+    member_of = list(TeamMember.objects \
+        .filter(member_id=request.user.id,
+            invitation_status=TeamMember.INVITATION_ACCEPTED) \
+        .values_list('team__competition_id', flat=True))
 
-    return {'competitions': competitions, 'current_time': datetime.now()}
+    return {'competitions': competitions, 'current_time': datetime.now(),
+            'member_of': member_of}
 
 @competition_view()
 @response('competition_homepage.html')
@@ -447,7 +452,11 @@ def notifications_admin(request, competition, data):
     team_ct = ContentType.objects.get_for_model(Team)
 
     posts = list(competition.posts.select_related('author', 'content'))
-    team_posts = list(Post.objects.filter(content_type=team_ct) \
+    team_ids = list(Team.objects \
+            .filter(competition=competition).values_list('id', flat=True))
+    # Post.objects.filter(team__competition_id=id, ct=...) makes an extra JOIN.
+    team_posts = list(Post.objects \
+            .filter(content_type=team_ct, object_id__in=team_ids) \
             .select_related('author', 'content'))
     user_id_to_team = \
             get_teams_for_user_ids([post.author_id for post in team_posts])

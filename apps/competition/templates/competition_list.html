@@ -29,12 +29,20 @@
     <td>
       {% if comp.registration_open_date < current_time %}
         {% if current_time < comp.end_date %}
-          <a href="{{ comp.get_registration_url }}">Registracija</a>
+          {% if comp.id in member_of %}
+            <a href="{{ comp.get_absolute_url }}">Ulaz</a>
+          {% else %}
+            <a href="{{ comp.get_registration_url }}" class="register">
+              Registracija
+            </a>
+          {% endif %}
         {% else %}
           <a href="{{ comp.get_scoreboard_url }}">Rezultati</a>
         {% endif %}
       {% else %}
-          <span class="comp-list-reg-not-open">Registracija još nije otvorena</span>
+        <span class="comp-list-reg-not-open">
+          Registracija još nije otvorena
+        </span>
       {% endif %}
     </td>
   </tr>
