@@ -21,7 +21,7 @@
   </tr>
 {% for comp in competitions %}
   {% if comp.hidden %}<tr class="comp-list-hidden">{% else %}<tr>{% endif %}
-    <td>{{ forloop.counter }}</td>
+    <td>{{ comp.id }}</td>
     <td><a href="{{ comp.get_absolute_url }}">{{ comp.name }}</a></td>
     <td>{{ comp.registration_open_date }}</td>
     <td>{{ comp.start_date }}</td>
