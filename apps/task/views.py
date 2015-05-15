@@ -359,9 +359,11 @@ def similar(request, id):
     sorted_tasks = sorted([(p, id) for id, p in sorted_tasks.iteritems()], reverse=True)
     similar_ids = [id for p, id in sorted_tasks[:6]]
 
-    similar = Task.objects.filter(id__in=similar_ids).select_related('content')
+    similar = list(Task.objects.for_user(request.user, VIEW) \
+            .filter(id__in=similar_ids).select_related('content'))
 
     return {
+        'all_tasks': [task] + similar,
         'task': task,
         'similar': similar,
         'view_type': 'similar_task_view_type',
