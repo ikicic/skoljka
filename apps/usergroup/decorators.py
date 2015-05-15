@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 
 from permissions.constants import VIEW, EDIT, EDIT_PERMISSIONS, ADD_MEMBERS
 
-from usergroup.models import UserGroup
+from usergroup.models import UserGroup, is_group_member
 
 from functools import wraps
 
@@ -53,7 +53,8 @@ def group_view(permission=VIEW):
             context_dict['can_edit_permissions'] = EDIT_PERMISSIONS in perm
 
             # Author of the group might not be a member.
-            context_dict['is_member'] = group.data.is_member(request.user)
+            context_dict['is_member'] = \
+                    is_group_member(group_id, request.user.id)
 
             return func(request, group, context_dict, *args, **kwargs)
 

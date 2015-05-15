@@ -9,6 +9,12 @@ from permissions.models import BasePermissionsModel, ObjectPermission, \
         get_permissions_for_object, has_group_perm
 from mathcontent.models import MathContent
 
+
+def is_group_member(group_id, user_id):
+    return User.groups.through.objects \
+            .filter(user_id=user_id, group_id=group_id).exists()
+
+
 # TODO: optimizirati ovaj upit, npr. rucno dati prava autoru, da se ovdje
 #       ne treba to navoditi
 
@@ -55,13 +61,8 @@ class UserGroup(models.Model):
     def get_members(self):
         return User.objects.filter(groups__pk=self.group.pk)
 
-    def is_member(self, user):
-        return User.groups.through.objects.filter(
-                user=user, group_id=self.group_id).exists()
-
 # iako ovo izgleda jako cudno (grupna prava za grupe), zapravo je jako korisno
 # grupa ima sama sebi dodijeljena neka prava (npr. VIEW)
-# TODO: zasto onda postoji is_member (koja je ipak bitna informacija)?
 
 # problem oko related_name, umjesto defaultnog 'group' stavio sam 'groups' (ikicic)
 Group.add_to_class('permissions', generic.GenericRelation(ObjectPermission, related_name='groups'))
@@ -73,10 +74,12 @@ def group__user_has_perm(self, user, type):
     Manual implementation of user_has_perm (BasePermissionsModel), as we can't
     extend Group class.
     """
-    if user.id == self.data.author_id:
-        return True
-    if type == VIEW and not self.data.hidden:
-        return True
+    data = self.data
+    if data:
+        if user.id == data.author_id:
+            return True
+        if type == VIEW and not data.hidden:
+            return True
     return has_group_perm(user, self, type)
 
 def group__get_user_permissions(self, user):
@@ -84,11 +87,12 @@ def group__get_user_permissions(self, user):
     Manual implementation of get_user_permissions (BasePermissionsModel), as
     we can't extend Group class.
     """
-    if self.data.author_id == user.id:
+    data = self.data
+    if data and data.author_id == user.id:
         return group__object_permissions
     else:
         perm = get_permissions_for_object(user, self)
-        if not self.data.hidden:
+        if not (data and data.hidden):
             perm.append(VIEW)
         return perm
 

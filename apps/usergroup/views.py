@@ -13,7 +13,7 @@ from userprofile.models import user_refresh_group_cache
 
 from usergroup.decorators import group_view
 from usergroup.forms import GroupForm, UserGroupForm, UserEntryForm
-from usergroup.models import UserGroup, GroupExtended
+from usergroup.models import UserGroup, GroupExtended, is_group_member
 
 from skoljka.libs.decorators import response
 
@@ -45,7 +45,6 @@ def leave(request, group, context_dict):
 @group_view()
 @response('usergroup_detail.html')
 def detail(request, group, context_dict):
-    # FIXME: pipkavo
     if group.data is None:
         return ('/profile/%d/' % group.user_set.all()[0].id,)
 
@@ -70,7 +69,7 @@ def new(request, group_id=None):
         usergroup.hidden = bool(usergroup.hidden)
 
         perm = group.get_user_permissions(request.user)
-        is_member = group.data.is_member(request.user)
+        is_member = is_group_member(group.id, request.user.id)
         if EDIT not in perm:
             return (403, 'You do not have permission to edit this group\'s details.')
 
