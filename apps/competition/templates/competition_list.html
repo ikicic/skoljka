@@ -10,8 +10,7 @@
   <span>Vrijeme: {{ current_time|date:"H:i" }}</span>
 </div>
 
-<table width="60%" class="table-striped table-condensed"
-    style="text-align: center;">
+<table id="comp-list" class="table-striped table-condensed">
   <tr>
     <th width="30">#</th>
     <th>Natjecanje</th>
@@ -21,7 +20,7 @@
     <th>&nbsp;</th>
   </tr>
 {% for comp in competitions %}
-  <tr>
+  {% if comp.hidden %}<tr class="comp-list-hidden">{% else %}<tr>{% endif %}
     <td>{{ forloop.counter }}</td>
     <td><a href="{{ comp.get_absolute_url }}">{{ comp.name }}</a></td>
     <td>{{ comp.registration_open_date }}</td>
@@ -41,7 +40,7 @@
   </tr>
 {% empty %}
   <tr>
-    <td colspan="3">Nema natjecanja</td>
+    <td colspan="5">Nema natjecanja</td>
   </tr>
 {% endfor %}
 </table>

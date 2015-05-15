@@ -38,18 +38,18 @@ def has_group_perm(user, instance, type, content_type=None):
         ).exists()
 
 # don't waste time making values unique
-def get_permissions_for_object_by_id(user, object_id, content_type):
+def get_permissions_for_object_by_id(user, object_id, content_type_id):
     if not user.is_authenticated():
         return []
     return list(ObjectPermission.objects.filter(
             object_id=object_id,
-            content_type=content_type,
+            content_type_id=content_type_id,
             group_id__in=user.get_profile().get_group_ids(),
         ).values_list('permission_type', flat=True))
 
 def get_permissions_for_object(user, obj):
     content_type = ContentType.objects.get_for_model(obj)
-    return get_permissions_for_object_by_id(user, obj.id, content_type)
+    return get_permissions_for_object_by_id(user, obj.id, content_type.id)
 
 def convert_permission_names_to_values(names):
     permission_types = []
