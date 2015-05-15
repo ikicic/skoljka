@@ -198,10 +198,14 @@ if DEBUG and ENABLE_DEBUG_TOOLBAR:
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
 
-# TODO: Finish this. Admin emails are still not being sent!
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        }
+    },
     'formatters': {
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
@@ -224,6 +228,11 @@ LOGGING = {
             'level': 'WARNING',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'filters': ['require_debug_false'],
         }
     },
     'loggers': {
@@ -234,9 +243,9 @@ LOGGING = {
         },
         'django.request': {
 #            'handlers': ['sentry'],
-            'handlers': ['console'],
-            'level': 'WARNING',
-            'propagate': False,
+            'handlers': ['console', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
         },
 #        'sentry.errors': {
 #            'level': 'DEBUG',

@@ -6,6 +6,7 @@ from django.db.models import Max, Q
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
+from django.views.decorators.debug import sensitive_post_parameters
 
 from userprofile.forms import UserCreationForm, UserEditForm, UserProfileEditForm
 from userprofile.models import UserProfile
@@ -26,6 +27,7 @@ def logout(request):
     auth_logout(request)
     return redirect('/')
 
+@sensitive_post_parameters()
 def new_register(request):
     if request.user.is_authenticated():
         return HttpResponseRedirect('/')
