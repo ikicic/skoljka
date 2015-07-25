@@ -42,7 +42,7 @@ class GroupEntryField(forms.CharField):
 
         error = set(x.lower() for x in names) - groups_lowercase
 
-        # Do not immediately reject if len(error) > 0. List *all* invalid
+        # Do not immediately reject if len(error) > 0. List *all* invalid or
         # inaccessible groups.
 
         # Check permissions. Skip user private groups.

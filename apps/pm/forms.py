@@ -5,7 +5,7 @@ from usergroup.fields import GroupEntryField
 
 
 class NewMessageForm(forms.ModelForm):
-    list = GroupEntryField()
+    list = GroupEntryField(required=True)
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user') # user must be given!
