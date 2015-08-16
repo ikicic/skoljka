@@ -215,6 +215,18 @@ td.comp-chain-bonus {
   text-align: right;
 }
 
+#comp-chain-edit {
+  .form-section {
+    text-transform: uppercase;
+    color: gray;
+    font-weight: bold;
+    margin-top: 30px;
+  }
+  .control-group {
+    margin-bottom: 5px;
+  }
+}
+
 .progress .bar + .bar {
   box-shadow: inset 1px 0 0 rgba(0,0,0,.15), inset 0 -1px 0 rgba(0,0,0,.15);
 }

@@ -56,26 +56,64 @@ typewatch = (function(){
   }
 })();
 
-/* Automatically add preview button, help link and div after MathContentForm */
 $(function(){
-  var mc = $('.mathcontent-text');
-  var f = mc.closest('form');
-  /* Preview button and help link */
-  f.children('input[type=submit]').after(
-      ' <button type="button" class="btn mathcontent-preview-button">Pregled</button>'
-    + ' <a href="/help/instructions/#format" title="Pomoć oko formata" target="_blank"><i class="icon-question-sign"></i></a>'
-  )
-  f.append('<div class="mathcontent-preview outset" style="display:none;"></div>')
+  /* Automatically add preview button, help link and div after each
+   * MathContentForm marked with .mc-auto-preview-button. */
+  var counter = 0;
+  $('.mc-auto-preview-button').each(function(index) {
+    var mc = $(this);
+    var form = mc.closest('form');
+    var source_id = mc.attr('id');
+    if (!source_id) {
+      source_id = 'mc-source-auto-id' + counter;
+      mc.attr('id', source_id);
+    }
+    var target_id = 'mc-target-auto-id' + counter;
+    form.children('input[type=submit]').after(
+        ' <button type="button" class="btn mc-preview-button" ' +
+            'data-source="' + source_id + '" ' +
+            'data-target="' + target_id + '">' +
+          'Pregled</button>' +
+        ' <a href="/help/instructions/#format" title="Pomoć oko formata" ' +
+            'target="_blank"><i class="icon-question-sign"></i></a>');
+    form.append(
+      '<div class="mc-preview outset" id="' + target_id + '" ' +
+        'style="display:none;"></div>');
+    ++counter;
+  });
 
-  /* Preview button, send AJAX request to convert to html (and generate necessarry .png files) */
-  $('.mathcontent-preview-button').click(function(){
-    var t = $('.mathcontent-text').val();
-    var p = $('.mathcontent-preview');
-    p.html('Učitavanje...');
-    p.attr('style', '');
-    $.get('/ajax/mathcontent/preview/', {text: t}, function(d){
-      p.html(d);
-    });
+  /* Preview button, send AJAX request to convert to html (and generate
+   * necessarry .png files). */
+  $('.mc-preview-button').click(function(){
+    var source = $('#' + $(this).attr('data-source'));
+    var text = source.val();
+    /* Currently we ignore only if the response from the last click already
+     * arrived, and not if there is an AJAX request still running. */
+    if (text == source.data('mc-last-refresh'))
+      return;
+    var preview = $('#' + $(this).attr('data-target'));
+    if (text.length) {
+      preview.html("Učitavanje...");
+      preview.attr('style', '');
+      $.get('/ajax/mathcontent/preview/', {text: text}, function(result){
+        source.data('mc-last-refresh', text);
+        preview.html(result);
+      });
+    } else {
+      preview.html("");
+    }
+  });
+
+  /* Trigger click on all preview buttons. */
+  $('.mc-preview-all').click(function() {
+    console.log('adfasdf');
+    $('.mc-preview-button').click();
+  });
+
+  /* Refresh all previews on Ctrl-X. */
+  $(document).bind('keydown', function(event) {
+    if (event.ctrlKey && event.keyCode == 88)
+      $('.mc-preview-button').click();
   });
 });
 

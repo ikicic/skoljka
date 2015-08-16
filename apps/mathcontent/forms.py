@@ -19,7 +19,7 @@ class MathContentForm(ModelForm):
         self.fields['text'].required = not blank
         self.fields['text'].widget.attrs.update({
             'rows': 10,
-            'class': 'mathcontent-text',
+            'class': 'mc-text mc-auto-preview-button',
         })
 
     class Meta:

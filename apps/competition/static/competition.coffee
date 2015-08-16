@@ -79,17 +79,6 @@ window.reg_add_listeners = ->
     )
 
 $ ->
-  $('#comp-chain-edit').on 'click', '.comp-chain-edit-preview', ->
-    row = $(@).closest '.creg-table-row'
-    text = $('#' + $(@).attr('data-source')).val()
-    target = row.prev().find 'div.outset'
-    $.get(
-      '/ajax/mathcontent/preview/'
-      text: text
-      (html) ->
-        target.html html
-    )
-
   $('#comp-post-target').change ->
     # value == 0 stands for competition (global), value != 0 for team
     value = $(@).val()

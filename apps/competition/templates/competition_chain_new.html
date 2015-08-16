@@ -23,42 +23,35 @@
 
   <p>Za brisanje, označite odgovarajuće polje <i>Izbriši</i>, te pritisnite
     <i>Pošalji</i>.</p>
+
+  <p>Kombinacijom <b>Ctrl-X</b> osvježavaju se svi pregledi tekstova zadataka.
   </p>
 </div>
 
-<form action="{{ request.get_full_path }}" method="POST" id="comp-chain-edit">
+<form action="{{ request.get_full_path }}" method="POST" id="comp-chain-edit"
+    class="form-horizontal">
   {% csrf_token %}
   {{ formset.management_form }}
-  <table class="split-form">
-    <tr class="split-form-row"><th colspan="2">Lanac</th></tr>
-    {{ chain_form.as_table }}
-
-    {% for form in formset %}
-      <tr class="split-form-row">
-        <th colspan="2">Zadatak #{{ forloop.counter }}</th>
-      </tr>
-      {{ form.as_table }}
-      <tr>
-        <td colspan="2">
-          <div class="outset">
-            {% if form.instance.pk %}
-              {{ form.instance.task.content.render }}
-            {% endif %}
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2">
-          <button type="button" class="btn comp-chain-edit-preview"
-              data-source="{{ form.text.auto_id }}">
-            Pregled
-          </button>
-        </td>
-      </tr>
-    {% endfor %}
-  </table>
-  <input type="submit" value="Pošalji" class="btn btn-primary">
+  <div class="form-section">Lanac</div>
+  {% for field in chain_form %}
+    <div class="control-group">
+      <label for="{{ field.html_name }}" class="control-label">
+        {{ field.label }}:
+      </label>
+      <div class="controls">
+        {{ field }}
+      </div>
+    </div>
+  {% endfor %}
+  {% for form in formset %}
+    {% include 'inc_competition_chain_form.html' with form=form index=forloop.counter %}
+  {% endfor %}
+  <div class="controls">
+    <input type="submit" value="Pošalji" class="btn btn-primary">
+    <button type="button" class="btn mc-preview-all">
+      Pregled svih zadataka
+    </button>
+  </div>
 </form>
 
 {% endblock content %}
-
