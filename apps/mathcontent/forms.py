@@ -9,7 +9,8 @@ class AttachmentForm(ModelForm):
         fields = ('file', )
 
 class MathContentForm(ModelForm):
-    def __init__(self, auto_preview=True, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        auto_preview = kwargs.pop('auto_preview', True)
         blank = kwargs.pop('blank', False)
         label = kwargs.pop('label', None)
         super(MathContentForm, self).__init__(*args, **kwargs)

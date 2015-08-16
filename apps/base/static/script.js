@@ -110,9 +110,9 @@ $(function(){
     $('.mc-preview-button').click();
   });
 
-  /* Refresh all previews on Ctrl-X. */
+  /* Refresh all previews on Ctrl+M. */
   $(document).bind('keydown', function(event) {
-    if (event.ctrlKey && event.keyCode == 88)
+    if (event.ctrlKey && event.keyCode == 77)
       $('.mc-preview-button').click();
   });
 });
