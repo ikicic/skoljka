@@ -1,8 +1,5 @@
 ﻿from django import forms
 from task.models import Task
-from mathcontent.forms import MathContentForm
-
-from taggit.utils import parse_tags
 
 from permissions.constants import VIEW
 from permissions.utils import filter_objects_with_permission

@@ -9,7 +9,7 @@ class AttachmentForm(ModelForm):
         fields = ('file', )
 
 class MathContentForm(ModelForm):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, auto_preview=True, *args, **kwargs):
         blank = kwargs.pop('blank', False)
         label = kwargs.pop('label', None)
         super(MathContentForm, self).__init__(*args, **kwargs)
@@ -17,9 +17,13 @@ class MathContentForm(ModelForm):
         if label:
             self.fields['text'].label = label
         self.fields['text'].required = not blank
+
+        attr_class = 'mc-text'
+        if auto_preview:
+            attr_class += ' mc-auto-preview-button'
         self.fields['text'].widget.attrs.update({
             'rows': 10,
-            'class': 'mc-text mc-auto-preview-button',
+            'class': attr_class,
         })
 
     class Meta:

@@ -1,5 +1,4 @@
-﻿from django import forms
-from django.conf import settings
+﻿from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
@@ -198,7 +197,7 @@ def new(request, task_id=None, is_file=None):
         # Files can have blank description (i.e. math content)
         task_form = form_class(request.POST, instance=task, user=request.user)
         math_content_form = MathContentForm(request.POST, instance=math_content,
-            blank=is_file, label=math_content_label)
+            blank=is_file, label=math_content_label, auto_preview=False)
         attachment_form = is_file and not edit \
             and AttachmentForm(request.POST, request.FILES)
 
@@ -264,7 +263,7 @@ def new(request, task_id=None, is_file=None):
     else:
         task_form = form_class(instance=task)
         math_content_form = MathContentForm(instance=math_content,
-            blank=is_file, label=math_content_label)
+            blank=is_file, label=math_content_label, auto_preview=False)
         attachment_form = is_file and not edit and AttachmentForm()
 
     forms = [task_form, math_content_form]

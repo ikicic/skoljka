@@ -50,20 +50,25 @@
 
 <br>
 <div style="width: 70%; margin-left: 10px; font-style: italic;">
-  {% if is_file %}
-    Napomena: Nemojte dodavati datoteke za čiji sadržaj nemate ovlasti!
-  {% else %}
-    Napomena: Nemojte dodavati zadatke za koja nemate ovlasti. Također, nemojte
-    dodavati zadatke s domaćih natjecanja (općinskih, županijskih, državnih,
-    izbornih) i s olimpijada (IMO, shortlist, MEMO, HMO), jer će to prije ili
-    poslije dodati mentori. Ukoliko dodajete zadatke s natjecanja, po mogućnosti
-    dodajte sve zadatke odjednom (svih, primjerice, pet zadataka).
-  {% endif %}
+  <p>
+    {% if is_file %}
+      Napomena: Nemojte dodavati datoteke za čiji sadržaj nemate ovlasti!
+    {% else %}
+      Napomena: Nemojte dodavati zadatke za koja nemate ovlasti. Također,
+      nemojte dodavati zadatke s domaćih natjecanja (općinskih, županijskih,
+      državnih, izbornih) i s olimpijada (IMO, shortlist, MEMO, HMO), jer će to
+      prije ili poslije dodati mentori. Ukoliko dodajete zadatke s natjecanja,
+      po mogućnosti dodajte sve zadatke odjednom (svih, primjerice, pet
+      zadataka).
+    {% endif %}
+  </p>
+  <p>Hint: Kombinacijom <b>Ctrl-X</b> osvježava se pregled teksta zadatka.</p>
 </div>
 
-<br><br>
+<br>
 
-<form {% if is_file %}enctype="multipart/form-data"{% endif %} action="{{ action_url }}" method="post">
+<form {% if is_file %}enctype="multipart/form-data"{% endif %}
+    action="{{ action_url }}" method="post">
   {% csrf_token %}
   <table class="kill-br split-form">
     {# Any better way to split a form? #}
@@ -71,9 +76,25 @@
     <tr class="split-form-row"><th colspan="2">Osnovno</th></tr>
     {% get_fieldset name,tags,source as first_part from forms.0 %}
     {{ first_part.as_table }}
-
     <tr class="split-form-row"><th colspan="2">Sadržaj</th></tr>
     {{ forms.1.as_table }}
+    <tr>
+      <th>
+        <button type="button" class="btn mc-preview-button"
+            data-source="{{ forms.1.text.auto_id }}"
+            data-target="task-preview">
+          Pregled
+        </button>
+      </th>
+      <td>
+        <div class="outset" id="task-preview">
+          {% if task.pk %}
+            {{ task.content.render }}
+          {% endif %}
+        </div>
+      </td>
+    </tr>
+
     {{ forms.2.as_table }} {# if taskfile #}
 
     <tr class="split-form-row"><th colspan="2">Napredno</th></tr>
