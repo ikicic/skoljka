@@ -69,7 +69,9 @@ def competition_view(permission=VIEW):
                     'has_started': has_started, 'has_finished': has_finished,
                     'nearly_finished': nearly_finished,
                     'current_time': current_time,
-                    'minutes_passed': minutes_passed}
+                    'minutes_passed': minutes_passed,
+                    'is_scoreboard_frozen':
+                        current_time > competition.scoreboard_freeze_date}
 
             return func(request, competition, data, *args, **kwargs)
 

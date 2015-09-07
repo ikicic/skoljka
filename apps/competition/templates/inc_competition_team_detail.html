@@ -1,7 +1,9 @@
+{% load competition_tags %}
+
 <h3 class="comp-header">Tim {{ preview_team.name }}</h3>
 
 <div class="team-score-container">
-  Bodovi: <span class="team-score">{{ preview_team.cache_score }}</span>
+  Bodovi: <span class="team-score">{% team_score preview_team %}</span>
 </div>
 
 Članovi:

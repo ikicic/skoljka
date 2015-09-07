@@ -103,3 +103,21 @@ def legend_chain(_class, text):
                 u'<td width="100%"><span class="badge {}">+1</span></td>' \
                 u'<td>{}</td>' \
             u'</tr>'.format(_class, text))
+
+@register.simple_tag(takes_context=True)
+def team_score(context, team):
+    """Outputs formatted team score.
+
+    Takes into account if the scoreboard is frozen, were there any submissions
+    after the freeze, is the current user a member of the given team or if it
+    is a competition admin.
+    """
+    result = str(team.cache_score)
+    if context['is_scoreboard_frozen']:
+        before = team.cache_score_before_freeze
+        max_after = team.cache_max_score_after_freeze
+        if before != max_after:
+            result += " (+{}?)".format(max_after - before)
+            if context['team'] == team or context['is_admin']:
+                result += " ({})".format(team.cache_score)
+    return result

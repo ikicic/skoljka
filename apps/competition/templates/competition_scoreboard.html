@@ -1,4 +1,5 @@
 {% extends "competition_base.html" %}
+{% load competition_tags %}
 
 {% block content %}
 
@@ -13,6 +14,24 @@
 {% if has_finished %}
   <div class="alert">
     Natjecanje je završilo!
+  </div>
+{% endif %}
+
+{% if is_scoreboard_frozen %}
+  <div class="alert">
+    Rang lista i bodovi su zamrznuti. Konačni rezultati će biti dostupni nakon
+    kraja natjecanja.
+    {% if is_admin %}
+      {% if sort_by_actual_score %}
+        <a href="{% comp_url 'scoreboard' %}">
+          Sortiraj po zamrznutim bodovima
+        </a>
+      {% else %}
+        <a href="{% comp_url 'scoreboard' %}?sort_by_actual_score=1">
+          Sortiraj po pravim bodovima
+        </a>
+      {% endif %}
+    {% endif %}
   </div>
 {% endif %}
 
@@ -33,12 +52,22 @@
             {{ t.t_position }}{{ t.is_test|yesno:"*," }}
           </td>
           <td><a href="{{ t.get_absolute_url }}">{{ t.name }}</a></td>
-          <td>{{ t.cache_score }}</td>
+          <td>{% team_score t %}</td>
         </tr>
       {% endfor %}
     </table>
   </div>
 </div>
 
-{% endblock content %}
+{% if is_admin %}
+  <form action="" method="post" id="comp-scoreboard-admin-refresh">
+    {% csrf_token %}
+    <input type="submit" name="refresh" value="Refresh" class="btn">
+    -- Ne koristi ako nije nužno!
+  </form>
+  {% if refresh_calculation_time %}
+    <span>Refresh time: {{ refresh_calculation_time.total_seconds }}s</span>
+  {% endif %}
+{% endif %}
 
+{% endblock content %}

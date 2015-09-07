@@ -8,6 +8,7 @@ from permissions.models import BasePermissionsModel
 from post.generic import PostGenericRelation
 from task.models import Task
 
+from datetime import datetime
 import re
 
 class Competition(BasePermissionsModel):
@@ -31,6 +32,7 @@ class Competition(BasePermissionsModel):
     description_template_filename = models.CharField(blank=True, max_length=255)
     rules_template_filename = models.CharField(blank=True, max_length=255)
     url_path_prefix = models.CharField(blank=True, max_length=64)
+    scoreboard_freeze_date = models.DateTimeField()
 
     posts = PostGenericRelation(placeholder="Poruka")
 
@@ -57,7 +59,9 @@ class Team(models.Model):
     name = models.CharField(max_length=40)
     author = models.ForeignKey(User)
     competition = models.ForeignKey(Competition)
-    cache_score = models.IntegerField(default=0)
+    cache_score = models.IntegerField(default=0, db_index=True)
+    cache_score_before_freeze = models.IntegerField(default=0, db_index=True)
+    cache_max_score_after_freeze = models.IntegerField(default=0)
     is_test = models.BooleanField(default=False)
 
     posts = PostGenericRelation(placeholder="Poruka")
@@ -134,9 +138,15 @@ class CompetitionTask(models.Model):
 class Submission(models.Model):
     ctask = models.ForeignKey(CompetitionTask)
     team = models.ForeignKey(Team)
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField()
     result = models.CharField(max_length=255)
     cache_is_correct = models.BooleanField()
+
+    def save(self, *args, **kwargs):
+        # Using auto_add_now would break tests.
+        if self.date is None:
+            self.date = datetime.now()
+        super(Submission, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return "ctask={} team={} {}".format(

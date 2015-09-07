@@ -51,8 +51,8 @@
       "first_name": "Alice",
       "last_name": "AliceLast",
       "is_active": true,
-      "is_superuser": true,
-      "is_staff": true,
+      "is_superuser": false,
+      "is_staff": false,
       "last_login": "2014-05-11T17:41:52",
       "groups": [
         2

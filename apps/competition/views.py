@@ -22,9 +22,11 @@ from competition.forms import ChainForm, CompetitionTask, \
         BaseCompetitionTaskFormSet, TeamForm, TaskListAdminPanelForm
 from competition.models import Chain, Competition, CompetitionTask, Team, \
         TeamMember, Submission
-from competition.utils import check_single_chain, get_teams_for_user_ids, \
-        lock_ctasks_in_chain, get_ctask_statistics
+from competition.utils import update_score_on_ctask_action, preprocess_chain, \
+        get_teams_for_user_ids, lock_ctasks_in_chain, get_ctask_statistics, \
+        refresh_teams_cache_score
 
+from collections import defaultdict
 from datetime import datetime
 
 
@@ -150,24 +152,36 @@ def rules(request, competition, data):
 @competition_view()
 @response('competition_scoreboard.html')
 def scoreboard(request, competition, data):
+    if data['is_admin'] and 'refresh' in request.POST:
+        start = datetime.now()
+        teams = Team.objects.filter(competition=data['competition'])
+        refresh_teams_cache_score(teams)
+        data['refresh_calculation_time'] = datetime.now() - start
+
     extra = {} if data['is_admin'] else {'is_test': False}
+    sort_by_actual_score = data['is_admin'] and \
+            request.GET.get('sort_by_actual_score') == '1'
+    order_by = '-cache_score' if sort_by_actual_score \
+            else '-cache_score_before_freeze'
     teams = list(Team.objects.filter(competition=competition, **extra) \
-            .order_by('-cache_score', 'id') \
-            .only('id', 'name', 'cache_score', 'is_test'))
+            .order_by(order_by, 'id') \
+            .only('id', 'name', 'cache_score', 'cache_score_before_freeze',
+                  'cache_max_score_after_freeze', 'is_test'))
 
     last_score = -1
     last_position = 1
     position = 1
     for team in teams:
         team.competition = competition
-        if not team.is_test and team.cache_score != last_score:
+        if not team.is_test and team.cache_score_before_freeze != last_score:
             last_position = position
         team.t_position = last_position
         if not team.is_test:
-            last_score = team.cache_score
+            last_score = team.cache_score_before_freeze
             position += 1
 
     data['teams'] = teams
+    data['sort_by_actual_score'] = sort_by_actual_score
     return data
 
 
@@ -246,6 +260,7 @@ def task_detail(request, competition, data, ctask_id):
             CompetitionTask.objects.select_related('chain', 'task',
                 'task__content', *extra),
             competition=competition, id=ctask_id)
+    ctask_id = int(ctask_id)
     team = data['team']
     if not is_admin:
         if (not team and not data['has_finished']) or not data['has_started'] \
@@ -253,51 +268,51 @@ def task_detail(request, competition, data, ctask_id):
             raise Http404
 
     if team:
-        submissions = list(Submission.objects \
-                .filter(ctask=ctask, team=team) \
-                .order_by('date') \
-                .only('id', 'result', 'cache_is_correct'))
-        was_solved = any(x.cache_is_correct for x in submissions)
-        ctasks = check_single_chain(ctask.chain, team, preloaded_ctask=ctask,
-                competition=competition)
+        ctasks, chain_submissions = preprocess_chain(
+                competition, ctask.chain, team, preloaded_ctask=ctask)
+        submissions = [x for x in chain_submissions if x.ctask_id == ctask_id]
+        submissions.sort(key=lambda x: x.date)
 
         if data['has_finished']:
             ctask.t_is_locked = False
 
         if ctask.t_is_locked and not is_admin:
-            raise Http404 # Bye
+            raise Http404
 
         if request.method == 'POST' and (not data['has_finished'] or is_admin):
+            submission = None
+            delete = False
             if is_admin and 'delete-submission' in request.POST:
-                submission_id = int(request.POST['delete-submission'])
-                Submission.objects.filter(id=submission_id).delete()
-                submissions = filter(lambda x: x.id != submission_id,
-                        submissions) # Remove the deleted submission.
-
-            if 'result' in request.POST:
+                try:
+                    submission = Submission.objects.get(
+                            id=request.POST['delete-submission'])
+                    chain_submissions = \
+                            [x for x in chain_submissions if x != submission]
+                    submissions = [x for x in submissions if x != submission]
+                    submission.delete()
+                    delete = True
+                except Submission.DoesNotExist:
+                    pass
+            elif 'result' in request.POST:
                 result = request.POST['result'].strip()
                 if result and len(submissions) < ctask.max_submissions:
                     is_correct = ctask.check_result(result)
                     submission = Submission(ctask=ctask, team=team,
                             result=result, cache_is_correct=is_correct)
                     submission.save()
+                    chain_submissions.append(submission)
                     submissions.append(submission)
+            else:
+                return 400  # Bad request.
 
-            chain_was_solved = all(ctask.t_is_solved for ctask in ctasks)
-            is_solved = any(x.cache_is_correct for x in submissions)
-            if was_solved != is_solved:
-                ctask.t_is_solved = is_solved
-                chain_is_solved = all(ctask.t_is_solved for ctask in ctasks)
-                delta = (int(is_solved) - int(was_solved)) * ctask.score
-                delta += (int(chain_is_solved) - int(chain_was_solved)) \
-                        * ctask.chain.bonus_score
-                team.cache_score += delta
-                team.save()
-        else:
-            is_solved = was_solved
+            update_score_on_ctask_action(competition, team, ctask.chain, ctask,
+                    submission, delete, chain_ctask_ids=[x.id for x in ctasks],
+                    chain_submissions=chain_submissions)
+
+            return (ctask.get_absolute_url(), )
 
         data['submissions'] = submissions
-        data['is_solved'] = is_solved
+        data['is_solved'] = any(x.cache_is_correct for x in submissions)
         data['submissions_left'] = ctask.max_submissions - len(submissions)
 
     data['ctask'] = ctask
