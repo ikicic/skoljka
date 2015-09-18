@@ -1,19 +1,8 @@
 {% load base_tags %} 
+{% load bootstrap_toolkit %}
 
 <div class="form-section">Zadatak #{{ index }}</div>
-{% for field in form.visible_fields %}
-  <div class="control-group">
-    <label for="{{ field.html_name }}" class="control-label">
-      {{ field.label|fix_label_colon }}
-    </label>
-    <div class="controls">
-      {{ field }}
-    </div>
-  </div>
-{% endfor %}
-{% for field in form.hidden_fields %}
-  {{ field }}
-{% endfor %}
+{% bootstrap_form form layout="horizontal" %}
 <div class="control-group">
   <div class="control-label">
     <button type="button" class="btn mc-preview-button"

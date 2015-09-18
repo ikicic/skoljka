@@ -159,6 +159,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
+    'bootstrap_toolkit',
     'django_sorting',
     'pagination',
     'pipeline',

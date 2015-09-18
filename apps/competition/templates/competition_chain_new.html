@@ -1,5 +1,6 @@
 {% extends "competition_base.html" %}
 
+{% load bootstrap_toolkit %}
 {% load competition_tags %}
 
 {% block content %}
@@ -33,16 +34,7 @@
   {% csrf_token %}
   {{ formset.management_form }}
   <div class="form-section">Lanac</div>
-  {% for field in chain_form %}
-    <div class="control-group">
-      <label for="{{ field.html_name }}" class="control-label">
-        {{ field.label }}:
-      </label>
-      <div class="controls">
-        {{ field }}
-      </div>
-    </div>
-  {% endfor %}
+  {% bootstrap_form chain_form layout="horizontal" %}
   {% for form in formset %}
     {% include 'inc_competition_chain_form.html' with form=form index=forloop.counter %}
   {% endfor %}
