@@ -3,6 +3,7 @@ from django.db import models
 
 from libs.string_operations import join_urls
 
+from competition.evaluator import EVALUATOR_V1
 from permissions.constants import EDIT
 from permissions.models import BasePermissionsModel
 from post.generic import PostGenericRelation
@@ -33,6 +34,7 @@ class Competition(BasePermissionsModel):
     rules_template_filename = models.CharField(blank=True, max_length=255)
     url_path_prefix = models.CharField(blank=True, max_length=64)
     scoreboard_freeze_date = models.DateTimeField()
+    evaluator_version = models.IntegerField(default=EVALUATOR_V1)
 
     posts = PostGenericRelation(placeholder="Poruka")
 

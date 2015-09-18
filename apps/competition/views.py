@@ -18,7 +18,7 @@ from task.models import Task
 from userprofile.forms import AuthenticationFormEx
 
 from competition.decorators import competition_view
-from competition.forms import ChainForm, CompetitionTask, \
+from competition.forms import ChainForm, CompetitionTask, CompetitionTaskForm, \
         BaseCompetitionTaskFormSet, TeamForm, TaskListAdminPanelForm
 from competition.models import Chain, Competition, CompetitionTask, Team, \
         TeamMember, Submission
@@ -389,9 +389,14 @@ def chain_new(request, competition, data, chain_id=None):
     # CompetitionTaskFormSet = modelformset_factory(CompetitionTask,
     #         formset=BaseCompetitionTaskFormSet,
     #         fields=('correct_result', 'score'), extra=3)
-    from competition.forms import CompetitionTaskForm
+    class CompetitionTaskFormLambda(CompetitionTaskForm):
+        def __init__(self, *args, **kwargs):
+            super(CompetitionTaskFormLambda, self).__init__(
+                    evaluator_version=competition.evaluator_version,
+                    *args, **kwargs)
+
     CompetitionTaskFormSet = modelformset_factory(CompetitionTask,
-            form=CompetitionTaskForm, formset=BaseCompetitionTaskFormSet,
+            form=CompetitionTaskFormLambda, formset=BaseCompetitionTaskFormSet,
             extra=5, can_order=True, can_delete=True)
 
     POST = request.POST if request.method == 'POST' else None

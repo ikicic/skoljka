@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.forms.models import BaseModelFormSet, ModelForm
 
 from competition.models import Chain, CompetitionTask, Team, TeamMember
+from competition.evaluator import parse_official, InvalidOfficial
 
 
 class BaseCompetitionTaskFormSet(BaseModelFormSet):
@@ -17,6 +18,7 @@ class CompetitionTaskForm(ModelForm):
     text = forms.CharField(widget=forms.Textarea)
 
     def __init__(self, *args, **kwargs):
+        self.evaluator_version = kwargs.pop('evaluator_version')
         super(CompetitionTaskForm, self).__init__(*args, **kwargs)
         if self.instance.pk:
             self.fields['text'].initial = self.instance.task.content.text
@@ -30,6 +32,14 @@ class CompetitionTaskForm(ModelForm):
         super(CompetitionTaskForm, self).clean()
         self.instance._text = self.cleaned_data.get('text')
         return self.cleaned_data
+
+    def clean_correct_result(self):
+        data = self.cleaned_data['correct_result']
+        try:
+            parse_official(self.evaluator_version, data)
+        except InvalidOfficial as e:
+            raise forms.ValidationError(unicode(e))
+        return data
 
     class Meta:
         model = CompetitionTask
