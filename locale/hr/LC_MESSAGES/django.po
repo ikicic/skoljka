@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-20 12:48+0200\n"
-"PO-Revision-Date: 2015-09-18 21:30+0100\n"
+"POT-Creation-Date: 2015-09-20 17:42+0200\n"
+"PO-Revision-Date: 2015-09-20 17:47+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -15,22 +15,9 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2\n"
 
-#: apps/competition/evaluator.py:33
-msgid ""
-"Follow the instructions in the problem description. In the case the result "
-"is a number, please make sure to use the exact number of decimals as "
-"required."
-msgstr ""
-"Pratite instrukcije u tekstu zadatka. U slučaju da je rješenje broj, molimo "
-"pripazite da ste unijeli točan broj decimala."
-
-#: apps/competition/evaluator.py:57
-msgid ""
-"Split different correct results with a '|' character. Character '|' cannot "
-"be a part of the result. Trailing and leading spaces are always ignored."
-msgstr ""
-"Razdvojite različita točna rješenja sa znakom '|'. Znak '|' ne može biti dio "
-"rješenja. Vodeći i prateći razmaci se uvijek ignoriraju."
+#: apps/competition/evaluator.py:41
+msgid "OR"
+msgstr "ILI"
 
 #: apps/competition/evaluator_base.py:9
 msgid "Invalid solution!"
@@ -40,55 +27,76 @@ msgstr "Nevaljano rješenje!"
 msgid "Invalid solution descriptor!"
 msgstr "Nevaljan opis rješenja!"
 
-#: apps/competition/evaluator_base.py:82
-msgid "OR"
-msgstr "ILI"
+#: apps/competition/evaluator_v0.py:29
+msgid ""
+"Follow the instructions in the problem description. In the case the result "
+"is a number, please make sure to use the exact number of decimals as "
+"required."
+msgstr ""
+"Pratite instrukcije u tekstu zadatka. U slučaju da je rješenje broj, molimo "
+"pripazite da ste unijeli točan broj decimala."
 
-#: apps/competition/evaluator_v1.py:22
+#: apps/competition/evaluator_v0.py:52
+msgid ""
+"Split different correct results with a '|' character. Character '|' cannot "
+"be a part of the result. Trailing and leading spaces are always ignored."
+msgstr ""
+"Razdvojite različita točna rješenja sa znakom '|'. Znak '|' ne može biti dio "
+"rješenja. Vodeći i prateći razmaci se uvijek ignoriraju."
+
+#: apps/competition/evaluator_v1.py:23
 msgid "Invalid number of elements!"
 msgstr "Nevaljan broj članova!"
 
-#: apps/competition/evaluator_v1.py:28
+#: apps/competition/evaluator_v1.py:29
 msgid "Too few decimals!"
 msgstr "Premalen broj decimala!"
 
-#: apps/competition/evaluator_v1.py:35
+#: apps/competition/evaluator_v1.py:36
 msgid "Mixed types of elements not allowed!"
 msgstr "Miješani tipovi članova nisu dozvoljeni!"
 
-#: apps/competition/evaluator_v1.py:41
+#: apps/competition/evaluator_v1.py:42
 msgid "Mixed precisions not allowed!"
 msgstr "Miješane preciznosti brojeva nisu dozvoljene!"
 
-#: apps/competition/evaluator_v1.py:47
+#: apps/competition/evaluator_v1.py:48
 msgid "Unallowed characters!"
 msgstr "Nedozvoljeni znakovi!"
 
-#: apps/competition/evaluator_v1.py:53
+#: apps/competition/evaluator_v1.py:54
 msgid "Invalid modifiers!"
 msgstr "Nevaljani modifikatori!"
 
-#: apps/competition/evaluator_v1.py:59
+#: apps/competition/evaluator_v1.py:60
 msgid "Ambiguous, is it a number or a string?"
 msgstr "Dvoznačno, je li broj ili string?"
 
-#: apps/competition/evaluator_v1.py:65
+#: apps/competition/evaluator_v1.py:66
 msgid "Ambiguous, is it a float or a list?"
 msgstr "Dvoznačno, je li decimalni broj ili lista?"
 
-#: apps/competition/evaluator_v1.py:71
+#: apps/competition/evaluator_v1.py:72
 msgid "Elements must be separated by a comma!"
 msgstr "Članovi moraju biti razdvojeni zarezom!"
 
-#: apps/competition/evaluator_v1.py:77
+#: apps/competition/evaluator_v1.py:78
 msgid "Denominator cannot be 0!"
 msgstr "Nazivnik ne može biti 0!"
 
-#: apps/competition/evaluator_v1.py:101
+#: apps/competition/evaluator_v1.py:102
 msgid "Integer"
 msgstr "Cijeli broj"
 
-#: apps/competition/evaluator_v1.py:148
+#: apps/competition/evaluator_v1.py:110
+msgid ""
+"A simple number, positive or negative. In general, all numbers mentioned "
+"below can be positive or negative."
+msgstr ""
+"Običan broj, pozitivan ili negativan. Općenito, svi dolje spomenuti brojevi "
+"mogu biti pozitivni ili negativni."
+
+#: apps/competition/evaluator_v1.py:150
 #, python-format
 msgid "Write the result rounded to %(count)d decimal."
 msgid_plural "Write the result rounded to %(count)d decimals."
@@ -96,11 +104,11 @@ msgstr[0] "Napišite rezultat zaokružen na %(count)d decimalu."
 msgstr[1] "Napišite rezultat zaokružen na %(count)d decimale."
 msgstr[2] "Napišite rezultat zaokružen na %(count)d decimala."
 
-#: apps/competition/evaluator_v1.py:154
+#: apps/competition/evaluator_v1.py:156
 msgid "Decimal number"
 msgstr "Decimalni broj"
 
-#: apps/competition/evaluator_v1.py:158
+#: apps/competition/evaluator_v1.py:160
 msgid ""
 "The solution is required to have at least as many decimals as entered by the "
 "author, otherwise it will be rejected. The solution is accepted if and only "
@@ -115,7 +123,7 @@ msgstr ""
 "točno zaokružiti broj, molimo provjerite ručno prihvaća li se rješenje s "
 "više decimala. Preferirajte decimalne točke umjesto zareza."
 
-#: apps/competition/evaluator_v1.py:169
+#: apps/competition/evaluator_v1.py:171
 msgid ""
 "The solution must have as least as many decimals as written in the "
 "description, and has to exactly match the official solution when rounded to "
@@ -124,15 +132,15 @@ msgstr ""
 "Rješenje mora imati barem toliko decimala koliko piše u opisu, i mora biti "
 "točno jednako službenom rješenju kada se zaokruži ta taj broj decimala."
 
-#: apps/competition/evaluator_v1.py:199
+#: apps/competition/evaluator_v1.py:201
 msgid "Write the solution in the form a/b, where a and b are integers."
 msgstr "Rješenje napišite u obliku a/b, gdje su a i b cijeli brojevi."
 
-#: apps/competition/evaluator_v1.py:204
+#: apps/competition/evaluator_v1.py:206
 msgid "Fraction"
 msgstr "Razlomak"
 
-#: apps/competition/evaluator_v1.py:208
+#: apps/competition/evaluator_v1.py:210
 msgid ""
 "Fraction is written in the format a/b, where a and b are integers. The "
 "competitors solution will be accepted if it is an integer or a fraction "
@@ -142,7 +150,7 @@ msgstr ""
 "rješenje će  biti prihvaćeno ako se radi o cijelom broju ili razlomku "
 "jednakom traženoj vrijednosti. Neskraćeni razlomci su također prihvaćaju."
 
-#: apps/competition/evaluator_v1.py:215
+#: apps/competition/evaluator_v1.py:217
 msgid ""
 "Fractions are written in the format a/b, where a and b are integers. "
 "Reducible fractions are accepted. You can also write a single integer if you "
@@ -152,11 +160,11 @@ msgstr ""
 "razlomci se također prihvaćaju. Možete napisati i sami cijeli broj ako ste "
 "sigurni da rješenje jest cijeli broj. Decimalni brojevi se ne prihvaćaju."
 
-#: apps/competition/evaluator_v1.py:295 apps/competition/evaluator_v1.py:310
+#: apps/competition/evaluator_v1.py:297 apps/competition/evaluator_v1.py:312
 msgid "Write the results in the correct order, separated with a comma."
 msgstr "Rezultate napišite u točnom poretku, razdvojene zarezom."
 
-#: apps/competition/evaluator_v1.py:300
+#: apps/competition/evaluator_v1.py:302
 #, python-format
 msgid ""
 "Write the results in the correct order, round to %(decimals)d decimal and "
@@ -174,7 +182,7 @@ msgstr[2] ""
 "Rezultate napišite u točnom poretku, zaokružene na %(decimals)d decimala i "
 "razdvojene zarezom."
 
-#: apps/competition/evaluator_v1.py:306
+#: apps/competition/evaluator_v1.py:308
 msgid ""
 "Write the results in the correct order in the form a/b, where a and b are "
 "integers. Separate the results with a comma."
@@ -182,15 +190,15 @@ msgstr ""
 "Rezultate napišite u točnom poretku u obliku a/b, gdje su a i b cijeli "
 "brojevi. Rezultate razdvojite zarezom."
 
-#: apps/competition/evaluator_v1.py:313 apps/competition/evaluator_v1.py:398
+#: apps/competition/evaluator_v1.py:315 apps/competition/evaluator_v1.py:400
 msgid "Number of elements:"
 msgstr "Broj članova:"
 
-#: apps/competition/evaluator_v1.py:318
+#: apps/competition/evaluator_v1.py:320
 msgid "List"
 msgstr "Niz"
 
-#: apps/competition/evaluator_v1.py:322
+#: apps/competition/evaluator_v1.py:324
 msgid ""
 "A list can contain integers, decimal numbers, fractions or strings (anything "
 "else). All elements must have the same type. Elements are separated with a "
@@ -198,13 +206,13 @@ msgid ""
 "the length visible, use #: prefix. To make a single-element list, put the "
 "element into [ ] brackets."
 msgstr ""
-"Niz može sadržavati cijele brojeve, decimalne brojeve, razlomke ili stringove "
-"(sve ostalo). Svi članovi moraju biti istog tipa. Članovi se razdvajaju "
-"zarezom.  Ukoliko želite dati do znanja natjecateljima koliko članova niz "
-"ima, stavit prefix '#:'. Da bi napravili jednočlanu listu, stavite član "
-"unutar [ ] zagrada."
+"Niz može sadržavati cijele brojeve, decimalne brojeve, razlomke ili "
+"stringove (sve ostalo). Svi članovi moraju biti istog tipa. Članovi se "
+"razdvajaju zarezom.  Ukoliko želite dati do znanja natjecateljima koliko "
+"članova niz ima, stavit prefix '#:'. Da bi napravili jednočlanu listu, "
+"stavite član unutar [ ] zagrada."
 
-#: apps/competition/evaluator_v1.py:331
+#: apps/competition/evaluator_v1.py:333
 msgid ""
 "A list can contain integers, decimal numbers, fractions or strings (anything "
 "else). If not obvious, the type of elements will be specified, together with "
@@ -212,17 +220,17 @@ msgid ""
 "might or might not be specified. The list can also contain a single element! "
 "Separate the elements with a comma."
 msgstr ""
-"Niz može sadržavati cijele brojeve, decimalne brojeve, razlomke ili stringove "
-"(sve ostalo). Ako nije očito, tip članova će biti naveden, zajedno s traženim "
-"brojem decimala u slučaju decimalnih brojeva. Ovisno o problemu, traženi broj "
-"članova će biti specificiran ili ne. Niz također može sadržavati jedan član! "
-"Razdvajajte članove zarezom."
+"Niz može sadržavati cijele brojeve, decimalne brojeve, razlomke ili "
+"stringove (sve ostalo). Ako nije očito, tip članova će biti naveden, zajedno "
+"s traženim brojem decimala u slučaju decimalnih brojeva. Ovisno o problemu, "
+"traženi broj članova će biti specificiran ili ne. Niz također može "
+"sadržavati jedan član! Razdvajajte članove zarezom."
 
-#: apps/competition/evaluator_v1.py:382 apps/competition/evaluator_v1.py:396
+#: apps/competition/evaluator_v1.py:384 apps/competition/evaluator_v1.py:398
 msgid "Write the results in any order, separated with a comma."
 msgstr "Napišite rezultate u bilo kojem poretku, razdvojene zarezom."
 
-#: apps/competition/evaluator_v1.py:386
+#: apps/competition/evaluator_v1.py:388
 #, python-format
 msgid ""
 "Write the results in any order, round to %(decimals)d decimal and separated "
@@ -230,14 +238,17 @@ msgid ""
 msgid_plural ""
 "Write the results in any order, round to %(decimals)d decimals and separated "
 "with a comma."
-msgstr[0] "Napišite rezultate u bilo kojem poretku, zaokružene na %(decimals)d "
-"decimalu i razdvojene zarezom."
-msgstr[1] "Napišite rezultate u bilo kojem poretku, zaokružene na %(decimals)d "
-"decimale i razdvojene zarezom."
-msgstr[2] "Napišite rezultate u bilo kojem poretku, zaokružene na %(decimals)d "
-"decimala i razdvojene zarezom."
+msgstr[0] ""
+"Napišite rezultate u bilo kojem poretku, zaokružene na %(decimals)d decimalu "
+"i razdvojene zarezom."
+msgstr[1] ""
+"Napišite rezultate u bilo kojem poretku, zaokružene na %(decimals)d decimale "
+"i razdvojene zarezom."
+msgstr[2] ""
+"Napišite rezultate u bilo kojem poretku, zaokružene na %(decimals)d decimala "
+"i razdvojene zarezom."
 
-#: apps/competition/evaluator_v1.py:392
+#: apps/competition/evaluator_v1.py:394
 msgid ""
 "Write the results in any order, in the form a/b, where a and b are integers. "
 "Separate the results with a comma."
@@ -245,65 +256,73 @@ msgstr ""
 "Rezultate napišite u bilo kojem poretku u obliku a/b, gdje su a i b cijeli "
 "brojevi. Rezultate razdvojite zarezom."
 
-#: apps/competition/evaluator_v1.py:403
+#: apps/competition/evaluator_v1.py:405
 msgid "Set"
 msgstr "Skup"
 
-#: apps/competition/evaluator_v1.py:407
+#: apps/competition/evaluator_v1.py:409
 msgid ""
 "Acts similarly to lists, only the elements are treated as unordered. Put the "
 "comma separated values inside the { } brackets. Same as for lists, use #: "
 "prefix to make the length visible. Warning: Sets behave actually as "
 "multisets, please write a note in the problem description directly if you do "
 "except multiple equal values."
-msgstr "Ponaša se slično kao i niz, osim što poredak nije bitan. Stavite "
-"zarezom odvojene vrijednosti unutar { } zagrada. Isto kao i kod nizova, "
-"koristite #: prefiks kako bi duljina skupa bila vidljiva. Upozorenje: Skupovi "
-"se zapravo ponašaju kao multiskupovi, molimo navedite u tekstu zadatka "
-"direktno ako se očekuje više jednakih vrijednosti."
+msgstr ""
+"Ponaša se slično kao i niz, osim što poredak nije bitan. Stavite zarezom "
+"odvojene vrijednosti unutar { } zagrada. Isto kao i kod nizova, koristite #: "
+"prefiks kako bi duljina skupa bila vidljiva. Upozorenje: Skupovi se zapravo "
+"ponašaju kao multiskupovi, molimo navedite u tekstu zadatka direktno ako se "
+"očekuje više jednakih vrijednosti."
 
-#: apps/competition/evaluator_v1.py:416
+#: apps/competition/evaluator_v1.py:418
 msgid "Same as for lists, just the order does not matter."
 msgstr "Isto kao i za nizove, samo što poredak nije bitan."
 
-#: apps/competition/evaluator_v1.py:432
+#: apps/competition/evaluator_v1.py:434
 msgid "String"
 msgstr "String"
 
-#: apps/competition/evaluator_v1.py:436
+#: apps/competition/evaluator_v1.py:438
 msgid ""
 "Anything that does not match any other type. To force the type to be a "
 "string, use = prefix."
-msgstr "Bilo što što ne odgovara drugim tipovima. Ukoliko želite forsirati tip "
-"da bude string, stavite = prefiks."
+msgstr ""
+"Bilo što što ne odgovara drugim tipovima. Ukoliko želite forsirati tip da "
+"bude string, stavite = prefiks."
 
-#: apps/competition/evaluator_v1.py:442
+#: apps/competition/evaluator_v1.py:443
 msgid ""
 "Anything that does not match any other type. That can include words, special "
 "formats, or even numbers of special forms."
-msgstr "Bilo što što ne odgovara drugim tipovima. To može uključivati riječi, "
+msgstr ""
+"Bilo što što ne odgovara drugim tipovima. To može uključivati riječi, "
 "specijalne formate, ili čak brojeve u specijalnim oblicima."
 
-#: apps/competition/evaluator_v1.py:538
+#: apps/competition/evaluator_v1.py:539
 msgid ""
 "Split different accepted solutions by a '|' character. To use the '|' "
 "character, write '\\|'. To use '\\', write '\\\\'. Trailing and leading "
 "spaces are always ignored."
-msgstr "Razdvojite različita točna rješenja znakom '|'. Da biste koristili "
-"znak '|' kao dio rješenja, napišite '\\|'. Da bi dobili '\\', napišite "
-"'\\\\'.  Vodeći i prateći razmaci se uvijek ignoriraju."
+msgstr ""
+"Razdvojite različita točna rješenja znakom '|'. Da biste koristili znak '|' "
+"kao dio rješenja, napišite '\\|'. Da bi dobili '\\', napišite '\\\\'.  "
+"Vodeći i prateći razmaci se uvijek ignoriraju."
 
-#: apps/competition/forms.py:30
+#: apps/competition/forms.py:34
+msgid "Descriptor error. Please notify admins!"
+msgstr "Nevaljan deskriptor. Molimo obavijestite administratore!"
+
+#: apps/competition/forms.py:56
 msgid "Invalid!"
 msgstr "Nevaljano rješenje!"
+
+#: apps/competition/templates/competition_chain_new.html:36
+msgid "There were some errors!"
+msgstr "Bilo je nekih grešaka!"
 
 #: apps/competition/templates/competition_rules.html:13
 msgid "Solution format description"
 msgstr "Objašnjenje formata rješenja"
-
-#: apps/competition/templates/competition_task_detail.html:91
-msgid "Solution format:"
-msgstr "Format rješenja:"
 
 #: apps/tags/managers.py:24 apps/tags/models.py:17
 msgid "Tags"

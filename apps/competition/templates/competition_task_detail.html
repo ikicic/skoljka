@@ -91,8 +91,15 @@
             {{ help_text }}
           </div>
         {% endif %}
-        <input type="text" name="result">
+        {{ solution_form.result }}
         <input type="submit" value="Pošalji" class="btn btn-primary">
+        {% if solution_form.errors %}
+          <span class="comp-error">
+            {% for error in solution_form.result.errors %}
+              {{ error }}
+            {% endfor %}
+          </span>
+        {% endif %}
       </form>
     {% else %}
       <div class="ctask-submit-already-finished">

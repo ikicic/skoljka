@@ -7,7 +7,6 @@ EVALUATOR_V0 = 0
 EVALUATOR_V1 = 1
 
 def get_evaluator(evaluator_version):
-    return evaluator_v0
     if evaluator_version == EVALUATOR_V0:
         return evaluator_v0
     if evaluator_version == EVALUATOR_V1:

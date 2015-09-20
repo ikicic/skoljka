@@ -130,11 +130,6 @@ class CompetitionTask(models.Model):
     def get_absolute_url(self):
         return self.competition.get_absolute_url() + 'task/{}/'.format(self.id)
 
-    def check_result(self, result):
-        result = re.sub(r'\s+', '', result).lower()
-        correct_result = re.sub(r'\s+', '', self.correct_result).lower()
-        return result in correct_result.split('|')
-
 
 
 class Submission(models.Model):

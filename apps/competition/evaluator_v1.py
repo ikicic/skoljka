@@ -107,7 +107,8 @@ class Integer(Variable):
 
     @staticmethod
     def help_for_competitors():
-        return ""  # No help needed.
+        return _("A simple number, positive or negative. In general, all "
+                 "numbers mentioned below can be positive or negative.")
 
 
 class Float(Variable):

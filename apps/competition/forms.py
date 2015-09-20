@@ -5,8 +5,34 @@ from django.forms.models import BaseModelFormSet, ModelForm
 from django.utils.translation import ugettext as _
 
 from competition.models import Chain, CompetitionTask, Team, TeamMember
-from competition.evaluator import InvalidDescriptor
+from competition.evaluator import InvalidDescriptor, InvalidSolution
 from competition.evaluator import get_evaluator, get_solution_help_text
+
+
+class CompetitionSolutionForm(forms.Form):
+    result = forms.CharField(max_length=255)
+
+    def __init__(self, *args, **kwargs):
+        self.descriptor = kwargs.pop('descriptor')
+        self.evaluator = kwargs.pop('evaluator')
+        super(CompetitionSolutionForm, self).__init__(*args, **kwargs)
+
+    def clean_result(self):
+        data = self.cleaned_data['result']
+        try:
+            self.evaluator.check_result(self.descriptor, data)
+        except InvalidSolution as e:
+            # TODO: Make a base form that automatically does this (depending on
+            # a parameter).
+            self.fields['result'].widget.attrs.update({
+                            'class': 'ctask-submit-error'})
+            raise forms.ValidationError(unicode(e))
+        except InvalidDescriptor as e:
+            self.fields['result'].widget.attrs.update({
+                            'class': 'ctask-submit-error'})
+            raise forms.ValidationError(
+                    _("Descriptor error. Please notify admins!"))
+        return data
 
 
 class BaseCompetitionTaskFormSet(BaseModelFormSet):

@@ -4,6 +4,7 @@ from evaluator_base import *
 
 import re
 
+# Here Variable takes care of different solutions, and not the evaluator.
 class VariableV0(Variable):
     def __init__(self, descriptor):
         self.descriptor = re.sub(r'\s+', '', descriptor).lower().split('|')
@@ -31,7 +32,7 @@ class VariableV0(Variable):
 
 
 def parse_descriptor(descriptor):
-    return VariableV0(descriptor)
+    return [VariableV0(descriptor)]
 
 
 def check_result(descriptor, result):

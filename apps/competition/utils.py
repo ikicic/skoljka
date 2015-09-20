@@ -34,7 +34,6 @@ def update_score_on_ctask_action(competition, team, chain, ctask, submission,
             _delta = -ctask.score
             if len(_potential_solutions_count) == len(chain_ctask_ids) - 1:
                 _delta -= chain.bonus_score
-            del _potential_solutions_count[ctask.id]
         else:
             return 0
 
@@ -165,15 +164,17 @@ def preprocess_chain(competition, chain, team, preloaded_ctask=None):
 def refresh_submissions_cache_is_correct(submissions, ctasks=None):
     if ctasks is None:
         ctask_ids = set(submission.ctask_id for submission in submissions)
-        ctasks = CompetitionTask.objects.filter(id__in=ctask_ids)
+        ctasks = CompetitionTask.objects.filter(id__in=ctask_ids) \
+                .select_related('competition__evaluator_version')
 
     ctasks = list(ctasks)
     ctasks_dict = {ctask.id: ctask for ctask in ctasks}
 
     for submission in submissions:
         ctask = ctasks_dict[submission.ctask_id]
+        evaluator = ctask.competition.evaluator_version
         old = submission.cache_is_correct
-        new = ctask.check_result(submission.result)
+        new = evaluator.check_result(ctask.descriptor, submission.result)
         if old != new:
             submission.cache_is_correct = new
             submission.save()

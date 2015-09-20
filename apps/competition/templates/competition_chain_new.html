@@ -1,4 +1,5 @@
 {% extends "competition_base.html" %}
+{% load i18n %}
 
 {% load bootstrap_toolkit %}
 {% load competition_tags %}
@@ -31,6 +32,9 @@
 
 <form action="{{ request.get_full_path }}" method="POST" id="comp-chain-edit"
     class="form-horizontal">
+  {% if formset.errors %}
+    <div class="alert alert-error">{% trans "There were some errors!" %}</div>
+  {% endif %}
   {% csrf_token %}
   {{ formset.management_form }}
   <div class="form-section">Lanac</div>

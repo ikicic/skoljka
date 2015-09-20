@@ -1,5 +1,11 @@
 @import "main";
 
+// TODO: Generalize this.
+.comp-error {
+  border-color: #b94a48;
+  color: #b94a48;
+}
+
 #comp-list {
   max-width: 1000px;
   text-align: center;

@@ -19,8 +19,9 @@ from userprofile.forms import AuthenticationFormEx
 
 from competition.decorators import competition_view
 from competition.evaluator import get_evaluator, get_solution_help_text
-from competition.forms import ChainForm, CompetitionTask, CompetitionTaskForm, \
-        BaseCompetitionTaskFormSet, TeamForm, TaskListAdminPanelForm
+from competition.forms import ChainForm, CompetitionSolutionForm, \
+        CompetitionTaskForm, BaseCompetitionTaskFormSet, TeamForm, \
+        TaskListAdminPanelForm
 from competition.models import Chain, Competition, CompetitionTask, Team, \
         TeamMember, Submission
 from competition.utils import update_score_on_ctask_action, preprocess_chain, \
@@ -275,6 +276,7 @@ def task_detail(request, competition, data, ctask_id):
                 or ctask.chain.unlock_minutes > data['minutes_passed']:
             raise Http404
 
+    evaluator = get_evaluator(competition.evaluator_version)
     if team:
         ctasks, chain_submissions = preprocess_chain(
                 competition, ctask.chain, team, preloaded_ctask=ctask)
@@ -288,6 +290,8 @@ def task_detail(request, competition, data, ctask_id):
             raise Http404
 
         if request.method == 'POST' and (not data['has_finished'] or is_admin):
+            solution_form = CompetitionSolutionForm(request.POST,
+                    descriptor=ctask.descriptor, evaluator=evaluator)
             submission = None
             delete = False
             if is_admin and 'delete-submission' in request.POST:
@@ -301,32 +305,39 @@ def task_detail(request, competition, data, ctask_id):
                     delete = True
                 except Submission.DoesNotExist:
                     pass
-            elif 'result' in request.POST:
-                result = request.POST['result'].strip()
-                if result and len(submissions) < ctask.max_submissions:
-                    is_correct = ctask.check_result(result)
+            elif solution_form.is_valid():
+                # TODO: Ignore submission if already correctly solved.
+                if len(submissions) < ctask.max_submissions:
+                    result = solution_form.cleaned_data['result']
+                    is_correct = evaluator.check_result(
+                            ctask.descriptor, result)
                     submission = Submission(ctask=ctask, team=team,
                             result=result, cache_is_correct=is_correct)
                     submission.save()
                     chain_submissions.append(submission)
                     submissions.append(submission)
-            else:
-                return 400  # Bad request.
+
+                    # Prevent form resubmission.
+                    return (ctask.get_absolute_url(), )
 
             update_score_on_ctask_action(competition, team, ctask.chain, ctask,
                     submission, delete, chain_ctask_ids=[x.id for x in ctasks],
                     chain_submissions=chain_submissions)
 
-            return (ctask.get_absolute_url(), )
+        else:
+            solution_form = CompetitionSolutionForm(
+                    descriptor=ctask.descriptor, evaluator=evaluator)
 
-        data['submissions'] = submissions
         data['is_solved'] = any(x.cache_is_correct for x in submissions)
+        data['solution_form'] = solution_form
+        data['submissions'] = submissions
         data['submissions_left'] = ctask.max_submissions - len(submissions)
 
-    evaluator = get_evaluator(competition.evaluator_version)
+
     data['help_text'] = get_solution_help_text(evaluator, ctask.descriptor)
-    data['ctask'] = ctask
     data['chain'] = ctask.chain
+    data['ctask'] = ctask
+
     return data
 
 
