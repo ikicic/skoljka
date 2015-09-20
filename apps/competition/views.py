@@ -412,9 +412,8 @@ def chain_new(request, competition, data, chain_id=None):
     evaluator = get_evaluator(competition.evaluator_version)
     class CompetitionTaskFormLambda(CompetitionTaskForm):
         def __init__(self, *args, **kwargs):
-            super(CompetitionTaskFormLambda, self).__init__(
-                    evaluator=evaluator,
-                    *args, **kwargs)
+            super(CompetitionTaskFormLambda, self).__init__(evaluator=evaluator,
+                    fixed_score=competition.fixed_task_score, *args, **kwargs)
 
     CompetitionTaskFormSet = modelformset_factory(CompetitionTask,
             form=CompetitionTaskFormLambda, formset=BaseCompetitionTaskFormSet,

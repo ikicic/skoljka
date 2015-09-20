@@ -5,6 +5,13 @@ from competition.models import Chain, Competition, CompetitionTask, Team, \
 from competition.utils import refresh_teams_cache_score, \
         refresh_submissions_cache_is_correct
 
+class CompetitionAdmin(admin.ModelAdmin):
+    def save_model(self, request, obj, form, change):
+        if obj.fixed_task_score:
+            CompetitionTask.objects.filter(competition=obj) \
+                                   .update(score=obj.fixed_task_score)
+        obj.save()
+
 class TeamAdmin(admin.ModelAdmin):
     actions = ['refresh_cache_score']
 
@@ -26,7 +33,7 @@ class CompetitionTaskAdmin(admin.ModelAdmin):
         submissions = Submission.objects.filter(ctask__in=queryset)
         refresh_submissions_cache_is_correct(submissions, queryset)
 
-admin.site.register(Competition, admin.ModelAdmin)
+admin.site.register(Competition, CompetitionAdmin)
 admin.site.register(Chain, admin.ModelAdmin)
 admin.site.register(CompetitionTask, CompetitionTaskAdmin)
 admin.site.register(Team, TeamAdmin)

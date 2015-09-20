@@ -35,6 +35,8 @@ class Competition(BasePermissionsModel):
     url_path_prefix = models.CharField(blank=True, max_length=64)
     scoreboard_freeze_date = models.DateTimeField()
     evaluator_version = models.IntegerField(default=EVALUATOR_V1)
+    fixed_task_score = models.IntegerField(default=0,
+            help_text="Use 0 to disable.")
 
     posts = PostGenericRelation(placeholder="Poruka")
 

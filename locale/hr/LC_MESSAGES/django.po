@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-20 17:42+0200\n"
-"PO-Revision-Date: 2015-09-20 17:47+0200\n"
+"POT-Creation-Date: 2015-09-20 22:49+0200\n"
+"PO-Revision-Date: 2015-09-20 22:51+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2\n"
 
-#: apps/competition/evaluator.py:41
+#: apps/competition/evaluator.py:40
 msgid "OR"
 msgstr "ILI"
 
@@ -312,11 +312,16 @@ msgstr ""
 msgid "Descriptor error. Please notify admins!"
 msgstr "Nevaljan deskriptor. Molimo obavijestite administratore!"
 
-#: apps/competition/forms.py:56
+#: apps/competition/forms.py:57
 msgid "Invalid!"
 msgstr "Nevaljano rješenje!"
 
 #: apps/competition/templates/competition_chain_new.html:36
+#, python-format
+msgid "Note: Score for the each task has been fixed to %(score)s."
+msgstr "Napomena: Bodovi za svaki zadatak su fiksirani na %(score)s."
+
+#: apps/competition/templates/competition_chain_new.html:43
 msgid "There were some errors!"
 msgstr "Bilo je nekih grešaka!"
 
@@ -367,10 +372,3 @@ msgstr "Email adresa se već koristi."
 #: apps/userprofile/forms.py:92
 msgid "Please type the same password each time!"
 msgstr "Molimo upišite istu lozinku oba puta!"
-
-#: local/modules/django-template-preprocessor/build/lib.linux-x86_64-2.7/template_preprocessor/core/django_processor.py:986
-#: local/modules/django-template-preprocessor/build/lib.linux-x86_64-2.7/template_preprocessor/core/django_processor.py:1028
-#: local/modules/django-template-preprocessor/src/template_preprocessor/core/django_processor.py:986
-#: local/modules/django-template-preprocessor/src/template_preprocessor/core/django_processor.py:1028
-msgid " "
-msgstr ""

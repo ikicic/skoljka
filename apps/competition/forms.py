@@ -47,6 +47,7 @@ class CompetitionTaskForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.evaluator = kwargs.pop('evaluator')
+        self.fixed_score = kwargs.pop('fixed_score')
         super(CompetitionTaskForm, self).__init__(*args, **kwargs)
         if self.instance.pk:
             self.fields['text'].initial = self.instance.task.content.text
@@ -54,6 +55,8 @@ class CompetitionTaskForm(ModelForm):
         self.fields['descriptor'].help_text = get_solution_help_text(
                 self.evaluator, self.initial.get('descriptor'),
                 error_message=_("Invalid!"), show_types=True)
+        if self.fixed_score:
+            del self.fields['score']
 
         self.fields['text'].widget.attrs.update({
             'rows': 5,
@@ -63,6 +66,8 @@ class CompetitionTaskForm(ModelForm):
     def clean(self):
         super(CompetitionTaskForm, self).clean()
         self.instance._text = self.cleaned_data.get('text')
+        if self.fixed_score:
+            self.instance.score = self.fixed_score
         return self.cleaned_data
 
     def clean_descriptor(self):

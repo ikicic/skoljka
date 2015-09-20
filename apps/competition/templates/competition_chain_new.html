@@ -30,6 +30,13 @@
   </p>
 </div>
 
+{% if competition.fixed_task_score %}
+  <div class="alert">
+    {# Whitespace problem fixed in 1.7. #}
+    {% blocktrans with score=competition.fixed_task_score %}Note: Score for the each task has been fixed to {{ score }}.{% endblocktrans %}
+  </div>
+{% endif %}
+
 <form action="{{ request.get_full_path }}" method="POST" id="comp-chain-edit"
     class="form-horizontal">
   {% if formset.errors %}
