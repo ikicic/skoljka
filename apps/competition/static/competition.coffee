@@ -98,6 +98,12 @@ $ ->
     'T': 'bar ctask-tried'
   }
 
+  $('.ctask-solution-help i').click (event) ->
+    event.preventDefault()
+    a = $(@)
+    span = a.next 'span'
+    span.html (if span.html() then "" else a.attr 'title')
+
   $('#ctask-admin-panel select').change ->
     is_test = $('#id_filter_by_is_test').val()
     status = $('#id_filter_by_status').val()

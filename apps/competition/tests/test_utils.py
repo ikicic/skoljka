@@ -10,14 +10,14 @@ from task.models import Task
 
 import datetime
 
-def create_ctask(author, competition, chain, correct_result, score):
+def create_ctask(author, competition, chain, descriptor, score):
     # TODO: make a test util for creating tasks
     content = MathContent.objects.create(text="Test text", html="Test text")
     task = Task.objects.create(name="Test task", content=content,
             author=author, hidden=True)
     chain_position = CompetitionTask.objects.filter(chain=chain).count()
     return CompetitionTask.objects.create(competition=competition, task=task,
-            correct_result=correct_result, score=score, chain=chain,
+            descriptor=descriptor, score=score, chain=chain,
             chain_position=chain_position)
 
 CHAIN_BONUS_SCORE = 1000000

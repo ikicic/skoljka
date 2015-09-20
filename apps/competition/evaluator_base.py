@@ -1,23 +1,30 @@
 # -*- coding: utf-8 -*-
 
+from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext as _
+
 class InvalidSolution(Exception):
-    def __init__(self, msg="Nevaljano rješenje"):
+    def __init__(self, msg=None):
+        if msg is None:
+            msg = _("Invalid solution!")
         super(InvalidSolution, self).__init__(msg)
 
 class NotThisFormat(Exception):
     pass
 
-class InvalidOfficial(Exception):
-    def __init__(self, msg="Nevaljan opis rješenja!"):
-        super(InvalidOfficial, self).__init__(msg)
+class InvalidDescriptor(Exception):
+    def __init__(self, msg=None):
+        if msg is None:
+            msg = _("Invalid solution descriptor!")
+        super(InvalidDescriptor, self).__init__(msg)
 
 class Variable(object):
-    def __init__(self, official):
-        """Parse given official solution.
+    def __init__(self, descriptor):
+        """Parse given solution descriptor.
 
-        Throws a NotThisFormat exception if the given official solution does
+        Throws a NotThisFormat exception if the given solution descriptor does
         not match this format. If the format matches, but there are some
-        errors, throws InvalidOfficial exception. Otherwise, saves any data
+        errors, throws InvalidDescriptor exception. Otherwise, saves any data
         necessary data to correctly evaluate users' solutions."""
         pass
 
@@ -27,4 +34,23 @@ class Variable(object):
         Throws a InvalidSolution exception if the given value doesn't have the
         expected format. Otherwise, returns True or False, depending on if the
         solution is correct or not."""
+        raise NotImplementedError
+
+    def help_text(self):
+        """Returns a string describing the solution format to the user."""
+        raise NotImplementedError
+
+    @staticmethod
+    def help_type():
+        """Name of the variable type."""
+        raise NotImplementedError
+
+    @staticmethod
+    def help_for_authors():
+        """Description of the format of the solution descriptor."""
+        raise NotImplementedError
+
+    @staticmethod
+    def help_for_competitors():
+        """Help shown to the competitors in the competition rules."""
         raise NotImplementedError

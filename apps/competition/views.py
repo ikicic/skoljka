@@ -18,6 +18,7 @@ from task.models import Task
 from userprofile.forms import AuthenticationFormEx
 
 from competition.decorators import competition_view
+from competition.evaluator import get_evaluator, get_solution_help_text
 from competition.forms import ChainForm, CompetitionTask, CompetitionTaskForm, \
         BaseCompetitionTaskFormSet, TeamForm, TaskListAdminPanelForm
 from competition.models import Chain, Competition, CompetitionTask, Team, \
@@ -146,6 +147,13 @@ def registration(request, competition, data):
 @competition_view()
 @response('competition_rules.html')
 def rules(request, competition, data):
+    evaluator = get_evaluator(competition.evaluator_version)
+    types = evaluator.get_variable_types()
+    # Class object is a callable, so wrap it with another function. If the
+    # lambda was simply written as "lambda: x", all the values would have the
+    # same x.
+    data['variable_types'] = [(lambda y=x: y) for x in types]
+    data['help_authors_general'] = evaluator.help_authors_general()
     return data
 
 
@@ -315,6 +323,8 @@ def task_detail(request, competition, data, ctask_id):
         data['is_solved'] = any(x.cache_is_correct for x in submissions)
         data['submissions_left'] = ctask.max_submissions - len(submissions)
 
+    evaluator = get_evaluator(competition.evaluator_version)
+    data['help_text'] = get_solution_help_text(evaluator, ctask.descriptor)
     data['ctask'] = ctask
     data['chain'] = ctask.chain
     return data
@@ -388,11 +398,12 @@ def chain_new(request, competition, data, chain_id=None):
 
     # CompetitionTaskFormSet = modelformset_factory(CompetitionTask,
     #         formset=BaseCompetitionTaskFormSet,
-    #         fields=('correct_result', 'score'), extra=3)
+    #         fields=('descriptor', 'score'), extra=3)
+    evaluator = get_evaluator(competition.evaluator_version)
     class CompetitionTaskFormLambda(CompetitionTaskForm):
         def __init__(self, *args, **kwargs):
             super(CompetitionTaskFormLambda, self).__init__(
-                    evaluator_version=competition.evaluator_version,
+                    evaluator=evaluator,
                     *args, **kwargs)
 
     CompetitionTaskFormSet = modelformset_factory(CompetitionTask,

@@ -1,4 +1,5 @@
 {% extends "competition_base.html" %}
+{% load i18n %}
 
 {% load competition_tags %}
 
@@ -78,13 +79,18 @@
 
   {% if submissions|length < ctask.max_submissions and not is_solved %}
     {% if not has_finished %}
-      <h4 class="ctask-submit">Slanje rješenja</h4>
+      {# <h4 class="ctask-submit">Slanje rješenja</h4> #}
       <form action="{{ request.get_full_path }}" method="POST"
           class="form-inline">
         {% csrf_token %}
         <div class="ctask-submissions-count">
           Preostalo pokušaja: {{ submissions_left }}
         </div>
+        {% if help_text %}
+          <div class="ctask-format-help">
+            {{ help_text }}
+          </div>
+        {% endif %}
         <input type="text" name="result">
         <input type="submit" value="Pošalji" class="btn btn-primary">
       </form>

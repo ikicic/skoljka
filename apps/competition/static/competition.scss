@@ -75,6 +75,27 @@ textarea.comp-mathcontent-text {
   background-color: #f8f6f4 !important;
 }
 
+.chelp-authors-general, .chelp-var-authors {
+  color: gray;
+  margin-left: 10px;
+}
+
+.chelp-text {
+  font-style: italic;
+}
+.chelp-type {
+  padding-right: 1em;
+}
+
+.chelp-var {
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+
+.chelp-var-competitors {
+  margin-left: 10px;
+}
+
 #creg-invitations-table {
   text-align: center;
 }
@@ -292,9 +313,10 @@ div#ctask-legend-container {
   margin: 8px 0px 23px 0px;
 }
 
-.ctask-submissions-count {
-  font-size: 12px;
+.ctask-submissions-count, .ctask-format-help {
   color: gray;
+  font-size: 12px;
+  font-style: italic;
 }
 
 .ctask-submissions-table {

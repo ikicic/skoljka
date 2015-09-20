@@ -9,3 +9,5 @@ ALTER TABLE competition_team ADD COLUMN cache_max_score_after_freeze INT NOT NUL
 
 ALTER TABLE competition_team ADD INDEX competition_team_score (cache_score);
 ALTER TABLE competition_team ADD INDEX competition_team_frozen_score (cache_score_before_freeze);
+
+ALTER TABLE competition_competitiontask CHANGE COLUMN correct_result descriptor VARCHAR(255) NOT NULL;

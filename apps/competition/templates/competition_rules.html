@@ -1,4 +1,6 @@
 {% extends "competition_base.html" %}
+{% load i18n %}
+{% load competition_tags %}
 
 {% block content %}
 
@@ -7,6 +9,22 @@
 {% if competition.rules_template_filename %}
   {% include competition.rules_template_filename %}
 {% endif %}
+
+<h3>{% trans "Solution format description" %}</h3>
+<p class="chelp-authors-general">{{ help_authors_general }}</p>
+{% for var in variable_types %}
+  <div class="chelp-var">
+    {% if var.help_type %}
+      <h4>{{ var.help_type }}</h4>
+    {% endif %}
+    {% if is_admin and var.help_for_authors %}
+      <p class="chelp-var-authors">{{ var.help_for_authors }}</p>
+    {% endif %}
+    {% if var.help_for_competitors %}
+      <p class="chelp-var-competitors">{{ var.help_for_competitors }}</p>
+    {% endif %}
+  </div>
+{% endfor %}
 
 {% endblock content %}
 

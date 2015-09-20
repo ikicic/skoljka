@@ -17,6 +17,10 @@ def comp_url(context, url_name):
     return competition.get_absolute_url() + url_name + suffix
 
 @register.simple_tag(takes_context=True)
+def cdebug(context, var):
+    return dir(var)
+
+@register.simple_tag(takes_context=True)
 def reg_available_users(context):
     in_teams = TeamMember.objects \
             .filter(team__competition_id=context['competition'].id, \

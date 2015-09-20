@@ -2,9 +2,11 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.forms.models import BaseModelFormSet, ModelForm
+from django.utils.translation import ugettext as _
 
 from competition.models import Chain, CompetitionTask, Team, TeamMember
-from competition.evaluator import parse_official, InvalidOfficial
+from competition.evaluator import InvalidDescriptor
+from competition.evaluator import get_evaluator, get_solution_help_text
 
 
 class BaseCompetitionTaskFormSet(BaseModelFormSet):
@@ -18,10 +20,14 @@ class CompetitionTaskForm(ModelForm):
     text = forms.CharField(widget=forms.Textarea)
 
     def __init__(self, *args, **kwargs):
-        self.evaluator_version = kwargs.pop('evaluator_version')
+        self.evaluator = kwargs.pop('evaluator')
         super(CompetitionTaskForm, self).__init__(*args, **kwargs)
         if self.instance.pk:
             self.fields['text'].initial = self.instance.task.content.text
+
+        self.fields['descriptor'].help_text = get_solution_help_text(
+                self.evaluator, self.initial.get('descriptor'),
+                error_message=_("Invalid!"), show_types=True)
 
         self.fields['text'].widget.attrs.update({
             'rows': 5,
@@ -33,17 +39,19 @@ class CompetitionTaskForm(ModelForm):
         self.instance._text = self.cleaned_data.get('text')
         return self.cleaned_data
 
-    def clean_correct_result(self):
-        data = self.cleaned_data['correct_result']
+    def clean_descriptor(self):
+        data = self.cleaned_data['descriptor']
         try:
-            parse_official(self.evaluator_version, data)
-        except InvalidOfficial as e:
+            variables = self.evaluator.parse_descriptor(data)
+        except InvalidDescriptor as e:
+            self.fields['descriptor'].help_text = ""
             raise forms.ValidationError(unicode(e))
+        self.fields['descriptor'].help_text = variables[0].help_text()
         return data
 
     class Meta:
         model = CompetitionTask
-        fields = ('correct_result', 'score')
+        fields = ('descriptor', 'score')
 
 class ChainForm(forms.ModelForm):
     class Meta:

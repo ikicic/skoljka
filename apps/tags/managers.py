@@ -21,8 +21,9 @@ class CaseInsensitiveTagField(taggit_TagField):
 
 # TODO: signals!
 class TaggableManager(taggit_TaggableManager):
-    def __init__(self, verbose_name=_("Oznake"),
-            help_text=icon_help_text('Popis oznaka, odvojene zarezom. Npr. IMO, komb, igra'),
+    def __init__(self, verbose_name=_("Tags"),
+            help_text=icon_help_text(
+                "Popis oznaka, odvojene zarezom. Npr. IMO, komb, igra"),
             through=None, blank=False):
         through = through or TaggedItem
         super(TaggableManager, self).__init__(verbose_name, help_text, through, blank)

@@ -117,7 +117,7 @@ class CompetitionTask(models.Model):
         unique_together = (('competition', 'task'), )
     competition = models.ForeignKey(Competition)
     task = models.ForeignKey(Task)
-    correct_result = models.CharField(max_length=255)
+    descriptor = models.CharField(max_length=255)
     max_submissions = models.IntegerField(default=3)
     score = models.IntegerField(default=1)
     chain = models.ForeignKey(Chain)

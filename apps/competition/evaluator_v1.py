@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from evaluator_base import InvalidSolution, NotThisFormat, InvalidOfficial
+from django.utils.translation import ugettext as _, ungettext
+
+from evaluator_base import InvalidSolution, NotThisFormat, InvalidDescriptor
 from evaluator_base import Variable
+
 import re
 
 integer_re = re.compile(r'^[+-]?\d+$')
@@ -15,54 +18,73 @@ space_separated_list_re = re.compile(r'\w \w')  # \w == alphanumeric
 
 # Solution exceptions.
 class IncorrectNumberOfElements(InvalidSolution):
-    def __init__(self, msg="Nevaljan broj elemanata!"):
+    def __init__(self, msg=None):
+        if msg is None:
+            msg = _("Invalid number of elements!")
         super(IncorrectNumberOfElements, self).__init__(msg)
 
 class TooFewDecimals(InvalidSolution):
-    def __init__(self, msg="Premalen broj decimala!"):
+    def __init__(self, msg=None):
+        if msg is None:
+            msg = _("Too few decimals!")
         super(TooFewDecimals, self).__init__(msg)
 
-# Official solution exceptions.
-class MixedTypes(InvalidOfficial):
-    def __init__(self, msg="Miješani tipovi elemenata nisu podržani!"):
-        super(InvalidOfficial, self).__init__(msg)
+# Solution descriptor exceptions.
+class MixedTypes(InvalidDescriptor):
+    def __init__(self, msg=None):
+        if msg is None:
+            msg = _("Mixed types of elements not allowed!")
+        super(InvalidDescriptor, self).__init__(msg)
 
-class MixedPrecisions(InvalidOfficial):
-    def __init__(self,
-                 msg="Miješane preciznosti decimalnih brojeva nisu podržane!"):
+class MixedPrecisions(InvalidDescriptor):
+    def __init__(self, msg=None):
+        if msg is None:
+            msg = _("Mixed precisions not allowed!")
         super(MixedPrecisions, self).__init__(msg)
 
-class UnallowedCharacter(InvalidOfficial):
-    def __init__(self, msg="Nedozvoljeni znakovi!"):
+class UnallowedCharacter(InvalidDescriptor):
+    def __init__(self, msg=None):
+        if msg is None:
+            msg = _("Unallowed characters!")
         super(UnallowedCharacter, self).__init__(msg)
 
-class InvalidModifiers(InvalidOfficial):
-    def __init__(self, msg="Nevaljani modifikatori!"):
-        super(InvalidOfficial, self).__init__(msg)
+class InvalidModifiers(InvalidDescriptor):
+    def __init__(self, msg=None):
+        if msg is None:
+            msg = _("Invalid modifiers!")
+        super(InvalidDescriptor, self).__init__(msg)
 
-class AmbiguousNumberOrString(InvalidOfficial):
-    def __init__(self, msg="Dvosmisleno, broj ili string?"):
+class AmbiguousNumberOrString(InvalidDescriptor):
+    def __init__(self, msg=None):
+        if msg is None:
+            msg = _("Ambiguous, is it a number or a string?")
         super(AmbiguousNumberOrString, self).__init__(msg)
 
-class AmbiguousFloatOrList(InvalidOfficial):
-    def __init__(self, msg="Dvosmisleno, decimalni broj ili lista?"):
+class AmbiguousFloatOrList(InvalidDescriptor):
+    def __init__(self, msg=None):
+        if msg is None:
+            msg = _("Ambiguous, is it a float or a list?")
         super(AmbiguousFloatOrList, self).__init__(msg)
 
-class SpaceSeparatedList(InvalidOfficial):
-    def __init__(self, msg="Elementi moraju biti odvojeni zarezom!"):
+class SpaceSeparatedList(InvalidDescriptor):
+    def __init__(self, msg=None):
+        if msg is None:
+            msg = _("Elements must be separated by a comma!")
         super(SpaceSeparatedList, self).__init__(msg)
 
-class ZeroDenominator(InvalidOfficial):
-    def __init__(self, msg="Nazivnik ne može biti nula!"):
+class ZeroDenominator(InvalidDescriptor):
+    def __init__(self, msg=None):
+        if msg is None:
+            msg = _("Denominator cannot be 0!")
         super(ZeroDenominator, self).__init__(msg)
 
 
 # Variables
 class Integer(Variable):
-    def __init__(self, official):
-        super(Integer, self).__init__(official)
+    def __init__(self, descriptor):
+        super(Integer, self).__init__(descriptor)
         try:
-            self.value = int(official)
+            self.value = int(descriptor)
         except ValueError:
             raise NotThisFormat
 
@@ -72,16 +94,32 @@ class Integer(Variable):
 
         return self.value == int(value)
 
+    def help_text(self):
+        return ""
+
+    @staticmethod
+    def help_type():
+        return _("Integer")
+
+    @staticmethod
+    def help_for_authors():
+        return ""  # No help needed.
+
+    @staticmethod
+    def help_for_competitors():
+        return ""  # No help needed.
+
 
 class Float(Variable):
-    def __init__(self, official):
-        super(Float, self).__init__(official)
-        if not float_re.match(official):
+    def __init__(self, descriptor):
+        super(Float, self).__init__(descriptor)
+        if not float_re.match(descriptor):
             raise NotThisFormat
-        self.sign = -1 if official[0] == '-' else 1
-        if official[0] in '-+':
-            official = official[1:]
-        self.integer, self.fractional = re.split('[.,]', official)
+        self.sign = -1 if descriptor[0] == '-' else 1
+        if descriptor[0] in '-+':
+            descriptor = descriptor[1:]
+        self.integer, self.fractional = re.split('[.,]', descriptor)
+        self.decimal_count = len(self.fractional)
 
     def evaluate_solution(self, value):
         if not float_re.match(value):
@@ -99,23 +137,47 @@ class Float(Variable):
                    sign * int(integer + fractional)
         extra = len(fractional) - len(self.fractional)
         margin = 5 * 10 ** (extra - 1)
-        official = int(self.integer + self.fractional + '0' * extra)
+        descriptor = int(self.integer + self.fractional + '0' * extra)
         given = int(integer + fractional)
         given *= sign * self.sign
-        if official == 0:
+        if descriptor == 0:
             return -margin < given and given < margin
-        return official - margin <= given and given < official + margin
+        return descriptor - margin <= given and given < descriptor + margin
 
-    def get_decimal_count(self):
-        return len(self.fractional)
+    def help_text(self):
+        return ungettext(
+                "Write the result rounded to %(count)d decimal.",
+                "Write the result rounded to %(count)d decimals.",
+                self.decimal_count) % {'count': self.decimal_count}
+
+    @staticmethod
+    def help_type():
+        return _("Decimal number")
+
+    @staticmethod
+    def help_for_authors():
+        return _("The solution is required to have at least as many decimals "
+                 "as entered by the author, otherwise it will be rejected. The "
+                 "solution is accepted if and only if it is equal to the "
+                 "author's solution when rounded to the same number of "
+                 "decimals. If you are unsure about how the rounding is "
+                 "performed, please try sending the solution with more "
+                 "decimals than required. Please prefer dots over commas as a "
+                 "decimal mark.")
+
+    @staticmethod
+    def help_for_competitors():
+        return _("The solution must have as least as many decimals as written "
+                 "in the description, and has to exactly match the official "
+                 "solution when rounded to that number of decimals.")
 
 
 class Fraction(Variable):
-    def __init__(self, official):
-        super(Fraction, self).__init__(official)
-        if not fraction_re.match(official):
+    def __init__(self, descriptor):
+        super(Fraction, self).__init__(descriptor)
+        if not fraction_re.match(descriptor):
             raise NotThisFormat
-        a, b = fraction_slash_re.split(official)
+        a, b = fraction_slash_re.split(descriptor)
         self.num = int(a)
         self.den = int(b)
         if self.den == 0:
@@ -134,6 +196,28 @@ class Fraction(Variable):
             return c * self.den == self.num
         return fraction.num * self.den == fraction.den * self.num
 
+    def help_text(self):
+        return _("Write the solution in the form a/b, where a and b are "
+                 "integers.")
+
+    @staticmethod
+    def help_type():
+        return _("Fraction")
+
+    @staticmethod
+    def help_for_authors():
+        return _("Fraction is written in the format a/b, where a and b are "
+                 "integers. The competitors solution will be accepted if it is "
+                 "an integer or a fraction equal to the given fraction. "
+                 "Reducible fractions are also accepted.")
+
+    @staticmethod
+    def help_for_competitors():
+        return _("Fractions are written in the format a/b, where a and b are "
+                 "integers. Reducible fractions are accepted. You can also "
+                 "write a single integer if you are sure the result is an "
+                 "integer. Decimal numbers are not accepted.")
+
 
 def _parse_element(part):
     part = part.strip()
@@ -150,12 +234,12 @@ def _parse_element(part):
 
 
 class BaseList(Variable):
-    def __init__(self, official):
-        super(BaseList, self).__init__(official)
-        self.length_specified = official.startswith('#:')
+    def __init__(self, descriptor):
+        super(BaseList, self).__init__(descriptor)
+        self.length_specified = descriptor.startswith('#:')
         if self.length_specified:
-            official = official[2:]
-        self.items = [_parse_element(x) for x in official.split(',')]
+            descriptor = descriptor[2:]
+        self.items = [_parse_element(x) for x in descriptor.split(',')]
 
         contained = set()
         for var_type in [Integer, Float, Fraction, String]:
@@ -165,25 +249,25 @@ class BaseList(Variable):
             raise MixedTypes
         if Float in contained:
             for item in self.items:
-                if item.get_decimal_count() != \
-                        self.items[0].get_decimal_count():
+                if item.decimal_count != self.items[0].decimal_count:
                     raise MixedPrecisions
+        self.element_type = list(contained)[0]
 
 
 class List(BaseList):
-    def __init__(self, official):
+    def __init__(self, descriptor):
         brackets = False
-        if official[-1] == ']':
-            if official[0] == '[':
+        if descriptor[-1] == ']':
+            if descriptor[0] == '[':
                 brackets = True
-                super(List, self).__init__(official[1:-1])
-            elif official.startswith('#:') and official[2] == '[':
+                super(List, self).__init__(descriptor[1:-1])
+            elif descriptor.startswith('#:') and descriptor[2] == '[':
                 brackets = True
-                super(List, self).__init__('#:' + official[3:-1])
+                super(List, self).__init__('#:' + descriptor[3:-1])
             else:
-                super(List, self).__init__(official)
+                super(List, self).__init__(descriptor)
         else:
-            super(List, self).__init__(official)
+            super(List, self).__init__(descriptor)
 
         if len(self.items) == 1:
             if self.length_specified:
@@ -207,18 +291,64 @@ class List(BaseList):
 
         return is_correct
 
+    def help_text(self):
+        if self.element_type == Integer:
+            msg = _("Write the results in the correct order, separated with "
+                    "a comma.")
+        if self.element_type == Float:
+            decimal_count = self.items[0].decimal_count
+            msg = ungettext(
+                    "Write the results in the correct order, round to "
+                    "%(decimals)d decimal and separated with a comma.",
+                    "Write the results in the correct order, round to "
+                    "%(decimals)d decimals and separated with a comma.",
+                    decimal_count) % {'decimals': decimal_count}
+        if self.element_type == Fraction:
+            msg = _("Write the results in the correct order in the form a/b, "
+                    "where a and b are integers. Separate the results with a "
+                    "comma.")
+        if self.element_type == String:
+            msg = _("Write the results in the correct order, separated with a "
+                    "comma.")
+        if self.length_specified:
+            msg += " " + _("Number of elements:") + " " + str(len(self.items))
+        return msg
+
+    @staticmethod
+    def help_type():
+        return _("List")
+
+    @staticmethod
+    def help_for_authors():
+        return _("A list can contain integers, decimal numbers, fractions or "
+                 "strings (anything else). All elements must have the same "
+                 "type. Elements are separated with a comma. By default, "
+                 "competitors don't know the length of the list. To make the "
+                 "length visible, use #: prefix. To make a single-element "
+                 "list, put the element into [ ] brackets.")
+
+    @staticmethod
+    def help_for_competitors():
+        return _("A list can contain integers, decimal numbers, fractions or "
+                 "strings (anything else). If not obvious, the type of "
+                 "elements will be specified, together with the decimal count "
+                 "in the case of decimal numbers. The length of the list might "
+                 "or might not be specified. The list can also contain a "
+                 "single element! Separate the elements with a comma.")
+
+
 
 class MultiSet(BaseList):
-    def __init__(self, official):
-        if official.startswith('#:'):
-            if official[2] == '{' and official[-1] == '}':
-                super(MultiSet, self).__init__('#:' + official[3:-1])
+    def __init__(self, descriptor):
+        if descriptor.startswith('#:'):
+            if descriptor[2] == '{' and descriptor[-1] == '}':
+                super(MultiSet, self).__init__('#:' + descriptor[3:-1])
                 if len(self.items) == 1:
                     raise InvalidModifiers
             else:
                 raise NotThisFormat
-        elif official[0] == '{' and official[-1] == '}':
-            super(MultiSet, self).__init__(official[1:-1])
+        elif descriptor[0] == '{' and descriptor[-1] == '}':
+            super(MultiSet, self).__init__(descriptor[1:-1])
         else:
             raise NotThisFormat
 
@@ -248,73 +378,131 @@ class MultiSet(BaseList):
             available.remove(matched)
         return True
 
+    def help_text(self):
+        if self.element_type == Integer:
+            msg = _("Write the results in any order, separated with a comma.")
+        if self.element_type == Float:
+            decimal_count = self.items[0].decimal_count
+            msg = ungettext(
+                    "Write the results in any order, round to "
+                    "%(decimals)d decimal and separated with a comma.",
+                    "Write the results in any order, round to "
+                    "%(decimals)d decimals and separated with a comma.",
+                    decimal_count) % {'decimals': decimal_count}
+        if self.element_type == Fraction:
+            msg = _("Write the results in any order, in the form a/b, "
+                    "where a and b are integers. Separate the results with a "
+                    "comma.")
+        if self.element_type == String:
+            msg = _("Write the results in any order, separated with a comma.")
+        if self.length_specified:
+            msg += " " + _("Number of elements:") + " " + str(len(self.items))
+        return msg
+
+    @staticmethod
+    def help_type():
+        return _("Set")
+
+    @staticmethod
+    def help_for_authors():
+        return _("Acts similarly to lists, only the elements are treated as "
+                 "unordered. Put the comma separated values inside the { } "
+                 "brackets. Same as for lists, use #: prefix to make the "
+                 "length visible. Warning: Sets behave actually as multisets, "
+                 "please write a note in the problem description directly if "
+                 "you do except multiple equal values.")
+
+    @staticmethod
+    def help_for_competitors():
+        return _("Same as for lists, just the order does not matter.")
+
+
 
 class String(Variable):
-    def __init__(self, official):
-        self.value = official
+    def __init__(self, descriptor):
+        self.value = descriptor
 
     def evaluate_solution(self, value):
         return self.value == value
 
+    def help_text(self):
+        return ""
 
-def parse_variable(official):
-    official = official.strip()
+    @staticmethod
+    def help_type():
+        return _("String")
+
+    @staticmethod
+    def help_for_authors():
+        return _("Anything that does not match any other type. To force the "
+                 "type to be a string, use = prefix.")
+
+    @staticmethod
+    def help_for_competitors():
+        return _("Anything that does not match any other type. That can "
+                 "include words, special formats, or even numbers of special "
+                 "forms.")
+
+
+
+def parse_variable(descriptor):
+    descriptor = descriptor.strip()
     try:
-        str(official)
+        str(descriptor)
     except UnicodeEncodeError:
         raise UnallowedCharacter
 
-    if official.startswith('='):
-        return String(official[1:])
+    if descriptor.startswith('='):
+        return String(descriptor[1:])
     else:
-        if ambiguous_number_or_string_re.match(official):
+        if ambiguous_number_or_string_re.match(descriptor):
             raise AmbiguousNumberOrString
-        if ambiguous_float_or_list_re.match(official):
+        if ambiguous_float_or_list_re.match(descriptor):
             raise AmbiguousFloatOrList
-        if space_separated_list_re.search(official):
+        if space_separated_list_re.search(descriptor):
             raise SpaceSeparatedList
 
         try:
-            return Integer(official)
+            return Integer(descriptor)
         except NotThisFormat:
             pass
 
         try:
-            return Float(official)
+            return Float(descriptor)
         except NotThisFormat:
             pass
 
         try:
-            return Fraction(official)
+            return Fraction(descriptor)
         except NotThisFormat:
             pass
 
         try:
-            return MultiSet(official)
+            return MultiSet(descriptor)
         except NotThisFormat:
             pass
 
         try:
-            return List(official)
+            return List(descriptor)
         except NotThisFormat:
             pass
 
-        return String(official)
+        return String(descriptor)
 
 
-def parse_official(official):
-    """Parse full official solution for v1 evaluator.
+def parse_descriptor(descriptor):
+    """Parse full solution descriptor for v1 evaluator.
 
     Splits the string by | delimiter and parses each part separately.
     Returns the list of variables, one for each part."""
     variables = []
-    official += " |"
+    descriptor += " |"
     part = ""
     k = 0
-    while k < len(official):
-        current = official[k]
-        if current == '\\' and k < len(official) - 1:
-            next_char = official[k + 1]
+    while k < len(descriptor):
+        current = descriptor[k]
+        if current == '\\' and k < len(descriptor) - 1:
+            next_char = descriptor[k + 1]
             if next_char in '\\|':
                 part += next_char
                 k += 2
@@ -329,9 +517,9 @@ def parse_official(official):
     return variables
 
 
-def check_result(correct_result, result):
+def check_result(descriptor, result):
     """Implementation of check_result for v1 evaluator."""
-    variables = parse_official(correct_result)
+    variables = parse_descriptor(descriptor)
     exception = False
     for variable in variables:
         try:
@@ -342,3 +530,11 @@ def check_result(correct_result, result):
     if exception:
         raise
     return False
+
+def get_variable_types():
+    return [Integer, Float, Fraction, List, MultiSet, String]
+
+def help_authors_general():
+    return _("Split different accepted solutions by a '|' character. "
+             "To use the '|' character, write '\\|'. To use '\\', write "
+             "'\\\\'. Trailing and leading spaces are always ignored.")

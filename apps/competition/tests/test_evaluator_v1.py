@@ -2,12 +2,12 @@ from django.test import TestCase
 
 from competition.evaluator_v1 import InvalidSolution, MixedTypes, \
         MixedPrecisions, IncorrectNumberOfElements, TooFewDecimals, \
-        InvalidOfficial, UnallowedCharacter, InvalidModifiers, \
+        InvalidDescriptor, UnallowedCharacter, InvalidModifiers, \
         AmbiguousNumberOrString, AmbiguousFloatOrList, SpaceSeparatedList, \
         ZeroDenominator
 from competition.evaluator_v1 import Integer, Float, Fraction, List, MultiSet, \
         String
-from competition.evaluator_v1 import check_result, parse_official
+from competition.evaluator_v1 import check_result, parse_descriptor
 
 import inspect
 
@@ -33,12 +33,12 @@ class EvaluatorV1Test(TestCase):
     def assertVariableTypes(self, variable_types, tests):
         for test in tests:
             try:
-                result = parse_official(test)
+                result = parse_descriptor(test)
             except:
                 print "Failed on the test case {}.".format(test)
                 raise
             self.assertEqual(len(result), len(variable_types),
-                    msg="Official: {}".format(test))
+                    msg="Descriptor: {}".format(test))
             for k in xrange(len(result)):
                 self.assertIsInstance(result[k], variable_types[k],
                         msg="test={} k={} expected={} result={}".format(
@@ -46,25 +46,25 @@ class EvaluatorV1Test(TestCase):
 
     def assertMultipleVariableTypesOrRaises(self, variable_types, tests):
         for test_case in tests:
-            official, exception = test_case
+            descriptor, exception = test_case
             try:
                 if exception is not None:
-                    self.assertRaises(exception, parse_official, official)
+                    self.assertRaises(exception, parse_descriptor, descriptor)
                     continue
 
-                result = parse_official(official)
+                result = parse_descriptor(descriptor)
                 self.assertEqual(len(result), len(variable_types),
-                        msg="Official: {}".format(official))
+                        msg="Descriptor: {}".format(descriptor))
                 for k in xrange(len(result)):
-                    self.assertIsInstance(result[k], variable_types[k],
-                            msg="official={} k={} expected={} result={}".format(
-                                official, k, variable_types[k], result[k]))
+                    msg="descriptor={} k={} expected={} result={}".format(
+                        descriptor, k, variable_types[k], result[k]))
+                    self.assertIsInstance(result[k], variable_types[k], msg)
             except Exception as e:
                 print "Unexpected exception '{}' ({}) for test case {}.".format(
                         e, type(e), test_case)
                 raise
 
-    def test_validate_official_integer(self):
+    def test_validate_descriptor_integer(self):
         self.assertMultipleVariableTypesOrRaises([Integer], [
             ("0", None),
             ("000", AmbiguousNumberOrString),
@@ -100,7 +100,7 @@ class EvaluatorV1Test(TestCase):
         self.assertVariableTypes([Integer], [x[0] for x in tests])
         self.assertMultipleEqualOrRaise(check_result, tests)
 
-    def test_validate_official_float(self):
+    def test_validate_descriptor_float(self):
         self.assertMultipleVariableTypesOrRaises([Float], [
             ("0012.23", AmbiguousNumberOrString),
             ("0012,23", AmbiguousNumberOrString),
@@ -162,7 +162,7 @@ class EvaluatorV1Test(TestCase):
         self.assertVariableTypes([Float], [x[0] for x in tests])
         self.assertMultipleEqualOrRaise(check_result, tests)
 
-    def test_validate_official_fraction(self):
+    def test_validate_descriptor_fraction(self):
         self.assertMultipleVariableTypesOrRaises([Fraction], [
             ("0/1", None),
             ("10/5", None),
@@ -190,7 +190,7 @@ class EvaluatorV1Test(TestCase):
         self.assertVariableTypes([Fraction], [x[0] for x in tests])
         self.assertMultipleEqualOrRaise(check_result, tests)
 
-    def test_validate_official_list(self):
+    def test_validate_descriptor_list(self):
         self.assertMultipleVariableTypesOrRaises([List], [
             ("12,123", AmbiguousFloatOrList),
             ("12,-123", None),
@@ -227,7 +227,7 @@ class EvaluatorV1Test(TestCase):
         self.assertVariableTypes([List], [x[0] for x in tests])
         self.assertMultipleEqualOrRaise(check_result, tests)
 
-    def test_validate_official_multiset(self):
+    def test_validate_descriptor_multiset(self):
         self.assertMultipleVariableTypesOrRaises([MultiSet], [
             ("{12}", None),
             ("#:{12}", InvalidModifiers),

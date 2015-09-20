@@ -30,18 +30,18 @@ attrs_dict = {'class': 'required'}
 
 class UserCreationForm(forms.Form):
     username = forms.RegexField(regex=r'^\w+$', max_length=30,
-        widget=forms.TextInput(attrs=attrs_dict), label=_(u'Korisničko ime'))
+        widget=forms.TextInput(attrs=attrs_dict), label=_(u"Username"))
     email = forms.EmailField(
             widget=forms.TextInput(attrs=dict(attrs_dict, maxlength=75)),
-            label=_(u'Email'))
+            label=_(u"E-mail"))
     password1 = forms.CharField(
             widget=forms.PasswordInput(attrs=attrs_dict, render_value=False),
-            label=_(u'Lozinka'))
+            label=_(u"Password"))
     password2 = forms.CharField(
             widget=forms.PasswordInput(attrs=attrs_dict, render_value=False),
-            label=_(u'Potvrda lozinke'))
+            label=_(u"Confirm password"))
     tou = forms.BooleanField(required=True,
-            label=mark_safe(_(u'Prihvaćam <a href="/tou/">uvjete korištenja</a>')),
+            label=mark_safe(u'Prihvaćam <a href="/tou/">uvjete korištenja</a>'),
             error_messages={
                 'required': 'Ukoliko ne prihvaćate uvjete korištenja, ne možete koristiti Školjku.'
             })
@@ -75,19 +75,21 @@ class UserCreationForm(forms.Form):
         username = self.cleaned_data['username']
         if User.objects.filter(username__iexact=username).exists() \
             or Group.objects.filter(name__iexact=username).exists():
-            raise forms.ValidationError(_(u'This name is already reserved. Please choose another.'))
+            raise forms.ValidationError(
+                    _(u"This name is already reserved. Please choose another."))
         return self.cleaned_data['username']
 
     def clean_email(self):
         email = self.cleaned_data['email']
         if User.objects.filter(email=email).exists():
-            raise forms.ValidationError(_(u'E-mail address already in use. Please choose another.'))
+            raise forms.ValidationError(_(u"E-mail address already in use."))
         return self.cleaned_data['email']
 
     def clean(self):
         if 'password1' in self.cleaned_data and 'password2' in self.cleaned_data:
             if self.cleaned_data['password1'] != self.cleaned_data['password2']:
-                raise forms.ValidationError(_(u'You must type the same password each time'))
+                raise forms.ValidationError(
+                        _(u"Please type the same password each time!"))
         return self.cleaned_data
 
 
