@@ -327,20 +327,29 @@ PIPELINE_CSS = {
 }
 
 # TODO: fix /*! */ comments, they should be preserved
+# TODO: how to properly exclude files?
 PIPELINE_JS_COMPRESSOR = 'libs.jscompressor.JSCompressor'
 PIPELINE_JS = {
     'scripts': {
         'source_filenames': (
             'jquery.min.js',
             'jquery.[!t]*.js',
-            '[!a]*/*.js',
-            '[!a]*/*/*.js',
+            'b[!o]*/*.js',
+            'b[!o]*/*/*.js',
+            '[!abdt]*/*.js',
+            '[!abdt]*/*/*.js',
             'a[!d]*/*.js',
             'a[!d]*/*/*.js',
-            'ad[!m]*/*.js', # exclude admin js files
+            'ad[!m]*/*.js',
             'ad[!m]*/*/*.js',
-            # Don't include *.js, as it would make a duplicate of script.js and
-            # jquery.tools.min.js
+            't[!e]*/*.js',
+            't[!e]*/*/*.js',
+            # Don't include *.js, because we have to exclude:
+            #  - duplicates of script.js and jquery.tools.min.js
+            #  - admin scripts
+            #  - bootstrap_toolkit/** and datepicker/**, both from
+            #       django-bootstrap-toolkit module.
+            #  - template_preprocessor/**
         ),
         'output_filename': 'scripts.min.js',
     },
