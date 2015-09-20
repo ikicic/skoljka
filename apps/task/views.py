@@ -1,4 +1,5 @@
-﻿from django.conf import settings
+﻿from django import forms
+from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction

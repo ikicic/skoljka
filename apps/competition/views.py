@@ -194,7 +194,6 @@ def scoreboard(request, competition, data):
     return data
 
 
-@login_required
 @competition_view()
 @response('competition_task_list.html')
 def task_list(request, competition, data):
