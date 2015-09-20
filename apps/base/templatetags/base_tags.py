@@ -1,9 +1,17 @@
 from django import template
+from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
 from search.utils import search_tasks
 
 register = template.Library()
+
+@register.simple_tag
+def my_url(name, *args):
+    # TODO: Test this after upgrading to Django 1.5.
+    # {% url %} tag calls the reverse method with kwargs={} instead of None, so
+    # it doesn't work for some reason.
+    return reverse(name, args=args)
 
 @register.filter
 def fix_label_colon(label):

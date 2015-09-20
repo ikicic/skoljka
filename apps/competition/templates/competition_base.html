@@ -1,4 +1,5 @@
 {% load compressed %}
+{% load base_tags %}
 {% load competition_tags %}
 {% load tags_tags %}
 
@@ -65,6 +66,13 @@
         <li class="nav-header">Admin</li>
         <li><a href="{% comp_url 'chain' %}">Lanci</a></li>
         <li><a href="{% comp_url 'notifications/admin' %}">Obavijesti</a></li>
+        {% if user.is_superuser %}
+          <li><a href="{% my_url 'admin:app_list' 'competition' %}">
+            Admin</a></li>
+          {# TODO: Change to my_url/url after upgrading to Django 1.5. #}
+          <li><a href="/admin/competition/competition/{{ competition.id }}/">
+            Competition admin</a></li>
+        {% endif %}
       {% endif %}
     </ul>
   </div>
