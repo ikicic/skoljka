@@ -11,11 +11,13 @@ class UserEntryField(forms.CharField):
     widget = forms.Textarea(attrs={'rows':3})
 
     def clean(self, value):
-        usernames = [x.strip() for x in value.split(',')]
+        usernames = [x.strip().lower() for x in value.split(',') if x.strip()]
         # this must be case-insensitive!
         found = User.objects.filter(username__in=usernames)
+        if self.required and not found:
+            raise forms.ValidationError(self.error_messages['required'])
 
-        not_found = set(usernames) - set(x.username for x in found)
+        not_found = set(usernames) - set(x.username.lower() for x in found)
         if not_found:
             raise forms.ValidationError(u'Nepostojeći korisnici: %s' \
                 % ', '.join(not_found))
@@ -34,14 +36,14 @@ class GroupEntryField(forms.CharField):
 
     def clean(self, value):
         if not value or not value.strip():
+            if self.required:
+                raise forms.ValidationError(self.error_messages['required'])
             return []
-        names = [x.strip() for x in value.split(',')]
+        names = [x.strip().lower() for x in value.split(',')]
         # this must be case-insensitive!
         groups = Group.objects.filter(name__in=names).select_related('data')
-        groups_lowercase = set(x.name.lower() for x in groups)
 
-        error = set(x.lower() for x in names) - groups_lowercase
-
+        error = set(names) - set(x.name.lower() for x in groups)
         # Do not immediately reject if len(error) > 0. List *all* invalid or
         # inaccessible groups.
 
