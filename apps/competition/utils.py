@@ -1,3 +1,5 @@
+from django.db import connection, transaction
+
 from competition.models import Chain, Competition, CompetitionTask, \
         Submission, Team, TeamMember
 
@@ -114,11 +116,19 @@ def refresh_teams_cache_score(teams):
     score_all = _calculate_score(submissions_correct)
     score_max = _calculate_score(submissions_correct_or_after)
 
+    queries_args = []
     for team in teams:
         team.cache_score = score_all.get(team.id, 0)
         team.cache_score_before_freeze = score_before.get(team.id, 0)
         team.cache_max_score_after_freeze = score_max.get(team.id, 0)
-        team.save()
+        queries_args.append((team.cache_score, team.cache_score_before_freeze,
+                team.cache_max_score_after_freeze, int(team.id)))
+    cursor = connection.cursor()
+    cursor.executemany(
+            "UPDATE `competition_team` SET `cache_score`=%s, "
+            "`cache_score_before_freeze`=%s, `cache_max_score_after_freeze`=%s "
+            "WHERE `id`=%s;", queries_args)
+    transaction.commit_unless_managed()
 
 
 def lock_ctasks_in_chain(ctasks):
