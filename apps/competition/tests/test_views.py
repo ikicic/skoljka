@@ -77,6 +77,10 @@ class SubmissionTest(CompetitionViewsTestBase):
     def _send_solution(self, task, result):
         return self.client.post(task.get_absolute_url(), {'result': result})
 
+    def _delete_solution(self, task, submission_id):
+        return self.client.post(task.get_absolute_url(),
+                {'delete-submission': submission_id})
+
     def test_before_contest_start(self):
         self.init_competition(self.competitions[2], self.alice)
         self.login(self.alice)
@@ -174,6 +178,23 @@ class SubmissionTest(CompetitionViewsTestBase):
         response = self._send_solution(self.ctask3, "42")
         self.assertEqual(Submission.objects.all().count(), 5)
         self.assertEqual(Team.objects.get(id=self.team.id).cache_score, 110)
+        self.logout()
+
+    def test_nonadmin_cannot_delete_solution(self):
+        self.init_competition(self.competitions[3], self.alice)
+        self.login(self.alice)
+        response = self._send_solution(self.ctask1, "42")
+        response = self._delete_solution(self.ctask1, 1)
+        self.assertEqual(Submission.objects.all().count(), 1)
+        self.logout()
+
+    def test_admin_delete_solution(self):
+        self.init_competition(self.competitions[3], self.admin)
+        self.login(self.admin)
+        response = self._send_solution(self.ctask1, "42")
+        response = self._delete_solution(self.ctask1, 1)
+        self.assertEqual(Submission.objects.all().count(), 0)
+        self.assertEqual(Team.objects.get(id=self.team.id).cache_score, 0)
         self.logout()
 
     # TODO: Test submission with frozen scoreboard.

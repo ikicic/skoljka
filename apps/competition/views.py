@@ -316,12 +316,14 @@ def task_detail(request, competition, data, ctask_id):
                     chain_submissions.append(submission)
                     submissions.append(submission)
 
-                    # Prevent form resubmission.
-                    return (ctask.get_absolute_url(), )
+            if delete or submission:
+                update_score_on_ctask_action(competition, team, ctask.chain,
+                        ctask, submission, delete,
+                        chain_ctask_ids=[x.id for x in ctasks],
+                        chain_submissions=chain_submissions)
 
-            update_score_on_ctask_action(competition, team, ctask.chain, ctask,
-                    submission, delete, chain_ctask_ids=[x.id for x in ctasks],
-                    chain_submissions=chain_submissions)
+                # Prevent form resubmission.
+                return (ctask.get_absolute_url(), )
 
         else:
             solution_form = CompetitionSolutionForm(

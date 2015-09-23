@@ -17,7 +17,7 @@ def create_ctask(author, competition, chain, descriptor, score):
             author=author, hidden=True)
     chain_position = CompetitionTask.objects.filter(chain=chain).count()
     return CompetitionTask.objects.create(competition=competition, task=task,
-            descriptor=descriptor, score=score, chain=chain,
+            descriptor=descriptor, max_submissions=3, score=score, chain=chain,
             chain_position=chain_position)
 
 CHAIN_BONUS_SCORE = 1000000
@@ -25,7 +25,7 @@ HOUR = datetime.timedelta(hours=1)
 MINUTE = datetime.timedelta(minutes=1)
 
 
-class CompetitionUtilsTest(TestCase):
+class TeamScoreTest(TestCase):
     fixtures = ['apps/userprofile/fixtures/test_userprofiles.json']
 
     def setUp(self):
@@ -54,21 +54,42 @@ class CompetitionUtilsTest(TestCase):
         self.after_freeze = freeze_date + 10 * MINUTE
 
     def simulate_submissions(self, submissions):
+        """
+        Submissions is a list of tuples:
+            (ctask, date, action, expected_score_triple),
+        Action can be:
+            True -> sending a correct solution
+            False -> sending an incorrect solution
+            int x -> ID of the solution (assume 1-based).
+        """
         team = self.team
-        for ctask, date, is_correct, expected_score_triple in submissions:
-            result = "42" if is_correct else "0"
-            submission = Submission.objects.create(ctask=ctask, team=team,
-                    date=date, result=result, cache_is_correct=is_correct)
-            update_score_on_ctask_action(self.competition, team, self.chain,
-                    ctask, submission, False)
-            score_triple = (team.cache_score_before_freeze,
-                    team.cache_score, team.cache_max_score_after_freeze)
-            self.assertEqual(score_triple, expected_score_triple)
+        for index, test_case in enumerate(submissions):
+            try:
+                ctask, date, action, expected_score_triple = test_case
+                if isinstance(action, bool):
+                    is_correct = action
+                    result = "42" if is_correct else "0"
+                    submission = Submission.objects.create(ctask=ctask,
+                            team=team, date=date, result=result,
+                            cache_is_correct=is_correct)
+                    update_score_on_ctask_action(self.competition, team,
+                            self.chain, ctask, submission, False)
+                else:
+                    # Raise an exception if not found.
+                    submission = Submission.objects.get(id=action)
+                    submission.delete()
+                    update_score_on_ctask_action(self.competition, team,
+                            self.chain, ctask, None, True)
+                score_triple = (team.cache_score_before_freeze,
+                        team.cache_score, team.cache_max_score_after_freeze)
 
-            refresh_teams_cache_score([team])
-            score_triple = (team.cache_score_before_freeze,
-                    team.cache_score, team.cache_max_score_after_freeze)
-            self.assertEqual(score_triple, expected_score_triple)
+                refresh_teams_cache_score([team])
+                score_triple = (team.cache_score_before_freeze,
+                        team.cache_score, team.cache_max_score_after_freeze)
+                self.assertEqual(score_triple, expected_score_triple)
+            except:
+                print "Test case #{}: {}".format(index, test_case)
+                raise
 
     def test_refresh_score_no_submissions(self):
         self.set_freeze_date(self.now)
@@ -98,4 +119,15 @@ class CompetitionUtilsTest(TestCase):
                 (self.ctask2, self.after_freeze, True, (1, 11, 11)),
                 (self.ctask3, self.after_freeze, False, (1, 11, 1111)),
                 (self.ctask3, self.after_freeze, True, (1, 1111, 1111)),
+        ])
+
+    def test_admin_delete_solution(self):
+        self.set_freeze_date(self.now - 5 * MINUTE)
+        self.simulate_submissions([
+                (self.ctask1, self.before_freeze, True, (1, 1, 1)),
+                (self.ctask1, self.before_freeze, 1, (0, 0, 0)),
+                (self.ctask1, self.before_freeze, False, (0, 0, 0)),
+                (self.ctask1, self.before_freeze, False, (0, 0, 0)),
+                (self.ctask1, self.before_freeze, 2, (0, 0, 0)),
+                (self.ctask1, self.before_freeze, True, (1, 1, 1)),
         ])

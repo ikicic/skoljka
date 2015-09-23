@@ -57,7 +57,7 @@ class EvaluatorV1Test(TestCase):
                         msg="Descriptor: {}".format(descriptor))
                 for k in xrange(len(result)):
                     msg="descriptor={} k={} expected={} result={}".format(
-                        descriptor, k, variable_types[k], result[k]))
+                        descriptor, k, variable_types[k], result[k])
                     self.assertIsInstance(result[k], variable_types[k], msg)
             except Exception as e:
                 print "Unexpected exception '{}' ({}) for test case {}.".format(
