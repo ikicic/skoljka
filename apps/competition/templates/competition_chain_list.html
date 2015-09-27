@@ -1,4 +1,5 @@
 {% extends "competition_base.html" %}
+{% load i18n %}
 
 {% load competition_tags %}
 
@@ -21,6 +22,8 @@
     <th>Duljina</th>
     <th title="Vrijeme otključavanja">Minute</th>
     <th>Autor(i)</th>
+    <th>{% trans "Edit" %}</th>
+    <th>{% trans "Overview" %}</th>
   </tr>
   {% for chain in chains %}
     <tr>
@@ -29,6 +32,9 @@
       <td>{{ chain.t_ctask_count }}</td>
       <td>{{ chain.unlock_minutes }}</td>
       <td>{{ chain.t_authors }}</td>
+      <td><a href="{{ chain.get_absolute_url }}">{% trans "Edit" %}</a></td>
+      <td><a href="{{ chain.get_absolute_url }}overview/">
+          {% trans "Overview" %}</a></td>
     </div>
   {% empty %}
     <tr><td colspan="3"><i>Prazno...</i></td> </tr>

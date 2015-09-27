@@ -1,0 +1,29 @@
+{% extends "competition_base.html" %}
+{% load i18n %}
+
+{% load bootstrap_toolkit %}
+{% load competition_tags %}
+
+{% block content %}
+
+<h3>
+  <a href="{{ chain.get_absolute_url }}">{{ chain.name }}</a>
+</h3>
+
+{% for ctask in ctasks %}
+  <div class="ctask-container">
+    <div class="chain-overview-ctask-author">
+      {% trans "Author:" %} {{ ctask.task.author|userlink }}
+    </div>
+    <h4 class="ctask-title">
+      <a href="{{ ctask.get_absolute_url }}">
+        {{ chain.name }} #{{ ctask.chain_position }}
+      </a>
+    </h4>
+    <div class="outset ctask-content">
+      {{ ctask.task.content.render }}
+    </div>
+  </div>
+{% endfor %}
+
+{% endblock content %}

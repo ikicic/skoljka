@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-20 22:49+0200\n"
-"PO-Revision-Date: 2015-09-20 22:51+0200\n"
+"POT-Creation-Date: 2015-09-27 15:16+0200\n"
+"PO-Revision-Date: 2015-09-27 15:16+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -316,14 +316,32 @@ msgstr "Nevaljan deskriptor. Molimo obavijestite administratore!"
 msgid "Invalid!"
 msgstr "Nevaljano rješenje!"
 
+#: apps/competition/templates/competition_chain_list.html:25
+#: apps/competition/templates/competition_chain_list.html:35
+msgid "Edit"
+msgstr "Uredi"
+
+#: apps/competition/templates/competition_chain_list.html:26
+#: apps/competition/templates/competition_chain_list.html:37
+msgid "Overview"
+msgstr "Pregled"
+
 #: apps/competition/templates/competition_chain_new.html:36
 #, python-format
 msgid "Note: Score for the each task has been fixed to %(score)s."
 msgstr "Napomena: Bodovi za svaki zadatak su fiksirani na %(score)s."
 
-#: apps/competition/templates/competition_chain_new.html:43
+#: apps/competition/templates/competition_chain_new.html:41
+msgid "Chain overview"
+msgstr "Pregled lanca"
+
+#: apps/competition/templates/competition_chain_new.html:47
 msgid "There were some errors!"
 msgstr "Bilo je nekih grešaka!"
+
+#: apps/competition/templates/competition_chain_overview.html:16
+msgid "Author:"
+msgstr "Autor:"
 
 #: apps/competition/templates/competition_rules.html:13
 msgid "Solution format description"

@@ -37,6 +37,10 @@
   </div>
 {% endif %}
 
+<a href="{{ chain.get_absolute_url }}overview/" target="_new">
+  {% trans "Chain overview" %}
+</a>
+
 <form action="{{ request.get_full_path }}" method="POST" id="comp-chain-edit"
     class="form-horizontal">
   {% if formset.errors %}

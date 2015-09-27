@@ -398,6 +398,18 @@ def _create_or_update_task(instance, user, competition, chain, index, text):
 
 
 @competition_view(permission=EDIT)
+@response('competition_chain_overview.html')
+def chain_overview(request, competition, data, chain_id):
+    chain = get_object_or_404(Chain, id=chain_id)
+    ctasks = CompetitionTask.objects.filter(chain=chain) \
+            .order_by('chain_position')
+
+    data['chain'] = chain
+    data['ctasks'] = ctasks
+    return data
+
+
+@competition_view(permission=EDIT)
 @response('competition_chain_new.html')
 def chain_new(request, competition, data, chain_id=None):
     if chain_id:
