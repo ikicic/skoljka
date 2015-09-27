@@ -37,11 +37,14 @@ def view(request):
 
     groups_error = False
     if request.user.has_perm('advanced_search'):
-        advanced_form = AdvancedSearchForm(request.GET, user=request.user)
-        if advanced_form.is_valid():
-            kwargs['groups'] = advanced_form.cleaned_data['groups']
+        if request.GET.get('q') is not None:
+            advanced_form = AdvancedSearchForm(request.GET, user=request.user)
+            if advanced_form.is_valid():
+                kwargs['groups'] = advanced_form.cleaned_data['groups']
+            else:
+                groups_error = True
         else:
-            groups_error = True
+            advanced_form = AdvancedSearchForm(user=request.user)
     else:
         advanced_form = None
 

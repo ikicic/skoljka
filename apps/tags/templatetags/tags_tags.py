@@ -1,5 +1,6 @@
 from django import template
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core import urlresolvers
 from django.core.cache import cache
 from django.db.models.signals import post_save, post_delete
@@ -20,7 +21,6 @@ register = template.Library()
 
 @register.simple_tag(takes_context=True)
 def tag_list(context, owner, plus_exclude=None):
-    # TODO: make this contenttype-independent (look at last line)
     # TODO: memcache this
 
     if plus_exclude is not None:
@@ -34,19 +34,22 @@ def tag_list(context, owner, plus_exclude=None):
     plus = no_plus + u'<a href="/search/?q=' + add + ',%(tag)s"%(class)s>+</a>'
 
     user = context['user']
-    show_hidden_option = user.is_authenticated() and user.get_profile().show_hidden_tags
-    if show_hidden_option == UserProfile.HIDDEN_TAGS_SHOW_IF_SOLVED:
-        solution = getattr(owner, 'cache_solution', None)
-        show_hidden = solution and solution.is_solved()
-    else:
-        show_hidden = show_hidden_option == UserProfile.HIDDEN_TAGS_SHOW_ALWAYS
+    show_hidden_option = user.is_authenticated() \
+            and user.get_profile().show_hidden_tags
+    show_hidden = show_hidden_option == UserProfile.HIDDEN_TAGS_SHOW_ALWAYS
+
+    content_type = ContentType.objects.get_for_model(owner)
+    if content_type.app_label == 'task' and content_type.model == 'task':
+        if show_hidden_option == UserProfile.HIDDEN_TAGS_SHOW_IF_SOLVED:
+            # TODO: do not rely on cache_solution
+            solution = getattr(owner, 'cache_solution', None)
+            show_hidden = solution and solution.is_solved()
 
     v0 = []     # not hidden
     v1 = []     # hidden
     for tagged_item in get_object_tagged_items(owner):
-        name, votes = tagged_item.tag.name, tagged_item.votes_sum
-
-        format = no_plus if (not plus_exclude or name.lower() in plus_exclude_lower) else plus
+        name = tagged_item.tag.name
+        votes = tagged_item.votes_sum
         attr = {'votes': votes, 'class': '', 'fulltag': name}
         if name[0] != '$':
             attr['tag'] = name
@@ -58,13 +61,19 @@ def tag_list(context, owner, plus_exclude=None):
 
         if votes <= VOTE_WRONG:
             attr['class'] += ' tag-wrong'
-        attr['class'] = ' class="%s"' % attr['class'].strip() if attr['class'] else ''
+        if attr['class']:
+            attr['class'] = ' class="{}"'.format(attr['class'].strip())
 
-        (v0 if name[0] != '$' else v1).append(format % attr)
+        if not plus_exclude or name.lower() in plus_exclude_lower:
+            fmt = no_plus
+        else:
+            fmt = plus
+        (v0 if name[0] != '$' else v1).append(fmt % attr)
 
-    # TODO: do not use model-specific names
-    return mark_safe(u'<div class="tag-list" data-task="%d">%s</div>' % (
-        owner.id, u" ".join(v0 + v1)))
+    # Update apps/tags/static/tags.coffee and .scss if changing this!
+    return mark_safe(u'<div class="tag-list" data-content-type-id="{}" '
+                     u'data-object-id="{}">{}</div>'.format(
+                          content_type.id, owner.id, u" ".join(v0 + v1)))
 
 
 ###################

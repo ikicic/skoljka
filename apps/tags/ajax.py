@@ -1,14 +1,13 @@
-﻿from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.contenttypes.models import ContentType
-from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
+﻿from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404, HttpResponse, HttpResponseForbidden, \
+        HttpResponseBadRequest
+from django.db.models import Model
 from django.shortcuts import get_object_or_404
 
-from tags.models import Tag, TaggedItem
-from task.models import Task
-from permissions.constants import VIEW, EDIT
+from permissions.constants import EDIT
 
-from tags.signals import send_task_tags_changed_signal
-from tags.utils import add_task_tags
+from tags.utils import add_tags, remove_tags
 
 from skoljka.libs.decorators import ajax
 
@@ -16,45 +15,43 @@ from skoljka.libs.decorators import ajax
 #   perm: delete_tag
 #   (TODO: uzeti neko drugo ime, ovo je rezervirano vec)
 
+_ALLOWED_CONTENT_TYPES = [('task', 'task')]
 
-@ajax(post=['name', 'task'])
+def _get_object(request):
+    content_type_id = request.POST['content_type_id']
+    content_type = get_object_or_404(ContentType, id=content_type_id)
+    if (content_type.app_label, content_type.model) \
+            not in _ALLOWED_CONTENT_TYPES:
+        return HttpResponseBadRequest()
+    object_id = request.POST['object_id']
+    try:
+        instance = content_type.get_object_for_this_type(id=object_id)
+    except ObjectDoesNotExist:
+        raise Http404
+    if not instance.user_has_perm(request.user, EDIT):
+        return HttpResponseForbidden('0')
+    return instance
+
+@ajax(post=['name', 'content_type_id', 'object_id'])
 def delete(request):
-    task = get_object_or_404(Task, id=request.POST['task'])
-    if not task.user_has_perm(request.user, EDIT):
-        return '0' # HttpResponseForbidden("Not allowed to edit this task.")
-    task_ct = ContentType.objects.get_for_model(Task)
-
-    tag_name = request.POST['name']
-    tag = get_object_or_404(Tag, name=tag_name)
-
-    old_tags = list(task.tags.values_list('name', flat=True))
-
-    # If task not tagged with this tag, ignore. (Although, we throw 404 if the
-    # tag doesn't exist. Consistency?)
-    TaggedItem.objects.filter(
-            tag=tag, object_id=task.id, content_type=task_ct).delete()
-    new_tags = [x for x in old_tags if x != tag_name]
-
-    send_task_tags_changed_signal(task, old_tags, new_tags)
-
+    instance = _get_object(request)
+    if not isinstance(instance, Model):
+        return instance  # HttpResponse
+    name = request.POST['name']
+    remove_tags(instance, [name])  # Only one tag!
     return '1'
 
-@ajax(post=['name', 'task'])
+
+@ajax(post=['name', 'content_type_id', 'object_id'])
 def add(request):
-    # TODO: DRY
-    name = request.POST['name'].strip()
+    instance = _get_object(request)
+    if not isinstance(instance, Model):
+        return instance  # HttpResponse
+    name = request.POST['name']
     if len(name) == 0:
         return HttpResponseBadRequest(
                 "Tag name has to be at least one character long.")
-
-    # 'news' is used to mark task as news
-    if name.lower() in ['news', 'oldnews']:
-        return '00' # HttpResponseForbidden("Nedozvoljena oznaka.")
-
-    task = get_object_or_404(Task, id=request.POST['task'])
-    if not task.user_has_perm(request.user, EDIT):
-        return '0' # HttpResponseForbidden("Not allowed to edit this task.")
-
-    created = add_task_tags(request.POST['name'], task)
-
-    return '1' if created else '-1'
+    if name.lower() in ['news', 'oldnews'] and not request.user.is_superuser:
+        return '00'  # HttpResponseForbidden("Nedozvoljena oznaka.")
+    change = add_tags(instance, [name])  # Only one tag!
+    return '1' if change != 0 else '-1'

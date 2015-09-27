@@ -5,6 +5,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.generic import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
+from django.utils.html import mark_safe
 
 from permissions.constants import VIEW
 from permissions.models import BasePermissionsModel
@@ -19,7 +20,6 @@ from tags.managers import TaggableManager
 from skoljka.libs import interpolate_three_colors, ncache
 from skoljka.libs.decorators import cache_function, cache_many_function
 from skoljka.libs.models import icon_help_text
-from skoljka.libs.tags import tag_list_to_html
 
 import itertools, time
 
@@ -85,24 +85,18 @@ class Folder(BasePermissionsModel):
         #return '/folder/{}/{}'.format(self.id, slugify(self.name))
         return '/folder/{}/{}'.format(self.id, self.cache_path)
 
-    def _refresh_cache_tags(self, commit=True):
+    def refresh_cache_tags(self):
         old = self.cache_tags
+        tags = list(self.tags.order_by('name').values_list('id', 'name'))
 
-        tags = self.tags.order_by('name').values_list('id', 'name')
-        if tags:
-            ids, names = zip(*tags)
-        else:
-            ids = names = []
+        self.cache_tags = ','.join(name for id, name in tags)
+        self.cache_tag_ids = ','.join(str(id) for id, name in tags)
 
-        self.cache_tags = ','.join(names)
-        self.cache_tag_ids = ','.join(str(id) for id in ids)
-
-        # Should invalidate folder cache?
         if old != self.cache_tags:
             ncache.invalidate_namespace(FOLDER_NAMESPACE_FORMAT.format(self))
             self.cache_searchcache = None
 
-        if commit:
+        if not getattr(self, '_no_save', None):
             self.save()
 
     def _html_breadcrumb_item(self):
@@ -188,7 +182,11 @@ class Folder(BasePermissionsModel):
             self.get_absolute_url(), self.short_name, stats_str)
 
     def tag_list_html(self):
-        return tag_list_to_html(self.cache_tags)
+        if not self.cache_tags:
+            return u''
+        links = [u'<a href="/search/?q={}">{}</a>'.format(tag, tag) \
+                for tag in sorted(self.cache_tags.split(','))]
+        return mark_safe(u'[ {} ]'.format(u' | '.join(links)))
 
     @staticmethod
     def _prepare_folderfilters(folders):
@@ -336,7 +334,7 @@ class Folder(BasePermissionsModel):
         return {
             'folder': self,
             'tag_list': self.cache_tags,
-            'tag_list_html': tag_list_to_html(self.cache_tags),
+            'tag_list_html': self.tag_list_html(),
             'tasks': self.get_queryset(user),
         }
 

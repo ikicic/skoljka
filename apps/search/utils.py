@@ -11,7 +11,7 @@ from task.models import Task
 from tags.models import Tag, TaggedItem
 from tags.utils import get_available_tags, replace_with_original_tags,  \
     split_tags, split_tag_ids
-from tags.signals import task_tags_changed_high_priority
+from tags.signals import object_tag_ids_changed_high_priority
 
 from search.models import SearchCache, SearchCacheElement, _normal_search_key, \
     _reverse_search_key
@@ -19,14 +19,12 @@ from search.models import SearchCache, SearchCacheElement, _normal_search_key, \
 from collections import defaultdict
 
 
-# Any better way to implement priority?
-@receiver(task_tags_changed_high_priority, sender=Task)
-def update_search_cache(instance, old_tags, new_tags, **kwargs):
-    # old_tags and new_tags are list of strings, not objects!
-    diff = set(old_tags) ^ set(new_tags)
+@receiver(object_tag_ids_changed_high_priority, sender=Task)
+def update_search_cache(instance, old_tag_ids, new_tag_ids, **kwargs):
+    diff = set(old_tag_ids) ^ set(new_tag_ids)
 
     # This will delete SearchCacheElement rows as well
-    SearchCache.objects.filter(tags__name__in=diff).delete()
+    SearchCache.objects.filter(tags__id__in=diff).delete()
 
 
 # recursive
@@ -46,7 +44,7 @@ def _search_and_cache(tag_ids):
         cache = SearchCache(key=key)
         cache.save()
         tags = Tag.objects.filter(id__in=tag_ids)
-        cache.tags.set(*tags)
+        cache.tags.set(*tags)  # Do not use set_tags() here.
 
     cache_content_type = ContentType.objects.get_for_model(SearchCache)
 
@@ -96,6 +94,7 @@ def search(tags=None, tag_ids=None):
 
     # Sort by id before calling.
     return _search_and_cache(sorted(tag_ids))
+
 
 def search_tasks(tags=[], tag_ids=None, user=None, **kwargs):
     if kwargs.get('no_hidden_check'):
@@ -179,7 +178,7 @@ def reverse_search(input):
     # Create cache object.
     cache = SearchCache(key=key)
     cache.save()
-    cache.tags.set(*tags)
+    cache.tags.set(*tags)  # Do not use set_tags here.
 
     # Generate SQL query
     cache_content_type = ContentType.objects.get_for_model(SearchCache)

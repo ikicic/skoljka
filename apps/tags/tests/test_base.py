@@ -6,6 +6,7 @@ from mathcontent.models import MathContent
 from task.models import Task
 
 from tags.models import Tag, TaggedItem
+from tags.utils import set_tags
 
 def get_tags(instance):
     # no cache!
@@ -25,16 +26,17 @@ class TagsTestCaseBase(TestCase):
             Tag.objects.create(name=tag)
 
     def _set_up_tasks(self):
-        self.user1 = User.objects.get(id=1)
-        self.user2 = User.objects.get(id=2)
+        # TODO: add base test for model with userprofiles.
+        self.admin = User.objects.get(id=1)
+        self.alice = User.objects.get(id=2)
         content1 = MathContent.objects.create(text="Test text for the task1")
         content2 = MathContent.objects.create(text="Test text for the task2")
-        self.task1 = Task.objects.create(name="First", content=content1,
-                author=self.user1)
-        self.task2 = Task.objects.create(name="Second", content=content2,
-                author=self.user2)
-        self.task1.tags.set("MEMO", "alg")
-        self.task2.tags.set("IMO", "geo")
+        self.admin_task = Task.objects.create(name="First", content=content1,
+                author=self.admin, hidden=True)
+        self.alice_task = Task.objects.create(name="Second", content=content2,
+                author=self.alice, hidden=True)
+        set_tags(self.admin_task, ["IMO", "geo"])
+        set_tags(self.alice_task, ["MEMO", "alg"])
 
     def assertTagsEqual(self, tags, expected):
         self.assertItemsEqual(get_tags(tags), expected)

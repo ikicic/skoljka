@@ -1,6 +1,9 @@
-from tags.utils import add_task_tags, get_available_tags, \
+from django.test import TestCase
+
+from tags.models import Tag
+from tags.utils import add_tags, get_available_tags, \
         get_object_tagged_items, split_tag_ids, split_tags, \
-        replace_with_original_tags
+        replace_with_original_tags, tag_names_to_ids
 from tags.tests.test_base import TagsTestCaseBase
 
 
@@ -46,26 +49,25 @@ class TagsUtilsTestCase(TagsTestCaseBase):
         CHECK("geo,imo,2007,NEWTAG", ["geo", "IMO", "2007", "NEWTAG"])
         CHECK(["Imo", "asdf"], ["IMO", "asdf"], "should work with lists")
 
-    def test_add_task_tags(self):
+    def test_add_tags(self):
         CHECK = lambda x, y, z = None: \
             self.assertEqual(
                     sorted(x.tags.values_list('name', flat=True)), sorted(y), z)
         self._set_up_tasks()
 
-        # TODO: check signals
-        CHECK(self.task1, ["MEMO", "alg"])
-        add_task_tags("memo, tb", self.task1)
-        CHECK(self.task1, ["MEMO", "alg", "tb"])
-        CHECK(self.task2, ["IMO", "geo"])
-        add_task_tags("asdf, asdf2", self.task2)
-        CHECK(self.task2, ["IMO", "geo", "asdf", "asdf2"])
+        CHECK(self.alice_task, ["MEMO", "alg"])
+        add_tags(self.alice_task, "memo, tb")
+        CHECK(self.alice_task, ["MEMO", "alg", "tb"])
+        CHECK(self.admin_task, ["IMO", "geo"])
+        add_tags(self.admin_task, "asdf, asdf2")
+        CHECK(self.admin_task, ["IMO", "geo", "asdf", "asdf2"])
 
-        self.task1._cache_tagged_items = -1
-        add_task_tags("memo", self.task1)
-        self.assertIsNotNone(self.task1._cache_tagged_items,
+        self.alice_task._cache_tagged_items = -1
+        add_tags(self.alice_task, "memo")
+        self.assertIsNotNone(self.alice_task._cache_tagged_items,
                 "shouldn't clear ._cache_tagged_items if no new tags added")
-        add_task_tags("new-tag", self.task1)
-        self.assertFalse(hasattr(self.task1, '._cache_tagged_items'),
+        add_tags(self.alice_task, "new-tag")
+        self.assertFalse(hasattr(self.alice_task, '._cache_tagged_items'),
                 "should delete ._cache_tagged_items if new tags added")
 
     def test_get_object_tagged_items(self):
@@ -74,10 +76,43 @@ class TagsUtilsTestCase(TagsTestCaseBase):
             self.assertEqual(sorted(names), sorted(y), z)
 
         self._set_up_tasks()
-        CHECK(self.task1, ["MEMO", "alg"])
-        self.assertIsNotNone(self.task1._cache_tagged_items,
+        CHECK(self.alice_task, ["MEMO", "alg"])
+        self.assertIsNotNone(self.alice_task._cache_tagged_items,
                 "should fill ._cache_tagged_items")
 
-        CHECK(self.task2, ["IMO", "geo"])
-        add_task_tags("tb, asdf", self.task2)
-        CHECK(self.task2, ["IMO", "geo", "tb", "asdf"])
+        CHECK(self.admin_task, ["IMO", "geo"])
+        add_tags(self.admin_task, "tb, asdf")
+        CHECK(self.admin_task, ["IMO", "geo", "tb", "asdf"])
+
+
+class TestTagNamesToIds(TestCase):
+    def test_add_false(self):
+        Tag.objects.create(name="one")
+        Tag.objects.create(name="two")
+        Tag.objects.create(name="three")
+        Tag.objects.create(name="four")
+        self.assertItemsEqual(tag_names_to_ids("one,two,three"), [1, 2, 3])
+        self.assertItemsEqual(tag_names_to_ids("ONe,TwO,three"), [1, 2, 3])
+        self.assertItemsEqual(tag_names_to_ids(["three", "two", "one"]),
+                              [1, 2, 3])
+        self.assertItemsEqual(tag_names_to_ids("three,two,one,foo"), [1, 2, 3])
+        self.assertItemsEqual(tag_names_to_ids("one,four"), [1, 4])
+        self.assertItemsEqual(tag_names_to_ids(""), [])
+        self.assertItemsEqual(tag_names_to_ids("foo,bar"), [])
+        self.assertEqual(Tag.objects.all().count(), 4)
+
+    def test_add_true(self):
+        Tag.objects.create(name="one")
+        Tag.objects.create(name="two")
+        Tag.objects.create(name="three")
+        self.assertItemsEqual(tag_names_to_ids("one,two,three", add=True),
+                              [3, 2, 1])
+        self.assertEqual(Tag.objects.all().count(), 3)
+        self.assertItemsEqual(tag_names_to_ids("one,four", add=True), [1, 4])
+        self.assertEqual(Tag.objects.all().count(), 4)
+        self.assertItemsEqual(tag_names_to_ids("FOO,BaR", add=True), [5, 6])
+        self.assertEqual(Tag.objects.all().count(), 6)
+
+        new_tags = Tag.objects.filter(id__in=[5, 6]) \
+                              .values_list('name', flat=True)
+        self.assertItemsEqual(new_tags, ["FOO", "BaR"])

@@ -13,7 +13,7 @@ from permissions.models import ObjectPermission
 from post.forms import PostsForm
 from post.models import Post
 from skoljka.libs.decorators import response
-from tags.utils import add_task_tags
+from tags.utils import add_tags
 from task.models import Task
 from userprofile.forms import AuthenticationFormEx
 
@@ -387,9 +387,8 @@ def _create_or_update_task(instance, user, competition, chain, index, text):
     task.save()
 
     if not edit:
-        task_ct = ContentType.objects.get_for_model(Task)
         if competition.automatic_task_tags:
-            add_task_tags(competition.automatic_task_tags, task, task_ct)
+            add_tags(task, competition.automatic_task_tags)
         if competition.admin_group:
             ObjectPermission.objects.create(content_object=task,
                     group=competition.admin_group, permission_type=VIEW)

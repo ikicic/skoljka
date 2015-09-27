@@ -1,46 +1,71 @@
 from django.contrib.contenttypes.models import ContentType
+from django.utils.html import mark_safe
 
 from taggit.utils import parse_tags
 
 from tags.models import Tag, TaggedItem
+from tags.signals import object_tag_ids_changed_high_priority, \
+        object_tag_ids_changed
 
 # TODO: Taggit is case sensitive, and makes different slugs for tags that
 # differ in case only. We want tags to be case-insensitive, so we use a wrapper.
 # Therefore, we can stop to use Taggit and use our own model that has no slug
 # field. Before making any changes, find a way to make tags multilingual.
 
-def add_task_tags(tags, task, content_type=None):
+def _set_tag_ids(instance, content_type, old_tag_ids, new_tag_ids):
     """
-    Adds given tags (a list or a string of comma-separated tags) to the given
-    task. Returns the total number of new tags added (number of new TaggedItem
-    instances).
+    Sets tags (a list or a string of comma-separated tags) for the given
+    object.
+
+    Returns the difference in number of tags now and before.
     """
-    from tags.signals import send_task_tags_changed_signal
     if not content_type:
-        content_type = ContentType.objects.get_for_model(task)
+        content_type = ContentType.objects.get_for_model(instance)
 
-    total_created = 0
-    old_tags = list(task.tags.values_list('name', flat=True))
-    for tag in split_tags(tags):
-        # https://code.djangoproject.com/ticket/13492
-        # (maybe related: https://code.djangoproject.com/ticket/7789)
-        try:
-            tag = Tag.objects.get(name__iexact=tag)
-        except Tag.DoesNotExist:
-            tag = Tag.objects.create(name=tag)
+    old_tag_ids = set(old_tag_ids)
+    new_tag_ids = set(new_tag_ids)
 
-        tagged_item, created = TaggedItem.objects.get_or_create(
-                object_id=task.id, content_type=content_type, tag=tag)
-        if created:
-            total_created += 1
+    added = 0
+    removed = 0
+    for tag_id in old_tag_ids - new_tag_ids:
+        tagged_item = TaggedItem.objects.get(
+                object_id=instance.id, content_type=content_type, tag_id=tag_id)
+        tagged_item.delete()
+        removed += 1
 
-    if total_created:
-        if hasattr(task, '_cache_tagged_items'):
-            delattr(task, '_cache_tagged_items')
-        new_tags = task.tags.values_list('name', flat=True)
-        send_task_tags_changed_signal(task, old_tags, new_tags)
+    for tag_id in new_tag_ids - old_tag_ids:
+        TaggedItem.objects.create(
+                object_id=instance.id, content_type=content_type, tag_id=tag_id)
+        added += 1
 
-    return total_created
+    if added + removed > 0:
+        if hasattr(instance, '_cache_tagged_items'):
+            delattr(instance, '_cache_tagged_items')
+        object_tag_ids_changed_high_priority.send(
+                sender=content_type.model_class(), instance=instance,
+                old_tag_ids=old_tag_ids, new_tag_ids=new_tag_ids)
+        object_tag_ids_changed.send(
+                sender=content_type.model_class(), instance=instance,
+                old_tag_ids=old_tag_ids, new_tag_ids=new_tag_ids)
+
+    return added - removed
+
+
+def set_tags(instance, tags, content_type=None):
+    old_tag_ids = list(instance.tags.values_list('id', flat=True))
+    new_tag_ids = tag_names_to_ids(tags, add=True)
+    return _set_tag_ids(instance, content_type, old_tag_ids, new_tag_ids)
+
+def add_tags(instance, tags, content_type=None):
+    old_tag_ids = list(instance.tags.values_list('id', flat=True))
+    new_tag_ids = old_tag_ids + tag_names_to_ids(tags, add=True)
+    return _set_tag_ids(instance, content_type, old_tag_ids, new_tag_ids)
+
+def remove_tags(instance, tags_to_remove, content_type=None):
+    old_tag_ids = set(instance.tags.values_list('id', flat=True))
+    to_remove = tag_names_to_ids(tags_to_remove)
+    new_tag_ids = old_tag_ids - set(to_remove)
+    return _set_tag_ids(instance, content_type, old_tag_ids, new_tag_ids)
 
 
 def split_tags(tags):
@@ -58,6 +83,7 @@ def split_tags(tags):
     # Using split+join to remove multiple whitespace and strip.
     return filter(None, [' '.join(x.split()) for x in tags])
 
+
 def split_tag_ids(tag_ids):
     """
     Split comma-separated ids from the tag_ids string and returns a list of ids.
@@ -67,6 +93,7 @@ def split_tag_ids(tag_ids):
     if isinstance(tag_ids, list):
         return tag_ids
     return [int(x) for x in tag_ids.split(',')]
+
 
 def get_available_tags(tags):
     """
@@ -85,13 +112,13 @@ def get_available_tags(tags):
 
     return Tag.objects.filter(name__in=split_tags(tags))
 
+
 def replace_with_original_tags(tags):
     """
     Fix cases for known tags and keep unknown tags.
     Doesn't have to preserve order or remove duplicates.
     Returns a list of tag names.
     """
-    # TODO: strictly define if `tags` is a string or a list
     tags = split_tags(tags)
     available = list(get_available_tags(tags).values_list('name', flat=True))
     lowercase = {x.lower(): x for x in available}
@@ -100,7 +127,33 @@ def replace_with_original_tags(tags):
     return [lowercase.get(y.lower(), y) for y in tags]
 
 
+def tag_names_to_ids(tag_names, add=False):
+    """
+    Search tags by their names. If add is set to True and a name is not found,
+    a new tag is added. Otherwise, it is ignored.
+    Does not preserve order!
+    """
+    if add:
+        tag_names = split_tags(tag_names)
+        available = Tag.objects.filter(name__in=tag_names) \
+                               .values_list('id', 'name')
+        lowercase = {name.lower(): tag_id for tag_id, name in available}
+        result = []
+        for name in tag_names:
+            if name.lower() in lowercase:
+                result.append(lowercase[name.lower()])
+            else:
+                tag = Tag(name=name)
+                tag.save()
+                result.append(tag.id)
+        return result
+    else:
+        return Tag.objects.filter(name__in=split_tags(tag_names)) \
+                          .values_list('id', flat=True)
+
+
 def get_object_tagged_items(instance):
+    """Returns TaggedItem objects linked to a given object."""
     if not hasattr(instance, '_cache_tagged_items'):
         content_type = ContentType.objects.get_for_model(instance)
 

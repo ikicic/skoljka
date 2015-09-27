@@ -3,6 +3,9 @@ from django.test import TestCase
 from folder.models import Folder
 from folder.utils import get_folder_descendant_ids
 
+# TODO: Do not use fixtures.
+# TODO: Tests.
+
 class TaskUtilsTestCase(TestCase):
     fixtures = ['apps/folder/fixtures/test_folders.json']
 

@@ -11,7 +11,6 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 
 from pagination.paginator import InfinitePaginator
-from taggit.utils import parse_tags
 
 from activity import action as _action
 from folder.models import Folder
@@ -24,7 +23,7 @@ from mathcontent.utils import check_and_save_attachment
 from permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS, VIEW_SOLUTIONS
 from permissions.models import ObjectPermission
 from solution.models import Solution, SolutionStatus
-from tags.signals import send_task_tags_changed_signal
+from tags.utils import set_tags, split_tags
 from usergroup.forms import GroupEntryForm
 
 from skoljka.libs.decorators import response
@@ -130,9 +129,8 @@ def advanced_new(request):
                     task.save()
 
                     # WARNING: .set is case-sensitive!
-                    tags = parse_tags(task_form.cleaned_data['_tags'] % dictionary)
-                    task.tags.set(*tags)
-                    send_task_tags_changed_signal(task, [], tags)
+                    tags = task_form.cleaned_data['_tags'] % dictionary
+                    set_tags(task, tags)
 
                     # --- difficulty ---
                     difficulty = task_form.cleaned_data['_difficulty'] % dictionary
@@ -179,13 +177,11 @@ def new(request, task_id=None, is_file=None):
         if EDIT not in perm:
             return 403
         math_content = task.content
-        old_tags = list(task.tags.values_list('name', flat=True))
         edit = True
         is_file = task.is_file()
     else:
         perm = []
         task = math_content = None
-        old_tags = []
         edit = False
 
     form_class = TaskFileForm if is_file else TaskForm
@@ -222,34 +218,18 @@ def new(request, task_id=None, is_file=None):
 
             if is_file:
                 task.cache_file_attachment_url = task.file_attachment.get_url()
-
             if not edit:
                 task.author = request.user
-
             task.content = math_content
 
-            if edit:
-                # Have to use .cleaned_data because m2m isn't saved yet.
-                old_tags_str = ','.join(sorted(old_tags))
-                new_tags_str = ','.join(sorted(task_form.cleaned_data['tags']))
-            else:
-                old_tags_str = 'x'
-                new_tags_str = 'y'
-
             task.save()
-
-            # Required for django-taggit:
-            task_form.save_m2m()
+            # Do not call task_form.save_m2m()!
+            set_tags(task, task_form.cleaned_data['tags'])
 
             # TODO: signals!
             if not edit or old_hidden != task.hidden    \
                     or old_solvable != task.solvable:   \
                 invalidate_folder_cache_for_task(task)
-
-            if old_tags_str != new_tags_str:
-                new_tags = task.tags.values_list('name', flat=True)
-                # TODO: call this automatically when tags are changed
-                send_task_tags_changed_signal(task, [], new_tags)
 
             # send action if creating a new nonhidden task
             if not edit:

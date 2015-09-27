@@ -11,7 +11,7 @@ from django.template.defaultfilters import slugify
 from permissions.constants import DELETE, EDIT, EDIT_PERMISSIONS, VIEW
 from permissions.models import ObjectPermission
 from task.models import Task
-from tags.utils import replace_with_original_tags
+from tags.utils import set_tags
 from skoljka.libs import get_referrer_path, ncache
 from skoljka.libs.decorators import response
 
@@ -270,6 +270,9 @@ def new(request, folder_id=None):
         if folder_form.is_valid():
             folder = folder_form.save(commit=False)
 
+            # TODO: Make a util function for creating Folder instances, to be
+            # able to create tests easier.
+
             # If user can't edit short name, copy full name.
             if 'short_name' not in folder_form.fields:
                 folder.short_name = folder.name
@@ -288,16 +291,16 @@ def new(request, folder_id=None):
                 # Update order...
                 children.sort(key=lambda x: x.parent_index)
 
-                # Update tag cache
-                # If edit, immediately save m2m, to be able to refresh cache.
-                folder_form.save_m2m()
-                folder._refresh_cache_tags()
+                # If editing, refresh immediately before saving.
+                # Do not call folder_form.save_m2m()!
+                folder._no_save = True
+                set_tags(folder, folder_form.cleaned_data['tags'])
 
             folder.save()
 
             if not edit:
-                # If new, first save folder (and define ID), and then save m2m
-                folder_form.save_m2m()
+                # If new, first save folder (and define ID), and then save tags.
+                set_tags(folder, folder_form.cleaned_data['tags'])
 
             # Refresh Folder cache.
             if old_parent_id != folder.parent_id:
@@ -411,8 +414,8 @@ def _create_folders(author, parent, structure, p):
             created += 1
 
         # Note that the object has to exist to use this!
-        folder.tags.set(*replace_with_original_tags(vars['tags']))
-        folder._refresh_cache_tags()
+        set_tags(folder, vars['tags'])
+        # TODO: call folder._refresh_cache_tags() on change signal.
 
         # Call recursion if there is any level left
         if rest:

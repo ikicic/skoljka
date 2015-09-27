@@ -13,14 +13,11 @@ class FolderAdmin(admin.ModelAdmin):
 
     def refresh_cache_tags(self, request, queryset):
         for folder in queryset:
-            folder._refresh_cache_tags()
+            folder.refresh_cache_tags()
 
-    def migrate061_070(self, request, queryset):
-        for folder in queryset:
-            tags = folder.cache_tags
-            folder.tags.set(*replace_with_original_tags(tags))
-            folder._refresh_cache_tags()
-    migrate061_070.short_description = "Migrate v0.6.1 to v0.7"
+    # Not supported anymore.
+    # def migrate061_070(self, request, queryset):
+    #     pass
 
 
 admin.site.register(Folder, FolderAdmin)

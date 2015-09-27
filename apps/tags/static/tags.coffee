@@ -49,10 +49,12 @@ $ ->
 
     $(@).val ""
     tt_info.html "Slanje..."
+    container = tt_info.data('tag').parent()
     $.post(
       '/ajax/tag/add/'
+      content_type_id: container.attr 'data-content-type-id'
+      object_id: container.attr 'data-object-id'
       name: name
-      task: tt_info.data('tag').parent().attr 'data-task'
       (data) ->
         if data == '1'
           tt_info.html "Spremljeno"
@@ -76,7 +78,8 @@ $ ->
     $.post(
       '/ajax/tag/delete/'
       name: tag.html()
-      task: tag.parent().attr 'data-task'
+      content_type_id: tag.parent().attr 'data-content-type-id'
+      object_id: tag.parent().attr 'data-object-id'
       (data) ->
         if data == '1'
           tt_info.data('tooltip').hide()

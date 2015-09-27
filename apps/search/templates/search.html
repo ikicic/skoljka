@@ -14,13 +14,22 @@
   <table>
     {{ form.as_table }}
     {% if advanced_form %}
-    <tr><td colspan="2">
-      <a href="#" class="toggler toggle"{% if search_solved_count %} style="display:none;"{% endif %}>Prikaži napredne opcije</a>
-      <a href="#" class="toggler toggle"{% if not search_solved_count %} style="display:none;"{% endif %}>Sakrij napredne opcije</a>
-      <div class="toggle"{% if not groups_error and not search_solved_count %} style="display:none;"{% endif %}>
-        {{ advanced_form.as_p }}
-      </div>
-    </td></tr>
+      <tr>
+        <td colspan="2">
+          <a href="#" class="toggler toggle"
+              {% if search_solved_count %} style="display:none;"{% endif %}>
+            Prikaži napredne opcije</a>
+          <a href="#" class="toggler toggle"
+              {% if not search_solved_count %} style="display:none;"{% endif %}>
+            Sakrij napredne opcije</a>
+          <div class="toggle"
+              {% if not groups_error and not search_solved_count %}
+                style="display:none;"
+              {% endif %}>
+            {{ advanced_form.as_p }}
+          </div>
+        </td>
+      </tr>
     {% endif %}
     <tr><td colspan="2">
         <button type="submit" class="btn btn-primary"><i class="icon-search"></i> Pretraži</button>

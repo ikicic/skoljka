@@ -7,8 +7,7 @@ from permissions.models import ObjectPermission
 from permissions.utils import get_object_ids_with_exclusive_permission
 from solution.models import Solution, SolutionDetailedStatus
 from tags.models import Tag, TaggedItem
-from tags.signals import send_task_tags_changed_signal
-from tags.utils import replace_with_original_tags
+from tags.utils import set_tags
 
 from task.models import Task
 
@@ -201,9 +200,8 @@ def create_tasks_from_json(description):
             # Third, save other data.
 
             # --- tags ---
-            tags = replace_with_original_tags(desc.get('_tags', ''))
-            task.tags.set(*tags)
-            send_task_tags_changed_signal(task, [], tags)
+            tags = desc.get('_tags', '')
+            set_tags(task, tags)
 
             # --- difficulty ---
             difficulty = desc.get('_difficulty')

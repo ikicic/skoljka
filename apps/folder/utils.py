@@ -10,7 +10,7 @@ from search.models import SearchCacheElement
 from search.utils import search, reverse_search
 from solution.models import Solution
 from tags.utils import get_object_tagged_items
-from tags.signals import task_tags_changed
+from tags.signals import object_tag_ids_changed
 from task.models import Task
 from usergroup.models import UserGroup
 from skoljka.libs import ncache
@@ -330,15 +330,15 @@ def _invalidate_on_usergroup_update(sender, **kwargs):
         .values_list('id', flat=True).distinct()
     invalidate_cache_for_folder_ids(folder_ids)
 
-@receiver(task_tags_changed, sender=Task)
-def _invalidate_on_task_tags_change(sender, old_tags, new_tags, **kwargs):
+@receiver(object_tag_ids_changed, sender=Task)
+def _invalidate_on_task_tags_change(sender, old_tag_ids, new_tag_ids, **kwargs):
     content_type = ContentType.objects.get_for_model(Folder)
 
     # TODO: Optimize. Filter only those folders that really need invalidation...
     search_cache_ids = []
-    diff = set(old_tags) ^ set(new_tags)
+    diff = set(old_tag_ids) ^ set(new_tag_ids)
     for tag in diff:
-        search_cache = search([tag])
+        search_cache = search(tag_ids=[tag])
         search_cache_ids.append(search_cache.id)
 
     folder_ids = SearchCacheElement.objects.filter(
@@ -347,3 +347,7 @@ def _invalidate_on_task_tags_change(sender, old_tags, new_tags, **kwargs):
 
     FolderTask.objects.filter(folder_id__in=folder_ids).delete()
     invalidate_cache_for_folder_ids(folder_ids)
+
+@receiver(object_tag_ids_changed, sender=Folder)
+def _refresh_cache_tags_on_tags_change(sender, instance, **kwargs):
+    instance.refresh_cache_tags()
