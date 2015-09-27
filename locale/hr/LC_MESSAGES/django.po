@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-27 15:16+0200\n"
-"PO-Revision-Date: 2015-09-27 15:16+0200\n"
+"POT-Creation-Date: 2015-09-27 19:38+0200\n"
+"PO-Revision-Date: 2015-09-27 19:39+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -312,7 +312,7 @@ msgstr ""
 msgid "Descriptor error. Please notify admins!"
 msgstr "Nevaljan deskriptor. Molimo obavijestite administratore!"
 
-#: apps/competition/forms.py:57
+#: apps/competition/forms.py:59
 msgid "Invalid!"
 msgstr "Nevaljano rješenje!"
 
@@ -346,6 +346,10 @@ msgstr "Autor:"
 #: apps/competition/templates/competition_rules.html:13
 msgid "Solution format description"
 msgstr "Objašnjenje formata rješenja"
+
+#: apps/mathcontent/templates/inc_mathcontent_bootstrap_preview.html:7
+msgid "Preview"
+msgstr "Pregled"
 
 #: apps/tags/managers.py:24 apps/tags/models.py:17
 msgid "Tags"
