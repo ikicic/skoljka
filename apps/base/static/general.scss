@@ -85,9 +85,9 @@ h2, h3, h4, h4 a {
 }
 
 .outset {
-  background: #fafcfc;
+  background: $outset-bg-color;
   border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(128, 128, 128, 0.55);
+  box-shadow: 0 2px 4px $outset-box-shadow-color;
   padding: 15px 17px;
 }
 

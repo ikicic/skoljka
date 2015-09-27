@@ -320,6 +320,17 @@ div#ctask-legend-container {
   }
 }
 
+.ctask-comment {
+  color: gray;
+  &.outset {
+    box-shadow: 0 2px 4px mix($page-content-bg-color, $outset-box-shadow-color);
+    background: mix($page-content-bg-color, $outset-bg-color, 10%);
+  }
+  .ctask-content + & {
+    margin: -8px 0px 23px 0px;
+  }
+}
+
 .ctask-content {
   margin: 8px 0px 23px 0px;
 }

@@ -5,6 +5,11 @@
   }
 }
 
+/* Fixing min height in the case of Bootstrap forms. */
+.controls.outset {
+  min-height: 0.6em;
+}
+
 .mc-text {
   box-sizing: border-box;
   width: 100%;

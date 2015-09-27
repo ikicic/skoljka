@@ -81,6 +81,10 @@ def ctask_class(ctask):
         return "bar ctask-failed"
     return "bar ctask-tried"
 
+@register.simple_tag(takes_context=True)
+def ctask_comment_class(context, ctask):
+    return ""
+
 @register.simple_tag()
 def chain_badge_class(chain):
     if all(ctask.t_is_solved for ctask in chain.ctasks):

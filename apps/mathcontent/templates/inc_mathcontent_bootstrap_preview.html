@@ -1,0 +1,13 @@
+{% load i18n %}
+<div class="control-group">
+  <div class="control-label no-top-padding">
+    <button type="button" class="btn mc-preview-button"
+        data-source="{{ source_id }}"
+        data-target="{{ target_id }}">
+      {% trans "Preview" %}
+    </button>
+  </div>
+  <div class="controls outset {{ extra_class }}" id="{{ target_id }}">
+    {{ content.render }}
+  </div>
+</div>

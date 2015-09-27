@@ -44,6 +44,7 @@ class BaseCompetitionTaskFormSet(BaseModelFormSet):
 
 class CompetitionTaskForm(ModelForm):
     text = forms.CharField(widget=forms.Textarea)
+    comment = forms.CharField(widget=forms.Textarea, required=False)
 
     def __init__(self, *args, **kwargs):
         self.evaluator = kwargs.pop('evaluator')
@@ -51,6 +52,7 @@ class CompetitionTaskForm(ModelForm):
         super(CompetitionTaskForm, self).__init__(*args, **kwargs)
         if self.instance.pk:
             self.fields['text'].initial = self.instance.task.content.text
+            self.fields['comment'].initial = self.instance.comment.text
 
         self.fields['descriptor'].help_text = get_solution_help_text(
                 self.evaluator, self.initial.get('descriptor'),
@@ -58,14 +60,15 @@ class CompetitionTaskForm(ModelForm):
         if self.fixed_score:
             del self.fields['score']
 
-        self.fields['text'].widget.attrs.update({
-            'rows': 5,
-            'class': 'comp-mathcontent-text',
-        })
+        self.fields['text'].widget.attrs.update(
+                {'class': 'comp-mathcontent-text', 'rows': 5})
+        self.fields['comment'].widget.attrs.update(
+                {'class': 'comp-mathcontent-text ctask-comment', 'rows': 3})
 
     def clean(self):
         super(CompetitionTaskForm, self).clean()
         self.instance._text = self.cleaned_data.get('text')
+        self.instance._comment = self.cleaned_data.get('comment')
         if self.fixed_score:
             self.instance.score = self.fixed_score
         return self.cleaned_data

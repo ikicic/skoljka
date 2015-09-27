@@ -1,10 +1,13 @@
 from django import template
 from django.core.urlresolvers import reverse
-from django.utils.safestring import mark_safe
 
 from search.utils import search_tasks
 
 register = template.Library()
+
+@register.filter
+def concat(first, second):
+    return unicode(first) + unicode(second)
 
 @register.simple_tag
 def my_url(name, *args):

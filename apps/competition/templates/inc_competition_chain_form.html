@@ -1,19 +1,16 @@
 {% load base_tags %} 
+{% load mathcontent_tags %}
 {% load bootstrap_toolkit %}
 
 <div class="form-section">Zadatak #{{ index }}</div>
-{% bootstrap_form form layout="horizontal" %}
-<div class="control-group">
-  <div class="control-label">
-    <button type="button" class="btn mc-preview-button"
-        data-source="{{ form.text.auto_id }}"
-        data-target="form-ctask{{ index }}">
-      Pregled
-    </button>
-  </div>
-  <div class="controls outset" id="form-ctask{{ index }}">
-    {% if form.instance.pk %}
-      {{ form.instance.task.content.render }}
-    {% endif %}
-  </div>
-</div>
+{% for hidden_field in form.hidden_fields %}
+  {{ hidden_field }}
+{% endfor %}
+{% bootstrap_field form.descriptor %}
+{% bootstrap_field form.score %}
+{% bootstrap_field form.text layout="horizontal" %}
+{% mathcontent_bootstrap_preview form.instance.task.content form.text.auto_id "form-ctask-text"|concat:index "" %}
+{% bootstrap_field form.comment layout="horizontal" %}
+{% mathcontent_bootstrap_preview form.instance.comment form.comment.auto_id "form-ctask-comment"|concat:index "ctask-comment" %}
+{% bootstrap_field form.ORDER layout="horizontal" %}
+{% bootstrap_field form.DELETE layout="horizontal" %}

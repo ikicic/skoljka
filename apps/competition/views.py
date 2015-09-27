@@ -371,16 +371,21 @@ def chain_list(request, competition, data):
     data['chains'] = chains
     return data
 
-def _create_or_update_task(instance, user, competition, chain, index, text):
-    edit = bool(instance.task_id)
+def _create_or_update_task(
+        ctask, user, competition, chain, index, text, comment):
+    edit = bool(ctask.task_id)
     if not edit:
         content = MathContent(text=text)
         content.save()
         task = Task(content=content, author=user, hidden=True)
+        comment = MathContent(text=comment)
+        comment.save()
     else:
-        task = instance.task
+        task = ctask.task
         task.content.text = text
         task.content.save()
+        ctask.comment.text = comment
+        ctask.comment.save()
 
     task.name = u"{} - {} #{}".format(competition.name, chain.name, index + 1)
     task.source = competition.name
@@ -394,15 +399,19 @@ def _create_or_update_task(instance, user, competition, chain, index, text):
                     group=competition.admin_group, permission_type=VIEW)
             ObjectPermission.objects.create(content_object=task,
                     group=competition.admin_group, permission_type=EDIT)
-        instance.task = task
+        ctask.task = task
 
 
 @competition_view(permission=EDIT)
 @response('competition_chain_overview.html')
 def chain_overview(request, competition, data, chain_id):
     chain = get_object_or_404(Chain, id=chain_id)
+    chain.competition = competition
     ctasks = CompetitionTask.objects.filter(chain=chain) \
+            .select_related('task__content', 'task__author', 'comment') \
             .order_by('chain_position')
+    for ctask in ctasks:
+        ctask.competition = competition
 
     data['chain'] = chain
     data['ctasks'] = ctasks
@@ -435,7 +444,7 @@ def chain_new(request, competition, data, chain_id=None):
     POST = request.POST if request.method == 'POST' else None
     chain_form = ChainForm(data=POST, instance=chain)
     queryset = CompetitionTask.objects.filter(chain_id=chain_id) \
-            .select_related('task__content') \
+            .select_related('task__content', 'comment') \
             .order_by('chain_position')
     formset = CompetitionTaskFormSet(data=POST, queryset=queryset)
 
@@ -458,7 +467,7 @@ def chain_new(request, competition, data, chain_id=None):
                 instance.max_submissions = competition.default_max_submissions
 
                 _create_or_update_task(instance, request.user, competition,
-                        chain, index, instance._text)
+                        chain, index, instance._text, instance._comment)
 
                 instance.save()
 

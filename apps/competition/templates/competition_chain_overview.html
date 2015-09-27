@@ -23,6 +23,11 @@
     <div class="outset ctask-content">
       {{ ctask.task.content.render }}
     </div>
+    {% if ctask.comment.html %}
+      <div class="outset ctask-comment {% ctask_comment_class ctask %}">
+        {{ ctask.comment.render }}
+      </div>
+    {% endif %}
   </div>
 {% endfor %}
 

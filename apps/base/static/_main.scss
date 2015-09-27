@@ -12,6 +12,10 @@ $screen-xs-max:   $screen-sm-min - 1px;
 $screen-sm-max:   $screen-md-min - 1px;
 $screen-md-max:   $screen-lg-min - 1px;
 
+$page-content-bg-color: #f0f5f4;
+$outset-bg-color: #fafcfc;
+$outset-box-shadow-color: rgba(128, 128, 128, 0.55);
+
 
 @media (max-width: $screen-xs-min - 1px) {
   .hidden-xs-phone {

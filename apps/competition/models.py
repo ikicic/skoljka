@@ -4,6 +4,7 @@ from django.db import models
 from libs.string_operations import join_urls
 
 from competition.evaluator import EVALUATOR_V1
+from mathcontent.models import MathContent
 from permissions.constants import EDIT
 from permissions.models import BasePermissionsModel
 from post.generic import PostGenericRelation
@@ -124,6 +125,7 @@ class CompetitionTask(models.Model):
     score = models.IntegerField(default=1)
     chain = models.ForeignKey(Chain)
     chain_position = models.IntegerField(default=0)
+    comment = models.OneToOneField(MathContent)
 
     def __unicode__(self):
         return "CompetitionTask #{} comp={} task={}".format(
