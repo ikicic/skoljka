@@ -24,7 +24,8 @@ from competition.forms import ChainForm, CompetitionSolutionForm, \
         TaskListAdminPanelForm
 from competition.models import Chain, Competition, CompetitionTask, Team, \
         TeamMember, Submission
-from competition.utils import update_score_on_ctask_action, preprocess_chain, \
+from competition.utils import update_chain_comments_cache, \
+        update_score_on_ctask_action, preprocess_chain, \
         get_teams_for_user_ids, lock_ctasks_in_chain, get_ctask_statistics, \
         refresh_teams_cache_score
 
@@ -351,7 +352,8 @@ def chain_list(request, competition, data):
     ctasks = CompetitionTask.objects.filter(competition=competition) \
             .values_list('chain_id', 'task__author_id')
     author_ids = [] if not ctasks else zip(*ctasks)[1]
-    authors = User.objects.in_bulk(author_ids)
+    authors = User.objects.only('id', 'username', 'first_name', 'last_name') \
+            .in_bulk(set(author_ids))
 
     for chain in chains:
         chain.competition = competition
@@ -435,7 +437,8 @@ def chain_new(request, competition, data, chain_id=None):
     class CompetitionTaskFormLambda(CompetitionTaskForm):
         def __init__(self, *args, **kwargs):
             super(CompetitionTaskFormLambda, self).__init__(evaluator=evaluator,
-                    fixed_score=competition.fixed_task_score, *args, **kwargs)
+                    fixed_score=competition.fixed_task_score, user=request.user,
+                    *args, **kwargs)
 
     CompetitionTaskFormSet = modelformset_factory(CompetitionTask,
             form=CompetitionTaskFormLambda, formset=BaseCompetitionTaskFormSet,
@@ -453,7 +456,7 @@ def chain_new(request, competition, data, chain_id=None):
             chain = chain_form.save(commit=False)
             if not edit:
                 chain.competition = competition
-            chain.save()
+                chain.save()  # Save to get an ID.
 
             instances = formset.save(commit=False)
             for form in formset.ordered_forms:
@@ -470,6 +473,11 @@ def chain_new(request, competition, data, chain_id=None):
                         chain, index, instance._text, instance._comment)
 
                 instance.save()
+
+            chain_ctasks = CompetitionTask.objects.filter(chain=chain) \
+                    .select_related('comment').only('id', 'comment')
+            update_chain_comments_cache(chain, chain_ctasks)
+            chain.save()
 
             # Problems with existing formset... ahh, just refresh
             return (chain.get_absolute_url(), )

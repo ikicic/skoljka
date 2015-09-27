@@ -7,10 +7,12 @@
   {{ hidden_field }}
 {% endfor %}
 {% bootstrap_field form.descriptor %}
-{% bootstrap_field form.score %}
+{% if form.score %}
+  {% bootstrap_field form.score %}
+{% endif %}
 {% bootstrap_field form.text layout="horizontal" %}
 {% mathcontent_bootstrap_preview form.instance.task.content form.text.auto_id "form-ctask-text"|concat:index "" %}
 {% bootstrap_field form.comment layout="horizontal" %}
-{% mathcontent_bootstrap_preview form.instance.comment form.comment.auto_id "form-ctask-comment"|concat:index "ctask-comment" %}
+{% mathcontent_bootstrap_preview form.instance.comment form.comment.auto_id "form-ctask-comment"|concat:index form.t_comment_extra_class  %}
 {% bootstrap_field form.ORDER layout="horizontal" %}
 {% bootstrap_field form.DELETE layout="horizontal" %}

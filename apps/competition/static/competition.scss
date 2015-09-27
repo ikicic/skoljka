@@ -324,10 +324,29 @@ div#ctask-legend-container {
   color: gray;
   &.outset {
     box-shadow: 0 2px 4px mix($page-content-bg-color, $outset-box-shadow-color);
-    background: mix($page-content-bg-color, $outset-bg-color, 10%);
+    background: mix($page-content-bg-color, $outset-bg-color, 20%);
+    &.ctask-comment-important {
+      color: #555;
+      background: mix(red, $outset-bg-color, 5%);
+      &.ctask-my {
+        background: mix(red, $outset-bg-color, 10%);
+      }
+    }
   }
   .ctask-content + & {
     margin: -8px 0px 23px 0px;
+  }
+}
+
+.cchain-comments-important {
+  & td, &:hover td {
+    background-color: mix(red, $page-content-bg-color, 5%) !important;
+  }
+}
+
+.cchain-comments-important-my-ctasks {
+  & td, &:hover td {
+    background-color: mix(red, $page-content-bg-color, 10%) !important;
   }
 }
 

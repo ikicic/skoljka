@@ -3,22 +3,24 @@ from django.test import TestCase
 
 from competition.models import Competition, CompetitionTask, Chain, \
         Submission, Team
-from competition.utils import refresh_teams_cache_score, \
-        update_score_on_ctask_action
+from competition.utils import is_ctask_comment_important, \
+        update_chain_comments_cache, parse_chain_comments_cache, \
+        refresh_teams_cache_score, update_score_on_ctask_action
 from mathcontent.models import MathContent
 from task.models import Task
 
 import datetime
 
-def create_ctask(author, competition, chain, descriptor, score):
+def create_ctask(author, competition, chain, descriptor, score, comment=""):
     # TODO: make a test util for creating tasks
     content = MathContent.objects.create(text="Test text", html="Test text")
     task = Task.objects.create(name="Test task", content=content,
             author=author, hidden=True)
+    comment = MathContent.objects.create(text=comment, html=None)
     chain_position = CompetitionTask.objects.filter(chain=chain).count()
     return CompetitionTask.objects.create(competition=competition, task=task,
             descriptor=descriptor, max_submissions=3, score=score, chain=chain,
-            chain_position=chain_position)
+            chain_position=chain_position, comment=comment)
 
 CHAIN_BONUS_SCORE = 1000000
 HOUR = datetime.timedelta(hours=1)
@@ -131,3 +133,67 @@ class TeamScoreTest(TestCase):
                 (self.ctask1, self.before_freeze, 2, (0, 0, 0)),
                 (self.ctask1, self.before_freeze, True, (1, 1, 1)),
         ])
+
+
+class TestCompetitionTaskComments(TestCase):
+    fixtures = ['apps/userprofile/fixtures/test_userprofiles.json']
+
+    def setUp(self):
+        # TODO: make a base class for users
+        self.admin = User.objects.get(id=1)
+        self.alice = User.objects.get(id=2)
+        self.bob = User.objects.get(id=3)
+
+        now = datetime.datetime.now()
+        self.competition = Competition.objects.create(
+                name="Test competition",
+                registration_open_date=now - 50 * HOUR,
+                start_date=now - 3 * HOUR,
+                scoreboard_freeze_date=now + 2 * HOUR,
+                end_date=now + 3 * HOUR)
+        self.chain = Chain.objects.create(competition=self.competition,
+                name="Test chain")
+
+    def test_is_important(self):
+        self.assertFalse(is_ctask_comment_important("nothing important here"))
+        self.assertTrue(is_ctask_comment_important(
+                "this is not important\n"
+                "IMPORTANT: But this is very important!\n"
+                "read this also"))
+
+    def test_update_chain_comments_cache(self):
+        ctasks = []
+        ctasks.append(create_ctask(self.admin, self.competition, self.chain,
+                "42", 1, "nothing important here"))
+        ctasks.append(create_ctask(self.admin, self.competition, self.chain,
+                "42", 1,
+                "first nothing important\n"
+                "IMPORTANT: but then something important"))
+        ctasks.append(create_ctask(self.admin, self.competition, self.chain,
+                "42", 1,
+                "again first nothing important\n"
+                "IMPORTANT: bla bla\n"
+                "bla bla"))
+        ctasks.append(create_ctask(self.alice, self.competition, self.chain,
+                "42", 1,
+                "nothing important"))
+        ctasks.append(create_ctask(self.alice, self.competition, self.chain,
+                "42", 1,
+                "nothing important\n"
+                "IMPORTANT: bla bla\n"
+                "bla bla"))
+        update_chain_comments_cache(self.chain, ctasks)
+        num_important, num_important_my = parse_chain_comments_cache(
+            self.chain, self.admin)
+        self.assertEqual(num_important, 3)
+        self.assertEqual(num_important_my, 2)
+
+        num_important, num_important_my = parse_chain_comments_cache(
+            self.chain, self.alice)
+        self.assertEqual(num_important, 3)
+        self.assertEqual(num_important_my, 1)
+
+        num_important, num_important_my = parse_chain_comments_cache(
+            self.chain, self.bob)
+        self.assertEqual(num_important, 3)
+        self.assertEqual(num_important_my, 0)

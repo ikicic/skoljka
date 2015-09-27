@@ -6,6 +6,46 @@ from competition.models import Chain, Competition, CompetitionTask, \
 from collections import defaultdict
 from datetime import timedelta
 
+import re
+
+_is_important_re = re.compile(r'^IMPORTANT:', re.MULTILINE)
+def is_ctask_comment_important(comment):
+    return bool(_is_important_re.search(comment))
+
+
+def update_chain_comments_cache(chain, ctasks):
+    count_by_author = defaultdict(int)
+    for ctask in ctasks:
+        if is_ctask_comment_important(ctask.comment.text):
+            count_by_author[ctask.task.author_id] += 1
+        print ctask, ctask.comment.text, is_ctask_comment_important(ctask.comment.text)
+    chain.cache_ctask_comments_info = ','.join(
+            ['{}:{}'.format(author_id, cnt) \
+                    for author_id, cnt in count_by_author.items()])
+
+
+def parse_chain_comments_cache(chain, current_user):
+    """Returns num_important, num_important_my."""
+    cache = chain.cache_ctask_comments_info
+    num_important = 0
+    num_important_my = 0
+    if cache:
+        for author_cnt in cache.split(','):
+            author_id, count = [int(x) for x in author_cnt.split(':')]
+            num_important += count
+            if author_id == current_user.id:
+                num_important_my = count
+    return num_important, num_important_my
+
+
+def ctask_comment_class(ctask, current_user):
+    if is_ctask_comment_important(ctask.comment.text):
+        if ctask.task.author_id == current_user.id:
+            return 'ctask-comment-important ctask-my'
+        return 'ctask-comment-important'
+    return ""
+
+
 def update_score_on_ctask_action(competition, team, chain, ctask, submission,
         delete, chain_ctask_ids=None, chain_submissions=None):
     """Updates team score for a given submit/delete action."""

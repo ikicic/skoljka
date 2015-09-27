@@ -35,3 +35,5 @@ DELIMITER ;
 CALL add_competitiontask_empty_comments();
 DROP PROCEDURE add_competitiontask_empty_comments;
 ALTER TABLE `competition_competitiontask` ADD CONSTRAINT `comment_id_refs_id_74d1988` FOREIGN KEY (`comment_id`) REFERENCES `mathcontent_mathcontent` (`id`);
+
+ALTER TABLE competition_chain ADD COLUMN cache_ctask_comments_info VARCHAR(255) NOT NULL AFTER bonus_score;

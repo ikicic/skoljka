@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-27 19:38+0200\n"
-"PO-Revision-Date: 2015-09-27 19:39+0200\n"
+"POT-Creation-Date: 2015-09-27 23:31+0200\n"
+"PO-Revision-Date: 2015-09-27 23:32+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -308,34 +308,38 @@ msgstr ""
 "kao dio rješenja, napišite '\\|'. Da bi dobili '\\', napišite '\\\\'.  "
 "Vodeći i prateći razmaci se uvijek ignoriraju."
 
-#: apps/competition/forms.py:34
+#: apps/competition/forms.py:35
 msgid "Descriptor error. Please notify admins!"
 msgstr "Nevaljan deskriptor. Molimo obavijestite administratore!"
 
-#: apps/competition/forms.py:59
+#: apps/competition/forms.py:65
 msgid "Invalid!"
 msgstr "Nevaljano rješenje!"
 
 #: apps/competition/templates/competition_chain_list.html:25
-#: apps/competition/templates/competition_chain_list.html:35
-msgid "Edit"
-msgstr "Uredi"
+msgid "Comments"
+msgstr "Komentari"
 
 #: apps/competition/templates/competition_chain_list.html:26
 #: apps/competition/templates/competition_chain_list.html:37
+msgid "Edit"
+msgstr "Uredi"
+
+#: apps/competition/templates/competition_chain_list.html:27
+#: apps/competition/templates/competition_chain_list.html:39
 msgid "Overview"
 msgstr "Pregled"
 
-#: apps/competition/templates/competition_chain_new.html:36
+#: apps/competition/templates/competition_chain_new.html:44
 #, python-format
 msgid "Note: Score for the each task has been fixed to %(score)s."
 msgstr "Napomena: Bodovi za svaki zadatak su fiksirani na %(score)s."
 
-#: apps/competition/templates/competition_chain_new.html:41
+#: apps/competition/templates/competition_chain_new.html:49
 msgid "Chain overview"
 msgstr "Pregled lanca"
 
-#: apps/competition/templates/competition_chain_new.html:47
+#: apps/competition/templates/competition_chain_new.html:55
 msgid "There were some errors!"
 msgstr "Bilo je nekih grešaka!"
 
@@ -346,6 +350,22 @@ msgstr "Autor:"
 #: apps/competition/templates/competition_rules.html:13
 msgid "Solution format description"
 msgstr "Objašnjenje formata rješenja"
+
+#: apps/competition/templatetags/competition_tags.py:92
+#, python-format
+msgid "%d important"
+msgid_plural "%d important"
+msgstr[0] "%d važan"
+msgstr[1] "%d važna"
+msgstr[2] "%d važnih"
+
+#: apps/competition/templatetags/competition_tags.py:95
+#, python-format
+msgid "%d my task"
+msgid_plural "%d my tasks"
+msgstr[0] "%d moj zadatak"
+msgstr[1] "%d moja zadatka"
+msgstr[2] "%d mojih zadataka"
 
 #: apps/mathcontent/templates/inc_mathcontent_bootstrap_preview.html:7
 msgid "Preview"

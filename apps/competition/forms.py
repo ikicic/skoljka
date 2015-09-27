@@ -7,6 +7,7 @@ from django.utils.translation import ugettext as _
 from competition.models import Chain, CompetitionTask, Team, TeamMember
 from competition.evaluator import InvalidDescriptor, InvalidSolution
 from competition.evaluator import get_evaluator, get_solution_help_text
+from competition.utils import ctask_comment_class
 
 
 class CompetitionSolutionForm(forms.Form):
@@ -49,10 +50,15 @@ class CompetitionTaskForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.evaluator = kwargs.pop('evaluator')
         self.fixed_score = kwargs.pop('fixed_score')
+        user = kwargs.pop('user')
         super(CompetitionTaskForm, self).__init__(*args, **kwargs)
+
+        self.t_comment_extra_class = "ctask-comment"
         if self.instance.pk:
             self.fields['text'].initial = self.instance.task.content.text
             self.fields['comment'].initial = self.instance.comment.text
+            self.t_comment_extra_class += \
+                    " " + ctask_comment_class(self.instance, user)
 
         self.fields['descriptor'].help_text = get_solution_help_text(
                 self.evaluator, self.initial.get('descriptor'),

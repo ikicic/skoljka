@@ -106,6 +106,7 @@ class Chain(models.Model):
     unlock_minutes = models.IntegerField(default=0)
     category = models.CharField(blank=True, db_index=True, max_length=32)
     bonus_score = models.IntegerField(default=1)
+    cache_ctask_comments_info = models.CharField(blank=True, max_length=255)
 
     def __unicode__(self):
         return self.name

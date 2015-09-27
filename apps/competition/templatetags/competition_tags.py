@@ -1,9 +1,12 @@
 from django import template
 from django.contrib.auth.models import User
 from django.utils.html import mark_safe
+from django.utils.translation import ungettext
 
 from competition.models import TeamMember
-from competition.utils import get_ctask_statistics
+from competition.utils import is_ctask_comment_important, \
+        parse_chain_comments_cache, get_ctask_statistics
+from competition.utils import ctask_comment_class as utils__ctask_comment_class
 
 import json
 
@@ -82,8 +85,32 @@ def ctask_class(ctask):
     return "bar ctask-tried"
 
 @register.simple_tag(takes_context=True)
-def ctask_comment_class(context, ctask):
+def chain_ctask_comments_info(context, chain):
+    num_important, num_important_my = parse_chain_comments_cache(
+            chain, context['user'])
+    if num_important:
+        first = ungettext("%d important", "%d important", num_important) \
+                % num_important
+        if num_important_my:
+            second = ungettext("%d my task", "%d my tasks", num_important_my) \
+                    % num_important_my
+            return mark_safe(u"{} <b>({})</b>".format(first, second))
+        return first
     return ""
+
+@register.simple_tag(takes_context=True)
+def chain_ctask_comments_class(context, chain):
+    num_important, num_important_my = parse_chain_comments_cache(
+            chain, context['user'])
+    if num_important_my > 0:
+        return 'cchain-comments-important-my-ctasks'
+    if num_important > 0:
+        return 'cchain-comments-important'
+    return ""
+
+@register.simple_tag(takes_context=True)
+def ctask_comment_class(context, ctask):
+    return utils__ctask_comment_class(ctask, context['user'])
 
 @register.simple_tag()
 def chain_badge_class(chain):

@@ -22,20 +22,22 @@
     <th>Duljina</th>
     <th title="Vrijeme otključavanja">Minute</th>
     <th>Autor(i)</th>
+    <th>{% trans "Comments" %}</th>
     <th>{% trans "Edit" %}</th>
     <th>{% trans "Overview" %}</th>
   </tr>
   {% for chain in chains %}
-    <tr>
+    <tr class="{% chain_ctask_comments_class chain %}">
       <td>{{ chain.category }}</td>
       <td><a href="{{ chain.get_absolute_url }}">{{ chain.name }}</a></td>
       <td>{{ chain.t_ctask_count }}</td>
       <td>{{ chain.unlock_minutes }}</td>
       <td>{{ chain.t_authors }}</td>
+      <td>{% chain_ctask_comments_info chain %}</td>
       <td><a href="{{ chain.get_absolute_url }}">{% trans "Edit" %}</a></td>
       <td><a href="{{ chain.get_absolute_url }}overview/">
           {% trans "Overview" %}</a></td>
-    </div>
+    </tr>
   {% empty %}
     <tr><td colspan="3"><i>Prazno...</i></td> </tr>
   {% endfor %}
