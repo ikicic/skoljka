@@ -18,7 +18,6 @@ def update_chain_comments_cache(chain, ctasks):
     for ctask in ctasks:
         if is_ctask_comment_important(ctask.comment.text):
             count_by_author[ctask.task.author_id] += 1
-        print ctask, ctask.comment.text, is_ctask_comment_important(ctask.comment.text)
     chain.cache_ctask_comments_info = ','.join(
             ['{}:{}'.format(author_id, cnt) \
                     for author_id, cnt in count_by_author.items()])
