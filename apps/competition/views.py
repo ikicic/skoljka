@@ -382,6 +382,7 @@ def _create_or_update_task(
         task = Task(content=content, author=user, hidden=True)
         comment = MathContent(text=comment)
         comment.save()
+        ctask.comment = comment
     else:
         task = ctask.task
         task.content.text = text

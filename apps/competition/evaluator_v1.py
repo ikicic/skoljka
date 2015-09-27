@@ -305,9 +305,9 @@ class List(BaseList):
                     "%(decimals)d decimals and separated with a comma.",
                     decimal_count) % {'decimals': decimal_count}
         if self.element_type == Fraction:
-            msg = _("Write the results in the correct order in the form a/b, "
-                    "where a and b are integers. Separate the results with a "
-                    "comma.")
+            msg = _("Write the results in in the form a/b, where a and b are "
+                    "integers. Separate the results with a comma, and write "
+                    "them in the correct order.")
         if self.element_type == String:
             msg = _("Write the results in the correct order, separated with a "
                     "comma.")
@@ -391,9 +391,9 @@ class MultiSet(BaseList):
                     "%(decimals)d decimals and separated with a comma.",
                     decimal_count) % {'decimals': decimal_count}
         if self.element_type == Fraction:
-            msg = _("Write the results in any order, in the form a/b, "
-                    "where a and b are integers. Separate the results with a "
-                    "comma.")
+            msg = _("Write the results in the form a/b, where a and b are "
+                    "integers. Separate the results with a comma. List them in "
+                    "any order.")
         if self.element_type == String:
             msg = _("Write the results in any order, separated with a comma.")
         if self.length_specified:

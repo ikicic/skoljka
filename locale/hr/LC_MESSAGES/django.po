@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-27 23:31+0200\n"
-"PO-Revision-Date: 2015-09-27 23:32+0200\n"
+"POT-Creation-Date: 2015-09-28 00:12+0200\n"
+"PO-Revision-Date: 2015-09-28 00:14+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -184,11 +184,11 @@ msgstr[2] ""
 
 #: apps/competition/evaluator_v1.py:308
 msgid ""
-"Write the results in the correct order in the form a/b, where a and b are "
-"integers. Separate the results with a comma."
+"Write the results in in the form a/b, where a and b are integers. Separate "
+"the results with a comma, and write them in the correct order."
 msgstr ""
-"Rezultate napišite u točnom poretku u obliku a/b, gdje su a i b cijeli "
-"brojevi. Rezultate razdvojite zarezom."
+"Rezultate napišite u obliku a/b, gdje su a i b cijeli brojevi. Rezultate "
+"razdvojite zarezom te ih napišite u točnom poretku."
 
 #: apps/competition/evaluator_v1.py:315 apps/competition/evaluator_v1.py:400
 msgid "Number of elements:"
@@ -250,11 +250,11 @@ msgstr[2] ""
 
 #: apps/competition/evaluator_v1.py:394
 msgid ""
-"Write the results in any order, in the form a/b, where a and b are integers. "
-"Separate the results with a comma."
+"Write the results in the form a/b, where a and b are integers. Separate the "
+"results with a comma. List them in any order."
 msgstr ""
-"Rezultate napišite u bilo kojem poretku u obliku a/b, gdje su a i b cijeli "
-"brojevi. Rezultate razdvojite zarezom."
+"Rezultate napišite u obliku a/b, gdje su a i b cijeli brojevi. Rezultate "
+"razdvojite zarezom i navedite ih u bilo kojem poretku."
 
 #: apps/competition/evaluator_v1.py:405
 msgid "Set"
