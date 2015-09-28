@@ -80,7 +80,8 @@ def _update_team_invitations(team, team_form):
 @competition_view()
 @response('competition_team_detail.html')
 def team_detail(request, competition, data, team_id):
-    data['preview_team'] = get_object_or_404(Team, id=team_id)
+    data['preview_team'] = \
+            get_object_or_404(Team, id=team_id, competition_id=competition.id)
     data['preview_team_members'] = TeamMember.objects.filter(team_id=team_id,
             invitation_status=TeamMember.INVITATION_ACCEPTED) \
                     .select_related('member')
@@ -408,7 +409,7 @@ def _create_or_update_task(
 @competition_view(permission=EDIT)
 @response('competition_chain_overview.html')
 def chain_overview(request, competition, data, chain_id):
-    chain = get_object_or_404(Chain, id=chain_id)
+    chain = get_object_or_404(Chain, id=chain_id, competition_id=competition.id)
     chain.competition = competition
     ctasks = CompetitionTask.objects.filter(chain=chain) \
             .select_related('task__content', 'task__author', 'comment') \
@@ -425,7 +426,8 @@ def chain_overview(request, competition, data, chain_id):
 @response('competition_chain_new.html')
 def chain_new(request, competition, data, chain_id=None):
     if chain_id:
-        chain = get_object_or_404(Chain, id=chain_id)
+        chain = get_object_or_404(
+                Chain, id=chain_id, competition_id=competition.id)
         edit = True
     else:
         chain = None
