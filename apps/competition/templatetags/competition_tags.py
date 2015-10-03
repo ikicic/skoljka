@@ -69,7 +69,8 @@ def reg_add_member_fields(context):
 
 @register.simple_tag(takes_context=True)
 def ctask_statistics_json(context):
-    stats = get_ctask_statistics(context['competition'])
+    # TODO: This shouldn't be a template tag.
+    stats = get_ctask_statistics(context['competition'].id)
     return json.dumps(stats)
 
 @register.simple_tag()
@@ -99,14 +100,16 @@ def chain_ctask_comments_info(context, chain):
     return ""
 
 @register.simple_tag(takes_context=True)
-def chain_ctask_comments_class(context, chain):
+def chain_class(context, chain):
     num_important, num_important_my = parse_chain_comments_cache(
             chain, context['user'])
     if num_important_my > 0:
-        return 'cchain-comments-important-my-ctasks'
-    if num_important > 0:
-        return 'cchain-comments-important'
-    return ""
+        return 'cchain-important-my-ctasks'
+    elif num_important > 0:
+        return 'cchain-important'
+    elif chain.t_is_verified:
+        return 'cchain-verified'
+    return ''
 
 @register.simple_tag(takes_context=True)
 def ctask_comment_class(context, ctask):

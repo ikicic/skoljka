@@ -271,22 +271,24 @@ def get_teams_for_user_ids(user_ids):
 
     return {x.member_id: x.team for x in team_members}
 
-def get_ctask_statistics(competition):
+def get_ctask_statistics(competition_id):
     """
     # TODO: documentation
     """
+    # TODO: cache!
     max_submissions_dict = dict(CompetitionTask.objects \
-            .filter(competition=competition) \
+            .filter(competition_id=competition_id) \
             .values_list('id', 'max_submissions'))
-    test_teams = Team.objects.filter(competition=competition, is_test=True) \
+    test_teams = Team.objects \
+            .filter(competition_id=competition_id, is_test=True) \
             .values_list('id', flat=True)
-    correct_submissions = Submission.objects.filter(
-            ctask__competition_id=competition.id) \
-                    .values_list('team_id', 'ctask_id', 'cache_is_correct')
+    submissions = Submission.objects \
+            .filter(ctask__competition_id=competition_id) \
+            .values_list('team_id', 'ctask_id', 'cache_is_correct')
 
     submission_count_dict = defaultdict(int)
     is_solved_dict = defaultdict(bool)
-    for team_id, ctask_id, cache_is_correct in correct_submissions:
+    for team_id, ctask_id, cache_is_correct in submissions:
         key = (team_id, ctask_id)
         submission_count_dict[key] += 1
         is_solved_dict[key] |= cache_is_correct

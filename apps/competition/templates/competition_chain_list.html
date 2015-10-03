@@ -27,7 +27,7 @@
     <th>{% trans "Overview" %}</th>
   </tr>
   {% for chain in chains %}
-    <tr class="{% chain_ctask_comments_class chain %}">
+    <tr class="{% chain_class chain %}">
       <td>{{ chain.category }}</td>
       <td><a href="{{ chain.get_absolute_url }}">{{ chain.name }}</a></td>
       <td>{{ chain.t_ctask_count }}</td>

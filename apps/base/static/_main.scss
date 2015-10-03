@@ -13,6 +13,9 @@ $screen-sm-max:   $screen-md-min - 1px;
 $screen-md-max:   $screen-lg-min - 1px;
 
 $page-content-bg-color: #f0f5f4;
+$table-bg: #f0f5f4;
+$table-bg-odd: #f4f7f6;
+
 $outset-bg-color: #fafcfc;
 $outset-box-shadow-color: rgba(128, 128, 128, 0.55);
 
@@ -26,5 +29,14 @@ $outset-box-shadow-color: rgba(128, 128, 128, 0.55);
 @media (min-width: $screen-xs-min) {
   .visible-xs-phone {
     display: none !important;
+  }
+}
+
+@mixin colored-tr-striped($color, $weight) {
+  & td, &:hover td {
+    background-color: mix($color, $table-bg, $weight) !important;
+  }
+  &:nth-child(odd) td, &:nth-child(odd):hover td {
+    background-color: mix($color, $table-bg-odd, $weight) !important;
   }
 }

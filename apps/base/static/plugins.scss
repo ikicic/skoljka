@@ -25,10 +25,10 @@
   margin-left: -20px !important; /* independent of browser size */
 }
 
-
 .table-striped tbody tr:nth-child(odd) td,
 .table-striped tbody tr:nth-child(odd) th {
-  background-color: rgb(244, 247, 246);
+  /* TODO: override default bootstrap values instead of changing later */
+  background-color: $table-bg-odd;
 }
 
 .thin {

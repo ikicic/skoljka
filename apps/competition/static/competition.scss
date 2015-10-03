@@ -338,16 +338,17 @@ div#ctask-legend-container {
   }
 }
 
-.cchain-comments-important {
-  & td, &:hover td {
-    background-color: mix(red, $page-content-bg-color, 5%) !important;
-  }
+
+.cchain-verified {
+  @include colored-tr-striped(lime, 8%);
 }
 
-.cchain-comments-important-my-ctasks {
-  & td, &:hover td {
-    background-color: mix(red, $page-content-bg-color, 10%) !important;
-  }
+.cchain-important {
+  @include colored-tr-striped(red, 5%);
+}
+
+.cchain-important-my-ctasks {
+  @include colored-tr-striped(red, 10%);
 }
 
 .ctask-content {

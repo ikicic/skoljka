@@ -26,7 +26,7 @@ from competition.models import Chain, Competition, CompetitionTask, Team, \
         TeamMember, Submission
 from competition.utils import fix_ctask_order, update_chain_comments_cache, \
         update_score_on_ctask_action, preprocess_chain, \
-        get_teams_for_user_ids, lock_ctasks_in_chain, get_ctask_statistics, \
+        get_teams_for_user_ids, lock_ctasks_in_chain, \
         refresh_teams_cache_score, update_ctask_task
 
 from collections import defaultdict
@@ -199,8 +199,7 @@ def scoreboard(request, competition, data):
 @competition_view()
 @response('competition_task_list.html')
 def task_list(request, competition, data):
-    all_ctasks = list(CompetitionTask.objects.filter(competition=competition) \
-            .select_related('task__content'))
+    all_ctasks = list(CompetitionTask.objects.filter(competition=competition))
     all_ctasks_dict = {ctask.id: ctask for ctask in all_ctasks}
     all_chains = list(Chain.objects.filter(competition=competition) \
             .order_by('category', 'name'))
@@ -350,21 +349,30 @@ def chain_list(request, competition, data):
     chains = Chain.objects.filter(competition=competition) \
             .order_by('category', 'name')
     chain_dict = {chain.id: chain for chain in chains}
-    ctasks = CompetitionTask.objects.filter(competition=competition) \
-            .values_list('chain_id', 'task__author_id')
-    author_ids = [] if not ctasks else zip(*ctasks)[1]
+    ctasks = list(CompetitionTask.objects.filter(competition=competition) \
+            .values_list('id', 'chain_id', 'task__author_id'))
+    author_ids = [author_id for ctask_id, chain_id, author_id in ctasks]
     authors = User.objects.only('id', 'username', 'first_name', 'last_name') \
             .in_bulk(set(author_ids))
+
+    verified_ctask_ids = set(Submission.objects \
+            .filter(team__competition_id=competition.id,
+                    team__is_test=True,
+                    cache_is_correct=True) \
+            .values_list('ctask_id', flat=True))
 
     for chain in chains:
         chain.competition = competition
         chain.t_ctask_count = 0
         chain._author_ids = set()
+        chain.t_is_verified = True
 
-    for chain_id, author_id in ctasks:
+    for ctask_id, chain_id, author_id in ctasks:
         chain = chain_dict[chain_id]
         chain.t_ctask_count += 1
         chain._author_ids.add(author_id)
+        if ctask_id not in verified_ctask_ids:
+            chain.t_is_verified = False
 
     from userprofile.templatetags.userprofile_tags import userlink
     for chain in chains:
