@@ -45,6 +45,15 @@
   </div>
 {% endif %}
 
+{% if was_order_fixed %}
+  <div class="alert alert-danger">
+    Neki zadaci nisu imali dobro definirane pozicije u lancu, pa su automatski
+    popravljene (postojale su duple pozicije, nisu počinjale od 1, ili nisu
+    bile uzastopne). Molimo provjerite je li poredak zadataka točan i maknite
+    odgovarajuće komentare.
+  </div>
+{% endif %}
+
 <a href="{{ chain.get_absolute_url }}overview/" target="_new">
   {% trans "Chain overview" %}
 </a>

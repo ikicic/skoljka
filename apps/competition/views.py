@@ -24,10 +24,10 @@ from competition.forms import ChainForm, CompetitionSolutionForm, \
         TaskListAdminPanelForm
 from competition.models import Chain, Competition, CompetitionTask, Team, \
         TeamMember, Submission
-from competition.utils import update_chain_comments_cache, \
+from competition.utils import fix_ctask_order, update_chain_comments_cache, \
         update_score_on_ctask_action, preprocess_chain, \
         get_teams_for_user_ids, lock_ctasks_in_chain, get_ctask_statistics, \
-        refresh_teams_cache_score
+        refresh_teams_cache_score, update_ctask_task
 
 from collections import defaultdict
 from datetime import datetime
@@ -391,9 +391,7 @@ def _create_or_update_task(
         ctask.comment.text = comment
         ctask.comment.save()
 
-    task.name = u"{} - {} #{}".format(competition.name, chain.name, index + 1)
-    task.source = competition.name
-    task.save()
+    update_ctask_task(task, competition, chain, index + 1, commit=True)
 
     if not edit:
         if competition.automatic_task_tags:
@@ -443,6 +441,7 @@ def chain_new(request, competition, data, chain_id=None):
                     fixed_score=competition.fixed_task_score, user=request.user,
                     *args, **kwargs)
 
+    # TODO: Set min_num and max_num after migrating to Django 1.7.
     CompetitionTaskFormSet = modelformset_factory(CompetitionTask,
             form=CompetitionTaskFormLambda, formset=BaseCompetitionTaskFormSet,
             extra=5, can_order=True, can_delete=True)
@@ -451,7 +450,8 @@ def chain_new(request, competition, data, chain_id=None):
     chain_form = ChainForm(data=POST, instance=chain)
     queryset = CompetitionTask.objects.filter(chain_id=chain_id) \
             .select_related('task__content', 'comment') \
-            .order_by('chain_position')
+            .order_by('chain_position', 'id')
+    was_order_fixed = fix_ctask_order(competition, chain, list(queryset))
     formset = CompetitionTaskFormSet(data=POST, queryset=queryset)
 
     if request.method == 'POST':
@@ -484,10 +484,11 @@ def chain_new(request, competition, data, chain_id=None):
 
             # Problems with existing formset... ahh, just refresh
             return (chain.get_absolute_url(), )
-
+    
     data.update({
         'chain_form': chain_form,
         'formset': formset,
+        'was_order_fixed': was_order_fixed,
     })
     return data
 

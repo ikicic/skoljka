@@ -8,12 +8,46 @@ from datetime import timedelta
 
 import re
 
+# TODO(ivica): Add commit argument to all update_* methods.
+def update_ctask_task(task, competition, chain, position, commit=False):
+    """Updates task.name and .source. Does not save!"""
+    task.name = u"{} - {} #{}".format(competition.name, chain.name, position)
+    task.source = competition.name
+    if commit:
+        task.save()
+
+
+def fix_ctask_order(competition, chain, ctasks):
+    """Fix ctask chain_position if not correctly set.
+
+    Method checks if chain positions are consecutive, unique and start from 1.
+    If not, the chain positions are fixed and an appropriate comment is added
+    to each of the tasks affected.
+
+    Returns True if any changes were made.
+    """
+    changes = False
+    for k, ctask in enumerate(ctasks, 1):
+        if ctask.chain_position != k:
+            changes = True
+            ctask.chain_position = k
+            update_ctask_task(ctask.task, competition, chain, k, commit=True)
+            ctask.comment.text += "\nIMPORTANT: Please check whether the " \
+                                  "task is in the right position! (automatic)"
+            ctask.comment.html = None
+            ctask.comment.save()
+            ctask.save()
+    if changes:
+        update_chain_comments_cache(chain, ctasks, commit=True)
+    return changes
+
+
 _is_important_re = re.compile(r'^IMPORTANT:', re.MULTILINE)
 def is_ctask_comment_important(comment):
     return bool(_is_important_re.search(comment))
 
 
-def update_chain_comments_cache(chain, ctasks):
+def update_chain_comments_cache(chain, ctasks, commit=False):
     count_by_author = defaultdict(int)
     for ctask in ctasks:
         if is_ctask_comment_important(ctask.comment.text):
@@ -21,6 +55,8 @@ def update_chain_comments_cache(chain, ctasks):
     chain.cache_ctask_comments_info = ','.join(
             ['{}:{}'.format(author_id, cnt) \
                     for author_id, cnt in count_by_author.items()])
+    if commit:
+        chain.save()
 
 
 def parse_chain_comments_cache(chain, current_user):
