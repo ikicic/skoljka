@@ -33,7 +33,7 @@ def fix_ctask_order(competition, chain, ctasks):
             ctask.chain_position = k
             update_ctask_task(ctask.task, competition, chain, k, commit=True)
             ctask.comment.text += "\nIMPORTANT: Please check whether the " \
-                                  "task is in the right position! (automatic)"
+                                  "tasks are in the right order! (automatic)"
             ctask.comment.html = None
             ctask.comment.save()
             ctask.save()
