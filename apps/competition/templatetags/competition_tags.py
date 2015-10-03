@@ -36,7 +36,7 @@ def reg_available_users(context):
     available = list(User.objects.filter(is_active=True) \
             .exclude(id__in=in_teams) \
             .values_list('username', 'id'))
-    available.sort()
+    available.sort(key=lambda x: x[0].lower())
 
     return mark_safe(u'<script>reg_available_users={{{}}};</script>'.format(
             u','.join(u'"{}":{}'.format(username, user_id) for
