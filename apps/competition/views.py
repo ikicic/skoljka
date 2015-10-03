@@ -31,6 +31,7 @@ from competition.utils import fix_ctask_order, update_chain_comments_cache, \
 
 from collections import defaultdict
 from datetime import datetime
+import django_sorting
 
 
 @response('competition_list.html')
@@ -346,8 +347,12 @@ def task_detail(request, competition, data, ctask_id):
 @competition_view(permission=EDIT)
 @response('competition_chain_list.html')
 def chain_list(request, competition, data):
-    chains = Chain.objects.filter(competition=competition) \
-            .order_by('category', 'name')
+    chains = Chain.objects.filter(competition=competition)
+    order_by_field = django_sorting.middleware.get_field(request)
+    if len(order_by_field) > 1:
+        chains = chains.order_by(order_by_field, 'category', 'name')
+    else:
+        chains = chains.order_by('category', 'name')
     chain_dict = {chain.id: chain for chain in chains}
     ctasks = list(CompetitionTask.objects.filter(competition=competition) \
             .values_list('id', 'chain_id', 'task__author_id'))

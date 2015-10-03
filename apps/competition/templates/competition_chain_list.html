@@ -2,6 +2,7 @@
 {% load i18n %}
 
 {% load competition_tags %}
+{% load sorting_tags %}
 
 {% block content %}
 
@@ -20,7 +21,7 @@
     <th>Kategorija</th>
     <th>Lanac</th>
     <th>Duljina</th>
-    <th title="Vrijeme otključavanja">Minute</th>
+    <th title="Vrijeme otključavanja">{% anchor unlock_minutes Minute %}</th>
     <th>Autor(i)</th>
     <th>{% trans "Comments" %}</th>
     <th>{% trans "Edit" %}</th>
