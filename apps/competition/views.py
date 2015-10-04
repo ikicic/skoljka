@@ -115,8 +115,8 @@ def registration(request, competition, data):
         data['team_invitations'] = []
 
     elif request.method == 'POST' and 'name' in request.POST:
-        team_form = TeamForm(request.POST, instance=team,
-                max_team_size=competition.max_team_size)
+        team_form = TeamForm(request.POST, competition=competition,
+                max_team_size=competition.max_team_size, instance=team)
         if team_form.is_valid():
             old_team = team
             team = team_form.save(commit=False)
@@ -138,7 +138,7 @@ def registration(request, competition, data):
             return (request.get_full_path() + '?changes=1', )
 
     if team_form is None and (not team or team.author_id == request.user.id):
-        team_form = TeamForm(instance=team,
+        team_form = TeamForm(instance=team, competition=competition,
                 max_team_size=competition.max_team_size)
 
     data['show_member_links'] = True

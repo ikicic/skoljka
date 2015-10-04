@@ -104,6 +104,7 @@ class TeamForm(forms.ModelForm):
         initial = kwargs.pop('initial', {})
         extra_fields = []
         self.max_team_size = kwargs.pop('max_team_size', 3)
+        self.competition_id = kwargs.pop('competition').id
 
         if instance:
             # Author cannot be removed from the team.
@@ -154,7 +155,8 @@ class TeamForm(forms.ModelForm):
 
     def clean_name(self):
         name = self.cleaned_data['name'].strip()
-        if Team.objects.filter(name__iexact=name) \
+        if Team.objects \
+                .filter(competition_id=self.competition_id, name__iexact=name) \
                 .exclude(id=self.instance.id).exists():
             raise ValidationError(
                     u"Uneseno ime tima ve\u0107 iskori\u0161teno!")
