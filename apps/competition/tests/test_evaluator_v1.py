@@ -218,6 +218,8 @@ class EvaluatorV1Test(TestCase):
             ("1,2,3,4,5", ",2,3,4,5", InvalidSolution),
             ("1,2,3,4,5", "1,2,,4,5", InvalidSolution),
             ("1,2,3,4,5", "1 2,3,4,5", InvalidSolution),
+            ("1,2,3,4,5", "1,2,3,4,5,6", False),
+            ("1,2,3,4,5", "1,2,3,4,5,6.5", InvalidSolution),
             ("1,2,3,4,5", "1, 2, 3, 4.5", InvalidSolution),
             ("1,2,3,4,5", "1, 2, 3, 4", False),
             ("1/2, 3/1", "1/2,3", True),

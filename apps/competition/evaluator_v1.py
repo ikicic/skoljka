@@ -287,7 +287,12 @@ class List(BaseList):
             # Only one type and one Float precision currently supported.
             # If the number of items not matching, call to check format.
             index = k if k < len(self.items) else 0
-            if not self.items[k].evaluate_solution(items[k]):
+            if k < len(self.items):
+                if not self.items[k].evaluate_solution(items[k]):
+                    is_correct = False
+            else:
+                if len(self.items):
+                    self.items[0].evaluate_solution(items[k])
                 is_correct = False
 
         return is_correct
