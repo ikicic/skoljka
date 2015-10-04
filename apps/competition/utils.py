@@ -2,7 +2,8 @@ from django.db import connection, transaction
 
 from competition.models import Chain, Competition, CompetitionTask, \
         Submission, Team, TeamMember
-from competition.evaluator import get_evaluator
+from competition.evaluator import get_evaluator, InvalidSolution, \
+        InvalidDescriptor
 
 from collections import defaultdict
 from datetime import timedelta
@@ -279,7 +280,10 @@ def refresh_submissions_cache_is_correct(submissions=None, ctasks=None,
         ctask = ctasks_dict[submission.ctask_id]
         evaluator = get_evaluator(ctask.competition.evaluator_version)
         old = submission.cache_is_correct
-        new = evaluator.check_result(ctask.descriptor, submission.result)
+        try:
+            new = evaluator.check_result(ctask.descriptor, submission.result)
+        except InvalidSolution, InvalidDescriptor:
+            new = False
         if old != new:
             submission.cache_is_correct = new
             submission.save()
