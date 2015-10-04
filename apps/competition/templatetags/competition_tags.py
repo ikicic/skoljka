@@ -150,7 +150,7 @@ def team_score(context, team):
     after the freeze, is the current user a member of the given team or if it
     is a competition admin.
     """
-    result = str(team.cache_score)
+    result = str(team.cache_score_before_freeze)
     if context['is_scoreboard_frozen']:
         before = team.cache_score_before_freeze
         max_after = team.cache_max_score_after_freeze
