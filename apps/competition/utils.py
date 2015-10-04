@@ -2,6 +2,7 @@ from django.db import connection, transaction
 
 from competition.models import Chain, Competition, CompetitionTask, \
         Submission, Team, TeamMember
+from competition.evaluator import get_evaluator
 
 from collections import defaultdict
 from datetime import timedelta
@@ -246,8 +247,26 @@ def preprocess_chain(competition, chain, team, preloaded_ctask=None):
 
     return ctasks, submissions
 
-def refresh_submissions_cache_is_correct(submissions, ctasks=None):
-    if ctasks is None:
+def refresh_submissions_cache_is_correct(submissions=None, ctasks=None,
+        competitions=None):
+    """Returns the number of solutions updated."""
+    if not submissions and not ctasks and not competitions:
+        raise ValueError
+    # TODO: simplify this
+    if competitions:
+        competitions = list(competitions)
+        id_to_comp = {x.id: x for x in competitions}
+        if ctasks is None:
+            ctasks = CompetitionTask.objects \
+                    .filter(competition_id__in=id_to_comp.keys())
+            for ctask in ctasks:
+                ctask.competition = id_to_comp[ctask.competition_id]
+        # TODO: select only given ctasks
+        if submissions is None:
+            submissions = Submission.objects \
+                    .filter(ctask__competition_id__in=id_to_comp.keys())
+    elif ctasks is None:
+        # TODO: get submissions if not provided.
         ctask_ids = set(submission.ctask_id for submission in submissions)
         ctasks = CompetitionTask.objects.filter(id__in=ctask_ids) \
                 .select_related('competition__evaluator_version')
@@ -255,14 +274,17 @@ def refresh_submissions_cache_is_correct(submissions, ctasks=None):
     ctasks = list(ctasks)
     ctasks_dict = {ctask.id: ctask for ctask in ctasks}
 
+    updated = 0
     for submission in submissions:
         ctask = ctasks_dict[submission.ctask_id]
-        evaluator = ctask.competition.evaluator_version
+        evaluator = get_evaluator(ctask.competition.evaluator_version)
         old = submission.cache_is_correct
         new = evaluator.check_result(ctask.descriptor, submission.result)
         if old != new:
             submission.cache_is_correct = new
             submission.save()
+            updated += 1
+    return updated
 
 def get_teams_for_user_ids(user_ids):
     team_members = list(TeamMember.objects.filter(member_id__in=set(user_ids)) \
