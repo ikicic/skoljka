@@ -94,11 +94,16 @@ def team_detail(request, competition, data, team_id):
 @competition_view()
 @response('competition_registration.html')
 def registration(request, competition, data):
+    if data['has_finished']:
+        return (competition.get_absolute_url(), )
+    if competition.registration_open_date > data['current_time'] and \
+            not data['is_admin']:
+        return (competition.get_absolute_url(), )
     if not request.user.is_authenticated():
         data['form'] = AuthenticationFormEx()
         return 'competition_registration_login.html', data
 
-    team = data.get('team', None)
+    team = data['team']
     edit = team is not None
     team_form = None
 
@@ -109,11 +114,11 @@ def registration(request, competition, data):
                 member=request.user)
         team_member.invitation_status = TeamMember.INVITATION_ACCEPTED
         team_member.save()
-        TeamMember.objects.filter(member=request.user) \
+        TeamMember.objects \
+                .filter(team__competition=competition, member=request.user) \
                 .exclude(id=team_member.id).delete()
         data['team'] = team
         data['team_invitations'] = []
-
     elif request.method == 'POST' and 'name' in request.POST:
         team_form = TeamForm(request.POST, competition=competition,
                 max_team_size=competition.max_team_size, instance=team)
@@ -130,7 +135,9 @@ def registration(request, competition, data):
             _update_team_invitations(team, team_form)
 
             if not old_team:
-                TeamMember.objects.filter(member=request.user) \
+                TeamMember.objects \
+                        .filter(team__competition=competition,
+                                member=request.user) \
                         .exclude(team=team).delete()
                 data['team'] = team
                 return ('competition_registration_complete.html', data)

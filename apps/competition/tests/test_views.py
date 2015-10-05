@@ -2,6 +2,9 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.test.client import Client
 
+from permissions.constants import VIEW
+from permissions.models import ObjectPermission
+
 from competition.models import Competition, CompetitionTask, Chain, \
         Submission, Team, TeamMember
 from competition.tests.test_utils import create_ctask
@@ -27,6 +30,7 @@ class CompetitionViewsTestBase(TestCase):
         # TODO: make a base class for users
         self.admin = User.objects.get(id=1)
         self.alice = User.objects.get(id=2)
+        self.bob = User.objects.get(id=3)
         self.client = Client()
 
         now = datetime.datetime.now()
@@ -59,6 +63,148 @@ class CompetitionViewsTestBase(TestCase):
 
     def logout(self):
         self.client.logout()
+
+
+class RegistrationTest(CompetitionViewsTestBase):
+    def test_hidden_not_logged_in(self):
+        """If not logged in, it shouldn't work."""
+        response = self.client.get('/competition/5/registration/')
+        self.assertEqual(response.status_code, 403)
+
+    def test_hidden_logged_in_no_permission(self):
+        """If random user logged in, it shouldn't work."""
+        self.login(self.alice)
+        response = self.client.get('/competition/5/registration/')
+        self.assertEqual(response.status_code, 403)
+        self.logout()
+
+    def test_hidden_admin_logged_in_no_permission(self):
+        """If admin logged in, without a permission, it shouldn't work."""
+        self.login(self.admin)
+        response = self.client.get('/competition/5/registration/')
+        self.assertEqual(response.status_code, 403)
+        self.logout()
+
+    def test_hidden_with_permission(self):
+        """With explicit permission, it should work."""
+        competition = Competition.objects.get(id=5)
+        ObjectPermission.objects.create(content_object=competition,
+                permission_type=VIEW,
+                group=self.alice.get_profile().private_group)
+
+        # It doesn't have to work even for admin_group if no explicit
+        # permission is given. That's why we have permission system.
+
+    def test_registration_unopened_redirect(self):
+        """If registration unopened, redirect to competition homepage."""
+        response = self.client.get('/competition/1/registration/')
+        self.assertRedirects(response, '/competition/1/')
+
+    def test_registration_unopened_admin_accept(self):
+        """Even if registration unopened for public, it should be open for
+        admins."""
+        self.login(self.admin)
+        response = self.client.get('/competition/1/registration/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_registration_closed_redirect(self):
+        """If registration closed, registration requests should be ignored and
+        redirected to competition homepage."""
+        self.login(self.alice)
+        response = self.client.post('/competition/4/registration/',
+                {'name': "Team name"})
+        self.assertRedirects(response, '/competition/4/')
+        self.logout()
+
+    def test_registration_single_member(self):
+        """Test registration without any additional members."""
+        self.login(self.alice)
+        response = self.client.post('/competition/2/registration/',
+                {'name': "Team name"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'competition_registration_complete.html')
+        self.assertIsNotNone(response.context['team'])
+        self.assertEqual(response.context['team'].name, "Team name")
+        self.assertEqual(TeamMember.objects.all().count(), 1)
+        self.logout()
+
+    def test_registration_one_invite_and_accept(self):
+        """Test full registration with two members."""
+        self.login(self.alice)
+        response = self.client.post('/competition/2/registration/',
+                {'name': "Team name", "member2_user_id": self.admin.id})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'competition_registration_complete.html')
+        team = response.context['team']
+        self.assertIsNotNone(team)
+        self.assertEqual(team.name, "Team name")
+        self.assertEqual(TeamMember.objects.filter(
+            invitation_status=TeamMember.INVITATION_ACCEPTED).count(), 1)
+        self.assertEqual(TeamMember.objects.filter(
+            invitation_status=TeamMember.INVITATION_UNANSWERED).count(), 1)
+        self.logout()
+
+        self.login(self.admin)
+        response = self.client.post('/competition/2/registration/',
+                {'invitation-accept': team.id})
+        self.assertIsNotNone(response.context['team'])
+        self.assertEqual(TeamMember.objects.filter(
+            invitation_status=TeamMember.INVITATION_ACCEPTED).count(), 2)
+        self.assertEqual(TeamMember.objects.filter(
+            invitation_status=TeamMember.INVITATION_UNANSWERED).count(), 0)
+        self.logout()
+
+    def test_same_user_in_two_competitions(self):
+        """User should be able to join multiple competitions, also using the
+        same team name."""
+        self.login(self.alice)
+        self.client.post('/competition/2/registration/', {'name': "same-name"})
+        self.assertEqual(Team.objects.all().count(), 1)
+        self.assertEqual(TeamMember.objects.all().count(), 1)
+        response = self.client.post('/competition/3/registration/',
+                {'name': "same-name"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Team.objects.all().count(), 2)
+        self.assertEqual(TeamMember.objects.all().count(), 2)
+
+    def test_delete_invitations_after_creating_a_team(self):
+        self.login(self.alice)
+        self.client.post('/competition/2/registration/',
+                {'name': "Alice's team", "member2_user_id": self.bob.id})
+        self.assertEqual(TeamMember.objects \
+                .filter(team_id=1, member_id=self.bob.id).count(), 1)
+        self.logout()
+        self.login(self.bob)
+        self.client.post('/competition/2/registration/', {'name': "Bob's team"})
+        self.assertEqual(TeamMember.objects \
+                .filter(team_id=1, member_id=self.bob.id).count(), 0)
+
+    def test_delete_other_invitations_after_accepting_one(self):
+        """Other invitations in the same competition should be deleted after
+        selecting one. Invitations from other competition shouldn't be
+        affected."""
+        self.login(self.alice)
+        self.client.post('/competition/2/registration/',
+                {'name': "Alice 2", "member2_user_id": self.admin.id})
+        self.client.post('/competition/3/registration/',
+                {'name': "Alice 3", "member2_user_id": self.admin.id})
+        self.logout()
+        self.login(self.bob)
+        response = self.client.post('/competition/2/registration/',
+                {'name': "Bob 2", "member2_user_id": self.admin.id})
+        self.assertEqual(response.status_code, 200)
+        self.logout()
+        self.login(self.admin)
+        self.assertEqual(
+                TeamMember.objects.filter(team__competition_id=2).count(), 4)
+        self.assertEqual(
+                TeamMember.objects.filter(team__competition_id=3).count(), 2)
+        self.client.post('/competition/2/registration/',
+                {'invitation-accept': 1})
+        self.assertEqual(
+                TeamMember.objects.filter(team__competition_id=2).count(), 3)
+        self.assertEqual(
+                TeamMember.objects.filter(team__competition_id=3).count(), 2)
 
 
 class SubmissionTest(CompetitionViewsTestBase):

@@ -4,6 +4,8 @@
 
 {% block content %}
 
+{# This template not reachable for has_finished=True case. #}
+
 {% if competition.registration_open_date > current_time %}
   <h3 class="comp-header">Registracija</h3>
   <div class="alert">Registracije još nisu otvorene! </div>
@@ -11,13 +13,6 @@
   {% if is_admin %}
     <div class="alert">Trenutačno vidljivo samo administratorima! </div>
   {% endif %}
-{% endif %}
-
-{% if has_finished %}
-  <div class="alert">
-    Natjecanje je završilo!
-    {% if not team %}Registracije su zatvorene! {% endif %}
-  </div>
 {% endif %}
 
 {% if 'created' in request.GET %}
@@ -55,7 +50,7 @@
     </form>
   {% endif %}
 
-  {% if team_form and not has_finished %}
+  {% if team_form %}
     {% if team %}
       <h3 class="comp-header">Uređivanje tima</h3>
     {% else %}
