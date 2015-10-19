@@ -2,8 +2,8 @@
 
 # Run this from the skoljka's (repository) root folder!
 
-# subversion (svn): used to instal jquery-star-rating-plugin
-sudo apt-get install python2.7 python-setuptools python-pip mysql-client-core-5.5 mysql-server-5.5 texlive-full memcached subversion libmysqlclient-dev npm nodejs-legacy
+# subversion (svn): used to install jquery-star-rating-plugin
+sudo apt-get install python-setuptools python-pip mysql-client-core-5.5 mysql-server-5.5 texlive-full memcached subversion libmysqlclient-dev npm nodejs-legacy
 pip install -r requirements.txt
 
 # TODO: How to properly add this to requirements.txt?

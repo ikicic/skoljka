@@ -5,12 +5,12 @@ http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supe
 
 1. Go to your projects folder (e.g. `~/projects`). Run:
   ```sh
-  sudo apt-get install python-virtualenv
-  virtualenv skoljka
+  sudo apt-get install python2.7 python-virtualenv
+  virtualenv -p /usr/bin/python2.7 skoljka
   cd skoljka
   ```
 
-2. In current folder, create file `profile` containing:
+2. In the current folder, create a file `profile` containing:
   ```sh
   export PYTHONPATH=$PWD:$PWD/skoljka:$PYTHONPATH
   export PROD=true
@@ -18,7 +18,7 @@ http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supe
   source bin/activate
   ```
 
-3. Go to virtual env, clone skoljka and run installation script:
+3. Go to the virtual env, clone skoljka and run the installation script:
   ```sh
   chmod +x profile
   source profile
@@ -33,7 +33,7 @@ http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supe
   mysql -e "CREATE DATABASE skoljka CHARACTER SET utf8 COLLATE utf8_general_ci;" -u username -p
   ```
 
-5. Fill out `settings/local.py`.
+5. Fill out `settings/local.py`, at least the fields marked as `REQUIRED`.
 
 6. Initialize database and build:
   ```sh
@@ -44,6 +44,8 @@ http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supe
   You can now use Django test server by running `python manage.py runserver`. The database is pre-filled with superuser `arhiva` whose password is `a`. Note that by default, `DEBUG` is `False`, so static files won't be loaded correctly.
 
 # Configuring gunicorn
+
+The following three sections are used only for running in the release mode.
 
 You should now be in `~/projects/skoljka/skoljka/`.
 
@@ -78,7 +80,7 @@ You should now be in `~/projects/skoljka/skoljka/`.
 
 # Configuring supervisor
 
-1. Run following commands:
+1. Run the following commands:
   ```sh
   sudo apt-get install supervisor
   mkdir -p logs
