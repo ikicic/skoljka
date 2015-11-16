@@ -37,6 +37,7 @@ from task.utils import check_prerequisites_for_task, \
         get_task_folder_data
 
 import codecs, datetime, hashlib, json, os, sys, traceback, zipfile
+import django_sorting
 
 # TODO: promijeniti nacin na koji se Task i MathContent generiraju.
 # vrijednosti koje ne ovise o samom formatu se direktno trebaju
@@ -312,38 +313,41 @@ def detail(request, id):
     return data
 
 @response('task_similar.html')
-def similar(request, id):
-    task = get_object_or_404(Task, pk=id)
-
+def similar(request, task_id):
     # SPEED: read main task together with the rest
-    # no need to sort here
-    similar = list(SimilarTask.objects.filter(task=task)[:50].values_list('similar_id', 'score'))
+    task = get_object_or_404(Task, pk=task_id)
+
+    sorted_tasks = dict(SimilarTask.objects \
+            .filter(task_id=task_id)[:50].values_list('similar_id', 'score'))
+
     if request.user.is_authenticated():
-        solutions = Solution.objects.filter(task__similar_backward=task,
-                author=request.user).exclude(status=SolutionStatus.BLANK)
-        solutions = solutions.only('status', 'correctness_avg', 'task')
-    else:
-        solutions = []
+        solutions = Solution.objects \
+                .filter(task__similar_backward=task, author=request.user) \
+                .exclude(status=SolutionStatus.BLANK) \
+                .only('status', 'correctness_avg', 'task')
+        for s in solutions:
+            p = 1.0
+            if s.is_todo(): p = 0.5
+            elif s.is_as_solved(): p = 0.3
+            elif s.is_submitted() and s.is_correct(): p = 0.2
 
-    sorted_tasks = dict(similar)
-    for s in solutions:
-        p = 1.0
-        if s.is_todo(): p = 0.5
-        elif s.is_as_solved(): p = 0.3
-        elif s.is_submitted():
-            if s.is_correct(): p = 0.2
+            sorted_tasks[s.task_id] *= p
 
-        sorted_tasks[s.task_id] *= p
-
-    # sort here
-    sorted_tasks = sorted([(p, id) for id, p in sorted_tasks.iteritems()], reverse=True)
+    sorted_tasks = sorted(
+            [(p, id) for id, p in sorted_tasks.iteritems()], reverse=True)
     similar_ids = [id for p, id in sorted_tasks[:6]]
+    similar = Task.objects.for_user(request.user, VIEW) \
+            .filter(id__in=similar_ids).select_related('content')
 
-    similar = list(Task.objects.for_user(request.user, VIEW) \
-            .filter(id__in=similar_ids).select_related('content'))
+    order_by_field = django_sorting.middleware.get_field(request)
+    if len(order_by_field) > 1:
+        similar = similar.order_by(order_by_field)
+
+    similar = list(similar)
 
     return {
         'all_tasks': [task] + similar,
+        'no_autosort': True,
         'task': task,
         'similar': similar,
         'view_type': 'similar_task_view_type',

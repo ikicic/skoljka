@@ -10,7 +10,9 @@
 {% task_options_mode_check %}
 {% temporary_get_key 'options' 'task_view_type' %}
 
-{% autosort tasks %}
+{% if not no_autosort %}
+  {% autosort tasks %}
+{% endif %}
 
 {% if options_mode %}
   {% cache_task_info_lite tasks %}
