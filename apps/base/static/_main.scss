@@ -12,9 +12,14 @@ $screen-xs-max:   $screen-sm-min - 1px;
 $screen-sm-max:   $screen-md-min - 1px;
 $screen-md-max:   $screen-lg-min - 1px;
 
+$body-bg-color: #feffff;
+$body-box-shadow-color: #666;
 $page-content-bg-color: #f0f5f4;
 $table-bg: #f0f5f4;
 $table-bg-odd: #f4f7f6;
+
+$header-color1: mix(darken($page-content-bg-color, 4%), blue, 98%);
+$header-color2: mix(darken($page-content-bg-color, 7%), blue, 98%);
 
 $outset-bg-color: #fafcfc;
 $outset-box-shadow-color: rgba(128, 128, 128, 0.55);

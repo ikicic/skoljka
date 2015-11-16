@@ -8,17 +8,16 @@
 
 /* General */
 body {
-  background-image: url('images/bg_pattern.png');
+  background-color: $body-bg-color;
   padding: 0px; /* change to bootstrap */
 }
 
 #header {
   background-color: rgb(206, 216, 214);
-  /* background: -webkit-gradient(linear, left top, left bottom, from(rgb(216, 213, 206)), to(rgb(231, 227, 219))); */
   background: -webkit-gradient(
     linear, left top, left bottom,
-    from(rgb(206, 216, 214)), to(rgb(219, 229, 231)));
-  box-shadow: 0 1px 4px #333;
+    from($header-color1), to($header-color2));
+  box-shadow: 0 1px 4px $body-box-shadow-color;
   margin-bottom: 3px;
   padding: 5px!important;
 
@@ -34,7 +33,7 @@ body {
 
 #content, #sidebar {
   border-radius: 5px;
-  box-shadow: 0 1px 4px #333;
+  box-shadow: 0 1px 4px $body-box-shadow-color;
 }
 
 #content {
