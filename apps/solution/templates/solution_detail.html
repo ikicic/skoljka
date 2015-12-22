@@ -16,7 +16,7 @@
     <form action="/solution/{{ solution.pk }}/edit/mark/" method="post">
       {% csrf_token %}
       <div class="btn-group">
-        {% if user.is_staff or solution.task.author == user %}
+        {% if can_mark_as_official %}
           {% if solution.is_official %}
             <button class="btn btn-mini" name="action" value="official0">Makni oznaku službenog</button>
           {% else %}

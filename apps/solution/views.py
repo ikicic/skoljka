@@ -13,6 +13,7 @@ from skoljka.libs.decorators import ajax, response, require
 
 from solution.models import HTML_INFO, Solution, SolutionStatus, \
         SOLUTION_STATUS_BY_NAME, _update_solved_count
+from solution.utils import can_mark_as_official
 
 from datetime import datetime
 import json
@@ -56,6 +57,8 @@ def detail(request, solution_id):
 
     return {
         'can_edit': solution.can_edit(request.user),
+        'can_mark_as_official': \
+                can_mark_as_official(request.user, solution.task),
         'can_view': can_view,
         'obfuscate': obfuscate,
         'ratings': ratings,
@@ -83,8 +86,8 @@ def _do_mark(request, solution, task):
     if action not in ['official0', 'official1', 'blank', 'as_solved', 'todo']:
         return (403, u'Action "%s" not valid.' % action)
 
-    if action in ['official0', 'official1'] and task.author != request.user \
-            and not request.user.has_perm('solution.mark_as_official_solution'):
+    if action in ['official0', 'official1'] and \
+            not can_mark_as_official(request.user, task):
         return (403, u'No permission to mark as official solution.')
 
     if not task.solvable:
