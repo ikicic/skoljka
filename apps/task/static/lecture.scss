@@ -1,0 +1,59 @@
+@import "main";
+
+$width: 200px;
+$height: 150px;
+
+.homepage-files-container {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.lecture-small-box {
+  width: $width;
+  margin: 8px;
+  display: inline-block;
+}
+
+img.lecture {
+  width: $width;
+  height: $height;
+  border: 1px solid #EEE;
+  box-shadow: 0 1px 2px rgba(192, 192, 192, 0.35);
+  background-color: white;
+}
+
+$small-width: 150px;
+@media (max-width: $screen-sm-max) {
+  .lecture-small-box {
+    width: $small-width;
+  }
+
+  img.lecture {
+    width: $small-width;
+    height: $small-width * $height / $width;
+  }
+}
+
+.lecture-description {
+  margin: .4em 0 0 0;
+  > h4 {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-bottom: .3em;
+
+    > a {
+      color: #333;
+    }
+  }
+}
+
+.lecture-date-created {
+  color: #999;
+  text-align: right;
+  float: right;
+}
+
+.lecture-link {
+  display: block;
+}

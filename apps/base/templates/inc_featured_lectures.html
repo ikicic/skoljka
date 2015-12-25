@@ -1,0 +1,14 @@
+{% load i18n %}
+{% load task_tags %}
+
+{% if featured_lectures %}
+  <div class="outdiv">
+    <h3>{% trans "Featured lectures" %}</h3>
+    <div class="featured-lectures-container">
+      {% for lecture in featured_lectures %}
+        {% lecture_small_box lecture %}
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+

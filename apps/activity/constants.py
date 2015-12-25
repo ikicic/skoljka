@@ -2,6 +2,7 @@
 
 TASK_ADD = (100, 1)
 FILE_ADD = (100, 2)
+LECTURE_ADD = (100, 3)
 
 SOLUTION_SEND = 200
 SOLUTION_SUBMIT = (SOLUTION_SEND, 1)
@@ -23,6 +24,7 @@ GROUP_LEAVE = (GROUP_CHANGE, 2)     # group
 action_label = {
     TASK_ADD: ('label-success', 'Novi zadatak'),
     FILE_ADD: ('label-success', 'Nova datoteka'),
+    LECTURE_ADD: ('label-success', 'Novo predavanje'),
     SOLUTION_SUBMIT: ('label-info', 'Rješenje'),
     SOLUTION_AS_OFFICIAL: ('label-info', u'Službeno rješenje'),
 }

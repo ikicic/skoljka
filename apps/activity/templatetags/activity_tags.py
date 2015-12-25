@@ -24,6 +24,8 @@ def prepare_action_data(context, A):
         S = u'je doda%s novi zadatak' % G1
     elif ttype == FILE_ADD:
         S = u'je doda%s novu datoteku' % G1
+    elif ttype == LECTURE_ADD:
+        S = u'je doda%s novo predavanje' % G1
     elif ttype == SOLUTION_SUBMIT:
         link = u'rješenje' if getattr(A, '_hide_solution_link', False) \
             else A.A('solution', u'rješenje')

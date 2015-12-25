@@ -1,9 +1,9 @@
-﻿"""
-    Useful string operations
-"""
+﻿"""Useful string operations"""
 
+from django.conf import settings
 from django.template.defaultfilters import slugify as _slugify
 
+import os
 import re
 
 # some other name?
@@ -28,6 +28,10 @@ def join_urls(a, b):
     if a[-1] == '/': a = a[:-1]
     if b[0] == '/': b = b[1:]
     return a + '/' + b
+
+def media_path_to_url(path):
+    """Get the URL for the given media file."""
+    return settings.MEDIA_URL + path[len(settings.MEDIA_ROOT) + 1:]
 
 def obfuscate_text(text):
     return re.sub('\\S', '?', text)

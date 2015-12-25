@@ -1,8 +1,11 @@
 ﻿from django import forms
+from django.utils.translation import ugettext_lazy as _
+
 from task.models import Task
 
 from permissions.constants import VIEW
 from permissions.utils import filter_objects_with_permission
+from skoljka.libs.models import icon_help_text
 
 EXPORT_FORMAT_CHOICES = (('latex', 'LaTeX'), ('pdf', 'PDF'))
 
@@ -120,8 +123,40 @@ class TaskForm(forms.ModelForm):
         fields = ['name', 'tags', 'source', 'hidden', 'solvable',
             'solution_settings', 'prerequisites']
 
+
+
 class TaskFileForm(TaskForm):
     def __init__(self, *args, **kwargs):
         super(TaskFileForm, self).__init__(*args, **kwargs)
 
         self.fields['solvable'].initial = False
+
+
+
+class TaskLectureForm(TaskFileForm):
+    folder_id = forms.IntegerField(required=False, help_text=icon_help_text(_(
+            u"ID of the folder containing the problems and files related to "
+            u"this lecture.")))
+
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.get('instance', None)
+        super(TaskFileForm, self).__init__(*args, **kwargs)
+
+        self.fields['folder_id'].initial = \
+                instance.lecture_folder_id or '' if instance else ''
+
+    def save(self, commit=True, *args, **kwargs):
+        task = super(TaskLectureForm, self).save(commit=False, *args, **kwargs)
+        task.is_lecture = True
+        try:
+            task.lecture_folder_id = int(self.cleaned_data['folder_id'])
+        except TypeError, ValueError:
+            task.lecture_folder_id = None
+        if commit:
+            task.save()
+            task.save_m2m()  # If someone later adds a many-to-many relation.
+        return task
+
+    class Meta(TaskFileForm.Meta):
+        model = Task
+        fields = TaskFileForm.Meta.fields + ['lecture_video_url']

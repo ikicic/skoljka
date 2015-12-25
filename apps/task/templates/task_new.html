@@ -1,7 +1,14 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-  {% if is_file %}
+  {% if is_lecture %}
+    {% if edit %}
+      {% blocktrans %}Editing lecture {{ task_name }}{% endblocktrans %}
+    {% else %}
+      {% trans "New lecture" %}
+    {% endif %}
+  {% elif is_file %}
     {% if edit %}
       Uređivanje datoteke {{ task.name }}
     {% else %}
@@ -77,6 +84,7 @@
     {% get_fieldset name,tags,source as first_part from forms.0 %}
     {{ first_part.as_table }}
     <tr class="split-form-row"><th colspan="2">Sadržaj</th></tr>
+    {{ forms.2.as_table }}  {# if taskfile #}
     {{ forms.1.as_table }}
     <tr>
       <th>
@@ -91,11 +99,20 @@
           {% if task.pk %}
             {{ task.content.render }}
           {% endif %}
+          {% if not task.pk or not task.content.render %}
+            <span class="mc-preview-empty-message">
+              {% trans "Press Ctrl+M to get the preview of the text." %}
+            </span>
+          {% endif %}
         </div>
       </td>
     </tr>
 
-    {{ forms.2.as_table }} {# if taskfile #}
+    {% if is_lecture %}
+      {% get_fieldset lecture_video_url,folder_id as lecture_part from forms.0 %}
+      {{ lecture_part.as_table }}
+    {% endif %}
+
 
     <tr class="split-form-row"><th colspan="2">Napredno</th></tr>
     {% get_fieldset hidden,solvable,solution_settings,prerequisites as second_part from forms.0 %}

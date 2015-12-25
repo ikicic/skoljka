@@ -10,9 +10,11 @@
 {% show_news 'outdiv' 'Novosti' %}
 
 <div class="outdiv">
-  <h3>Odabrani zadaci</h3>
+  <h3>Odabrana natjecanja</h3>
   {% folder_inline_year_shortcuts folder_shortcut_desc split=3 %}
 </div>
+
+{% show_featured_lectures %}
 
 {# TODO: DRY, napraviti tag ili nesto, ovo se ponavlja #}
 

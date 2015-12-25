@@ -19,7 +19,8 @@ from folder.utils import invalidate_cache_for_folders, \
 from mathcontent import latex
 from mathcontent.forms import AttachmentForm, MathContentForm
 from mathcontent.models import MathContent, Attachment
-from mathcontent.utils import check_and_save_attachment
+from mathcontent.utils import check_and_save_attachment, \
+        create_file_thumbnail, ThumbnailRenderingException
 from permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS, VIEW_SOLUTIONS
 from permissions.models import ObjectPermission
 from solution.models import Solution, SolutionStatus
@@ -31,7 +32,7 @@ from skoljka.libs.timeout import run_command
 
 from task.models import Task, SimilarTask
 from task.forms import TaskForm, TaskFileForm, TaskAdvancedForm, \
-        TaskExportForm, EXPORT_FORMAT_CHOICES, TaskJSONForm
+        TaskExportForm, EXPORT_FORMAT_CHOICES, TaskJSONForm, TaskLectureForm
 from task.utils import check_prerequisites_for_task, \
         check_prerequisites_for_tasks, create_tasks_from_json, \
         get_task_folder_data
@@ -163,9 +164,13 @@ def new_file(request):
     return new(request, is_file=True)
 
 
+def new_lecture(request):
+    return new(request, is_file=True, is_lecture=True)
+
+
 @login_required
 @response('task_new.html')
-def new(request, task_id=None, is_file=None):
+def new(request, task_id=None, is_file=None, is_lecture=None):
     """
         New Task and Edit Task
         + New TaskFile and Edit TaskFile
@@ -180,12 +185,17 @@ def new(request, task_id=None, is_file=None):
         math_content = task.content
         edit = True
         is_file = task.is_file()
+        is_lecture = task.is_lecture
     else:
         perm = []
         task = math_content = None
         edit = False
 
-    form_class = TaskFileForm if is_file else TaskForm
+    # Make sure each lecture is a file.
+    assert is_lecture and is_file or not is_lecture
+
+    form_class = TaskLectureForm if is_lecture \
+            else (TaskFileForm if is_file else TaskForm)
     math_content_label = 'Opis' if is_file else None    # else default
 
     if request.method == 'POST':
@@ -210,6 +220,12 @@ def new(request, task_id=None, is_file=None):
                     attachment, attachment_form = check_and_save_attachment(
                         request, math_content)
                     task.file_attachment = attachment   # This is a file.
+                    path = attachment.get_full_path_and_filename()
+                    try:
+                        task.cache_file_attachment_thumbnail_url = \
+                                create_file_thumbnail(path)
+                    except ThumbnailRenderingException:
+                        pass
 
                     # Immediately remember file url, so that we don't have to
                     # access Attachment table to show the link.
@@ -235,7 +251,9 @@ def new(request, task_id=None, is_file=None):
             # send action if creating a new nonhidden task
             if not edit:
                 # TODO: signals!
-                type = _action.FILE_ADD if is_file else _action.TASK_ADD
+                type = _action.LECTURE_ADD if is_lecture \
+                        else (_action.FILE_ADD if is_file else _action.TASK_ADD)
+
                 _action.add(request.user, type,
                     action_object=task, target=task)
 
@@ -261,6 +279,8 @@ def new(request, task_id=None, is_file=None):
         'edit': edit,
         'forms': forms,
         'is_file': is_file,
+        'is_lecture': is_lecture,
+        'task_name': task.name if task else None,  # Convenience.
         'task': task,
     })
 

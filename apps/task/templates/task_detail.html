@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% load mathcontent_tags %}
 {% load post_tags %}
@@ -44,12 +45,19 @@
 </div>
 
 {% if task.is_file %}
-  <a href="{{ task.cache_file_attachment_url }}">
+  <a href="{{ task.cache_file_attachment_url }}" class="task-file">
     <div id="task-file" class="outset center-vertically">
       <div>
         <div>
-            {{ task.file_attachment.get_filename }}<br>
-            <span id="task-file-info">Kliknite ovdje kako biste otvorili datoteku.</span>
+          {% if task.cache_file_attachment_thumbnail_url %}
+            <img src="{{ task.cache_file_attachment_thumbnail_url }}"
+                 alt="{{ task.file_attachment_get_filename }}"
+                 class="lecture"><br>  {# No space here! #}
+          {% endif %}
+          {{ task.file_attachment.get_filename }}<br>
+          <span id="task-file-info">
+            {% trans "Click here to open the file." %}
+          </span>
         </div>
       </div>
     </div>

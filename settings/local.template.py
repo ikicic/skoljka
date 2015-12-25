@@ -100,15 +100,16 @@ FOLDER_INLINE_YEAR_COUNT = 10
 # Other
 ######################################
 
-# Old path -> new path
-FOLDER_PATH_MIGRATIONS = [
-    # ('oldpath', 'newpath'),
-]
-
-DISABLE_PREF_COOKIES = True
-
-COMPETITION_URLS = { # no leading slashes!
+COMPETITION_URLS = {  # no leading slashes!
     # 1: 'marinada/',
 }
 
+DISABLE_PREF_COOKIES = True
+
 EXTRA_HEADER_TOP = ""
+
+FEATURED_LECTURES_FOLDER_ID = None
+
+FOLDER_PATH_MIGRATIONS = [
+    # ('oldpath', 'newpath'),
+]

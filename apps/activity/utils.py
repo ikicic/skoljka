@@ -58,8 +58,8 @@ def get_recent_activities(user, max_count, exclude_user=None, target=None,
             kill.add(x.id)
             continue
 
-        if ttype in [TASK_ADD, FILE_ADD, SOLUTION_SUBMIT, SOLUTION_AS_SOLVED,
-                SOLUTION_TODO, SOLUTION_AS_OFFICIAL]:
+        if ttype in [TASK_ADD, FILE_ADD, LECTURE_ADD, SOLUTION_SUBMIT,
+                SOLUTION_AS_SOLVED, SOLUTION_TODO, SOLUTION_AS_OFFICIAL]:
             # check task permissions...
             to_check.append((x.target_content_type_id, x.target_id, x.id))
             if ttype == SOLUTION_SUBMIT:

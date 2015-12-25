@@ -5,6 +5,7 @@ from django.template.loader import render_to_string
 
 from skoljka.libs.decorators import autoconnect
 from skoljka.libs.generators import LowerNumKeyGen
+from skoljka.libs.string_operations import media_path_to_url
 
 import os
 import re
@@ -93,9 +94,7 @@ class Attachment(models.Model):
             return 'Attachment #{} <MISSING>'.format(self.id)
 
     def get_url(self):
-        # FIXME: this is risky...
-        # file.name includes path
-        return settings.MEDIA_URL + self.file.name[len(settings.MEDIA_ROOT)+1:]
+        return media_path_to_url(self.file.name)
 
     def get_filename(self):
         return os.path.basename(self.file.name)

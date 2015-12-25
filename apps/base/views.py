@@ -10,10 +10,10 @@ from solution.models import Solution, SolutionStatus
 from task.models import Task
 from task.templatetags.task_tags import cache_task_info
 from task.utils import check_prerequisites_for_tasks
-
 from skoljka.libs.decorators import response
 
 import random
+
 
 def homepage_offline(request, recent_tasks):
     folder_shortcuts = settings.FOLDER_HOMEPAGE_SHORTCUTS_OFFLINE
@@ -23,6 +23,7 @@ def homepage_offline(request, recent_tasks):
         'folder_shortcut_desc': settings.FOLDER_HOMEPAGE_SHORTCUTS_OFFLINE,
         'recent_tasks': recent_tasks,
         })
+
 
 def homepage_online(request, recent_tasks):
     recommend = UserRecommendation.objects.raw(

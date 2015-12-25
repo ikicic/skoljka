@@ -1,8 +1,13 @@
 .mc-preview {
-  margin-top: 10px;
+  margin: 10px 0px;
   br { /* Cancels the effect of kill-br. */
     display: block;
   }
+}
+
+.mc-preview-empty-message {
+  color: #999;
+  font-style: italic;
 }
 
 /* Fixing min height in the case of Bootstrap forms. */
@@ -12,6 +17,7 @@
 
 .mc-text {
   box-sizing: border-box;
+  margin-bottom: 0px;
   width: 100%;
 }
 

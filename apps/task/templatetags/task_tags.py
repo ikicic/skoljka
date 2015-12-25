@@ -109,3 +109,8 @@ def cache_task_info(context, tasks):
     # ------ context variables --------
     context['task_ids'] = ids
     return ''
+
+
+@register.inclusion_tag('inc_task_lecture_small_box.html', takes_context=True)
+def lecture_small_box(context, task):
+    return {'task': task}

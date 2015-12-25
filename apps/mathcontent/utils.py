@@ -1,9 +1,12 @@
 ﻿from skoljka.libs import xss
+from skoljka.libs.timeout import run_command
 
 from mathcontent import ERROR_DEPTH_VALUE
 from mathcontent.forms import AttachmentForm
 from mathcontent.latex import generate_png, generate_svg
 from mathcontent.models import Attachment
+
+import os
 
 # used for tag_open[tag][type]
 TYPE_HTML = 0
@@ -373,3 +376,24 @@ def check_and_save_attachment(request, content):
         attachment = None
 
     return attachment, form
+
+
+class ThumbnailRenderingException(Exception):
+    pass
+
+def create_file_thumbnail(filename):
+    filename_no_ext, ext = os.path.splitext(filename)
+    if not ext or ext[0] != '.':
+        return
+    ext = ext[1:]
+    if ext not in ['pdf', 'ps', 'jpg', 'jpeg', 'bmp', 'png', 'svg']:
+        return
+    thumbnail_name = filename_no_ext + '-thumb200x150.png'
+    cmd = "convert -thumbnail '200x150^' -crop 200x150+0+0 +repage {}[0] {}"
+    cmd = cmd.format(filename, thumbnail_name)
+
+    error = run_command(cmd, timeout=5)
+    if error:
+        raise ThumbnailRenderingException(error)
+
+    return thumbnail_name

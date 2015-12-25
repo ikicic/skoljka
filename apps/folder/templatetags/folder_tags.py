@@ -24,6 +24,10 @@ def _descriptors_to_folders(descriptors):
     descriptor_position = {key: value for value, key in enumerate(descriptors)}
     return sorted(folders, key=lambda x: descriptor_position[x.cache_tags])
 
+@register.simple_tag
+def folder_url_by_id(folder_id):
+    return '/folder/{}/'.format(folder_id)
+
 @register.inclusion_tag('inc_folder_year_shortcuts.html', takes_context=True)
 def folder_inline_year_shortcuts(context, folder_descriptors, split=1000):
     """

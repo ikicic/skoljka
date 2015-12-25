@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.generic import GenericRelation
 from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext_lazy as _
 
 from mathcontent.models import MathContent, Attachment
 from permissions.constants import EDIT, VIEW, VIEW_SOLUTIONS
@@ -68,11 +69,6 @@ class Task(BasePermissionsModel):
 
     solved_count = models.IntegerField(default=0, db_index=True)
 
-    # If nonempty, this Task is a file actually.
-    file_attachment = models.ForeignKey(Attachment, blank=True, null=True)
-    cache_file_attachment_url = models.CharField(max_length=150, blank=True,
-        default='')
-
     solvable = models.BooleanField(default=True, verbose_name=u'Zadatak',
         help_text=icon_help_text(
             u'Rješivo ili ne, to jest mogu li se slati rješenja?'))
@@ -103,6 +99,23 @@ class Task(BasePermissionsModel):
             u'Popis ID-eva zadataka, odvojenih zarezom, '
             u'koji su preduvjet ovom zadatku. Korisnik će moći pristupiti '
             u'zadatku samo uz poslana i točna rješenja navedenih zadataka.'))
+
+    ###############################
+    # Derived classes
+    ###############################
+    # If nonempty, this Task represents actually a file.
+    file_attachment = models.ForeignKey(Attachment, blank=True, null=True)
+    cache_file_attachment_url = models.CharField(max_length=150, blank=True,
+            default='')
+    cache_file_attachment_thumbnail_url = models.CharField(max_length=150,
+            blank=True, default='')
+
+    # For lectures
+    is_lecture = models.BooleanField(default=False)
+    lecture_folder = models.ForeignKey('folder.Folder', blank=True, null=True)
+    lecture_video_url = models.URLField(blank=True, max_length=200,
+            verbose_name=_("Lecture video URL"))
+
 
     def __unicode__(self):
         return '#%d %s' % (self.id, self.name)
@@ -158,9 +171,10 @@ class Task(BasePermissionsModel):
 
         if self.file_attachment_id:
             url = self.cache_file_attachment_url
+            icon = 'icon-book' if self.is_lecture else 'icon-file'
             file = u'<a href="{}" title="{}">'      \
-                    u'<i class="icon-file"></i>'    \
-                    u'</a> '.format(url, url[url.rfind('/') + 1:])
+                    u'<i class="{}"></i>'    \
+                    u'</a> '.format(url, url[url.rfind('/') + 1:], icon)
         else:
             file = u''
 

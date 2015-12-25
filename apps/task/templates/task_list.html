@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}Lista zadataka{% endblock %}
 
@@ -15,6 +16,9 @@
     </a>
     <a href="/task/new/file/" class="btn">
       <i class="icon-file"></i> Dodaj datoteku
+    </a>
+    <a href="/task/new/lecture/" class="btn">
+      <i class="icon-book"></i> {% trans "New lecture" %}
     </a>
   </div>
   <br><br>
