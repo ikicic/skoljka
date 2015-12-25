@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Max, Count
 from django.db.models.signals import pre_save, post_save, pre_delete
 from django.dispatch import receiver
 
@@ -20,6 +21,32 @@ from folder.models import Folder, FolderTask, FOLDER_NAMESPACE_FORMAT,  \
     FOLDER_NAMESPACE_FORMAT_ID
 
 from collections import Counter, defaultdict
+
+def add_or_remove_folder_task(folder_id, task_id, add):
+    """Add or remove given task from the given folder."""
+    try:
+        foldertask = FolderTask.objects.get(
+                folder_id=folder_id, task_id=task_id)
+    except:
+        foldertask = None
+
+    if foldertask and not add:
+        foldertask.delete()
+        changed = True
+    elif not foldertask and add:
+        info = FolderTask.objects.filter(folder_id=folder_id) \
+                .aggregate(Max('position'), Count('id'))
+        position = max(info['position__max'], info['id__count']) + 1
+        FolderTask.objects.create(
+                folder_id=folder_id, task_id=task_id, position=position)
+        changed = True
+    else:
+        changed = False
+
+    if changed:
+        ncache.invalidate_namespace(
+                FOLDER_NAMESPACE_FORMAT_ID.format(folder_id))
+
 
 def get_folder_descendant_ids(folder_id):
     """

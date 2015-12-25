@@ -12,6 +12,11 @@ FEATURED_FOLDER_ID = getattr(settings, 'FEATURED_LECTURES_FOLDER_ID', None)
 FEATURED_LECTURES_FOLDER_NAMESPACE = \
         FOLDER_NAMESPACE_FORMAT_ID.format(FEATURED_FOLDER_ID)
 
+def can_edit_featured_lectures(user):
+    """Check if the given user can edit featured lectures."""
+    return user.is_staff
+
+
 @cache_function(namespace=FEATURED_LECTURES_FOLDER_NAMESPACE)
 def _get_featured_lectures_cached():
     try:
@@ -31,7 +36,7 @@ def _get_featured_lectures_cached():
 
 
 def get_featured_lectures():
-    """Returns the list of all featured lectures (Task objects).
+    """Return the list of all featured lectures (Task objects).
 
     Lecture is featured if it is contained in the folder with ID equal to
     settings.FEATURED_LECTURES_FOLDER_ID. All hidden tasks are automatically

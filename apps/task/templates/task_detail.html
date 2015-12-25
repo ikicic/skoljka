@@ -10,9 +10,29 @@
 
 {% block content %}
 
-{% if can_edit %}
-  <div id="task-detail-top-action">
-    <a href="/task/{{ task.pk }}/edit/" class="btn">Uredi</a>
+{% if can_edit or can_select_as_featured %}
+  <div id="task-detail-top-action" class="btn-group">
+    {% if can_edit %}
+      <a href="/task/{{ task.pk }}/edit/" class="btn">Uredi</a>
+    {% endif %}
+    {% if can_select_as_featured %}
+      <form action="/featured_lecture/" method="POST" style="display: inline;">
+        <input type="hidden" name="task_id" value="{{ task.id }}">
+        <button class="btn" type="submit" name="featured"
+            {% if not is_featured and task.hidden %}
+              disabled="disabled"
+              title="{% trans "Only public lectures can be put on the homepage." %}"
+            {% endif %}
+            value="{{ is_featured|yesno:"no,yes" }}">
+          {% if not is_featured %}
+            <i class="icon-check"></i> {% trans "Put on homepage" %}
+          {% else %}
+            <i class="icon-check"></i> {% trans "Remove from homepage" %}
+          {% endif %}
+        </button>
+        {% csrf_token %}
+      </form>
+    {% endif %}
   </div>
 {% endif %}
 

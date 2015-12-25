@@ -1,18 +1,45 @@
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 from activity.models import Action
+from base.utils import can_edit_featured_lectures
+from folder.utils import add_or_remove_folder_task
 from permissions.constants import VIEW
 from recommend.models import UserRecommendation
 from solution.models import Solution, SolutionStatus
 from task.models import Task
 from task.templatetags.task_tags import cache_task_info
 from task.utils import check_prerequisites_for_tasks
-from skoljka.libs.decorators import response
+from skoljka.libs.decorators import require, response
 
 import random
+
+
+@require(post=['task_id', 'featured'])
+@login_required
+@response()
+def featured_lecture(request):
+    if not can_edit_featured_lectures(request.user):
+        return (403, "Not allowed to modify featured lectures.")
+
+    folder_id = getattr(settings, 'FEATURED_LECTURES_FOLDER_ID', None)
+    if not folder_id:
+        return (400, "Featured lectures not enabled.")
+
+    featured = request.POST['featured']
+    if featured not in ['yes', 'no']:
+        return (400, "Argument `featured` should be 'yes' or 'no'.")
+
+    task = get_object_or_404(Task, id=request.POST['task_id'])
+    if featured == 'yes' and (task.hidden or not task.is_lecture):
+        return (403, "Task hidden or not a lecture.")  # Allow to remove.
+
+    add = True if featured == 'yes' else False
+    add_or_remove_folder_task(folder_id, task.id, add)
+    return (task.get_absolute_url(), )
 
 
 def homepage_offline(request, recent_tasks):

@@ -2,8 +2,9 @@
 from django.contrib.admin.models import LogEntry, CHANGE
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Max, Count
-from django.http import Http404, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseRedirect, HttpResponsePermanentRedirect
+from django.http import Http404, HttpResponse, HttpResponseForbidden, \
+        HttpResponseBadRequest, HttpResponseRedirect, \
+        HttpResponsePermanentRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.template.defaultfilters import slugify
@@ -16,11 +17,11 @@ from skoljka.libs import get_referrer_path, ncache
 from skoljka.libs.decorators import response
 
 from folder.decorators import folder_view
-from folder.models import Folder, FolderTask, FOLDER_TASKS_DB_TABLE,        \
-    FOLDER_NAMESPACE_FORMAT
+from folder.models import Folder, FolderTask, FOLDER_TASKS_DB_TABLE, \
+        FOLDER_NAMESPACE_FORMAT
 from folder.forms import FolderForm, FolderAdvancedCreateForm
-from folder.utils import get_folder_descendant_ids, get_visible_folder_tree,  \
-    prepare_folder_menu, refresh_path_cache
+from folder.utils import add_or_remove_folder_task, get_folder_descendant_ids, \
+        get_visible_folder_tree, prepare_folder_menu, refresh_path_cache
 
 import re
 
@@ -111,35 +112,17 @@ def select_task(request, task_id):
     folder = request.user.profile.selected_folder
     if not request.is_ajax() or folder is None:
         return HttpResponseBadRequest()
-    if not folder.editable or not folder.user_has_perm(request.user, EDIT):
-        return HttpResponseForbidden('Not allowed to edit this folder.')
+    if not folder.editable or not folder.user_has_perm(user, EDIT):
+        return "Not allowed to edit this folder."
 
     task = get_object_or_404(Task, id=task_id)
-    if not task.user_has_perm(request.user, VIEW):
-        return HttpResponseForbidden('Not allowed to view this task.')
+    if not task.user_has_perm(user, VIEW):
+        return "Not allowed to view this task."
 
-    is_checked = request.POST['checked'] == 'true'
-
-    try:
-        foldertask = FolderTask.objects.get(folder=folder, task=task)
-        exists = True
-    except:
-        exists = False
-
-    changed = True
-    if exists and not is_checked:
-        foldertask.delete()
-    elif not exists and is_checked:
-        info = FolderTask.objects.filter(folder=folder) \
-            .aggregate(Max('position'), Count('id'))
-
-        position = max(info['position__max'], info['id__count']) + 1
-        FolderTask.objects.create(folder=folder, task=task, position=position)
-    else:
-        changed = False
-
-    if changed:
-        ncache.invalidate_namespace(FOLDER_NAMESPACE_FORMAT.format(folder))
+    add = request.POST['checked'] == 'true'
+    error = add_or_remove_folder_task(request.user, folder, task, add)
+    if error:
+        return HttpResponseBadRequest(error)
 
     return HttpResponse('1' if is_checked else '0')
 

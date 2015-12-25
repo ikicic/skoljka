@@ -14,7 +14,9 @@ urlpatterns = patterns('',
     (r'^help/other/$', direct_to_template, {'template': 'help/help_other.html'}),
     (r'^help/permissions/$', direct_to_template, {'template': 'help/help_permissions.html'}),
     (r'^help/upload/$', direct_to_template, {'template': 'help/help_upload.html'}),
+
     (r'^about/$', direct_to_template, {'template': 'about.html'}),
+    (r'^featured_lecture/', 'base.views.featured_lecture'),
     (r'^tou/$', direct_to_template, {'template': 'terms_of_use.html'}),
 
     *_EXTRA_URLS

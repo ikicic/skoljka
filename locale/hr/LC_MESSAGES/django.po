@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-25 15:44+0100\n"
-"PO-Revision-Date: 2015-12-25 15:42+0100\n"
+"POT-Creation-Date: 2015-12-26 00:28+0100\n"
+"PO-Revision-Date: 2015-12-26 00:29+0100\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -408,7 +408,19 @@ msgstr "Video"
 msgid "Tasks"
 msgstr "Zadaci"
 
-#: apps/task/templates/task_detail.html:59
+#: apps/task/templates/task_detail.html:24
+msgid "Only public lectures can be put on the homepage."
+msgstr "Samo se javno dostupna predavanja mogu staviti na naslovnu stranicu."
+
+#: apps/task/templates/task_detail.html:28
+msgid "Put on homepage"
+msgstr "Stavi na naslovnu"
+
+#: apps/task/templates/task_detail.html:30
+msgid "Remove from homepage"
+msgstr "Makni s naslovne"
+
+#: apps/task/templates/task_detail.html:79
 msgid "Click here to open the file."
 msgstr "Kliknite ovdje kako biste otvorili datoteku."
 

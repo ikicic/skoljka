@@ -13,7 +13,8 @@ from django.template.loader import render_to_string
 from pagination.paginator import InfinitePaginator
 
 from activity import action as _action
-from folder.models import Folder
+from base.utils import can_edit_featured_lectures
+from folder.models import Folder, FolderTask
 from folder.utils import invalidate_cache_for_folders, \
         invalidate_folder_cache_for_task
 from mathcontent import latex
@@ -307,7 +308,6 @@ def detail(request, id):
     perm = task.get_user_permissions(request.user)
     if VIEW not in perm:
         return (403, 'Not allowed to view this task!')
-
     if not check_prerequisites_for_task(task, request.user, perm):
         return (403, 'Prerequisites not met, not allowed to view the task!')
 
@@ -325,8 +325,15 @@ def detail(request, id):
         'solution': solution,
     }
 
-    folder_data = get_task_folder_data(task, request.user)
+    featured_folder_id = getattr(settings, 'FEATURED_LECTURES_FOLDER_ID', None)
+    if task.is_lecture and featured_folder_id and \
+            can_edit_featured_lectures(request.user):
+        # The case where task is hidden is handled in the template.
+        data['can_select_as_featured'] = True
+        data['is_featured'] = FolderTask.objects \
+                .filter(folder_id=featured_folder_id, task_id=id).exists()
 
+    folder_data = get_task_folder_data(task, request.user)
     if folder_data:
         data.update(folder_data)
 

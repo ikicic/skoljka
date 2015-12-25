@@ -9,9 +9,10 @@ $height: 150px;
 }
 
 .lecture-small-box {
-  width: $width;
-  margin: 8px;
   display: inline-block;
+  margin: 8px;
+  vertical-align: top;
+  width: $width;
 }
 
 img.lecture {
