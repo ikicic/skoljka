@@ -16,102 +16,109 @@ from functools import wraps
 
 
 def _key_list(input):
-    """
-        Helper function. Replace models with their primary keys.
-    """
+    """Helper function. Replace models with their primary keys."""
     return [(x.pk if isinstance(x, models.Model) else x) for x in input]
 
+
 def _key_dict(input):
-    """
-        Helper function. Replace models with their primary keys.
-    """
+    """Helper function. Replace models with their primary keys."""
     return {key: str(value.pk if isinstance(value, models.Model) else value)
         for key, value in input.iteritems()}
 
+
+def get_cache_function_full_key(
+        func, key=None, namespace=None, args=(), kwargs={}):
+    """Generate the key for given function, key, namespace and arguments.
+
+    To avoid conflicts between this function's arguments and given function's
+    arguments, args and kwargs are passed as args and kwargs arguments (not as
+    *args, **kwargs).
+    """
+    # _key stands for final/full key.
+    if key:
+        _key = key.format(*args)
+    else:
+        if namespace:
+            # Don't unnecesarry put module name here.
+            # If you need it for any reason, feel free to put it.
+            _key = '{}{}{}'.format(func.__name__, _key_list(args),
+                _key_dict(kwargs))
+        else:
+            # If no namespace given, distinguish different modules.
+            _key = '{}{}{}{}'.format(func.__module__, func.__name__,
+                _key_list(args), _key_dict(kwargs))
+
+        # Memcached doesn't like ascii <= 32 and ascii == 127. Just hash it.
+        _key = sha1(_key).hexdigest()
+
+    if namespace:
+        _namespace = namespace.format(*args)
+        _key = ncache.get_full_key(_namespace, _key)
+
+    return _key
+
 def cache_function(key=None, namespace=None, seconds=86400*7):
+    """Cache the result of a function call.
+
+    Parameters:
+        key: Cache key format.
+        namespace: Format of namespace used. E.g. 'Folder{0.pk}'
+            will be converted to Folder5 if function's first parameter
+            is a model with .pk == 5.
+        seconds: Specify for how long should this cache be valid.
+
+    Parameters are called 'key' & 'namespace', not 'key_format' &
+    'namespace_format' for DRY reasons.
+
+    Note that it is possible to set both namespace and key format.
+    In that case, key is considered as a 'subkey'.
+
+    There is no special option to define key and namespace independent
+    of function arguments. Just use key and namespace without any
+    curly brackets instead.
     """
-        Cache the result of a function call.
-
-        Parameters:
-            key: Cache key format.
-            namespace: Format of namespace used. E.g. 'Folder{0.pk}'
-                will be converted to Folder5 if function's first parameter
-                is a model with .pk == 5.
-            seconds: Specify for how long should this cache be valid.
-
-        Parameters are called 'key' & 'namespace', not 'key_format' &
-        'namespace_format' for DRY reasons.
-
-        Note that it is possible to set both namespace and key format.
-        In that case, key is considered as a 'subkey'.
-
-        There is no special option to define key and namespace independent
-        of function arguments. Just use key and namespace without any
-        curly brackets instead.
-    """
-
     def decorator(func):
         def inner(*args, **kwargs):
-            # _key stands for final/full key
-            if key:
-                _key = key.format(*args)
-            else:
-                if namespace:
-                    # Don't unnecesarry put module name here.
-                    # If you need it for any reason, feel free to put it.
-                    _key = '{}{}{}'.format(func.__name__, _key_list(args),
-                        _key_dict(kwargs))
-                else:
-                    # If no namespace given, distinguish different modules.
-                    _key = '{}{}{}{}'.format(func.__module__, func.__name__,
-                        _key_list(args), _key_dict(kwargs))
-
-                # Memcached doesn't like ascii <= 32 and ascii == 127.
-                # Just hash it.
-                _key = sha1(_key).hexdigest()
-
-            if namespace:
-                _namespace = namespace.format(*args)
-                _key = ncache.get_full_key(_namespace, _key)
+            # Send as args, kwargs, not *args, **kwargs.
+            full_key = get_cache_function_full_key(
+                    func, key, namespace, args, kwargs)
 
             # Check if value cached. If not, retrieve and save it.
-            result = cache.get(_key)
+            result = cache.get(full_key)
             if result is None:
                 result = func(*args, **kwargs)
-                cache.set(_key, result, seconds)
+                cache.set(full_key, result, seconds)
             return result
         return wraps(func)(inner)
     return decorator
 
 def cache_many_function(namespace_format=None, key_format=None, pre_test=None):
-    """
-        Handles special case of multiple-get functions.
+    """Handles a special case of multiple-get functions.
 
-        Wrapper around functions of type
-            def some_many_function(objects, *args)
-        where `objects` is a list of object instances(!), and the result is
-        a dictionary {object.id: some object info}.
+    Wrapper around functions of type
+        def some_many_function(objects, *args)
+    where `objects` is a list of object instances(!), and the result is
+    a dictionary {object.id: some object info}.
 
-        Generates namespaces, keys and full keys for each object in the objects
-        list. Checks which results are already cached, and calls given function
-        for the rest, if any. Function will not be called if all the results
-        are found in the cache.
+    Generates namespaces, keys and full keys for each object in the objects
+    list. Checks which results are already cached, and calls given function for
+    the rest, if any. Function will not be called if all the results have been
+    found in the cache.
 
-        Both namespace and key format can be dependend on the object and args
-        (in terms of str.format() method).
-        E.g. namespace = namespace_format.format(object.id, *args)
+    Both namespace and key format can be dependend on the object and args
+    (in terms of str.format() method).
+    E.g. namespace = namespace_format.format(object.id, *args)
 
-        Additional optional parameters:
+    Additional optional parameters:
 
-        pre_test: Function to call with objects and *args before *any* work
-            is done. Must return pair
-                (should_continue, result_if_not_continuing)
+    pre_test: Function to call with objects and *args before *any* work is done.
+        Must return a pair (should_continue, result_if_not_continuing)
 
-            Example:
-                pre_test=lambda objects, user: (user.is_authenticated(), {})
-                This method prevents accessing the cache and calling the
-                main function if user is not authenticated, in which case it
-                just returns {}.
+        Example:
+            pre_test=lambda objects, user: (user.is_authenticated(), {})
+            This method prevents accessing the cache and calling the main
+            function if user is not authenticated, in which case it just
+            returns {}.
     """
 
     def decorator(func):
@@ -121,12 +128,12 @@ def cache_many_function(namespace_format=None, key_format=None, pre_test=None):
                 if not ok:
                     return not_ok_value
 
-            # Get all namespaces and keys and check cache
+            # Get all namespaces and keys and check the cache.
             namespaces = [namespace_format.format(x, *args) for x in objects]
             keys = [key_format.format(x, *args) for x in objects]
             cached, full_keys = ncache.get_many_for_update(namespaces, keys)
 
-            # Most common case, handle immediately:
+            # Most common case, handle immediately.
             if len(keys) == len(cached):
                 return {x.id: cached[full_key]
                     for x, full_key in zip(objects, full_keys)}
@@ -136,22 +143,23 @@ def cache_many_function(namespace_format=None, key_format=None, pre_test=None):
             keys = []
             for x, full_key in zip(objects, full_keys):
                 if full_key in cached:
-                    # ok, we have this result
+                    # OK, we have this result.
                     result[x.id] = cached[full_key]
                 else:
-                    # not ok, but we are going to ask for it.
-                    result[x.id] = full_key # temporary put key here
+                    # Not ok, but we are going to ask for it.
+                    result[x.id] = full_key  # Temporarily put the key here.
                     eval.append(x)
 
-            # Evaluate function for objects whose function value not cached
+            # Evaluate function for objects whose function value not cached.
             values = func(eval, *args)
 
-            # Update cache. Here result[id] is the full_key. Not any special
-            # reason why we use the same dict `result` for full_keys.
+            # Update cache. Here result[id] is the full_key. There is no any
+            # special reason why we use the same dict `result` for full keys
+            # (performance?).
             cache.set_many({result[id]: value
                 for id, value in values.iteritems()})
 
-            # Finally, update result (replace those full_keys with results)
+            # Finally, update result (replace those full_keys with results).
             result.update(values)
 
             return result
