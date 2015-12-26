@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 import os
+import sys
+import time
+
 import settings
 
 def run_command(cmd):
@@ -12,13 +15,15 @@ def main(argv):
     if settings.DEBUG:
         print "WARNING: DEBUG is ON!!!"
         print "WARNING: DEBUG is ON!!!"
+        sys.stdout.flush()
+        time.sleep(1)
 
     run_command("python manage.py collectstatic --noinput")
+    run_command("python manage.py compilemessages");
 
     # TODO: no "--all" if --force
-    run_command("python manage.py compile_templates -v 2 --all --noinput")
+    run_command("python manage.py compile_templates -v 0 --all --noinput")
 
 
 if __name__ == "__main__":
-    import sys
     main(sys.argv)
