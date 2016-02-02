@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load base_tags %}
+{% load task_tags %}
+
+{% block title %}{% trans "Bulk add" %}{% endblock %}
+
+{% block content %}
+
+{% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+<form action="{{ request.get_absolute_url }}" method="post">
+  {% csrf_token %}
+  <table class="kill-br split-form">
+    {{ form.as_table }}
+  </table>
+  {# JavaScript takes care of the preview button. #}
+  <button type="submit" class="btn btn-primary">
+    {% trans "Continue" %}
+  </button>
+  <input type="hidden" name="step" value="second">
+  <button type="button" class="btn" id="tb-preview-button"
+          value="preview">{% trans "Preview" %}</button>
+  <span id="tb-loading-indicator" style="display: none;">
+    {% trans "Loading..." %}
+  </span>
+</form>
+
+<div id="tb-preview"></div>
+
+{% history_select history %}
+
+{% endblock content %}
+

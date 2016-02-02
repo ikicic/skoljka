@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load base_tags %}
+{% load task_tags %}
+
+{% block title %}{% trans "Bulk add" %}{% endblock %}
+
+{% block content %}
+
+<h3>
+  {% trans "Check the tasks once again before creating them!" %}
+</h3>
+
+
+<br><h4>{% trans "Template name:" %} {{ form.cleaned_data.name }}</h4><br>
+
+<div>
+  {% task_bulk_preview_multiple task_infos %}
+</div>
+
+<form action="" method="POST">
+  {% csrf_token %}
+  {% for field in form %}
+    {{ field.as_hidden }}
+  {% endfor %}
+  <input type="hidden" name="step" value="final">
+  <button type="submit" class="btn btn-primary" name="action" value="create">
+    {% trans "Submit" %}
+  </button>
+  <button type="submit" class="btn" name="action" value="back">
+    {% trans "Back" %}
+  </button>
+</form>
+
+<h3>Exact JSON to be used:</h3>
+<div class="outset">
+  <pre class="multi-line">{{ json_dump }}</pre>
+</div>
+
+{% endblock content %}

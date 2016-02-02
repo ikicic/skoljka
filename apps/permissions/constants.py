@@ -12,7 +12,7 @@ MODEL_DEFAULT = [VIEW, EDIT, DELETE, EDIT_PERMISSIONS]
 
 # Ordered list of (constant value, name)
 # Any way to DRY this?
-constants = [
+PERMISSIONS = [
     ('view', VIEW),
     ('edit', EDIT),
     ('delete', DELETE),
@@ -21,9 +21,11 @@ constants = [
     ('view_solutions', VIEW_SOLUTIONS),
 ]
 
+PERMISSION_NAMES = {value: key for key, value in PERMISSIONS}
+
 # Dictionary constant name / 'shortcut' -> list of related constants
-constants_names = {key: [value] for key, value in constants}
-constants_names.update({
+PERMISSION_GROUPS = {key: [value] for key, value in PERMISSIONS}
+PERMISSION_GROUPS.update({
     # 'shortcuts'...
     'default': MODEL_DEFAULT
 })

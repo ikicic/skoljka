@@ -1,9 +1,14 @@
 ﻿from django import template
+from django.contrib.auth.models import Group, User
 from django.contrib.contenttypes.models import ContentType
 from django.utils.safestring import mark_safe
 
-from tags.models import TaggedItem
+from mathcontent.utils import convert_to_html
+from permissions.constants import PERMISSION_NAMES
 from solution.models import Solution
+from tags.models import TaggedItem
+from tags.templatetags.tags_tags import tag_list_preview
+from usergroup.templatetags.usergroup_tags import grouplink
 from userprofile.utils import get_useroption
 
 from task.utils import check_prerequisites_for_tasks
@@ -12,6 +17,7 @@ import collections
 
 register = template.Library()
 
+
 @register.simple_tag()
 def task_link(task, tooltip=False, url_suffix=''):
     """
@@ -19,10 +25,12 @@ def task_link(task, tooltip=False, url_suffix=''):
     """
     return task.get_link(tooltip=tooltip, url_suffix=url_suffix)
 
+
 @register.inclusion_tag('inc_task_small_box.html', takes_context=True)
 def task_small_box(context, task, div_class='', url_suffix='', options=''):
     return {'user': context['user'], 'task': task, 'div_class': div_class,
         'url_suffix': url_suffix, 'options': options}
+
 
 @register.simple_tag(takes_context=True)
 def task_options_mode_check(context):
@@ -32,6 +40,35 @@ def task_options_mode_check(context):
     if context['user'].is_staff:
         context['options_mode'] = 'options' in context['request'].GET
     return ''
+
+
+@register.inclusion_tag('inc_task_bulk_preview_multiple.html',
+        takes_context=True)
+def task_bulk_preview_multiple(context, task_infos):
+    """Render multiple task preview, given a list of TaskInfo instances."""
+    return {'task_infos': task_infos}
+
+
+@register.inclusion_tag('inc_task_bulk_preview_single.html')
+def task_bulk_preview_single(task_info):
+    """Renders a single task preview, given TaskInfo instance."""
+
+    permissions = []
+    for perm_id, groups in task_info.template_data['permissions'].iteritems():
+        task_groups = mark_safe(", ".join([grouplink(x) for x in groups]))
+        permissions.append((PERMISSION_NAMES[perm_id].upper(), task_groups))
+
+    return {
+        'content': mark_safe(convert_to_html(task_info.json['_content'])),
+        'difficulty': task_info.json['_difficulty'],
+        'folder': task_info.template_data['folder'],
+        'folder_position': task_info.json['_folder_position'],
+        'json': task_info.json,
+        'permissions': permissions,
+        'tags': tag_list_preview(task_info.json['_tags']),
+        'template_data': task_info.template_data,
+    }
+
 
 @register.simple_tag(takes_context=True)
 def task_view_type_check(context):
@@ -48,6 +85,7 @@ def task_view_type_check(context):
         if get_useroption(context['request'], field_name) != 0:
             context['tasks'] = tasks.select_related('content')
     return ''
+
 
 @register.simple_tag(takes_context=True)
 def cache_task_info_lite(context, tasks):

@@ -42,3 +42,12 @@ def show_news(context, div_class=None, title=None):
         'title': title,
         'user': context['user'],
     }
+
+
+@register.inclusion_tag('inc_history_select.html')
+def history_select(history):
+    """Show the history of given actions.
+
+    `history` is a list of dictionaries {'title':, 'content':}.
+    """
+    return {'history': history}

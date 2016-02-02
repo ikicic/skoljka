@@ -16,6 +16,8 @@ from skoljka.libs.models import icon_help_text
 
 from collections import defaultdict
 
+# TODO: clean up, move utility methods to utils.py
+
 # Take unique ID and description
 USERPROFILE_SCHOOL_CLASS_CHOICES = [(0, '-------------')]       \
     + [x[:2] for x in settings.USERPROFILE_SCHOOL_CLASS_INFO]

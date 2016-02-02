@@ -12,12 +12,25 @@ from skoljka.libs.decorators import cache_function
 
 from tags.models import Tag, TaggedItem, VOTE_WRONG, \
     CACHE_TAGS_AUTOCOMPLETE_JS_SRC
-from tags.utils import get_object_tagged_items
+from tags.utils import get_object_tagged_items, split_tags
 
 from hashlib import sha1
 import os, codecs, re
 
 register = template.Library()
+
+@register.simple_tag()
+def tag_list_preview(tags):
+    """Given a list or a comma-separated list of tags, just render them
+    without any logic."""
+    tags = split_tags(tags)
+
+    no_plus = u'<a href="/search/?q={}">{}</a>'
+    tags_html = [no_plus.format(tag, tag) for tag in tags]
+
+    return mark_safe(u'<div class="tag-list preview">{}</div>'.format(
+            u" ".join(tags_html)))
+
 
 @register.simple_tag(takes_context=True)
 def tag_list(context, owner, plus_exclude=None):
@@ -71,9 +84,10 @@ def tag_list(context, owner, plus_exclude=None):
         (v0 if name[0] != '$' else v1).append(fmt % attr)
 
     # Update apps/tags/static/tags.coffee and .scss if changing this!
-    return mark_safe(u'<div class="tag-list" data-content-type-id="{}" '
-                     u'data-object-id="{}">{}</div>'.format(
-                          content_type.id, owner.id, u" ".join(v0 + v1)))
+    return mark_safe(
+            u'<div class="tag-list tag-list-tooltip" data-content-type-id="{}" '
+            u'data-object-id="{}">{}</div>'.format(
+                content_type.id, owner.id, u" ".join(v0 + v1)))
 
 
 ###################

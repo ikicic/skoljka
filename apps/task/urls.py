@@ -4,6 +4,7 @@ from task.models import Task
 
 urlpatterns = patterns('',
     # TODO: this ajax url is different from the other ajax urls
+    (r'^ajax/bulk/preview/', 'task.ajax.bulk_preview'),
     (r'^ajax/prerequisites/', 'task.ajax.prerequisites'),
     (r'^$', 'task.views.task_list'),
     (r'^user/(?P<user_id>\d+)/$', 'task.views.task_list'),
@@ -12,7 +13,8 @@ urlpatterns = patterns('',
     (r'^(?P<task_id>\d+)/similar/$', 'task.views.similar'),
 
     (r'^new/$', 'task.views.new'),
-    (r'^new/advanced/$', 'task.views.advanced_new'),
+    (r'^new/bulk/$', 'task.views.bulk_new'),
+    (r'^new/bulk/success/$', 'task.views.bulk_new_success'),
     (r'^new/file/$', 'task.views.new_file'),
     (r'^new/json/$', 'task.views.json_new'),
     (r'^new/lecture/$', 'task.views.new_lecture'),

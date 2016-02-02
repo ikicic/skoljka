@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 
-from permissions.constants import EDIT, VIEW, MODEL_DEFAULT, constants_names
+from permissions.constants import EDIT, VIEW, MODEL_DEFAULT, PERMISSION_GROUPS
 
 class ObjectPermission(models.Model):
     object_id = models.PositiveIntegerField()
@@ -55,7 +55,7 @@ def convert_permission_names_to_values(names):
     permission_types = []
     for x in names:
         if isinstance(x, basestring):
-            permission_types.extend(constants_names[x])
+            permission_types.extend(PERMISSION_GROUPS[x])
         else:
             permission_types.append(x)
 
@@ -104,7 +104,7 @@ class BasePermissionsModel(models.Model):
 
         Use object_permissions list to specify which permissions are applicable
         to the model. You can use numbers or permission names (for more info,
-        look at constants_names)
+        look at PERMISSION_GROUPS)
     """
     class Meta:
         abstract = True

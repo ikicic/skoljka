@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load base_tags %}
+{% load task_tags %}
+
+{% block title %}{% trans "Bulk add" %}{% endblock %}
+
+{% block content %}
+
+<div class="alert alert-success">
+  {% trans "Total number of tasks created:" %} {{ total }}
+</div>
+
+{% endblock content %}
+

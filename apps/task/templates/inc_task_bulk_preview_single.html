@@ -1,0 +1,43 @@
+{% load i18n %}
+{% load solution_tags %}
+{% load task_tags %}
+
+{# Note that JavaScript task-tooltip makes some assumptions about the this structure. #}
+{# task-container also used for tr. #}
+<div>
+  <div class="task-container mc-hover-area outset">
+    <div class="task-small-info">
+      <h4 class="task-small-title">
+        <a href="#" onclick="javascript:return false;">{{ json.name }}</a>
+      </h4>
+      <div class="task-small-info-right">{{ tags }}</div>
+    </div>
+
+    {{ content }}
+
+    <div class="task-preview-other-info">
+      {% trans "Author:" %} {{ template_data.author|userlink }}<br>
+      {% if task.t_difficulty %}
+        {% trans "Difficulty:" %} {{ difficulty }}<br>
+      {% endif %}
+      {% if folder %}
+        {% trans "Folder:" %}
+        <a href="{{ folder.get_absolute_url }}">{{ folder }}</a>
+        ({% trans "Position:" %} {{ folder_position }})
+        <br>
+      {% endif %}
+      {% if json.hidden %}
+        <div class="task-preview-hidden">{% trans "Hidden" %}</div>
+      {% endif %}
+      {% if permissions %}
+        {% for perm, groups in permissions %}
+          {{ perm }}: {{ groups }}{% if not forloop.last %},{% endif %}
+        {% endfor %}<br>
+      {% endif %}
+      {% if json.source %}
+        {% trans "Source:" %} {{ json.source }}<br>
+      {% endif %}
+    </div>
+  </div>
+</div>
+

@@ -39,6 +39,15 @@ DIFFICULTY_RATING_ATTRS = {
 }
 
 
+class TaskBulkTemplate(BasePermissionsModel):
+    author = models.ForeignKey(User)
+    hidden = models.BooleanField(default=False, verbose_name=_("Hidden"))
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_edit_date = models.DateTimeField(auto_now=True)
+    name = models.CharField(blank=True, max_length=100, verbose_name=_("Template name"))
+    source_code = models.TextField(max_length=100000)
+
+
 # ovdje ili u recommend?
 class SimilarTask(models.Model):
     task = models.ForeignKey('Task', db_index=True, related_name='from')
@@ -115,6 +124,9 @@ class Task(BasePermissionsModel):
     lecture_folder = models.ForeignKey('folder.Folder', blank=True, null=True)
     lecture_video_url = models.URLField(blank=True, max_length=200,
             verbose_name=_("Lecture video URL"))
+
+    class Meta:
+        permissions = (("can_bulk_add", "Can bulk add"), )
 
 
     def __unicode__(self):

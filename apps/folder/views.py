@@ -501,12 +501,12 @@ def advanced_new(request):
 
     structure_history = LogEntry.objects.filter(content_type=content_type,
         object_repr=ADVANCED_NEW_OBJECT_REPR)
-    history_array = [x.change_message for x in structure_history];
+    history_array = [{'title': x.action_time, 'content': x.change_message} \
+            for x in structure_history];
 
     return {
         'form': form,
         'created_folder_count': created,
         'existing_folder_count': existing,
-        'structure_history': structure_history,
         'history_array': history_array,
     }

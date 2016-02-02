@@ -1,13 +1,45 @@
 ﻿from django import forms
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 
-from task.models import Task
+from task.models import Task, TaskBulkTemplate
 
 from permissions.constants import VIEW
 from permissions.utils import filter_objects_with_permission
 from skoljka.libs.models import icon_help_text
 
+from task.bulk_format import BulkFormatError, parse_bulk
+
 EXPORT_FORMAT_CHOICES = (('latex', 'LaTeX'), ('pdf', 'PDF'))
+
+class TaskBulkTemplateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.task_infos = None
+        self.user = kwargs.pop('user')
+        super(TaskBulkTemplateForm, self).__init__(*args, **kwargs)
+        self.fields['source_code'].widget.attrs.update(
+                {'rows': 20, 'cols': 100, 'class': 'uneditable-textarea'})
+
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        if not name:
+            name = "(untitled)"
+            self.cleaned_data['name'] = name
+        return name
+
+    def clean_source_code(self):
+        data = self.cleaned_data['source_code']
+        try:
+            self.task_infos = parse_bulk(self.user, data)
+        except BulkFormatError as e:
+            raise forms.ValidationError(e.message)
+        if not self.task_infos:
+            raise forms.ValidationError(ugettext("At least one task expected."))
+        return data
+
+    class Meta:
+        model = TaskBulkTemplate
+        fields = ['hidden', 'name', 'source_code']
+
 
 class TaskExportForm(forms.Form):
     format = forms.ChoiceField(choices=EXPORT_FORMAT_CHOICES)

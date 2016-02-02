@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load base_tags %}
 
 {% block title %}
   Napredno dodavanje kategorija
@@ -20,26 +21,6 @@
   <input type="submit" class="btn btn-primary" value="Pošalji">
 </form>
 
-<div>
-  {# Advanced add is quite complex. For that reason, all those actions are #}
-  {# saved in the admin log, so that in future they can be used as examples. #}
-  {% if structure_history %}
-    <script>
-      var folder_history_array = [];
-      {% for x in history_array %}
-        folder_history_array.push("{{ x|escapejs }}");
-      {% endfor %}
-    </script>
-    <select id="folder-adv-history-select" size="{{ structure_history|length|add:2 }}">
-      {# Note: javascript parses option value and reads the index #}
-      {% for x in structure_history %}
-        <option>{{ forloop.counter }}. {{ x.action_time }} {{ x.change_message|length }}B</option>
-      {% endfor %}
-    </select>
-    <textarea id="folder-adv-history-view" rows="10" cols="90" class="uneditable-textarea"></textarea>
-  {% else %}
-    Nema zapisa o prethodnim naprednim dodavanjima.
-  {% endif %}
-</div>
+{% history_select history_array %}
 
 {% endblock content %}

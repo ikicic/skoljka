@@ -23,3 +23,7 @@ $ ->
     event.preventDefault()
     target_id = $(@).attr 'data-target'
     $('#' + target_id).toggle()
+
+  $('#history-select').change ->
+    index = parseInt($(this).val()[0].split('.')[0]) - 1
+    $('#history-view').text history_array[index]

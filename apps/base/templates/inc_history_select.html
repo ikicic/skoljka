@@ -1,0 +1,15 @@
+<div>
+  <script>
+    var history_array = [];
+    {% for x in history %}
+      history_array.push("{{ x.content|escapejs }}");
+    {% endfor %}
+  </script>
+  <select id="history-select" size="{{ history|length|add:2 }}">
+    {# Note: javascript parses option value and reads the index #}
+    {% for x in history %}
+      <option>{{ forloop.counter }}. {{ x.title }} {{ x.content|length }}B</option>
+    {% endfor %}
+  </select>
+  <textarea id="history-view" rows="10" cols="90" class="uneditable-textarea"></textarea>
+</div>

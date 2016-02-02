@@ -13,11 +13,11 @@ new_tag_link = (tag) ->
 
 $ ->
   return if not is_authenticated
-  return if not $('.tag-list').length
+  return if not $('.tag-list-tooltip').length
 
   VOTE_WRONG = -1
 
-  $('.tag-list a').each (index) ->
+  $('.tag-list-tooltip a').each (index) ->
     refresh_tag_votes $(@)
 
   $('body').append '''
@@ -113,4 +113,4 @@ $ ->
   $('#tt-minus').click (event) -> vote_func event, -1
   $('#tt-delete-vote').click (event) -> vote_func event, 0
 
-  $('.tag-list a').tooltip tooltip_options
+  $('.tag-list-tooltip a').tooltip tooltip_options

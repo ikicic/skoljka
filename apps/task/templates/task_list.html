@@ -11,6 +11,11 @@
 
 {% if user.is_authenticated %}
   <div class="btn-group" style="float: right;">
+    {% if can_bulk_add %}
+      <a href="/task/new/bulk/" class="btn">
+        <i class="icon-pencil"></i> {% trans "Bulk add" %}
+      </a>
+    {% endif %}
     <a href="/task/new/" class="btn">
       <i class="icon-pencil"></i> Dodaj zadatak
     </a>

@@ -11,7 +11,7 @@ from django.template import RequestContext
 from usergroup.forms import GroupEntryForm
 from skoljka.libs.decorators import response
 
-from permissions.constants import VIEW, EDIT_PERMISSIONS, constants
+from permissions.constants import VIEW, EDIT_PERMISSIONS, PERMISSIONS
 from permissions.models import ObjectPermission, has_group_perm,        \
     convert_permission_names_to_values
 from permissions.signals import objectpermissions_changed
@@ -70,7 +70,7 @@ def _edit(request, data, id, object, type_id, content_type):
 
     # Get (name, value) pairs in the specific order.
     applicable_permissions = [(name, value)
-        for name, value in constants if value in permission_types]
+        for name, value in PERMISSIONS if value in permission_types]
 
 
     selected_types = [VIEW]

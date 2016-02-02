@@ -31,9 +31,10 @@ from usergroup.forms import GroupEntryForm
 from skoljka.libs.decorators import response
 from skoljka.libs.timeout import run_command
 
-from task.models import Task, SimilarTask
-from task.forms import TaskForm, TaskFileForm, TaskAdvancedForm, \
-        TaskExportForm, EXPORT_FORMAT_CHOICES, TaskJSONForm, TaskLectureForm
+from task.models import SimilarTask, Task, TaskBulkTemplate
+from task.forms import TaskAdvancedForm, TaskBulkTemplateForm, TaskExportForm, \
+        TaskFileForm, TaskForm, TaskJSONForm, TaskLectureForm, \
+        EXPORT_FORMAT_CHOICES
 from task.utils import check_prerequisites_for_task, \
         check_prerequisites_for_tasks, create_tasks_from_json, \
         get_task_folder_data
@@ -43,6 +44,7 @@ import django_sorting
 
 # TODO: promijeniti nacin na koji se Task i MathContent generiraju.
 # vrijednosti koje ne ovise o samom formatu se direktno trebaju
+# postaviti na vrijednosti iz forme.
 
 
 @response('task_json_new.html')
@@ -54,111 +56,76 @@ def json_new(request):
         if form.is_valid():
             description = json.loads(form.cleaned_data['description'])
             try:
-                create_tasks_from_json(description)
-            except Exception, e:
-                message = e._json_tasks_debug
-                message += "\n\n" + traceback.format_exc()
-            else:
-                message = "Created {} task(s).".format(len(description))
+                tasks = create_tasks_from_json(description)
+                message = "Created {} task(s).".format(len(tasks))
+            except Exception as e:
+                message = e.message
     else:
         form = TaskJSONForm()
 
     return {'form': form, 'message': message}
 
 
-# DEPRECATED
-@transaction.commit_on_success
-@permission_required('task.add_advanced')
-def advanced_new(request):
-    """
-        Used only by admin
-    """
+@login_required
+@response('task_bulk_new_success.html')
+def bulk_new_success(request):
+    """Redirected to after successful bulk add."""
+    return {'total': request.GET.get('total')}
+
+
+@permission_required('task.can_bulk_add')
+@response('task_bulk_new.html')
+def bulk_new(request, template_id=None):
+    template = None
+    if template_id:
+        template = get_object_or_404(TaskBulkTemplate, id=template_id)
+    edit = template is not None
+    error = None
 
     if request.method == 'POST':
-        task_form = TaskAdvancedForm(request.POST)
-        math_content_form = MathContentForm(request.POST)
-        group_form = GroupEntryForm(request.POST, user=request.user)
+        if 'step' not in request.POST:
+            return 400
+        form = TaskBulkTemplateForm(request.POST, instance=template,
+                user=request.user)
+        if form.is_valid():
+            step = request.POST['step']
+            jsons = [x.json for x in form.task_infos]
+            if step == 'final' and request.POST.get('action') == 'create':
+                try:
+                    tasks = create_tasks_from_json(jsons)
+                except Exception as e:
+                    error = e.message
 
-        if task_form.is_valid() and math_content_form.is_valid() and group_form.is_valid():
-            task_template = task_form.save(commit=False)
-            math_content_template = math_content_form.save(commit=False)
-
-            groups = group_form.cleaned_data['list']
-
-            from collections import defaultdict
-            dictionary = defaultdict(unicode)
-
-            from xml.dom.minidom import parseString
-            from xml.dom.minidom import Node
-            dom = parseString(math_content_template.text.encode('utf-8'))
-            # Xml -> <info> ... </info>
-
-            for x in dom.firstChild.childNodes:
-                if x.nodeType == Node.TEXT_NODE:
-                    continue
-
-                if x.nodeName != 'content':
-                    if x.nodeValue:
-                        value = x.nodeValue
-                    elif x.firstChild and x.firstChild.nodeValue:
-                        value = x.firstChild.nodeValue
-                    else:
-                        value = ''
-                    dictionary[x.nodeName] = value
-                    print (u'Postavljam varijablu "%s" na "%s"' % (x.nodeName, value)).encode('utf-8')
-
-                if x.nodeName == 'content':
-                    print (u'Dodajem zadatak "%s" s oznakama "%s"' % (task_template.name % dictionary, task_form.cleaned_data['_tags'] % dictionary)).encode('utf-8')
-                    value = x.nodeValue or ''
-                    if x.firstChild:
-                        value += x.firstChild.nodeValue or ''
-                    math_content = MathContent()
-                    math_content.text = value     # should be safe
-                    math_content.save()
-                    print 'uspio dodati math_content'
-
-                    # rucno spajam 'tags1' i 'tags'
-                    if 'tags1' in dictionary:
-                        dictionary['tags'] = dictionary.get('tags', '') + ',' + dictionary['tags1']
-                        dictionary.pop('tags1')     # samo za ovaj zadatak!
-
-                    task = Task()
-                    task.name = task_template.name % dictionary
-                    task.author = request.user
-                    task.content = math_content
-# TODO: automatizirati .hidden (vidi TODO na vrhu funkcije)
-                    task.hidden = task_template.hidden
-                    task.source = task_template.source % dictionary
-                    task.save()
-
-                    # WARNING: .set is case-sensitive!
-                    tags = task_form.cleaned_data['_tags'] % dictionary
-                    set_tags(task, tags)
-
-                    # --- difficulty ---
-                    difficulty = task_form.cleaned_data['_difficulty'] % dictionary
-                    if difficulty:
-                        task.difficulty_rating.update(request.user, int(difficulty))
-
-                    # --- group permissions ---
-                    for x in groups:
-                        ObjectPermission.objects.create(content_object=task, group=x, permission_type=VIEW)
-                        ObjectPermission.objects.create(content_object=task, group=x, permission_type=EDIT)
-
-            invalidate_cache_for_folders(Folder.objects.all())
-
-            return HttpResponseRedirect('/task/new/finish/')
+                if error is None:
+                    template = form.save(commit=False)
+                    template.author = request.user
+                    template.save()
+                    total = len(tasks)
+                    # return ('/task/new/bulk/success/?total=' + str(total), )
+            if step == 'second' and jsons:
+                json_dump = json.dumps(jsons, indent=2, sort_keys=True)
+                return ('task_bulk_new_2nd.html', {
+                    'form': form,
+                    'task_infos': form.task_infos,
+                    'json_dump': json_dump,
+                })
     else:
-        task_form = TaskAdvancedForm()
-        group_form = GroupEntryForm(user=request.user)
-        math_content_form = MathContentForm()
+        form = TaskBulkTemplateForm(instance=template, user=request.user)
 
-    return render_to_response( 'task_new.html', {
-                'forms': [task_form, group_form, math_content_form],
-                'action_url': request.path,
-                'advanced': True,
-            }, context_instance=RequestContext(request),
-        )
+    history = list(TaskBulkTemplate.objects.for_user(request.user, VIEW) \
+            .order_by('id').distinct())
+    history = [{
+            'title': "{} ({})".format(x.name, x.last_edit_date),
+            'content': x.source_code,
+        } for x in history]
+
+    return {
+        'error': error,
+        'form': form,
+        'task_infos': form.task_infos,
+        'history': history,
+    }
+
 
 
 def new_file(request):
@@ -298,7 +265,10 @@ def task_list(request, user_id=None):
     if user_id:
         tasks = tasks.filter(author_id=user_id)
 
-    return {'tasks' : tasks}
+    return {
+        'can_bulk_add': True or user.has_perm('task.can_bulk_add'),
+        'tasks': tasks,
+    }
 
 
 @response('task_detail.html')

@@ -154,22 +154,27 @@ def create_tasks_from_json(description):
         _folder_position (int) - position in that folder
         _tags (string) - a comma-separated list of tags
         _difficulty (int) - difficulty rating to be assigned by the author
-        _permissions (list {"type": int, "group_ids": []}) - group permission
-            to automatically assign.
+        _permissions (dict {"permission type ID": [list of group IDs]})
+                - group permission to automatically assign.
+                - (ID is a string because in JSON keys must be strings)
 
     All other elements with an underscore are ignored.
 
     Params:
         description (list): list of dict object, describing the tasks
 
-    If an exception is thrown, additional debug information will be saved into
-    e._json_tasks_debug.
+    Returns:
+        A list of the new Task objects.
+
+    If an exception is thrown in the middle of the process, the exception is
+    caputed, the message changed, and raised again.
     """
     # Approx.
     task_fields = set(Task._meta.get_all_field_names())
     task_fields |= set(x + '_id' for x in task_fields)
 
     created_objects = []
+    created_tasks = []
     message_list = []
 
     # List of objects to create
@@ -196,6 +201,7 @@ def create_tasks_from_json(description):
                     setattr(task, key, value)
             task.save()
             created_objects.append(task)
+            created_tasks.append(task)
 
             # Third, save other data.
 
@@ -211,31 +217,29 @@ def create_tasks_from_json(description):
             # --- folder ids ---
             folder_id = desc.get('_folder_id')
             if folder_id is not None:
-                folder_tasks.append(
-                        FolderTask(
-                            folder_id=folder_id,
-                            task=task,
-                            position=desc.get('_folder_position', 0)))
+                folder_tasks.append(FolderTask(
+                        folder_id=folder_id, task=task,
+                        position=desc.get('_folder_position', 0)))
 
             # --- group permissions ---
-            for perm in desc.get('_permissions', []):
-                for group_id in perm['group_ids']:
-                    object_permissions.append(
-                            ObjectPermission(
-                                content_object=task,
-                                group_id=group_id,
-                                permission_type=perm['type']))
+            for perm, group_ids in desc.get('_permissions', {}).iteritems():
+                for group_id in group_ids:
+                    object_permissions.append(ObjectPermission(
+                            content_object=task, group_id=group_id,
+                            permission_type=perm))
 
 
         FolderTask.objects.bulk_create(folder_tasks)
         ObjectPermission.objects.bulk_create(object_permissions)
-    except Exception, e:
+    except Exception as e:
         # This should remove all dependend objects.
         for obj in created_objects:
             obj.delete()
 
-        message_list.append('Reverting changes...')
-        e._json_tasks_debug = '\n'.join(message_list)
-        raise
+        message_list.append("Reverting changes...")
+        message = "\n".join(message_list) + "\n\n" + traceback.format_exc()
+        raise type(e)(message)
     finally:
+        # SPEED: Don't invalidate everything.
         invalidate_cache_for_folders(Folder.objects.all())
+    return created_tasks

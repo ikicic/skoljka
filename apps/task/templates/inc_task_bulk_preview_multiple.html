@@ -1,0 +1,4 @@
+{% load task_tags %}
+{% for task_info in task_infos %}
+  {% task_bulk_preview_single task_info %}
+{% endfor %}
