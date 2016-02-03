@@ -44,7 +44,7 @@ class TaskBulkTemplate(BasePermissionsModel):
     hidden = models.BooleanField(default=False, verbose_name=_("Hidden"))
     date_created = models.DateTimeField(auto_now_add=True)
     last_edit_date = models.DateTimeField(auto_now=True)
-    name = models.CharField(blank=True, max_length=100, verbose_name=_("Template name"))
+    name = models.CharField(blank=True, max_length=100, verbose_name=_("Name"))
     source_code = models.TextField(max_length=100000)
 
 

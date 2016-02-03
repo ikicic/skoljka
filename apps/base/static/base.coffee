@@ -25,5 +25,5 @@ $ ->
     $('#' + target_id).toggle()
 
   $('#history-select').change ->
-    index = parseInt($(this).val()[0].split('.')[0]) - 1
+    index = parseInt $(this).val()
     $('#history-view').text history_array[index]

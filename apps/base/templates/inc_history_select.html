@@ -6,10 +6,10 @@
     {% endfor %}
   </script>
   <select id="history-select" size="{{ history|length|add:2 }}">
-    {# Note: javascript parses option value and reads the index #}
-    {% for x in history %}
-      <option>{{ forloop.counter }}. {{ x.title }} {{ x.content|length }}B</option>
+    {% for x in history reversed %}
+      <option value="{{ forloop.revcounter0 }}">{{ x.title }} {{ x.content|length }}B</option>
     {% endfor %}
   </select>
-  <textarea id="history-view" rows="10" cols="90" class="uneditable-textarea"></textarea>
+  <textarea id="history-view" rows="10" cols="90" class="uneditable-textarea"
+      readonly></textarea>
 </div>

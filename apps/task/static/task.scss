@@ -214,6 +214,15 @@ tr.task-hidden:nth-child(odd) td {
 }
 
 /* Task bulk. */
+#tb-instructions-container {
+  font-size: 11px;
+  float: right;
+  width: 350px;
+}
+#tb-instructions > pre {
+  font-size: 11px;
+}
+
 .tb-error,
 .task-preview-hidden {
   color: red;

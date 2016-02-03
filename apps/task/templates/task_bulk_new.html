@@ -7,6 +7,60 @@
 
 {% block content %}
 
+<div id="tb-instructions-container" class="outdiv">
+  <a href="#" class="auto-toggler" data-target="tb-instructions">
+    <h4>{% trans "Short instructions" %}</h4>
+  </a>
+  <div id="tb-instructions" style="display:none;">
+    {% trans "Separate different tasks with at least 3 empty lines." %}
+    {% trans "To specify the name and other fields, write for example:" %}<br>
+    <pre class="multi-line">@NAME = some competition, task #@{COUNTER}</pre><br>
+    {% trans "You can also specify your own variables:" %}<br>
+    <pre class="multi-line">@level = Regional
+ @year = 2016
+ @competition = @{level} competiton @{year}
+ @NAME = @{competition}, task #@{COUNTER}</pre><br>
+    {% trans "All additions will be saved for future use and shown in the list at the bottom of this page." %}
+    {% trans "So, please specify the <i>Name</i>." %}
+    {% trans "Also, if you check <i>Hidden</i>, the template will be visible to you only." %}
+    {% trans "Please look at the previous additions for further information." %}<br><br>
+
+    {% trans "Press <b>Ctrl+M</b> for a preview." %}<br><br>
+
+    <h4>{% trans "Standard fields:" %}</h4>
+    <ul>
+      <li>AUTHOR - {% trans "Username of the author (default: current user)." %}</li>
+      <li>HIDDEN - {% trans "0 or 1." %}</li>
+      <li>NAME - {% trans "Task name/title (must be nonempty)." %}</li>
+      <li>SOURCE - {% trans "Task source." %}</li>
+      <li>TAGS - {% trans "Comma-separated list of tags." %}</li>
+    </ul>
+    <h4>{% trans "Special values:" %}</h4>
+    <ul>
+      <li>DIFFICULTY - {% trans "Difficulty rating to automatically assign by the author." %}</li>
+      <li>FOLDER_ID - {% trans "ID of the target container folder." %}</li>
+      <li>FOLDER_POSITION - {% trans "Position of the task in the folder." %}</li>
+    </ul>
+    <h4>{% trans "Automatically specified variables:" %}</h4>
+    <ul>
+      <li>COUNTER - {% trans "Task number, affected by @CLEAR_PERM." %}</li>
+      <li>TOTAL_COUNTER - {% trans "Task number, not affected by @CLEAR_PERM." %}</li>
+    </ul>
+    <h4>{% trans "Commands:" %}</h4>
+    <ul>
+      <li>@ADD_PERM [users or groups] [permissions] -
+          {% trans "Grant the user/group a permission. Users and permissions are separated by a plus sign. Permissions are:" %}
+          VIEW, EDIT, EDIT_PERMISSIONS, VIEW_SOLUTIONS</li>
+      <li>@CLEAR_PERMS - {% trans "Resets the permissions list." %}</li>
+      <li>@RESET_COUNTER - {% trans "Resets COUNTER variable to 1." %}</li>
+    </ul>
+    <h4>{% trans "Other special features:" %}</h4>
+    <ul>
+      <li>{% trans "You can multiply a variable (only if an integer) with a constant integer factor, e.g.:" %}
+          <pre class="multi-line">@{100*COUNTER}</pre></li>
+    </ul>
+  </div>
+</div>
 {% if error %}
   <div class="alert alert-danger">{{ error }}</div>
 {% endif %}
@@ -28,8 +82,10 @@
   </span>
 </form>
 
+<div style="clear: both;"></div>
 <div id="tb-preview"></div>
 
+<h2>{% trans "Previous additions" %}</h2>
 {% history_select history %}
 
 {% endblock content %}

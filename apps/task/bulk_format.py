@@ -296,7 +296,7 @@ def parse_add_perm(input):
     Returns the list of pairs (permission type, group name)."""
     parameters = input.split()
     if len(parameters) != 2:
-        raise InvalidParameter(_("Invalid parameter count"))
+        raise InvalidParameter(_("Invalid parameter count."))
 
     # Split by +, strip whitespace and remove empty values.
     groups = [x.strip() for x in parameters[0].split('+') if x.strip()]
