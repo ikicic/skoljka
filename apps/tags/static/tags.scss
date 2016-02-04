@@ -39,12 +39,8 @@
   color: #444;
   display: none;
   padding: 5px 6px 0px 6px;
-}
 
-.tag-tooltip img {
-  vertical-align:-3px;
-}
-
-.tag-tooltip input {
-  margin-top:3px;
+  > a > img {
+    vertical-align: 0px;
+  }
 }
