@@ -81,7 +81,8 @@ def attachment_upload_to(instance, filename):
     )
 
 class Attachment(models.Model):
-    file = models.FileField(upload_to=attachment_upload_to, blank=True)
+    file = models.FileField(max_length=500, upload_to=attachment_upload_to,
+            blank=True)
     content = models.ForeignKey(MathContent, related_name='attachments')
     date_created = models.DateTimeField(auto_now_add=True)
 

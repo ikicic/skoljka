@@ -11,17 +11,23 @@
 
 {% if user.is_authenticated %}
   <div class="btn-group" style="float: right;">
-    {% if can_bulk_add %}
-      <a href="/task/new/bulk/" class="btn">
-        <i class="icon-pencil"></i> {% trans "Bulk add" %}
+    {% if not only_lectures %}
+      {% if can_bulk_add %}
+        <a href="/task/new/bulk/" class="btn">
+          <i class="icon-pencil"></i> {% trans "Bulk add" %}
+        </a>
+      {% endif %}
+      <a href="/task/new/" class="btn">
+        <i class="icon-pencil"></i> Dodaj zadatak
+      </a>
+      <a href="/task/new/file/" class="btn">
+        <i class="icon-file"></i> Dodaj datoteku
+      </a>
+    {% else %}
+      <a href="/lectures/{% append_get_parameters %}" class="btn">
+        <i class="icon-picture"></i> {% trans "Thumbnails" %}
       </a>
     {% endif %}
-    <a href="/task/new/" class="btn">
-      <i class="icon-pencil"></i> Dodaj zadatak
-    </a>
-    <a href="/task/new/file/" class="btn">
-      <i class="icon-file"></i> Dodaj datoteku
-    </a>
     <a href="/task/new/lecture/" class="btn">
       <i class="icon-book"></i> {% trans "New lecture" %}
     </a>

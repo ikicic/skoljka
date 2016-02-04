@@ -55,3 +55,38 @@ END;
 
 DELIMITER ';'
 -- end script
+
+
+-- http://dba.stackexchange.com/questions/24531/mysql-create-index-if-not-exists
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS AddIndexUnlessExists $$
+CREATE PROCEDURE AddIndexUnlessExists(
+    given_table    VARCHAR(64),
+    given_index    VARCHAR(64),
+    given_columns  VARCHAR(64)
+)
+BEGIN
+
+    DECLARE IndexIsThere INTEGER;
+
+    SELECT COUNT(1) INTO IndexIsThere
+    FROM INFORMATION_SCHEMA.STATISTICS
+    WHERE table_schema = 'skoljka'
+    AND   table_name   = given_table
+    AND   index_name   = given_index;
+
+    IF IndexIsThere = 0 THEN
+        SET @sqlstmt = CONCAT('CREATE INDEX ',given_index,' ON ',
+        'skoljka','.',given_table,' (',given_columns,')');
+        PREPARE st FROM @sqlstmt;
+        EXECUTE st;
+        DEALLOCATE PREPARE st;
+    ELSE
+        SELECT CONCAT('Index ',given_index,' already exists on Table ',
+        'skoljka','.',given_table) CreateindexErrorMessage;
+    END IF;
+
+END $$
+
+DELIMITER ;

@@ -29,6 +29,7 @@ from tags.utils import set_tags, split_tags
 from usergroup.forms import GroupEntryForm
 
 from skoljka.libs.decorators import response
+from skoljka.libs.string_operations import media_path_to_url
 from skoljka.libs.timeout import run_command
 
 from task.models import SimilarTask, Task, TaskBulkTemplate
@@ -127,7 +128,6 @@ def bulk_new(request, template_id=None):
     }
 
 
-
 def new_file(request):
     return new(request, is_file=True)
 
@@ -190,8 +190,9 @@ def new(request, task_id=None, is_file=None, is_lecture=None):
                     task.file_attachment = attachment   # This is a file.
                     path = attachment.get_full_path_and_filename()
                     try:
+                        thumbnail_path = create_file_thumbnail(path)
                         task.cache_file_attachment_thumbnail_url = \
-                                create_file_thumbnail(path)
+                                media_path_to_url(thumbnail_path)
                     except ThumbnailRenderingException:
                         pass
 
@@ -242,12 +243,14 @@ def new(request, task_id=None, is_file=None, is_lecture=None):
 
     data.update({
         'action_url': request.path,
+        'bulk_add_url': '/task/new/bulk/',
         'can_edit_permissions': EDIT_PERMISSIONS in perm,
         'content_type': content_type,
         'edit': edit,
         'forms': forms,
         'is_file': is_file,
         'is_lecture': is_lecture,
+        'lectures_folder_url': settings.LECTURES_FOLDER_URL,
         'task_name': task.name if task else None,  # Convenience.
         'task': task,
     })
@@ -255,9 +258,23 @@ def new(request, task_id=None, is_file=None, is_lecture=None):
     return data
 
 
+@response('task_lectures_list.html')
+def lectures_list(request):
+    lectures = Task.objects.for_user(request.user, VIEW) \
+            .filter(is_lecture=True).distinct()
+    return {'lectures': lectures}
+
+
+def lectures_as_list(request):
+    return task_list(request, only_lectures=True)
+
+
 @response('task_list.html')
-def task_list(request, user_id=None):
-    tasks = Task.objects.for_user(request.user, VIEW).select_related('content').distinct()
+def task_list(request, user_id=None, only_lectures=False):
+    tasks = Task.objects.for_user(request.user, VIEW)
+    if only_lectures:
+        tasks = tasks.filter(is_lecture=True)
+    tasks = tasks.select_related('content').distinct()
     # treba mi LEFT JOIN ON (task_task.id = solution_solution.task_id AND solution_solution.author_id = ##)
     # sada se umjesto toga koristi .cache_task_info()
     # (slicno za tag-ove)
@@ -267,6 +284,7 @@ def task_list(request, user_id=None):
 
     return {
         'can_bulk_add': True or user.has_perm('task.can_bulk_add'),
+        'only_lectures': only_lectures,
         'tasks': tasks,
     }
 

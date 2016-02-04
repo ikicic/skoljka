@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-03 21:35+0100\n"
-"PO-Revision-Date: 2016-02-03 21:35+0100\n"
+"POT-Creation-Date: 2016-02-04 23:31+0100\n"
+"PO-Revision-Date: 2016-02-04 23:31+0100\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -15,7 +15,13 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2\n"
 
-#: apps/base/templates/inc_featured_lectures.html:6
+#: apps/base/templates/base.html:80
+#: apps/task/templates/task_lectures_list.html:8
+#: apps/task/templates/task_lectures_list.html:12
+msgid "Lectures"
+msgstr "Predavanja"
+
+#: apps/base/templates/inc_featured_lectures.html:8
 msgid "Featured lectures"
 msgstr "Odabrana predavanja"
 
@@ -520,18 +526,18 @@ msgstr "Pozicija:"
 msgid "Source:"
 msgstr "Izvor:"
 
-#: apps/task/templates/inc_task_lecture_small_box.html:18
+#: apps/task/templates/inc_task_lecture_small_box.html:19
 msgid "Video"
 msgstr "Video"
 
-#: apps/task/templates/inc_task_lecture_small_box.html:25
+#: apps/task/templates/inc_task_lecture_small_box.html:26
 msgid "Tasks"
 msgstr "Zadaci"
 
 #: apps/task/templates/task_bulk_new.html:6
 #: apps/task/templates/task_bulk_new_2nd.html:6
 #: apps/task/templates/task_bulk_new_success.html:6
-#: apps/task/templates/task_list.html:16
+#: apps/task/templates/task_list.html:17
 msgid "Bulk add"
 msgstr "Višestruko dodavanje"
 
@@ -709,16 +715,45 @@ msgstr "Makni s naslovne"
 msgid "Click here to open the file."
 msgstr "Kliknite ovdje kako biste otvorili datoteku."
 
-#: apps/task/templates/task_list.html:26 apps/task/templates/task_new.html:9
+#: apps/task/templates/task_lectures_list.html:16
+msgctxt "A list of lectures"
+msgid "List"
+msgstr "Popis"
+
+#: apps/task/templates/task_lectures_list.html:20
+#: apps/task/templates/task_list.html:32 apps/task/templates/task_new.html:9
 msgid "New lecture"
 msgstr "Novo predavanje"
+
+#: apps/task/templates/task_list.html:28
+msgid "Thumbnails"
+msgstr "Ikone"
 
 #: apps/task/templates/task_new.html:7
 #, python-format
 msgid "Editing lecture %(task_name)s"
 msgstr "Uređivanje lekcije %(task_name)s"
 
-#: apps/task/templates/task_new.html:104
+#: apps/task/templates/task_new.html:31
+#, python-format
+msgid ""
+"To add the tasks, first create a folder\n"
+"      <a href=\"%(lectures_folder_url)s\">here</a>, then use\n"
+"      <a href=\"%(bulk_add_url)s\">bulk add</a>."
+msgstr ""
+"Kako biste dodali zadatke, prvo napravite direktorij <a href="
+"\"%(lectures_folder_url)s\">ovdje</a>, zatim iskoristite <a href="
+"\"%(bulk_add_url)s\">višestruko dodavanje</a>."
+
+#: apps/task/templates/task_new.html:34
+msgid ""
+"If you do not have the permission to perform these steps, please contact the "
+"administrators."
+msgstr ""
+"Ako nemate privilegije za napraviti navedene korake, molimo kontaktirajte "
+"administratore."
+
+#: apps/task/templates/task_new.html:94
 msgid "Press Ctrl+M to get the preview of the text."
 msgstr "Pritisnite Ctrl+M za pregled teksta."
 

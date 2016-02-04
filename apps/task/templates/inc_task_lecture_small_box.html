@@ -1,10 +1,11 @@
 {% load i18n %}
 {% load folder_tags %}
+{% load task_tags %}
 
 <div class="lecture-small-box">
   <a href="{{ task.cache_file_attachment_url }}">
     <img src="{{ task.cache_file_attachment_thumbnail_url }}" alt="(snapshot)"
-         class="lecture">
+        class="lecture{% lecture_img_class task %}">
   </a>
   <div class="lecture-description">
     <h4 title="{{ task.name }}">

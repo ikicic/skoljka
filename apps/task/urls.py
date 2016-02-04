@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import patterns, include, url
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import TemplateView
 from task.models import Task
 
 urlpatterns = patterns('',

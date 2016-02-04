@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load pagination_tags %}
+{% load sorting_tags %}
+
+{% load task_tags %}
+
+{% block title %}{% trans "Lectures" %}{% endblock %}
+
+{% block content %}
+
+<h2 style="display:inline;">{% trans "Lectures" %}</h2>
+
+<div class="btn-group" style="float: right;">
+  <a href="/lectures/list/{% append_get_parameters %}" class="btn">
+    <i class="icon-th-list"></i> {% trans "List" context "A list of lectures" %}
+  </a>
+  {% if user.is_authenticated %}
+    <a href="/task/new/lecture/" class="btn">
+      <i class="icon-book"></i> {% trans "New lecture" %}
+    </a>
+  {% endif %}
+</div>
+<br><br>
+
+{% autosort lectures %}
+{% autopaginate lectures 30 %}
+{% cache_task_info lectures %}
+
+{% paginate %}
+{% for lecture in lectures %}
+  {% lecture_small_box lecture %}
+{% endfor %}
+{% paginate %}
+
+{% endblock content %}
+

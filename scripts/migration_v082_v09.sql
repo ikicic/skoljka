@@ -7,3 +7,5 @@ call AddColumnUnlessExists('task_task', 'lecture_folder_id', 'INT NULL AFTER is_
 call AddForeignKeyUnlessExists('task_task', 'lecture_folder_id', 'folder_folder');
 call AddColumnUnlessExists('task_task', 'lecture_video_url', 'VARCHAR(200) NOT NULL AFTER is_lecture');
 
+ALTER TABLE mathcontent_attachment CHANGE COLUMN `file` `file` VARCHAR(500) NOT NULL;
+call AddIndexUnlessExists('task_task', 'task_task_is_lecture_index', 'is_lecture')

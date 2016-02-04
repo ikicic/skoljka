@@ -26,9 +26,12 @@ def fix_label_colon(label):
     return label if label[-1] == ":" else label + ":"
 
 
-@register.inclusion_tag('inc_featured_lectures.html')
-def show_featured_lectures():
-    return {'featured_lectures': get_featured_lectures()}
+@register.inclusion_tag('inc_featured_lectures.html', takes_context=True)
+def show_featured_lectures(context):
+    return {
+        'featured_lectures': get_featured_lectures(),
+        'user': context['user'],
+    }
 
 
 @register.inclusion_tag('inc_news_list.html', takes_context=True)

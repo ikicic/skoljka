@@ -120,7 +120,7 @@ class Task(BasePermissionsModel):
             blank=True, default='')
 
     # For lectures
-    is_lecture = models.BooleanField(default=False)
+    is_lecture = models.BooleanField(default=False, db_index=True)
     lecture_folder = models.ForeignKey('folder.Folder', blank=True, null=True)
     lecture_video_url = models.URLField(blank=True, max_length=200,
             verbose_name=_("Lecture video URL"))

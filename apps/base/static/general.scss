@@ -67,6 +67,14 @@ h2, h3, h4, h4 a {
   text-shadow: 1px 1px 1px rgb(210, 210, 210);
 }
 
+/* Instructions */
+.instructions {
+  font-size: 11px;
+  &.outdiv {
+    margin: 5px 5px 15px 5px;
+  }
+}
+
 /* outdiv */
 .outdiv {
   border-radius: 5px;

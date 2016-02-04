@@ -43,8 +43,6 @@ def featured_lecture(request):
 
 
 def homepage_offline(request, recent_tasks):
-    folder_shortcuts = settings.FOLDER_HOMEPAGE_SHORTCUTS_OFFLINE
-
     return ('homepage_offline.html', {
         'homepage': True,
         'folder_shortcut_desc': settings.FOLDER_HOMEPAGE_SHORTCUTS_OFFLINE,

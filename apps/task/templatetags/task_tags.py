@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 
 from mathcontent.utils import convert_to_html
 from permissions.constants import PERMISSION_NAMES
-from solution.models import Solution
+from solution.models import Solution, HTML_INFO, SolutionDetailedStatus
 from tags.models import TaggedItem
 from tags.templatetags.tags_tags import tag_list_preview
 from usergroup.templatetags.usergroup_tags import grouplink
@@ -152,3 +152,10 @@ def cache_task_info(context, tasks):
 @register.inclusion_tag('inc_task_lecture_small_box.html', takes_context=True)
 def lecture_small_box(context, task):
     return {'task': task}
+
+@register.simple_tag()
+def lecture_img_class(task):
+    solution = task.cache_solution  # Must be available!
+    if not solution or solution.detailed_status == SolutionDetailedStatus.BLANK:
+        return ''
+    return ' ' + HTML_INFO[solution.detailed_status]['tr_class']

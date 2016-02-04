@@ -20,6 +20,8 @@ urlpatterns = patterns('',
 
     (r'^', include('competition.urls')),
     (r'^folder/', include('folder.urls')),
+    (r'^lectures/$', 'task.views.lectures_list'),
+    (r'^lectures/list/$', 'task.views.lectures_as_list'),
     (r'^', include('mathcontent.urls')), # namjerno nije r'^mathcontent/'
     (r'^permissions/', include('permissions.urls')),
     (r'^pm/', include('pm.urls')),

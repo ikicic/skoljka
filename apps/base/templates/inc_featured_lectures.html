@@ -1,6 +1,8 @@
 {% load i18n %}
 {% load task_tags %}
 
+{% cache_task_info featured_lectures %}
+
 {% if featured_lectures %}
   <div class="outdiv">
     <h3>{% trans "Featured lectures" %}</h3>

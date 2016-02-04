@@ -85,25 +85,22 @@ h4.task-small-title {
 /* Task status */
 
 /* Don't remove !important. Otherwise odd rows won't be affected. */
-.task-correct {
-  @include colored-tr-striped(lime, 15%);
+@mixin colored-tr-and-lecture($class, $color, $weight) {
+  tr.#{$class} {
+    @include colored-tr-striped($color, $weight);
+  }
+  /* For lectures. */
+  img.#{$class} {
+    border: 1px solid mix($color, #eee, $weight);
+    box-shadow: 0 1px 3px rgba(mix($color, #ccc, 50%), 0.35) !important;
+  }
 }
 
-.task-submitted-not-rated {
-  @include colored-tr-striped(cyan, 12%);
-}
-
-.task-as-solved {
-  @include colored-tr-striped(lime, 10%);
-}
-
-.task-wrong {
-  @include colored-tr-striped(red, 10%);
-}
-
-.task-todo {
-  @include colored-tr-striped(yellow, 12%);
-}
+@include colored-tr-and-lecture(task-correct, lime, 15%);
+@include colored-tr-and-lecture(task-submitted-not-rated, cyan, 12%);
+@include colored-tr-and-lecture(task-as-solved, lime, 10%);
+@include colored-tr-and-lecture(task-wrong, red, 10%);
+@include colored-tr-and-lecture(task-todo, yellow, 12%);
 
 .task-hidden {
   @include colored-tr-striped(gray, 12%);
@@ -210,7 +207,6 @@ h4.task-small-title {
 
 /* Task bulk. */
 #tb-instructions-container {
-  font-size: 11px;
   float: right;
   width: 350px;
 }

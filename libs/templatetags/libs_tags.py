@@ -40,6 +40,14 @@ def temporary_get_key(context, *args):
     return ''
 
 @register.simple_tag(takes_context=True)
+def append_get_parameters(context):
+    """Generate "?a=b" part of the URL.
+
+    Returns an empty string if GET is empty."""
+    get = context['request'].GET
+    return '?' + escape(get.urlencode()) if get else ''
+
+@register.simple_tag(takes_context=True)
 def generate_get_query_string(context, *args, **kwargs):
     """
         Generates GET part of URL given keys to remove (*args) and
