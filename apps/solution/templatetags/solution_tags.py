@@ -50,7 +50,7 @@ def solution_tr_bg_color_attr(solution, row_number):
     r, g, b = rgb
 
     days = (datetime.now() - solution.date_created).days
-    percent = 1 if days < 3 else (.6 if days < 90 else .2)
+    percent = .5 if days < 3 else (.25 if days < 90 else .15)
 
     if row_number % 2 == 1:
         r, g, b = interpolate_colors(240, 245, 244, # #content.color

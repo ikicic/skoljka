@@ -85,33 +85,28 @@ h4.task-small-title {
 /* Task status */
 
 /* Don't remove !important. Otherwise odd rows won't be affected. */
-/* TODO: brighter colors for odd rows */
-.task-correct td {
-  background-color: #70FF70!important;
+.task-correct {
+  @include colored-tr-striped(lime, 15%);
 }
 
-.task-submitted-not-rated td {
-  background-color: rgb(244, 255, 163)!important;
+.task-submitted-not-rated {
+  @include colored-tr-striped(cyan, 12%);
 }
 
-.task-as-solved td {
-  background-color: #AFA!important;
+.task-as-solved {
+  @include colored-tr-striped(lime, 10%);
 }
 
-.task-wrong td {
-  background-color: #F99!important;
+.task-wrong {
+  @include colored-tr-striped(red, 10%);
 }
 
-.task-todo td {
-  background-color: #8FF!important;
+.task-todo {
+  @include colored-tr-striped(yellow, 12%);
 }
 
-.task-hidden td {
-  background-color: #E0E0E0!important;
-}
-
-tr.task-hidden:nth-child(odd) td {
-  background-color: #E4E3E3!important;
+.task-hidden {
+  @include colored-tr-striped(gray, 12%);
 }
 
 .task-locked {
@@ -120,9 +115,9 @@ tr.task-hidden:nth-child(odd) td {
 
 .task-unsolvable a {
   color: rgb(132, 152, 162);
-}
-.task-unsolvable a:hover {
-  color: rgb(112, 125, 142);
+  &:hover {
+    color: rgb(112, 125, 142);
+  }
 }
 
 /* End task table */
