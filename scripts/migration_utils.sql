@@ -78,13 +78,13 @@ BEGIN
 
     IF IndexIsThere = 0 THEN
         SET @sqlstmt = CONCAT('CREATE INDEX ',given_index,' ON ',
-        'skoljka','.',given_table,' (',given_columns,')');
+        given_table,' (',given_columns,')');
         PREPARE st FROM @sqlstmt;
         EXECUTE st;
         DEALLOCATE PREPARE st;
     ELSE
         SELECT CONCAT('Index ',given_index,' already exists on Table ',
-        'skoljka','.',given_table) CreateindexErrorMessage;
+        given_table) CreateindexErrorMessage;
     END IF;
 
 END $$

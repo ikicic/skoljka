@@ -45,7 +45,7 @@ def get_featured_lectures():
     The result is cached in the folder's cache namespace.
     """
     if not FEATURED_FOLDER_ID:
-        return None  # No cache queries if featured lectures not used at all.
+        return []  # No cache queries if featured lectures not used at all.
     return _get_featured_lectures_cached()
 
 
