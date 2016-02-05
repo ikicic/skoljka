@@ -118,8 +118,8 @@ class SolutionManager(models.Manager):
         if user is not None and user.is_authenticated():
             user_group_ids = user.get_profile().get_group_ids()
             return self.filter(
-                Q(task__permissions__group_id__in=user_group_ids,
-                    task__permissions__permission_type=VIEW)    \
+                Q(task__objpermissions__group_id__in=user_group_ids,
+                    task__objpermissions__permission_type=VIEW)    \
                 | Q(task__author_id=user.id)    \
                 | Q(task__hidden=False)).distinct()
         else:

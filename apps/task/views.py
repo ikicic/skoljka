@@ -283,7 +283,7 @@ def task_list(request, user_id=None, only_lectures=False):
         tasks = tasks.filter(author_id=user_id)
 
     return {
-        'can_bulk_add': True or user.has_perm('task.can_bulk_add'),
+        'can_bulk_add': request.user.has_perm('task.can_bulk_add'),
         'only_lectures': only_lectures,
         'tasks': tasks,
     }

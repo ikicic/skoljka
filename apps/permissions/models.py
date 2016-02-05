@@ -66,8 +66,8 @@ def convert_permission_names_to_values(names):
 class PermissionManager(models.Manager):
     def for_user(self, user, permission_type):
         if user is not None and user.is_authenticated():
-            q = Q(permissions__group_id__in=user.get_profile().get_group_ids(),
-                permissions__permission_type=permission_type)
+            q = Q(objpermissions__group_id__in=user.get_profile().get_group_ids(),
+                objpermissions__permission_type=permission_type)
 
             try:
                 self.model._meta.get_field_by_name('author')
@@ -112,7 +112,9 @@ class BasePermissionsModel(models.Model):
     # Possible permissions applicable to the Model
     object_permissions = MODEL_DEFAULT
 
-    permissions = generic.GenericRelation(ObjectPermission)
+    # TODO: Django 1.5, something with the custom Group model?
+    # 'permissions' would be in conflict with Group.permissions!
+    objpermissions = generic.GenericRelation(ObjectPermission)
     objects = PermissionManager()
 
     def user_has_perm(self, user, type):

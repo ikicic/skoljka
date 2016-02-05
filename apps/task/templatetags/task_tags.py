@@ -155,7 +155,7 @@ def lecture_small_box(context, task):
 
 @register.simple_tag()
 def lecture_img_class(task):
-    solution = task.cache_solution  # Must be available!
+    solution = getattr(task, 'cache_solution', None)
     if not solution or solution.detailed_status == SolutionDetailedStatus.BLANK:
         return ''
     return ' ' + HTML_INFO[solution.detailed_status]['tr_class']

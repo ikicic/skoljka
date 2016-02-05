@@ -25,8 +25,8 @@ class GroupPermissionManager(models.Manager):
             return self.filter(
                   Q(data__hidden=False)
                 | Q(data__author_id=user.id)
-                | Q(permissions__group_id__in=user.get_profile().get_group_ids(),
-                    permissions__permission_type=permission_type)).distinct()
+                | Q(objpermissions__group_id__in=user.get_profile().get_group_ids(),
+                    objpermissions__permission_type=permission_type)).distinct()
         else:
             return self.filter(data__hidden=False)
 
@@ -65,7 +65,9 @@ class UserGroup(models.Model):
 # grupa ima sama sebi dodijeljena neka prava (npr. VIEW)
 
 # problem oko related_name, umjesto defaultnog 'group' stavio sam 'groups' (ikicic)
-Group.add_to_class('permissions', generic.GenericRelation(ObjectPermission, related_name='groups'))
+# 'permissions' would be in conflict with the existing Group.permissions!
+Group.add_to_class('objpermissions',
+        generic.GenericRelation(ObjectPermission, related_name='groups'))
 
 # Manually extending an existing class, not such a smart idea...
 group__object_permissions = MODEL_DEFAULT + [ADD_MEMBERS]

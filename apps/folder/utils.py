@@ -353,7 +353,7 @@ def _invalidate_on_task_permissions_update(sender, **kwargs):
 @receiver(post_save, sender=UserGroup)
 def _invalidate_on_usergroup_update(sender, **kwargs):
     folder_ids = Folder.objects    \
-        .filter(hidden=True, permissions__group_id=kwargs['instance'].group_id) \
+        .filter(hidden=True, objpermissions__group_id=kwargs['instance'].group_id) \
         .values_list('id', flat=True).distinct()
     invalidate_cache_for_folder_ids(folder_ids)
 
