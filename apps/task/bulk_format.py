@@ -123,7 +123,7 @@ class InternalTaskInfo(object):
         # Author.
         author = prefetch.users.get(var['AUTHOR'], None)
         if not author:
-            raise UserNotFound(_("User \"%s\" not found.") % var['AUTHOR'])
+            raise UserNotFound(_(u"User \"%s\" not found.") % var['AUTHOR'])
         self.json['author_id'] = author.id
         template_data['author'] = author
 
@@ -146,7 +146,7 @@ class InternalTaskInfo(object):
                 perm_group_ids[str(perm)].append(group.id)
             except KeyError:
                 raise GroupNotFound(
-                        _("User or group \"%s\" not found.") % group_name)
+                        _(u"User or group \"%s\" not found.") % group_name)
         # Sort to be make unittests simpler.
         self.json['_permissions'] = {perm_id: sorted(ids) \
                 for perm_id, ids in perm_group_ids.iteritems()}
@@ -259,7 +259,7 @@ def parse_variables(variables):
     def _generate(var):
         value = values.get(var, None)
         if value == -1:  # Gray node.
-            msg = _("Cyclic dependency detected for the variable \"%s\".") % var
+            msg = _(u"Cyclic dependency detected for the variable \"%s\".") % var
             raise CyclicDependency(msg)
         if value:
             return value
@@ -276,7 +276,7 @@ def parse_variables(variables):
                 result.append(part)
             total += len(result[-1])
             if total > VALUE_LENGTH_LIMIT:
-                msg = _("Value of the variable \"%s\" too long.") % var
+                msg = _(u"Value of the variable \"%s\" too long.") % var
                 raise ValueTooLong(msg)
         values[var] = u''.join(result)
         return values[var]

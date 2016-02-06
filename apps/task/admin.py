@@ -3,7 +3,7 @@ from django.contrib import admin
 from mathcontent.utils import create_file_thumbnail, ThumbnailRenderingException
 from skoljka.libs.string_operations import media_path_to_url
 
-from task.models import Task
+from task.models import Task, TaskBulkTemplate
 
 class TaskAdmin(admin.ModelAdmin):
     actions = ['refresh_thumbnails']
@@ -30,3 +30,4 @@ class TaskAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Task, TaskAdmin)
+admin.site.register(TaskBulkTemplate, admin.ModelAdmin)

@@ -116,7 +116,7 @@ def bulk_new(request, template_id=None):
     history = list(TaskBulkTemplate.objects.for_user(request.user, VIEW) \
             .order_by('id').distinct())
     history = [{
-            'title': "{} ({})".format(x.name, x.last_edit_date),
+            'title': u"{} ({})".format(x.name, x.last_edit_date),
             'content': x.source_code,
         } for x in history]
 
