@@ -4,7 +4,7 @@ $(function() {
     event.preventDefault();
     $('#tb-loading-indicator').show();
     var text = $(this).closest('form').find('textarea').val();
-    $.get(
+    $.post(
         '/task/ajax/bulk/preview/',
         {text: text},
         function(result) {

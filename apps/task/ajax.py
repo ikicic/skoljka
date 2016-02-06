@@ -7,12 +7,12 @@ from task.forms import check_prerequisites
 
 import json
 
-@ajax(get=['text'])
+@ajax(post=['text'])
 @response('inc_task_bulk_preview_multiple.html')
 def bulk_preview(request):
     """This basically simulates task_bulk_preview_multiple tag."""
     try:
-        task_infos = parse_bulk(request.user, request.GET['text'])
+        task_infos = parse_bulk(request.user, request.POST['text'])
     except BulkFormatError as e:
         return e.message
 
