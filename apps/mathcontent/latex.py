@@ -1,12 +1,15 @@
-﻿import os, sys, hashlib, re, codecs
-
-from django.conf import settings
+﻿from django.conf import settings
 from django.template.loader import render_to_string
 
-from mathcontent import ERROR_DEPTH_VALUE
-from mathcontent.models import LatexElement
+from mathcontent.models import ERROR_DEPTH_VALUE, LatexElement
 
 from skoljka.libs.timeout import run_command
+
+import codecs
+import hashlib
+import os
+import re
+import sys
 
 
 # Obican .getstatusoutput ne radi na Windowimsa, ovo je zamjena

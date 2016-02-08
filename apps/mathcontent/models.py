@@ -8,13 +8,16 @@ from skoljka.libs.generators import LowerNumKeyGen
 from skoljka.libs.string_operations import media_path_to_url
 
 import os
-import re
 
 # TODO: napraviti MathContentField koji ce se sam spremiti
 # pri spremanju forme, ako je to uopce moguce
 
-
+ERROR_DEPTH_VALUE = -1000
 MAX_LENGTH = 100000
+IMG_URL_PATH = '/media/m/'
+TYPE_HTML = 0
+TYPE_LATEX = 1
+
 
 class LatexElement(models.Model):
     hash = models.CharField(max_length=32, primary_key=True)
@@ -31,6 +34,7 @@ class MathContent(models.Model):
     text = models.TextField(blank=True, max_length=MAX_LENGTH,
         verbose_name='Tekst')
     html = models.TextField(blank=True, null=True)
+    # version = models.IntegerField(default=0)
 
     def __unicode__(self):
         return self.short()
@@ -42,15 +46,15 @@ class MathContent(models.Model):
         return not self.text or self.text.isspace()
 
     def pre_save(self):
-        if not hasattr(self, 'no_html_reset'):
+        if not hasattr(self, '_no_html_reset'):
             self.html = None
 
     def render(self, quote=False):
         if self.html is None:
             from mathcontent.utils import convert_to_html
             print 'CONVERTING %d...' % self.id
-            self.html = convert_to_html(self.text, self)
-            self.no_html_reset = True
+            self.html = convert_to_html(self.text, content=self)
+            self._no_html_reset = True
             self.save()
             print 'DONE!'
 
@@ -65,10 +69,6 @@ class MathContent(models.Model):
     # TODO: template tag!
     def render_quote(self):
         return self.render(quote=True)
-
-    def convert_to_latex(self, attachment_path=None):
-        from mathcontent.utils import convert_to_latex as _convert_to_latex
-        return _convert_to_latex(self.text, self, attachment_path)
 
 
 def attachment_upload_to(instance, filename):

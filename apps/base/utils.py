@@ -22,7 +22,7 @@ def _get_featured_lectures_cached():
     try:
         folder = Folder.objects.get(id=FEATURED_FOLDER_ID)
     except Folder.DoesNotExist:
-        return None  # This is the homepage, don't just throw exceptions.
+        return []  # This is the homepage, don't just throw exceptions.
 
     # Remove all hidden task. Featured lectured should work as fast as
     # possible, and we don't want to cache this for each user separately.

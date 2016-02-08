@@ -20,7 +20,7 @@ from folder.utils import invalidate_cache_for_folders, \
 from mathcontent import latex
 from mathcontent.forms import AttachmentForm, MathContentForm
 from mathcontent.models import MathContent, Attachment
-from mathcontent.utils import check_and_save_attachment, \
+from mathcontent.utils import check_and_save_attachment, convert_to_latex, \
         create_file_thumbnail, ThumbnailRenderingException
 from permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS, VIEW_SOLUTIONS
 from permissions.models import ObjectPermission
@@ -380,8 +380,9 @@ def _convert_to_latex(sorted_tasks, **kwargs):
     tasks = []
     for k, x in enumerate(sorted_tasks):
         # no / at the end
-        attachment_path = is_latex and '{}/{}'.format(ZIP_ATTACHMENT_DIR, x.id)
-        content = x.content.convert_to_latex(attachment_path=attachment_path)
+        attachments_path = is_latex and '{}/{}'.format(ZIP_ATTACHMENT_DIR, x.id)
+        content = convert_to_latex(
+                content=x.content, attachments_path=attachments_path)
         data = {
             'title': x.name,
             'url': x.get_absolute_url(),
