@@ -47,6 +47,13 @@ class MathContentRenderTestCase(TestCase):
 
     def test_latex_commands(self):
         self.assertHTMLAutoLatex("bla", "bla")
+        self.assertHTMLAutoLatex("bla\nbla", "bla\nbla")
+        self.assertHTMLAutoLatex("bla\n\nbla", "bla<br>bla")
+        # First spaces are copies (it's not important how do they behave).
+        self.assertHTMLAutoLatex("bla  \n\n  bla", "bla  <br>bla")
+        self.assertHTMLAutoLatex("bla  \n \n \n\n  bla", "bla  <br>bla")
+        self.assertHTMLAutoLatex("bla\n\n\n\nbla", "bla<br>bla")
+
         self.assertHTMLAutoLatex("bla\\\\asdf", "bla<br>asdf")
         self.assertHTMLAutoLatex("\\emph{bla bla bla}", "<i>bla bla bla</i>")
         self.assertHTMLAutoLatex("\\emph{bla \\textbf{bla} bla}",

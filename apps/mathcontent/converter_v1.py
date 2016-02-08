@@ -1,6 +1,7 @@
 from django.utils.translation import ugettext as _
 
 from skoljka.libs import xss
+from skoljka.libs.string_operations import startswith_ex
 
 from mathcontent.models import ERROR_DEPTH_VALUE, IMG_URL_PATH, TYPE_HTML, \
         TYPE_LATEX
@@ -44,11 +45,6 @@ def is_between(c, a, b):
     """Check if the unicode value of char c is between values of a and b."""
     u = unichr(c)
     return unichr(a) <= u and u <= unichr(b)
-
-
-def startswith_ex(T, start, string):
-    """As startswith, but with a specified start."""
-    return T[start:start + len(string)] == string
 
 
 def warning(msg):
@@ -380,9 +376,11 @@ latex_commands = {
     'url': LatexURL(),
     '~': LatexSpecialSymbol('~'),               # Not really.
 }
+
 latex_begin_commands = {
     'center': LatexBeginCommand('<div class="mc-center">', '</div>'),
 }
+
 bb_commands = {
     'b': BBCodeContainerWrapper('textbf'),
     'center': BBCodeContainer('<div class="mc-center">', '</div>',
@@ -454,15 +452,14 @@ class Converter(object):
     def handle_newline(self, i):
         line_ends = 0
         k = i
-        # NOT TESTED.
         while not self.is_end(i) and self.T[i].isspace():
             if self.T[i] == '\r' or self.T[i] == '\n':
                 line_ends += 1
             i += 2 if self.T[i:i + 2] == '\r\n' else 1
         if self.type == TYPE_LATEX:
             self.out.append(self.T[k:i])  # Keep the spaces!
-        if self.type == TYPE_HTML and line_ends >= 2:
-            self.out.append('<br>')
+        if self.type == TYPE_HTML:
+            self.out.append(self.T[k:i] if line_ends <= 1 else '<br>')
         return i
 
     def handle_whitespace(self, i):
