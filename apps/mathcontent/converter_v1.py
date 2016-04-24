@@ -1,14 +1,62 @@
 from django.utils.translation import ugettext as _
 
-from skoljka.libs import xss
+from skoljka.libs import flatten_ignore_none, xss
 from skoljka.libs.string_operations import startswith_ex
 
 from mathcontent.models import ERROR_DEPTH_VALUE, IMG_URL_PATH, TYPE_HTML, \
         TYPE_LATEX
-from mathcontent.latex import generate_png, generate_svg
+from mathcontent.latex import generate_png, generate_latex_hash, \
+        get_available_latex_elements
 
-# Prepend this to the text to use this converter.
-VERSION_MARKER = '%VERSION1'
+from collections import defaultdict
+from urlparse import urljoin
+
+import re
+
+# TODO: Ignore spaces after a command.
+#   \textasciicircum bla --> ~bla
+#   \textasciicircum{} bla --> ~ bla
+# TODO: % ignores whitespace at the beginning of the next line!
+#   bla bla%ignore this\n  asdf --> bla blaasdf
+# TODO: Support for starred commands.
+#  E.g. \\* which does nothing in HTML.
+# TODO: \\[5pt]
+# TODO: \newline
+# TODO: \par
+# TODO: \-
+# TODO: \mbox{...}
+# TODO: \TeX
+# TODO: \LaTeX
+# TODO: Quotation marks ``text'' and `text' for HTML.
+# TODO: -, -- (en-dash), --- (em-dash) and other ligatures
+# TODO: Fig.~5  (treat as a LaTeX-only feature)
+# TODO: \underline
+# TODO: \begin{enumerate} \item ... \end{enumerate}
+# TODO: \begin{itemize} \item ... \end{itemize}
+# TODO: \begin{description} \item[bla] ... \end{description}
+# TODO: Support recursive enumerate / itemize / description.
+# TODO: \begin{quote}...\end{quote}
+# TODO: \begin{multline}...\end{multline}
+# TODO: \begin{eqnarray}...\end{eqnarray}
+
+# MAYBE: \" \i \j \o \^ \ss \~ and other special characters
+# MAYBE: \emph{italic \emph{not italic} italic} (CSS thing)
+# MAYBE: \begin{verbatim}...\end{verbatim}
+# MAYBE: \verb+asdf+
+# MAYBE: \begin{verbatim*} and \verb*
+# MAYBE: \newpage
+# MAYBE: \(no)linebreak[n]
+# MAYBE: \(no)pagebreak[n]
+# MAYBE: \begin{comment}...\end{comment} with \usepackage{verbatim}
+
+
+COUNTER_EQUATION = 1
+COUNTER_FIGURE = 2
+
+ROOT_BLOCK_NAME = 'root'
+
+RE_ASCII_ALPHA_SINGLE_CHAR = re.compile('[a-zA-Z]')
+_NT__READ_TEXT__END_CHAR = set('{}[]$\n\r\\%')
 
 escape_table = {
     # NOT TESTED.
@@ -33,6 +81,152 @@ escape_table = {
     },
 }
 
+########################################################
+# Test utils
+########################################################
+# Use in unit tests to skip a comparison of a certain field.
+class _SkipComparison():
+    def __repr__(self):
+        return '<<SKIP>>'
+
+SKIP_COMPARISON = _SkipComparison()
+def _test_eq(A, B):
+    """Compare two objects. Skip comparison of keys with a value
+    SKIP_COMPARISON (it is still required that both objects have the same keys).
+    """
+    if A.__class__ != B.__class__:
+        return False
+    x = A.__dict__
+    y = B.__dict__
+    if x == y:
+        return True
+    for key, value in x.iteritems():
+        if key not in y:
+            return False
+        if value != y[key] and value != SKIP_COMPARISON and \
+                y[key] != SKIP_COMPARISON:
+            return False
+    # It suffices to compare only if they have the same keys.
+    return x.keys() == y.keys()
+
+
+########################################################
+# Tokens
+########################################################
+# Unprocesssed tokens.
+TOKEN_COMMAND = 20
+TOKEN_OPEN_CURLY = 30
+TOKEN_CLOSED_CURLY = 31
+TOKEN_OPEN_SQUARE = 32
+TOKEN_CLOSED_SQUARE = 33
+
+
+# Processed tokens.
+class Token(object):
+    def __eq__(self, other):
+        return _test_eq(self, other)
+
+class TokenComment(Token):
+    def __init__(self, text):
+        self.text = text
+    def __repr__(self):
+        return 'TokenComment({})'.format(repr(self.text))
+
+class TokenMath(Token):
+    def __init__(self, format, content):
+        self.format = format
+        self.content = content
+    def __repr__(self):
+        return 'TokenMath({}, {})'.format(repr(self.format), repr(self.content))
+
+class TokenText(Token):
+    def __init__(self, text):
+        self.text = text
+    def __repr__(self):
+        return 'TokenText({})'.format(repr(self.text))
+
+class TokenActiveWhitespace(Token):
+    def __init__(self, text):
+        self.text = text
+    def __repr__(self):
+        return 'TokenActiveWhitespace({})'.format(repr(self.text))
+
+class TokenInactiveWhitespace(Token):
+    def __init__(self, text):
+        self.text = text
+    def __repr__(self):
+        return 'TokenInactiveWhitespace({})'.format(repr(self.text))
+
+class TokenError(Token):
+    def __init__(self, error_message, content):
+        self.error_message = error_message
+        self.content = content
+    def __repr__(self):
+        return 'TokenError({}, {})'.format(
+                repr(self.error_message), repr(self.content))
+
+class TokenCommand(Token):
+    def __init__(self, command, part=0, args=[]):
+        self.command = command
+        self.args = args
+        self.part = part
+    def __repr__(self):
+        return 'TokenCommand({}, part={}, args={})'.format(
+                repr(self.command), self.part, repr(self.args))
+
+class TokenOpenCurly(Token):
+    def __repr__(self):
+        return 'TokenOpenCurly()'
+
+class TokenClosedCurly(Token):
+    def __repr__(self):
+        return 'TokenClosedCurly()'
+
+class TokenBBCode(Token):
+    def __init__(self, name, attrs, T_start, T_end, content=None):
+        self.name = name
+        self.attrs = attrs
+        self.T_start = T_start  # Original interval of the input string.
+        self.T_end = T_end
+        self.content = content
+    def __repr__(self):
+        return 'TokenBBCode({}, {}, {}, {})'.format(
+                repr(self.name), repr(self.attrs), self.T_start, self.T_end)
+    def is_open(self):
+        return self.attrs is not None
+
+
+########################################################
+# Exceptions
+########################################################
+# TODO: Handle exceptions.
+class BBCodeException(Exception):
+    pass
+
+
+class ParseError(Exception):
+    pass
+
+
+class CriticalError(ParseError):
+    def __init__(self, converter, index, msg):
+        self.converter = converter
+        self.index = index
+        super(CriticalError, self).__init__(msg)
+
+
+class LatexSyntaxError(ParseError):
+    pass
+
+class UnknownEnvironment(ParseError):
+    pass
+
+class TooManyParseErrors(ParseError):
+    pass
+
+class ParserInternalError(Exception):
+    pass
+
 
 ########################################################
 # General helper functions.
@@ -45,10 +239,6 @@ def is_between(c, a, b):
     """Check if the unicode value of char c is between values of a and b."""
     u = unichr(c)
     return unichr(a) <= u and u <= unichr(b)
-
-
-def warning(msg):
-    return "{{ " + msg + " }}"
 
 
 def latex_escape(val):
@@ -66,36 +256,62 @@ def parse_latex_params(val):
         try:
             name, val = pair.split('=')
         except ValueError:
-            raise BBCodeError(_("Invalid format:") + " " + val)
+            raise BBCodeException(_("Invalid format:") + " " + val)
         result[name.strip()] = val.strip()
     return result
 
 
-########################################################
-# Exceptions
-########################################################
-# TODO: Handle exceptions.
-class BBCodeError(Exception):
-    pass
-
-
-class ParseError(Exception):
-    pass
-
-
-class CriticalError(ParseError):
-    def __init__(self, converter, index, msg):
-        self.converter = converter
-        self.index = index
-        super(CriticalError, self).__init__(msg)
-
-
-class TooManyParseErrors(ParseError):
-    pass
+# def read_until(T, i, begin_pattern, end_pattern):
+#     """Return everything until the matching end_pattern. Final index
+#     points at the first character of the pattern.
+#
+#     Set begin_pattern to None to disable depth counting (i.e. recursive
+#     commands).
+#
+#     Returns (i, content)."""
+#     start = i
+#     depth = 1
+#     while i < len(T):
+#         current = T[i];
+#         if current == end_pattern[0] and \
+#                 startswith_ex(T, i, end_pattern):
+#             if depth == 1:
+#                 return i, T[start:i]
+#             depth -= 1
+#         elif begin_pattern and current == begin_pattern[0] and \
+#                 startswith_ex(T, i, begin_pattern):
+#             depth += 1
+#         elif startswith_ex(T, i, '\\url{'):
+#             # This fixes just a single case where % doesn't actually
+#             # represent a comment.
+#             i, dummy = self.read_until_curly_brace(
+#                     i + len('\\url{'), comments_enabled=False)
+#         elif current == '%':
+#             while i < len(T) and T[i] not in '\r\n':
+#                 i += 1
+#         elif current == '\\':
+#             i += 2
+#         else:
+#             i += 1
+#     raise ParseError(_("Matching \"%s\" not found.") % end_pattern)
 
 ########################################################
 # Tag/command-specific helper functions
 ########################################################
+def bb_code_link(type, url, content):
+    """Output the <a...>...</a> tag or  \\url{...} or \\href{...}{...} command.
+
+    Content will be used as the url if the 'url' is empty.
+    """
+    if type == TYPE_HTML:
+        return u'<a href="{}" rel="nofollow">{}</a>'.format(
+                xss.escape(url or content), content)
+    if type == TYPE_LATEX:
+        if url:
+            return u'\\href{%s}{%s}' % (latex_escape(url), content)
+        else:
+            return u'\\url{%s}' % latex_escape(content)
+
 
 def _img_parse_length(value):
     try:
@@ -126,7 +342,7 @@ def img_params_to_html(params):
                 raise ParseError(_("Unexpected value:") + " " + value)
             width = float_to_str_pretty(100 * scale) + "%"
             height = float_to_str_pretty(100 * scale) + "%"
-        elif name != 'attachment':
+        elif name != 'attachment' and name != 'img':
             raise ParseError(_("Unexpected attribute:") + " " + name)
     return (' width="{}"'.format(width) if width else '') + \
            (' height="{}"'.format(height) if height else '')
@@ -137,7 +353,7 @@ def img_params_to_latex(params):
     scale = []
     for name, value in params.iteritems():
         name = name.lower()
-        value = value.strip()
+        value = (value or '').strip()
         if name in ['width', 'height']:
             if value[-1] == '%':
                 try:
@@ -151,7 +367,7 @@ def img_params_to_latex(params):
                 scale.append(str(float(value)))
             except ValueError:
                 raise ParseError(_("Expected a number."))
-        elif name != 'attachment':
+        elif name != 'attachment' and name != 'img':
             raise ParseError(_("Unexpected attribute:") + " " + name)
     if any(x != scale[0] for x in scale):
         raise ParseError(_("Incompatible scaling."))
@@ -169,129 +385,546 @@ def img_params_to_latex(params):
 ########################################################
 # Commands
 ########################################################
+def _parse_argument__url(tokenizer):
+    T = tokenizer.T
+    K = tokenizer.K
+    start = K
+    braces = 0
+    while K < len(T):
+        if T[K] == '}':
+            if braces == 0:
+                K += 1
+                break
+            braces -= 1
+        elif T[K] == '{':
+            braces += 1
+        K += 1
+    tokenizer.K = K
+    if braces > 0:
+        return TokenError(_("Closing '}' bracket not found."), T[start : K])
+    return T[start : K - 1]  # Don't include }.
+
+
 class Command(object):
-    def __init__(self, argc, parse_content):
-        self.parse_content = parse_content
-        self.argc = argc
+    def __init__(self, args_desc=""):
+        """Args descriptor is a string of format <X><Y>...<Z>, where
+        < > stands for [ ] or { }, and X for one of the following:
+            P - parse ({} only)
+            U - read as an URL ({} only)
+            S - read until ']', but escaping \\\\ and \\] ([] only)
+
+        Also, [...] brackets are treated as optional parameters."""
+
+        assert len(args_desc) % 3 == 0
+        self.argc = len(args_desc) / 3
+        self.args_desc = args_desc
+
+        # Example:
+        # Argument index:   0  1  2  3  4  5  6  7
+        # Argument descr:  [U]{U}{P}{P}{U}{U}{P}{U}
+        # Part index:      0000000 11 22222222 3333
+        # P_indices = [-1, 2, 3, 6, 8]  (8 == argc)
+        mid = [k for k in range(self.argc) if args_desc[3 * k + 1] == 'P']
+        self.P_indices = [-1] + mid + [self.argc]
+
+    def __eq__(self, other):
+        return _test_eq(self, other)
+
+    def get_arg_open_bracket(self, index):
+        assert index < self.argc
+        return self.args_desc[3 * index]
+
+    def parse_argument(self, tokenizer, name, index):
+        """Default argument parsing method."""
+        assert index < self.argc
+        open, method, closed = self.args_desc[3 * index : 3 * index + 3]
+        if method == 'P':
+            assert open == '{' and closed == '}'
+            tokenizer.push_state(State(break_condition=TOKEN_CLOSED_CURLY))
+            return tokenizer.parse()
+        if method == 'U':
+            assert open == '{' and closed == '}'
+            return _parse_argument__url(tokenizer)
+        if method == 'S':
+            assert open == '[' and closed == ']'
+            return tokenizer.read_until(']', [r'\\', r'\]'])
+
+    def apply_command(self, tokenizer, name, args):
+        """Manually add states or control tokenizer, or return tokens to be
+        added. By default, add all parts that have been parsed and all
+        TokenCommand in between and at the beginning and at the end of the
+        command."""
+
+        tokenizer.state.add_token(TokenCommand(name, 0, args))
+        for part in range(1, len(self.P_indices) - 1):
+            tokenizer.state.add_token(args[self.P_indices[part]])
+            tokenizer.state.add_token(TokenCommand(name, part, args))
+
+    def to_html(self, token, converter):
+        raise NotImplementedError(repr(token))
+
+    def to_latex(self, token, converter):
+        """Given a TokenCommand instance, generate LaTeX.
+
+        By default it basically just reproduces the original input."""
+        part = token.part
+        output = []
+        if token.part == 0:
+            output.append('\\' + token.command)
+        else:
+            output.append('}')  # Close previous part.
+
+        # Between previous and next P:
+        for k in range(self.P_indices[part] + 1, self.P_indices[part + 1]):
+            if token.args[k] is None:
+                continue
+            open, method, closed = self.args_desc[3 * k : 3 * k + 3]
+            assert method == 'S' or method == 'U'
+            output.append(open + token.args[k] + closed)
+
+        if part < len(self.P_indices) - 2:
+            output.append('{')
+        return u"".join(output)
+
+
+
+class LatexBegin(Command):
+    # TODO: \begin[...]{equation} ... \end{equation}
+    # TODO: \begin{equation} ... \end{equation}
+    def __init__(self):
+        # SIMPLIFICATION MARK: Ignoring comments, using U.
+        super(LatexBegin, self).__init__(args_desc="{U}")
+
+    def apply_command(self, tokenizer, name, args):
+        """Simply add itself to the current state."""
+        if args[0] not in latex_environments:
+            return TokenError(_("Unknown LaTeX environment:"), args[0])
+
+        # Generate new LatexEnvironment instance.
+        environment = latex_environments[args[0]]()
+
+        # Pass environment as the arg.
+        tokenizer.state.add_token(TokenCommand(name, 0, [args[0], environment]))
+        tokenizer.push_state(State(break_condition='begin-' + args[0],
+                environment=environment))
+
+    def to_html(self, token, converter):
+        environment = token.args[1]
+        return environment.to_html(True, token, converter)
+
+
+
+class LatexEnd(Command):
+    # In the current implementation, \end{...} doesn't have the access to the
+    # [...] arguments of \begin[...]{...}. (That's not so difficult to fix
+    # if necessary)
+
+    # TODO: \begin{equation} ... \end{equation}
+    def __init__(self):
+        # SIMPLIFICATION MARK: Ignoring comments, using U.
+        super(LatexEnd, self).__init__(args_desc="{U}")
+
+    def apply_command(self, tokenizer, name, args):
+        """Simply add itself to the current state."""
+        break_condition = tokenizer.state.break_condition
+        if not isinstance(break_condition, basestring) or \
+                not break_condition.startswith('begin-'):
+            return TokenError(_("Unexpected \\end."), "")
+        expected = break_condition[6:]
+        if expected != args[0]:
+            return TokenError(
+                    _("Expected '%(expected)s', received '%(received)s'.") %
+                            {'expected': expected, 'received': args[0]}, "")
+        environment = tokenizer.state.environment
+        assert environment is not None
+        result = tokenizer.pop_state().tokens
+        return [result, TokenCommand(name, 0, [args[0], environment])]
+
+    def to_html(self, token, converter):
+        environment = token.args[1]
+        return environment.to_html(False, token, converter)
+
+
+
+class LatexCaption(Command):
+    """Handle \\caption{...}."""
+    def __init__(self):
+        super(LatexCaption, self).__init__(args_desc="{P}")
+
+    def apply_command(self, tokenizer, name, args):
+        # SIMPLIFICATION MARK - Not sure, but probably.
+        if not hasattr(tokenizer.state.environment, 'tag'):
+            return TokenError(_("Unexpected \\caption."), "")
+
+        tokenizer.counters[COUNTER_FIGURE] += 1
+        tag = str(tokenizer.counters[COUNTER_FIGURE])
+        tokenizer.state.environment.tag = tag
+        return super(LatexCaption, self).apply_command(
+                tokenizer, name, args + [tag])
+
+    def to_html(self, token, converter):
+        if token.part == 0:
+            # TODO: Translation to other languages.
+            tag_text = u"Slika {}:".format(token.args[-1])
+            return u'<div class="mc-caption">' \
+                    '<span class="mc-caption-tag">{}</span> '.format(tag_text)
+        return '</div>'
+
+    # def contribute(self, converter, name, content, params):
+    #     block = converter.block_stack[-1]
+    #     if block.name != 'figure':
+    #         msg = _("\\caption supported only inside a 'figure' environment.")
+    #         raise ParseError(msg)
+    #     converter.counters[COUNTER_FIGURE] += 1
+    #     tag = str(converter.counters[COUNTER_FIGURE])
+    #     block.variables['tag'] = tag
+    #     if converter.type == TYPE_HTML:
+    #         # TODO: Translation to other languages.
+    #         tag = u"Slika {}:".format(tag)
+    #         return u'<div class="mc-caption">' \
+    #                 '<span class="mc-caption-tag">{}</span> {}</div>'.format(
+    #                         tag, content)
+    #     elif converter.type == TYPE_LATEX:
+    #         return r"\caption{" + content + "}"
+
+
+
+class LatexCentering(Command):
+    """Set block variable 'centering' to True."""
+    def __init__(self):
+        super(LatexCentering, self).__init__()
+
+    def apply_command(self, tokenizer, name, args):
+        environment = tokenizer.state.environment
+        if environment and hasattr(environment, 'centering'):
+            environment.centering = True
+            return TokenCommand('centering', 0)
+        else:
+            return TokenError(_("Unexpected \\centering."), "")
+
+    def to_html(self, token, converter):
+        return u""
+
+    # def contribute(self, converter, name, content, params):
+    #     converter.block_stack[-1].variables['centering'] = True
+    #     if converter.type == TYPE_HTML:
+    #         return ""
+    #     elif converter.type == TYPE_LATEX:
+    #         return r"\centering"
 
 
 
 class LatexContainer(Command):
-    def __init__(self, html_open, html_close, argc=1, parse_content=True):
-        super(LatexContainer, self).__init__(
-                argc=argc, parse_content=parse_content)
+    def __init__(self, html_open, html_close):
+        super(LatexContainer, self).__init__(args_desc="{P}")
         self.html_open = html_open
         self.html_close = html_close
 
-    def contribute(self, converter, name, content, params):
-        if converter.type == TYPE_HTML:
-            return self.html_open + content + self.html_close
-        if converter.type == TYPE_LATEX:
-            assert self.argc <= 1
-            if self.argc == 0:
-                return '\\' + name
-            else:
-                return '\\' + name + '{' + content + '}'
+    # def apply_command(self, tokenizer, name, args):
+    #     # Do not pass arguments, we do not need them there.
+    #     tokenizer.state.add_token(TokenCommand(name, 0))
+    #     tokenizer.state.add_token(args[0])
+    #     tokenizer.state.add_token(TokenCommand(name, 1))
 
-
+    def to_html(self, token, converter):
+        return self.html_open if token.part == 0 else self.html_close
 
 class LatexHref(Command):
     def __init__(self):
-        super(LatexHref, self).__init__(argc=2, parse_content=False)
+        super(LatexHref, self).__init__(args_desc="{U}{P}")
 
-    def contribute(self, converter, name, contents, params):
-        url, desc = contents
-        if converter.type == TYPE_HTML:
-            return u'<a href="{}" rel="nofollow">{}</a>'.format(
-                    xss.escape(url), xss.escape(desc))
-        elif converter.type == TYPE_LATEX:
-            return u'\\href{%s}{%s}' % (latex_escape(url), latex_escape(desc))
+    # def parse_argument(self, tokenizer, name, index):
+    #     """Parse first argument as an URL, second normally."""
+    #     if index == 0:
+    #         return _parse_argument__url(tokenizer)
+    #     return super(LatexHref, self).parse_argument(tokenizer, name, index)
+
+    def to_html(self, token, converter):
+        if token.part == 0:
+            return u'<a href="{}" rel="nofollow">'.format(
+                xss.escape(token.args[0]))
+        else:
+            return '</a>'
+    # def contribute(self, converter, name, contents, params):
+    #     url, desc = contents
+    #     if converter.type == TYPE_HTML:
+    #     elif converter.type == TYPE_LATEX:
+    #         return u'\\href{%s}{%s}' % (latex_escape(url), latex_escape(desc))
 
 
 
 class LatexIncludeGraphics(Command):
     def __init__(self):
-        super(LatexIncludeGraphics, self).__init__(argc=1, parse_content=False)
+        # SIMPLIFICATION MARK - We don't ignore comments here, because
+        # whitespace handling seems also complicated, not to mention commands.
+        super(LatexIncludeGraphics, self).__init__(args_desc='[S]{U}')
 
-    def contribute(self, converter, name, content, params):
+    def to_html(self, token, converter):
+        # TODO: always send the list of attachments to the converter
         if converter.attachments is None:
-            return warning(_("Attachments not shown in a preview."))
-        filename = content.strip()
+            return TokenError(_("Attachments not shown in a preview."), "")
+        filename = token.args[1]
         try:
             attachment = converter.attachments_dict[filename]
         except KeyError:
-            raise BBCodeError(_("Attachment not found:") + " " + content.strip())
-        if converter.type == TYPE_HTML:
-            params = parse_latex_params(params)
-            return u'<img src="{}" alt="Attachment {}" class="latex"{}>'.format(
-                    xss.escape(attachment.get_url()),
-                    xss.escape(filename),
-                    img_params_to_html(params))
-        if converter.type == TYPE_LATEX:
-            if params:
-                params = '[' + params + ']'
-            return u'\\includegraphics%s{%s}' % (params, content)
+            return TokenError(_("Attachment not found:"), content.strip())
+
+        params = parse_latex_params(token.args[0] or '')
+        return u'<img src="{}" alt="Attachment {}" class="latex"{}>'.format(
+                xss.escape(attachment.get_url()),
+                xss.escape(filename),
+                img_params_to_html(params))
+
+
+class LatexLabel(Command):
+    """Handle \\label{...}."""
+    def __init__(self):
+        super(LatexLabel, self).__init__(args_desc="{U}")
+
+    def apply_command(self, tokenizer, name, args):
+        # SIMPLIFICATION MARK - Possibly labels don't work this way.
+        environment = tokenizer.state.environment
+
+        # HTML-only error.
+        if not hasattr(environment, 'tag'):
+            error = TokenError(_("Unexpected '\\label'."), "")
+        elif environment.tag is None:
+            error = TokenError(
+                    _("Tag missing, did you put \\label before \\caption?"), "")
+        else:
+            error = u""
+        tokenizer.refs[args[0]] = environment.tag
+        return TokenCommand(name, 0, args + [error])
+
+    def to_html(self, token, converter):
+        return token.args[-1]
+
+    # def contribute(self, converter, name, content, params):
+    #     block = converter.block_stack[-1]
+    #     if 'tag' in block.variables:
+    #         block.variables['label'] = content
+    #         warning = u""
+    #     else:
+    #         msg = _(r"No tag set. Maybe \caption was written after \label?")
+    #         warning = converter.warning(msg)
+
+    #     if converter.type == TYPE_HTML:
+    #         return warning
+    #     elif converter.type == TYPE_LATEX:
+    #         return warning + r"\label{" + content + "}"
 
 
 
-class LatexSpecialSymbol(LatexContainer):
-    def __init__(self, html, argc=1):
-        super(LatexSpecialSymbol, self).__init__(html, '', argc=argc)
+class LatexRef(Command):
+    """Manually processed by Converter."""
+    def __init__(self):
+        super(LatexRef, self).__init__(args_desc="{U}")
+
+    def to_html(self, token, converter):
+        raise ParserInternalError("LatexRef.to_html is unreachable.")
+
+
+
+class LatexSpecialSymbol(Command):
+    def __init__(self, html):
+        super(LatexSpecialSymbol, self).__init__()
+        self.html = html
+
+    def __repr__(self):
+        return "LatexSpecialSymbol({})".format(repr(self.html))
+
+    def to_html(self, token, converter):
+        return self.html
 
 
 
 class LatexURL(Command):
     def __init__(self):
-        super(LatexURL, self).__init__(argc=1, parse_content=False)
+        super(LatexURL, self).__init__(args_desc="{U}")
 
-    def contribute(self, converter, name, content, params):
-        if converter.type == TYPE_HTML:
-            # For example, in \url{...} character sequence "\}" is not
-            # allowed, and % is not treated as a comment. (!)
-            url = xss.escape(content)
-            return u'<a href="{}" rel="nofollow">{}</a>'.format(url, url)
-        elif converter.type == TYPE_LATEX:
-            return u'\\url{' + content + '}'
+    def to_html(self, token, converter):
+        url = xss.escape(token.args[0])
+        return u'<a href="{}" rel="nofollow">{}</a>'.format(url, url)
 
 
+########################################################
+# LaTeX Environments
+########################################################
 
-class LatexBeginCommand(Command):
-    def __init__(self, html_open, html_close):
-        super(LatexBeginCommand, self).__init__(argc=1, parse_content=True)
-        self.html_open = html_open
-        self.html_close = html_close
+class LatexEnvironment(object):
+    def __eq__(self, other):
+        return _test_eq(self, other)
 
-    def contribute(self, converter, name, content, params):
-        if converter.type == TYPE_HTML:
-            # TODO: params
-            return self.html_open + content + self.html_close
-        if converter.type == TYPE_LATEX:
-            if params:
-                params = '[' + params + ']'
-            return u'\\begin{%s}%s%s\\end{%s}' % (name, params, content, name)
+
+
+class LatexEnvironmentDiv(LatexEnvironment):
+    def __init__(self, html_class):
+        super(LatexEnvironmentDiv, self).__init__()
+        self.html_class = html_class
+
+    def __repr__(self):
+        return 'LatexEnvironmentDiv({})'.format(repr(self.html_class))
+
+    def to_html(self, begin, token, converter):
+        if begin:
+            return u'<div class="{}">'.format(self.html_class)
+        else:
+            return "</div>"
+
+
+
+def latex_environment_div_factory(html_class):
+    return lambda : LatexEnvironmentDiv(html_class=html_class)
+
+
+
+
+# class LatexEnvironmentEquation(Command):
+#     """Fixes the \\begin{equation}...\\end{equation} number."""
+#     def __init__(self):
+#         super(LatexEnvironmentEquation, self).__init__(parse_content=False)
+#
+#     def contribute(self, converter, name, content, params):
+#         converter.counters[COUNTER_EQUATION] += 1
+#         converter.extract_labels_from_mathmode(content, COUNTER_EQUATION)
+#         if converter.type == TYPE_HTML:
+#             latex = u"\\begin{equation}\\tag{%d}%s\\end{equation}" % \
+#                     (converter.counters[COUNTER_EQUATION], content)
+#             return u'<div class="mc-center">{}</div>'.format(
+#                     converter.convert_latex_formula('%s', latex))
+#         if converter.type == TYPE_LATEX:
+#             # Return whatever here is.
+#             if params:
+#                 params = '[' + params + ']'
+#             return u'\\begin{%s}%s%s\\end{%s}' % (name, params, content, name)
+
+
+
+class LatexEnvironmentFigure(LatexEnvironment):
+    """Handles \\begin{figure}...\\end{figure}."""
+    def __init__(self, centering=False, tag=None):
+        super(LatexEnvironmentFigure, self).__init__()
+        self.centering = centering
+        self.tag = tag
+
+    def __repr__(self):
+        return u'LatexEnvironmentFigure(centering={}, tag={})'.format(
+                self.centering, repr(self.tag))
+
+    def to_html(self, begin, token, converter):
+        if begin:
+            if self.centering:
+                return u'<div class="mc-figure mc-center">'
+            return u'<div class="mc-figure">'
+        return u'</div>'
+
+
+    # def contribute(self, converter, name, content, params):
+    #     if converter.type == TYPE_HTML:
+    #         if converter.block_stack[-1].variables.get('centering'):
+    #             center = " mc-center"
+    #         else:
+    #             center = ""
+    #         return u'<div class="mc-figure{}">{}</div>'.format(center, content)
+    #     if converter.type == TYPE_LATEX:
+    #         # Return whatever here is.
+    #         if params:
+    #             params = '[' + params + ']'
+    #         return u'\\begin{%s}%s%s\\end{%s}' % (name, params, content, name)
+
+
+
+########################################################
+# BBCode
+########################################################
+
+def parse_bbcode(T, K):
+    """Parse the following format:
+        [tag_name var1=value1 var2=value2...]
+    where `tag_name` is a sequence of alphanumeric characters, and `value` a
+    sequence of non-whitespace non-] characters, or any characters wrapped in
+    "..." or '...'. The quotation marks are escaped using \\", \\' and \\\\.
+    Characters [ and ] shouldn't be escaped if inside quotation marks.
+
+    Returns tag_name, open (True/False), {attr_name: value}, K
+    (tag_name is also included in the dict in the middle)
+    """
+    assert T[K] == '['
+    K += 1
+    if K < len(T):
+        open = T[K] != '/'
+        if not open:
+            K += 1
+
+    tag_name = None
+    attrs = {}
+    while K < len(T) and T[K] != ']':
+        while K < len(T) and T[K].isspace():
+            K += 1  # Skip whitespace.
+
+        # Read the variable name
+        start = K
+        while K < len(T) and T[K].isalnum():
+            K += 1
+        if K == start:
+            # No special characters allowed in the variable name.
+            raise BBCodeException()
+        attr_name = T[start : K]
+        if tag_name is None:
+            tag_name = attr_name
+        elif not open:
+            raise BBCodeException()
+
+        while K < len(T) and T[K].isspace():
+            K += 1  # Skip whitespace.
+
+        # Read the value.
+        if T[K] == '=':
+            if not open:
+                raise BBCodeException()
+            K += 1
+            while K < len(T) and T[K].isspace():
+                K += 1  # Skip whitespace.
+            if T[K] in '\'"':
+                quot = T[K]
+                K += 1
+                value = []
+                while K < len(T) and T[K] != quot:
+                    if T[K] == '\\' and K + 1 < len(T) and \
+                            (T[K + 1] == '\\' or T[K + 1] == quot):
+                        value.append(T[K + 1])
+                        K += 2
+                    else:
+                        value.append(T[K])
+                        K += 1
+                if K == len(T):
+                    raise BBCodeException()
+                K += 1
+                attrs[attr_name] = u"".join(value)
+            else:
+                start = K
+                while K < len(T) and T[K] not in ' \t\r\n]':
+                    K += 1
+                attrs[attr_name] = T[start : K]
+        else:
+            attrs[attr_name] = None
+    if K == len(T):
+        raise BBCodeException()
+
+    return tag_name, (attrs if open else None), K + 1
 
 
 
 class BBCodeTag(object):
-    def __init__(self, has_close_tag=True, parse_content=True):
+    def __init__(self, has_close_tag=True):
         self.has_close_tag = has_close_tag
-        self.parse_content = parse_content
 
-
-
-class BBCodeContainerWrapper(BBCodeTag):
-    def __init__(self, latex_command):
-        super(BBCodeContainerWrapper, self).__init__()
-
-        # Convert to LaTeXContainer, which converts to HTML or LaTeX.
-        self.latex_command = latex_command
-        self.latex_container = latex_commands[latex_command]
-
-    def contribute(self, converter, name, content, attributes):
-        if len(attributes) != 1 or attributes[0][1] is not None:
-            raise BBCodeError(_("Unexpected parameter(s)."))
-        return self.latex_container.contribute(
-                converter, self.latex_command, content, "")
+    def should_parse_content(self, token):
+        """Some tags might have parsing enabled or disabled depending on the
+        attributes (e.g. [url]not parsed[/url], [url=...]parsed[/url]).
+        Return True to use normal LaTeX parses, False to read until the end
+        tag. """
+        raise NotImplementedError()
 
 
 
@@ -303,13 +936,22 @@ class BBCodeContainer(BBCodeTag):
         self.latex_open = latex_open
         self.latex_close = latex_close
 
-    def contribute(self, converter, name, content, attributes):
-        if len(attributes) != 1 or attributes[0][1] is not None:
-            raise BBCodeError(_("Unexpected parameter(s)."))
-        if converter.type == TYPE_HTML:
-            return self.html_open + content + self.html_close
-        if converter.type == TYPE_LATEX:
-            return self.latex_open + content + self.latex_close
+    def should_parse_content(self, token):
+        return True
+
+    def to_html(self, token, converter):
+        if token.is_open():
+            if len(token.attrs) != 1 or token.attrs.values()[0] is not None:
+                raise BBCodeException(_("Unexpected parameter(s)."))
+            return self.html_open
+        return self.html_close
+
+    def to_latex(self, token, converter):
+        if token.is_open():
+            if len(token.attrs) != 1 or token.attrs.values()[0] is not None:
+                raise BBCodeException(_("Unexpected parameter(s)."))
+            return self.latex_open
+        return self.latex_close
 
 
 
@@ -317,484 +959,570 @@ class BBCodeImg(BBCodeTag):
     def __init__(self):
         super(BBCodeImg, self).__init__(has_close_tag=False)
 
-    def contribute(self, converter, name, content, attributes):
+    def _check(self, token, converter):
         if converter.attachments is None:
-            return warning(_("Attachments not shown in a preview."))
-        if attributes[0][1] is not None:  # "img" attribute should be None.
-            raise BBCodeError(_("Unexpected parameter:") + " " + "img")
-        attributes = dict(attributes[1:])
+            return converter.warning(_("Attachments not shown in a preview."))
+        if token.attrs['img'] is not None:  # "img" attribute should be None.
+            raise BBCodeException(_("Unexpected parameter:") + " " + "img")
         try:
-            val = attributes['attachment'].strip()
+            val = token.attrs['attachment'].strip()
             index = int(val) - 1
             attachment = converter.attachments[index]
         except KeyError:
-            raise BBCodeError(_("Missing an attribute:") + " attachment")
+            raise BBCodeException(_("Missing an attribute:") + " attachment")
         except ValueError:
-            msg = _("Invalid value \"%(val)s\" for the attribute \"%(attr)s\".")
-            raise BBCodeError(msg % {'val': val, 'attr': 'attachment'})
+            msg = _(u'Invalid value "%(val)s" for the attribute "%(attr)s".')
+            raise BBCodeException(msg % {'val': val, 'attr': 'attachment'})
         except IndexError:
-            raise BBCodeError(_("Unavailable attachment:") + " " + val)
-        if converter.type == TYPE_HTML:
-            return '<img src="{}" alt="Attachment #{}" class="latex"{}>'.format(
-                    xss.escape(attachment.get_url()), val,
-                    img_params_to_html(attributes))
-        elif converter.type == TYPE_LATEX:
-            return '\\includegraphics%s{%s}' % \
-                    (img_params_to_latex(attributes), attachment.get_filename())
+            raise BBCodeException(_("Unavailable attachment:") + " " + val)
+        return val, index, attachment
+
+    def to_html(self, token, converter):
+        val, index, attachment = self._check(token, converter)
+        return u'<img src="{}" alt="Attachment #{}" class="latex"{}>'.format(
+                xss.escape(attachment.get_url()), val,
+                img_params_to_html(token.attrs))
+
+    def to_latex(self, token, converter):
+        val, index, attachment = self._check(token, converter)
+        return u'\\includegraphics%s{%s}' % \
+                (img_params_to_latex(token.attrs), attachment.get_filename())
+
+
+
+# class BBCodeRef(BBCodeTag):
+#     """Handle [ref=<tag> task=<task_id> page=<page>]link desc[/ref].
+#
+#     [ref...]...[/ref] is a skoljka-specific tag for referencing an external
+#     formula or figure (any \\label{...}).
+#     Attribute 'page' is optional, it adds #page=<page> to the link.
+#     """
+#     def contribute(self, converter, name, content, attributes):
+#         attributes = dict(attributes)
+#         ref = attributes.pop('ref', None)  # Tag.
+#         task_id = attributes.pop('task', None)
+#         if ref is None:
+#             return converter.warning(_("Missing an attribute:") + " 'ref'")
+#         if task_id is None:
+#             return converter.warning(_("Missing an attribute:") + " 'task'")
+#         page = attributes.pop('page', None)  # Optional.
+#         page = "?page=" + page if page else ""
+#         url = converter.get_full_url('/task/{}/ref/{}'.format(task_id, page))
+#         if not content:
+#             content = "(link)"
+#         return converter.convert_latex_formula('$%s$', ref) + \
+#                 bb_code_link(converter.type, url, content)
 
 
 
 class BBCodeURL(BBCodeTag):
-    def contribute(self, converter, name, content, attributes):
-        url = attributes[0][1]
-        if url is None:
-            url = content
-        if len(attributes) > 1:
-            raise BBCodeError(_("Unexpected parameter(s)."))
-        if converter.type == TYPE_HTML:
-            return '<a href="{}" rel="nofollow">{}</a>'.format(
-                    xss.escape(url), content)
-        if converter.type == TYPE_LATEX:
-            if attributes[0][1]:
-                return '\\href{%s}{%s}' % (latex_escape(url), content)
-            else:
-                return '\\url{%s}' % latex_escape(url)
+    def should_parse_content(self, token):
+        # [url=...]...[/url --> parse normally
+        # [url]...[/url] --> no parsing, read until [/url]
+        return token.attrs['url'] is not None
+
+    def to_html(self, token, converter):
+        if token.is_open():
+            if len(token.attrs) > 1:
+                raise BBCodeException(_("Unexpected parameter(s)."))
+            if token.content is not None:
+                return u'<a href="{}" rel="nofollow">{}</a>'.format(
+                        xss.escape(token.content), xss.escape(token.content))
+            return u'<a href="{}" rel="nofollow">'.format(
+                    xss.escape(token.attrs['url']))
+        return '</a>'
+
+    def to_latex(self, token, converter):
+        if token.is_open():
+            if len(token.attrs) > 1:
+                raise BBCodeException(_("Unexpected parameter(s)."))
+            if token.content is not None:
+                # [url]...[/url]
+                return u'\\url{%s}' % latex_escape(token.content)
+            # [url=...]
+            return u'\\href{%s}{' % latex_escape(token.attrs['url'])
+        # [/url]
+        return '}'
 
 
 
 latex_commands = {
-    '\\': LatexSpecialSymbol('<br>', argc=0),
+    '\\': LatexSpecialSymbol('<br>'),  # NOT FULLY TESTED.
+    'begin': LatexBegin(),
+    'caption': LatexCaption(),
+    'centering': LatexCentering(),
+    'end': LatexEnd(),
     'emph': LatexContainer('<i>', '</i>'),
+#     # TODO: eqref
     'href': LatexHref(),
     'includegraphics': LatexIncludeGraphics(),
+    'label': LatexLabel(),
+    'ref': LatexRef(),
     'sout': LatexContainer('<s>', '</s>'),
-    'textasciicircum': LatexSpecialSymbol('^'),
-    'textasciitilde': LatexSpecialSymbol('~'),  # Not really.
-    'textbackslash': LatexSpecialSymbol('\\'),
+    'textasciicircum': LatexSpecialSymbol('^'),  # NOT FULLY TESTED.
+    'textasciitilde': LatexSpecialSymbol('~'),  # NOT FULLY TESTED. Not really.
+    'textbackslash': LatexSpecialSymbol('\\'),  # NOT FULLY TESTED.
     'textbf': LatexContainer('<b>', '</b>'),
     'uline': LatexContainer('<u>', '</u>'),
     'url': LatexURL(),
-    '~': LatexSpecialSymbol('~'),               # Not really.
+    '~': LatexSpecialSymbol('~'),               # NOT FULLY TESTED. Not really.
 }
 
-latex_begin_commands = {
-    'center': LatexBeginCommand('<div class="mc-center">', '</div>'),
+latex_environments = {
+    'center': latex_environment_div_factory('mc-center'),
+    'equation': None, # LatexEnvironmentEquation(),
+    'figure': LatexEnvironmentFigure,
+    'flushleft': latex_environment_div_factory('mc-flushleft'),
+    'flushright': latex_environment_div_factory('mc-flushright'),
 }
 
 bb_commands = {
-    'b': BBCodeContainerWrapper('textbf'),
+    'b': BBCodeContainer('<b>', '</b>', '\\textbf{', '}'),
     'center': BBCodeContainer('<div class="mc-center">', '</div>',
                               '\\begin{center}', '\\end{center}'),
-    'i': BBCodeContainerWrapper('emph'),
+    'i': BBCodeContainer('<i>', '</i>', '\\emph{', '}'),
     'img': BBCodeImg(),
     # TODO: Quote for LaTeX.
     'quote': BBCodeContainer('<div class="mc-quote">', '</div>', '', ''),
-    's': BBCodeContainerWrapper('sout'),
-    'u': BBCodeContainerWrapper('uline'),
+    # 'ref': BBCodeRef(),
+    's': BBCodeContainer('<s>', '</s>', '\\sout{', '}'),
+    'u': BBCodeContainer('<u>', '</u>', '\\uline{', '}'),
     'url': BBCodeURL(),
 }
 
 
 ########################################################
-# Converter
+# Tokenizer
 ########################################################
-class Converter(object):
-    def __init__(self, type, T, attachments):
-        # TODO: For the latex case, include the whitespace?
-        self.T = T.strip()
-        self.type = type
-        self.attachments = attachments
-        self.attachments_dict = {x.get_filename(): x for x in attachments or []}
 
-        self.out = []
-        self.bbcode = True
-        self.error_cnt = 0
-        self.end_pattern = None
-        self.end_pattern_first_char = None
+class State(object):
+    def __init__(self, break_condition=None, environment=None):
+        self.tokens = []
+        self.break_condition = break_condition
+        self.environment = environment  # LatexEnvironment instance.
+
+    def add_token(self, tokens):
+        self.tokens.append(tokens)  # Flatten later.
+
+
+class Tokenizer(object):
+    def __init__(self, T):
+        self.T = T.strip()
+        # self.bbcode = True
+        self.K = 0
+        self.state = State()
+        self.state_stack = [self.state]
+
+        self.counters = defaultdict(int)
+        self.refs = {}      # References, dict label -> tag.
+
+        self._last_token = None
+        self._undoed_token = None
+
+    def push_state(self, state):
+        self.state_stack.append(state)
+        self.state = state
+
+    def pop_state(self):
+        """Pop current state and return it."""
+        if len(self.state_stack) < 2:
+            raise ParserInternalError("State stack has too few elements.")
+        self.state = self.state_stack[-2]
+        return self.state_stack.pop()
+
+
+    def get_full_url(self, url):
+        return urljoin(self.url_prefix, url)
 
     def get_latex_picture(self, *args, **kwargs):
         # To be able to mock it.
         return get_latex_picture(*args, **kwargs)
 
-    def is_end(self, i):
-        if i >= len(self.T):
-            return True
-        return self.end_pattern_first_char == self.T[i] and \
-                startswith_ex(self.T, i, self.end_pattern)
+    def _nt__read_text(self):
+        """(next_token helper function) Read everything until any of the
+        `end_char` characters is reached.  The end character is not read."""
+        T = self.T
+        K = self.K
+        start = K
+        while K < len(T) and T[K] not in _NT__READ_TEXT__END_CHAR:
+            K += 1
+        if K < len(T):
+            # Don't include the whitespace at the end.
+            while K > start and T[K - 1].isspace():
+                K -= 1
+        self.K = K
+        return T[start : K]
 
-    def _add_error(self, i, msg):
-        msg = u'<span class="mc-error">{} ' \
-                u'<span class="mc-error-source">...{}...</span>'.format(
-                        msg, self.T[max(i - 10, 0):i + 50])
-        self.out.append(msg)
-        self.error_cnt += 1
-        if self.error_cnt >= 5:
-            raise TooManyParseErrors()
+    def _nt__read_whitespace(self):
+        """(next_token helper function) Read until a non-whitespace character
+        is found (doesn't read that character). Counts properly the number of
+        line breaks."""
+        T = self.T
+        K = self.K
+        start = K
+        line_breaks = 0
+        while K < len(T) and T[K].isspace():
+            if T[K] in '\r\n':
+                if T[K : K + 2] == '\r\n':
+                    K += 1
+                line_breaks += 1
+            K += 1
+        self.K = K
+        return T[start : K], line_breaks
 
-    def handle_comment(self, i):
-        k = i
-        while not self.is_end(i) and self.T[i] != '\r' and self.T[i] != '\n':
-            i += 1
-        if self.T[i - 1:i + 1] == '\r\n':
-            i += 1
-        if type == TYPE_LATEX:
-            self.out.append(self.T[k:i])  # Keep the comment!
+    def _nt__read_command_name(self):
+        """(next_token helper function) Read command name according to
+        http://tex.stackexchange.com/a/66671 """
+        T = self.T
+        K = self.K
+        assert K < len(T)
+        start = K
+        if RE_ASCII_ALPHA_SINGLE_CHAR.match(T[K]):
+            # Any number of [a-zA-Z] characters.
+            K += 1
+            while K < len(T) and RE_ASCII_ALPHA_SINGLE_CHAR.match(T[K]):
+                K += 1
+        else:
+            # Or a single non-[a-zA-Z] character.
+            K += 1
+        self.K = K
+        return T[start : K]
 
-        # Is this some special command?
-        cmd = self.T[k + 1:i].strip()
-        # NOT TESTED.
-        if cmd == 'NOBBCODE':
-            self.bbcode = False
-        elif cmd == 'BBCODE':
-            self.bbcode = True
-        return i
+    def _nt__read_comment(self):
+        """(next_token helper function) Read until a newline, inclusive."""
+        T = self.T
+        K = self.K
+        start = K
+        while K < len(T):
+            if T[K] in '\r\n':
+                K += 2 if T[K : K + 2] == '\r\n' else 1
+                break
+            K += 1
+        self.K = K
+        return T[start : K]
 
-    def handle_newline(self, i):
-        line_ends = 0
-        k = i
-        while not self.is_end(i) and self.T[i].isspace():
-            if self.T[i] == '\r' or self.T[i] == '\n':
-                line_ends += 1
-            i += 2 if self.T[i:i + 2] == '\r\n' else 1
-        if self.type == TYPE_LATEX:
-            self.out.append(self.T[k:i])  # Keep the spaces!
-        if self.type == TYPE_HTML:
-            self.out.append(self.T[k:i] if line_ends <= 1 else '<br>')
-        return i
 
-    def handle_whitespace(self, i):
-        # NOT TESTED.
-        k = self._skip_whitespace(i)
-        if i != k and self.type == TYPE_LATEX:  # Not really necessary.
-            self.out.append(T[i:k])
-        return k
+    def _next_token(self):
+        """Get the next token. If the logic is trivial, immediately return a
+        Token object, otherwise return (token_type, content) for the caller to
+        handle it."""
+        T = self.T
+        K = self.K
+        if K >= len(T):
+            return None
+        if T[K].isspace():
+            whitespace, line_breaks = self._nt__read_whitespace()
+            if line_breaks >= 2:
+                return TokenActiveWhitespace(whitespace)
+            # Unreachable code actually.
+            return TokenInactiveWhitespace(whitespace)
+        elif T[K] == '$' or T[K : K + 2] in [r'\(', r'\[']:
+            return self.handle_math_mode()
+        elif T[K] == '\\':
+            self.K += 1
+            if self.K == len(T):
+                return TokenError("'\' character without a command name.")
+            return TOKEN_COMMAND, self._nt__read_command_name()
+        elif T[K] == '{':
+            self.K += 1
+            return TOKEN_OPEN_CURLY, '{'
+        elif T[K] == '}':
+            self.K += 1
+            return TOKEN_CLOSED_CURLY, '}'
+        elif T[K] == '[':
+            self.K += 1
+            return TOKEN_OPEN_SQUARE, '['
+        elif T[K] == ']':
+            self.K += 1
+            return TOKEN_CLOSED_SQUARE, ']'
+        elif T[K] == '%':
+            self.K += 1
+            return TokenComment(self._nt__read_comment())
+        else:
+            return TokenText(self._nt__read_text())
 
-    def _skip_whitespace(self, i):
-        while not self.is_end(i) and self.T[i].isspace():
-            i += 1
-        return i
+    def next_token(self):
+        """Wrapper around real next token method, checks if the token was
+        undoed."""
+        if self._undoed_token:
+            result = self._undoed_token
+            self._undoed_token = None
+            return result
 
-    def handle_latex_params(self, i):
-        """Parse [...] part after a command if it exists. Stops searching for
-        [...] after the first blank line. Returns a pair (i, params), where
-        params is a string. The final index points at the first character
-        after ] if the [...] block exists, otherwise it just skips (and
-        appends to self.out) whitespace."""
-        line_ends = 0
-        k = i
-        while not self.is_end(i) and self.T[i].isspace():
-            if self.T[i] == '\r' and self.T[i] == '\n':
-                line_ends += 1
-            i += 2 if self.T[i:i + 2] == '\r\n' else 1
-        if line_ends > 1:
-            if self.type == TYPE_LATEX:
-                self.out.append(self.T[k:i])
-            return i, ""
-        if not self.is_end(i) and self.T[i] == '[':
-            end = self._find_closing_bracket(i + 1, '[', ']')
-            return end + 1, self.T[i + 1:end]
-        return i, ""
+        self._last_token = self._next_token()
+        return self._last_token
 
-    def _find_closing_bracket(self, i, left, right):
-        """Find a matching bracket. Index i must skip the first open bracket.
-        Treats open bracket between start and closing bracket as a syntax
-        error."""
-        end = self.T.find(right, i)
-        if end == -1:
-            raise CriticalError(self, i, _("Matching bracket not found."))
-        if self.T.find(left, i, end - 1) != -1:
-            raise CriticalError(self, i, _("Syntax error."))
-        return end
+    def undo_token(self):
+        if self._undoed_token:
+            raise ParserInternalError(
+                    "Cannot perform undo twice in a row. Old={} New={}".format(
+                        self._undoed_token, self._last_token))
+        self._undoed_token = self._last_token
 
-    def _find_closing_curly_bracket_latex(self, i):
-        """Find a matching closing bracket. Index i must skip the first open
-        bracket. Treats \\} as a character }, not as the closing bracket.
-        Return index points at the } bracket."""
-        while not self.is_end(i) and self.T[i] != '}':
-            # SPEED: Trie?
-            for key, value in escape_table[TYPE_LATEX].iteritems():
-                if self.T[i] == value[0] and startswith_ex(self.T, i, value):
-                    # Skip the escaped character.
-                    i += len(value) - 1
+
+    def read_until(self, end, skip_patterns):
+        """Read everything until `end` is reached. Skips all patterns in the
+        list `skip_patterns`. The result doesn't contain `end`, but `end` itself
+        is skipped.
+
+        Low-level, doesn't use next_token."""
+        # self._last_token = False
+        # self._undoed_token = False  # Sorry, have to forget the last undo.
+
+        T = self.T
+        K = self.K
+        start = K
+        while K < len(T) and T[K : K + len(end)] != end:
+            jump = 1
+            for pattern in skip_patterns:
+                if T[K : K + len(pattern)] == pattern:
+                    jump = len(pattern)
                     break
-            i += 1
-        if self.is_end(i):
-            raise CriticalError(self, i, _("Matching bracket not found."))
-        return i
+            K += jump
+        if T[K : K + len(end)] != end:
+            raise LatexSyntaxError(_("Ending not found:") + " " + end)
+        self.K = K + len(end)
+        return T[start : K]
 
-    def handle_latex_begin_end_block(self, i):
-        """Handle \\begin{...}[...] ... \\end{...}, where index i points at the
-        first \\."""
-        start = i
-
-        # Parse \begin{...}
-        i += len('\\begin{')
-        end = self._find_closing_bracket(i + 1, '{', '}')
-        name = self.T[i:end]
-
-        # Parse [...]
-        i = end + 1
-        i, params = self.handle_latex_params(i)
-
-        # Parse content.
-        end_pattern = '\\end{' + name + '}'
-        i, content = self.parse_until(i, '\\end{' + name + '}')
-
-        if name in latex_begin_commands:
-            cmd = latex_begin_commands[name]
-            self.out.append(cmd.contribute(self, name, content, params))
-        else:
-            self._add_error(start, _("Unknown LaTeX environment."))
-        return i + len(end_pattern)
-
-    def handle_latex_command(self, i, name):
-        cmd = latex_commands[name]
-        start = i
-        # TODO: Check how latex behaves in this case.
-        i += 1 + len(name)
-        i, params = self.handle_latex_params(i)
-
-        # Latex wouldn't allow an empty line between "\somecommand" and "{}"(?).
-        contents = []
-        for k in range(cmd.argc):
-            i = self.handle_whitespace(i)
-            if not self.is_end(i) and self.T[i] == '{':
-                if cmd.parse_content:
-                    i, content = self.parse_until(i + 1, '}')
-                else:
-                    # No escaping performed here.
-                    start = i + 1
-                    i = self._find_closing_curly_bracket_latex(i)
-                    content = self.T[start:i]
-                i += 1
-                contents.append(content)
-            else:
-                msg = _("Parameter #%d missing.") % (k + 1)
-                msg += " " + _("Please put each argument in curly braces.")
-                self._add_error(start, msg)
-                contents.append("")
-
-
-        # If argc == 1, send just the first
-        if len(contents) == 0:
-            content = ""
-        elif len(contents) == 1:
-            content = contents[0]
-        else:
-            content = contents
-        self.out.append(cmd.contribute(self, name, content, params))
-        return i
-
-    def handle_latex_formula(self, i):
+    def handle_math_mode(self):
         """Handle $...$, $$...$$, \(...\), \[...\] and $$$ ... $$$."""
-        prefix = ""
+        T = self.T
+        K = self.K
         dollars = 0
-        if self.T[i] == '$':
-            while not self.is_end(i) and self.T[i] == '$':
+        if T[K] == '$':
+            while K < len(T) and dollars < 4 and T[K] == '$':
                 dollars += 1
-                i += 1
-            if dollars >= 4:  # Special case
-                prefix = self.get_latex_picture('$$%s$$', "") * (dollars // 4)
-                dollars %= 4
-                if dollars == 0:
-                    self.out.append(prefix)
-                    return i
+                K += 1
+            if dollars == 4:  # Special case.
+                self.K = K
+                return TokenMath('$$%s$$', "")
             begin = '$' * dollars
             end = begin
         else:
-            begin = self.T[i:i + 2]
-            i += 2
-            if begin == '\\(':
-                end = '\\)'
-            elif begin == '\\[':
-                end = '\\]'
+            begin = self.T[K : K + 2]
+            K += 2
+            if begin == r'\(':
+                end = r'\)'
+            elif begin == r'\[':
+                end = r'\]'
             else:
-                raise Exception("Unreachable code. begin=" + begin)
+                raise ParserInternalError("Unreachable code. begin=" + begin)
 
-        start = i
-        # Here we don't care about self.end_pattern.
-        while i < len(self.T) and not startswith_ex(self.T, i, end):
-            i += 2 if self.T[i:i + 2] in ['\\\\', '\\$'] else 1
-        if self.is_end(i) or not startswith_ex(self.T, i, end):
-            raise ParseError(_("Missing the ending:") + " " + end)
+        self.K = K
+        latex = self.read_until(end, [r'\\', r'\$'])
 
         if begin == '$$$':
             format = '%s'
-        elif begin == '$$':
-            format = '\[%s\]'
         else:
             format = begin + '%s' + end
-        latex = self.T[start:i]
-        if self.type == TYPE_HTML:
-            self.out.append(prefix + self.get_latex_picture(format, latex))
-        elif self.type == TYPE_LATEX:
-            self.out.append(prefix + format % latex)
-        return i + len(end)
+        return TokenMath(format, latex)
 
+    # def handle_square_bracket(self):
+    #     # SIMPLIFICATION MARK - We don't parse the content.
+    #     return self.read_until(']', [r'\\', r'\]'])
 
-    def handle_backslash(self, i):
-        if self.T[i:i + 2] in ['\(', '\[']:
-            return self.handle_latex_formula(i)
-        if startswith_ex(self.T, i + 1, "begin"):
-            return self.handle_latex_begin_end_block(i)
+    # def handle_curly_bracket(self):
+    #     """Read  "something}" after "}" is read."""
+    #     self.push_state(end_token=TOKEN_CLOSED_CURLY)
+    #     return self.parse()
 
-        # SPEED: Trie?
-        for key in latex_commands.iterkeys():
-            if self.T[i + 1] == key[0] and startswith_ex(self.T, i + 1, key):
-                return self.handle_latex_command(i, key)
+    def handle_command(self, name):
+        """Handle the logic of optional [] and mandatory {} arguments (this is
+        our simplification) and call command.parse_argument(...) which performs
+        the actual parsing. Command is performing the parsing because the
+        syntax actually depends on the command itself. (e.g. \\url and \\href).
+        """
+        full_name = '\\' + name
+        try:
+            command = latex_commands[name]
+        except KeyError:
+            return TokenError(_("Unknown LaTeX command."), full_name)
+        args = []
 
-        self._add_error(i, _("Unrecognized command:"))
-        return i + 1
+        # SIMPLIFICATION MARK - Maybe this isn't how it's supposed to work.
+        # We allow complicated patterns like [][]{}{}[]{}.
+        # [] represents here an optional parameter, {} mandatory.
 
-    def handle_string_literal(self, i, end_delimiters):
-        """Parse a string of the format connected-text, 'multiple words' or
-        "multiple words".
-
-        Returns (i, string), where i points at the first character after the
-        string. """
-        if self.T[i] == '\'' or self.T[i] == '"':
-            delimiter = self.T[start]
-            out = []
-            start = i
-            while not self.is_end(i) and self.T[i] != delimiter:
-                if self.T[i] == '\\' and not self.is_end(i + 1) and \
-                        self.T[i + 1] == delimiter:
-                    out.append(delimiter)
-                    i += 2
+        # Here len(args) == index of the current argument we are processing.
+        start = self.K
+        while len(args) < command.argc:
+            # TODO: support \name <char><char> or \name<digit><char/digit><...>
+            last_K = self.K
+            token = self.next_token()
+            if token is None or isinstance(token, Token):
+                token_type = None
+                content = None
+            else:
+                token_type, content = token
+            expected_bracket = command.get_arg_open_bracket(len(args))
+            # TODO: whitespace
+            if token_type == TOKEN_OPEN_SQUARE:
+                if expected_bracket == '[':
+                    # args.append(self.handle_square_bracket())
+                    args.append(command.parse_argument(self, name, len(args)))
+                    if isinstance(args[-1], TokenError):
+                        return args[-1]
+                    continue
                 else:
-                    out.append(self.T[i])
-                    i += 1
-            if self.is_end(i):
-                raise CriticalError(
-                        self, start, _("String missing the end delimiter."))
-            return i + 1, u"".join(out)
-        else:
-            return self.handle_nonwhitespace_literal(i, end_delimiters)
-
-    def handle_nonwhitespace_literal(self, i, end_delimiters):
-        start = i
-        while not self.is_end(i) and \
-                not self.T[i].isspace() and \
-                self.T[i] not in end_delimiters:
-            i += 1
-        return i, self.T[start:i]
-
-    def handle_bbcode(self, i):
-        """Parse BB Code tag. Index i points at the first open bracket [."""
-        start = i
-        attributes = []
-        i += 1
-        while True:
-            i = self._skip_whitespace(i)
-            if self.is_end(i) or self.T[i] == ']':
+                    return TokenError(_("Expected a '}' bracket."),
+                            full_name + self.T[start : last_K])
+            while len(args) < command.argc and \
+                    command.get_arg_open_bracket(len(args)) == '[':
+                args.append(None)  # Skip optional arguments.
+            if len(args) == command.argc:
+                self.undo_token()
                 break
-            i, name = self.handle_nonwhitespace_literal(i, '=]')
-            i = self._skip_whitespace(i)
-            if self.is_end(i) or self.T[i] != '=':
-                attributes.append((name, None))
-                continue
-            i, value = self.handle_string_literal(i + 1, '=]')
-            attributes.append((name, value))
-
-        try:
-            if self.is_end(i) or self.T[i] != ']':
-                raise ValueError()
-            name = attributes[0][0]
-            cmd = bb_commands[name]
-        except (ValueError, IndexError, KeyError):
-            if name not in bb_commands:
-                return i, self.T[start:i]  # Silent error, return as is.
-
-        content = ""
-        try:
-            i += 1  # Skip the closing bracket ].
-            if not cmd.has_close_tag:
-                return i, cmd.contribute(self, name, None, attributes)
-
-            closing_tag = '[/' + name + ']'
-            if cmd.parse_content:
-                i, content = self.parse_until(i, closing_tag)
+            if token_type == TOKEN_OPEN_CURLY:
+                args.append(command.parse_argument(self, name, len(args)))
+                if isinstance(args[-1], TokenError):
+                    return args[-1]
+                # args.append(self.handle_curly_bracket())
             else:
-                # No escaping performed here.
-                start = i
-                i = self.T.find(i, closing_tag)
-                if i == -1:
-                    raise BBCodeError(_("Closing tag %s not found.") \
-                            % closing_tag)
-                content = self.T[start:i]
-            i += len(closing_tag)
-            return i, cmd.contribute(self, name, content, attributes)
-        except BBCodeError as e:
-            self._add_error(start, e.message)
-            return i, content
+                self.undo_token()
+                return TokenError(
+                        _("Expected a '%s' bracket.") % expected_bracket,
+                        full_name + self.T[start : last_K])
 
-    def parse_until(self, i, end_pattern):
-        old = self.out, self.end_pattern, self.end_pattern_first_char
+        return command.apply_command(self, name, args)
 
-        self.out = []
-        self.end_pattern = end_pattern
-        self.end_pattern_first_char = end_pattern[0]
-        # SPEED: self.out should be a list, because this is also O(N^2).
-        start = i
-        end, child_result = self.parse(i)
-        if not startswith_ex(self.T, end, end_pattern):
-            raise CriticalError(self, start, _("Matching \"%s\" not found.")
-                    % end_pattern)
 
-        self.out, self.end_pattern, self.end_pattern_first_char = old
-        return end, child_result
-
-    def parse(self, i):
+    def handle_bbcode(self):
+        """Handle BBCode or do nothing. If BBCode is in any way invalid, the
+        original text is shown without any errors or messages."""
+        start = self.K - 1
         T = self.T
-        out = self.out
-        _escape_table = escape_table[self.type]
+        try:
+            name, attrs, K = parse_bbcode(T, start)
+        except BBCodeException:
+            return TokenText(u"[")  # Just print it as a normal string.
+        if name not in bb_commands:
+            return TokenText(u"[")
 
-        while not self.is_end(i):
-            if T[i] == '\r' or T[i] == '\n':
-                i = self.handle_newline(i)
-            elif T[i] == '%':
-                i = self.handle_comment(i)
-            elif T[i] == '\\':
-                i = self.handle_backslash(i)
-            elif T[i] == '[' and self.bbcode:
-                i, content = self.handle_bbcode(i)
-                out.append(content)
-            elif T[i] == '$':
-                i = self.handle_latex_formula(i)
+        token = TokenBBCode(name, attrs, start, K)
+        command = bb_commands[name]
+        if token.is_open() and command.has_close_tag and \
+                not command.should_parse_content(token):
+            end_pattern = '[/{}]'.format(name)
+            content = []
+            while K < len(T):
+                if T[K] == '[':
+                    if T[K : K + len(end_pattern)] == end_pattern:
+                        break
+                elif T[K] == '\\' and K + 1 < len(T) and T[K + 1] in '\\[':
+                    # Escape \ and [.
+                    K += 1
+                content.append(T[K])
+                K += 1
+            if K == len(T):
+                return TokenText(u"[")  # End tag missing.
+            # This case will generate a single token, one for both open and
+            # close tag.
+            K += len(end_pattern)
+            token.content = u"".join(content)
+
+        self.K = K
+        return token
+
+
+
+    def parse(self):
+        start = self.K
+        last_K = None
+        repeat_count = 0
+        while True:
+            if self.K <= last_K:
+                repeat_count += 1
+                if repeat_count > 1:    # Handle undo.
+                    raise ParserInternalError(
+                            "Infinite loop at K={}?".format(self.K))
             else:
-                out.append(_escape_table.get(T[i], T[i]))
-                i += 1
+                repeat_count = 0
+            last_K = self.K
 
-        return i, u"".join(out)
+            token = self.next_token()
+            if isinstance(token, Token):
+                self.state.add_token(token)
+                continue
+            elif token is None:
+                break
 
-    def convert(self):  # XSS danger!!! Be careful
-        """Converts MathContent format to HTML (type 0) or LaTeX (type 1)
+            type, content = token
+            if type == TOKEN_COMMAND:
+                final_token = self.handle_command(content)
+            elif type == TOKEN_CLOSED_CURLY:
+                if self.state.break_condition != TOKEN_CLOSED_CURLY:
+                    final_token = TokenError(_("Unexpected '}'."), '}')
+                elif len(self.state_stack) < 2:
+                    final_token = ParserInternalError("Unexpected '}'.")
+                else:
+                    return self.pop_state().tokens
+            elif type == TOKEN_OPEN_CURLY:
+                self.push_state(State(break_condition=TOKEN_CLOSED_CURLY))
+                final_token = [
+                        TokenOpenCurly(),
+                        self.parse(),
+                        TokenClosedCurly()
+                ]
+            elif type == TOKEN_OPEN_SQUARE:
+                final_token = self.handle_bbcode()
+            elif type == TOKEN_CLOSED_SQUARE:
+                final_token = TokenText("]")
+            else:
+                raise NotImplementedError(repr(token))
 
-        To support special tags like [img], it must be called with a
-        content instance."""
+            self.state.add_token(final_token)
 
-        return self.parse(0)
+        if self.state.break_condition is not None:
+            if self.state.break_condition == TOKEN_CLOSED_CURLY:
+                msg = _("Expected a '}' bracket.")
+            else:
+                msg = _("End delimiter missing.")
+            return [TokenError(msg, self.T[start : self.K])]
+        return self.state.tokens
+
+    def tokenize(self):
+        tokens = list(flatten_ignore_none(self.parse()))
+        # print
+        # print "Tokenization"
+        # print "-----------"
+        # print self.T
+        # print "-----------"
+        # print repr(self.T)
+        # print "-----------"
+        # for token in tokens:
+        #     print repr(token)
+        return tokens
+
+    # def convert(self):  # XSS danger!!! Be careful
+    #     """Converts MathContent format to HTML (type 0) or LaTeX (type 1)
+
+    #     To support special tags like [img], it must be called with a
+    #     content instance."""
+
+    #     self.K = 0
+    #     return self.parse()
 
 
-def get_latex_picture(format, latex):
-    """Generates LaTeX PNGs and outputs an <img> tag."""
+def get_latex_html(latex_element):
+    """Given LatexElement instance generate <img> HTML."""
     inline = format in ['$%s$', '\(%s\)']
-    if format == '$$%s$$':
-        format = '\[%s\]'
-    latex_escaped = xss.escape(latex)
+    latex_escaped = xss.escape(latex_element.text)
+    depth = latex_element.depth
 
-    # FIXME: don't save error message to depth
-    hash, depth = generate_png(latex, format)
     if depth == ERROR_DEPTH_VALUE:
         # TODO: link to the log file.
-        return '{{ INVALID LATEX }}'
+        return u'<span class="mc-error-source" title="{}">{}</span>'.format(
+                xss.escape(_("Invalid LaTeX.")),
+                xss.escape(latex_element.format % latex_element.text))
 
+
+    hash = latex_element.hash
     url = '%s%s/%s/%s/%s.png' % (IMG_URL_PATH, hash[0], hash[1], hash[2], hash)
     if inline:
-        return '<img src="%s" alt="%s" class="latex" ' \
+        return u'<img src="%s" alt="%s" class="latex" ' \
                 'style="vertical-align:%dpx">' % (url, latex_escaped, -depth)
     else:
-        return '<img src="%s" alt="%s" class="latex-center">' % \
+        return u'<img src="%s" alt="%s" class="latex-center">' % \
                 (url, latex_escaped)
 
     # # FIXME: don't save error message to depth
@@ -811,13 +1539,216 @@ def get_latex_picture(format, latex):
     return img
 
 
-def convert(type, text, attachments=None, attachments_path=None):
+########################################################
+# Converter
+########################################################
+class _BBTemporaryOpenTag(object):
+    """Token marking the processed open BB tag, which has to wait to see if
+    closing tag exists. If it exists, the token is replaced with .result,
+    otherwise the original text is shown (.token has the interval of the
+    original string)."""
+    def __init__(self, result, token):
+        self.result = result
+        self.token = token
+        self.approved = False
+
+    def finalize(self, converter):
+        if self.approved:
+            return self.result
+        return converter.tokenizer.T[self.token.T_start : self.token.T_end]
+
+
+class Converter(object):
+    def __init__(self, tokens, tokenizer, attachments=None,
+            errors_enabled=True):
+        # TODO: attachments_path
+        # TODO: url_prefix (what is this?)
+
+        # TODO: this makes no sense...
+        self.tokens = tokens
+        self.tokenizer = tokenizer
+        self.refs = tokenizer.refs
+
+        self.maths = None
+        self.attachments = attachments
+        self.attachments_dict = {x.get_filename(): x for x in attachments or []}
+        self.errors_enabled = errors_enabled
+
+        self.mock__generate_png = generate_png
+        self.mock__generate_latex_hash = generate_latex_hash
+        self.mock__get_available_latex_elements = get_available_latex_elements
+        self.mock__get_latex_html = get_latex_html
+
+        self.bb_stack = []
+
+    def _pre_convert_to_html(self):
+        # Here we process tokens of specific types before calling .to_html.
+        # TokenCommand for LatexRef are replaced with TokenMath.
+        formulas = []
+        tokens = []
+        for token in self.tokens:
+            if isinstance(token, TokenCommand) and token.command == 'ref':
+                ref = self.refs.get(token.args[0])
+                token = TokenMath('$%s$', ref if ref is not None else '??')
+
+            if isinstance(token, TokenMath):
+                latex_hash = self.mock__generate_latex_hash(
+                        token.format, token.content)
+                formulas.append((latex_hash, token.format, token.content))
+
+            tokens.append(token)
+
+        latex_elements = {x.hash: x \
+                for x in self.mock__get_available_latex_elements(formulas)}
+
+        self.maths = {}
+        for hash, format, content in formulas:
+            element = latex_elements.get(hash)
+            if element is None:
+                element = self.mock__generate_png(hash, format, content)
+            self.maths[(format, content)] = element
+
+        return tokens
+
+    def process_bb(self, token, type):
+        assert token.name in bb_commands
+        bb = bb_commands[token.name]
+        try:
+            if token.is_open():
+                if type == TYPE_HTML:
+                    result = bb.to_html(token, self)
+                else:
+                    result = bb.to_latex(token, self)
+                if isinstance(result, TokenError):
+                    return result
+                if bb.has_close_tag and token.content is None:
+                    # If content isn't None, close tag has been parsed
+                    # immediately, and there was only a single BB token added.
+                    bb_token = _BBTemporaryOpenTag(result, token)
+                    self.bb_stack.append(bb_token)
+                    return bb_token
+                else:
+                    return result
+            else:  # Closed tag.
+                if not bb.has_close_tag or len(self.bb_stack) == 0 or \
+                        not hasattr(self.bb_stack[-1], 'token') or \
+                        getattr(self.bb_stack[-1].token, 'name', None) != \
+                                token.name:
+                    raise BBCodeException()
+                self.bb_stack[-1].approved = True
+                self.bb_stack.pop()
+                if type == TYPE_HTML:
+                    return bb.to_html(token, self)
+                else:
+                    return bb.to_latex(token, self)
+        except BBCodeException as e:
+            return TokenError(
+                    e.msg, self.tokenizer.T[token.T_start : token.T_end])
+
+    def finalize_output(self, output, error_func):
+        # Conversion helper function can return TokenError. We convert them to
+        # LaTeX here.
+        final = []
+        for x in output:
+            if isinstance(x, _BBTemporaryOpenTag):
+                x = x.finalize(self)
+            if isinstance(x, TokenError):
+                x = error_func(x)
+            if isinstance(x, basestring):
+                final.append(x)
+            elif x is not None:
+                raise ParserInternalError(
+                        "Unrecognized value in the final step: " + repr(x))
+        return u"".join(final)
+
+    def convert_to_html(self):
+        tokens = self._pre_convert_to_html()
+        if self.errors_enabled:
+            error_func = lambda token: u'<span class="mc-error">{} ' \
+                    u'<span class="mc-error-source">{}</span></span>'.format(
+                        token.error_message, token.content)
+        else:
+            error_func = lambda token: u""
+
+        output = []
+        for token in tokens:
+            if isinstance(token, (TokenComment, TokenOpenCurly, \
+                    TokenClosedCurly)):
+                continue
+            elif isinstance(token, TokenMath):
+                element = self.maths[(token.format, token.content)]
+                output.append(self.mock__get_latex_html(element))
+            elif isinstance(token, TokenText):
+                output.append(xss.escape(token.text))
+            elif isinstance(token, TokenInactiveWhitespace):
+                output.append(" ")  # Single whitespace is enough.
+            elif isinstance(token, TokenActiveWhitespace):
+                # SIMPLIFICATION MARK - Instead of handling paragraphs, we just
+                # put a line break.
+                output.append("<br>")
+            elif isinstance(token, TokenError):
+                output.append(error_func(token))
+            elif isinstance(token, TokenCommand):
+                command = latex_commands[token.command]
+                output.append(command.to_html(token, self))
+            elif isinstance(token, TokenBBCode):
+                output.append(self.process_bb(token, TYPE_HTML))
+            else:
+                raise NotImplementedError(repr(token))
+        return self.finalize_output(output, error_func)
+
+    def convert_to_latex(self):
+        output = []
+        if self.errors_enabled:
+            error_func = lambda token: "\\textbf{%s} %s" % \
+                    (token.error_message, token.content)
+        else:
+            error_func = lambda token: u""
+        for token in self.tokens:
+            if isinstance(token, (TokenText, TokenInactiveWhitespace, \
+                    TokenActiveWhitespace)):
+                output.append(token.text)
+            elif isinstance(token, TokenComment):
+                output.append("%")
+                output.append(token.text)
+            elif isinstance(token, TokenMath):
+                output.append(token.format % token.content)
+            elif isinstance(token, TokenCommand):
+                command = latex_commands[token.command]
+                output.append(command.to_latex(token, self))
+            elif isinstance(token, TokenError):
+                output.append(error_func(token))
+            elif isinstance(token, TokenOpenCurly):
+                output.append('{')
+            elif isinstance(token, TokenClosedCurly):
+                output.append('}')
+            elif isinstance(token, TokenBBCode):
+                output.append(self.process_bb(token, TYPE_LATEX))
+            else:
+                raise NotImplementedError(repr(token))
+
+        return self.finalize_output(output, error_func)
+
+
+
+def convert(type, text, attachments=None, attachments_path=None, url_prefix=""):
     """Convert given text to the given type in the context of the given
     attachments."""
     # TODO: attachments_path
-    converter = Converter(type, text, attachments)
-    try:
-        i, output = converter.convert()
-    except Exception as e:
-        return _("Error converting the text:") + " " + e.message
-    return output
+    # TODO: url_prefix (what is this?)
+    tokenizer = Tokenizer(text)
+    tokens = tokenizer.tokenize()
+
+    converter = Converter(tokens, tokenizer, attachments=attachments)
+    if type == TYPE_HTML:
+        return converter.convert_to_html()
+    else:
+        return converter.convert_to_latex()
+
+    # # converter = Converter(type, text, attachments, url_prefix=url_prefix)
+    # try:
+    #     i, output = converter.convert()
+    # except Exception as e:
+    #     msg = _("Error converting the text:") + " " + e.message
+    #     return u'<span class="mc-error">{}</span>'.format(msg)
+    # return output

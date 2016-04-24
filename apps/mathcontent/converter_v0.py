@@ -4,7 +4,10 @@ from skoljka.libs import xss
 
 from mathcontent.models import ERROR_DEPTH_VALUE, IMG_URL_PATH, TYPE_HTML, \
         TYPE_LATEX
-from mathcontent.latex import generate_png, generate_svg
+from mathcontent.latex import get_or_generate_png
+
+# Prepend this to the text to use this converter.
+VERSION_MARKER = '%V0'
 
 inline_format = "$%s$"
 block_format = "\\[%s\\]"
@@ -267,13 +270,14 @@ def _handle_latex_html(cnt, latex):
         format = advanced_format
 
     # FIXME: don't save error message to depth
-    hash, depth = generate_png(latex, format)
-    if depth == ERROR_DEPTH_VALUE:
+    latex_element = get_or_generate_png(format, latex)
+    if latex_element.depth == ERROR_DEPTH_VALUE:
         return '{{ INVALID LATEX }}'
     else:
+        hash = latex_element.hash
         url = '%s%s/%s/%s/%s.png' % (IMG_URL_PATH, hash[0], hash[1], hash[2], hash)
         if inline:
-            img = '<img src="%s" alt="%s" class="latex" style="vertical-align:%dpx">' % (url, latex_escaped, -depth)
+            img = '<img src="%s" alt="%s" class="latex" style="vertical-align:%dpx">' % (url, latex_escaped, -latex_element.depth)
         else:
             img = '<img src="%s" alt="%s" class="latex_center">' % (url, latex_escaped)
 

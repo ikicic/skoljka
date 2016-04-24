@@ -43,3 +43,13 @@ def interpolate_three_colors(r1, g1, b1, r2, g2, b2, percent2, r3, g3, b3, perce
     return (r1 + (r2 - r1) * percent2 + (r3 - r1) * percent3,
             g1 + (g2 - g1) * percent2 + (g3 - g1) * percent3,
             b1 + (b2 - b1) * percent2 + (b3 - b1) * percent3)
+
+
+def flatten_ignore_none(input):
+    """Recursively flatten a list (uses yield). Ignores None values."""
+    for item in input:
+        if isinstance(item, list):
+            for subitem in flatten_ignore_none(item):
+                yield subitem
+        elif item is not None:
+            yield item

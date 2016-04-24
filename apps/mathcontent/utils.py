@@ -10,11 +10,11 @@ import os
 
 def convert(type, text, content=None, attachments_path=None):
     """Call the right converter to convert given text to HTML or LaTeX."""
-    if text.startswith(converter_v1.VERSION_MARKER):
-        text = text[len(converter_v1.VERSION_MARKER):]
-        converter = converter_v1
-    else:
+    if text.startswith(converter_v0.VERSION_MARKER):
+        text = text[len(converter_v0.VERSION_MARKER):]
         converter = converter_v0
+    else:
+        converter = converter_v1
 
     attachments = content and list(Attachments.objects.filter(content=content))
     return converter.convert(type, text, attachments=attachments,

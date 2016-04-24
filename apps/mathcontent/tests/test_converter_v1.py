@@ -1,9 +1,24 @@
+# -*- coding: utf-8 -*-
+
 from django.test import TestCase
 
-from mathcontent.converter_v1 import Converter
-from mathcontent.models import TYPE_HTML, TYPE_LATEX
+from mathcontent.converter_v1 import Tokenizer, Converter
+from mathcontent.converter_v1 import SKIP_COMPARISON as SKIP
+from mathcontent.converter_v1 import parse_bbcode, BBCodeException
+from mathcontent.converter_v1 import TokenText, TokenCommand, \
+        TokenActiveWhitespace, TokenInactiveWhitespace, TokenMath, TokenError, \
+        TokenComment, TokenOpenCurly, TokenClosedCurly, TokenBBCode
+from mathcontent.converter_v1 import LatexEnvironmentDiv, LatexEnvironmentFigure
+from mathcontent.models import TYPE_HTML, TYPE_LATEX, LatexElement
 
-def _mock_attachment(filename):
+
+# MOCK_URL_PREFIX = "http://mock.com/"
+#
+# class ConverterMock(Converter):
+#     def get_latex_picture(self, format, latex):
+#         return "<<{}||{}>>".format(format, latex)
+
+def _mock__attachment(filename):
     class File(object):
         def __init__(self, fn):
             self.filename = fn
@@ -20,38 +35,313 @@ def _mock_attachment(filename):
 
     return Attachment(filename)
 
-class MathContentRenderTestCase(TestCase):
+
+def _mock__generate_png(hash, format, latex):
+    return LatexElement(hash=hash, format=format, text=latex, depth=0)
+
+def _mock__generate_latex_hash(format, latex):
+    return "<<{}||{}>>".format(format, latex)
+
+def _mock__get_available_latex_elements(formulas):
+    return {}
+
+def _mock__get_latex_html(element):
+    return element.hash
+
+
+class ConverterV1TestCase(TestCase):
     def setUp(self):
         self.attachments = [
-            _mock_attachment("first.png"),
-            _mock_attachment("second.png"),
+            _mock__attachment("first.png"),
+            _mock__attachment("second.png"),
         ]
 
-    def assertHTML(self, input, output, converter_mock=Converter):
-        converter = converter_mock(TYPE_HTML, input, self.attachments)
-        i, html = converter.convert()
-        self.assertEqual(html, output)
+    # TODO: move to skoljka custom TestCase
+    def assertEqualPrint(self, received, expected):
+        if received != expected:
+            print
+            print "Received: ", received
+            print "Expected: ", expected
+            self.fail("Received != Expected")
 
-    def assertLatex(self, input, output, converter_mock=Converter):
-        converter = converter_mock(TYPE_LATEX, input, self.attachments)
-        i, html = converter.convert()
-        self.assertEqual(html, output)
+    # def _get_converter(self, type, input, warnings=True,
+    #         converter_mock=Converter):
+    #     return converter_mock(type, input, self.attachments,
+    #             url_prefix=MOCK_URL_PREFIX, warnings=warnings)
 
-    def assertHTMLLatex(self, input, output_html, output_latex, *args, **kwargs):
-        self.assertHTML(input, output_html, *args, **kwargs)
-        self.assertLatex(input, output_latex, *args, **kwargs)
+    def assertTokenization(self, input, expected_tokens, *args, **kwargs):
+        tokenizer = Tokenizer(input, *args, **kwargs)
+        tokens = tokenizer.tokenize()
+        self.assertEqual(tokens, expected_tokens)
+
+    def assertHTML(self, input, output, *args, **kwargs):
+        self.assertHTMLLatex(input, output, None, *args, **kwargs)
+        # # converter = self._get_converter(TYPE_HTML, input, *args, **kwargs)
+        # html = convert(TYPE_HTML, input, attachments=self.attachments)
+        # self.assertEqualPrint(html, output)
+
+    def assertLatex(self, input, output, *args, **kwargs):
+        self.assertHTMLLatex(input, None, output, *args, **kwargs)
+        # # converter = self._get_converter(TYPE_LATEX, input, *args, **kwargs)
+        # # i, latex = converter.convert()
+        # latex = convert(TYPE_LATEX, input, attachments=self.attachments)
+        # self.assertEqualPrint(latex, output)
+
+    def assertHTMLLatex(self, input, output_html, output_latex,
+            converter_kwargs={}, *args, **kwargs):
+        tokenizer = Tokenizer(input)
+        tokens = tokenizer.tokenize()
+        converter = Converter(tokens, tokenizer, attachments=self.attachments,
+                **converter_kwargs)
+        converter.mock__generate_png = _mock__generate_png
+        converter.mock__generate_latex_hash = _mock__generate_latex_hash
+        converter.mock__get_available_latex_elements = _mock__get_available_latex_elements
+        converter.mock__get_latex_html = _mock__get_latex_html
+        if output_html is not None:
+            self.assertEqualPrint(converter.convert_to_html(), output_html)
+        if output_latex is not None:
+            self.assertEqualPrint(converter.convert_to_latex(), output_latex)
+        # self.assertHTML(input, output_html, *args, **kwargs)
+        # self.assertLatex(input, output_latex, *args, **kwargs)
 
     def assertHTMLAutoLatex(self, input, output_html, *args, **kwargs):
-        self.assertHTML(input, output_html, *args, **kwargs)
-        self.assertLatex(input, input, *args, **kwargs)
+        self.assertHTMLLatex(input, output_html, input, *args, **kwargs)
+        # self.assertHTML(input, output_html, *args, **kwargs)
+        # self.assertLatex(input, input, *args, **kwargs)
+
+    def test_tokenization(self):
+        self.assertTokenization("bla", [TokenText("bla")])
+        self.assertTokenization("bla  bla", [TokenText("bla  bla")])
+        self.assertTokenization("bla\n  bla", [
+                TokenText("bla"),
+                TokenInactiveWhitespace("\n  "),
+                TokenText("bla"),
+        ])
+        self.assertTokenization("bla \n \n   bla", [
+                TokenText("bla"),
+                TokenActiveWhitespace(" \n \n   "),
+                TokenText("bla"),
+        ])
+        self.assertTokenization(
+            "bla $a + b = c$ \n$$d*f+g  $$ dummy$$$$$$$$$a+b$\n  bla", [
+                TokenText("bla"),
+                TokenInactiveWhitespace(" "),
+                TokenMath('$%s$', "a + b = c"),
+                TokenInactiveWhitespace(" \n"),
+                TokenMath('$$%s$$', "d*f+g  "),
+                TokenInactiveWhitespace(" "),
+                TokenText("dummy"),
+                TokenMath('$$%s$$', ""),
+                TokenMath('$$%s$$', ""),
+                TokenMath('$%s$', "a+b"),
+                TokenInactiveWhitespace("\n  "),
+                TokenText("bla"),
+        ])
+        self.assertTokenization(
+            "bla \( a+b  \)\n\n\[\n   c*d\n\]\n\nbla bla", [
+                TokenText("bla"),
+                TokenInactiveWhitespace(" "),
+                TokenMath('\(%s\)', " a+b  "),
+                TokenActiveWhitespace("\n\n"),
+                TokenMath('\[%s\]', "\n   c*d\n"),
+                TokenActiveWhitespace("\n\n"),
+                TokenText("bla bla"),
+        ])
+
+        self.assertTokenization("\\\\ \\\\", [
+                TokenCommand('\\'),
+                TokenInactiveWhitespace(" "),
+                TokenCommand('\\'),
+        ])
+        self.assertTokenization(
+            "\\textasciicircum\\textasciitilde\\textbackslash", [
+                TokenCommand('textasciicircum'),
+                TokenCommand('textasciitilde'),
+                TokenCommand('textbackslash'),
+        ])
+        self.assertTokenization( "bla\\unknownname bla", [
+                TokenText("bla"),
+                TokenError(SKIP, "\\unknownname"),
+                TokenInactiveWhitespace(" "),
+                TokenText("bla"),
+        ])
+        self.assertTokenization(
+            "bla\r\n% a comment\nblabla % another comment", [
+                TokenText("bla"),
+                TokenInactiveWhitespace("\r\n"),
+                TokenComment(" a comment\n"),
+                TokenText("blabla"),
+                TokenInactiveWhitespace(" "),
+                TokenComment(" another comment")
+        ])
+        self.assertTokenization(r"\url{bla}", [TokenCommand('url', 0, ["bla"])])
+        self.assertTokenization(r"\url{b%la}", [TokenCommand('url', 0, ["b%la"])])
+        self.assertTokenization(r"\url{b{}%la}", [TokenCommand('url', 0, ["b{}%la"])])
+        self.assertTokenization(r"\url", [TokenError(SKIP, r"\url")])
+        self.assertTokenization(r"\url bla", [
+                TokenError(SKIP, r"\url"),
+                TokenInactiveWhitespace(" "),
+                TokenText("bla"),
+        ])
+        self.assertTokenization(r"\href{http://www.google.com}{bla}", [
+                TokenCommand('href', 0, ["http://www.google.com", [TokenText("bla")]]),
+                TokenText("bla"),
+                TokenCommand('href', 1, ["http://www.google.com", [TokenText("bla")]]),
+        ])
+        self.assertTokenization(r"\href{http://ww%w.g{}oogle.com}{bla}", [
+                TokenCommand('href', 0, ["http://ww%w.g{}oogle.com", [TokenText("bla")]]),
+                TokenText("bla"),
+                TokenCommand('href', 1, ["http://ww%w.g{}oogle.com", [TokenText("bla")]]),
+        ])
+        self.assertTokenization(r"\href{http://ww%w.g{}oogle.com}", [
+                TokenError(SKIP, r"\href{http://ww%w.g{}oogle.com}"),
+        ])
+        self.assertTokenization(r"\href{http://ww%w.g{}oogle.com}{bl%a}", [
+                TokenError(SKIP, r"\href{http://ww%w.g{}oogle.com}{bl%a}"),
+        ])
+        self.assertTokenization(r"\emph{bla}", [
+                TokenCommand('emph', 0, SKIP),
+                TokenText("bla"),
+                TokenCommand('emph', 1, SKIP),
+        ])
+        self.assertTokenization(r"\textbf{bla \sout{asdf}\uline{bla bla}}", [
+                TokenCommand('textbf', 0, SKIP),
+                TokenText("bla"),
+                TokenInactiveWhitespace(" "),
+                TokenCommand('sout', 0, SKIP),
+                TokenText("asdf"),
+                TokenCommand('sout', 1, SKIP),
+                TokenCommand('uline', 0, SKIP),
+                TokenText("bla bla"),
+                TokenCommand('uline', 1, SKIP),
+                TokenCommand('textbf', 1, SKIP),
+        ])
+        self.assertTokenization(r"\includegraphics[width=100pt]{image.png}", [
+                TokenCommand('includegraphics', 0, ["width=100pt", "image.png"]),
+        ])
+        self.assertTokenization(
+            "\\begin{center}\n  some content\n\\end{center}", [
+                TokenCommand('begin', 0, ['center', LatexEnvironmentDiv('mc-center')]),
+                TokenInactiveWhitespace("\n  "),
+                TokenText("some content"),
+                TokenInactiveWhitespace("\n"),
+                TokenCommand('end', 0, ['center', LatexEnvironmentDiv('mc-center')]),
+        ])
+        self.assertTokenization(
+            "\\begin{asdf}bla\\end{asdf}", [
+                TokenError(SKIP, 'asdf'),
+                TokenText("bla"),
+                TokenError(SKIP, ''),
+        ])
+
+        # Test empty {}.
+        self.assertTokenization("\\textasciicircum bla", [
+                TokenCommand('textasciicircum', 0),
+                TokenInactiveWhitespace(" "),
+                TokenText("bla"),
+        ])
+        self.assertTokenization("\\textasciicircumbla", [
+                TokenError(SKIP, "\\textasciicircumbla"),
+        ])
+        self.assertTokenization("\\textasciicircum{}bla", [
+                TokenCommand('textasciicircum', 0),
+                TokenOpenCurly(),
+                TokenClosedCurly(),
+                TokenText("bla"),
+        ])
+
+        # Test environments.
+        _figure = LatexEnvironmentFigure(centering=False, tag="1")
+        _flushleft = LatexEnvironmentDiv('mc-flushleft')
+        self.assertTokenization(
+            r'\begin{figure}'
+            r'\begin{flushleft}'
+            r'\includegraphics{first.png}'
+            r'\end{flushleft}'
+            r'\caption{Some caption here.}'
+            r'\label{some-label}'
+            r'\end{figure}', [
+                TokenCommand('begin', 0, ['figure', _figure]),
+                TokenCommand('begin', 0, ['flushleft', _flushleft]),
+                TokenCommand('includegraphics', 0, [None, 'first.png']),
+                TokenCommand('end', 0, ['flushleft', _flushleft]),
+                TokenCommand('caption', 0, [[TokenText("Some caption here.")], "1"]),
+                TokenText("Some caption here."),
+                TokenCommand('caption', 1, [[TokenText("Some caption here.")], "1"]),
+                TokenCommand('label', 0, ["some-label", ""]),
+                TokenCommand('end', 0, ['figure', _figure]),
+        ])
+
+        _figure = LatexEnvironmentFigure(centering=True, tag="1")
+        self.assertTokenization(
+            r'\begin{figure}'
+            r'\includegraphics{first.png}'
+            r'\caption{Some caption here.}'
+            r'\label{some-label}'
+            r'\centering'
+            r'\end{figure}', [
+                TokenCommand('begin', 0, ['figure', _figure]),
+                TokenCommand('includegraphics', 0, [None, 'first.png']),
+                TokenCommand('caption', 0, [[TokenText("Some caption here.")], "1"]),
+                TokenText("Some caption here."),
+                TokenCommand('caption', 1, [[TokenText("Some caption here.")], "1"]),
+                TokenCommand('label', 0, ["some-label", ""]),
+                TokenCommand('centering', 0),
+                TokenCommand('end', 0, ['figure', _figure]),
+        ])
+
+        _figure = LatexEnvironmentFigure(centering=True, tag="1")
+        self.assertTokenization(
+            r'\begin{figure}'
+            r'\includegraphics{first.png}'
+            r'\label{wrong-order}'
+            r'\caption{Some caption here.}'
+            r'\centering'
+            r'\end{figure}', [
+                TokenCommand('begin', 0, ['figure', _figure]),
+                TokenCommand('includegraphics', 0, [None, 'first.png']),
+                TokenCommand('label', 0, ["wrong-order", TokenError(SKIP, "")]),
+                TokenCommand('caption', 0, [[TokenText("Some caption here.")], "1"]),
+                TokenText("Some caption here."),
+                TokenCommand('caption', 1, [[TokenText("Some caption here.")], "1"]),
+                TokenCommand('centering', 0),
+                TokenCommand('end', 0, ['figure', _figure]),
+        ])
+
+        # BBCode
+        self.assertTokenization("[]", [TokenText("["), TokenText("]")])
+        self.assertTokenization("[unknown tag]",
+                [TokenText("["), TokenText("unknown tag"), TokenText("]")])
+        self.assertTokenization("[b]bla[/b]", [
+                TokenBBCode('b', {'b': None}, 0, 3),
+                TokenText("bla"),
+                TokenBBCode('b', None, 6, 10),
+        ])
+        self.assertTokenization("[/b]bla[b bla=\"xy\\\"z\"]", [
+                TokenBBCode('b', None, 0, 4),
+                TokenText("bla"),
+                TokenBBCode('b', {'b': None, 'bla': "xy\"z"}, SKIP, SKIP),
+        ])
+
+        self.assertTokenization("[url=http://www.example.com/]title[/url]", [
+                TokenBBCode('url', {'url': 'http://www.example.com/'}, 0, SKIP),
+                TokenText("title"),
+                TokenBBCode('url', None, SKIP, SKIP),
+        ])
+        self.assertTokenization("[url]http://www.example.com/[/url]", [
+                TokenBBCode('url', {'url': None}, 0, SKIP, "http://www.example.com/"),
+        ])
+
+
 
     def test_latex_commands(self):
+        # Newlines are always seperated as TokenInactiveWhitespace, which then
+        # is replaced with a single whitespace (for HTML that is enough).
         self.assertHTMLAutoLatex("bla", "bla")
-        self.assertHTMLAutoLatex("bla\nbla", "bla\nbla")
+        self.assertHTMLAutoLatex("bla\nbla", "bla bla")
         self.assertHTMLAutoLatex("bla\n\nbla", "bla<br>bla")
-        # First spaces are copies (it's not important how do they behave).
-        self.assertHTMLAutoLatex("bla  \n\n  bla", "bla  <br>bla")
-        self.assertHTMLAutoLatex("bla  \n \n \n\n  bla", "bla  <br>bla")
+        self.assertHTMLAutoLatex("bla  \n\n  bla", "bla<br>bla")
+        self.assertHTMLAutoLatex("bla  \n \n \n\n  bla", "bla<br>bla")
         self.assertHTMLAutoLatex("bla\n\n\n\nbla", "bla<br>bla")
 
         self.assertHTMLAutoLatex("bla\\\\asdf", "bla<br>asdf")
@@ -71,9 +361,11 @@ class MathContentRenderTestCase(TestCase):
                 '<a href="http://www.example.com/bla%40bla" rel="nofollow">'
                     'http://www.example.com/bla%40bla</a>')
 
+        # Note: Look at setUp for mocked attachments.
         self.assertHTMLAutoLatex(
                 "\\includegraphics{first.png}",
                 '<img src="/mock/first.png" alt="Attachment first.png" class="latex">')
+
         # TODO: Check if the conversion pt->px makes any sense.
         self.assertHTMLAutoLatex(
                 "\\includegraphics[width=100pt]{first.png}",
@@ -102,8 +394,96 @@ class MathContentRenderTestCase(TestCase):
         # Begin commands.
         self.assertHTMLAutoLatex("\\begin{center}\\textbf{bla}\\end{center}",
                         '<div class="mc-center"><b>bla</b></div>')
+        # Math mode.
+        self.assertHTMLAutoLatex("$a+b$", "<<$%s$||a+b>>")
+        self.assertHTMLAutoLatex("\(a+b\)", "<<\(%s\)||a+b>>")
+        self.assertHTMLAutoLatex("\[ a+b \]", "<<\[%s\]|| a+b >>")
+        self.assertHTMLAutoLatex("$$  a+b $$", "<<$$%s$$||  a+b >>")
+
+        # Figures and environment testing.
+        self.assertHTMLAutoLatex(
+            r'\begin{figure}'
+            r'\includegraphics{first.png}'
+            r'\caption{Some caption here.}'
+            r'\label{some-label}'
+            r'\centering'
+            r'\end{figure}',
+            '<div class="mc-figure mc-center">'
+            '<img src="/mock/first.png" alt="Attachment first.png" class="latex">'
+            '<div class="mc-caption"><span class="mc-caption-tag">Slika 1:</span> Some caption here.</div>'
+            '</div>'
+        )
+
+
+        # Complex example.
+        self.assertHTMLAutoLatex(
+                r'\begin{figure}'
+                r'\begin{flushleft}'
+                r'\includegraphics{first.png}'
+                r'\end{flushleft}'
+                r'\caption{Some caption here.}'
+                r'\label{label-after-accepted}'
+                r'\end{figure}'
+                r''
+                r'\begin{figure}'
+                r'\centering'
+                r'\includegraphics{second.png}'
+                r'\label{label-before-ignored}'
+                r'\caption{Another caption here.}'
+                r'\end{figure}'
+                r''
+                r'First: \ref{label-after-accepted}'
+                r'Second: \ref{label-before-ignored}',
+                '<div class="mc-figure">'
+                '<div class="mc-flushleft">'
+                '<img src="/mock/first.png" alt="Attachment first.png" class="latex">'
+                '</div>'
+                '<div class="mc-caption"><span class="mc-caption-tag">Slika 1:</span> Some caption here.</div>'
+                '</div>'
+                ''
+                '<div class="mc-figure mc-center">'
+                '<img src="/mock/second.png" alt="Attachment second.png" class="latex">'
+                '<div class="mc-caption"><span class="mc-caption-tag">Slika 2:</span> Another caption here.</div>'
+                '</div>'
+                ''
+                'First: <<$%s$||1>>'
+                'Second: <<$%s$||??>>',
+                converter_kwargs={'errors_enabled': False})
+
+    # # def test_bla(self):
+    # #     #self.assertHTMLAutoLatex("", "")
+    # #     pass
+
+
 
     def test_bbcode(self):
+        self.assertEqual(parse_bbcode("[b]", 0), ('b', {'b': None}, 3))
+        self.assertEqual(parse_bbcode("[b]bla", 0), ('b', {'b': None}, 3))
+        self.assertEqual(parse_bbcode("[/b]bla", 0), ('b', None, 4))
+        self.assertRaises(BBCodeException, lambda : parse_bbcode("[/b=5]", 0))
+        self.assertRaises(BBCodeException, lambda : parse_bbcode("[/b asdf]", 0))
+        self.assertEqual(
+                parse_bbcode("[asdf=bla]x", 0),
+                ('asdf', {'asdf': "bla"}, 10))
+        self.assertEqual(
+                parse_bbcode("[abc def=ghi]x", 0),
+                ('abc', {'abc': None, 'def': "ghi"}, 13))
+        self.assertEqual(
+                parse_bbcode("[abc def=ghi asdf]x", 0),
+                ('abc', {'abc': None, 'def': "ghi", 'asdf': None}, 18))
+        self.assertEqual(
+                parse_bbcode("[abc def='ghi \\'asdf']x", 0),
+                ('abc', {'abc': None, 'def': "ghi 'asdf"}, 22))
+        self.assertRaises(
+                BBCodeException,
+                lambda : parse_bbcode("[abc def='ghi \\'as\\\\'df']x", 0))
+        self.assertEqual(
+                parse_bbcode("[abc def=\"ghi a\\'\\\"sdf\"]x", 0),
+                ('abc', {'abc': None, 'def': "ghi a\\'\"sdf"}, 24))
+        self.assertEqual(
+                parse_bbcode("[abc def=\"][[]][\"]x", 0),
+                ('abc', {'abc': None, 'def': "][[]]["}, 18))
+
         self.assertHTMLLatex(
                 "[b]bla[/b]",
                 "<b>bla</b>",
@@ -140,6 +520,16 @@ class MathContentRenderTestCase(TestCase):
                 "[quote]bla bla[/quote]",
                 '<div class="mc-quote">bla bla</div>',
                 "bla bla")
+    #     self.assertHTMLLatex(
+    #             "[ref=5 task=123](click here)[/ref]",
+    #             r'<<$%s$||5>><a href="http://mock.com/task/123/ref/" rel="nofollow">(click here)</a>',
+    #             r"$5$\href{http://mock.com/task/123/ref/}{(click here)}",
+    #             converter_mock=ConverterMock)
+    #     self.assertHTMLLatex(
+    #             "[ref=5 task=123 page=3](click here)[/ref]",
+    #             r'<<$%s$||5>><a href="http://mock.com/task/123/ref/?page=3" rel="nofollow">(click here)</a>',
+    #             r"$5$\href{http://mock.com/task/123/ref/?page=3}{(click here)}",
+    #             converter_mock=ConverterMock)
         self.assertHTMLLatex(
                 "[url]http://example.com/[/url]",
                 '<a href="http://example.com/" rel="nofollow">http://example.com/</a>',
@@ -150,37 +540,40 @@ class MathContentRenderTestCase(TestCase):
                 "\\href{http://example.com/}{click here}")
 
     def test_latex_formula(self):  # Test $ ... $ etc.
-        class ConverterMock(Converter):
-            def get_latex_picture(self, format, latex):
-                return "<<{}||{}>>".format(format, latex)
-
         self.assertHTMLLatex(
                 "$bla$",
                 "<<$%s$||bla>>",
-                "$bla$",
-                converter_mock=ConverterMock)
+                "$bla$")
         self.assertHTMLLatex(
-                "$$bla$$",
-                "<<\[%s\]||bla>>",
                 "\[bla\]",
-                converter_mock=ConverterMock)
+                "<<\[%s\]||bla>>",
+                "\[bla\]")
         self.assertHTMLLatex(
                 "$$$bla$$$",
                 "<<%s||bla>>",
-                "bla",
-                converter_mock=ConverterMock)
+                "bla")
         self.assertHTMLLatex(
                 "bla $$$something $a + b = c$ bla $$d + e = f$$ $$$ bla",
                 "bla <<%s||something $a + b = c$ bla $$d + e = f$$ >> bla",
-                "bla something $a + b = c$ bla $$d + e = f$$  bla",
-                converter_mock=ConverterMock)
+                "bla something $a + b = c$ bla $$d + e = f$$  bla")
         self.assertHTMLLatex(
                 "\(bla\)",
                 "<<\(%s\)||bla>>",
-                "\(bla\)",
-                converter_mock=ConverterMock)
+                "\(bla\)")
         self.assertHTMLLatex(
                 "\[bla\]",
                 "<<\[%s\]||bla>>",
-                "\[bla\]",
-                converter_mock=ConverterMock)
+                "\[bla\]")
+
+    # def test_labels(self):
+    #     """Test \\label and \\ref."""
+    #     self.assertHTMLAutoLatex(
+    #             r"\begin{equation}\label{first}x = y + z\end{equation}" \
+    #             r"ref to equation \ref{first}" \
+    #             r"\begin{equation}\label{second}a = b + c\end{equation}" \
+    #             r"ref to equation \ref{second}",
+    #             r'<div class="mc-center"><<%s||\begin{equation}\tag{1}\label{first}x = y + z\end{equation}>></div>' \
+    #             r'ref to equation <<$%s$||1>>' \
+    #             r'<div class="mc-center"><<%s||\begin{equation}\tag{2}\label{second}a = b + c\end{equation}>></div>' \
+    #             r'ref to equation <<$%s$||2>>',
+    #             converter_mock=ConverterMock)
