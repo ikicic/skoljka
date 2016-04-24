@@ -16,8 +16,6 @@ import re
 # TODO: Ignore spaces after a command.
 #   \textasciicircum bla --> ~bla
 #   \textasciicircum{} bla --> ~ bla
-# TODO: % ignores whitespace at the beginning of the next line!
-#   bla bla%ignore this\n  asdf --> bla blaasdf
 # TODO: Support for starred commands.
 #  E.g. \\* which does nothing in HTML.
 # TODO: \\[5pt]
@@ -145,17 +143,19 @@ class TokenText(Token):
     def __repr__(self):
         return 'TokenText({})'.format(repr(self.text))
 
-class TokenActiveWhitespace(Token):
+class TokenMultilineWhitespace(Token):
+    """Paragraph-breaking whitespace, contains at least two line breaks."""
     def __init__(self, text):
         self.text = text
     def __repr__(self):
-        return 'TokenActiveWhitespace({})'.format(repr(self.text))
+        return 'TokenMultilineWhitespace({})'.format(repr(self.text))
 
-class TokenInactiveWhitespace(Token):
+class TokenSimpleWhitespace(Token):
+    """Paragraph-non-breaking whitespace, contains at most one line break."""
     def __init__(self, text):
         self.text = text
     def __repr__(self):
-        return 'TokenInactiveWhitespace({})'.format(repr(self.text))
+        return 'TokenSimpleWhitespace({})'.format(repr(self.text))
 
 class TokenError(Token):
     def __init__(self, error_message, content):
@@ -166,13 +166,17 @@ class TokenError(Token):
                 repr(self.error_message), repr(self.content))
 
 class TokenCommand(Token):
-    def __init__(self, command, part=0, args=[]):
+    def __init__(self, command, part=0, args=[], whitespace=SKIP_COMPARISON):
         self.command = command
         self.args = args
         self.part = part
+        # SKIP_COMPARISON used only for testing, the real code MUST manually
+        # set whitespace.
+        self.whitespace = whitespace
     def __repr__(self):
-        return 'TokenCommand({}, part={}, args={})'.format(
-                repr(self.command), self.part, repr(self.args))
+        return 'TokenCommand({}, part={}, args={}, whitespace={})'.format(
+                repr(self.command), self.part, repr(self.args),
+                repr(self.whitespace))
 
 class TokenOpenCurly(Token):
     def __repr__(self):
@@ -449,16 +453,17 @@ class Command(object):
             assert open == '[' and closed == ']'
             return tokenizer.read_until(']', [r'\\', r'\]'])
 
-    def apply_command(self, tokenizer, name, args):
+    def apply_command(self, tokenizer, name, args, whitespace):
         """Manually add states or control tokenizer, or return tokens to be
         added. By default, add all parts that have been parsed and all
         TokenCommand in between and at the beginning and at the end of the
         command."""
 
-        tokenizer.state.add_token(TokenCommand(name, 0, args))
+        tokenizer.state.add_token(TokenCommand(name, 0, args, whitespace))
         for part in range(1, len(self.P_indices) - 1):
             tokenizer.state.add_token(args[self.P_indices[part]])
-            tokenizer.state.add_token(TokenCommand(name, part, args))
+            tokenizer.state.add_token(
+                    TokenCommand(name, part, args, whitespace))
 
     def to_html(self, token, converter):
         raise NotImplementedError(repr(token))
@@ -471,11 +476,14 @@ class Command(object):
         output = []
         if token.part == 0:
             output.append('\\' + token.command)
+            if self.argc == 0:
+                output.append(token.whitespace[0])
         else:
             output.append('}')  # Close previous part.
 
         # Between previous and next P:
         for k in range(self.P_indices[part] + 1, self.P_indices[part + 1]):
+            output.append(token.whitespace[k])
             if token.args[k] is None:
                 continue
             open, method, closed = self.args_desc[3 * k : 3 * k + 3]
@@ -483,6 +491,7 @@ class Command(object):
             output.append(open + token.args[k] + closed)
 
         if part < len(self.P_indices) - 2:
+            output.append(token.whitespace[self.P_indices[part + 1]])
             output.append('{')
         return u"".join(output)
 
@@ -495,7 +504,7 @@ class LatexBegin(Command):
         # SIMPLIFICATION MARK: Ignoring comments, using U.
         super(LatexBegin, self).__init__(args_desc="{U}")
 
-    def apply_command(self, tokenizer, name, args):
+    def apply_command(self, tokenizer, name, args, whitespace):
         """Simply add itself to the current state."""
         if args[0] not in latex_environments:
             return TokenError(_("Unknown LaTeX environment:"), args[0])
@@ -504,7 +513,8 @@ class LatexBegin(Command):
         environment = latex_environments[args[0]]()
 
         # Pass environment as the arg.
-        tokenizer.state.add_token(TokenCommand(name, 0, [args[0], environment]))
+        tokenizer.state.add_token(
+                TokenCommand(name, 0, [args[0], environment], whitespace))
         tokenizer.push_state(State(break_condition='begin-' + args[0],
                 environment=environment))
 
@@ -524,7 +534,7 @@ class LatexEnd(Command):
         # SIMPLIFICATION MARK: Ignoring comments, using U.
         super(LatexEnd, self).__init__(args_desc="{U}")
 
-    def apply_command(self, tokenizer, name, args):
+    def apply_command(self, tokenizer, name, args, whitespace):
         """Simply add itself to the current state."""
         break_condition = tokenizer.state.break_condition
         if not isinstance(break_condition, basestring) or \
@@ -538,7 +548,10 @@ class LatexEnd(Command):
         environment = tokenizer.state.environment
         assert environment is not None
         result = tokenizer.pop_state().tokens
-        return [result, TokenCommand(name, 0, [args[0], environment])]
+        return [
+                result,
+                TokenCommand(name, 0, [args[0], environment], whitespace)
+        ]
 
     def to_html(self, token, converter):
         environment = token.args[1]
@@ -551,7 +564,7 @@ class LatexCaption(Command):
     def __init__(self):
         super(LatexCaption, self).__init__(args_desc="{P}")
 
-    def apply_command(self, tokenizer, name, args):
+    def apply_command(self, tokenizer, name, args, whitespace):
         # SIMPLIFICATION MARK - Not sure, but probably.
         if not hasattr(tokenizer.state.environment, 'tag'):
             return TokenError(_("Unexpected \\caption."), "")
@@ -560,7 +573,7 @@ class LatexCaption(Command):
         tag = str(tokenizer.counters[COUNTER_FIGURE])
         tokenizer.state.environment.tag = tag
         return super(LatexCaption, self).apply_command(
-                tokenizer, name, args + [tag])
+                tokenizer, name, args + [tag], whitespace)
 
     def to_html(self, token, converter):
         if token.part == 0:
@@ -594,11 +607,11 @@ class LatexCentering(Command):
     def __init__(self):
         super(LatexCentering, self).__init__()
 
-    def apply_command(self, tokenizer, name, args):
+    def apply_command(self, tokenizer, name, args, whitespace):
         environment = tokenizer.state.environment
         if environment and hasattr(environment, 'centering'):
             environment.centering = True
-            return TokenCommand('centering', 0)
+            return TokenCommand('centering', 0, whitespace=whitespace)
         else:
             return TokenError(_("Unexpected \\centering."), "")
 
@@ -681,7 +694,7 @@ class LatexLabel(Command):
     def __init__(self):
         super(LatexLabel, self).__init__(args_desc="{U}")
 
-    def apply_command(self, tokenizer, name, args):
+    def apply_command(self, tokenizer, name, args, whitespace):
         # SIMPLIFICATION MARK - Possibly labels don't work this way.
         environment = tokenizer.state.environment
 
@@ -694,7 +707,7 @@ class LatexLabel(Command):
         else:
             error = u""
         tokenizer.refs[args[0]] = environment.tag
-        return TokenCommand(name, 0, args + [error])
+        return TokenCommand(name, 0, args + [error], whitespace)
 
     def to_html(self, token, converter):
         return token.args[-1]
@@ -1189,7 +1202,8 @@ class Tokenizer(object):
         return T[start : K]
 
     def _nt__read_comment(self):
-        """(next_token helper function) Read until a newline, inclusive."""
+        """(next_token helper function) Read until a newline and all whitespace
+        after the newline."""
         T = self.T
         K = self.K
         start = K
@@ -1197,6 +1211,8 @@ class Tokenizer(object):
             if T[K] in '\r\n':
                 K += 2 if T[K : K + 2] == '\r\n' else 1
                 break
+            K += 1
+        while K < len(T) and T[K].isspace():
             K += 1
         self.K = K
         return T[start : K]
@@ -1213,9 +1229,9 @@ class Tokenizer(object):
         if T[K].isspace():
             whitespace, line_breaks = self._nt__read_whitespace()
             if line_breaks >= 2:
-                return TokenActiveWhitespace(whitespace)
+                return TokenMultilineWhitespace(whitespace)
             # Unreachable code actually.
-            return TokenInactiveWhitespace(whitespace)
+            return TokenSimpleWhitespace(whitespace)
         elif T[K] == '$' or T[K : K + 2] in [r'\(', r'\[']:
             return self.handle_math_mode()
         elif T[K] == '\\':
@@ -1338,6 +1354,9 @@ class Tokenizer(object):
         except KeyError:
             return TokenError(_("Unknown LaTeX command."), full_name)
         args = []
+        whitespace = []  # One for each argument.
+        # (in the case some arguments are not given, the order of whitespace
+        # might be incorrect, but it won't affect the final LaTex output)
 
         # SIMPLIFICATION MARK - Maybe this isn't how it's supposed to work.
         # We allow complicated patterns like [][]{}{}[]{}.
@@ -1349,31 +1368,42 @@ class Tokenizer(object):
             # TODO: support \name <char><char> or \name<digit><char/digit><...>
             last_K = self.K
             token = self.next_token()
+            # TODO: multiline whitespace
+            if isinstance(token, TokenSimpleWhitespace):
+                current_whitespace = token.text
+                token = self.next_token()
+            else:
+                current_whitespace = ""
+
             if token is None or isinstance(token, Token):
                 token_type = None
                 content = None
             else:
                 token_type, content = token
+
             expected_bracket = command.get_arg_open_bracket(len(args))
-            # TODO: whitespace
             if token_type == TOKEN_OPEN_SQUARE:
                 if expected_bracket == '[':
                     # args.append(self.handle_square_bracket())
                     args.append(command.parse_argument(self, name, len(args)))
+                    whitespace.append(current_whitespace)
                     if isinstance(args[-1], TokenError):
                         return args[-1]
                     continue
                 else:
-                    return TokenError(_("Expected a '}' bracket."),
+                    return TokenError(_("Expected a '{' bracket."),
                             full_name + self.T[start : last_K])
             while len(args) < command.argc and \
                     command.get_arg_open_bracket(len(args)) == '[':
                 args.append(None)  # Skip optional arguments.
+                whitespace.append(current_whitespace)
+                current_whitespace = ""
             if len(args) == command.argc:
                 self.undo_token()
                 break
             if token_type == TOKEN_OPEN_CURLY:
                 args.append(command.parse_argument(self, name, len(args)))
+                whitespace.append(current_whitespace)
                 if isinstance(args[-1], TokenError):
                     return args[-1]
                 # args.append(self.handle_curly_bracket())
@@ -1383,7 +1413,16 @@ class Tokenizer(object):
                         _("Expected a '%s' bracket.") % expected_bracket,
                         full_name + self.T[start : last_K])
 
-        return command.apply_command(self, name, args)
+        # Manually handle no-argument commands and their trailing whitespace.
+        if command.argc == 0:
+            token = self.next_token()
+            if isinstance(token, TokenSimpleWhitespace):
+                whitespace = [token.text]
+            else:
+                whitespace = [""]
+                self.undo_token()
+
+        return command.apply_command(self, name, args, whitespace)
 
 
     def handle_bbcode(self):
@@ -1680,9 +1719,9 @@ class Converter(object):
                 output.append(self.mock__get_latex_html(element))
             elif isinstance(token, TokenText):
                 output.append(xss.escape(token.text))
-            elif isinstance(token, TokenInactiveWhitespace):
+            elif isinstance(token, TokenSimpleWhitespace):
                 output.append(" ")  # Single whitespace is enough.
-            elif isinstance(token, TokenActiveWhitespace):
+            elif isinstance(token, TokenMultilineWhitespace):
                 # SIMPLIFICATION MARK - Instead of handling paragraphs, we just
                 # put a line break.
                 output.append("<br>")
@@ -1705,8 +1744,8 @@ class Converter(object):
         else:
             error_func = lambda token: u""
         for token in self.tokens:
-            if isinstance(token, (TokenText, TokenInactiveWhitespace, \
-                    TokenActiveWhitespace)):
+            if isinstance(token, (TokenText, TokenSimpleWhitespace, \
+                    TokenMultilineWhitespace)):
                 output.append(token.text)
             elif isinstance(token, TokenComment):
                 output.append("%")

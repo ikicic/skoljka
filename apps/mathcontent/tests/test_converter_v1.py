@@ -6,8 +6,10 @@ from mathcontent.converter_v1 import Tokenizer, Converter
 from mathcontent.converter_v1 import SKIP_COMPARISON as SKIP
 from mathcontent.converter_v1 import parse_bbcode, BBCodeException
 from mathcontent.converter_v1 import TokenText, TokenCommand, \
-        TokenActiveWhitespace, TokenInactiveWhitespace, TokenMath, TokenError, \
-        TokenComment, TokenOpenCurly, TokenClosedCurly, TokenBBCode
+        TokenMultilineWhitespace, TokenSimpleWhitespace, TokenMath, \
+        TokenError, TokenComment, TokenOpenCurly, TokenClosedCurly, \
+        TokenBBCode
+
 from mathcontent.converter_v1 import LatexEnvironmentDiv, LatexEnvironmentFigure
 from mathcontent.models import TYPE_HTML, TYPE_LATEX, LatexElement
 
@@ -114,79 +116,84 @@ class ConverterV1TestCase(TestCase):
         self.assertTokenization("bla  bla", [TokenText("bla  bla")])
         self.assertTokenization("bla\n  bla", [
                 TokenText("bla"),
-                TokenInactiveWhitespace("\n  "),
+                TokenSimpleWhitespace("\n  "),
                 TokenText("bla"),
         ])
         self.assertTokenization("bla \n \n   bla", [
                 TokenText("bla"),
-                TokenActiveWhitespace(" \n \n   "),
+                TokenMultilineWhitespace(" \n \n   "),
                 TokenText("bla"),
         ])
         self.assertTokenization(
             "bla $a + b = c$ \n$$d*f+g  $$ dummy$$$$$$$$$a+b$\n  bla", [
                 TokenText("bla"),
-                TokenInactiveWhitespace(" "),
+                TokenSimpleWhitespace(" "),
                 TokenMath('$%s$', "a + b = c"),
-                TokenInactiveWhitespace(" \n"),
+                TokenSimpleWhitespace(" \n"),
                 TokenMath('$$%s$$', "d*f+g  "),
-                TokenInactiveWhitespace(" "),
+                TokenSimpleWhitespace(" "),
                 TokenText("dummy"),
                 TokenMath('$$%s$$', ""),
                 TokenMath('$$%s$$', ""),
                 TokenMath('$%s$', "a+b"),
-                TokenInactiveWhitespace("\n  "),
+                TokenSimpleWhitespace("\n  "),
                 TokenText("bla"),
         ])
         self.assertTokenization(
             "bla \( a+b  \)\n\n\[\n   c*d\n\]\n\nbla bla", [
                 TokenText("bla"),
-                TokenInactiveWhitespace(" "),
+                TokenSimpleWhitespace(" "),
                 TokenMath('\(%s\)', " a+b  "),
-                TokenActiveWhitespace("\n\n"),
+                TokenMultilineWhitespace("\n\n"),
                 TokenMath('\[%s\]', "\n   c*d\n"),
-                TokenActiveWhitespace("\n\n"),
+                TokenMultilineWhitespace("\n\n"),
                 TokenText("bla bla"),
         ])
 
         self.assertTokenization("\\\\ \\\\", [
-                TokenCommand('\\'),
-                TokenInactiveWhitespace(" "),
+                # Not sure about this one.
+                TokenCommand('\\', whitespace=[" "]),
                 TokenCommand('\\'),
         ])
         self.assertTokenization(
-            "\\textasciicircum\\textasciitilde\\textbackslash", [
+            "\\textasciicircum\\textasciitilde  \\textbackslash", [
                 TokenCommand('textasciicircum'),
-                TokenCommand('textasciitilde'),
+                TokenCommand('textasciitilde', whitespace=["  "]),
                 TokenCommand('textbackslash'),
         ])
         self.assertTokenization( "bla\\unknownname bla", [
                 TokenText("bla"),
                 TokenError(SKIP, "\\unknownname"),
-                TokenInactiveWhitespace(" "),
+                TokenSimpleWhitespace(" "),
                 TokenText("bla"),
         ])
         self.assertTokenization(
-            "bla\r\n% a comment\nblabla % another comment", [
+            # Comment picks all the leading whitespace from the next line.
+            "bla\r\n% a comment\n   blabla % another comment", [
                 TokenText("bla"),
-                TokenInactiveWhitespace("\r\n"),
-                TokenComment(" a comment\n"),
+                TokenSimpleWhitespace("\r\n"),
+                TokenComment(" a comment\n   "),
                 TokenText("blabla"),
-                TokenInactiveWhitespace(" "),
+                TokenSimpleWhitespace(" "),
                 TokenComment(" another comment")
         ])
         self.assertTokenization(r"\url{bla}", [TokenCommand('url', 0, ["bla"])])
         self.assertTokenization(r"\url{b%la}", [TokenCommand('url', 0, ["b%la"])])
         self.assertTokenization(r"\url{b{}%la}", [TokenCommand('url', 0, ["b{}%la"])])
+        self.assertTokenization(r"\url  {bla}", [TokenCommand('url', 0, ["bla"], ["  "])])
         self.assertTokenization(r"\url", [TokenError(SKIP, r"\url")])
         self.assertTokenization(r"\url bla", [
                 TokenError(SKIP, r"\url"),
-                TokenInactiveWhitespace(" "),
                 TokenText("bla"),
         ])
-        self.assertTokenization(r"\href{http://www.google.com}{bla}", [
-                TokenCommand('href', 0, ["http://www.google.com", [TokenText("bla")]]),
+        self.assertTokenization("\\href  {http://www.google.com} \n  {bla}", [
+                TokenCommand('href', 0,
+                    ["http://www.google.com", [TokenText("bla")]],
+                    ["  ", " \n  "]),
                 TokenText("bla"),
-                TokenCommand('href', 1, ["http://www.google.com", [TokenText("bla")]]),
+                TokenCommand('href', 1,
+                    ["http://www.google.com", [TokenText("bla")]],
+                    ["  ", " \n  "]),
         ])
         self.assertTokenization(r"\href{http://ww%w.g{}oogle.com}{bla}", [
                 TokenCommand('href', 0, ["http://ww%w.g{}oogle.com", [TokenText("bla")]]),
@@ -207,7 +214,7 @@ class ConverterV1TestCase(TestCase):
         self.assertTokenization(r"\textbf{bla \sout{asdf}\uline{bla bla}}", [
                 TokenCommand('textbf', 0, SKIP),
                 TokenText("bla"),
-                TokenInactiveWhitespace(" "),
+                TokenSimpleWhitespace(" "),
                 TokenCommand('sout', 0, SKIP),
                 TokenText("asdf"),
                 TokenCommand('sout', 1, SKIP),
@@ -221,11 +228,13 @@ class ConverterV1TestCase(TestCase):
         ])
         self.assertTokenization(
             "\\begin{center}\n  some content\n\\end{center}", [
-                TokenCommand('begin', 0, ['center', LatexEnvironmentDiv('mc-center')]),
-                TokenInactiveWhitespace("\n  "),
+                TokenCommand('begin', 0,
+                    ['center', LatexEnvironmentDiv('mc-center')], ['']),
+                TokenSimpleWhitespace("\n  "),
                 TokenText("some content"),
-                TokenInactiveWhitespace("\n"),
-                TokenCommand('end', 0, ['center', LatexEnvironmentDiv('mc-center')]),
+                TokenSimpleWhitespace("\n"),
+                TokenCommand('end', 0,
+                    ['center', LatexEnvironmentDiv('mc-center')], ['']),
         ])
         self.assertTokenization(
             "\\begin{asdf}bla\\end{asdf}", [
@@ -235,18 +244,18 @@ class ConverterV1TestCase(TestCase):
         ])
 
         # Test empty {}.
-        self.assertTokenization("\\textasciicircum bla", [
-                TokenCommand('textasciicircum', 0),
-                TokenInactiveWhitespace(" "),
+        self.assertTokenization("\\textasciicircum \n  bla", [
+                TokenCommand('textasciicircum', whitespace=[" \n  "]),
                 TokenText("bla"),
         ])
         self.assertTokenization("\\textasciicircumbla", [
                 TokenError(SKIP, "\\textasciicircumbla"),
         ])
-        self.assertTokenization("\\textasciicircum{}bla", [
+        self.assertTokenization("\\textasciicircum{}  bla", [
                 TokenCommand('textasciicircum', 0),
                 TokenOpenCurly(),
                 TokenClosedCurly(),
+                TokenSimpleWhitespace("  "),
                 TokenText("bla"),
         ])
 
@@ -335,7 +344,7 @@ class ConverterV1TestCase(TestCase):
 
 
     def test_latex_commands(self):
-        # Newlines are always seperated as TokenInactiveWhitespace, which then
+        # Newlines are always seperated as TokenSimpleWhitespace, which then
         # is replaced with a single whitespace (for HTML that is enough).
         self.assertHTMLAutoLatex("bla", "bla")
         self.assertHTMLAutoLatex("bla\nbla", "bla bla")
@@ -344,9 +353,9 @@ class ConverterV1TestCase(TestCase):
         self.assertHTMLAutoLatex("bla  \n \n \n\n  bla", "bla<br>bla")
         self.assertHTMLAutoLatex("bla\n\n\n\nbla", "bla<br>bla")
 
-        self.assertHTMLAutoLatex("bla\\\\asdf", "bla<br>asdf")
+        self.assertHTMLAutoLatex("bla\\\\  asdf", "bla<br>asdf")
         self.assertHTMLAutoLatex("\\emph{bla bla bla}", "<i>bla bla bla</i>")
-        self.assertHTMLAutoLatex("\\emph{bla \\textbf{bla} bla}",
+        self.assertHTMLAutoLatex("\\emph  {bla \\textbf \n{bla} bla}",
                         "<i>bla <b>bla</b> bla</i>")
         self.assertHTMLAutoLatex(
                 "\\href{http://www.example.com/bla%40bla}{click here}",
@@ -368,7 +377,7 @@ class ConverterV1TestCase(TestCase):
 
         # TODO: Check if the conversion pt->px makes any sense.
         self.assertHTMLAutoLatex(
-                "\\includegraphics[width=100pt]{first.png}",
+                "\\includegraphics  [width=100pt] {first.png}",
                 '<img src="/mock/first.png" alt="Attachment first.png" class="latex" width="100">')
         self.assertHTMLAutoLatex(
                 "\\includegraphics[width=100pt,height=200pt]{first.png}",
@@ -393,6 +402,8 @@ class ConverterV1TestCase(TestCase):
 
         # Begin commands.
         self.assertHTMLAutoLatex("\\begin{center}\\textbf{bla}\\end{center}",
+                        '<div class="mc-center"><b>bla</b></div>')
+        self.assertHTMLAutoLatex("\\begin\n{center}\\textbf  {bla}\\end \n{center}",
                         '<div class="mc-center"><b>bla</b></div>')
         # Math mode.
         self.assertHTMLAutoLatex("$a+b$", "<<$%s$||a+b>>")
