@@ -353,10 +353,17 @@ class ConverterV1TestCase(TestCase):
         self.assertHTMLAutoLatex("bla  \n \n \n\n  bla", "bla<br>bla")
         self.assertHTMLAutoLatex("bla\n\n\n\nbla", "bla<br>bla")
 
+        self.assertHTMLAutoLatex(
+                r"a\-very\-very\-long\-word\-here",
+                r"averyverylongwordhere")
+        self.assertHTMLAutoLatex( r"\TeX", r"<<$%s$||\TeX>>")
+        self.assertHTMLAutoLatex( r"\LaTeX", r"<<$%s$||\LaTeX>>")
+
         self.assertHTMLAutoLatex("bla\\\\  asdf", "bla<br>asdf")
         self.assertHTMLAutoLatex("\\emph{bla bla bla}", "<i>bla bla bla</i>")
         self.assertHTMLAutoLatex("\\emph  {bla \\textbf \n{bla} bla}",
                         "<i>bla <b>bla</b> bla</i>")
+
         self.assertHTMLAutoLatex(
                 "\\href{http://www.example.com/bla%40bla}{click here}",
                 '<a href="http://www.example.com/bla%40bla" rel="nofollow">'
@@ -394,7 +401,19 @@ class ConverterV1TestCase(TestCase):
         self.assertHTMLAutoLatex("bla\\textasciitilde{}asdf", "bla~asdf")
         self.assertHTMLAutoLatex("something\\textbackslash{}something",
                         "something\\something")
+
+        # Simple containers.
+        self.assertHTMLAutoLatex(
+                "\\fbox{do not wrap this part}",
+                '<span class="mc-fbox">do not wrap this part</span>')
+        self.assertHTMLAutoLatex(
+                "\\mbox{do not wrap this part}",
+                '<span class="mc-mbox">do not wrap this part</span>')
         self.assertHTMLAutoLatex("\\textbf{bla bla bla}", "<b>bla bla bla</b>")
+        self.assertHTMLAutoLatex("\\textit{bla bla bla}", "<i>bla bla bla</i>")
+        self.assertHTMLAutoLatex(
+                "\\underline{underlined with nowrap}",
+                '<span class="mc-underline">underlined with nowrap</span>')
         self.assertHTMLAutoLatex("asdf \\sout{bla bla} qwerty \\uline{asdf}",
                         "asdf <s>bla bla</s> qwerty <u>asdf</u>")
         self.assertHTMLAutoLatex("bla\\~{}asdf", "bla~asdf")

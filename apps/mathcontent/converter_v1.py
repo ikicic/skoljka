@@ -13,19 +13,12 @@ from urlparse import urljoin
 
 import re
 
-# TODO: Ignore spaces after a command.
-#   \textasciicircum bla --> ~bla
-#   \textasciicircum{} bla --> ~ bla
 # TODO: Support for starred commands.
 #  E.g. \\* which does nothing in HTML.
 # TODO: \\[5pt]
 # TODO: \newline
 # TODO: \par
-# TODO: \-
-# TODO: \mbox{...}
-# TODO: \TeX
-# TODO: \LaTeX
-# TODO: Quotation marks ``text'' and `text' for HTML.
+# TODO: Quotation marks ``text'' and `text' for HTML.  # NOT FULLY IMPLEMENTED.
 # TODO: -, -- (en-dash), --- (em-dash) and other ligatures
 # TODO: Fig.~5  (treat as a LaTeX-only feature)
 # TODO: \underline
@@ -36,6 +29,7 @@ import re
 # TODO: \begin{quote}...\end{quote}
 # TODO: \begin{multline}...\end{multline}
 # TODO: \begin{eqnarray}...\end{eqnarray}
+# TODO: fix uline and sout --> support for custom usepackage
 
 # MAYBE: \" \i \j \o \^ \ss \~ and other special characters
 # MAYBE: \emph{italic \emph{not italic} italic} (CSS thing)
@@ -642,6 +636,8 @@ class LatexContainer(Command):
     def to_html(self, token, converter):
         return self.html_open if token.part == 0 else self.html_close
 
+
+
 class LatexHref(Command):
     def __init__(self):
         super(LatexHref, self).__init__(args_desc="{U}{P}")
@@ -689,6 +685,20 @@ class LatexIncludeGraphics(Command):
                 img_params_to_html(params))
 
 
+
+class LatexInlineMathCommand(Command):
+    """Command to be treated as an inline math when generating HTML, where it is
+    replaced with $\\<command name>$. Leaves as-is when generating LaTeX."""
+    def __init__(self):
+        super(LatexInlineMathCommand, self).__init__()
+
+    def to_html(self, token, converter):
+        # Handled manually in Converter.
+        raise ParserInternalError(
+                "LatexInlineMathCommand.to_html is unreachable.")
+
+
+
 class LatexLabel(Command):
     """Handle \\label{...}."""
     def __init__(self):
@@ -725,6 +735,18 @@ class LatexLabel(Command):
     #         return warning
     #     elif converter.type == TYPE_LATEX:
     #         return warning + r"\label{" + content + "}"
+
+
+
+class LatexNoop(Command):
+    """Ignored when converting to HTML, printed without any logic when
+    converting to LaTeX. Used for commonly used commands whose purpose is
+    specific to LaTeX. (e.g. \-)"""
+    def __init__(self):
+        super(LatexNoop, self).__init__()
+
+    def to_html(self, token, converter):
+        return ""
 
 
 
@@ -1060,25 +1082,32 @@ class BBCodeURL(BBCodeTag):
 
 
 latex_commands = {
-    '\\': LatexSpecialSymbol('<br>'),  # NOT FULLY TESTED.
+    '-': LatexNoop(),
+    'LaTeX': LatexInlineMathCommand(),
+    'TeX': LatexInlineMathCommand(),
+    '\\': LatexSpecialSymbol('<br>'),
     'begin': LatexBegin(),
     'caption': LatexCaption(),
     'centering': LatexCentering(),
     'end': LatexEnd(),
-    'emph': LatexContainer('<i>', '</i>'),
+    'emph': LatexContainer('<i>', '</i>'),  # NOT FULLY IMPLEMENTED.
 #     # TODO: eqref
+    'fbox': LatexContainer('<span class="mc-fbox">', '</span>'),
     'href': LatexHref(),
     'includegraphics': LatexIncludeGraphics(),
     'label': LatexLabel(),
+    'mbox': LatexContainer('<span class="mc-mbox">', '</span>'),
     'ref': LatexRef(),
     'sout': LatexContainer('<s>', '</s>'),
-    'textasciicircum': LatexSpecialSymbol('^'),  # NOT FULLY TESTED.
-    'textasciitilde': LatexSpecialSymbol('~'),  # NOT FULLY TESTED. Not really.
-    'textbackslash': LatexSpecialSymbol('\\'),  # NOT FULLY TESTED.
+    'textasciicircum': LatexSpecialSymbol('^'),
+    'textasciitilde': LatexSpecialSymbol('~'),  # Not really.
+    'textbackslash': LatexSpecialSymbol('\\'),
     'textbf': LatexContainer('<b>', '</b>'),
+    'textit': LatexContainer('<i>', '</i>'),
     'uline': LatexContainer('<u>', '</u>'),
+    'underline': LatexContainer('<span class="mc-underline">', '</span>'),
     'url': LatexURL(),
-    '~': LatexSpecialSymbol('~'),               # NOT FULLY TESTED. Not really.
+    '~': LatexSpecialSymbol('~'),  # NOT FULLY IMPLEMENTED.
 }
 
 latex_environments = {
@@ -1626,9 +1655,13 @@ class Converter(object):
         formulas = []
         tokens = []
         for token in self.tokens:
-            if isinstance(token, TokenCommand) and token.command == 'ref':
-                ref = self.refs.get(token.args[0])
-                token = TokenMath('$%s$', ref if ref is not None else '??')
+            if isinstance(token, TokenCommand):
+                if token.command == 'ref':
+                    ref = self.refs.get(token.args[0])
+                    token = TokenMath('$%s$', ref if ref is not None else '??')
+                elif isinstance(
+                        latex_commands[token.command], LatexInlineMathCommand):
+                    token = TokenMath('$%s$', '\\' + token.command)
 
             if isinstance(token, TokenMath):
                 latex_hash = self.mock__generate_latex_hash(

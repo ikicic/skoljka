@@ -73,3 +73,18 @@ object.latex_center {
   display: block;
   margin: 6pt auto;
 }
+
+/* MathContent content */
+.mc-fbox {
+  border: 1px solid black;
+  white-space: nowrap;
+}
+
+.mc-mbox {
+  white-space: nowrap;
+}
+
+.mc-underline {
+  text-decoration: underline;
+  white-space: nowrap;
+}
