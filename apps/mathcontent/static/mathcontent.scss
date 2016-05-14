@@ -80,8 +80,16 @@ object.latex_center {
   white-space: nowrap;
 }
 
+.mc-indent {
+  text-indent: 1em;
+}
+
 .mc-mbox {
   white-space: nowrap;
+}
+
+.mc-noindent {
+  text-indent: 0em;
 }
 
 .mc-underline {

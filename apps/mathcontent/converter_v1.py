@@ -11,17 +11,18 @@ from mathcontent.latex import generate_png, generate_latex_hash, \
 from collections import defaultdict
 from urlparse import urljoin
 
+import copy
 import re
 
+# TODO: Paragraphs!
 # TODO: Support for starred commands.
 #  E.g. \\* which does nothing in HTML.
 # TODO: \\[5pt]
 # TODO: \newline
 # TODO: \par
-# TODO: Quotation marks ``text'' and `text' for HTML.  # NOT FULLY IMPLEMENTED.
+# TODO: Quotation marks ``text'' and `text' for HTML.
 # TODO: -, -- (en-dash), --- (em-dash) and other ligatures
 # TODO: Fig.~5  (treat as a LaTeX-only feature)
-# TODO: \underline
 # TODO: \begin{enumerate} \item ... \end{enumerate}
 # TODO: \begin{itemize} \item ... \end{itemize}
 # TODO: \begin{description} \item[bla] ... \end{description}
@@ -802,8 +803,14 @@ class LatexEnvironmentDiv(LatexEnvironment):
 
     def to_html(self, begin, token, converter):
         if begin:
+            converter.push_state()
+            converter.state.is_in_paragraph = False
+            converter.state.all_no_indent = True
             return u'<div class="{}">'.format(self.html_class)
         else:
+            converter.pop_state()
+            converter.state.is_in_paragraph = False
+            converter.state.indent_next = False
             return "</div>"
 
 
@@ -1628,7 +1635,7 @@ class _BBTemporaryOpenTag(object):
 
 class Converter(object):
     def __init__(self, tokens, tokenizer, attachments=None,
-            errors_enabled=True):
+            errors_enabled=True, paragraphs_disabled=False):
         # TODO: attachments_path
         # TODO: url_prefix (what is this?)
 
@@ -1641,13 +1648,25 @@ class Converter(object):
         self.attachments = attachments
         self.attachments_dict = {x.get_filename(): x for x in attachments or []}
         self.errors_enabled = errors_enabled
+        self.paragraphs_disabled = paragraphs_disabled
 
-        self.mock__generate_png = generate_png
-        self.mock__generate_latex_hash = generate_latex_hash
-        self.mock__get_available_latex_elements = get_available_latex_elements
-        self.mock__get_latex_html = get_latex_html
+        self.generate_png__func = generate_png
+        self.generate_latex_hash__func = generate_latex_hash
+        self.get_available_latex_elements__func = get_available_latex_elements
+        self.get_latex_html__func = get_latex_html
 
         self.bb_stack = []
+
+        self._state_stack = []
+        self.state = None
+
+    def push_state(self):
+        self._state_stack.append(copy.copy(self._state_stack[-1]))
+        self.state = self._state_stack[-1]
+
+    def pop_state(self):
+        self._state_stack.pop()
+        self.state = self._state_stack[-1]
 
     def _pre_convert_to_html(self):
         # Here we process tokens of specific types before calling .to_html.
@@ -1664,20 +1683,20 @@ class Converter(object):
                     token = TokenMath('$%s$', '\\' + token.command)
 
             if isinstance(token, TokenMath):
-                latex_hash = self.mock__generate_latex_hash(
+                latex_hash = self.generate_latex_hash__func(
                         token.format, token.content)
                 formulas.append((latex_hash, token.format, token.content))
 
             tokens.append(token)
 
         latex_elements = {x.hash: x \
-                for x in self.mock__get_available_latex_elements(formulas)}
+                for x in self.get_available_latex_elements__func(formulas)}
 
         self.maths = {}
         for hash, format, content in formulas:
             element = latex_elements.get(hash)
             if element is None:
-                element = self.mock__generate_png(hash, format, content)
+                element = self.generate_png__func(hash, format, content)
             self.maths[(format, content)] = element
 
         return tokens
@@ -1742,27 +1761,59 @@ class Converter(object):
         else:
             error_func = lambda token: u""
 
+        class HTMLConverterState(object):
+            def __init__(self):
+                self.is_in_paragraph = False
+                self.indent_next = False
+                self.all_no_indent = False
+
+        self._state_stack = [HTMLConverterState()]
+        self.state = self._state_stack[-1]
+
         output = []
+        def add_content_par(content):
+            """First check if paragraph should be added and then add content."""
+            state = self.state
+            if not self.paragraphs_disabled and not state.is_in_paragraph:
+                if state.indent_next and not state.all_no_indent:
+                    output.append("<p class=\"mc-indent\">")
+                else:
+                    output.append("<p class=\"mc-noindent\">")
+            output.append(content)
+            state.is_in_paragraph = True
+
         for token in tokens:
-            if isinstance(token, (TokenComment, TokenOpenCurly, \
-                    TokenClosedCurly)):
+            if isinstance(token, TokenComment):
                 continue
+            elif isinstance(token, TokenOpenCurly):
+                self.push_state()
+            elif isinstance(token, TokenClosedCurly):
+                if len(self._state_stack) == 1:
+                    output.append(TokenError(_("Unexpected '}'"), '}'))
+                else:
+                    self.pop_state()
             elif isinstance(token, TokenMath):
                 element = self.maths[(token.format, token.content)]
-                output.append(self.mock__get_latex_html(element))
+                add_content_par(self.get_latex_html__func(element))
             elif isinstance(token, TokenText):
-                output.append(xss.escape(token.text))
+                add_content_par(xss.escape(token.text))
             elif isinstance(token, TokenSimpleWhitespace):
                 output.append(" ")  # Single whitespace is enough.
             elif isinstance(token, TokenMultilineWhitespace):
-                # SIMPLIFICATION MARK - Instead of handling paragraphs, we just
-                # put a line break.
-                output.append("<br>")
+                if self.paragraphs_disabled:
+                    output.append("<br>")
+                else:
+                    self.state.is_in_paragraph = False
+                    self.state.indent_next = True
             elif isinstance(token, TokenError):
-                output.append(error_func(token))
+                add_content_par(error_func(token))
             elif isinstance(token, TokenCommand):
                 command = latex_commands[token.command]
-                output.append(command.to_html(token, self))
+                # TODO: \begin{equation}...\end{equation}
+                if token.command in ['begin', 'end']:
+                    output.append(command.to_html(token, self))
+                else:
+                    add_content_par(command.to_html(token, self))
             elif isinstance(token, TokenBBCode):
                 output.append(self.process_bb(token, TYPE_HTML))
             else:

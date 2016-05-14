@@ -62,8 +62,10 @@ class ConverterV1TestCase(TestCase):
     def assertEqualPrint(self, received, expected):
         if received != expected:
             print
-            print "Received: ", received
-            print "Expected: ", expected
+            print "Received: ", repr(unicode(received))
+            print "Expected: ", repr(unicode(expected))
+            # print "Received: ", received
+            # print "Expected: ", expected
             self.fail("Received != Expected")
 
     # def _get_converter(self, type, input, warnings=True,
@@ -95,21 +97,27 @@ class ConverterV1TestCase(TestCase):
         tokens = tokenizer.tokenize()
         converter = Converter(tokens, tokenizer, attachments=self.attachments,
                 **converter_kwargs)
-        converter.mock__generate_png = _mock__generate_png
-        converter.mock__generate_latex_hash = _mock__generate_latex_hash
-        converter.mock__get_available_latex_elements = _mock__get_available_latex_elements
-        converter.mock__get_latex_html = _mock__get_latex_html
+        converter.generate_png__func = _mock__generate_png
+        converter.generate_latex_hash__func = _mock__generate_latex_hash
+        converter.get_available_latex_elements__func = \
+                _mock__get_available_latex_elements
+        converter.get_latex_html__func = _mock__get_latex_html
         if output_html is not None:
             self.assertEqualPrint(converter.convert_to_html(), output_html)
         if output_latex is not None:
             self.assertEqualPrint(converter.convert_to_latex(), output_latex)
-        # self.assertHTML(input, output_html, *args, **kwargs)
-        # self.assertLatex(input, output_latex, *args, **kwargs)
+
+    def assertHTMLLatexNoPar(self, *args, **kwargs):
+        if 'converter_kwargs' not in kwargs:
+            kwargs['converter_kwargs'] = {}
+        kwargs['converter_kwargs']['paragraphs_disabled'] = True
+        self.assertHTMLLatex(*args, **kwargs)
 
     def assertHTMLAutoLatex(self, input, output_html, *args, **kwargs):
         self.assertHTMLLatex(input, output_html, input, *args, **kwargs)
-        # self.assertHTML(input, output_html, *args, **kwargs)
-        # self.assertLatex(input, input, *args, **kwargs)
+
+    def assertHTMLAutoLatexNoPar(self, input, output_html, *args, **kwargs):
+        self.assertHTMLLatexNoPar(input, output_html, input, *args, **kwargs)
 
     def test_tokenization(self):
         self.assertTokenization("bla", [TokenText("bla")])
@@ -346,92 +354,92 @@ class ConverterV1TestCase(TestCase):
     def test_latex_commands(self):
         # Newlines are always seperated as TokenSimpleWhitespace, which then
         # is replaced with a single whitespace (for HTML that is enough).
-        self.assertHTMLAutoLatex("bla", "bla")
-        self.assertHTMLAutoLatex("bla\nbla", "bla bla")
-        self.assertHTMLAutoLatex("bla\n\nbla", "bla<br>bla")
-        self.assertHTMLAutoLatex("bla  \n\n  bla", "bla<br>bla")
-        self.assertHTMLAutoLatex("bla  \n \n \n\n  bla", "bla<br>bla")
-        self.assertHTMLAutoLatex("bla\n\n\n\nbla", "bla<br>bla")
+        self.assertHTMLAutoLatexNoPar("bla", "bla")
+        self.assertHTMLAutoLatexNoPar("bla\nbla", "bla bla")
+        self.assertHTMLAutoLatexNoPar("bla\n\nbla", "bla<br>bla")
+        self.assertHTMLAutoLatexNoPar("bla  \n\n  bla", "bla<br>bla")
+        self.assertHTMLAutoLatexNoPar("bla  \n \n \n\n  bla", "bla<br>bla")
+        self.assertHTMLAutoLatexNoPar("bla\n\n\n\nbla", "bla<br>bla")
 
-        self.assertHTMLAutoLatex(
+        self.assertHTMLAutoLatexNoPar(
                 r"a\-very\-very\-long\-word\-here",
                 r"averyverylongwordhere")
-        self.assertHTMLAutoLatex( r"\TeX", r"<<$%s$||\TeX>>")
-        self.assertHTMLAutoLatex( r"\LaTeX", r"<<$%s$||\LaTeX>>")
+        self.assertHTMLAutoLatexNoPar( r"\TeX", r"<<$%s$||\TeX>>")
+        self.assertHTMLAutoLatexNoPar( r"\LaTeX", r"<<$%s$||\LaTeX>>")
 
-        self.assertHTMLAutoLatex("bla\\\\  asdf", "bla<br>asdf")
-        self.assertHTMLAutoLatex("\\emph{bla bla bla}", "<i>bla bla bla</i>")
-        self.assertHTMLAutoLatex("\\emph  {bla \\textbf \n{bla} bla}",
+        self.assertHTMLAutoLatexNoPar("bla\\\\  asdf", "bla<br>asdf")
+        self.assertHTMLAutoLatexNoPar("\\emph{bla bla bla}", "<i>bla bla bla</i>")
+        self.assertHTMLAutoLatexNoPar("\\emph  {bla \\textbf \n{bla} bla}",
                         "<i>bla <b>bla</b> bla</i>")
 
-        self.assertHTMLAutoLatex(
+        self.assertHTMLAutoLatexNoPar(
                 "\\href{http://www.example.com/bla%40bla}{click here}",
                 '<a href="http://www.example.com/bla%40bla" rel="nofollow">'
                     'click here</a>')
-        self.assertHTMLAutoLatex(
+        self.assertHTMLAutoLatexNoPar(
                 "\\url{http://www.example.com/}",
                 '<a href="http://www.example.com/" rel="nofollow">'
                     'http://www.example.com/</a>')
-        self.assertHTMLAutoLatex(
+        self.assertHTMLAutoLatexNoPar(
                 "\\url{http://www.example.com/bla%40bla}",
                 '<a href="http://www.example.com/bla%40bla" rel="nofollow">'
                     'http://www.example.com/bla%40bla</a>')
 
         # Note: Look at setUp for mocked attachments.
-        self.assertHTMLAutoLatex(
+        self.assertHTMLAutoLatexNoPar(
                 "\\includegraphics{first.png}",
                 '<img src="/mock/first.png" alt="Attachment first.png" class="latex">')
 
         # TODO: Check if the conversion pt->px makes any sense.
-        self.assertHTMLAutoLatex(
+        self.assertHTMLAutoLatexNoPar(
                 "\\includegraphics  [width=100pt] {first.png}",
                 '<img src="/mock/first.png" alt="Attachment first.png" class="latex" width="100">')
-        self.assertHTMLAutoLatex(
+        self.assertHTMLAutoLatexNoPar(
                 "\\includegraphics[width=100pt,height=200pt]{first.png}",
                 '<img src="/mock/first.png" alt="Attachment first.png" class="latex" width="100" height="200">')
-        self.assertHTMLAutoLatex(
+        self.assertHTMLAutoLatexNoPar(
                 "\\includegraphics[scale=0.7]{first.png}",
                 '<img src="/mock/first.png" alt="Attachment first.png" class="latex" width="70%" height="70%">')
-        self.assertHTMLAutoLatex(
+        self.assertHTMLAutoLatexNoPar(
                 "\\includegraphics[scale=0.7123]{first.png}",
                 '<img src="/mock/first.png" alt="Attachment first.png" class="latex" width="71.23%" height="71.23%">')
 
-        self.assertHTMLAutoLatex("bla\\textasciicircum{}asdf", "bla^asdf")
-        self.assertHTMLAutoLatex("bla\\textasciicircum{}asdf", "bla^asdf")
-        self.assertHTMLAutoLatex("bla\\textasciitilde{}asdf", "bla~asdf")
-        self.assertHTMLAutoLatex("something\\textbackslash{}something",
+        self.assertHTMLAutoLatexNoPar("bla\\textasciicircum{}asdf", "bla^asdf")
+        self.assertHTMLAutoLatexNoPar("bla\\textasciicircum{}asdf", "bla^asdf")
+        self.assertHTMLAutoLatexNoPar("bla\\textasciitilde{}asdf", "bla~asdf")
+        self.assertHTMLAutoLatexNoPar("something\\textbackslash{}something",
                         "something\\something")
 
         # Simple containers.
-        self.assertHTMLAutoLatex(
+        self.assertHTMLAutoLatexNoPar(
                 "\\fbox{do not wrap this part}",
                 '<span class="mc-fbox">do not wrap this part</span>')
-        self.assertHTMLAutoLatex(
+        self.assertHTMLAutoLatexNoPar(
                 "\\mbox{do not wrap this part}",
                 '<span class="mc-mbox">do not wrap this part</span>')
-        self.assertHTMLAutoLatex("\\textbf{bla bla bla}", "<b>bla bla bla</b>")
-        self.assertHTMLAutoLatex("\\textit{bla bla bla}", "<i>bla bla bla</i>")
-        self.assertHTMLAutoLatex(
+        self.assertHTMLAutoLatexNoPar("\\textbf{bla bla bla}", "<b>bla bla bla</b>")
+        self.assertHTMLAutoLatexNoPar("\\textit{bla bla bla}", "<i>bla bla bla</i>")
+        self.assertHTMLAutoLatexNoPar(
                 "\\underline{underlined with nowrap}",
                 '<span class="mc-underline">underlined with nowrap</span>')
-        self.assertHTMLAutoLatex("asdf \\sout{bla bla} qwerty \\uline{asdf}",
+        self.assertHTMLAutoLatexNoPar("asdf \\sout{bla bla} qwerty \\uline{asdf}",
                         "asdf <s>bla bla</s> qwerty <u>asdf</u>")
-        self.assertHTMLAutoLatex("bla\\~{}asdf", "bla~asdf")
-        self.assertHTMLAutoLatex("bla\\~{}asdf", "bla~asdf")
+        self.assertHTMLAutoLatexNoPar("bla\\~{}asdf", "bla~asdf")
+        self.assertHTMLAutoLatexNoPar("bla\\~{}asdf", "bla~asdf")
 
         # Begin commands.
-        self.assertHTMLAutoLatex("\\begin{center}\\textbf{bla}\\end{center}",
+        self.assertHTMLAutoLatexNoPar("\\begin{center}\\textbf{bla}\\end{center}",
                         '<div class="mc-center"><b>bla</b></div>')
-        self.assertHTMLAutoLatex("\\begin\n{center}\\textbf  {bla}\\end \n{center}",
+        self.assertHTMLAutoLatexNoPar("\\begin\n{center}\\textbf  {bla}\\end \n{center}",
                         '<div class="mc-center"><b>bla</b></div>')
         # Math mode.
-        self.assertHTMLAutoLatex("$a+b$", "<<$%s$||a+b>>")
-        self.assertHTMLAutoLatex("\(a+b\)", "<<\(%s\)||a+b>>")
-        self.assertHTMLAutoLatex("\[ a+b \]", "<<\[%s\]|| a+b >>")
-        self.assertHTMLAutoLatex("$$  a+b $$", "<<$$%s$$||  a+b >>")
+        self.assertHTMLAutoLatexNoPar("$a+b$", "<<$%s$||a+b>>")
+        self.assertHTMLAutoLatexNoPar("\(a+b\)", "<<\(%s\)||a+b>>")
+        self.assertHTMLAutoLatexNoPar("\[ a+b \]", "<<\[%s\]|| a+b >>")
+        self.assertHTMLAutoLatexNoPar("$$  a+b $$", "<<$$%s$$||  a+b >>")
 
         # Figures and environment testing.
-        self.assertHTMLAutoLatex(
+        self.assertHTMLAutoLatexNoPar(
             r'\begin{figure}'
             r'\includegraphics{first.png}'
             r'\caption{Some caption here.}'
@@ -446,7 +454,7 @@ class ConverterV1TestCase(TestCase):
 
 
         # Complex example.
-        self.assertHTMLAutoLatex(
+        self.assertHTMLAutoLatexNoPar(
                 r'\begin{figure}'
                 r'\begin{flushleft}'
                 r'\includegraphics{first.png}'
@@ -481,10 +489,79 @@ class ConverterV1TestCase(TestCase):
                 converter_kwargs={'errors_enabled': False})
 
     # # def test_bla(self):
-    # #     #self.assertHTMLAutoLatex("", "")
+    # #     #self.assertHTMLAutoLatexNoPar("", "")
     # #     pass
 
+    def test_paragraphs(self):
+        self.assertHTMLAutoLatex(
+                "bla",
+                '<p class="mc-noindent">bla')
+        self.assertHTMLAutoLatex(
+                "first  \n \n \n\n  second \n\n third",
+                '<p class="mc-noindent">first'
+                    '<p class="mc-indent">second'
+                    '<p class="mc-indent">third')
 
+        # No paragraph after an $$ ... $$ equation.
+        self.assertHTMLAutoLatex(
+                "asdf $$a + b = c$$ hjkl",
+                '<p class="mc-noindent">asdf <<$$%s$$||a + b = c>> hjkl')
+        # self.assertHTMLAutoLatex(
+        #         "asdf\n\\begin{equation}a + b = c\\end{equation}hjkl",
+        #         '<p class="mc-noindent">asdf <<$$%s$$||a + b = c>>hjkl')
+
+        # Do or do not add first paragraph depending on the beginning content.
+        self.assertHTMLAutoLatex(
+                "$$first row formula should have a paragraph$$",
+                '<p class="mc-noindent">'
+                    '<<$$%s$$||first row formula should have a paragraph>>')
+        self.assertHTMLAutoLatex(
+                "\\begin{center}no paragraph before div\\end{center}",
+                '<div class="mc-center">'
+                    '<p class="mc-noindent">no paragraph before div'
+                '</div>')
+        self.assertHTMLAutoLatex(
+                "\TeX",
+                '<p class="mc-noindent"><<$%s$||\\TeX>>')
+
+        # Depending on the whitespace after environment, put indent or noindent.
+        # (test HTMLConverterState.last_was_block)
+        self.assertHTMLAutoLatex(
+                "\\begin{center}bla\\end{center}\nno indent here",
+                '<div class="mc-center">'
+                    '<p class="mc-noindent">bla'
+                '</div> '
+                '<p class="mc-noindent">no indent here')
+        self.assertHTMLAutoLatex(
+                "\\begin{center}bla\\end{center}\n\nindent here",
+                '<div class="mc-center">'
+                    '<p class="mc-noindent">bla'
+                '</div>'
+                '<p class="mc-indent">indent here')
+        self.assertHTMLAutoLatex(
+                "bla\n\n\\begin{center}bla\\end{center}\nno indent here",
+                '<p class="mc-noindent">bla'
+                '<div class="mc-center">'
+                    '<p class="mc-noindent">bla'
+                '</div> '
+                '<p class="mc-noindent">no indent here')
+
+        for env in ['center', 'flushleft', 'flushright']:
+            # Center, flushleft and flushright should always have noindent.
+            self.assertHTMLAutoLatex(
+                    "First\n\n"
+                    "Second\n"
+                    "\\begin{%s}Inner first\n\nInner second\\end{%s}\n\n"
+                    "Third\n\n"
+                    "Fourth" % (env, env),
+                    '<p class="mc-noindent">First'
+                    '<p class="mc-indent">Second '
+                    '<div class="mc-%s">'
+                        '<p class="mc-noindent">Inner first'
+                        '<p class="mc-noindent">Inner second'
+                    '</div>'
+                    '<p class="mc-indent">Third'
+                    '<p class="mc-indent">Fourth' % env)
 
     def test_bbcode(self):
         self.assertEqual(parse_bbcode("[b]", 0), ('b', {'b': None}, 3))
@@ -514,90 +591,90 @@ class ConverterV1TestCase(TestCase):
                 parse_bbcode("[abc def=\"][[]][\"]x", 0),
                 ('abc', {'abc': None, 'def': "][[]]["}, 18))
 
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "[b]bla[/b]",
                 "<b>bla</b>",
                 "\\textbf{bla}")
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "Is this [b]example [i]working[/i][/b]?",
                 "Is this <b>example <i>working</i></b>?",
                 "Is this \\textbf{example \\emph{working}}?")
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "A [b]complex [i]example[/i] [s]bla[u]asdf[/u][/s][/b]",
                 "A <b>complex <i>example</i> <s>bla<u>asdf</u></s></b>",
                 "A \\textbf{complex \\emph{example} \\sout{bla\\uline{asdf}}}")
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "[center]This is centered[/center]",
                 '<div class="mc-center">This is centered</div>',
                 "\\begin{center}This is centered\\end{center}")
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "[img attachment=1]",
                 '<img src="/mock/first.png" alt="Attachment #1" class="latex">',
                 "\\includegraphics{first.png}")
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "[img attachment=1 width=200px]",
                 '<img src="/mock/first.png" alt="Attachment #1" class="latex" width="200">',
                 "\\includegraphics[width=200pt]{first.png}")
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "[img attachment=1 height=300px]",
                 '<img src="/mock/first.png" alt="Attachment #1" class="latex" height="300">',
                 "\\includegraphics[height=300pt]{first.png}")
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "[img attachment=1 scale=0.6]",
                 '<img src="/mock/first.png" alt="Attachment #1" class="latex" width="60%" height="60%">',
                 "\\includegraphics[scale=0.6]{first.png}")
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "[quote]bla bla[/quote]",
                 '<div class="mc-quote">bla bla</div>',
                 "bla bla")
-    #     self.assertHTMLLatex(
+    #     self.assertHTMLLatexNoPar(
     #             "[ref=5 task=123](click here)[/ref]",
     #             r'<<$%s$||5>><a href="http://mock.com/task/123/ref/" rel="nofollow">(click here)</a>',
     #             r"$5$\href{http://mock.com/task/123/ref/}{(click here)}",
     #             converter_mock=ConverterMock)
-    #     self.assertHTMLLatex(
+    #     self.assertHTMLLatexNoPar(
     #             "[ref=5 task=123 page=3](click here)[/ref]",
     #             r'<<$%s$||5>><a href="http://mock.com/task/123/ref/?page=3" rel="nofollow">(click here)</a>',
     #             r"$5$\href{http://mock.com/task/123/ref/?page=3}{(click here)}",
     #             converter_mock=ConverterMock)
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "[url]http://example.com/[/url]",
                 '<a href="http://example.com/" rel="nofollow">http://example.com/</a>',
                 "\\url{http://example.com/}")
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "[url=http://example.com/]click here[/url]",
                 '<a href="http://example.com/" rel="nofollow">click here</a>',
                 "\\href{http://example.com/}{click here}")
 
     def test_latex_formula(self):  # Test $ ... $ etc.
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "$bla$",
                 "<<$%s$||bla>>",
                 "$bla$")
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "\[bla\]",
                 "<<\[%s\]||bla>>",
                 "\[bla\]")
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "$$$bla$$$",
                 "<<%s||bla>>",
                 "bla")
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "bla $$$something $a + b = c$ bla $$d + e = f$$ $$$ bla",
                 "bla <<%s||something $a + b = c$ bla $$d + e = f$$ >> bla",
                 "bla something $a + b = c$ bla $$d + e = f$$  bla")
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "\(bla\)",
                 "<<\(%s\)||bla>>",
                 "\(bla\)")
-        self.assertHTMLLatex(
+        self.assertHTMLLatexNoPar(
                 "\[bla\]",
                 "<<\[%s\]||bla>>",
                 "\[bla\]")
 
     # def test_labels(self):
     #     """Test \\label and \\ref."""
-    #     self.assertHTMLAutoLatex(
+    #     self.assertHTMLAutoLatexNoPar(
     #             r"\begin{equation}\label{first}x = y + z\end{equation}" \
     #             r"ref to equation \ref{first}" \
     #             r"\begin{equation}\label{second}a = b + c\end{equation}" \
