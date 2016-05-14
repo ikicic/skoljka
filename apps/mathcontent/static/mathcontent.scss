@@ -75,6 +75,15 @@ object.latex_center {
 }
 
 /* MathContent content */
+.mc-error {
+  color: red;
+}
+
+.mc-error-source {
+  color: red;
+  font-weight: bold;
+}
+
 .mc-fbox {
   border: 1px solid black;
   white-space: nowrap;
@@ -95,4 +104,14 @@ object.latex_center {
 .mc-underline {
   text-decoration: underline;
   white-space: nowrap;
+}
+
+.mc-preview p, .mc-inner p {
+  margin: 1em 0 0 0;  // Default \parskip.
+}
+
+.mc-preview > p:first-child, .mc-inner > p:first-child {
+  // No margin for the first paragraphs (cancel \parskip).
+  // This implementation simplifies testing.
+  margin-top: 0 !important;
 }

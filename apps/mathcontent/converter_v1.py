@@ -206,6 +206,8 @@ class BBCodeException(Exception):
 class ParseError(Exception):
     pass
 
+class LatexValueError(Exception):
+    pass
 
 class CriticalError(ParseError):
     def __init__(self, converter, index, msg):
@@ -258,6 +260,37 @@ def parse_latex_params(val):
             raise BBCodeException(_("Invalid format:") + " " + val)
         result[name.strip()] = val.strip()
     return result
+
+
+# https://en.wikibooks.org/wiki/LaTeX/Lengths#Units
+# Each TeX pt is converted to (72 / 72.27) CSS pts.
+# <TeX unit>: (<length factor>, <HTML unit>)
+_TEX_PT_TO_HTML = 72 / 72.27
+_convert_tex_length_to_html__map = {
+    'pt': (_TEX_PT_TO_HTML, 'pt'),
+    'mm': None,
+    'cm': None,
+    'in': None,
+    'ex': None,
+    'em': None,
+    'bp': (1. / 72, 'in'),
+    'pc': (12 * _TEX_PT_TO_HTML, 'pt'),
+    'dd': (1238 / 1157 * _TEX_PT_TO_HTML, 'pt'),
+    'cc': (12 * 1238 / 1157 * _TEX_PT_TO_HTML, 'pt'),
+    'sp': (_TEX_PT_TO_HTML / 65536., 'pt'),
+}
+def convert_tex_length_to_html(value):
+    value = value.strip()
+    try:
+        length = float(value[:-2])
+        unit = value[-2:]
+        conversion = _convert_tex_length_to_html__map[unit]
+    except (KeyError, ValueError):
+        raise LatexValueError(_("Unexpected value:") + value)
+
+    if conversion is None:
+        return value  # Nothing to change.
+    return "{:.9}{}".format(conversion[0] * length, conversion[1])
 
 
 # def read_until(T, i, begin_pattern, end_pattern):
@@ -761,6 +794,21 @@ class LatexRef(Command):
 
 
 
+class LatexSetLength(Command):
+    """Set length of the given property. Limited to very few properties."""
+    def __init__(self):
+        super(LatexSetLength, self).__init__(args_desc="{U}{U}")
+
+    def to_html(self, token, converter):
+        var = token.args[0].strip()
+        if var not in converter.state.lengths_html:
+            msg = _("Unsupported value \"%(value)s\" for the command \"%(cmd)s\".")
+            raise LatexValueError(msg % {'cmd': '\\setlength', 'value': var})
+        converter.state.lengths_html[var] = \
+                convert_tex_length_to_html(token.args[1])
+
+
+
 class LatexSpecialSymbol(Command):
     def __init__(self, html):
         super(LatexSpecialSymbol, self).__init__()
@@ -1105,6 +1153,7 @@ latex_commands = {
     'label': LatexLabel(),
     'mbox': LatexContainer('<span class="mc-mbox">', '</span>'),
     'ref': LatexRef(),
+    'setlength': LatexSetLength(),
     'sout': LatexContainer('<s>', '</s>'),
     'textasciicircum': LatexSpecialSymbol('^'),
     'textasciitilde': LatexSpecialSymbol('~'),  # Not really.
@@ -1661,7 +1710,7 @@ class Converter(object):
         self.state = None
 
     def push_state(self):
-        self._state_stack.append(copy.copy(self._state_stack[-1]))
+        self._state_stack.append(copy.deepcopy(self._state_stack[-1]))
         self.state = self._state_stack[-1]
 
     def pop_state(self):
@@ -1755,9 +1804,9 @@ class Converter(object):
     def convert_to_html(self):
         tokens = self._pre_convert_to_html()
         if self.errors_enabled:
-            error_func = lambda token: u'<span class="mc-error">{} ' \
-                    u'<span class="mc-error-source">{}</span></span>'.format(
-                        token.error_message, token.content)
+            error_func = lambda token: u'<span class="mc-error">' \
+                    u'<span class="mc-error-source">{}</span> {}</span>'.format(
+                        token.content, token.error_message)
         else:
             error_func = lambda token: u""
 
@@ -1767,18 +1816,44 @@ class Converter(object):
                 self.indent_next = False
                 self.all_no_indent = False
 
+                # List of all supported lengths. None stands for the default
+                # value. These are the HTML values.
+                self.lengths_html = {'\\parindent': None, '\\parskip': None}
+
+
         self._state_stack = [HTMLConverterState()]
         self.state = self._state_stack[-1]
 
         output = []
         def add_content_par(content):
-            """First check if paragraph should be added and then add content."""
+            """First check if paragraph should be added and then add content.
+            No-op if content evaluates to False."""
+            if not content:
+                return
+
             state = self.state
             if not self.paragraphs_disabled and not state.is_in_paragraph:
-                if state.indent_next and not state.all_no_indent:
-                    output.append("<p class=\"mc-indent\">")
+                indent = state.indent_next and not state.all_no_indent
+
+                css_class = ""
+                css_style = ""
+                parskip = state.lengths_html['\\parskip']
+                if parskip is not None:
+                    # It seems to be top, not bottom that's affected.
+                    css_style += "margin-top:{};".format(parskip)
+
+                if indent:
+                    parindent = state.lengths_html['\\parindent']
+                    if parindent is not None:
+                        css_style += "text-indent:{};".format(parindent)
+                    else:
+                        css_class = "mc-indent"
                 else:
-                    output.append("<p class=\"mc-noindent\">")
+                    css_class = "mc-noindent"
+
+                output.append("<p{}{}>".format(
+                    " class=\"{}\"".format(css_class) if css_class else "",
+                    " style=\"{}\"".format(css_style) if css_style else ""))
             output.append(content)
             state.is_in_paragraph = True
 
@@ -1810,10 +1885,13 @@ class Converter(object):
             elif isinstance(token, TokenCommand):
                 command = latex_commands[token.command]
                 # TODO: \begin{equation}...\end{equation}
-                if token.command in ['begin', 'end']:
-                    output.append(command.to_html(token, self))
-                else:
-                    add_content_par(command.to_html(token, self))
+                try:
+                    if token.command in ['begin', 'end']:
+                        output.append(command.to_html(token, self))
+                    else:
+                        add_content_par(command.to_html(token, self))
+                except LatexValueError as e:
+                    output.append(TokenError(e.message, '\\' + token.command))
             elif isinstance(token, TokenBBCode):
                 output.append(self.process_bb(token, TYPE_HTML))
             else:

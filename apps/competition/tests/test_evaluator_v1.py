@@ -1,5 +1,3 @@
-from django.test import TestCase
-
 from competition.evaluator_v1 import InvalidSolution, MixedTypes, \
         MixedPrecisions, IncorrectNumberOfElements, TooFewDecimals, \
         InvalidDescriptor, UnallowedCharacter, InvalidModifiers, \
@@ -9,27 +7,11 @@ from competition.evaluator_v1 import Integer, Float, Fraction, List, MultiSet, \
         String
 from competition.evaluator_v1 import check_result, parse_descriptor
 
-import inspect
+from skoljka.libs.testcase import TestCaseEx
 
 
-class EvaluatorV1Test(TestCase):
-    # TODO: create TestCaseEx or something like that.
-    def assertMultipleEqualOrRaise(self, func, tests):
-        # test_case = (arg1, arg2, ..., argN, expected_value_or_exception)
-        for test_case in tests:
-            expected = test_case[-1]
-            args = test_case[:-1]
-            try:
-                if inspect.isclass(expected) and \
-                        issubclass(expected, Exception):
-                    self.assertRaises(expected, func, *args)
-                else:
-                    self.assertEqual(func(*args), expected)
-            except Exception as e:
-                print "Unexpected exception '{}' ({}) for test case {}.".format(
-                        e, type(e), test_case)
-                raise
-
+class EvaluatorV1Test(TestCaseEx):
+    # TODO: Document and move to TestCaseEx.
     def assertVariableTypes(self, variable_types, tests):
         for test in tests:
             try:
@@ -44,6 +26,7 @@ class EvaluatorV1Test(TestCase):
                         msg="test={} k={} expected={} result={}".format(
                             test, k, variable_types[k], result[k]))
 
+    # TODO: Document and move to TestCaseEx.
     def assertMultipleVariableTypesOrRaises(self, variable_types, tests):
         for test_case in tests:
             descriptor, exception = test_case

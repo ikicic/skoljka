@@ -16,7 +16,7 @@ def convert(type, text, content=None, attachments_path=None):
     else:
         converter = converter_v1
 
-    attachments = content and list(Attachments.objects.filter(content=content))
+    attachments = content and list(Attachment.objects.filter(content=content))
     return converter.convert(type, text, attachments=attachments,
             attachments_path=attachments_path)
 

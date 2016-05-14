@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from django.test import TestCase
-
 from mathcontent.converter_v1 import Tokenizer, Converter
 from mathcontent.converter_v1 import SKIP_COMPARISON as SKIP
 from mathcontent.converter_v1 import parse_bbcode, BBCodeException
+from mathcontent.converter_v1 import LatexValueError
+from mathcontent.converter_v1 import convert_tex_length_to_html
 from mathcontent.converter_v1 import TokenText, TokenCommand, \
         TokenMultilineWhitespace, TokenSimpleWhitespace, TokenMath, \
         TokenError, TokenComment, TokenOpenCurly, TokenClosedCurly, \
@@ -13,6 +13,7 @@ from mathcontent.converter_v1 import TokenText, TokenCommand, \
 from mathcontent.converter_v1 import LatexEnvironmentDiv, LatexEnvironmentFigure
 from mathcontent.models import TYPE_HTML, TYPE_LATEX, LatexElement
 
+from skoljka.libs.testcase import TestCaseEx
 
 # MOCK_URL_PREFIX = "http://mock.com/"
 #
@@ -51,7 +52,7 @@ def _mock__get_latex_html(element):
     return element.hash
 
 
-class ConverterV1TestCase(TestCase):
+class ConverterV1TestCase(TestCaseEx):
     def setUp(self):
         self.attachments = [
             _mock__attachment("first.png"),
@@ -118,6 +119,34 @@ class ConverterV1TestCase(TestCase):
 
     def assertHTMLAutoLatexNoPar(self, input, output_html, *args, **kwargs):
         self.assertHTMLLatexNoPar(input, output_html, input, *args, **kwargs)
+
+    def test_helper_functions(self):
+        # TODO: Test other helper functions.
+
+        # Test convert_tex_length_to_html.
+        self.assertMultipleEqualOrRaise(convert_tex_length_to_html, [
+            ('1em', '1em'),
+            ('1.em', '1.em'),
+            ('.5em', '.5em'),
+            ('1.2341em', '1.2341em'),
+            ('5634em', '5634em'),
+            ('em', LatexValueError),
+            ('1xy', LatexValueError),
+            ('1xyz', LatexValueError),
+
+            ('72.27pt', '72.0pt'),
+            ('1mm', '1mm'),
+            ('1cm', '1cm'),
+            ('1in', '1in'),
+            ('1ex', '1ex'),
+            ('1em', '1em'),
+            ('144bp', '2.0in'),
+            ('1pc', '11.9551681pt'),
+            ('1dd', '0.99626401pt'),
+            ('1cc', '11.9551681pt'),
+            ('1sp', '1.52017824e-05pt'),
+        ])
+
 
     def test_tokenization(self):
         self.assertTokenization("bla", [TokenText("bla")])
@@ -562,6 +591,33 @@ class ConverterV1TestCase(TestCase):
                     '</div>'
                     '<p class="mc-indent">Third'
                     '<p class="mc-indent">Fourth' % env)
+
+        # Test \parindent and \parskip.
+        self.assertHTMLAutoLatex(
+                "\\setlength{\\parindent}{2em}"
+                "First\n\n"
+                "Second",
+                '<p class="mc-noindent">First'
+                '<p style="text-indent:2em;">Second')
+
+        self.assertHTMLAutoLatex(
+                "\\setlength{\\parskip}{1.5in}"
+                "First\n\n"
+                "Second",
+                '<p class="mc-noindent" style="margin-top:1.5in;">First'
+                '<p class="mc-indent" style="margin-top:1.5in;">Second')
+
+        self.assertHTMLAutoLatex(  # Test {...} scope.
+                "{"
+                    "\\setlength{\\parindent}{2em}"
+                    "First\n\n"
+                    "Second"
+                "}\n\n"
+                "Third",
+                '<p class="mc-noindent">First'
+                '<p style="text-indent:2em;">Second'
+                '<p class="mc-indent">Third')
+
 
     def test_bbcode(self):
         self.assertEqual(parse_bbcode("[b]", 0), ('b', {'b': None}, 3))
