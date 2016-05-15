@@ -10,6 +10,7 @@ urlpatterns = patterns('',
 
     (r'^help/$', direct_to_template, {'template': 'help/help.html'}),
     (r'^help/folders/$', direct_to_template, {'template': 'help/help_folders.html'}),
+    (r'^help/format/$', 'base.help.help_format'),
     (r'^help/instructions/$', direct_to_template, {'template': 'help/help_instructions.html'}),
     (r'^help/other/$', direct_to_template, {'template': 'help/help_other.html'}),
     (r'^help/permissions/$', direct_to_template, {'template': 'help/help_permissions.html'}),

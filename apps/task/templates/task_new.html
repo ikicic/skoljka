@@ -78,11 +78,18 @@
     {{ forms.1.as_table }}
     <tr>
       <th>
-        <button type="button" class="btn mc-preview-button"
-            data-source="{{ forms.1.text.auto_id }}"
-            data-target="task-preview">
-          Pregled
-        </button>
+        <div style="text-align: center;">
+          <button type="button" class="btn mc-preview-button"
+              style="display:block;margin:auto;"
+              data-source="{{ forms.1.text.auto_id }}"
+              data-target="task-preview">
+            Pregled
+          </button>
+          <a href="/help/format/" target="_blank"
+              style="display:block;">
+            {% trans "Help" %}
+          </a>
+        </div>
       </th>
       <td>
         <div class="mc-preview outset" id="task-preview">

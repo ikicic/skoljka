@@ -75,6 +75,12 @@ h2, h3, h4, h4 a {
   }
 }
 
+/* Multi-line code */
+code.multi-line {
+  display: inline-block;
+  white-space: pre;
+}
+
 /* outdiv */
 .outdiv {
   border-radius: 5px;

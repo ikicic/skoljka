@@ -1,4 +1,6 @@
-﻿from skoljka.libs import xss
+﻿from django.utils.translation import ugettext as _
+
+from skoljka.libs import xss
 from skoljka.libs.timeout import run_command
 
 from mathcontent.forms import AttachmentForm
@@ -17,8 +19,15 @@ def convert(type, text, content=None, attachments_path=None):
         converter = converter_v1
 
     attachments = content and list(Attachment.objects.filter(content=content))
-    return converter.convert(type, text, attachments=attachments,
-            attachments_path=attachments_path)
+    try:
+        return converter.convert(type, text, attachments=attachments,
+                attachments_path=attachments_path)
+    except:
+        msg = _("Internal parser error. Please contact administrators.")
+        if type == TYPE_HTML:
+            return "<span style=\"color:red;\">{}</span>".format(msg)
+        return msg
+
 
 def convert_to_html(*args, **kwargs):
     """Shortcut function for `convert`."""

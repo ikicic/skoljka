@@ -535,7 +535,7 @@ class LatexBegin(Command):
     def apply_command(self, tokenizer, name, args, whitespace):
         """Simply add itself to the current state."""
         if args[0] not in latex_environments:
-            return TokenError(_("Unknown LaTeX environment:"), args[0])
+            return TokenError(_("Unknown LaTeX environment."), args[0])
 
         # Generate new LatexEnvironment instance.
         environment = latex_environments[args[0]]()

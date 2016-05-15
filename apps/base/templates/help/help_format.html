@@ -1,0 +1,106 @@
+{% extends "help/help_base.html" %}
+
+{% block title %}Format unosa teksta - Pomoć{% endblock %}
+
+{% block inner_content %}
+
+<h4>Opis</h4>
+<p>Svi tekstovi zadataka, rješenja, poruke i dr. podržavaju matematičke
+formule, uređeni tekst i slično. Format unosa je uvelike baziran na
+<a href="#latex">LaTeX-u</a>, a podržava i osnovan
+<a href="#bb-code">BB code</a>.</p>
+
+<p>LaTeX sam po sebi je složen jezik te je izrazito teško podržati ili oponašati
+sve njegove mogućnosti. Stoga Školjka ima pojednostavljenu verziju, koja bi
+ipak trebala biti dovoljna za sve potrebe.</p>
+
+<p>Iako je <a href="#format-v0">stari format</a> već funkcionirao, postojalo
+je nekoliko bitnih nekonzistentnosti s LaTeX-om koje je trebalo popraviti. Osim
+toga, veća kompatibilnost je preduvjet za automatsko dodavanje zadataka i
+natjecanja, što će jednog dana biti implementirano.</p>
+
+<h4>Osnove</h4>
+<p>Web stranice su ograničene po pitanju mogućnosti prikazivanja matematičkih
+formula. Postoje određeni načini vektorskog prikazivanja formula
+(npr. <a href="https://www.mathjax.org/">MathJax</a>), ali smo se ovdje
+odlučili za prikazivanje formula pomoću malih slika - za svaku formulu se
+generira jedna slika (PNG formata). Neke druge stvari, poput <b>bold-a</b>,
+<i>italic-a</i>, <u>underline-a</u> i drugog (centriranja, boje...) se mogu
+vjerno prikazati kao dio same web stranice, bez generiranja slike.</p>
+
+<h4>Podržane LaTeX naredbe</h4>
+
+Navodimo naredbe koje su trenutačno (u potpunosti ili djelomično) podržane.
+
+<b>Napomena: Za sada nisu podržane <i>starred*</i> verzije naredbi!</b>
+
+<table class="table-striped">
+  {% for group in command_groups %}
+    <tr><th colspan="4">{{ group.0 }}</th></tr>
+    {% for cmd in group.1 %}
+      <tr>
+        <td><code>{{ cmd.name }}</code></td>
+        <td>{{ cmd.description|safe }}</td>
+        <td>
+          {% if cmd.example %}
+            <code class="multi-line">{{ cmd.example }}</code>
+          {% endif %}
+        </td>
+        <td>{% if cmd.example %}{{ cmd.evaluated|safe }}{% endif %}</td>
+      </tr>
+    {% endfor %}
+  {% endfor %}
+</table>
+
+<h4 id="bb-code">BB Code</h4>
+<p>Podržane su sve BB code naredbe kao i u <a href="#format-v0">prošlom
+  formatu</a>, uz dodatnu naredbu <code>[center]tekst[/center]</code>, koja kao
+što ime kaže, centrira tekst.</p>
+
+
+<h4 id="format-v0">Stari format</h4>
+<p>Gore opisani format odgovara trenutačno preporučenom formatu unosa. Ukoliko
+želite koristiti stari format, dodajte <code>%V0</code> na početak teksta.</p>
+
+<p><b>Napomena:</b> <i>Ovaj format se više ne održava i vrlo vjerojatno neće
+biti mijenjan. Format je dostupan iz dva razloga - zbog postojećeg sadržaja, i
+zbog toga što je novi format još u eksperimentalnoj fazi i još nije u
+potpunosti dovršen.</i></p>
+
+Navodimo kratke upute:
+<ul>
+  <li>$ ... $ - inline LaTeX (ostaje kao $ ... $), na mjesto ... stavljate neki matematički izraz</li>
+  <li>$$ ... $$ - block LaTex (pretvara se u \[ ... \]), prikazuje se u zasebnom retku, centrirano</li>
+  <li>$$$ ... $$$ - za napredniji LaTeX, centrirano, bez automatskog $ $, \[ \] i sličnog.</li>
+  <li>U slučaju da želite napisati samostalni znak $, pišite \$.</li>
+  <li>Znak \ pišete kao \\.</li>
+  <li>Znakove [ i ] pišete kao \[ i \].</li>
+  <li>"BBCode"</li>
+  <ul>
+    <li>[b] [/b] - <b>bold</b></li>
+    <li>[i] [/i] - <i>italic</i></li>
+    <li>[s] [/s] - <s>strikethrough</s></li>
+    <li>[u] [/u] - <u>underline</u></li>
+    <li>[quote] [/quote] - Citiranje, tekst će se prikazan s plavkastom pozadinom</li>
+    <li>[img attachment=x <span style="color:gray;">width=300px height=300px</span>] - Prikazuje x-tu (brojeći od 1) datoteku kao sliku (gledaju se samo datoteke poslane za taj tekst, sortirane po redu kojim su poslane). Attachment je obavezan parametar. Molimo ne pretjerujte s veličinama.</li>
+    <li>[url=http://www.example.org/]Primjer[/url] ili [url]http://www.example.org/[/url] -
+      <a href="http://www.example.org/" rel="nofollow">Primjer</a> ili
+      <a href="http://www.example.org/" rel="nofollow">http://www.example.org/</a>.<br>
+      <i>Napomena:</i> Ne radi u LaTeX-u, odnosno PDF-u.</li>
+  </ul>
+</ul>
+
+
+<h4 id="latex">LaTeX</h4>
+<br>
+Neki korisni linkovi o LaTeX-u:<br>
+<a href="http://en.wikibooks.org/wiki/LaTeX">http://en.wikibooks.org/wiki/LaTeX</a><br>
+<a href="http://en.wikibooks.org/wiki/LaTeX/Mathematics">http://en.wikibooks.org/wiki/LaTeX/Mathematics</a><br>
+<a href="https://www.facebook.com/TeX.LaTeX.savjeti">https://www.facebook.com/TeX.LaTeX.savjeti</a><br>
+<a href="ftp://ftp.ams.org/ams/doc/amsmath/short-math-guide.pdf">ftp://ftp.ams.org/ams/doc/amsmath/short-math-guide.pdf</a><br>
+<br>
+Općenito možete pogledati kako su napisani postojeći zadaci.
+
+
+{% endblock %}
+
