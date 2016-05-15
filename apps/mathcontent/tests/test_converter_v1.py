@@ -397,9 +397,10 @@ class ConverterV1TestCase(TestCaseEx):
         self.assertHTMLAutoLatexNoPar( r"\LaTeX", r"<<$%s$||\LaTeX>>")
 
         self.assertHTMLAutoLatexNoPar("bla\\\\  asdf", "bla<br>asdf")
-        self.assertHTMLAutoLatexNoPar("\\emph{bla bla bla}", "<i>bla bla bla</i>")
+        self.assertHTMLAutoLatexNoPar("\\emph{bla bla bla}",
+                "<em>bla bla bla</em>")
         self.assertHTMLAutoLatexNoPar("\\emph  {bla \\textbf \n{bla} bla}",
-                        "<i>bla <b>bla</b> bla</i>")
+                "<em>bla <b>bla</b> bla</em>")
 
         self.assertHTMLAutoLatexNoPar(
                 "\\href{http://www.example.com/bla%40bla}{click here}",
@@ -654,11 +655,11 @@ class ConverterV1TestCase(TestCaseEx):
         self.assertHTMLLatexNoPar(
                 "Is this [b]example [i]working[/i][/b]?",
                 "Is this <b>example <i>working</i></b>?",
-                "Is this \\textbf{example \\emph{working}}?")
+                "Is this \\textbf{example \\textit{working}}?")
         self.assertHTMLLatexNoPar(
                 "A [b]complex [i]example[/i] [s]bla[u]asdf[/u][/s][/b]",
                 "A <b>complex <i>example</i> <s>bla<u>asdf</u></s></b>",
-                "A \\textbf{complex \\emph{example} \\sout{bla\\uline{asdf}}}")
+                "A \\textbf{complex \\textit{example} \\sout{bla\\uline{asdf}}}")
         self.assertHTMLLatexNoPar(
                 "[center]This is centered[/center]",
                 '<div class="mc-center">This is centered</div>',

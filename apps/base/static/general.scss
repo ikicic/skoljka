@@ -43,6 +43,11 @@ button.blank {
   padding: 0px;
 }
 
+/* Recursive em. Used mainly for MathContent. */
+em em {
+  font-style: normal;
+}
+
 /* Form that doesn't use .as_table, but uses {{ field }} instead. */
 form.no-table {
   button, input[type=submit], input[type=text], input[type=password] {

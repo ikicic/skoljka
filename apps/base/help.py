@@ -25,7 +25,10 @@ def help_format(request):
         ('\\textit', _("Italic"), "\\textit{TEXT}"),
         ('\\sout', _("Strikethrough"), "\\sout{TEXT}"),
         ('\\uline', _("Underline"), "\\uline{TEXT}"),         # a)
-        ('\\underline', _("Underline"), "\\underline{TEXT}"), # a)
+        ('\\underline',
+            _("Underline and disable word-wrap. "
+                "It's recommended to use \\uline instead."),
+            "\\underline{TEXT}"), # a)
         ('\\\\', _("Newline") + INCOMPATIBLE, "a\\\\b"),
         _("Advanced commands"),
         ('\\includegraphics', _("Show images.") + PARTIAL, ""),  # b)

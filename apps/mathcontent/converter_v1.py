@@ -33,7 +33,6 @@ import re
 # TODO: fix uline and sout --> support for custom usepackage
 
 # MAYBE: \" \i \j \o \^ \ss \~ and other special characters
-# MAYBE: \emph{italic \emph{not italic} italic} (CSS thing)
 # MAYBE: \begin{verbatim}...\end{verbatim}
 # MAYBE: \verb+asdf+
 # MAYBE: \begin{verbatim*} and \verb*
@@ -1145,7 +1144,7 @@ latex_commands = {
     'caption': LatexCaption(),
     'centering': LatexCentering(),
     'end': LatexEnd(),
-    'emph': LatexContainer('<i>', '</i>'),  # NOT FULLY IMPLEMENTED.
+    'emph': LatexContainer('<em>', '</em>'),
 #     # TODO: eqref
     'fbox': LatexContainer('<span class="mc-fbox">', '</span>'),
     'href': LatexHref(),
@@ -1178,7 +1177,7 @@ bb_commands = {
     'b': BBCodeContainer('<b>', '</b>', '\\textbf{', '}'),
     'center': BBCodeContainer('<div class="mc-center">', '</div>',
                               '\\begin{center}', '\\end{center}'),
-    'i': BBCodeContainer('<i>', '</i>', '\\emph{', '}'),
+    'i': BBCodeContainer('<i>', '</i>', '\\textit{', '}'),
     'img': BBCodeImg(),
     # TODO: Quote for LaTeX.
     'quote': BBCodeContainer('<div class="mc-quote">', '</div>', '', ''),
