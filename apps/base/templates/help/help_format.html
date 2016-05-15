@@ -34,8 +34,8 @@ Navodimo naredbe koje su trenutačno (u potpunosti ili djelomično) podržane.
 
 <b>Napomena: Za sada nisu podržane <i>starred*</i> verzije naredbi!</b>
 
-<table class="table-striped">
-  {% for group in command_groups %}
+{% for group in command_groups %}
+  <table class="table-striped">
     <tr><th colspan="4">{{ group.0 }}</th></tr>
     {% for cmd in group.1 %}
       <tr>
@@ -49,8 +49,9 @@ Navodimo naredbe koje su trenutačno (u potpunosti ili djelomično) podržane.
         <td>{% if cmd.example %}{{ cmd.evaluated|safe }}{% endif %}</td>
       </tr>
     {% endfor %}
-  {% endfor %}
-</table>
+  </table>
+  <br>
+{% endfor %}
 
 <h4 id="bb-code">BB Code</h4>
 <p>Podržane su sve BB code naredbe kao i u <a href="#format-v0">prošlom

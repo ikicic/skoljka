@@ -776,7 +776,7 @@ class LatexLabel(Command):
 class LatexNoop(Command):
     """Ignored when converting to HTML, printed without any logic when
     converting to LaTeX. Used for commonly used commands whose purpose is
-    specific to LaTeX. (e.g. \-)"""
+    specific to LaTeX."""
     def __init__(self):
         super(LatexNoop, self).__init__()
 
@@ -1138,7 +1138,7 @@ class BBCodeURL(BBCodeTag):
 
 
 latex_commands = {
-    '-': LatexNoop(),
+    '-': LatexSpecialSymbol('&shy;'),  # Soft hyphen.
     'LaTeX': LatexInlineMathCommand('%s', '\\LaTeX'),
     'TeX': LatexInlineMathCommand('%s', '\\TeX'),
     '\\': LatexSpecialSymbol('<br>'),

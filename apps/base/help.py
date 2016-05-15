@@ -27,7 +27,7 @@ def help_format(request):
         ('\\uline', _("Underline"), "\\uline{TEXT}"),         # a)
         ('\\underline',
             _("Underline and disable word-wrap. "
-                "It's recommended to use \\uline instead."),
+                "It's recommended to use <code>\\uline</code> instead."),
             "\\underline{TEXT}"), # a)
         ('\\\\', _("Newline") + INCOMPATIBLE, "a\\\\b"),
         _("Advanced commands"),
@@ -35,27 +35,28 @@ def help_format(request):
         ('\\caption', _("Figure caption."), ""),      # b)
         ('\\centering', _("Figure centering."), ""),  # b)
         ('\\label', _("Set figure or equation label. ") + PARTIAL, ""),  # b)
-        ('\\ref', _("Given a label, show a link to the related content.") + \
-                PARTIAL, ""),  # TODO
+        ('\\ref', _("Given a label, show a link to the related content.")
+                + PARTIAL, ""),  # TODO
         ('\\url', _("Link"), "\\url{http://www.example.com/}"),
         ('\\href', _("Link"), "\\href{http://www.example.com/}{TEXT}"),
         ('\\setlength',
             _("Set value of the given length command. Currently, only "
-                "\\parindent and \\parskip are supported, representing "
-                "indentation length and paragraph top margin.") + " " +
-            _("Note that the first paragraph is not indented."),
+                "<code>\\parindent</code> and <code>\\parskip</code> are "
+                "supported, representing indentation length and paragraph "
+                "top margin.")
+            + " " + _("Note that the first paragraph is not indented."),
             "\\setlength{\\parindent}{2em}\n"
             "\\setlength{\\parskip}{3em}\n\n"
             "First paragraph\n\n"
             "Second paragraph"),
         _("Other commands"),
         ("\\fbox",
-            _("Framed box with disabled word-wrap.") + " " +
-            _("Please don't misuse."),
+            _("Framed box with disabled word-wrap.")
+            + " " + _("Please don't misuse."),
             "\\fbox{TEXT}"),
         ("\\mbox",
-            _("Disabled word-wrap.") + " " +
-            _("Please don't misuse."),
+            _("Disabled word-wrap.")
+            + " " + _("Please don't misuse."),
             "\\mbox{TEXT}"),
         ("\\TeX", "", None),
         ("\\LaTeX", "", None),
@@ -63,8 +64,8 @@ def help_format(request):
         ("\\textasciitilde", _("Symbol %s.") % '~' + PARTIAL, None),
         ("\\textbackslash", _("Symbol %s.") % '\\' + PARTIAL, None),  # Partial?
         ("\\~", _("Symbol %s.") % '~' + PARTIAL, None),
-        _("Ignored commands"),
-        ("\\-", "", "a\-very\-long\-word"),
+        ("\\-", _("Soft hyphen, shown in HTML as <pre>&amp;shy;</pre>."),
+            "a\-very\-long\-word"),
     ]
 
     # TODO: a) Document what's the difference.

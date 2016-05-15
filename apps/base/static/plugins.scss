@@ -19,6 +19,12 @@
   font-size: 12px;
 }
 
+pre {
+  border-radius: 2px;
+  display: inline;
+  padding: 2px 4px;
+}
+
 .row {
   /* FIXME: This causes conflict with normal usage of row class...
       See .row-fix-margin class */

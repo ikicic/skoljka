@@ -80,10 +80,10 @@ h2, h3, h4, h4 a {
   }
 }
 
-/* Multi-line code */
-code.multi-line {
+/* Multi-line code and pre */
+.multi-line {
   display: inline-block;
-  white-space: pre;
+  white-space: pre-wrap;
 }
 
 /* outdiv */

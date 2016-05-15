@@ -392,9 +392,9 @@ class ConverterV1TestCase(TestCaseEx):
 
         self.assertHTMLAutoLatexNoPar(
                 r"a\-very\-very\-long\-word\-here",
-                r"averyverylongwordhere")
-        self.assertHTMLAutoLatexNoPar( r"\TeX", r"<<$%s$||\TeX>>")
-        self.assertHTMLAutoLatexNoPar( r"\LaTeX", r"<<$%s$||\LaTeX>>")
+                r"a&shy;very&shy;very&shy;long&shy;word&shy;here")
+        self.assertHTMLAutoLatexNoPar( r"\TeX", r"<<%s||\TeX>>")
+        self.assertHTMLAutoLatexNoPar( r"\LaTeX", r"<<%s||\LaTeX>>")
 
         self.assertHTMLAutoLatexNoPar("bla\\\\  asdf", "bla<br>asdf")
         self.assertHTMLAutoLatexNoPar("\\emph{bla bla bla}",
@@ -552,7 +552,7 @@ class ConverterV1TestCase(TestCaseEx):
                 '</div>')
         self.assertHTMLAutoLatex(
                 "\TeX",
-                '<p class="mc-noindent"><<$%s$||\\TeX>>')
+                '<p class="mc-noindent"><<%s||\\TeX>>')
 
         # Depending on the whitespace after environment, put indent or noindent.
         # (test HTMLConverterState.last_was_block)

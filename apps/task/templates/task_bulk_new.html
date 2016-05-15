@@ -17,9 +17,9 @@
     <pre class="multi-line">@NAME = some competition, task #@{COUNTER}</pre><br>
     {% trans "You can also specify your own variables:" %}<br>
     <pre class="multi-line">@level = Regional
- @year = 2016
- @competition = @{level} competiton @{year}
- @NAME = @{competition}, task #@{COUNTER}</pre><br>
+@year = 2016
+@competition = @{level} competiton @{year}
+@NAME = @{competition}, task #@{COUNTER}</pre><br>
     {% trans "All additions will be saved for future use and shown in the list at the bottom of this page." %}
     {% trans "So, please specify the <i>Name</i>." %}
     {% trans "Also, if you check <i>Hidden</i>, the template will be visible to you only." %}
@@ -57,7 +57,7 @@
     <h4>{% trans "Other special features:" %}</h4>
     <ul>
       <li>{% trans "You can multiply a variable (only if an integer) with a constant integer factor, e.g.:" %}
-          <pre class="multi-line">@{100*COUNTER}</pre></li>
+          <pre>@{100*COUNTER}</pre></li>
     </ul>
   </div>
 </div>
