@@ -722,8 +722,10 @@ class LatexIncludeGraphics(Command):
 class LatexInlineMathCommand(Command):
     """Command to be treated as an inline math when generating HTML, where it is
     replaced with $\\<command name>$. Leaves as-is when generating LaTeX."""
-    def __init__(self):
+    def __init__(self, format, content):
         super(LatexInlineMathCommand, self).__init__()
+        self.format = format
+        self.content = content
 
     def to_html(self, token, converter):
         # Handled manually in Converter.
@@ -1137,8 +1139,8 @@ class BBCodeURL(BBCodeTag):
 
 latex_commands = {
     '-': LatexNoop(),
-    'LaTeX': LatexInlineMathCommand(),
-    'TeX': LatexInlineMathCommand(),
+    'LaTeX': LatexInlineMathCommand('%s', '\\LaTeX'),
+    'TeX': LatexInlineMathCommand('%s', '\\TeX'),
     '\\': LatexSpecialSymbol('<br>'),
     'begin': LatexBegin(),
     'caption': LatexCaption(),
@@ -1723,12 +1725,12 @@ class Converter(object):
         tokens = []
         for token in self.tokens:
             if isinstance(token, TokenCommand):
+                command = latex_commands[token.command]
                 if token.command == 'ref':
                     ref = self.refs.get(token.args[0])
                     token = TokenMath('$%s$', ref if ref is not None else '??')
-                elif isinstance(
-                        latex_commands[token.command], LatexInlineMathCommand):
-                    token = TokenMath('$%s$', '\\' + token.command)
+                elif isinstance(command , LatexInlineMathCommand):
+                    token = TokenMath(command.format, command.content)
 
             if isinstance(token, TokenMath):
                 latex_hash = self.generate_latex_hash__func(

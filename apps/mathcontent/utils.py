@@ -1,4 +1,5 @@
-﻿from django.utils.translation import ugettext as _
+﻿from django.conf import settings
+from django.utils.translation import ugettext as _
 
 from skoljka.libs import xss
 from skoljka.libs.timeout import run_command
@@ -23,6 +24,8 @@ def convert(type, text, content=None, attachments_path=None):
         return converter.convert(type, text, attachments=attachments,
                 attachments_path=attachments_path)
     except:
+        if settings.DEBUG:
+            raise
         msg = _("Internal parser error. Please contact administrators.")
         if type == TYPE_HTML:
             return "<span style=\"color:red;\">{}</span>".format(msg)
