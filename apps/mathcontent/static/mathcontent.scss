@@ -65,6 +65,10 @@ object.latex_center {
 }
 
 /* MathContent content */
+.mc-center {
+  text-align: center;
+}
+
 .mc-error {
   color: red;
 }

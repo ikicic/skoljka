@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
 from mathcontent.converter_v1 import Tokenizer, Converter
-from mathcontent.converter_v1 import SKIP_COMPARISON as SKIP
-from mathcontent.converter_v1 import parse_bbcode, BBCodeException
-from mathcontent.converter_v1 import LatexValueError
-from mathcontent.converter_v1 import convert_tex_length_to_html
-from mathcontent.converter_v1 import TokenText, TokenCommand, \
+from mathcontent.converter_v1.bbcode import parse_bbcode, BBCodeException
+from mathcontent.converter_v1.latex import convert_tex_length_to_html, \
+        LatexEnvironmentDiv, LatexEnvironmentFigure, LatexValueError
+from mathcontent.converter_v1.tokens import TokenText, TokenCommand, \
         TokenMultilineWhitespace, TokenSimpleWhitespace, TokenMath, \
         TokenError, TokenComment, TokenOpenCurly, TokenClosedCurly, \
         TokenBBCode
+from mathcontent.converter_v1.basics import SKIP_COMPARISON as SKIP
 
-from mathcontent.converter_v1 import LatexEnvironmentDiv, LatexEnvironmentFigure
 from mathcontent.models import TYPE_HTML, TYPE_LATEX, LatexElement
 
 from skoljka.libs.testcase import TestCaseEx
@@ -529,8 +528,8 @@ class ConverterV1TestCase(TestCaseEx):
         self.assertHTMLAutoLatex(
                 "first  \n \n \n\n  second \n\n third",
                 '<p class="mc-noindent">first'
-                    '<p class="mc-indent">second'
-                    '<p class="mc-indent">third')
+                '<p class="mc-indent">second'
+                '<p class="mc-indent">third')
 
         # No paragraph after an $$ ... $$ equation.
         self.assertHTMLAutoLatex(
@@ -649,9 +648,33 @@ class ConverterV1TestCase(TestCaseEx):
                 ('abc', {'abc': None, 'def': "][[]]["}, 18))
 
         self.assertHTMLLatexNoPar(
+                "bla [b bla",
+                "bla [b bla",
+                "bla [b bla")
+        self.assertHTMLLatexNoPar(
+                "bla [b bla]",
+                "bla [b bla]",
+                "bla [b bla]")
+        self.assertHTMLLatexNoPar(
                 "[b]bla[/b]",
                 "<b>bla</b>",
                 "\\textbf{bla}")
+        self.assertHTMLLatexNoPar(
+                "[nobb][b]bla[/b][/nobb]",
+                "[b]bla[/b]",
+                "[b]bla[/b]")
+        self.assertHTMLLatexNoPar(
+                "[nobb][b]bla[/b]",  # special tag, no need for [/nobb]
+                "[b]bla[/b]",
+                "[b]bla[/b]")
+        self.assertHTMLLatexNoPar(
+                "[/nobb][b]bla[/b]",
+                "[/nobb]<b>bla</b>",
+                "[/nobb]\\textbf{bla}")
+        self.assertHTMLLatexNoPar(
+                "[b]bla[/bb]",
+                "[b]bla[/bb]",
+                "[b]bla[/bb]")
         self.assertHTMLLatexNoPar(
                 "Is this [b]example [i]working[/i][/b]?",
                 "Is this <b>example <i>working</i></b>?",
