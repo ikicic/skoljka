@@ -19,11 +19,13 @@ class TokenComment(Token):
         return 'TokenComment({})'.format(repr(self.text))
 
 class TokenMath(Token):
-    def __init__(self, format, content):
+    def __init__(self, format, content, force_inline=False):
         self.format = format
         self.content = content
+        self.force_inline = force_inline
     def __repr__(self):
-        return 'TokenMath({}, {})'.format(repr(self.format), repr(self.content))
+        return 'TokenMath({}, {}, {})'.format(
+                repr(self.format), repr(self.content), repr(self.force_inline))
 
 class TokenText(Token):
     def __init__(self, text):

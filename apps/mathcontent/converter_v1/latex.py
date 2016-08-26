@@ -581,10 +581,13 @@ class LatexEnvironmentFigure(LatexEnvironment):
 ########################################################
 
 latex_commands = {
+    '%': LatexSpecialSymbol('%'),
     '-': LatexSpecialSymbol('&shy;'),  # Soft hyphen.
     'LaTeX': LatexInlineMathCommand('%s', '\\LaTeX'),
     'TeX': LatexInlineMathCommand('%s', '\\TeX'),
     '\\': LatexSpecialSymbol('<br>'),
+    '{': LatexSpecialSymbol('{'),
+    '}': LatexSpecialSymbol('}'),
     'begin': LatexBegin(),
     'caption': LatexCaption(),
     'centering': LatexCentering(),

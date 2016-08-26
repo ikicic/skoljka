@@ -5,7 +5,7 @@
 
 {% block inner_content %}
 
-<h4>Opis</h4>
+<h3>Opis</h3>
 <p>Svi tekstovi zadataka, rješenja, poruke i dr. podržavaju matematičke
 formule, uređeni tekst i slično. Format unosa je uvelike baziran na
 <a href="#latex">LaTeX-u</a>, a podržava i osnovan
@@ -20,7 +20,7 @@ je nekoliko bitnih nekonzistentnosti s LaTeX-om koje je trebalo popraviti. Osim
 toga, veća kompatibilnost je preduvjet za automatsko dodavanje zadataka i
 natjecanja, što će jednog dana biti implementirano.</p>
 
-<h4>Osnove</h4>
+<h3>Osnove</h3>
 <p>Web stranice su ograničene po pitanju mogućnosti prikazivanja matematičkih
 formula. Postoje određeni načini vektorskog prikazivanja formula
 (npr. <a href="https://www.mathjax.org/">MathJax</a>), ali smo se ovdje
@@ -29,7 +29,7 @@ generira jedna slika (PNG formata). Neke druge stvari, poput <b>bold-a</b>,
 <i>italic-a</i>, <u>underline-a</u> i drugog (centriranja, boje...) se mogu
 vjerno prikazati kao dio same web stranice, bez generiranja slike.</p>
 
-<h4>Podržane LaTeX naredbe</h4>
+<h3>Podržane LaTeX naredbe</h3>
 
 Navodimo naredbe koje su trenutačno (u potpunosti ili djelomično) podržane.
 
@@ -54,7 +54,7 @@ Navodimo naredbe koje su trenutačno (u potpunosti ili djelomično) podržane.
   <br>
 {% endfor %}
 
-<h4 id="bb-code">BB Code</h4>
+<h3 id="bb-code">BB Code</h3>
 <p>Podržane su sljedeće BB code naredbe:</p>
 <table class="table-striped">
   <tr><th colspan="5">{% trans "BB code commands" %}</th></tr>
@@ -84,7 +84,7 @@ Navodimo naredbe koje su trenutačno (u potpunosti ili djelomično) podržane.
 <p>BB code se isključuje koristeći <code>[nobb]</code>, a uključuje natrag pomoću <code>[/nobb]</code>.</p>
 
 
-<h4 id="format-v0">Stari format</h4>
+<h3 id="format-v0">Stari format</h3>
 <p>Gore opisani format odgovara trenutačno preporučenom formatu unosa. Ukoliko
 želite koristiti stari format, dodajte <code>%V0</code> na početak teksta.</p>
 
@@ -117,8 +117,7 @@ Navodimo kratke upute:
 </ul>
 
 
-<h4 id="latex">LaTeX</h4>
-<br>
+<h3 id="latex">LaTeX</h3>
 Neki korisni linkovi o LaTeX-u:<br>
 <a href="http://en.wikibooks.org/wiki/LaTeX">http://en.wikibooks.org/wiki/LaTeX</a><br>
 <a href="http://en.wikibooks.org/wiki/LaTeX/Mathematics">http://en.wikibooks.org/wiki/LaTeX/Mathematics</a><br>

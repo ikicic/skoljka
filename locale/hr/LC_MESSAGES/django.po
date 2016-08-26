@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-26 06:00+0200\n"
-"PO-Revision-Date: 2016-08-26 06:00+0200\n"
+"POT-Creation-Date: 2016-08-26 15:19+0200\n"
+"PO-Revision-Date: 2016-08-26 15:19+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -31,19 +31,19 @@ msgstr "Osnovne naredbe"
 msgid "Emphasized text (usually italic)"
 msgstr "Naglašeni tekst (obično italic)"
 
-#: apps/base/help.py:25 apps/base/help.py:76
+#: apps/base/help.py:25 apps/base/help.py:79
 msgid "Bold"
 msgstr "Bold"
 
-#: apps/base/help.py:26 apps/base/help.py:77
+#: apps/base/help.py:26 apps/base/help.py:80
 msgid "Italic"
 msgstr "Italic"
 
-#: apps/base/help.py:27 apps/base/help.py:78
+#: apps/base/help.py:27 apps/base/help.py:81
 msgid "Strikethrough"
 msgstr "Precrtano"
 
-#: apps/base/help.py:28 apps/base/help.py:79
+#: apps/base/help.py:28 apps/base/help.py:82
 msgid "Underline"
 msgstr "Podcrtano"
 
@@ -83,8 +83,8 @@ msgstr "Postavi oznaku slike ili jednadžbe."
 msgid "Given a label, show a link to the related content."
 msgstr "Link na sadržaj označen zadanom oznakom."
 
-#: apps/base/help.py:41 apps/base/help.py:42 apps/base/help.py:91
-#: apps/base/help.py:92
+#: apps/base/help.py:41 apps/base/help.py:42 apps/base/help.py:94
+#: apps/base/help.py:95
 msgid "Link"
 msgstr "Link"
 
@@ -107,7 +107,7 @@ msgid ""
 "The default values are <code>1pt</code> for <code>\\parskip</code> and "
 "<code>1em</code> for <code>\\parlength</code>."
 msgstr ""
-"Početne vrijednosti su <code>1pt</code> za <code>\\parskip<code> i "
+"Početne vrijednosti su <code>1pt</code> za <code>\\parskip</code> i "
 "<code>1em</code> za <code>\\parlength</code>."
 
 #: apps/base/help.py:56
@@ -118,7 +118,7 @@ msgstr "Ostale naredbe"
 msgid "Framed box with disabled word-wrap."
 msgstr "Uokviren tekst s isključenim prijelomom teksta."
 
-#: apps/base/help.py:59 apps/base/help.py:63 apps/base/help.py:89
+#: apps/base/help.py:59 apps/base/help.py:63 apps/base/help.py:92
 msgid "Please don't misuse."
 msgstr "Molimo nemojte zloupotrebljavati."
 
@@ -127,7 +127,8 @@ msgid "Disabled word-wrap."
 msgstr "Isključen prijelom teksta."
 
 #: apps/base/help.py:67 apps/base/help.py:68 apps/base/help.py:69
-#: apps/base/help.py:70
+#: apps/base/help.py:70 apps/base/help.py:73 apps/base/help.py:74
+#: apps/base/help.py:75
 #, python-format
 msgid "Symbol %s."
 msgstr "Simbol %s."
@@ -136,7 +137,7 @@ msgstr "Simbol %s."
 msgid "Soft hyphen, shown in HTML as <pre>&amp;shy;</pre>."
 msgstr "Tzv. <i>soft hyphen</i>, prikazan u HTML-u kao <pre>&amp;shy;</pre>."
 
-#: apps/base/help.py:81
+#: apps/base/help.py:84
 msgid ""
 "Shorthand for <code>\\setlength{\\parskip}{SKIP} \\setlength{\\parindent}"
 "{INDENT}</code>. Value <code>0</code> is treated as <code>0pt</code>."
@@ -144,11 +145,11 @@ msgstr ""
 "Kratica za <code>\\setlength{\\parskip}{SKIP} \\setlength{\\parindent}"
 "{INDENT}</code>. Vrijednost <code>0</code> se tretira kao <code>0pt</code>."
 
-#: apps/base/help.py:85
+#: apps/base/help.py:88
 msgid "Quote"
 msgstr "Citat"
 
-#: apps/base/help.py:88
+#: apps/base/help.py:91
 msgid ""
 "Show the attachment #x, counting from 1. Optionally, specify the width and "
 "height."
@@ -156,7 +157,7 @@ msgstr ""
 "Prikaži priloženu sliku #x, brojeći od 1. Po želji se mogu specificirati "
 "duljina i visina slike."
 
-#: apps/base/help.py:100
+#: apps/base/help.py:103
 msgid "Some text here."
 msgstr "Neki tekst."
 

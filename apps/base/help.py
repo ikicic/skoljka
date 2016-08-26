@@ -70,6 +70,9 @@ def help_format(request):
         ("\\~", _("Symbol %s.") % '~' + PARTIAL, None),
         ("\\-", _("Soft hyphen, shown in HTML as <pre>&amp;shy;</pre>."),
             "a\-very\-long\-word"),
+        ("\\%", _("Symbol %s.") % '%', None),
+        ("\\{", _("Symbol %s.") % '{', None),
+        ("\\}", _("Symbol %s.") % '}', None),
     ]
 
     bbcode_commands = [

@@ -504,9 +504,9 @@ class Tokenizer(object):
 
 
 
-def get_latex_html(latex_element):
+def get_latex_html(latex_element, force_inline):
     """Given LatexElement instance generate <img> HTML."""
-    inline = latex_element.format in ['$%s$', '\(%s\)']
+    inline = force_inline or latex_element.format in ['$%s$', '\(%s\)']
     latex_escaped = xss.escape(latex_element.text)
     depth = latex_element.depth
 
@@ -515,7 +515,6 @@ def get_latex_html(latex_element):
         return u'<span class="mc-error-source" title="{}">{}</span>'.format(
                 xss.escape(_("Invalid LaTeX.")),
                 xss.escape(latex_element.format % latex_element.text))
-
 
     hash = latex_element.hash
     url = '%s%s/%s/%s/%s.png' % (IMG_URL_PATH, hash[0], hash[1], hash[2], hash)
@@ -610,7 +609,8 @@ class Converter(object):
                     ref = self.refs.get(token.args[0])
                     token = TokenMath('$%s$', ref if ref is not None else '??')
                 elif isinstance(command , LatexInlineMathCommand):
-                    token = TokenMath(command.format, command.content)
+                    token = TokenMath(command.format, command.content,
+                            force_inline=True)
 
             if isinstance(token, TokenMath):
                 latex_hash = self.generate_latex_hash__func(
@@ -754,7 +754,8 @@ class Converter(object):
                     self.pop_state()
             elif isinstance(token, TokenMath):
                 element = self.maths[(token.format, token.content)]
-                add_content_par(self.get_latex_html__func(element))
+                add_content_par(
+                        self.get_latex_html__func(element, token.force_inline))
             elif isinstance(token, TokenText):
                 add_content_par(xss.escape(token.text).replace('~', '&nbsp;'))
             elif isinstance(token, TokenSimpleWhitespace):

@@ -47,8 +47,8 @@ def _mock__generate_latex_hash(format, latex):
 def _mock__get_available_latex_elements(formulas):
     return {}
 
-def _mock__get_latex_html(element):
-    return element.hash
+def _mock__get_latex_html(element, force_inline):
+    return ("INLINE:" if force_inline else "") + element.hash
 
 
 class ConverterV1TestCase(TestCaseEx):
@@ -391,8 +391,8 @@ class ConverterV1TestCase(TestCaseEx):
         self.assertHTMLAutoLatexNoPar(
                 r"a\-very\-very\-long\-word\-here",
                 r"a&shy;very&shy;very&shy;long&shy;word&shy;here")
-        self.assertHTMLAutoLatexNoPar( r"\TeX", r"<<%s||\TeX>>")
-        self.assertHTMLAutoLatexNoPar( r"\LaTeX", r"<<%s||\LaTeX>>")
+        self.assertHTMLAutoLatexNoPar( r"\TeX", r"INLINE:<<%s||\TeX>>")
+        self.assertHTMLAutoLatexNoPar( r"\LaTeX", r"INLINE:<<%s||\LaTeX>>")
 
         self.assertHTMLAutoLatexNoPar("bla\\\\  asdf", "bla<br>asdf")
         self.assertHTMLAutoLatexNoPar("\\emph{bla bla bla}",
@@ -569,7 +569,7 @@ class ConverterV1TestCase(TestCaseEx):
                 '</div>')
         self.assertHTMLAutoLatex(
                 "\TeX",
-                '<p class="mc-noindent"><<%s||\\TeX>>')
+                '<p class="mc-noindent">INLINE:<<%s||\\TeX>>')
 
         # Depending on the whitespace after environment, put indent or noindent.
         # (test HTMLConverterState.last_was_block)
