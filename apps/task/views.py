@@ -381,7 +381,7 @@ def _convert_to_latex(sorted_tasks, **kwargs):
     for k, x in enumerate(sorted_tasks):
         # no / at the end
         attachments_path = is_latex and '{}/{}'.format(ZIP_ATTACHMENT_DIR, x.id)
-        content = convert_to_latex(
+        content = convert_to_latex(x.content.text,
                 content=x.content, attachments_path=attachments_path)
         data = {
             'title': x.name,
