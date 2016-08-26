@@ -1,16 +1,17 @@
 from django.utils.translation import ugettext as _
 
-from mathcontent.utils import convert_to_html
+from mathcontent.models import TYPE_HTML, TYPE_LATEX
+from mathcontent.utils import convert
 from skoljka.libs.decorators import response
 
 _evaluate__cache = {}
-def _evaluate(content):
+def _evaluate(type, content):
     try:
-        return _evaluate__cache[content]
+        return _evaluate__cache[(type, content)]
     except KeyError:
-        html = convert_to_html(content)
-        _evaluate__cache[content] = html
-        return html
+        result = convert(type, content)
+        _evaluate__cache[(type, content)] = result
+        return result
 
 
 @response('help/help_format.html')
@@ -68,6 +69,22 @@ def help_format(request):
             "a\-very\-long\-word"),
     ]
 
+    bbcode_commands = [
+        ('[b]...[/b]', _("Bold"), "[b]TEXT[/b]"),
+        ('[i]...[/i]', _("Italic"), "[i]TEXT[/i]"),
+        ('[s]...[/s]', _("Strikethrough"), "[s]TEXT[/s]"),
+        ('[u]...[/u]', _("Underline"), "[u]TEXT[/u]"),
+        ('[quote]...[/quote]', _("Quote"), "[quote]TEXT[/quote]"),
+        ('[img attachment=x '
+            '<span style=\"color:gray;\">width=300px height=300px</span>]',
+            _("Show the attachment #x, counting from 1. Optionally, specify "
+                "the width and height.") + " " + _("Please don't misuse."),
+            None),
+        ('[url]...[/url]', _("Link"), "[url]http://www.google.com/[/url]"),
+        ('[url=<url>]...[/url]', _("Link"),
+            "[url=http://www.google.com/]Google[/url]")
+    ]
+
     # TODO: a) Document what's the difference.
     # TODO: b) Write an example.
 
@@ -81,7 +98,7 @@ def help_format(request):
             self.name = name
             self.description = description
             self.example = example
-            self.evaluated = _evaluate(example) if example else example
+            self.evaluated = example and _evaluate(TYPE_HTML, example)
 
     command_groups = []
     for cmd in commands:
@@ -93,7 +110,19 @@ def help_format(request):
             # (Group name, list of commands).
             command_groups.append((cmd, []))
 
-    return {'command_groups': command_groups}
 
+    class BBCodeCommandHelp(object):
+        def __init__(self, info):
+            self.format = info[0]
+            self.description = info[1]
+            example = info[2] and _replace_text(info[2])
+            self.example = example
+            self.html = example and _evaluate(TYPE_HTML, example)
+            self.latex = example and _evaluate(TYPE_LATEX, example)
 
+    bbcode_commands_help = [BBCodeCommandHelp(x) for x in bbcode_commands]
 
+    return {
+        'command_groups': command_groups,
+        'bbcode_commands_help': bbcode_commands_help
+    }

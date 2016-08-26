@@ -283,6 +283,7 @@ bb_commands = {
     'i': BBCodeContainer('<i>', '</i>', '\\textit{', '}'),
     'img': BBCodeImg(),
     # TODO: Quote for LaTeX.
+    # TODO: Quote parameters.
     'quote': BBCodeContainer('<div class="mc-quote">', '</div>', '', ''),
     # 'ref': BBCodeRef(),
     # TODO: pre

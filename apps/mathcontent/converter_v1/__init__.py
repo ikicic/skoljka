@@ -37,7 +37,7 @@ import re
 # TODO: \par
 # TODO: Quotation marks ``text'' and `text' for HTML.
 # TODO: -, -- (en-dash), --- (em-dash) and other ligatures
-# TODO: Fig.~5  (treat as a LaTeX-only feature)
+# TODO: Fig.~5  --> &nbsp;
 # TODO: \begin{enumerate} \item ... \end{enumerate}
 # TODO: \begin{itemize} \item ... \end{itemize}
 # TODO: \begin{description} \item[bla] ... \end{description}
@@ -539,14 +539,6 @@ class Tokenizer(object):
         #     print repr(token)
         return tokens
 
-    # def convert(self):  # XSS danger!!! Be careful
-    #     """Converts MathContent format to HTML (type 0) or LaTeX (type 1)
-
-    #     To support special tags like [img], it must be called with a
-    #     content instance."""
-
-    #     self.K = 0
-    #     return self.parse()
 
 
 def get_latex_html(latex_element):
