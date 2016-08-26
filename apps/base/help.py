@@ -16,8 +16,8 @@ def _evaluate(type, content):
 
 @response('help/help_format.html')
 def help_format(request):
-    INFO_FORMAT = " <span style=\"color:gray;font-style:italic;\">{}</span>"
-    PARTIAL = INFO_FORMAT.format(_("Partial support."))
+    INFO_FORMAT = u" <span style=\"color:gray;font-style:italic;\">{}</span>"
+    PARTIAL = INFO_FORMAT.format(_("Partially supported."))
     INCOMPATIBLE = INFO_FORMAT.format(_("Possibly incompatible behavior."))
     commands = [
         _("Basic commands"),
@@ -32,10 +32,10 @@ def help_format(request):
             "\\underline{TEXT}"), # a)
         ('\\\\', _("Newline") + INCOMPATIBLE, "a\\\\b"),
         _("Advanced commands"),
-        ('\\includegraphics', _("Show images.") + PARTIAL, ""),  # b)
+        ('\\includegraphics', _("Show the given image.") + PARTIAL, ""),  # b)
         ('\\caption', _("Figure caption."), ""),      # b)
         ('\\centering', _("Figure centering."), ""),  # b)
-        ('\\label', _("Set figure or equation label. ") + PARTIAL, ""),  # b)
+        ('\\label', _("Set figure or equation label.") + PARTIAL, ""),  # b)
         ('\\ref', _("Given a label, show a link to the related content.")
                 + PARTIAL, ""),  # TODO
         ('\\url', _("Link"), "\\url{http://www.example.com/}"),

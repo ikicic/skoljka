@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-04 23:31+0100\n"
-"PO-Revision-Date: 2016-02-04 23:31+0100\n"
+"POT-Creation-Date: 2016-08-26 06:00+0200\n"
+"PO-Revision-Date: 2016-08-26 06:00+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -14,6 +14,151 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2\n"
+
+#: apps/base/help.py:20
+msgid "Partially supported."
+msgstr "Djelomično podržano."
+
+#: apps/base/help.py:21
+msgid "Possibly incompatible behavior."
+msgstr "Moguće nekompatilno ponašanje."
+
+#: apps/base/help.py:23
+msgid "Basic commands"
+msgstr "Osnovne naredbe"
+
+#: apps/base/help.py:24
+msgid "Emphasized text (usually italic)"
+msgstr "Naglašeni tekst (obično italic)"
+
+#: apps/base/help.py:25 apps/base/help.py:76
+msgid "Bold"
+msgstr "Bold"
+
+#: apps/base/help.py:26 apps/base/help.py:77
+msgid "Italic"
+msgstr "Italic"
+
+#: apps/base/help.py:27 apps/base/help.py:78
+msgid "Strikethrough"
+msgstr "Precrtano"
+
+#: apps/base/help.py:28 apps/base/help.py:79
+msgid "Underline"
+msgstr "Podcrtano"
+
+#: apps/base/help.py:30
+msgid ""
+"Underline and disable word-wrap. It's recommended to use <code>\\uline</"
+"code> instead."
+msgstr ""
+"Podcrtano s isključenim prijelomom teksta. Preporučeno je koristiti umjesto "
+"toga <code>\\uline</code>."
+
+#: apps/base/help.py:33
+msgid "Newline"
+msgstr "Novi red"
+
+#: apps/base/help.py:34
+msgid "Advanced commands"
+msgstr "Napredne naredbe"
+
+#: apps/base/help.py:35
+msgid "Show the given image."
+msgstr "Prikaži zadanu sliku."
+
+#: apps/base/help.py:36
+msgid "Figure caption."
+msgstr "Opis slike"
+
+#: apps/base/help.py:37
+msgid "Figure centering."
+msgstr "Centriranje slike"
+
+#: apps/base/help.py:38
+msgid "Set figure or equation label."
+msgstr "Postavi oznaku slike ili jednadžbe."
+
+#: apps/base/help.py:39
+msgid "Given a label, show a link to the related content."
+msgstr "Link na sadržaj označen zadanom oznakom."
+
+#: apps/base/help.py:41 apps/base/help.py:42 apps/base/help.py:91
+#: apps/base/help.py:92
+msgid "Link"
+msgstr "Link"
+
+#: apps/base/help.py:44
+msgid ""
+"Set value of the given length command. Currently, only <code>\\parindent</"
+"code> and <code>\\parskip</code> are supported, representing indentation "
+"length and paragraph top margin."
+msgstr ""
+"Postavi vrijednost zadane duljine. Trenutačno, podržani su samo <code>"
+"\\parindent</code> i <code>\\parskip</code>, koji predstavljaju uvlačenje i "
+"gornju marginu paragrafa (razmak između paragrafa)."
+
+#: apps/base/help.py:48
+msgid "Note that the first paragraph is not indented."
+msgstr "Primijetite da prvi paragraf nije uvučen."
+
+#: apps/base/help.py:49
+msgid ""
+"The default values are <code>1pt</code> for <code>\\parskip</code> and "
+"<code>1em</code> for <code>\\parlength</code>."
+msgstr ""
+"Početne vrijednosti su <code>1pt</code> za <code>\\parskip<code> i "
+"<code>1em</code> za <code>\\parlength</code>."
+
+#: apps/base/help.py:56
+msgid "Other commands"
+msgstr "Ostale naredbe"
+
+#: apps/base/help.py:58
+msgid "Framed box with disabled word-wrap."
+msgstr "Uokviren tekst s isključenim prijelomom teksta."
+
+#: apps/base/help.py:59 apps/base/help.py:63 apps/base/help.py:89
+msgid "Please don't misuse."
+msgstr "Molimo nemojte zloupotrebljavati."
+
+#: apps/base/help.py:62
+msgid "Disabled word-wrap."
+msgstr "Isključen prijelom teksta."
+
+#: apps/base/help.py:67 apps/base/help.py:68 apps/base/help.py:69
+#: apps/base/help.py:70
+#, python-format
+msgid "Symbol %s."
+msgstr "Simbol %s."
+
+#: apps/base/help.py:71
+msgid "Soft hyphen, shown in HTML as <pre>&amp;shy;</pre>."
+msgstr "Tzv. <i>soft hyphen</i>, prikazan u HTML-u kao <pre>&amp;shy;</pre>."
+
+#: apps/base/help.py:81
+msgid ""
+"Shorthand for <code>\\setlength{\\parskip}{SKIP} \\setlength{\\parindent}"
+"{INDENT}</code>. Value <code>0</code> is treated as <code>0pt</code>."
+msgstr ""
+"Kratica za <code>\\setlength{\\parskip}{SKIP} \\setlength{\\parindent}"
+"{INDENT}</code>. Vrijednost <code>0</code> se tretira kao <code>0pt</code>."
+
+#: apps/base/help.py:85
+msgid "Quote"
+msgstr "Citat"
+
+#: apps/base/help.py:88
+msgid ""
+"Show the attachment #x, counting from 1. Optionally, specify the width and "
+"height."
+msgstr ""
+"Prikaži priloženu sliku #x, brojeći od 1. Po želji se mogu specificirati "
+"duljina i visina slike."
+
+#: apps/base/help.py:100
+msgid "Some text here."
+msgstr "Neki tekst."
 
 #: apps/base/templates/base.html:80
 #: apps/task/templates/task_lectures_list.html:8
@@ -24,6 +169,30 @@ msgstr "Predavanja"
 #: apps/base/templates/inc_featured_lectures.html:8
 msgid "Featured lectures"
 msgstr "Odabrana predavanja"
+
+#: apps/base/templates/help/help_format.html:60
+msgid "BB code commands"
+msgstr "BB code naredbe"
+
+#: apps/base/templates/help/help_format.html:62
+msgid "Command"
+msgstr "Naredba"
+
+#: apps/base/templates/help/help_format.html:63
+msgid "Description"
+msgstr "Opis"
+
+#: apps/base/templates/help/help_format.html:64
+msgid "Example"
+msgstr "Primjer"
+
+#: apps/base/templates/help/help_format.html:65
+msgid "HTML"
+msgstr "HTML"
+
+#: apps/base/templates/help/help_format.html:66
+msgid "LaTeX"
+msgstr "LaTeX"
 
 #: apps/competition/evaluator.py:40
 msgid "OR"
@@ -377,6 +546,147 @@ msgid_plural "%d my tasks"
 msgstr[0] "%d moj zadatak"
 msgstr[1] "%d moja zadatka"
 msgstr[2] "%d mojih zadataka"
+
+#: apps/mathcontent/utils.py:29
+msgid "Internal parser error. Please contact administrators."
+msgstr "Greška parsiranja. Molimo obavijestite administratore!"
+
+#: apps/mathcontent/converter_v1/__init__.py:254
+msgid "Ending not found:"
+msgstr "Kraj nije pronađen:"
+
+#: apps/mathcontent/converter_v1/__init__.py:311
+msgid "Unknown LaTeX command."
+msgstr "Nepoznata LaTeX naredba."
+
+#: apps/mathcontent/converter_v1/__init__.py:350
+msgid "Expected a '{' bracket."
+msgstr "Očekuje se '{' zagrada."
+
+#: apps/mathcontent/converter_v1/__init__.py:369
+#, python-format
+msgid "Expected a '%s' bracket."
+msgstr "Očekuje se '%s' zagrada."
+
+#: apps/mathcontent/converter_v1/__init__.py:460
+msgid "Unexpected '}'."
+msgstr "Neočekivana zagrada '}'."
+
+#: apps/mathcontent/converter_v1/__init__.py:486
+msgid "Expected a '}' bracket."
+msgstr "Očekuje se '}' zagrada."
+
+#: apps/mathcontent/converter_v1/__init__.py:488
+msgid "End delimiter missing."
+msgstr "Nedostaje krajnja oznaka."
+
+#: apps/mathcontent/converter_v1/__init__.py:516
+msgid "Invalid LaTeX."
+msgstr "Nevaljan LaTeX."
+
+#: apps/mathcontent/converter_v1/__init__.py:752
+msgid "Unexpected '}'"
+msgstr "Neočekivana zagrada '}'."
+
+#: apps/mathcontent/converter_v1/basics.py:67
+#: apps/mathcontent/converter_v1/basics.py:83
+#: apps/mathcontent/converter_v1/latex.py:43
+msgid "Unexpected value:"
+msgstr "Neočekivana vrijednost:"
+
+#: apps/mathcontent/converter_v1/basics.py:87
+#: apps/mathcontent/converter_v1/bbcode.py:58
+msgid "Unexpected attribute:"
+msgstr "Neočekivani atribut"
+
+#: apps/mathcontent/converter_v1/bbcode.py:18
+msgid "Unexpected parameter(s)."
+msgstr "Neočekivani parametar/ri."
+
+#: apps/mathcontent/converter_v1/bbcode.py:20
+msgid "Unexpected parameter:"
+msgstr "Neočekivani parametar:"
+
+#: apps/mathcontent/converter_v1/bbcode.py:49
+#: apps/mathcontent/converter_v1/bbcode.py:56
+msgid "Expected a number."
+msgstr "Traži se broj."
+
+#: apps/mathcontent/converter_v1/bbcode.py:60
+msgid "Incompatible scaling."
+msgstr "Nekompatibilno skaliranje"
+
+#: apps/mathcontent/converter_v1/bbcode.py:197
+#: apps/mathcontent/converter_v1/latex.py:357
+msgid "Attachments not shown in a preview."
+msgstr "U pregledu slike nisu prikazane."
+
+#: apps/mathcontent/converter_v1/bbcode.py:206
+msgid "Missing an attribute:"
+msgstr "Nedostaje atribut:"
+
+#: apps/mathcontent/converter_v1/bbcode.py:208
+#, python-format
+msgid "Invalid value \"%(val)s\" for the attribute \"%(attr)s\"."
+msgstr "Nevaljana vrijednost \"%(val)s\" za atribut \"%(attr)s\"."
+
+#: apps/mathcontent/converter_v1/bbcode.py:211
+msgid "Unavailable attachment:"
+msgstr "Nedostupna slika:"
+
+#: apps/mathcontent/converter_v1/bbcode.py:237
+msgid "Expected two attributes."
+msgstr "Traže se dva atributa."
+
+#: apps/mathcontent/converter_v1/bbcode.py:240
+msgid "Unexpected attribute value:"
+msgstr "Neočekivana vrijednost atributa:"
+
+#: apps/mathcontent/converter_v1/bbcode.py:250
+msgid "Unexpected attribute value."
+msgstr "Neočekivana vrijednost atributa."
+
+#: apps/mathcontent/converter_v1/latex.py:66
+msgid "Closing '}' bracket not found."
+msgstr "Nedostaje zagrada '}'."
+
+#: apps/mathcontent/converter_v1/latex.py:80
+msgid "Invalid format:"
+msgstr "Nevaljani format:"
+
+#: apps/mathcontent/converter_v1/latex.py:219
+msgid "Unexpected \\end."
+msgstr "Neočekivani \\end."
+
+#: apps/mathcontent/converter_v1/latex.py:223
+#, python-format
+msgid "Expected '%(expected)s', received '%(received)s'."
+msgstr "Očekivano '%(expected)s', dobiveno '%(received)s'."
+
+#: apps/mathcontent/converter_v1/latex.py:247
+msgid "Unexpected \\caption."
+msgstr "Neočekivani \\caption."
+
+#: apps/mathcontent/converter_v1/latex.py:293
+msgid "Unexpected \\centering."
+msgstr "Neočekivani \\centering."
+
+#: apps/mathcontent/converter_v1/latex.py:362
+msgid "Attachment not found:"
+msgstr "Slika nije pronađena:"
+
+#: apps/mathcontent/converter_v1/latex.py:398
+msgid "Unexpected '\\label'."
+msgstr "Neočekivani \\label."
+
+#: apps/mathcontent/converter_v1/latex.py:401
+msgid "Tag missing, did you put \\label before \\caption?"
+msgstr "Nedostaje tag, jeste li stavili \\label prije \\caption?"
+
+#: apps/mathcontent/converter_v1/latex.py:456
+#, python-format
+msgid "Unsupported value \"%(value)s\" for the command \"%(cmd)s\"."
+msgstr "Nepodržana vrijednost \"%(value)s\" za naredbu \"%(cmd)s\"."
 
 #: apps/mathcontent/templates/inc_mathcontent_bootstrap_preview.html:7
 #: apps/task/templates/task_bulk_new.html:79
@@ -753,7 +1063,11 @@ msgstr ""
 "Ako nemate privilegije za napraviti navedene korake, molimo kontaktirajte "
 "administratore."
 
-#: apps/task/templates/task_new.html:94
+#: apps/task/templates/task_new.html:90
+msgid "Help"
+msgstr "Pomoć"
+
+#: apps/task/templates/task_new.html:101
 msgid "Press Ctrl+M to get the preview of the text."
 msgstr "Pritisnite Ctrl+M za pregled teksta."
 
