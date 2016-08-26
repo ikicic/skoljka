@@ -227,7 +227,7 @@ class BBCodeImg(BBCodeTag):
 class BBCodePar(BBCodeTag):
     """[par <skip> <indent>], a shorthand for
         \\setlength{\\parskip}{<skip>}
-        \\setlength{\\parindent}{<indent}.
+        \\setlength{\\parindent}{<indent>}.
     """
     def __init__(self):
         super(BBCodePar, self).__init__(has_close_tag=False)

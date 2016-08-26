@@ -45,7 +45,10 @@ def help_format(request):
                 "<code>\\parindent</code> and <code>\\parskip</code> are "
                 "supported, representing indentation length and paragraph "
                 "top margin.")
-            + " " + _("Note that the first paragraph is not indented."),
+            + " " + _("Note that the first paragraph is not indented.")
+            + " " + _("The default values are <code>1pt</code> for "
+                "<code>\\parskip</code> and <code>1em</code> for "
+                "<code>\\parlength</code>."),
             "\\setlength{\\parindent}{2em}\n"
             "\\setlength{\\parskip}{3em}\n\n"
             "First paragraph\n\n"
@@ -74,6 +77,11 @@ def help_format(request):
         ('[i]...[/i]', _("Italic"), "[i]TEXT[/i]"),
         ('[s]...[/s]', _("Strikethrough"), "[s]TEXT[/s]"),
         ('[u]...[/u]', _("Underline"), "[u]TEXT[/u]"),
+        ('[par SKIP INDENT]',
+            _("Shorthand for <code>\\setlength{\\parskip}{SKIP} "
+                "\\setlength{\\parindent}{INDENT}</code>. "
+                "Value <code>0</code> is treated as <code>0pt</code>."),
+            "[par 1em 0]"),
         ('[quote]...[/quote]', _("Quote"), "[quote]TEXT[/quote]"),
         ('[img attachment=x '
             '<span style=\"color:gray;\">width=300px height=300px</span>]',
