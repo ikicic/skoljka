@@ -4,6 +4,8 @@ from skoljka.libs import xss
 
 from mathcontent.converter_v1.basics import img_parse_length, \
         img_params_to_html, latex_escape
+from mathcontent.converter_v1.latex import convert_tex_length_to_html, \
+        LatexValueError
 
 
 class BBCodeException(Exception):
@@ -36,7 +38,7 @@ class BBUnexpectedParameters(BBCodeException):
 def _img_params_to_latex(params):
     out = {}
     scale = []
-    for name, value in params.iteritems():
+    for name, value in params:
         name = name.lower()
         value = (value or '').strip()
         if name in ['width', 'height']:
@@ -85,14 +87,14 @@ def parse_bbcode(T, K):
             K += 1
 
     tag_name = None
-    attrs = {}
+    attrs = []
     while K < len(T) and T[K] != ']':
         while K < len(T) and T[K].isspace():
             K += 1  # Skip whitespace.
 
         # Read the variable name
         start = K
-        while K < len(T) and T[K].isalnum():
+        while K < len(T) and (T[K].isalnum() or T[K] == '.'):
             K += 1
         if K == start:
             # No special characters allowed in the variable name.
@@ -131,14 +133,14 @@ def parse_bbcode(T, K):
                 if K == len(T):
                     raise BBCodeException()
                 K += 1
-                attrs[attr_name] = u"".join(value)
+                attrs.append((attr_name, u"".join(value)))
             else:
                 start = K
                 while K < len(T) and T[K] not in ' \t\r\n]':
                     K += 1
-                attrs[attr_name] = T[start : K]
+                attrs.append((attr_name, T[start : K]))
         else:
-            attrs[attr_name] = None
+            attrs.append((attr_name, None))
     if K == len(T):
         raise BBCodeException()
 
@@ -172,14 +174,14 @@ class BBCodeContainer(BBCodeTag):
 
     def to_html(self, token, converter):
         if token.is_open():
-            if len(token.attrs) != 1 or token.attrs.values()[0] is not None:
+            if len(token.attrs) != 1 or token.attrs[0][1] is not None:
                 raise BBUnexpectedParameters()
             return self.html_open
         return self.html_close
 
     def to_latex(self, token, converter):
         if token.is_open():
-            if len(token.attrs) != 1 or token.attrs.values()[0] is not None:
+            if len(token.attrs) != 1 or token.attrs[0][1] is not None:
                 raise BBUnexpectedParameters()
             return self.latex_open
         return self.latex_close
@@ -193,10 +195,11 @@ class BBCodeImg(BBCodeTag):
     def _check(self, token, converter):
         if converter.attachments is None:
             return converter.warning(_("Attachments not shown in a preview."))
-        if token.attrs['img'] is not None:  # "img" attribute should be None.
+        attrs_dict = dict(token.attrs)
+        if attrs_dict['img'] is not None:  # "img" attribute should be None.
             raise BBUnexpectedParameters("img")
         try:
-            val = token.attrs['attachment'].strip()
+            val = attrs_dict['attachment'].strip()
             index = int(val) - 1
             attachment = converter.attachments[index]
         except KeyError:
@@ -219,6 +222,44 @@ class BBCodeImg(BBCodeTag):
         return u'\\includegraphics%s{%s}' % \
                 (_img_params_to_latex(token.attrs), attachment.get_filename())
 
+
+
+class BBCodePar(BBCodeTag):
+    """[par <skip> <indent>], a shorthand for
+        \\setlength{\\parskip}{<skip>}
+        \\setlength{\\parindent}{<indent}.
+    """
+    def __init__(self):
+        super(BBCodePar, self).__init__(has_close_tag=False)
+
+    def _check(self, token, converter, is_latex):
+        if len(token.attrs) != 3:
+            raise BBCodeException(_("Expected two attributes."))
+        for k in range(3):
+            if token.attrs[k][1] is not None:
+                raise BBUnexpectedParameters(_("Unexpected attribute value:") +
+                                             "%s=%s" % token.attrs[k])
+        skip = token.attrs[1][0]
+        indent = token.attrs[2][0]
+        if skip == '0': skip = '0pt'
+        if indent == '0': indent = '0pt'
+        try:
+            html_skip = convert_tex_length_to_html(skip)
+            html_indent = convert_tex_length_to_html(indent)
+        except LatexValueError:
+            raise BBCodeException(_("Unexpected attribute value."))
+        return (skip, indent) if is_latex else (html_skip, html_indent)
+
+    def to_html(self, token, converter):
+        skip, indent = self._check(token, converter, False)
+        converter.state.lengths_html['\\parskip'] = skip
+        converter.state.lengths_html['\\parindent'] = indent
+        return u""
+
+    def to_latex(self, token, converter):
+        skip, indent = self._check(token, converter, True)
+        return u"\\setlength{\\parskip}{%s}\n\\setlength{\\parindent}{%s}\n" % \
+                (skip, indent)
 
 
 # class BBCodeRef(BBCodeTag):
@@ -250,7 +291,7 @@ class BBCodeURL(BBCodeTag):
     def should_parse_content(self, token):
         # [url=...]...[/url --> parse normally
         # [url]...[/url] --> no parsing, read until [/url]
-        return token.attrs['url'] is not None
+        return dict(token.attrs)['url'] is not None
 
     def to_html(self, token, converter):
         if token.is_open():
@@ -260,7 +301,7 @@ class BBCodeURL(BBCodeTag):
                 return u'<a href="{}" rel="nofollow">{}</a>'.format(
                         xss.escape(token.content), xss.escape(token.content))
             return u'<a href="{}" rel="nofollow">'.format(
-                    xss.escape(token.attrs['url']))
+                    xss.escape(dict(token.attrs)['url']))
         return '</a>'
 
     def to_latex(self, token, converter):
@@ -271,7 +312,7 @@ class BBCodeURL(BBCodeTag):
                 # [url]...[/url]
                 return u'\\url{%s}' % latex_escape(token.content)
             # [url=...]
-            return u'\\href{%s}{' % latex_escape(token.attrs['url'])
+            return u'\\href{%s}{' % latex_escape(dict(token.attrs)['url'])
         # [/url]
         return '}'
 
@@ -283,6 +324,7 @@ bb_commands = {
                               '\\begin{center}', '\\end{center}'),
     'i': BBCodeContainer('<i>', '</i>', '\\textit{', '}'),
     'img': BBCodeImg(),
+    'par': BBCodePar(),
     # TODO: Quote for LaTeX.
     # TODO: Quote parameters.
     'quote': BBCodeContainer('<div class="mc-quote">', '</div>', '', ''),

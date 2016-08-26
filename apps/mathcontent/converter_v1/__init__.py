@@ -400,7 +400,7 @@ class Tokenizer(object):
 
         try:
             name, attrs, K = parse_bbcode(T, start)
-        except BBCodeException:
+        except BBCodeException as e:
             return TokenText(u"[")  # Just print it as a normal string.
         if name not in bb_commands:
             return TokenText(u"[")

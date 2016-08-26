@@ -356,23 +356,23 @@ class ConverterV1TestCase(TestCaseEx):
         self.assertTokenization("[unknown tag]",
                 [TokenText("["), TokenText("unknown tag"), TokenText("]")])
         self.assertTokenization("[b]bla[/b]", [
-                TokenBBCode('b', {'b': None}, 0, 3),
+                TokenBBCode('b', [('b', None)], 0, 3),
                 TokenText("bla"),
                 TokenBBCode('b', None, 6, 10),
         ])
         self.assertTokenization("[/b]bla[b bla=\"xy\\\"z\"]", [
                 TokenBBCode('b', None, 0, 4),
                 TokenText("bla"),
-                TokenBBCode('b', {'b': None, 'bla': "xy\"z"}, SKIP, SKIP),
+                TokenBBCode('b', [('b', None), ('bla', "xy\"z")], SKIP, SKIP),
         ])
 
         self.assertTokenization("[url=http://www.example.com/]title[/url]", [
-                TokenBBCode('url', {'url': 'http://www.example.com/'}, 0, SKIP),
+                TokenBBCode('url', [('url', 'http://www.example.com/')], 0, SKIP),
                 TokenText("title"),
                 TokenBBCode('url', None, SKIP, SKIP),
         ])
         self.assertTokenization("[url]http://www.example.com/[/url]", [
-                TokenBBCode('url', {'url': None}, 0, SKIP, "http://www.example.com/"),
+                TokenBBCode('url', [('url', None)], 0, SKIP, "http://www.example.com/"),
         ])
 
 
@@ -617,14 +617,12 @@ class ConverterV1TestCase(TestCaseEx):
                 "Second",
                 '<p class="mc-noindent">First'
                 '<p style="text-indent:2em;">Second')
-
         self.assertHTMLAutoLatex(
                 "\\setlength{\\parskip}{1.5in}"
                 "First\n\n"
                 "Second",
                 '<p class="mc-noindent" style="margin-top:1.5in;">First'
                 '<p class="mc-indent" style="margin-top:1.5in;">Second')
-
         self.assertHTMLAutoLatex(  # Test {...} scope.
                 "{"
                     "\\setlength{\\parindent}{2em}"
@@ -635,35 +633,59 @@ class ConverterV1TestCase(TestCaseEx):
                 '<p class="mc-noindent">First'
                 '<p style="text-indent:2em;">Second'
                 '<p class="mc-indent">Third')
+        self.assertHTMLLatex(  # Test {...} scope.
+                "{"
+                    "[par 1.5in 2em]"
+                    "First\n\n"
+                    "Second"
+                "}\n\n"
+                "Third",
+                '<p class="mc-noindent" style="margin-top:1.5in;">First'
+                '<p style="margin-top:1.5in;text-indent:2em;">Second'
+                '<p class="mc-indent">Third',
+                "{"
+                    "\\setlength{\\parskip}{1.5in}\n"
+                    "\\setlength{\\parindent}{2em}\n"
+                    "First\n\n"
+                    "Second"
+                "}\n\n"
+                "Third")
+        self.assertLatex("[par 12pt 13pt]",
+                         "\\setlength{\\parskip}{12pt}\n"
+                         "\\setlength{\\parindent}{13pt}\n")
+        self.assertLatex("[par 12adfs 13pt]", "[par 12adfs 13pt]")
+        self.assertLatex("[par 0 1em]",
+                         "\\setlength{\\parskip}{0pt}\n"
+                         "\\setlength{\\parindent}{1em}\n")
 
 
     def test_bbcode(self):
-        self.assertEqual(parse_bbcode("[b]", 0), ('b', {'b': None}, 3))
-        self.assertEqual(parse_bbcode("[b]bla", 0), ('b', {'b': None}, 3))
+        self.assertEqual(parse_bbcode("[b]", 0), ('b', [('b', None)], 3))
+        self.assertEqual(parse_bbcode("[b]bla", 0), ('b', [('b', None)], 3))
         self.assertEqual(parse_bbcode("[/b]bla", 0), ('b', None, 4))
         self.assertRaises(BBCodeException, lambda : parse_bbcode("[/b=5]", 0))
         self.assertRaises(BBCodeException, lambda : parse_bbcode("[/b asdf]", 0))
         self.assertEqual(
                 parse_bbcode("[asdf=bla]x", 0),
-                ('asdf', {'asdf': "bla"}, 10))
+                ('asdf', [('asdf', "bla")], 10))
         self.assertEqual(
                 parse_bbcode("[abc def=ghi]x", 0),
-                ('abc', {'abc': None, 'def': "ghi"}, 13))
+                ('abc', [('abc', None), ('def', "ghi")], 13))
         self.assertEqual(
                 parse_bbcode("[abc def=ghi asdf]x", 0),
-                ('abc', {'abc': None, 'def': "ghi", 'asdf': None}, 18))
+                ('abc', [('abc', None), ('def', "ghi"), ('asdf', None)], 18))
         self.assertEqual(
                 parse_bbcode("[abc def='ghi \\'asdf']x", 0),
-                ('abc', {'abc': None, 'def': "ghi 'asdf"}, 22))
+                ('abc', [('abc', None), ('def', "ghi 'asdf")], 22))
         self.assertRaises(
                 BBCodeException,
                 lambda : parse_bbcode("[abc def='ghi \\'as\\\\'df']x", 0))
         self.assertEqual(
                 parse_bbcode("[abc def=\"ghi a\\'\\\"sdf\"]x", 0),
-                ('abc', {'abc': None, 'def': "ghi a\\'\"sdf"}, 24))
+                ('abc', [('abc', None), ('def', "ghi a\\'\"sdf")], 24))
         self.assertEqual(
                 parse_bbcode("[abc def=\"][[]][\"]x", 0),
-                ('abc', {'abc': None, 'def': "][[]]["}, 18))
+                ('abc', [('abc', None), ('def', "][[]][")], 18))
 
         self.assertHTMLLatexNoPar(
                 "bla [b bla",

@@ -365,7 +365,7 @@ class LatexIncludeGraphics(Command):
         return u'<img src="{}" alt="Attachment {}" class="latex"{}>'.format(
                 xss.escape(attachment.get_url()),
                 xss.escape(filename),
-                img_params_to_html(params))
+                img_params_to_html(params.iteritems()))
 
 
 

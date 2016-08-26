@@ -70,7 +70,7 @@ def img_parse_length(value):
 def img_params_to_html(params):
     width = None
     height = None
-    for name, value in params.iteritems():
+    for name, value in params:
         name = name.lower()
         if name == 'width':
             width = img_parse_length(value)
