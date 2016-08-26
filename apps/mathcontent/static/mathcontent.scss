@@ -52,14 +52,14 @@ a.mc-viewsource-clipboard {
 }
 
 img.latex,
-img.latex_center,
+img.latex-center,
 object.latex,
-object.latex_center {
+object.latex-center {
   max-width: 100%;
 }
 
-img.latex_center,
-object.latex_center {
+img.latex-center,
+object.latex-center {
   display: block;
   margin: 6pt auto;
 }

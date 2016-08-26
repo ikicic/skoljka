@@ -47,8 +47,3 @@ def slugify(value):
         d and D.
     """
     return _slugify(value.replace(u'đ', u'd').replace(u'Đ', u'D'))
-
-
-def startswith_ex(T, start, string):
-    """As startswith, but with a specified start."""
-    return T[start:start + len(string)] == string

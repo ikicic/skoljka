@@ -5,7 +5,7 @@ from skoljka.libs import xss
 from mathcontent.converter_v1.basics import img_params_to_html, State, \
         COUNTER_EQUATION, COUNTER_FIGURE, test_eq
 from mathcontent.converter_v1.tokens import TokenError, TokenCommand, \
-        TOKEN_CLOSED_CURLY
+        TokenMath, TOKEN_CLOSED_CURLY
 
 
 class LatexValueError(Exception):
@@ -89,7 +89,7 @@ class Command(object):
         < > stands for [ ] or { }, and X for one of the following:
             P - parse ({} only)
             U - read as an URL ({} only)
-            S - read until ']', but escaping \\\\ and \\] ([] only)
+            S - read until ']' ([] only).
 
         Also, [...] brackets are treated as optional parameters."""
 
@@ -125,7 +125,7 @@ class Command(object):
             return _parse_argument__url(tokenizer)
         if method == 'S':
             assert open == '[' and closed == ']'
-            return tokenizer.read_until(']', [r'\\', r'\]'])
+            return tokenizer.read_until(']', [])
 
     def apply_command(self, tokenizer, name, args, whitespace):
         """Manually add states or control tokenizer, or return tokens to be
@@ -181,7 +181,10 @@ class LatexBegin(Command):
     def apply_command(self, tokenizer, name, args, whitespace):
         """Simply add itself to the current state."""
         if args[0] not in latex_environments:
-            return TokenError(_("Unknown LaTeX environment."), args[0])
+            latex = tokenizer.read_until('\\end{%s}' % args[0], [r'\\'])
+            latex = '\\begin{%s}%s\\end{%s}' % (args[0], latex, args[0])
+            return TokenMath('%s', latex)
+            # return TokenError(_("Unknown LaTeX environment."), args[0])
 
         # Generate new LatexEnvironment instance.
         environment = latex_environments[args[0]]()
@@ -609,7 +612,7 @@ latex_commands = {
 
 latex_environments = {
     'center': latex_environment_div_factory('mc-center'),
-    'equation': None, # LatexEnvironmentEquation(),
+    # 'equation': None, # LatexEnvironmentEquation(),
     'figure': LatexEnvironmentFigure,
     'flushleft': latex_environment_div_factory('mc-flushleft'),
     'flushright': latex_environment_div_factory('mc-flushright'),

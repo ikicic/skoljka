@@ -279,7 +279,7 @@ def _handle_latex_html(cnt, latex):
         if inline:
             img = '<img src="%s" alt="%s" class="latex" style="vertical-align:%dpx">' % (url, latex_escaped, -latex_element.depth)
         else:
-            img = '<img src="%s" alt="%s" class="latex_center">' % (url, latex_escaped)
+            img = '<img src="%s" alt="%s" class="latex-center">' % (url, latex_escaped)
 
         return img
 
@@ -292,7 +292,7 @@ def _handle_latex_html(cnt, latex):
     #     if inline:
     #         obj = '<object data="%s" type="image/svg+xml" alt="%s" class="latex" style="vertical-align:%fpt"></object>' % (url, latex_escaped, -depth)
     #     else:
-    #         obj = '<object data="%s" type="image/svg+xml" alt="%s" class="latex_center"></object>' % (url, latex_escaped)
+    #         obj = '<object data="%s" type="image/svg+xml" alt="%s" class="latex-center"></object>' % (url, latex_escaped)
 
     #     # out.append(obj)
 

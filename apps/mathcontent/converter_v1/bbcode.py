@@ -9,6 +9,7 @@ from mathcontent.converter_v1.basics import img_parse_length, \
 class BBCodeException(Exception):
     pass
 
+
 class BBUnexpectedParameters(BBCodeException):
     def __init__(self, param=None):
         if param is None:

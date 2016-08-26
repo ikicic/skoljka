@@ -1,7 +1,6 @@
 from django.utils.translation import ugettext as _
 
 from skoljka.libs import flatten_ignore_none, xss
-from skoljka.libs.string_operations import startswith_ex
 
 from mathcontent.models import ERROR_DEPTH_VALUE, IMG_URL_PATH, TYPE_HTML, \
         TYPE_LATEX
@@ -27,6 +26,8 @@ import copy
 import re
 
 
+# FIXME: Converter crashes if $??$ from \ref{...} not already generated and
+# appears multiple times in the text.
 
 # TODO: Paragraphs!
 #  E.g. [center]...[/center] should be equal to \begin{center}...\end{center}.
@@ -56,54 +57,12 @@ import re
 # MAYBE: \begin{comment}...\end{comment} with \usepackage{verbatim}
 
 
-ROOT_BLOCK_NAME = 'root'
-
 RE_ASCII_ALPHA_SINGLE_CHAR = re.compile('[a-zA-Z]')
 _NT__READ_TEXT__END_CHAR = set('{}[]$\n\r\\%')
 
 
-# TODO: Handle exceptions.
 class ParserInternalError(Exception):
     pass
-
-
-########################################################
-# General helper functions.
-########################################################
-
-# def read_until(T, i, begin_pattern, end_pattern):
-#     """Return everything until the matching end_pattern. Final index
-#     points at the first character of the pattern.
-#
-#     Set begin_pattern to None to disable depth counting (i.e. recursive
-#     commands).
-#
-#     Returns (i, content)."""
-#     start = i
-#     depth = 1
-#     while i < len(T):
-#         current = T[i];
-#         if current == end_pattern[0] and \
-#                 startswith_ex(T, i, end_pattern):
-#             if depth == 1:
-#                 return i, T[start:i]
-#             depth -= 1
-#         elif begin_pattern and current == begin_pattern[0] and \
-#                 startswith_ex(T, i, begin_pattern):
-#             depth += 1
-#         elif startswith_ex(T, i, '\\url{'):
-#             # This fixes just a single case where % doesn't actually
-#             # represent a comment.
-#             i, dummy = self.read_until_curly_brace(
-#                     i + len('\\url{'), comments_enabled=False)
-#         elif current == '%':
-#             while i < len(T) and T[i] not in '\r\n':
-#                 i += 1
-#         elif current == '\\':
-#             i += 2
-#         else:
-#             i += 1
-#     raise ParseError(_("Matching \"%s\" not found.") % end_pattern)
 
 
 ########################################################
@@ -270,7 +229,7 @@ class Tokenizer(object):
     def read_until(self, end, skip_patterns):
         """Read everything until `end` is reached. Skips all patterns in the
         list `skip_patterns`. The result doesn't contain `end`, but `end` itself
-        is skipped.
+        is skipped. Skips comments, but includes them in the return value.
 
         Low-level, doesn't use next_token."""
         # self._last_token = False
@@ -281,6 +240,11 @@ class Tokenizer(object):
         start = K
         while K < len(T) and T[K : K + len(end)] != end:
             jump = 1
+            if T[K] == '%':
+                self.K = K
+                self._nt__read_comment()
+                K = self.K
+                continue
             for pattern in skip_patterns:
                 if T[K : K + len(pattern)] == pattern:
                     jump = len(pattern)
@@ -290,6 +254,7 @@ class Tokenizer(object):
             raise ParseError(_("Ending not found:") + " " + end)
         self.K = K + len(end)
         return T[start : K]
+
 
     def handle_math_mode(self):
         """Handle $...$, $$...$$, \(...\), \[...\] and $$$ ... $$$."""
@@ -541,7 +506,7 @@ class Tokenizer(object):
 
 def get_latex_html(latex_element):
     """Given LatexElement instance generate <img> HTML."""
-    inline = format in ['$%s$', '\(%s\)']
+    inline = latex_element.format in ['$%s$', '\(%s\)']
     latex_escaped = xss.escape(latex_element.text)
     depth = latex_element.depth
 
@@ -571,7 +536,7 @@ def get_latex_html(latex_element):
     #     if inline:
     #         obj = '<object data="%s" type="image/svg+xml" alt="%s" class="latex" style="vertical-align:%fpt"></object>' % (url, latex_escaped, -depth)
     #     else:
-    #         obj = '<object data="%s" type="image/svg+xml" alt="%s" class="latex_center"></object>' % (url, latex_escaped)
+    #         obj = '<object data="%s" type="image/svg+xml" alt="%s" class="latex-center"></object>' % (url, latex_escaped)
     return img
 
 
@@ -595,8 +560,12 @@ class _BBTemporaryOpenTag(object):
 
 
 class Converter(object):
+    ERRORS_DISABLED = 0
+    ERRORS_ENABLED = 1
+    ERRORS_TESTING = 2
+
     def __init__(self, tokens, tokenizer, attachments=None,
-            errors_enabled=True, paragraphs_disabled=False):
+            errors_mode=True, paragraphs_disabled=False):
         # TODO: attachments_path
         # TODO: url_prefix (what is this?)
 
@@ -608,7 +577,7 @@ class Converter(object):
         self.maths = None
         self.attachments = attachments
         self.attachments_dict = {x.get_filename(): x for x in attachments or []}
-        self.errors_enabled = errors_enabled
+        self.errors_mode = errors_mode
         self.paragraphs_disabled = paragraphs_disabled
 
         self.generate_png__func = generate_png
@@ -717,10 +686,12 @@ class Converter(object):
 
     def convert_to_html(self):
         tokens = self._pre_convert_to_html()
-        if self.errors_enabled:
+        if self.errors_mode == Converter.ERRORS_ENABLED:
             error_func = lambda token: u'<span class="mc-error">' \
                     u'<span class="mc-error-source">{}</span> {}</span>'.format(
                         token.content, token.error_message)
+        elif self.errors_mode == Converter.ERRORS_TESTING:
+            error_func = lambda token: u"<<ERROR>>"
         else:
             error_func = lambda token: u""
 
@@ -814,9 +785,11 @@ class Converter(object):
 
     def convert_to_latex(self):
         output = []
-        if self.errors_enabled:
+        if self.errors_mode == Converter.ERRORS_ENABLED:
             error_func = lambda token: "\\textbf{%s} %s" % \
                     (token.error_message, token.content)
+        elif self.errors_mode == Converter.ERRORS_TESTING:
+            error_func = lambda token: u"<<ERROR>>"
         else:
             error_func = lambda token: u""
         for token in self.tokens:

@@ -273,11 +273,8 @@ class ConverterV1TestCase(TestCaseEx):
                 TokenCommand('end', 0,
                     ['center', LatexEnvironmentDiv('mc-center')], ['']),
         ])
-        self.assertTokenization(
-            "\\begin{asdf}bla\\end{asdf}", [
-                TokenError(SKIP, 'asdf'),
-                TokenText("bla"),
-                TokenError(SKIP, ''),
+        self.assertTokenization("\\begin{asdf}bla\\end{asdf}", [
+                TokenMath('%s', "\\begin{asdf}bla\\end{asdf}")
         ])
 
         # Test empty {}.
@@ -459,10 +456,28 @@ class ConverterV1TestCase(TestCaseEx):
         self.assertHTMLAutoLatexNoPar("bla\\~{}asdf", "bla~asdf")
 
         # Begin commands.
-        self.assertHTMLAutoLatexNoPar("\\begin{center}\\textbf{bla}\\end{center}",
-                        '<div class="mc-center"><b>bla</b></div>')
-        self.assertHTMLAutoLatexNoPar("\\begin\n{center}\\textbf  {bla}\\end \n{center}",
-                        '<div class="mc-center"><b>bla</b></div>')
+        self.assertHTMLAutoLatexNoPar(
+                "\\begin{center}\\textbf{bla}\\end{center}",
+                '<div class="mc-center"><b>bla</b></div>')
+        self.assertHTMLAutoLatexNoPar(
+                "\\begin\n{center}\\textbf  {bla}\\end \n{center}",
+                '<div class="mc-center"><b>bla</b></div>')
+        self.assertHTMLAutoLatexNoPar(
+                "\\begin{xyz}something\\end{xyz}",
+                "<<%s||\\begin{xyz}something\\end{xyz}>>")
+        self.assertHTMLAutoLatexNoPar(
+                "\\begin{xyz}something\\\\end{xyz}\\end{xyz}",
+                "<<%s||\\begin{xyz}something\\\\end{xyz}\\end{xyz}>>")
+        self.assertHTMLLatexNoPar(
+                "\\begin{xyz}\\textbf{sar%ma}\\end{xyz}",
+                "<<ERROR>>",  # \\end is in the comment.
+                "<<ERROR>>",
+                converter_kwargs={'errors_mode': Converter.ERRORS_TESTING})
+        self.assertHTMLLatexNoPar(
+                "\\begin{xyz}\\url{sar%ma}\\end{xyz}",
+                "<<ERROR>>",  # SIMPLIFICATION MARK. Do not complicate with %.
+                "<<ERROR>>",
+                converter_kwargs={'errors_mode': Converter.ERRORS_TESTING})
         # Math mode.
         self.assertHTMLAutoLatexNoPar("$a+b$", "<<$%s$||a+b>>")
         self.assertHTMLAutoLatexNoPar("\(a+b\)", "<<\(%s\)||a+b>>")
@@ -512,12 +527,13 @@ class ConverterV1TestCase(TestCaseEx):
                 ''
                 '<div class="mc-figure mc-center">'
                 '<img src="/mock/second.png" alt="Attachment second.png" class="latex">'
+                '<<ERROR>>'
                 '<div class="mc-caption"><span class="mc-caption-tag">Slika 2:</span> Another caption here.</div>'
                 '</div>'
                 ''
                 'First: <<$%s$||1>>'
                 'Second: <<$%s$||??>>',
-                converter_kwargs={'errors_enabled': False})
+                converter_kwargs={'errors_mode': Converter.ERRORS_TESTING})
 
     # # def test_bla(self):
     # #     #self.assertHTMLAutoLatexNoPar("", "")
@@ -753,6 +769,14 @@ class ConverterV1TestCase(TestCaseEx):
                 "\[bla\]",
                 "<<\[%s\]||bla>>",
                 "\[bla\]")
+        self.assertHTMLLatexNoPar(
+                "$$ asdf % commented out $$",
+                "<<ERROR>>",
+                "<<ERROR>>",
+                converter_kwargs={'errors_mode': Converter.ERRORS_TESTING})
+        self.assertHTMLAutoLatexNoPar(
+                "$$ asdf % commented out $$\n$$",
+                "<<$$%s$$|| asdf % commented out $$\n>>")
 
     # def test_labels(self):
     #     """Test \\label and \\ref."""
