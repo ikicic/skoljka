@@ -19,8 +19,10 @@ def help_format(request):
     INFO_FORMAT = u" <span style=\"color:gray;font-style:italic;\">{}</span>"
     PARTIAL = INFO_FORMAT.format(_("Partially supported."))
     INCOMPATIBLE = INFO_FORMAT.format(_("Possibly incompatible behavior."))
+    VISUALLY_DIFFERENT = INFO_FORMAT.format(
+            _("Visually different than when exported to PDF."))
     commands = [
-        _("Basic commands"),
+        _("Basic Commands"),
         ('\\emph', _("Emphasized text (usually italic)"), "\\emph{TEXT}"),
         ('\\textbf', _("Bold"), "\\textbf{TEXT}"),
         ('\\textit', _("Italic"), "\\textit{TEXT}"),
@@ -30,8 +32,11 @@ def help_format(request):
             _("Underline and disable word-wrap. "
                 "It's recommended to use <code>\\uline</code> instead."),
             "\\underline{TEXT}"), # a)
+        ('\\texttt', _("Monospace font.") + VISUALLY_DIFFERENT,
+            "\\texttt{TEXT}"),
         ('\\\\', _("Newline") + INCOMPATIBLE, "a\\\\b"),
-        _("Advanced commands"),
+
+        _("Advanced Commands"),
         ('\\includegraphics', _("Show the given image.") + PARTIAL, ""),  # b)
         ('\\caption', _("Figure caption."), ""),      # b)
         ('\\centering', _("Figure centering."), ""),  # b)
@@ -53,7 +58,8 @@ def help_format(request):
             "\\setlength{\\parskip}{3em}\n\n"
             "First paragraph\n\n"
             "Second paragraph"),
-        _("Other commands"),
+
+        _("Other Commands"),
         ("\\fbox",
             _("Framed box with disabled word-wrap.")
             + " " + _("Please don't misuse."),
@@ -73,6 +79,23 @@ def help_format(request):
         ("\\%", _("Symbol %s.") % '%', None),
         ("\\{", _("Symbol %s.") % '{', None),
         ("\\}", _("Symbol %s.") % '}', None),
+
+        _("LaTeX Environments"),
+        ("\\begin{center}...\\end{center}", _("Centering."),
+                "\\begin{center}TEXT\\end{center}"),
+        ("\\begin{figure}...\\end{figure}",
+                _("Figure, used for inserting images."), ""),
+        ("\\begin{flushleft}...\\end{flushleft}", "",
+                "\\begin{flushleft}TEXT\\\\TEXT TEXT\\end{flushleft}"),
+        ("\\begin{flushright}...\\end{flushright}", "",
+                "\\begin{flushright}TEXT\\\\TEXT TEXT\\end{flushright}"),
+        ("\\begin{verbatim}...\\end{verbatim}",
+                _("Pre-formatted text.") + VISUALLY_DIFFERENT,
+                "\\begin{verbatim}a = b + c\n  = c + b\\end{verbatim}"),
+        ("\\begin{verbatim*}...\\end{verbatim*}",
+                _("Similar to <code>verbatim</code>, where spaces are shown "
+                    "as &blank;.") + VISUALLY_DIFFERENT,
+                "\\begin{verbatim*}a = b + c\n  = c + b\\end{verbatim*}"),
     ]
 
     bbcode_commands = [
@@ -80,6 +103,7 @@ def help_format(request):
         ('[i]...[/i]', _("Italic"), "[i]TEXT[/i]"),
         ('[s]...[/s]', _("Strikethrough"), "[s]TEXT[/s]"),
         ('[u]...[/u]', _("Underline"), "[u]TEXT[/u]"),
+        ('[code]...[/code]', _("Code"), "[code]TEXT[/code]"),
         ('[par SKIP INDENT]',
             _("Shorthand for <code>\\setlength{\\parskip}{SKIP} "
                 "\\setlength{\\parindent}{INDENT}</code>. "
@@ -100,8 +124,7 @@ def help_format(request):
             "[url=http://www.google.com/]Google[/url]")
     ]
 
-    # TODO: a) Document what's the difference.
-    # TODO: b) Write an example.
+    # TODO: Write an example.
 
     def _replace_text(text):
         return text.replace('TEXT', _("Some text here."))

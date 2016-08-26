@@ -753,7 +753,7 @@ class Converter(object):
                 css_style = ""
                 parskip = state.lengths_html['\\parskip']
                 if parskip is not None:
-                    # It seems to be top, not bottom that's affected.
+                    # It seems to be the top, not the bottom that's affected.
                     css_style += "margin-top:{};".format(parskip)
 
                 if indent:
@@ -808,7 +808,7 @@ class Converter(object):
                 except LatexValueError as e:
                     output.append(TokenError(e.message, '\\' + token.command))
             elif isinstance(token, TokenBBCode):
-                output.append(self.process_bb(token, TYPE_HTML))
+                add_content_par(self.process_bb(token, TYPE_HTML))
             else:
                 raise NotImplementedError(repr(token))
         return self.finalize_output(output, error_func)

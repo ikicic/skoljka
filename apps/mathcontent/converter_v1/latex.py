@@ -622,12 +622,12 @@ class LatexEnvironmentVerbatim(LatexEnvironment, _LatexEnvironmentReadUntil):
 
     def to_html(self, begin, token, converter):
         env_name = token.args[0]
-        content = token.args[2]
+        content = xss.escape(token.args[2])
         if env_name == 'verbatim*':
             content = content.replace(' ', '&blank;')
         converter.state.is_in_paragraph = False
         converter.state.indent_next = False
-        return '<pre class="mc-verbatim">{}</pre>'.format(xss.escape(content))
+        return '<pre class="mc-verbatim">{}</pre>'.format(content)
 
 
 ########################################################
@@ -661,6 +661,7 @@ latex_commands = {
     'textbackslash': LatexSpecialSymbol('\\'),
     'textbf': LatexContainer('<b>', '</b>'),
     'textit': LatexContainer('<i>', '</i>'),
+    'texttt': LatexContainer('<code>', '</code>'),
     'uline': LatexContainer('<u>', '</u>'),
     'underline': LatexContainer('<span class="mc-underline">', '</span>'),
     'url': LatexURL(),

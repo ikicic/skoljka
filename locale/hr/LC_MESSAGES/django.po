@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-26 17:55+0200\n"
-"PO-Revision-Date: 2016-08-26 17:56+0200\n"
+"POT-Creation-Date: 2016-08-26 18:43+0200\n"
+"PO-Revision-Date: 2016-08-26 18:43+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -24,30 +24,34 @@ msgid "Possibly incompatible behavior."
 msgstr "Moguće nekompatilno ponašanje."
 
 #: apps/base/help.py:23
-msgid "Basic commands"
+msgid "Visually different than when exported to PDF."
+msgstr "Vizualno drugačije nego kad se pretvori u PDF."
+
+#: apps/base/help.py:25
+msgid "Basic Commands"
 msgstr "Osnovne naredbe"
 
-#: apps/base/help.py:24
+#: apps/base/help.py:26
 msgid "Emphasized text (usually italic)"
 msgstr "Naglašeni tekst (obično italic)"
 
-#: apps/base/help.py:25 apps/base/help.py:79
+#: apps/base/help.py:27 apps/base/help.py:101
 msgid "Bold"
 msgstr "Bold"
 
-#: apps/base/help.py:26 apps/base/help.py:80
+#: apps/base/help.py:28 apps/base/help.py:102
 msgid "Italic"
 msgstr "Italic"
 
-#: apps/base/help.py:27 apps/base/help.py:81
+#: apps/base/help.py:29 apps/base/help.py:103
 msgid "Strikethrough"
 msgstr "Precrtano"
 
-#: apps/base/help.py:28 apps/base/help.py:82
+#: apps/base/help.py:30 apps/base/help.py:104
 msgid "Underline"
 msgstr "Podcrtano"
 
-#: apps/base/help.py:30
+#: apps/base/help.py:32
 msgid ""
 "Underline and disable word-wrap. It's recommended to use <code>\\uline</"
 "code> instead."
@@ -55,40 +59,44 @@ msgstr ""
 "Podcrtano s isključenim prijelomom teksta. Preporučeno je koristiti umjesto "
 "toga <code>\\uline</code>."
 
-#: apps/base/help.py:33
+#: apps/base/help.py:35
+msgid "Monospace font."
+msgstr "Monospace font."
+
+#: apps/base/help.py:37
 msgid "Newline"
 msgstr "Novi red"
 
-#: apps/base/help.py:34
-msgid "Advanced commands"
+#: apps/base/help.py:39
+msgid "Advanced Commands"
 msgstr "Napredne naredbe"
 
-#: apps/base/help.py:35
+#: apps/base/help.py:40
 msgid "Show the given image."
 msgstr "Prikaži zadanu sliku."
 
-#: apps/base/help.py:36
+#: apps/base/help.py:41
 msgid "Figure caption."
 msgstr "Opis slike"
 
-#: apps/base/help.py:37
+#: apps/base/help.py:42
 msgid "Figure centering."
 msgstr "Centriranje slike"
 
-#: apps/base/help.py:38
+#: apps/base/help.py:43
 msgid "Set figure or equation label."
 msgstr "Postavi oznaku slike ili jednadžbe."
 
-#: apps/base/help.py:39
+#: apps/base/help.py:44
 msgid "Given a label, show a link to the related content."
 msgstr "Link na sadržaj označen zadanom oznakom."
 
-#: apps/base/help.py:41 apps/base/help.py:42 apps/base/help.py:98
-#: apps/base/help.py:99
+#: apps/base/help.py:46 apps/base/help.py:47 apps/base/help.py:121
+#: apps/base/help.py:122
 msgid "Link"
 msgstr "Link"
 
-#: apps/base/help.py:44
+#: apps/base/help.py:49
 msgid ""
 "Set value of the given length command. Currently, only <code>\\parindent</"
 "code> and <code>\\parskip</code> are supported, representing indentation "
@@ -98,11 +106,11 @@ msgstr ""
 "\\parindent</code> i <code>\\parskip</code>, koji predstavljaju uvlačenje i "
 "gornju marginu paragrafa (razmak između paragrafa)."
 
-#: apps/base/help.py:48
+#: apps/base/help.py:53
 msgid "Note that the first paragraph is not indented."
 msgstr "Primijetite da prvi paragraf nije uvučen."
 
-#: apps/base/help.py:49
+#: apps/base/help.py:54
 msgid ""
 "The default values are <code>1pt</code> for <code>\\parskip</code> and "
 "<code>1em</code> for <code>\\parlength</code>."
@@ -110,34 +118,59 @@ msgstr ""
 "Početne vrijednosti su <code>1pt</code> za <code>\\parskip</code> i "
 "<code>1em</code> za <code>\\parlength</code>."
 
-#: apps/base/help.py:56
-msgid "Other commands"
+#: apps/base/help.py:62
+msgid "Other Commands"
 msgstr "Ostale naredbe"
 
-#: apps/base/help.py:58
+#: apps/base/help.py:64
 msgid "Framed box with disabled word-wrap."
 msgstr "Uokviren tekst s isključenim prijelomom teksta."
 
-#: apps/base/help.py:59 apps/base/help.py:63 apps/base/help.py:96
+#: apps/base/help.py:65 apps/base/help.py:69 apps/base/help.py:119
 msgid "Please don't misuse."
 msgstr "Molimo nemojte zloupotrebljavati."
 
-#: apps/base/help.py:62
+#: apps/base/help.py:68
 msgid "Disabled word-wrap."
 msgstr "Isključen prijelom teksta."
 
-#: apps/base/help.py:67 apps/base/help.py:68 apps/base/help.py:69
-#: apps/base/help.py:70 apps/base/help.py:73 apps/base/help.py:74
-#: apps/base/help.py:75
+#: apps/base/help.py:73 apps/base/help.py:74 apps/base/help.py:75
+#: apps/base/help.py:76 apps/base/help.py:79 apps/base/help.py:80
+#: apps/base/help.py:81
 #, python-format
 msgid "Symbol %s."
 msgstr "Simbol %s."
 
-#: apps/base/help.py:71
+#: apps/base/help.py:77
 msgid "Soft hyphen, shown in HTML as <pre>&amp;shy;</pre>."
 msgstr "Tzv. <i>soft hyphen</i>, prikazan u HTML-u kao <pre>&amp;shy;</pre>."
 
+#: apps/base/help.py:83
+msgid "LaTeX Environments"
+msgstr "LaTeX Environments"
+
 #: apps/base/help.py:84
+msgid "Centering."
+msgstr "Centriranje."
+
+#: apps/base/help.py:87
+msgid "Figure, used for inserting images."
+msgstr "Za ubacivanje slika."
+
+#: apps/base/help.py:92
+msgid "Pre-formatted text."
+msgstr "Unaprijed formatiran tekst."
+
+#: apps/base/help.py:95
+msgid "Similar to <code>verbatim</code>, where spaces are shown as &blank;."
+msgstr ""
+"Slično <code>verbatim</code>, samo što se razmaci prikazuju kao &blank;."
+
+#: apps/base/help.py:105
+msgid "Code"
+msgstr "Kod"
+
+#: apps/base/help.py:107
 msgid ""
 "Shorthand for <code>\\setlength{\\parskip}{SKIP} \\setlength{\\parindent}"
 "{INDENT}</code>. Value <code>0</code> is treated as <code>0pt</code>."
@@ -145,15 +178,16 @@ msgstr ""
 "Kratica za <code>\\setlength{\\parskip}{SKIP} \\setlength{\\parindent}"
 "{INDENT}</code>. Vrijednost <code>0</code> se tretira kao <code>0pt</code>."
 
-#: apps/base/help.py:89
+#: apps/base/help.py:112
 msgid "Preformatted text. Simulates LaTeX environment <code>verbatim</code>."
-msgstr "Unaprijed formatiran tekst. Simulira <code>verbatim</code> LaTeX environment."
+msgstr ""
+"Unaprijed formatiran tekst. Simulira <code>verbatim</code> LaTeX environment."
 
-#: apps/base/help.py:92
+#: apps/base/help.py:115
 msgid "Quote"
 msgstr "Citat"
 
-#: apps/base/help.py:95
+#: apps/base/help.py:118
 msgid ""
 "Show the attachment #x, counting from 1. Optionally, specify the width and "
 "height."
@@ -161,7 +195,7 @@ msgstr ""
 "Prikaži priloženu sliku #x, brojeći od 1. Po želji se mogu specificirati "
 "duljina i visina slike."
 
-#: apps/base/help.py:107
+#: apps/base/help.py:129
 msgid "Some text here."
 msgstr "Neki tekst."
 

@@ -83,6 +83,10 @@ object.latex-center {
   white-space: nowrap;
 }
 
+.mc-flushright {
+  text-align: right;
+}
+
 .mc-indent {
   // Default is 15pt, 17pt, 17.68pt for 10pt, 11pt, 12pt document size.
   text-indent: 1em;

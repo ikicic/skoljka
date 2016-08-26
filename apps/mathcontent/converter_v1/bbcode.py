@@ -342,6 +342,7 @@ bb_commands = {
     'b': BBCodeContainer('<b>', '</b>', '\\textbf{', '}'),
     'center': BBCodeContainer('<div class="mc-center">', '</div>',
                               '\\begin{center}', '\\end{center}'),
+    'code': BBCodeContainer('<code>', '</code>', '\\texttt{', '}'),
     'i': BBCodeContainer('<i>', '</i>', '\\textit{', '}'),
     'img': BBCodeImg(),
     'par': BBCodePar(),

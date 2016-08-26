@@ -459,6 +459,9 @@ class ConverterV1TestCase(TestCaseEx):
         self.assertHTMLAutoLatexNoPar("\\textbf{bla bla bla}", "<b>bla bla bla</b>")
         self.assertHTMLAutoLatexNoPar("\\textit{bla bla bla}", "<i>bla bla bla</i>")
         self.assertHTMLAutoLatexNoPar(
+                "\\texttt{bla bla bla}",
+                "<code>bla bla bla</code>")
+        self.assertHTMLAutoLatexNoPar(
                 "\\underline{underlined with nowrap}",
                 '<span class="mc-underline">underlined with nowrap</span>')
         self.assertHTMLAutoLatexNoPar("asdf \\sout{bla bla} qwerty \\uline{asdf}",
@@ -495,6 +498,9 @@ class ConverterV1TestCase(TestCaseEx):
         self.assertHTMLAutoLatexNoPar(
                 "\\begin{verbatim}<xss check>\\end{verbatim}",
                 '<pre class="mc-verbatim">&lt;xss check&gt;</pre>')
+        self.assertHTMLAutoLatexNoPar(
+                "\\begin{verbatim*}<xss check>  asdf\\end{verbatim*}",
+                '<pre class="mc-verbatim">&lt;xss&blank;check&gt;&blank;&blank;asdf</pre>')
 
         # Math mode.
         self.assertHTMLAutoLatexNoPar("$a+b$", "<<$%s$||a+b>>")
@@ -567,6 +573,13 @@ class ConverterV1TestCase(TestCaseEx):
         self.assertHTMLAutoLatex(
                 "bla",
                 '<p class="mc-noindent">bla')
+        self.assertHTMLAutoLatex(
+                "\\textbf{bla}",
+                '<p class="mc-noindent"><b>bla</b>')
+        self.assertHTMLLatex(
+                "[b]bla[/b]",
+                '<p class="mc-noindent"><b>bla</b>',
+                "\\textbf{bla}")
         self.assertHTMLAutoLatex(
                 "first  \n \n \n\n  second \n\n third",
                 '<p class="mc-noindent">first'
@@ -759,6 +772,10 @@ class ConverterV1TestCase(TestCaseEx):
                 "[pre]<xss check>[/pre]",
                 '<pre class="mc-verbatim">&lt;xss check&gt;</pre>',
                 "\\begin{verbatim}<xss check>\\end{verbatim}\n")
+        self.assertHTMLLatexNoPar(
+                "The variable [code]x[/code].",
+                "The variable <code>x</code>.",
+                "The variable \\texttt{x}.")
         self.assertHTMLLatexNoPar(
                 "[img attachment=1]",
                 '<img src="/mock/first.png" alt="Attachment #1" class="latex">',
