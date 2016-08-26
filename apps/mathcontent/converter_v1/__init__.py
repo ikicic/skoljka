@@ -36,8 +36,6 @@ import re
 # TODO: \newline
 # TODO: \par
 # TODO: Quotation marks ``text'' and `text' for HTML.
-# TODO: -, -- (en-dash), --- (em-dash) and other ligatures
-# TODO: Fig.~5  --> &nbsp;
 # TODO: \begin{enumerate} \item ... \end{enumerate}
 # TODO: \begin{itemize} \item ... \end{itemize}
 # TODO: \begin{description} \item[bla] ... \end{description}
@@ -787,7 +785,7 @@ class Converter(object):
                 element = self.maths[(token.format, token.content)]
                 add_content_par(self.get_latex_html__func(element))
             elif isinstance(token, TokenText):
-                add_content_par(xss.escape(token.text))
+                add_content_par(xss.escape(token.text).replace('~', '&nbsp;'))
             elif isinstance(token, TokenSimpleWhitespace):
                 output.append(" ")  # Single whitespace is enough.
             elif isinstance(token, TokenMultilineWhitespace):

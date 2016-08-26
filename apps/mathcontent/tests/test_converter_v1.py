@@ -150,6 +150,7 @@ class ConverterV1TestCase(TestCaseEx):
     def test_tokenization(self):
         self.assertTokenization("bla", [TokenText("bla")])
         self.assertTokenization("bla  bla", [TokenText("bla  bla")])
+        self.assertTokenization("bla~bla", [TokenText("bla~bla")])
         self.assertTokenization("bla\n  bla", [
                 TokenText("bla"),
                 TokenSimpleWhitespace("\n  "),
@@ -383,6 +384,7 @@ class ConverterV1TestCase(TestCaseEx):
         # Newlines are always seperated as TokenSimpleWhitespace, which then
         # is replaced with a single whitespace (for HTML that is enough).
         self.assertHTMLAutoLatexNoPar("bla", "bla")
+        self.assertHTMLAutoLatexNoPar("bla~bla", "bla&nbsp;bla")
         self.assertHTMLAutoLatexNoPar("bla\nbla", "bla bla")
         self.assertHTMLAutoLatexNoPar("bla\n\nbla", "bla<br>bla")
         self.assertHTMLAutoLatexNoPar("bla  \n\n  bla", "bla<br>bla")
