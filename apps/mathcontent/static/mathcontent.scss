@@ -110,3 +110,8 @@ object.latex-center {
   // This implementation simplifies testing.
   margin-top: 0 !important;
 }
+
+.mc-verbatim {
+  display: block;
+  margin: 1em 0;
+}

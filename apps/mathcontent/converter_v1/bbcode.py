@@ -188,6 +188,26 @@ class BBCodeContainer(BBCodeTag):
 
 
 
+class BBCodeNoParseContainer(BBCodeContainer):
+    def __init__(self, html_open, html_close, latex_open, latex_close):
+        super(BBCodeNoParseContainer, self).__init__(
+                html_open, html_close, latex_open, latex_close)
+
+    def should_parse_content(self, token):
+        return False
+
+    def to_html(self, token, converter):
+        if len(token.attrs) != 1 or token.attrs[0][1] is not None:
+            raise BBUnexpectedParameters()
+        return self.html_open + xss.escape(token.content) + self.html_close
+
+    def to_latex(self, token, converter):
+        if len(token.attrs) != 1 or token.attrs[0][1] is not None:
+            raise BBUnexpectedParameters()
+        return self.latex_open + token.content + self.latex_close
+
+
+
 class BBCodeImg(BBCodeTag):
     def __init__(self):
         super(BBCodeImg, self).__init__(has_close_tag=False)
@@ -325,6 +345,9 @@ bb_commands = {
     'i': BBCodeContainer('<i>', '</i>', '\\textit{', '}'),
     'img': BBCodeImg(),
     'par': BBCodePar(),
+    'pre': BBCodeNoParseContainer(
+            '<pre class="mc-verbatim">', '</pre>',
+            '\\begin{verbatim}', '\\end{verbatim}\n'),  # The \n is important!
     # TODO: Quote for LaTeX.
     # TODO: Quote parameters.
     'quote': BBCodeContainer('<div class="mc-quote">', '</div>', '', ''),

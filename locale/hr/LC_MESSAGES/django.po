@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-26 15:19+0200\n"
-"PO-Revision-Date: 2016-08-26 15:19+0200\n"
+"POT-Creation-Date: 2016-08-26 17:55+0200\n"
+"PO-Revision-Date: 2016-08-26 17:56+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -83,8 +83,8 @@ msgstr "Postavi oznaku slike ili jednadžbe."
 msgid "Given a label, show a link to the related content."
 msgstr "Link na sadržaj označen zadanom oznakom."
 
-#: apps/base/help.py:41 apps/base/help.py:42 apps/base/help.py:94
-#: apps/base/help.py:95
+#: apps/base/help.py:41 apps/base/help.py:42 apps/base/help.py:98
+#: apps/base/help.py:99
 msgid "Link"
 msgstr "Link"
 
@@ -118,7 +118,7 @@ msgstr "Ostale naredbe"
 msgid "Framed box with disabled word-wrap."
 msgstr "Uokviren tekst s isključenim prijelomom teksta."
 
-#: apps/base/help.py:59 apps/base/help.py:63 apps/base/help.py:92
+#: apps/base/help.py:59 apps/base/help.py:63 apps/base/help.py:96
 msgid "Please don't misuse."
 msgstr "Molimo nemojte zloupotrebljavati."
 
@@ -145,11 +145,15 @@ msgstr ""
 "Kratica za <code>\\setlength{\\parskip}{SKIP} \\setlength{\\parindent}"
 "{INDENT}</code>. Vrijednost <code>0</code> se tretira kao <code>0pt</code>."
 
-#: apps/base/help.py:88
+#: apps/base/help.py:89
+msgid "Preformatted text. Simulates LaTeX environment <code>verbatim</code>."
+msgstr "Unaprijed formatiran tekst. Simulira <code>verbatim</code> LaTeX environment."
+
+#: apps/base/help.py:92
 msgid "Quote"
 msgstr "Citat"
 
-#: apps/base/help.py:91
+#: apps/base/help.py:95
 msgid ""
 "Show the attachment #x, counting from 1. Optionally, specify the width and "
 "height."
@@ -157,7 +161,7 @@ msgstr ""
 "Prikaži priloženu sliku #x, brojeći od 1. Po želji se mogu specificirati "
 "duljina i visina slike."
 
-#: apps/base/help.py:103
+#: apps/base/help.py:107
 msgid "Some text here."
 msgstr "Neki tekst."
 
@@ -553,39 +557,44 @@ msgid "Internal parser error. Please contact administrators."
 msgstr "Greška parsiranja. Molimo obavijestite administratore!"
 
 #: apps/mathcontent/converter_v1/__init__.py:254
+#: apps/mathcontent/converter_v1/__init__.py:266
 msgid "Ending not found:"
 msgstr "Kraj nije pronađen:"
 
-#: apps/mathcontent/converter_v1/__init__.py:311
+#: apps/mathcontent/converter_v1/__init__.py:283
+msgid "None of the endings found:"
+msgstr "Niti jedan od krajeva nije pronađen:"
+
+#: apps/mathcontent/converter_v1/__init__.py:340
 msgid "Unknown LaTeX command."
 msgstr "Nepoznata LaTeX naredba."
 
-#: apps/mathcontent/converter_v1/__init__.py:350
+#: apps/mathcontent/converter_v1/__init__.py:379
 msgid "Expected a '{' bracket."
 msgstr "Očekuje se '{' zagrada."
 
-#: apps/mathcontent/converter_v1/__init__.py:369
+#: apps/mathcontent/converter_v1/__init__.py:398
 #, python-format
 msgid "Expected a '%s' bracket."
 msgstr "Očekuje se '%s' zagrada."
 
-#: apps/mathcontent/converter_v1/__init__.py:460
+#: apps/mathcontent/converter_v1/__init__.py:489
 msgid "Unexpected '}'."
 msgstr "Neočekivana zagrada '}'."
 
-#: apps/mathcontent/converter_v1/__init__.py:486
+#: apps/mathcontent/converter_v1/__init__.py:515
 msgid "Expected a '}' bracket."
 msgstr "Očekuje se '}' zagrada."
 
-#: apps/mathcontent/converter_v1/__init__.py:488
+#: apps/mathcontent/converter_v1/__init__.py:517
 msgid "End delimiter missing."
 msgstr "Nedostaje krajnja oznaka."
 
-#: apps/mathcontent/converter_v1/__init__.py:516
+#: apps/mathcontent/converter_v1/__init__.py:545
 msgid "Invalid LaTeX."
 msgstr "Nevaljan LaTeX."
 
-#: apps/mathcontent/converter_v1/__init__.py:752
+#: apps/mathcontent/converter_v1/__init__.py:781
 msgid "Unexpected '}'"
 msgstr "Neočekivana zagrada '}'."
 
@@ -617,33 +626,33 @@ msgstr "Traži se broj."
 msgid "Incompatible scaling."
 msgstr "Nekompatibilno skaliranje"
 
-#: apps/mathcontent/converter_v1/bbcode.py:197
-#: apps/mathcontent/converter_v1/latex.py:357
+#: apps/mathcontent/converter_v1/bbcode.py:217
+#: apps/mathcontent/converter_v1/latex.py:393
 msgid "Attachments not shown in a preview."
 msgstr "U pregledu slike nisu prikazane."
 
-#: apps/mathcontent/converter_v1/bbcode.py:206
+#: apps/mathcontent/converter_v1/bbcode.py:226
 msgid "Missing an attribute:"
 msgstr "Nedostaje atribut:"
 
-#: apps/mathcontent/converter_v1/bbcode.py:208
+#: apps/mathcontent/converter_v1/bbcode.py:228
 #, python-format
 msgid "Invalid value \"%(val)s\" for the attribute \"%(attr)s\"."
 msgstr "Nevaljana vrijednost \"%(val)s\" za atribut \"%(attr)s\"."
 
-#: apps/mathcontent/converter_v1/bbcode.py:211
+#: apps/mathcontent/converter_v1/bbcode.py:231
 msgid "Unavailable attachment:"
 msgstr "Nedostupna slika:"
 
-#: apps/mathcontent/converter_v1/bbcode.py:237
+#: apps/mathcontent/converter_v1/bbcode.py:257
 msgid "Expected two attributes."
 msgstr "Traže se dva atributa."
 
-#: apps/mathcontent/converter_v1/bbcode.py:240
+#: apps/mathcontent/converter_v1/bbcode.py:260
 msgid "Unexpected attribute value:"
 msgstr "Neočekivana vrijednost atributa:"
 
-#: apps/mathcontent/converter_v1/bbcode.py:250
+#: apps/mathcontent/converter_v1/bbcode.py:270
 msgid "Unexpected attribute value."
 msgstr "Neočekivana vrijednost atributa."
 
@@ -655,39 +664,48 @@ msgstr "Nedostaje zagrada '}'."
 msgid "Invalid format:"
 msgstr "Nevaljani format:"
 
-#: apps/mathcontent/converter_v1/latex.py:219
+#: apps/mathcontent/converter_v1/latex.py:216
+#, python-format
+msgid "Ignored the rest of the line after %s!"
+msgstr "Ostatak reda nakon %s je ignoriran!"
+
+#: apps/mathcontent/converter_v1/latex.py:255
 msgid "Unexpected \\end."
 msgstr "Neočekivani \\end."
 
-#: apps/mathcontent/converter_v1/latex.py:223
+#: apps/mathcontent/converter_v1/latex.py:259
 #, python-format
 msgid "Expected '%(expected)s', received '%(received)s'."
 msgstr "Očekivano '%(expected)s', dobiveno '%(received)s'."
 
-#: apps/mathcontent/converter_v1/latex.py:247
+#: apps/mathcontent/converter_v1/latex.py:283
 msgid "Unexpected \\caption."
 msgstr "Neočekivani \\caption."
 
-#: apps/mathcontent/converter_v1/latex.py:293
+#: apps/mathcontent/converter_v1/latex.py:329
 msgid "Unexpected \\centering."
 msgstr "Neočekivani \\centering."
 
-#: apps/mathcontent/converter_v1/latex.py:362
+#: apps/mathcontent/converter_v1/latex.py:398
 msgid "Attachment not found:"
 msgstr "Slika nije pronađena:"
 
-#: apps/mathcontent/converter_v1/latex.py:398
+#: apps/mathcontent/converter_v1/latex.py:434
 msgid "Unexpected '\\label'."
 msgstr "Neočekivani \\label."
 
-#: apps/mathcontent/converter_v1/latex.py:401
+#: apps/mathcontent/converter_v1/latex.py:437
 msgid "Tag missing, did you put \\label before \\caption?"
 msgstr "Nedostaje tag, jeste li stavili \\label prije \\caption?"
 
-#: apps/mathcontent/converter_v1/latex.py:456
+#: apps/mathcontent/converter_v1/latex.py:492
 #, python-format
 msgid "Unsupported value \"%(value)s\" for the command \"%(cmd)s\"."
 msgstr "Nepodržana vrijednost \"%(value)s\" za naredbu \"%(cmd)s\"."
+
+#: apps/mathcontent/converter_v1/tokens.py:63
+msgid "Warning:"
+msgstr "Upozorenje:"
 
 #: apps/mathcontent/templates/inc_mathcontent_bootstrap_preview.html:7
 #: apps/task/templates/task_bulk_new.html:79

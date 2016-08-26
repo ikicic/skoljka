@@ -85,6 +85,10 @@ def help_format(request):
                 "\\setlength{\\parindent}{INDENT}</code>. "
                 "Value <code>0</code> is treated as <code>0pt</code>."),
             "[par 1em 0]"),
+        ('[pre]...[/pre]',
+            _("Preformatted text. Simulates LaTeX environment "
+                "<code>verbatim</code>."),
+            "[pre]TEXT\n    TEXT[/pre]"),
         ('[quote]...[/quote]', _("Quote"), "[quote]TEXT[/quote]"),
         ('[img attachment=x '
             '<span style=\"color:gray;\">width=300px height=300px</span>]',

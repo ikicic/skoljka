@@ -255,6 +255,35 @@ class Tokenizer(object):
         self.K = K + len(end)
         return T[start : K]
 
+    def read_until_exact(self, end):
+        """Read everything until `end` is reached, without any complications.
+        The result doesn't contain `end`, but `end` itself is skipped.
+
+        Low-level, doesn't use next_token."""
+        start = self.K
+        K = self.T.find(end, start)
+        if K == -1:
+            raise ParseError(_("Ending not found:") + " " + end)
+        self.K = K + len(end)
+        return self.T[start : K]
+
+    def read_until_exact_any(self, endings):
+        """Similar to read_until_exact, just picks the closest ending.
+        Final ending not included in the result, but is skipped."""
+        start = self.K
+        minK = len(self.T)
+        closest = None
+        for end in endings:
+            K = self.T.find(end, start)
+            if K != -1 and K < minK:
+                minK = K
+                closest = end
+        if not closest:
+            raise ParseError(
+                    _("None of the endings found:") + " " + u", ".join(end))
+        self.K = K + len(end)
+        return self.T[start : K]
+
 
     def handle_math_mode(self):
         """Handle $...$, $$...$$, \(...\), \[...\] and $$$ ... $$$."""

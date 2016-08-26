@@ -3,11 +3,12 @@
 from mathcontent.converter_v1 import Tokenizer, Converter
 from mathcontent.converter_v1.bbcode import parse_bbcode, BBCodeException
 from mathcontent.converter_v1.latex import convert_tex_length_to_html, \
-        LatexEnvironmentDiv, LatexEnvironmentFigure, LatexValueError
+        LatexEnvironmentDiv, LatexEnvironmentFigure, LatexValueError, \
+        LatexEnvironmentVerbatim
 from mathcontent.converter_v1.tokens import TokenText, TokenCommand, \
         TokenMultilineWhitespace, TokenSimpleWhitespace, TokenMath, \
         TokenError, TokenComment, TokenOpenCurly, TokenClosedCurly, \
-        TokenBBCode
+        TokenBBCode, TokenWarning
 from mathcontent.converter_v1.basics import SKIP_COMPARISON as SKIP
 
 from mathcontent.models import TYPE_HTML, TYPE_LATEX, LatexElement
@@ -351,6 +352,16 @@ class ConverterV1TestCase(TestCaseEx):
                 TokenCommand('end', 0, ['figure', _figure]),
         ])
 
+        self.assertTokenization(
+            "asdf\\begin{verbatim}bla\\end{verbatim}ignored\nnot-ignored", [
+                TokenText("asdf"),
+                TokenCommand('begin', 0,
+                    ['verbatim', LatexEnvironmentVerbatim(), "bla"], SKIP),
+                TokenWarning(SKIP, "ignored"),
+                TokenSimpleWhitespace('\n'),
+                TokenText("not-ignored")
+        ])
+
         # BBCode
         self.assertTokenization("[]", [TokenText("["), TokenText("]")])
         self.assertTokenization("[unknown tag]",
@@ -478,6 +489,13 @@ class ConverterV1TestCase(TestCaseEx):
                 "<<ERROR>>",  # SIMPLIFICATION MARK. Do not complicate with %.
                 "<<ERROR>>",
                 converter_kwargs={'errors_mode': Converter.ERRORS_TESTING})
+        self.assertHTMLAutoLatexNoPar(
+                "\\begin{verbatim}\\textbf  {bla}\nasdf\\end{verbatim}",
+                '<pre class="mc-verbatim">\\textbf  {bla}\nasdf</pre>')
+        self.assertHTMLAutoLatexNoPar(
+                "\\begin{verbatim}<xss check>\\end{verbatim}",
+                '<pre class="mc-verbatim">&lt;xss check&gt;</pre>')
+
         # Math mode.
         self.assertHTMLAutoLatexNoPar("$a+b$", "<<$%s$||a+b>>")
         self.assertHTMLAutoLatexNoPar("\(a+b\)", "<<\(%s\)||a+b>>")
@@ -488,15 +506,21 @@ class ConverterV1TestCase(TestCaseEx):
         self.assertHTMLAutoLatexNoPar(
             r'\begin{figure}'
             r'\includegraphics{first.png}'
-            r'\caption{Some caption here.}'
+            r'\caption{Some caption here <xss check>.}'
             r'\label{some-label}'
             r'\centering'
             r'\end{figure}',
             '<div class="mc-figure mc-center">'
             '<img src="/mock/first.png" alt="Attachment first.png" class="latex">'
-            '<div class="mc-caption"><span class="mc-caption-tag">Slika 1:</span> Some caption here.</div>'
+            '<div class="mc-caption"><span class="mc-caption-tag">Slika 1:</span> Some caption here &lt;xss check&gt;.</div>'
             '</div>'
         )
+        self.assertHTMLAutoLatexNoPar(
+            r'\begin{figure}'
+            r'\includegraphics{first"><xss check=".png}'
+            r'\end{figure}',
+            '<div class="mc-figure"><<ERROR>></div>',  # Not found error at least.
+            converter_kwargs={'errors_mode': Converter.ERRORS_TESTING})
 
 
         # Complex example.
@@ -727,6 +751,14 @@ class ConverterV1TestCase(TestCaseEx):
                 "[center]This is centered[/center]",
                 '<div class="mc-center">This is centered</div>',
                 "\\begin{center}This is centered\\end{center}")
+        self.assertHTMLLatexNoPar(
+                "[pre]This is pre\n    This is pre[/pre]",
+                '<pre class="mc-verbatim">This is pre\n    This is pre</pre>',
+                "\\begin{verbatim}This is pre\n    This is pre\\end{verbatim}\n")
+        self.assertHTMLLatexNoPar(
+                "[pre]<xss check>[/pre]",
+                '<pre class="mc-verbatim">&lt;xss check&gt;</pre>',
+                "\\begin{verbatim}<xss check>\\end{verbatim}\n")
         self.assertHTMLLatexNoPar(
                 "[img attachment=1]",
                 '<img src="/mock/first.png" alt="Attachment #1" class="latex">',

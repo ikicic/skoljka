@@ -1,3 +1,5 @@
+from django.utils.translation import ugettext as _
+
 from mathcontent.converter_v1.basics import SKIP_COMPARISON, test_eq
 
 # Unprocesssed tokens.
@@ -53,6 +55,16 @@ class TokenError(Token):
         self.content = content
     def __repr__(self):
         return 'TokenError({}, {})'.format(
+                repr(self.error_message), repr(self.content))
+
+class TokenWarning(TokenError):
+    def __init__(self, error_message, content):
+        if error_message != SKIP_COMPARISON:
+            self.error_message = _("Warning:") + " " + error_message
+        self.error_message = error_message
+        self.content = content
+    def __repr__(self):
+        return 'TokenWarning({}, {})'.format(
                 repr(self.error_message), repr(self.content))
 
 class TokenCommand(Token):

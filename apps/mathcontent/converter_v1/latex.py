@@ -3,9 +3,9 @@ from django.utils.translation import ugettext as _
 from skoljka.libs import xss
 
 from mathcontent.converter_v1.basics import img_params_to_html, State, \
-        COUNTER_EQUATION, COUNTER_FIGURE, test_eq
+        COUNTER_EQUATION, COUNTER_FIGURE, test_eq, ParseError
 from mathcontent.converter_v1.tokens import TokenError, TokenCommand, \
-        TokenMath, TOKEN_CLOSED_CURLY
+        TokenMath, TokenWarning, TOKEN_CLOSED_CURLY
 
 
 class LatexValueError(Exception):
@@ -171,6 +171,15 @@ class Command(object):
 
 
 
+class _LatexEnvironmentReadUntil(object):
+    def __init__(self):
+        super(_LatexEnvironmentReadUntil, self).__init__()
+        # Ignore everything after \end{...} until the end of line.
+        # E.g. "LaTeX Warning: Characters dropped after `\end{verbatim}' (...)"
+        self.ignore_until_eol = False
+
+
+
 class LatexBegin(Command):
     # TODO: \begin[...]{equation} ... \end{equation}
     # TODO: \begin{equation} ... \end{equation}
@@ -180,14 +189,33 @@ class LatexBegin(Command):
 
     def apply_command(self, tokenizer, name, args, whitespace):
         """Simply add itself to the current state."""
-        if args[0] not in latex_environments:
+        environment_class = latex_environments.get(args[0])
+        if not environment_class:
             latex = tokenizer.read_until('\\end{%s}' % args[0], [r'\\'])
             latex = '\\begin{%s}%s\\end{%s}' % (args[0], latex, args[0])
             return TokenMath('%s', latex)
             # return TokenError(_("Unknown LaTeX environment."), args[0])
 
         # Generate new LatexEnvironment instance.
-        environment = latex_environments[args[0]]()
+        environment = environment_class()
+
+        if isinstance(environment, _LatexEnvironmentReadUntil):
+            end = '\\end{%s}' % args[0]
+            latex = tokenizer.read_until_exact(end)
+            tokenizer.state.add_token(TokenCommand(
+                    name, 0, [args[0], environment, latex], whitespace))
+            if environment.ignore_until_eol:
+                try:
+                    ignored = tokenizer.read_until_exact_any(['\r', '\n'])
+                    tokenizer.K -= 1  # Do not skip the newline.
+                except ParseError as e:
+                    ignored = tokenizer.T[tokenizer.K:]
+                    tokenizer.K = len(tokenizer.T)
+                if ignored.strip():
+                    tokenizer.state.add_token(TokenWarning(
+                        _("Ignored the rest of the line after %s!") % end,
+                        ignored))
+            return
 
         # Pass environment as the arg.
         tokenizer.state.add_token(
@@ -198,6 +226,14 @@ class LatexBegin(Command):
     def to_html(self, token, converter):
         environment = token.args[1]
         return environment.to_html(True, token, converter)
+
+    def to_latex(self, token, converter):
+        # Manually handle the _LatexEnvironmentReadUntil case.
+        environment = token.args[1]
+        result = super(LatexBegin, self).to_latex(token, converter)
+        if isinstance(environment, _LatexEnvironmentReadUntil):
+            return result + token.args[2] + '\\end{%s}' % token.args[0]
+        return result
 
 
 
@@ -359,7 +395,7 @@ class LatexIncludeGraphics(Command):
         try:
             attachment = converter.attachments_dict[filename]
         except KeyError:
-            return TokenError(_("Attachment not found:"), content.strip())
+            return TokenError(_("Attachment not found:"), filename.strip())
 
         params = _parse_latex_params(token.args[0] or '')
         return u'<img src="{}" alt="Attachment {}" class="latex"{}>'.format(
@@ -575,6 +611,24 @@ class LatexEnvironmentFigure(LatexEnvironment):
 
 
 
+class LatexEnvironmentVerbatim(LatexEnvironment, _LatexEnvironmentReadUntil):
+    """Handles \\begin{verbatim}...\\end{verbatim} and the starred version."""
+    def __init__(self):
+        super(LatexEnvironmentVerbatim, self).__init__()
+        self.ignore_until_eol = True
+
+    def __repr__(self):
+        return u'LatexEnvironmentVerbatim()'
+
+    def to_html(self, begin, token, converter):
+        env_name = token.args[0]
+        content = token.args[2]
+        if env_name == 'verbatim*':
+            content = content.replace(' ', '&blank;')
+        converter.state.is_in_paragraph = False
+        converter.state.indent_next = False
+        return '<pre class="mc-verbatim">{}</pre>'.format(xss.escape(content))
+
 
 ########################################################
 # Default latex commands and environments
@@ -619,4 +673,6 @@ latex_environments = {
     'figure': LatexEnvironmentFigure,
     'flushleft': latex_environment_div_factory('mc-flushleft'),
     'flushright': latex_environment_div_factory('mc-flushright'),
+    'verbatim': LatexEnvironmentVerbatim,
+    'verbatim*': LatexEnvironmentVerbatim,
 }
