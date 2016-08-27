@@ -19,7 +19,7 @@
   </table>
   {% if invalid_tasks %}
     <div class="alert alert-danger">
-      {% trans "There were some conversion errors in the following tasks:" %}
+      {% trans "There were some internal errors while converting the following tasks:" %}
       <ul>
         {% for task in invalid_tasks %}
           <li>{{ task.get_link }}</li>

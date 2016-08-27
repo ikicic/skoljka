@@ -75,7 +75,7 @@ Navodimo naredbe koje su trenutačno (u potpunosti ili djelomično) podržane.
         {% endif %}
       </td>
       <td>{% if cmd.example %}{{ cmd.html|safe }}{% endif %}</td>
-      <td>{% if cmd.example %}{{ cmd.latex|safe }}{% endif %}</td>
+      <td style="white-space:pre;">{% if cmd.example %}{{ cmd.latex|safe }}{% endif %}</td>
     </tr>
   {% endfor %}
 </table>

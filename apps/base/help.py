@@ -20,7 +20,7 @@ def help_format(request):
     PARTIAL = INFO_FORMAT.format(_("Partially supported."))
     INCOMPATIBLE = INFO_FORMAT.format(_("Possibly incompatible behavior."))
     VISUALLY_DIFFERENT = INFO_FORMAT.format(
-            _("Visually different than when exported to PDF."))
+            _("Visually different when exported to PDF."))
     commands = [
         _("Basic Commands"),
         ('\\emph', _("Emphasized text (usually italic)"), "\\emph{TEXT}"),
@@ -73,12 +73,15 @@ def help_format(request):
         ("\\textasciicircum", _("Symbol %s.") % '^' + PARTIAL, None),
         ("\\textasciitilde", _("Symbol %s.") % '~' + PARTIAL, None),
         ("\\textbackslash", _("Symbol %s.") % '\\' + PARTIAL, None),  # Partial?
-        ("\\~", _("Symbol %s.") % '~' + PARTIAL, None),
         ("\\-", _("Soft hyphen, shown in HTML as <pre>&amp;shy;</pre>."),
             "a\-very\-long\-word"),
-        ("\\%", _("Symbol %s.") % '%', None),
         ("\\{", _("Symbol %s.") % '{', None),
         ("\\}", _("Symbol %s.") % '}', None),
+        ("\\%", _("Symbol %s.") % '%', None),
+        ("\\_", _("Symbol %s.") % '_', None),
+        ("\\&", _("Symbol %s.") % '&', None),
+        ("\\$", _("Symbol %s.") % '$', None),
+        ("\\#", _("Symbol %s.") % '#', None),
 
         _("LaTeX Environments"),
         ("\\begin{center}...\\end{center}", _("Centering."),

@@ -16,8 +16,8 @@ from mathcontent.converter_v1.tokens import TOKEN_COMMAND, TOKEN_OPEN_CURLY, \
         TOKEN_CLOSED_CURLY, TOKEN_OPEN_SQUARE, TOKEN_CLOSED_SQUARE
 from mathcontent.converter_v1.bbcode import bb_commands, parse_bbcode, \
         BBCodeException
-from mathcontent.converter_v1.latex import latex_commands, latex_environments, \
-        LatexValueError, LatexInlineMathCommand
+from mathcontent.converter_v1.latex import latex_commands, latex_escape_chars, \
+        latex_environments, LatexValueError, LatexInlineMathCommand
 
 from collections import defaultdict
 from urlparse import urljoin
@@ -333,6 +333,11 @@ class Tokenizer(object):
         the actual parsing. Command is performing the parsing because the
         syntax actually depends on the command itself. (e.g. \\url and \\href).
         """
+        # Manually take care of escape characters, because they don't consume
+        # the following whitespace.
+        if name in latex_escape_chars:
+            return TokenCommand(name, 0, [], [""])
+
         full_name = '\\' + name
         try:
             command = latex_commands[name]

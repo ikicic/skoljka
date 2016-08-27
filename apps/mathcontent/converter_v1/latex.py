@@ -357,6 +357,18 @@ class LatexContainer(Command):
 
 
 
+class LatexEscapeCharacter(Command):
+    def __init__(self, char):
+        self.html = xss.escape(char)
+
+    def to_html(self, token, converter):
+        return self.html
+
+    def to_latex(self, token, converter):
+        return '\\' + token.command  # Speed up things.
+
+
+
 class LatexHref(Command):
     def __init__(self):
         super(LatexHref, self).__init__(args_desc="{U}{P}")
@@ -634,14 +646,16 @@ class LatexEnvironmentVerbatim(LatexEnvironment, _LatexEnvironmentReadUntil):
 # Default latex commands and environments
 ########################################################
 
+# These are manually handled by the tokenizer, because they don't gobble the
+# space following them. They are still represented by a Command, i.e.
+# LatexEscapeCharacter(char).
+latex_escape_chars = '{}%_&$#'
+
 latex_commands = {
-    '%': LatexSpecialSymbol('%'),
     '-': LatexSpecialSymbol('&shy;'),  # Soft hyphen.
     'LaTeX': LatexInlineMathCommand('%s', '\\LaTeX'),
     'TeX': LatexInlineMathCommand('%s', '\\TeX'),
     '\\': LatexSpecialSymbol('<br>'),
-    '{': LatexSpecialSymbol('{'),
-    '}': LatexSpecialSymbol('}'),
     'begin': LatexBegin(),
     'caption': LatexCaption(),
     'centering': LatexCentering(),
@@ -665,8 +679,8 @@ latex_commands = {
     'uline': LatexContainer('<u>', '</u>'),
     'underline': LatexContainer('<span class="mc-underline">', '</span>'),
     'url': LatexURL(),
-    '~': LatexSpecialSymbol('~'),  # NOT FULLY IMPLEMENTED.
 }
+latex_commands.update({x: LatexEscapeCharacter(x) for x in latex_escape_chars})
 
 latex_environments = {
     'center': latex_environment_div_factory('mc-center'),

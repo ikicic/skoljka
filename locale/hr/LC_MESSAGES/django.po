@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-26 18:43+0200\n"
-"PO-Revision-Date: 2016-08-26 18:43+0200\n"
+"POT-Creation-Date: 2016-08-27 17:33+0200\n"
+"PO-Revision-Date: 2016-08-27 17:33+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -24,8 +24,8 @@ msgid "Possibly incompatible behavior."
 msgstr "Moguće nekompatilno ponašanje."
 
 #: apps/base/help.py:23
-msgid "Visually different than when exported to PDF."
-msgstr "Vizualno drugačije nego kad se pretvori u PDF."
+msgid "Visually different when exported to PDF."
+msgstr "Vizualno drugačije kad se pretvori u PDF."
 
 #: apps/base/help.py:25
 msgid "Basic Commands"
@@ -35,19 +35,19 @@ msgstr "Osnovne naredbe"
 msgid "Emphasized text (usually italic)"
 msgstr "Naglašeni tekst (obično italic)"
 
-#: apps/base/help.py:27 apps/base/help.py:101
+#: apps/base/help.py:27 apps/base/help.py:105
 msgid "Bold"
 msgstr "Bold"
 
-#: apps/base/help.py:28 apps/base/help.py:102
+#: apps/base/help.py:28 apps/base/help.py:106
 msgid "Italic"
 msgstr "Italic"
 
-#: apps/base/help.py:29 apps/base/help.py:103
+#: apps/base/help.py:29 apps/base/help.py:107
 msgid "Strikethrough"
 msgstr "Precrtano"
 
-#: apps/base/help.py:30 apps/base/help.py:104
+#: apps/base/help.py:30 apps/base/help.py:108
 msgid "Underline"
 msgstr "Podcrtano"
 
@@ -91,8 +91,8 @@ msgstr "Postavi oznaku slike ili jednadžbe."
 msgid "Given a label, show a link to the related content."
 msgstr "Link na sadržaj označen zadanom oznakom."
 
-#: apps/base/help.py:46 apps/base/help.py:47 apps/base/help.py:121
-#: apps/base/help.py:122
+#: apps/base/help.py:46 apps/base/help.py:47 apps/base/help.py:125
+#: apps/base/help.py:126
 msgid "Link"
 msgstr "Link"
 
@@ -126,7 +126,7 @@ msgstr "Ostale naredbe"
 msgid "Framed box with disabled word-wrap."
 msgstr "Uokviren tekst s isključenim prijelomom teksta."
 
-#: apps/base/help.py:65 apps/base/help.py:69 apps/base/help.py:119
+#: apps/base/help.py:65 apps/base/help.py:69 apps/base/help.py:123
 msgid "Please don't misuse."
 msgstr "Molimo nemojte zloupotrebljavati."
 
@@ -135,42 +135,43 @@ msgid "Disabled word-wrap."
 msgstr "Isključen prijelom teksta."
 
 #: apps/base/help.py:73 apps/base/help.py:74 apps/base/help.py:75
-#: apps/base/help.py:76 apps/base/help.py:79 apps/base/help.py:80
-#: apps/base/help.py:81
+#: apps/base/help.py:78 apps/base/help.py:79 apps/base/help.py:80
+#: apps/base/help.py:81 apps/base/help.py:82 apps/base/help.py:83
+#: apps/base/help.py:84
 #, python-format
 msgid "Symbol %s."
 msgstr "Simbol %s."
 
-#: apps/base/help.py:77
+#: apps/base/help.py:76
 msgid "Soft hyphen, shown in HTML as <pre>&amp;shy;</pre>."
 msgstr "Tzv. <i>soft hyphen</i>, prikazan u HTML-u kao <pre>&amp;shy;</pre>."
 
-#: apps/base/help.py:83
+#: apps/base/help.py:86
 msgid "LaTeX Environments"
 msgstr "LaTeX Environments"
 
-#: apps/base/help.py:84
+#: apps/base/help.py:87
 msgid "Centering."
 msgstr "Centriranje."
 
-#: apps/base/help.py:87
+#: apps/base/help.py:90
 msgid "Figure, used for inserting images."
 msgstr "Za ubacivanje slika."
 
-#: apps/base/help.py:92
+#: apps/base/help.py:96
 msgid "Pre-formatted text."
 msgstr "Unaprijed formatiran tekst."
 
-#: apps/base/help.py:95
+#: apps/base/help.py:99
 msgid "Similar to <code>verbatim</code>, where spaces are shown as &blank;."
 msgstr ""
 "Slično <code>verbatim</code>, samo što se razmaci prikazuju kao &blank;."
 
-#: apps/base/help.py:105
+#: apps/base/help.py:109
 msgid "Code"
 msgstr "Kod"
 
-#: apps/base/help.py:107
+#: apps/base/help.py:111
 msgid ""
 "Shorthand for <code>\\setlength{\\parskip}{SKIP} \\setlength{\\parindent}"
 "{INDENT}</code>. Value <code>0</code> is treated as <code>0pt</code>."
@@ -178,16 +179,16 @@ msgstr ""
 "Kratica za <code>\\setlength{\\parskip}{SKIP} \\setlength{\\parindent}"
 "{INDENT}</code>. Vrijednost <code>0</code> se tretira kao <code>0pt</code>."
 
-#: apps/base/help.py:112
+#: apps/base/help.py:116
 msgid "Preformatted text. Simulates LaTeX environment <code>verbatim</code>."
 msgstr ""
 "Unaprijed formatiran tekst. Simulira <code>verbatim</code> LaTeX environment."
 
-#: apps/base/help.py:115
+#: apps/base/help.py:119
 msgid "Quote"
 msgstr "Citat"
 
-#: apps/base/help.py:118
+#: apps/base/help.py:122
 msgid ""
 "Show the attachment #x, counting from 1. Optionally, specify the width and "
 "height."
@@ -195,7 +196,7 @@ msgstr ""
 "Prikaži priloženu sliku #x, brojeći od 1. Po želji se mogu specificirati "
 "duljina i visina slike."
 
-#: apps/base/help.py:129
+#: apps/base/help.py:133
 msgid "Some text here."
 msgstr "Neki tekst."
 
@@ -561,7 +562,7 @@ msgstr "Pregled lanca"
 msgid "There were some errors!"
 msgstr "Bilo je nekih grešaka!"
 
-#: apps/competition/templates/competition_chain_overview.html:16
+#: apps/competition/templates/competition_chain_overview.html:17
 #: apps/task/templates/inc_task_bulk_preview_single.html:19
 msgid "Author:"
 msgstr "Autor:"
@@ -586,7 +587,8 @@ msgstr[0] "%d moj zadatak"
 msgstr[1] "%d moja zadatka"
 msgstr[2] "%d mojih zadataka"
 
-#: apps/mathcontent/utils.py:29
+#: apps/mathcontent/utils.py:33
+#: apps/mathcontent/templates/inc_mathcontent_render.html:9
 msgid "Internal parser error. Please contact administrators."
 msgstr "Greška parsiranja. Molimo obavijestite administratore!"
 
@@ -599,46 +601,46 @@ msgstr "Kraj nije pronađen:"
 msgid "None of the endings found:"
 msgstr "Niti jedan od krajeva nije pronađen:"
 
-#: apps/mathcontent/converter_v1/__init__.py:340
+#: apps/mathcontent/converter_v1/__init__.py:345
 msgid "Unknown LaTeX command."
 msgstr "Nepoznata LaTeX naredba."
 
-#: apps/mathcontent/converter_v1/__init__.py:379
+#: apps/mathcontent/converter_v1/__init__.py:384
 msgid "Expected a '{' bracket."
 msgstr "Očekuje se '{' zagrada."
 
-#: apps/mathcontent/converter_v1/__init__.py:398
+#: apps/mathcontent/converter_v1/__init__.py:403
 #, python-format
 msgid "Expected a '%s' bracket."
 msgstr "Očekuje se '%s' zagrada."
 
-#: apps/mathcontent/converter_v1/__init__.py:489
+#: apps/mathcontent/converter_v1/__init__.py:494
 msgid "Unexpected '}'."
 msgstr "Neočekivana zagrada '}'."
 
-#: apps/mathcontent/converter_v1/__init__.py:515
+#: apps/mathcontent/converter_v1/__init__.py:520
 msgid "Expected a '}' bracket."
 msgstr "Očekuje se '}' zagrada."
 
-#: apps/mathcontent/converter_v1/__init__.py:517
+#: apps/mathcontent/converter_v1/__init__.py:522
 msgid "End delimiter missing."
 msgstr "Nedostaje krajnja oznaka."
 
-#: apps/mathcontent/converter_v1/__init__.py:545
+#: apps/mathcontent/converter_v1/__init__.py:550
 msgid "Invalid LaTeX."
 msgstr "Nevaljan LaTeX."
 
-#: apps/mathcontent/converter_v1/__init__.py:781
+#: apps/mathcontent/converter_v1/__init__.py:786
 msgid "Unexpected '}'"
 msgstr "Neočekivana zagrada '}'."
 
-#: apps/mathcontent/converter_v1/basics.py:67
-#: apps/mathcontent/converter_v1/basics.py:83
+#: apps/mathcontent/converter_v1/basics.py:39
+#: apps/mathcontent/converter_v1/basics.py:55
 #: apps/mathcontent/converter_v1/latex.py:43
 msgid "Unexpected value:"
 msgstr "Neočekivana vrijednost:"
 
-#: apps/mathcontent/converter_v1/basics.py:87
+#: apps/mathcontent/converter_v1/basics.py:59
 #: apps/mathcontent/converter_v1/bbcode.py:58
 msgid "Unexpected attribute:"
 msgstr "Neočekivani atribut"
@@ -661,7 +663,7 @@ msgid "Incompatible scaling."
 msgstr "Nekompatibilno skaliranje"
 
 #: apps/mathcontent/converter_v1/bbcode.py:217
-#: apps/mathcontent/converter_v1/latex.py:393
+#: apps/mathcontent/converter_v1/latex.py:405
 msgid "Attachments not shown in a preview."
 msgstr "U pregledu slike nisu prikazane."
 
@@ -720,19 +722,19 @@ msgstr "Neočekivani \\caption."
 msgid "Unexpected \\centering."
 msgstr "Neočekivani \\centering."
 
-#: apps/mathcontent/converter_v1/latex.py:398
+#: apps/mathcontent/converter_v1/latex.py:410
 msgid "Attachment not found:"
 msgstr "Slika nije pronađena:"
 
-#: apps/mathcontent/converter_v1/latex.py:434
+#: apps/mathcontent/converter_v1/latex.py:446
 msgid "Unexpected '\\label'."
 msgstr "Neočekivani \\label."
 
-#: apps/mathcontent/converter_v1/latex.py:437
+#: apps/mathcontent/converter_v1/latex.py:449
 msgid "Tag missing, did you put \\label before \\caption?"
 msgstr "Nedostaje tag, jeste li stavili \\label prije \\caption?"
 
-#: apps/mathcontent/converter_v1/latex.py:492
+#: apps/mathcontent/converter_v1/latex.py:504
 #, python-format
 msgid "Unsupported value \"%(value)s\" for the command \"%(cmd)s\"."
 msgstr "Nepodržana vrijednost \"%(value)s\" za naredbu \"%(cmd)s\"."
@@ -741,10 +743,14 @@ msgstr "Nepodržana vrijednost \"%(value)s\" za naredbu \"%(cmd)s\"."
 msgid "Warning:"
 msgstr "Upozorenje:"
 
-#: apps/mathcontent/templates/inc_mathcontent_bootstrap_preview.html:7
+#: apps/mathcontent/templates/inc_mathcontent_bootstrap_preview.html:8
 #: apps/task/templates/task_bulk_new.html:79
 msgid "Preview"
 msgstr "Pregled"
+
+#: apps/mathcontent/templates/inc_mathcontent_render.html:11
+msgid "Original text:"
+msgstr "Originalni tekst:"
 
 #: apps/tags/managers.py:24 apps/tags/models.py:17
 msgid "Tags"
@@ -1078,13 +1084,26 @@ msgstr "Makni s naslovne"
 msgid "Click here to open the file."
 msgstr "Kliknite ovdje kako biste otvorili datoteku."
 
+#: apps/task/templates/task_export.html:22
+msgid "There were some internal errors while converting the following tasks:"
+msgstr "Došlo je do internih grešaka pri pretvaranju sljedećih zadataka:"
+
+#: apps/task/templates/task_export.html:28
+msgid "If you still want to export the tasks, click 'Convert' again."
+msgstr ""
+"Ako i dalje želite pretvoriti u .tex/.pdf, kliknite 'Pretvori' ponovno."
+
+#: apps/task/templates/task_export.html:32
+msgid "Convert"
+msgstr "Pretvori"
+
 #: apps/task/templates/task_lectures_list.html:16
 msgctxt "A list of lectures"
 msgid "List"
 msgstr "Popis"
 
 #: apps/task/templates/task_lectures_list.html:20
-#: apps/task/templates/task_list.html:32 apps/task/templates/task_new.html:9
+#: apps/task/templates/task_list.html:32 apps/task/templates/task_new.html:10
 msgid "New lecture"
 msgstr "Novo predavanje"
 
@@ -1092,12 +1111,12 @@ msgstr "Novo predavanje"
 msgid "Thumbnails"
 msgstr "Ikone"
 
-#: apps/task/templates/task_new.html:7
+#: apps/task/templates/task_new.html:8
 #, python-format
 msgid "Editing lecture %(task_name)s"
 msgstr "Uređivanje lekcije %(task_name)s"
 
-#: apps/task/templates/task_new.html:31
+#: apps/task/templates/task_new.html:32
 #, python-format
 msgid ""
 "To add the tasks, first create a folder\n"
@@ -1108,7 +1127,7 @@ msgstr ""
 "\"%(lectures_folder_url)s\">ovdje</a>, zatim iskoristite <a href="
 "\"%(bulk_add_url)s\">višestruko dodavanje</a>."
 
-#: apps/task/templates/task_new.html:34
+#: apps/task/templates/task_new.html:35
 msgid ""
 "If you do not have the permission to perform these steps, please contact the "
 "administrators."
@@ -1116,11 +1135,11 @@ msgstr ""
 "Ako nemate privilegije za napraviti navedene korake, molimo kontaktirajte "
 "administratore."
 
-#: apps/task/templates/task_new.html:90
+#: apps/task/templates/task_new.html:91
 msgid "Help"
 msgstr "Pomoć"
 
-#: apps/task/templates/task_new.html:101
+#: apps/task/templates/task_new.html:102
 msgid "Press Ctrl+M to get the preview of the text."
 msgstr "Pritisnite Ctrl+M za pregled teksta."
 

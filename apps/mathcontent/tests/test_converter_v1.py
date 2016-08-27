@@ -388,6 +388,18 @@ class ConverterV1TestCase(TestCaseEx):
         self.assertHTMLAutoLatexNoPar("bla\n\n\n\nbla", "bla<br>bla")
 
         self.assertHTMLAutoLatexNoPar(
+                "\\textbackslash begin\{...\} ... \\textbackslash end\{...\}",
+                "\\begin{...} ... \\end{...}")
+        self.assertHTMLAutoLatexNoPar(
+                "\\textbackslash{}begin\{...\} ... \\textbackslash{}end\{...\}",
+                "\\begin{...} ... \\end{...}")
+        self.assertHTMLAutoLatexNoPar(
+                "\\textbackslash{}\\textasciicircum{}\\textasciitilde{}",
+                "\\^~")
+        self.assertHTMLAutoLatexNoPar("\{\}\%\_\&\$\#", "{}%_&amp;$#")
+        self.assertHTMLAutoLatexNoPar("\\&\"'<>", "&amp;&quot;&apos;&lt;&gt;")
+
+        self.assertHTMLAutoLatexNoPar(
                 r"a\-very\-very\-long\-word\-here",
                 r"a&shy;very&shy;very&shy;long&shy;word&shy;here")
         self.assertHTMLAutoLatexNoPar( r"\TeX", r"INLINE:<<%s||\TeX>>")
@@ -454,8 +466,6 @@ class ConverterV1TestCase(TestCaseEx):
                 '<span class="mc-underline">underlined with nowrap</span>')
         self.assertHTMLAutoLatexNoPar("asdf \\sout{bla bla} qwerty \\uline{asdf}",
                         "asdf <s>bla bla</s> qwerty <u>asdf</u>")
-        self.assertHTMLAutoLatexNoPar("bla\\~{}asdf", "bla~asdf")
-        self.assertHTMLAutoLatexNoPar("bla\\~{}asdf", "bla~asdf")
 
         # Begin commands.
         self.assertHTMLAutoLatexNoPar(
