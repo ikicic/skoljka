@@ -1,5 +1,7 @@
 {% extends "usergroup_base.html" %}
 
+{% load mathcontent_tags %}
+
 {% block title %}Grupa {{ group.name }}{% endblock %}
 
 {% block inner_content %}
@@ -16,7 +18,8 @@
     </tr>
   </table>
   <br>
-  {{ group.data.description.render }}<br><br><br>
+  {% mathcontent_render group.data.description %}
+  <br><br><br>
   Korisnici: 
   {% for x in group.data.get_members %}
     {% if not forloop.first %}|{% endif %}

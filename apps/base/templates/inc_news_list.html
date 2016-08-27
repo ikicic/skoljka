@@ -1,3 +1,4 @@
+{% load mathcontent_tags %}
 {% if news %}
   <div class="{{ div_class }}">
     {% if title %}<h3>{{ title }}</h3>{% endif %}
@@ -11,7 +12,7 @@
             {{ x.name }}
           {% endif %}
         </div>
-        {{ x.content.render }}
+        {% mathcontent_render x.content %}
         <div class="added-by">
           Dodao/la {{ x.author|userlink }} {{ x.date_created }}
         </div>

@@ -3,6 +3,7 @@
 
 {% load bootstrap_toolkit %}
 {% load competition_tags %}
+{% load mathcontent_tags %}
 
 {% block content %}
 
@@ -21,11 +22,11 @@
       </a>
     </h4>
     <div class="outset ctask-content">
-      {{ ctask.task.content.render }}
+      {% mathcontent_render ctask.task.content %}
     </div>
     {% if ctask.comment.html %}
       <div class="outset ctask-comment {% ctask_comment_class ctask %}">
-        {{ ctask.comment.render }}
+        {% mathcontent_render ctask.comment %}
       </div>
     {% endif %}
   </div>

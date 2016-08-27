@@ -2,6 +2,7 @@
 {% load i18n %}
 
 {% load competition_tags %}
+{% load mathcontent_tags %}
 
 {% block float_right_extra %}
   {% if is_admin %}
@@ -29,7 +30,7 @@
 {% endif %}
 
 <div class="outset ctask-content">
-  {{ ctask.task.content.render }}
+  {% mathcontent_render ctask.task.content %}
 </div>
 
 {% if team %} {# admins are able to see this page without having a team #}

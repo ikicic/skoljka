@@ -5,29 +5,6 @@ from mathcontent.models import TYPE_HTML, TYPE_LATEX
 COUNTER_EQUATION = 1
 COUNTER_FIGURE = 2
 
-escape_table = {
-    # NOT TESTED.
-    TYPE_HTML: {
-        '&': '&amp;',
-        '"': '&quot;',
-        "'": '&apos;',
-        '>': '&gt;',
-        '<': '&lt;',
-    },
-    # NOT TESTED.
-    TYPE_LATEX: {
-        '#': '\\#',
-        # '%': '\\%',
-        '^': '\\textasciicircum{}',
-        '&': '\\&',
-        '_': '\\_',
-        '{': '\\{',
-        '}': '\\}',
-        '~': '\\~{}',
-        '\\': '\\textbackslash{}',
-    },
-}
-
 
 class State(object):
     def __init__(self, break_condition=None, environment=None):
@@ -47,11 +24,6 @@ class ParseError(Exception):
 
 def float_to_str_pretty(val):
     return "{}".format(val).rstrip('0').rstrip('.')
-
-
-def latex_escape(val):
-    tbl = escape_table[TYPE_LATEX]
-    return u"".join(tbl.get(x, x) for x in val)
 
 
 def img_parse_length(value):

@@ -17,8 +17,8 @@ from base.utils import can_edit_featured_lectures
 from folder.models import Folder, FolderTask
 from folder.utils import invalidate_cache_for_folders, \
         invalidate_folder_cache_for_task
-from mathcontent import latex
 from mathcontent.forms import AttachmentForm, MathContentForm
+from mathcontent.latex import latex_escape
 from mathcontent.models import MathContent, Attachment
 from mathcontent.utils import check_and_save_attachment, convert_to_latex, \
         create_file_thumbnail, ThumbnailRenderingException
@@ -371,18 +371,34 @@ def similar(request, task_id):
 # final filename is 'attachments/task_id/attachment index/filename.ext'
 ZIP_ATTACHMENT_DIR = 'attachments'
 
-def _convert_to_latex(sorted_tasks, **kwargs):
+class _ConvertException(Exception):
+    def __init__(self, invalid_tasks, *args, **kwargs):
+        super(_ConvertException, self).__init__(*args, **kwargs)
+        self.invalid_tasks = invalid_tasks
+
+
+
+def _convert_to_latex(sorted_tasks, ignore_exceptions, **kwargs):
     """
     Attachments go to attachments/task_id/attachment_index/filename.ext.
     """
     is_latex = kwargs['format'] == 'latex'
 
     tasks = []
+    invalid_tasks = []
     for k, x in enumerate(sorted_tasks):
         # no / at the end
         attachments_path = is_latex and '{}/{}'.format(ZIP_ATTACHMENT_DIR, x.id)
-        content = convert_to_latex(x.content.text,
-                content=x.content, attachments_path=attachments_path)
+        try:
+            content = convert_to_latex(x.content.text,
+                    content=x.content, attachments_path=attachments_path)
+        except:
+            if not ignore_exceptions:
+                invalid_tasks.append(x)
+                continue
+            escaped = latex_escape(x.content.text)
+            content = "CONVERSION ERROR! Original text:\n" \
+                    "\\begin{verbatim}\n%s\n\\end{verbatim}\n" % escaped
         data = {
             'title': x.name,
             'url': x.get_absolute_url(),
@@ -394,12 +410,15 @@ def _convert_to_latex(sorted_tasks, **kwargs):
 
         tasks.append(data)
 
+    if invalid_tasks:
+        raise _ConvertException(invalid_tasks)
+
     return render_to_string(
         'latex_task_export.tex',
         dict(tasks=tasks, **kwargs)
     )
 
-def _export(ids, sorted_tasks, tasks, form):
+def _export(ids, sorted_tasks, tasks, form, ignore_exceptions):
     """
         Output LaTeX or PDF, permission already checked.
         It is assumed that Attachments are already saved in tasks[...] as
@@ -436,7 +455,8 @@ def _export(ids, sorted_tasks, tasks, form):
             return HttpResponseRedirect(
                     '/media/export/task{}{}'.format(hash, fext))
 
-    latex = _convert_to_latex(sorted_tasks, **form.cleaned_data)
+    latex = _convert_to_latex(sorted_tasks, ignore_exceptions,
+            **form.cleaned_data)
 
     # if latex without archive, do not create file, but directly output it
     if format == 'latex' and not create_archive:
@@ -477,6 +497,7 @@ def _export(ids, sorted_tasks, tasks, form):
         f.close()
 
     return HttpResponseRedirect('/media/export/task{}{}'.format(hash, fext))
+
 
 @response('task_export.html')
 def export(request, format=None, ids=None):
@@ -548,11 +569,17 @@ def export(request, format=None, ids=None):
     for attachment in attachments:
         content_to_task[attachment.content_id].cache_file_list.append(attachment)
 
+    invalid_tasks = None
     if request.method == 'POST' and 'action' in POST:
         form = TaskExportForm(POST)
         if form.is_valid():
             # note that attachments are imported into each task as .cache_file_list
-            return _export(ids, sorted_tasks, tasks, form)
+            ignore_exceptions = request.POST.get('ignore-exceptions')
+            try:
+                return _export(ids, sorted_tasks, tasks, form,
+                        ignore_exceptions)
+            except _ConvertException as e:
+                invalid_tasks = e.invalid_tasks
 
     # otherwise, if form not given or not valid:
 
@@ -577,6 +604,7 @@ def export(request, format=None, ids=None):
         'attachments': attachments,
         'form': form,
         'format': available_formats[format],
+        'invalid_tasks': invalid_tasks,
         'removed_tasks': removed_tasks,
         'tasks': sorted_tasks,
     }

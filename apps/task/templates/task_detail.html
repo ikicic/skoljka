@@ -86,12 +86,7 @@
 
 {% if not task.content.is_empty %}
   <div class="task-container mc-hover-area task-detail outset">
-    {# TODO: render tag! #}
-    {% if user.is_authenticated %}
-      {{ task.content.render_quote }}
-    {% else %}
-      {{ task.content.render }}
-    {% endif %}
+    {% mathcontent_render task.content quote=user.is_authenticated %}
   </div>
 {% endif %}
 

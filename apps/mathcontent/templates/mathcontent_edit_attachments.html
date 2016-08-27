@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load mathcontent_tags %}
+
 {% block title %}Uređivanje datoteka{% endblock %}
 
 {% block content %}
@@ -8,7 +10,7 @@
   <h4>{{ task.get_link }}</h4>
 {% endif %}
 <div class="outset outset-margin">
-  {{ content.render }}
+  {% mathcontent_render content %}
 </div>
 
 <div class="outset outset-margin">

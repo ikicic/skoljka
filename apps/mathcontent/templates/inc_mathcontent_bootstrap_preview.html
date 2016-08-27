@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load mathcontent_tags %}
 <div class="control-group">
   <div class="control-label no-top-padding">
     <button type="button" class="btn mc-preview-button"
@@ -8,6 +9,8 @@
     </button>
   </div>
   <div class="controls outset {{ extra_class }}" id="{{ target_id }}">
-    {{ content.render }}
+    {% if content %}
+      {% mathcontent_render content %}
+    {% endif %}
   </div>
 </div>

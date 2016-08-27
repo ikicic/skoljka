@@ -12,9 +12,24 @@ import os
 import re
 import sys
 
+latex_escape_table = {
+    '#': '\\#',
+    '%': '\\%',
+    '^': '\\textasciicircum{}',
+    '&': '\\&',
+    '_': '\\_',
+    '{': '\\{',
+    '}': '\\}',
+    '~': '\\~{}',
+    '\\': '\\textbackslash{}',
+}
+
+def latex_escape(val):
+    return u"".join(latex_escape_table.get(x, x) for x in val)
+
+
 # Obican .getstatusoutput ne radi na Windowimsa, ovo je zamjena
 # Preuzeto s http://mail.python.org/pipermail/python-win32/2008-January/006606.html
-
 mswindows = (sys.platform == "win32")
 def getstatusoutput(cmd):
     """Return (status, output) of executing cmd in a shell."""

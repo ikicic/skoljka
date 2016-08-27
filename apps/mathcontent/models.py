@@ -49,26 +49,6 @@ class MathContent(models.Model):
         if not hasattr(self, '_no_html_reset'):
             self.html = None
 
-    def render(self, quote=False):
-        if self.html is None:
-            from mathcontent.utils import convert_to_html
-            print 'CONVERTING %d...' % self.id
-            self.html = convert_to_html(self.text, content=self)
-            self._no_html_reset = True
-            self.save()
-            print 'DONE!'
-
-        return render_to_string('inc_mathcontent_render.html', {
-            'content': self,
-            # TODO: make a template tag
-            # 'view_source': request.user.is_authenticated(),
-            'view_source': True,
-            'quote': quote,
-        })
-
-    # TODO: template tag!
-    def render_quote(self):
-        return self.render(quote=True)
 
 
 def attachment_upload_to(instance, filename):

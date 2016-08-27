@@ -2,6 +2,7 @@
 
 {% load pagination_tags %}
 
+{% load mathcontent_tags %}
 {% load pm_tags %}
 {% load usergroup_tags %}
 
@@ -33,7 +34,7 @@
     {% endfor %}
     <br>
     <b>{{ m.subject }}</b><br><br>
-    {{ m.content.render|safe }}
+    {% mathcontent_render m.content %}
   </div>
 {% empty %}
   <br><center><i>Nema poruka</i></center><br>

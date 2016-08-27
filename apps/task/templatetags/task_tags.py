@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group, User
 from django.contrib.contenttypes.models import ContentType
 from django.utils.safestring import mark_safe
 
-from mathcontent.utils import convert_to_html
+from mathcontent.utils import convert_to_html_safe
 from permissions.constants import PERMISSION_NAMES
 from solution.models import Solution, HTML_INFO, SolutionDetailedStatus
 from tags.models import TaggedItem
@@ -59,7 +59,7 @@ def task_bulk_preview_single(task_info):
         permissions.append((PERMISSION_NAMES[perm_id].upper(), task_groups))
 
     return {
-        'content': mark_safe(convert_to_html(task_info.json['_content'])),
+        'content': mark_safe(convert_to_html_safe(task_info.json['_content'])),
         'difficulty': task_info.json['_difficulty'],
         'folder': task_info.template_data['folder'],
         'folder_position': task_info.json['_folder_position'],

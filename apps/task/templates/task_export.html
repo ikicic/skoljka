@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 
+{% load i18n %}
 {% load mathcontent_tags %}
 
 {% block title %}Pretvaranje u {{ format }}{% endblock %}
@@ -16,7 +17,20 @@
   <table width="40%" class="table-striped" style="text-align:center;">
     {{ form.as_table }}
   </table>
-  <input type="submit" name="action" value="Pretvori" class="btn btn-primary">
+  {% if invalid_tasks %}
+    <div class="alert alert-danger">
+      {% trans "There were some conversion errors in the following tasks:" %}
+      <ul>
+        {% for task in invalid_tasks %}
+          <li>{{ task.get_link }}</li>
+        {% endfor %}
+      </ul>
+      {% trans "If you still want to export the tasks, click 'Convert' again." %}
+      <input type="hidden" name="ignore-exceptions" value="1">
+    </div>
+  {% endif %}
+  <input type="submit" name="action" value="{% trans "Convert" %}"
+         class="btn btn-primary">
 
   <br><br>
   {% if removed_tasks %}

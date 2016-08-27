@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load mathcontent_tags %}
 
 {% block title %}
   {% if is_lecture %}
@@ -94,9 +95,9 @@
       <td>
         <div class="mc-preview outset" id="task-preview">
           {% if task.pk %}
-            {{ task.content.render }}
+            {% mathcontent_render task.content %}
           {% endif %}
-          {% if not task.pk or not task.content.render %}
+          {% if not task.pk or not task.content.text %}
             <span class="mc-preview-empty-message">
               {% trans "Press Ctrl+M to get the preview of the text." %}
             </span>

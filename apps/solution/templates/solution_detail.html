@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 
+{% load mathcontent_tags %}
 {% load post_tags %}
 {% load rating_tags %}
 
@@ -49,12 +50,7 @@
 </div>
 
 <div class="outset mc-hover-area" id="solution-task">
-  {# TODO: DRY? render conditionally tag? #}
-  {% if user.is_authenticated %}
-    {{ solution.task.content.render_quote }}
-  {% else %}
-    {{ solution.task.content.render }}
-  {% endif %}
+  {% mathcontent_render solution.task.content quote=user.is_authenticated %}
 </div>
 
 <div class="outset mc-hover-area" id="solution-container">
@@ -72,12 +68,7 @@
     <div id="solution-inner-container" style="visibility: hidden;">
   {% endif %}
 
-  {# TODO: render tag! #}
-  {% if user.is_authenticated %}
-    {{ solution.content.render_quote }}
-  {% else %}
-    {{ solution.content.render }}
-  {% endif %}
+  {% mathcontent_render solution.content quote=user.is_authenticated %}
 
   {% if obfuscate %}
     </div> {# solution-inner-container #}

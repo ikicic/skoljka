@@ -1,7 +1,7 @@
 from django.utils.translation import ugettext as _
 
 from mathcontent.models import TYPE_HTML, TYPE_LATEX
-from mathcontent.utils import convert
+from mathcontent.utils import convert_safe
 from skoljka.libs.decorators import response
 
 _evaluate__cache = {}
@@ -9,7 +9,7 @@ def _evaluate(type, content):
     try:
         return _evaluate__cache[(type, content)]
     except KeyError:
-        result = convert(type, content)
+        result = convert_safe(type, content)
         _evaluate__cache[(type, content)] = result
         return result
 

@@ -1,3 +1,5 @@
+{% load mathcontent_tags %}
+
 <div class="post-list-small">
 {% if user.is_authenticated or posts %}
   <h4>Komentari:</h4>
@@ -18,7 +20,7 @@
       {{ post.author|userlink }}, {{ post.date_created }}
     </div>
 
-    {{ post.content.render }}
+    {% mathcontent_render post.content %}
 
     {% if post.date_created != post.last_edit_time %}
       <div class="post-last-edit">

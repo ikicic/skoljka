@@ -862,12 +862,3 @@ def convert(type, text, attachments=None, attachments_path=None, url_prefix=""):
         return converter.convert_to_html()
     else:
         return converter.convert_to_latex()
-
-    # # converter = Converter(type, text, attachments, url_prefix=url_prefix)
-    # try:
-    #     i, output = converter.convert()
-    # except Exception as e:
-    #     msg = _("Error converting the text:") + " " + e.message
-    #     return u'<span class="mc-error">{}</span>'.format(msg)
-    # return output
-

@@ -2,6 +2,7 @@
 
 {% load pagination_tags %}
 
+{% load mathcontent_tags %}
 {% load pm_tags %}
 {% load usergroup_tags %}
 
@@ -60,7 +61,7 @@
     {{ x.message.date_created }}<br>
     <b>{{ x.message.subject }}</b><br>
     <br>
-    {{ x.message.content.render|safe }}
+    {% mathcontent_render x.message.content %}
   </div>
 {% empty %}
   <center><i>Nema poruka</i></center><br>

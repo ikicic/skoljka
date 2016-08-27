@@ -1,7 +1,38 @@
 ﻿from django import template
+from django.conf import settings
 from django.utils.html import mark_safe
 
+from mathcontent.utils import convert_to_html
+
 register = template.Library()
+
+@register.inclusion_tag('inc_mathcontent_render.html')
+def mathcontent_render(content, quote=False):
+    if content.html is None:
+        try:
+            content.html = convert_to_html(content.text, content=content)
+        except Exception:
+            if getattr(settings, 'MATHCONTENT_DEBUG', False):
+                raise
+            # Leave content.html as None. If None, template will notify the
+            # user about the error. No error details are provided.
+            pass
+        else:
+            content._no_html_reset = True
+            content.save()
+
+    return {
+        'content': content,
+        # 'view_source': request.user.is_authenticated(),
+        'view_source': True,
+        'quote': quote,
+    }
+
+
+@register.simple_tag
+def mathcontent_render_quote(content):
+    return mathcontent_render(content, quote=True)
+
 
 @register.inclusion_tag('inc_mathcontent_attachments.html')
 def mathcontent_attachments(content):

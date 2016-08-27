@@ -1,9 +1,18 @@
+{% load i18n %}
 <div class="mc">
   {# You might wonder why is view source using position absolute instead of #}
   {# the float property. The problem is quote div, which moves the view #}
   {# source link outside of the mc div. #}
   <div class="mc-inner">
-    {{ content.html|safe }}
+    {% if content.html == None %}
+      <span style="color:red;">
+        {% trans "Internal parser error. Please contact administrators." %}
+      </span>
+      {% trans "Original text:" %}<br>
+      <pre>{{ content.text }}</pre>
+    {% else %}
+      {{ content.html|safe }}
+    {% endif %}
     {% if view_source %}
       <div class="mc-viewsource">
         {% if quote %}

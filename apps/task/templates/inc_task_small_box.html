@@ -1,3 +1,4 @@
+{% load mathcontent_tags %}
 {% load solution_tags %}
 {% load tags_tags %}
 {% load task_tags %}
@@ -19,7 +20,7 @@
     </div>
 
     {% if task.cache_prerequisites_met %}
-      {{ task.content.render }}
+      {% mathcontent_render task.content %}
     {% else %}
       <i>Nište riješili neke od preduvjeta za ovaj zadatak!</i>
     {% endif %}

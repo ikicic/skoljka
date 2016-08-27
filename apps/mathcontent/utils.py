@@ -20,21 +20,30 @@ def convert(type, text, content=None, attachments_path=None):
         converter = converter_v1
 
     attachments = content and list(Attachment.objects.filter(content=content))
+    return converter.convert(type, text, attachments=attachments,
+            attachments_path=attachments_path)
+
+
+def convert_safe(type, *args, **kwargs):
     try:
-        return converter.convert(type, text, attachments=attachments,
-                attachments_path=attachments_path)
+        return convert(type, *args, **kwargs)
     except:
-        if settings.DEBUG:
+        if getattr(settings, 'MATHCONTENT_DEBUG', False):
             raise
         msg = _("Internal parser error. Please contact administrators.")
         if type == TYPE_HTML:
-            return "<span style=\"color:red;\">{}</span>".format(msg)
+            return u"<span style=\"color:red;\">{}</span>".format(msg)
         return msg
 
 
 def convert_to_html(*args, **kwargs):
     """Shortcut function for `convert`."""
     return convert(TYPE_HTML, *args, **kwargs)
+
+
+def convert_to_html_safe(*args, **kwargs):
+    return convert_safe(TYPE_HTML, *args, **kwargs)
+
 
 def convert_to_latex(*args, **kwargs):
     """Shortcut function for `convert`."""

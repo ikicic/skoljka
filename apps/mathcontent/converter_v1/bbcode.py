@@ -2,8 +2,8 @@ from django.utils.translation import ugettext as _
 
 from skoljka.libs import xss
 
-from mathcontent.converter_v1.basics import img_parse_length, \
-        img_params_to_html, latex_escape
+from mathcontent.latex import latex_escape
+from mathcontent.converter_v1.basics import img_parse_length, img_params_to_html
 from mathcontent.converter_v1.latex import convert_tex_length_to_html, \
         LatexValueError
 

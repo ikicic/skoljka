@@ -69,11 +69,6 @@ class ConverterV1TestCase(TestCaseEx):
             # print "Expected: ", expected
             self.fail("Received != Expected")
 
-    # def _get_converter(self, type, input, warnings=True,
-    #         converter_mock=Converter):
-    #     return converter_mock(type, input, self.attachments,
-    #             url_prefix=MOCK_URL_PREFIX, warnings=warnings)
-
     def assertTokenization(self, input, expected_tokens, *args, **kwargs):
         tokenizer = Tokenizer(input, *args, **kwargs)
         tokens = tokenizer.tokenize()
@@ -81,16 +76,9 @@ class ConverterV1TestCase(TestCaseEx):
 
     def assertHTML(self, input, output, *args, **kwargs):
         self.assertHTMLLatex(input, output, None, *args, **kwargs)
-        # # converter = self._get_converter(TYPE_HTML, input, *args, **kwargs)
-        # html = convert(TYPE_HTML, input, attachments=self.attachments)
-        # self.assertEqualPrint(html, output)
 
     def assertLatex(self, input, output, *args, **kwargs):
         self.assertHTMLLatex(input, None, output, *args, **kwargs)
-        # # converter = self._get_converter(TYPE_LATEX, input, *args, **kwargs)
-        # # i, latex = converter.convert()
-        # latex = convert(TYPE_LATEX, input, attachments=self.attachments)
-        # self.assertEqualPrint(latex, output)
 
     def assertHTMLLatex(self, input, output_html, output_latex,
             converter_kwargs={}, *args, **kwargs):

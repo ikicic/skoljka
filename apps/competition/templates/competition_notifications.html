@@ -1,6 +1,7 @@
 {% extends "competition_base.html" %}
 
 {% load competition_tags %}
+{% load mathcontent_tags %}
 
 {% block content %}
 
@@ -25,7 +26,7 @@
       {{ post.date_created }}
     </div>
 
-    {{ post.content.render }}
+    {% mathcontent_render post.content %}
 
     {% if post.date_created != post.last_edit_time %}
       <div class="post-last-edit">

@@ -1,12 +1,14 @@
 {% extends "base.html" %}
 
+{% load mathcontent_tags %}
+
 {% block title %}Slanje rješenja{% endblock %}
 
 {% block content %}
 
 Zadatak: {{ task.get_link }}
 <div class="task-container mc-hover-area outset">
-  {{ task.content.render }}
+  {% mathcontent_render task.content %}
 </div>
 
 <form id="solution-submit-form" action="{{ action_url }}" method="post">
