@@ -692,6 +692,15 @@ class ConverterV1TestCase(TestCaseEx):
         self.assertLatex("[par 0 1em]",
                          "\\setlength{\\parskip}{0pt}\n"
                          "\\setlength{\\parindent}{1em}\n")
+        self.assertHTMLAutoLatex(
+                "\setlength{\parindent}{2em}\n"
+                "\setlength{\parskip}{3em}\n"
+                "\n"
+                "First paragraph\n"
+                "\n"
+                "Second paragraph",
+                '<p class="mc-noindent" style="margin-top:3em;">First paragraph'
+                '<p style="margin-top:3em;text-indent:2em;">Second paragraph')
 
 
     def test_bbcode(self):

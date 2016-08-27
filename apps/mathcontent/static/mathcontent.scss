@@ -89,7 +89,10 @@ object.latex-center {
 
 .mc-indent {
   // Default is 15pt, 17pt, 17.68pt for 10pt, 11pt, 12pt document size.
-  text-indent: 1em;
+  // We support this class (to simplify testing), but the default is no
+  // indentation.
+  // text-indent: 1em;
+  text-indent: 0em;
 }
 
 .mc-mbox {
@@ -106,7 +109,8 @@ object.latex-center {
 }
 
 .mc-preview p, .mc-inner p {
-  margin: 1pt 0 0 0;  // Default \parskip.
+  // margin: 1pt 0 0 0;  // Default LaTeX \parskip.
+  margin: 1em 0 0 0;  // Default \parskip here.
 }
 
 .mc-preview > p:first-child, .mc-inner > p:first-child {

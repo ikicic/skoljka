@@ -25,6 +25,12 @@ from urlparse import urljoin
 import copy
 import re
 
+# If changing these note that all the MathContents not setting these values
+# manually will be affected. Also, don't forget to update mathcontent.scss
+# (.mc-indent and .mc-preview p, .mc-inner p).
+default_parskip = '1em'
+default_parindent = '0em'
+
 
 # FIXME: Converter crashes if $??$ from \ref{...} not already generated and
 # appears multiple times in the text.
@@ -626,10 +632,13 @@ class Converter(object):
     def push_state(self):
         self._state_stack.append(copy.deepcopy(self._state_stack[-1]))
         self.state = self._state_stack[-1]
+        self.state.any_content_yet = False
 
     def pop_state(self):
+        was_content_yet = self.state.any_content_yet
         self._state_stack.pop()
         self.state = self._state_stack[-1]
+        self.state.any_content_yet |= was_content_yet
 
     def _pre_convert_to_html(self):
         # Here we process tokens of specific types before calling .to_html.
@@ -731,6 +740,7 @@ class Converter(object):
 
         class HTMLConverterState(object):
             def __init__(self):
+                self.any_content_yet = False
                 self.is_in_paragraph = False
                 self.indent_next = False
                 self.all_no_indent = False
@@ -751,6 +761,7 @@ class Converter(object):
                 return
 
             state = self.state
+            state.any_content_yet = True
             if not self.paragraphs_disabled and not state.is_in_paragraph:
                 indent = state.indent_next and not state.all_no_indent
 
@@ -793,11 +804,12 @@ class Converter(object):
             elif isinstance(token, TokenText):
                 add_content_par(xss.escape(token.text).replace('~', '&nbsp;'))
             elif isinstance(token, TokenSimpleWhitespace):
-                output.append(" ")  # Single whitespace is enough.
+                if self.state.any_content_yet:
+                    output.append(" ")  # Single whitespace is enough.
             elif isinstance(token, TokenMultilineWhitespace):
                 if self.paragraphs_disabled:
                     output.append("<br>")
-                else:
+                elif self.state.any_content_yet:
                     self.state.is_in_paragraph = False
                     self.state.indent_next = True
             elif isinstance(token, TokenError):

@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-27 17:33+0200\n"
-"PO-Revision-Date: 2016-08-27 17:33+0200\n"
+"POT-Creation-Date: 2016-08-27 21:55+0200\n"
+"PO-Revision-Date: 2016-08-27 21:55+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -15,43 +15,43 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2\n"
 
-#: apps/base/help.py:20
+#: apps/base/help.py:21
 msgid "Partially supported."
 msgstr "Djelomično podržano."
 
-#: apps/base/help.py:21
+#: apps/base/help.py:22
 msgid "Possibly incompatible behavior."
 msgstr "Moguće nekompatilno ponašanje."
 
-#: apps/base/help.py:23
+#: apps/base/help.py:24
 msgid "Visually different when exported to PDF."
 msgstr "Vizualno drugačije kad se pretvori u PDF."
 
-#: apps/base/help.py:25
+#: apps/base/help.py:26
 msgid "Basic Commands"
 msgstr "Osnovne naredbe"
 
-#: apps/base/help.py:26
+#: apps/base/help.py:27
 msgid "Emphasized text (usually italic)"
 msgstr "Naglašeni tekst (obično italic)"
 
-#: apps/base/help.py:27 apps/base/help.py:105
+#: apps/base/help.py:28 apps/base/help.py:109
 msgid "Bold"
 msgstr "Bold"
 
-#: apps/base/help.py:28 apps/base/help.py:106
+#: apps/base/help.py:29 apps/base/help.py:110
 msgid "Italic"
 msgstr "Italic"
 
-#: apps/base/help.py:29 apps/base/help.py:107
+#: apps/base/help.py:30 apps/base/help.py:111
 msgid "Strikethrough"
 msgstr "Precrtano"
 
-#: apps/base/help.py:30 apps/base/help.py:108
+#: apps/base/help.py:31 apps/base/help.py:112
 msgid "Underline"
 msgstr "Podcrtano"
 
-#: apps/base/help.py:32
+#: apps/base/help.py:33
 msgid ""
 "Underline and disable word-wrap. It's recommended to use <code>\\uline</"
 "code> instead."
@@ -59,44 +59,44 @@ msgstr ""
 "Podcrtano s isključenim prijelomom teksta. Preporučeno je koristiti umjesto "
 "toga <code>\\uline</code>."
 
-#: apps/base/help.py:35
+#: apps/base/help.py:36
 msgid "Monospace font."
 msgstr "Monospace font."
 
-#: apps/base/help.py:37
+#: apps/base/help.py:38
 msgid "Newline"
 msgstr "Novi red"
 
-#: apps/base/help.py:39
+#: apps/base/help.py:40
 msgid "Advanced Commands"
 msgstr "Napredne naredbe"
 
-#: apps/base/help.py:40
+#: apps/base/help.py:41
 msgid "Show the given image."
 msgstr "Prikaži zadanu sliku."
 
-#: apps/base/help.py:41
+#: apps/base/help.py:42
 msgid "Figure caption."
 msgstr "Opis slike"
 
-#: apps/base/help.py:42
+#: apps/base/help.py:43
 msgid "Figure centering."
 msgstr "Centriranje slike"
 
-#: apps/base/help.py:43
+#: apps/base/help.py:44
 msgid "Set figure or equation label."
 msgstr "Postavi oznaku slike ili jednadžbe."
 
-#: apps/base/help.py:44
+#: apps/base/help.py:45
 msgid "Given a label, show a link to the related content."
 msgstr "Link na sadržaj označen zadanom oznakom."
 
-#: apps/base/help.py:46 apps/base/help.py:47 apps/base/help.py:125
-#: apps/base/help.py:126
+#: apps/base/help.py:47 apps/base/help.py:48 apps/base/help.py:129
+#: apps/base/help.py:130
 msgid "Link"
 msgstr "Link"
 
-#: apps/base/help.py:49
+#: apps/base/help.py:50
 msgid ""
 "Set value of the given length command. Currently, only <code>\\parindent</"
 "code> and <code>\\parskip</code> are supported, representing indentation "
@@ -106,72 +106,73 @@ msgstr ""
 "\\parindent</code> i <code>\\parskip</code>, koji predstavljaju uvlačenje i "
 "gornju marginu paragrafa (razmak između paragrafa)."
 
-#: apps/base/help.py:53
+#: apps/base/help.py:54
 msgid "Note that the first paragraph is not indented."
 msgstr "Primijetite da prvi paragraf nije uvučen."
 
-#: apps/base/help.py:54
+#: apps/base/help.py:55
+#, python-format
 msgid ""
-"The default values are <code>1pt</code> for <code>\\parskip</code> and "
-"<code>1em</code> for <code>\\parlength</code>."
+"The default values are <code>%(parskip)s</code> for <code>\\parskip</code> "
+"and <code>%(parindent)s</code> for <code>\\parindent</code>."
 msgstr ""
-"Početne vrijednosti su <code>1pt</code> za <code>\\parskip</code> i "
-"<code>1em</code> za <code>\\parlength</code>."
+"Početne vrijednosti su <code>%(parskip)s</code> za <code>\\parskip</code> i "
+"<code>%(parindent)s</code> za <code>\\parindent</code>."
 
-#: apps/base/help.py:62
+#: apps/base/help.py:66
 msgid "Other Commands"
 msgstr "Ostale naredbe"
 
-#: apps/base/help.py:64
+#: apps/base/help.py:68
 msgid "Framed box with disabled word-wrap."
 msgstr "Uokviren tekst s isključenim prijelomom teksta."
 
-#: apps/base/help.py:65 apps/base/help.py:69 apps/base/help.py:123
+#: apps/base/help.py:69 apps/base/help.py:73 apps/base/help.py:127
 msgid "Please don't misuse."
 msgstr "Molimo nemojte zloupotrebljavati."
 
-#: apps/base/help.py:68
+#: apps/base/help.py:72
 msgid "Disabled word-wrap."
 msgstr "Isključen prijelom teksta."
 
-#: apps/base/help.py:73 apps/base/help.py:74 apps/base/help.py:75
-#: apps/base/help.py:78 apps/base/help.py:79 apps/base/help.py:80
-#: apps/base/help.py:81 apps/base/help.py:82 apps/base/help.py:83
-#: apps/base/help.py:84
+#: apps/base/help.py:77 apps/base/help.py:78 apps/base/help.py:79
+#: apps/base/help.py:82 apps/base/help.py:83 apps/base/help.py:84
+#: apps/base/help.py:85 apps/base/help.py:86 apps/base/help.py:87
+#: apps/base/help.py:88
 #, python-format
 msgid "Symbol %s."
 msgstr "Simbol %s."
 
-#: apps/base/help.py:76
+#: apps/base/help.py:80
 msgid "Soft hyphen, shown in HTML as <pre>&amp;shy;</pre>."
 msgstr "Tzv. <i>soft hyphen</i>, prikazan u HTML-u kao <pre>&amp;shy;</pre>."
 
-#: apps/base/help.py:86
+#: apps/base/help.py:90
 msgid "LaTeX Environments"
 msgstr "LaTeX Environments"
 
-#: apps/base/help.py:87
+#: apps/base/help.py:91
 msgid "Centering."
 msgstr "Centriranje."
 
-#: apps/base/help.py:90
+#: apps/base/help.py:94
 msgid "Figure, used for inserting images."
 msgstr "Za ubacivanje slika."
 
-#: apps/base/help.py:96
+#: apps/base/help.py:100
 msgid "Pre-formatted text."
 msgstr "Unaprijed formatiran tekst."
 
-#: apps/base/help.py:99
+#: apps/base/help.py:103
 msgid "Similar to <code>verbatim</code>, where spaces are shown as &blank;."
 msgstr ""
 "Slično <code>verbatim</code>, samo što se razmaci prikazuju kao &blank;."
 
-#: apps/base/help.py:109
+#: apps/base/help.py:113
 msgid "Code"
 msgstr "Kod"
 
-#: apps/base/help.py:111
+#: apps/base/help.py:115
 msgid ""
 "Shorthand for <code>\\setlength{\\parskip}{SKIP} \\setlength{\\parindent}"
 "{INDENT}</code>. Value <code>0</code> is treated as <code>0pt</code>."
@@ -179,16 +180,16 @@ msgstr ""
 "Kratica za <code>\\setlength{\\parskip}{SKIP} \\setlength{\\parindent}"
 "{INDENT}</code>. Vrijednost <code>0</code> se tretira kao <code>0pt</code>."
 
-#: apps/base/help.py:116
+#: apps/base/help.py:120
 msgid "Preformatted text. Simulates LaTeX environment <code>verbatim</code>."
 msgstr ""
 "Unaprijed formatiran tekst. Simulira <code>verbatim</code> LaTeX environment."
 
-#: apps/base/help.py:119
+#: apps/base/help.py:123
 msgid "Quote"
 msgstr "Citat"
 
-#: apps/base/help.py:122
+#: apps/base/help.py:126
 msgid ""
 "Show the attachment #x, counting from 1. Optionally, specify the width and "
 "height."
@@ -196,7 +197,7 @@ msgstr ""
 "Prikaži priloženu sliku #x, brojeći od 1. Po želji se mogu specificirati "
 "duljina i visina slike."
 
-#: apps/base/help.py:133
+#: apps/base/help.py:137
 msgid "Some text here."
 msgstr "Neki tekst."
 
@@ -592,45 +593,45 @@ msgstr[2] "%d mojih zadataka"
 msgid "Internal parser error. Please contact administrators."
 msgstr "Greška parsiranja. Molimo obavijestite administratore!"
 
-#: apps/mathcontent/converter_v1/__init__.py:254
-#: apps/mathcontent/converter_v1/__init__.py:266
+#: apps/mathcontent/converter_v1/__init__.py:260
+#: apps/mathcontent/converter_v1/__init__.py:272
 msgid "Ending not found:"
 msgstr "Kraj nije pronađen:"
 
-#: apps/mathcontent/converter_v1/__init__.py:283
+#: apps/mathcontent/converter_v1/__init__.py:289
 msgid "None of the endings found:"
 msgstr "Niti jedan od krajeva nije pronađen:"
 
-#: apps/mathcontent/converter_v1/__init__.py:345
+#: apps/mathcontent/converter_v1/__init__.py:351
 msgid "Unknown LaTeX command."
 msgstr "Nepoznata LaTeX naredba."
 
-#: apps/mathcontent/converter_v1/__init__.py:384
+#: apps/mathcontent/converter_v1/__init__.py:390
 msgid "Expected a '{' bracket."
 msgstr "Očekuje se '{' zagrada."
 
-#: apps/mathcontent/converter_v1/__init__.py:403
+#: apps/mathcontent/converter_v1/__init__.py:409
 #, python-format
 msgid "Expected a '%s' bracket."
 msgstr "Očekuje se '%s' zagrada."
 
-#: apps/mathcontent/converter_v1/__init__.py:494
+#: apps/mathcontent/converter_v1/__init__.py:500
 msgid "Unexpected '}'."
 msgstr "Neočekivana zagrada '}'."
 
-#: apps/mathcontent/converter_v1/__init__.py:520
+#: apps/mathcontent/converter_v1/__init__.py:526
 msgid "Expected a '}' bracket."
 msgstr "Očekuje se '}' zagrada."
 
-#: apps/mathcontent/converter_v1/__init__.py:522
+#: apps/mathcontent/converter_v1/__init__.py:528
 msgid "End delimiter missing."
 msgstr "Nedostaje krajnja oznaka."
 
-#: apps/mathcontent/converter_v1/__init__.py:550
+#: apps/mathcontent/converter_v1/__init__.py:556
 msgid "Invalid LaTeX."
 msgstr "Nevaljan LaTeX."
 
-#: apps/mathcontent/converter_v1/__init__.py:786
+#: apps/mathcontent/converter_v1/__init__.py:797
 msgid "Unexpected '}'"
 msgstr "Neočekivana zagrada '}'."
 

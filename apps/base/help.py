@@ -1,5 +1,6 @@
 from django.utils.translation import ugettext as _
 
+from mathcontent.converter_v1 import default_parskip, default_parindent
 from mathcontent.models import TYPE_HTML, TYPE_LATEX
 from mathcontent.utils import convert_safe
 from skoljka.libs.decorators import response
@@ -51,11 +52,14 @@ def help_format(request):
                 "supported, representing indentation length and paragraph "
                 "top margin.")
             + " " + _("Note that the first paragraph is not indented.")
-            + " " + _("The default values are <code>1pt</code> for "
-                "<code>\\parskip</code> and <code>1em</code> for "
-                "<code>\\parlength</code>."),
-            "\\setlength{\\parindent}{2em}\n"
-            "\\setlength{\\parskip}{3em}\n\n"
+            + " " + _(u"The default values are <code>%(parskip)s</code> for "
+                "<code>\\parskip</code> and <code>%(parindent)s</code> for "
+                "<code>\\parindent</code>.") % {
+                    'parskip': default_parskip,
+                    'parindent': default_parindent,
+                },
+            "\\setlength{\\parskip}{3em}\n"
+            "\\setlength{\\parindent}{2em}\n\n"
             "First paragraph\n\n"
             "Second paragraph"),
 
