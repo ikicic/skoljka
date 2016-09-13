@@ -19,8 +19,14 @@ def _make_patterns(*patterns):
 
 # Competition-related URLs, prefixed with competition/<id>/
 _patterns = _make_patterns(
+    # NOTE: Do not complicate here with names, as there might be multiple links
+    # to the same competition page (with /competition/{{ id }}/ prefix and with
+    # /{{ comp_prefix }}/). Use comp_url instead. Also, this is not a list
+    # of url()s, the following list is first processed by _make_patterns.
     (r'$', 'homepage'),
     (r'chain/$', 'chain_list'),
+    (r'chain/tasks/$', 'chain_tasks_list'),
+    (r'chain/tasks/action/$', 'chain_tasks_action'),
     (r'chain/(?P<chain_id>\d+)/$', 'chain_edit'),
     (r'chain/(?P<chain_id>\d+)/overview/$', 'chain_overview'),
     (r'chain/new/$', 'chain_new'),

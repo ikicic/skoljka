@@ -1,11 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
+from django.core.urlresolvers import reverse
 from django.db.models import Count
 from django.forms.models import modelformset_factory
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext as _
 
 from mathcontent.models import MathContent
 from permissions.constants import VIEW, EDIT
@@ -19,19 +21,25 @@ from userprofile.forms import AuthenticationFormEx
 
 from competition.decorators import competition_view
 from competition.evaluator import get_evaluator, get_solution_help_text
-from competition.forms import ChainForm, CompetitionSolutionForm, \
-        CompetitionTaskForm, BaseCompetitionTaskFormSet, TeamForm, \
-        TaskListAdminPanelForm
+from competition.forms import ChainForm, ChainTasksForm, \
+        CompetitionSolutionForm, CompetitionTaskForm, \
+        BaseCompetitionTaskFormSet, TeamForm, TaskListAdminPanelForm
 from competition.models import Chain, Competition, CompetitionTask, Team, \
         TeamMember, Submission
 from competition.utils import fix_ctask_order, update_chain_comments_cache, \
-        update_score_on_ctask_action, preprocess_chain, \
+        comp_url, update_score_on_ctask_action, preprocess_chain, \
         get_teams_for_user_ids, lock_ctasks_in_chain, \
-        refresh_teams_cache_score, update_ctask_task
+        refresh_teams_cache_score, update_ctask_task, \
+        is_ctask_comment_important, ctask_comment_class, \
+        detach_ctask_from_chain, delete_chain
+
+from skoljka.libs.decorators import require
 
 from collections import defaultdict
 from datetime import datetime
 import django_sorting
+
+import re
 
 
 @response('competition_list.html')
@@ -218,6 +226,8 @@ def task_list(request, competition, data):
         chain.competition = competition # use preloaded object
 
     for ctask in all_ctasks:
+        if ctask.chain_id is None:
+            continue
         chain = all_chains_dict[ctask.chain_id]
         ctask.competition = competition # use preloaded object
         ctask.chain = chain
@@ -352,6 +362,108 @@ def task_detail(request, competition, data, ctask_id):
 
 
 @competition_view(permission=EDIT)
+@response('competition_chain_list_tasks.html')
+def chain_tasks_list(request, competition, data):
+    created = False
+    if request.method == 'POST':
+        form = ChainTasksForm(request.POST, competition=competition)
+        if form.is_valid():
+            chain = form.save(commit=False)
+            chain.competition = competition
+            chain.save()
+
+            ctasks = form.cleaned_data['ctasks']
+            for k, ctask in enumerate(ctasks):
+                ctask.chain_id = chain.id
+                ctask.chain_position = k
+                ctask.save()
+            update_chain_comments_cache(chain, ctasks)
+            chain.save()
+            created = True
+    else:
+        form = ChainTasksForm(competition=competition)
+
+    chains = Chain.objects.filter(competition=competition)
+    order_by_field = django_sorting.middleware.get_field(request)
+    if len(order_by_field) > 1:
+        chains = chains.order_by(order_by_field, 'category', 'name')
+    else:
+        chains = chains.order_by('category', 'name')
+
+    chain_dict = {chain.id: chain for chain in chains}
+    ctasks = list(CompetitionTask.objects.filter(competition=competition) \
+            .select_related('task', 'task__author', 'task__content__text',
+                'comment__text'))
+
+    # TODO: 'ctask_id', 'team_id'
+    verified_ctask_ids = set(Submission.objects \
+            .filter(team__competition_id=competition.id,
+                    team__is_test=True,
+                    cache_is_correct=True) \
+            .values_list('ctask_id', flat=True))
+
+    for chain in chains:
+        chain.competition = competition
+        chain.t_ctasks = []
+        chain.t_is_verified = True
+
+    unused_ctasks = []
+    for ctask in ctasks:
+        if ctask.chain_id is None:
+            unused_ctasks.append(ctask)
+        else:
+            chain = chain_dict[ctask.chain_id]
+            chain.t_ctasks.append(ctask)
+            if ctask.id not in verified_ctask_ids:
+                chain.t_is_verified = False
+        ctask.t_admin_solved_count = 0
+        if ctask.comment.text.strip():
+            is_important = is_ctask_comment_important(ctask.comment.text)
+            ctask.t_comment = _("Important comment.") if is_important \
+                    else _("Comment.")
+        else:
+            is_important = False
+            ctask.t_comment = ""
+        ctask.t_class = ctask_comment_class(ctask, request.user,
+                is_important=is_important)
+
+    for ctask_id in verified_ctask_ids:
+        ctask.t_admin_solved_count += 1
+
+    for chain in chains:
+        chain.t_ctasks.sort(key=lambda x: x.chain_position)
+
+    data['created'] = created
+    data['form'] = form
+    data['chains'] = chains
+    data['unused_ctasks'] = unused_ctasks
+    data['trans_checked_title'] = _("Number of admins solved this task.")
+    return data
+
+
+_ACTION_RE = re.compile(r'(delete-chain|detach)-(\d+)')
+@require(post=['action'])
+@competition_view(permission=EDIT)
+@response()
+def chain_tasks_action(request, competition, data):
+    match = _ACTION_RE.match(request.POST['action'])
+    if not match:
+        raise Http404
+
+    action = match.group(1)
+    id = match.group(2)
+    if action == 'delete-chain':
+        chain = get_object_or_404(Chain, id=id, competition=competition)
+        delete_chain(chain)
+    elif action == 'detach':
+        ctask = get_object_or_404(CompetitionTask,
+            id=id, competition=competition)
+        detach_ctask_from_chain(ctask)
+    return (comp_url(competition, "chain/tasks"), )
+
+
+
+@competition_view(permission=EDIT)
 @response('competition_chain_list.html')
 def chain_list(request, competition, data):
     chains = Chain.objects.filter(competition=competition)
@@ -380,6 +492,8 @@ def chain_list(request, competition, data):
         chain.t_is_verified = True
 
     for ctask_id, chain_id, author_id in ctasks:
+        if chain_id is None:
+            continue
         chain = chain_dict[chain_id]
         chain.t_ctask_count += 1
         chain._author_ids.add(author_id)
@@ -393,6 +507,7 @@ def chain_list(request, competition, data):
 
     data['chains'] = chains
     return data
+
 
 def _create_or_update_task(
         ctask, user, competition, chain, index, text, comment):
@@ -468,9 +583,12 @@ def chain_new(request, competition, data, chain_id=None):
 
     POST = request.POST if request.method == 'POST' else None
     chain_form = ChainForm(data=POST, instance=chain)
-    queryset = CompetitionTask.objects.filter(chain_id=chain_id) \
-            .select_related('task__content', 'comment') \
-            .order_by('chain_position', 'id')
+    if chain_id is None:
+        queryset = CompetitionTask.objects.none()
+    else:
+        queryset = CompetitionTask.objects.filter(chain_id=chain_id) \
+                .select_related('task__content', 'comment') \
+                .order_by('chain_position', 'id')
     was_order_fixed = fix_ctask_order(competition, chain, list(queryset))
     formset = CompetitionTaskFormSet(data=POST, queryset=queryset)
 
@@ -539,6 +657,7 @@ def notifications(request, competition, data):
     data['target_container'] = team
     data['team_member_ids'] = member_ids
     return data
+
 
 @competition_view(permission=EDIT)
 @response('competition_notifications_admin.html')

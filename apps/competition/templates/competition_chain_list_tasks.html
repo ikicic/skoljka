@@ -1,0 +1,108 @@
+{% extends "competition_base.html" %}
+{% load i18n %}
+
+{% load competition_tags %}
+{% load sorting_tags %}
+
+{% block content %}
+
+<div class="alert">
+  Vidljivo samo administratorima!
+</div>
+
+<div id="chain-action-bar-right">
+  <a href="{% comp_url 'chain/new' %}" class="btn">Novi lanac</a>
+</div>
+
+<h3 class="comp-header">{% trans "Unused tasks" %}</h3>
+
+{% if created %}
+  <div class="alert alert-success">
+    {% trans "Chain successfully created." %}
+  </div>
+{% endif %}
+
+<form method="POST" action="" class="form-horizontal">
+  {% csrf_token %}
+  <p><i>
+    {% trans "Info: To create a chain, select tasks by clicking on them, fill out the chain information and submit." %}
+  </i>
+  <table class="table table-striped" id="cchain-unused-ctasks-table">
+    <tr class="comp-tr-ctask">
+      <th></th>
+      <th>{% trans "Date added" %}</th>
+      <th>{% trans "Author" %}</th>
+      <th>{% trans "Text" %}</th>
+      <th style="width:30px;" title="{{ trans_checked_title }}">
+        {% trans "Reviewed?" %}
+      </th>
+      <th>{% trans "Comment" %}</th>
+      <th>{% trans "Edit" %}</th>
+      <th>{% trans "Overview" %}</th>
+    </tr>
+    {% for ctask in unused_ctasks %}
+      {% chain_ctask_tr ctask %}
+    {% endfor %}
+  </table>
+
+  <table>
+    {{ form }}
+    <tr>
+      <td></td>
+      <td>
+        <input type="submit" class="btn btn-primary"
+               value="{% trans "Create chain" %}">
+      </td>
+    </tr>
+  </table>
+</form>
+
+<h3 class="comp-header">{% trans "Chains (used tasks)" %}</h3>
+
+<form method="POST" action="{% comp_url 'chain/tasks/action' %}">
+  {% csrf_token %}
+  <table class="table table-striped">
+    <tr class="cchain-list">
+      <th colspan="2">{% trans "Category" %}</th>
+      <th colspan="2">{% trans "Title" %}</th>
+      <th title="Vrijeme otključavanja">{% anchor unlock_minutes Minute %}</th>
+      <th></th>
+      <th></th>
+    </tr>
+    <tr class="comp-tr-ctask">
+      <th class="cchain-list-ctask-counter">#</th>
+      <th>{% trans "Author" %}</th>
+      <th>{% trans "Text" %}</th>
+      <th style="width:30px;" title="{{ trans_checked_title }}">
+        {% trans "Reviewed?" %}
+      </th>
+      <th>{% trans "Comment" %}</th>
+      <th></th>
+      <th></th>
+    </tr>
+    {% for chain in chains %}
+      <tr class="cchain-list">
+        <td colspan="2">{{ chain.category }}</td>
+        <td colspan="2">
+          <a href="{{ chain.get_absolute_url }}">{{ chain.name }}</a>
+        </td>
+        <td>{{ chain.unlock_minutes }} min.</td>
+        <td>
+          <button type="submit" name="action"
+                  value="delete-chain-{{ chain.id }}">
+            DELETE
+          </button>
+          <a href="{{ chain.get_absolute_url }}">{% trans "Edit" %}</a>
+        </td>
+        <td><a href="{{ chain.get_absolute_url }}overview/">
+            {% trans "Overview" %}</a></td>
+      </tr>
+      {% for ctask in chain.t_ctasks %}
+        {% chain_ctask_tr ctask forloop.counter %}
+      {% endfor %}
+    {% empty %}
+      <tr><td colspan="6"><i>{% trans "Empty..." %}</i></td> </tr>
+    {% endfor %}
+  </table>
+</form>
+{% endblock content %}

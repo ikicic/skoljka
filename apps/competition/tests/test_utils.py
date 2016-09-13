@@ -5,7 +5,8 @@ from competition.models import Competition, CompetitionTask, Chain, \
         Submission, Team
 from competition.utils import is_ctask_comment_important, \
         update_chain_comments_cache, parse_chain_comments_cache, \
-        refresh_teams_cache_score, update_score_on_ctask_action
+        refresh_teams_cache_score, update_score_on_ctask_action, \
+        detach_ctask_from_chain, delete_chain
 from mathcontent.models import MathContent
 from task.models import Task
 
@@ -27,13 +28,17 @@ HOUR = datetime.timedelta(hours=1)
 MINUTE = datetime.timedelta(minutes=1)
 
 
+def _set_up_users(self):
+    self.admin = User.objects.get(id=1)
+    self.alice = User.objects.get(id=2)
+    self.bob = User.objects.get(id=3)
+
+
 class TeamScoreTest(TestCase):
     fixtures = ['apps/userprofile/fixtures/test_userprofiles.json']
 
     def setUp(self):
-        # TODO: make a base class for users
-        self.admin = User.objects.get(id=1)
-        self.alice = User.objects.get(id=2)
+        _set_up_users(self)
         self.now = datetime.datetime.now()
         self.competition = Competition.objects.create(
                 name="Test competition", hidden=False,
@@ -139,10 +144,7 @@ class TestCompetitionTaskComments(TestCase):
     fixtures = ['apps/userprofile/fixtures/test_userprofiles.json']
 
     def setUp(self):
-        # TODO: make a base class for users
-        self.admin = User.objects.get(id=1)
-        self.alice = User.objects.get(id=2)
-        self.bob = User.objects.get(id=3)
+        _set_up_users(self)
 
         now = datetime.datetime.now()
         self.competition = Competition.objects.create(
@@ -197,3 +199,65 @@ class TestCompetitionTaskComments(TestCase):
             self.chain, self.bob)
         self.assertEqual(num_important, 3)
         self.assertEqual(num_important_my, 0)
+
+
+
+class ChainsTest(TestCase):
+    fixtures = ['apps/userprofile/fixtures/test_userprofiles.json']
+
+    def setUp(self):
+        _set_up_users(self)
+        self.now = datetime.datetime.now()
+        self.competition = Competition.objects.create(
+                name="Test competition", hidden=False,
+                registration_open_date=self.now - 50 * HOUR,
+                start_date=self.now - 3 * HOUR,
+                scoreboard_freeze_date=self.now + 2 * HOUR,
+                end_date=self.now + 3 * HOUR)
+        self.chain1 = Chain.objects.create(competition=self.competition,
+                name="Test chain 1", bonus_score=1000)
+        self.chain2 = Chain.objects.create(competition=self.competition,
+                name="Test chain 2", bonus_score=1000)
+
+    def test_remove_ctasks_and_chains(self):
+        def assertPositions(*positions):
+            for id, expected in zip(ctask_ids, positions):
+                ctask = CompetitionTask.objects.get(id=id)
+                self.assertEqual(ctask.chain_position, expected)
+                if expected == -1:
+                    self.assertIsNone(ctask.chain_id)
+                else:
+                    self.assertIsNotNone(ctask.chain_id)
+
+        c1 = create_ctask(self.admin, self.competition, self.chain1, "42", 1, "first")
+        c2 = create_ctask(self.admin, self.competition, self.chain1, "42", 1, "second")
+        c3 = create_ctask(self.admin, self.competition, self.chain1, "42", 1, "third")
+        c4 = create_ctask(self.admin, self.competition, self.chain1, "42", 1, "fourth")
+        d1 = create_ctask(self.admin, self.competition, self.chain2, "42", 1, "fourth")
+        d2 = create_ctask(self.admin, self.competition, self.chain2, "42", 1, "fourth")
+        d3 = create_ctask(self.admin, self.competition, self.chain2, "42", 1, "fourth")
+        ctask_ids = [c1.id, c2.id, c3.id, c4.id, d1.id, d2.id, d3.id]
+
+        assertPositions(0, 1, 2, 3, 0, 1, 2)
+
+        detach_ctask_from_chain(c2)
+        assertPositions(0, -1, 1, 2, 0, 1, 2)
+
+        detach_ctask_from_chain(c4)
+        assertPositions(0, -1, 1, -1, 0, 1, 2)
+
+        detach_ctask_from_chain(c1)
+        assertPositions(-1, -1, 0, -1, 0, 1, 2)
+
+        id1 = self.chain1.id
+        id2 = self.chain2.id
+
+        delete_chain(self.chain2)
+        self.assertTrue(Chain.objects.filter(id=id1).exists())
+        self.assertFalse(Chain.objects.filter(id=id2).exists())
+        assertPositions(-1, -1, 0, -1, -1, -1, -1)
+
+        delete_chain(self.chain1)
+        self.assertFalse(Chain.objects.filter(id=id1).exists())
+        self.assertFalse(Chain.objects.filter(id=id2).exists())
+        assertPositions(-1, -1, -1, -1, -1, -1, -1)

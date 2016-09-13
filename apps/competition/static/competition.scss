@@ -395,3 +395,61 @@ tr.ctask-correct > td {
   color: lightgray;
   float: right;
 }
+
+.cchain-list > th,
+.cchain-list > td {
+  background-color: mix(gray, $table-bg, 15%) !important;
+  line-height: 2em;
+}
+
+td.cchain-list-ctask-selected {
+  width: 2em;
+  text-align: right;
+}
+
+th.cchain-list-ctask-counter,
+td.cchain-list-ctask-counter {
+  text-align: right;
+  width: 2em;
+}
+
+.cchain-list-ctask-content {
+  color: gray;
+  text-overflow: ellipsis;
+}
+
+td.cchain-list-ctask-date {
+  color: gray;
+  font-size: 11px;
+  white-space: nowrap;
+  width: 90px;
+}
+
+$table-selected-bg: mix(blue, $table-bg, 5%);
+#cchain-unused-ctasks-table tr:hover > td {
+  background-color: $table-selected-bg;
+}
+
+.comp-tr-ctask.ctask-comment-important {
+  & > td,
+  &:hover > td {
+    background-color: mix(red, $table-bg, 5%) !important;
+  }
+  #cchain-unused-ctasks-table &:hover > td {
+    background-color: mix(red, $table-selected-bg, 5%) !important;
+  }
+}
+
+.comp-tr-ctask.ctask-comment-important.ctask-my {
+  & > td,
+  &:hover > td {
+    background-color: mix(red, $table-bg, 10%) !important;
+  }
+  #cchain-unused-ctasks-table &:hover > td {
+    background-color: mix(red, $table-selected-bg, 10%) !important;
+  }
+
+  & > td {
+    font-weight: bold;
+  }
+}

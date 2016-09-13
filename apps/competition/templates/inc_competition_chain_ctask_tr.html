@@ -1,0 +1,26 @@
+{% load i18n %}
+<tr class="comp-tr-ctask {{ ctask.t_class }}" data-id="{{ ctask.id }}">
+  {% if counter %}
+    <td class="cchain-list-ctask-counter">{{ counter }}</td>
+  {% else %}
+    <td class="cchain-list-ctask-selected"></td>
+    <td class="cchain-list-ctask-date">
+      {{ ctask.task.date_created|date:"Y-m-d H:i" }}
+    </td>
+  {% endif %}
+  <td>{{ ctask.task.author|userlink }}</td>
+  <td class="cchain-list-ctask-content">
+    {{ ctask.task.content.text|truncatechars:80 }}
+  </td>
+  <td>{{ ctask.t_is_verified }}</td>
+  <td>{{ ctask.t_comment }}</td>
+  <td>
+    {% if ctask.chain_id %}
+      <button type="submit" name="action" value="detach-{{ ctask.id }}">
+        REMOVE
+      </button>
+    {% endif %}
+    EDIT
+  </td>
+  <td><a href="{{ ctask.get_absolute_url }}">{% trans "View" %}</a></td>
+</tr>

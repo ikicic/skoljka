@@ -3,6 +3,8 @@
 {% load competition_tags %}
 {% load tags_tags %}
 
+{% load i18n %}
+
 <!DOCTYPE html>
 
 <html>
@@ -64,6 +66,7 @@
       {% endif %}
       {% if is_admin %}
         <li class="nav-header">Admin</li>
+        <li><a href="{% comp_url 'chain/tasks' %}">{% trans "Tasks" %}</a></li>
         <li><a href="{% comp_url 'chain' %}">Lanci</a></li>
         <li><a href="{% comp_url 'notifications/admin' %}">Obavijesti</a></li>
         {% if user.is_superuser %}

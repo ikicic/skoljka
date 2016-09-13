@@ -4,8 +4,8 @@ from django.utils.html import mark_safe
 from django.utils.translation import ungettext
 
 from competition.models import TeamMember
-from competition.utils import is_ctask_comment_important, \
-        parse_chain_comments_cache, get_ctask_statistics
+from competition.utils import parse_chain_comments_cache, get_ctask_statistics
+from competition.utils import comp_url as utils__comp_url
 from competition.utils import ctask_comment_class as utils__ctask_comment_class
 
 import json
@@ -13,15 +13,15 @@ import json
 register = template.Library()
 
 @register.simple_tag(takes_context=True)
-def comp_url(context, url_name):
-    competition = context['competition']
-    # TODO: do it the proper way
-    suffix = '/' if url_name else ''
-    return competition.get_absolute_url() + url_name + suffix
+def comp_url(context, url_suffix):
+    # TODO: Do it the proper way. Use names, not suffices.
+    return utils__comp_url(context['competition'], url_suffix)
+
 
 @register.simple_tag(takes_context=True)
 def cdebug(context, var):
     return dir(var)
+
 
 @register.simple_tag(takes_context=True)
 def reg_available_users(context):
@@ -41,6 +41,7 @@ def reg_available_users(context):
     return mark_safe(u'<script>reg_available_users={{{}}};</script>'.format(
             u','.join(u'"{}":{}'.format(username, user_id) for
                 username, user_id in available)))
+
 
 @register.simple_tag(takes_context=True)
 def reg_add_member_fields(context):
@@ -67,11 +68,13 @@ def reg_add_member_fields(context):
 
     return u"<script>{}</script>".format(u''.join(output))
 
+
 @register.simple_tag(takes_context=True)
 def ctask_statistics_json(context):
     # TODO: This shouldn't be a template tag.
     stats = get_ctask_statistics(context['competition'].id)
     return json.dumps(stats)
+
 
 @register.simple_tag()
 def ctask_class(ctask):
@@ -84,6 +87,7 @@ def ctask_class(ctask):
     if ctask.t_submission_count >= ctask.max_submissions:
         return "bar ctask-failed"
     return "bar ctask-tried"
+
 
 @register.simple_tag(takes_context=True)
 def chain_ctask_comments_info(context, chain):
@@ -99,6 +103,12 @@ def chain_ctask_comments_info(context, chain):
         return first
     return ""
 
+
+@register.inclusion_tag('inc_competition_chain_ctask_tr.html')
+def chain_ctask_tr(ctask, counter=None):
+    return {'ctask': ctask, 'counter': counter}
+
+
 @register.simple_tag(takes_context=True)
 def chain_class(context, chain):
     num_important, num_important_my = parse_chain_comments_cache(
@@ -111,9 +121,11 @@ def chain_class(context, chain):
         return 'cchain-verified'
     return ''
 
+
 @register.simple_tag(takes_context=True)
 def ctask_comment_class(context, ctask):
     return utils__ctask_comment_class(ctask, context['user'])
+
 
 @register.simple_tag()
 def chain_badge_class(chain):
@@ -123,6 +135,7 @@ def chain_badge_class(chain):
             for ctask in chain.ctasks):
         return ""
     return "badge-info"
+
 
 @register.simple_tag()
 def legend_ctask(_class, text):
@@ -134,6 +147,7 @@ def legend_ctask(_class, text):
                 u'<td>{}</td>' \
             u'</tr>'.format(_class, text))
 
+
 @register.simple_tag()
 def legend_chain(_class, text):
     return mark_safe(
@@ -141,6 +155,7 @@ def legend_chain(_class, text):
                 u'<td width="100%"><span class="badge {}">+1</span></td>' \
                 u'<td>{}</td>' \
             u'</tr>'.format(_class, text))
+
 
 @register.simple_tag(takes_context=True)
 def team_score(context, team):

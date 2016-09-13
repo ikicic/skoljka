@@ -124,7 +124,7 @@ class CompetitionTask(models.Model):
     descriptor = models.CharField(max_length=255)
     max_submissions = models.IntegerField(default=3)
     score = models.IntegerField(default=1)
-    chain = models.ForeignKey(Chain)
+    chain = models.ForeignKey(Chain, blank=True, null=True)
     chain_position = models.IntegerField(default=0)
     comment = models.OneToOneField(MathContent)
 

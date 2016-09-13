@@ -1,4 +1,5 @@
 from django.db import connection, transaction
+from django.db.models import F
 
 from competition.models import Chain, Competition, CompetitionTask, \
         Submission, Team, TeamMember
@@ -9,6 +10,12 @@ from collections import defaultdict
 from datetime import timedelta
 
 import re
+
+def comp_url(competition, url_suffix):
+    # TODO: Do it the proper way. Use names, not suffices.
+    suffix = '/' if url_suffix else ''
+    return competition.get_absolute_url() + url_suffix + suffix
+
 
 # TODO(ivica): Add commit argument to all update_* methods.
 def update_ctask_task(task, competition, chain, position, commit=False):
@@ -75,8 +82,11 @@ def parse_chain_comments_cache(chain, current_user):
     return num_important, num_important_my
 
 
-def ctask_comment_class(ctask, current_user):
-    if is_ctask_comment_important(ctask.comment.text):
+def ctask_comment_class(ctask, current_user, is_important=None):
+    """is_important --> boolean True/False or None if not checked yet
+    (micro-optimization)."""
+    if is_important is None and is_ctask_comment_important(ctask.comment.text) \
+            or is_important:
         if ctask.task.author_id == current_user.id:
             return 'ctask-comment-important ctask-my'
         return 'ctask-comment-important'
@@ -335,3 +345,19 @@ def get_ctask_statistics(competition_id):
         result[_key] += 1
 
     return result
+
+
+def detach_ctask_from_chain(ctask):
+    CompetitionTask.objects \
+            .filter(chain_id=ctask.chain_id,
+                    chain_position__gt=ctask.chain_position) \
+            .update(chain_position=F('chain_position') - 1)
+    ctask.chain_id = None
+    ctask.chain_position = -1
+    ctask.save()
+
+
+def delete_chain(chain):
+    CompetitionTask.objects.filter(chain=chain).update(
+            chain=None, chain_position=-1)
+    chain.delete()

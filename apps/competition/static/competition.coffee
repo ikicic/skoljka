@@ -115,6 +115,36 @@ $ ->
         stats[key.substr(2)] = value
     show_ctask_statistics stats, STATUS_CLASS[status], 'ctask-locked'
 
+
+$ ->
+  # Chain creation selection.
+  selection = []
+  trs = {}
+
+  _set_html = (ctask_id, html) ->
+    trs[ctask_id].find('.cchain-list-ctask-selected').html(html)
+
+  $('#cchain-unused-ctasks-table tr').click (event) ->
+    event.preventDefault()
+    me = $(@)
+    id = me.attr('data-id')
+    return if not id
+    pos = null
+    for ctask_id, index in selection
+      if ctask_id == id
+        pos = index
+        _set_html(id, '')
+      else if pos isnt null
+        _set_html(ctask_id, '#' + index)
+    if pos is null
+      selection.push(id)
+      trs[id] = me
+      _set_html(id, '#' + selection.length)
+    else
+      selection.splice(pos, 1)
+    $('#cchain-unused-ctasks-ids').val(selection.join(','))
+
+
 window.show_ctask_statistics = (stats, status_class, empty_class) ->
   $('.ctask').each ->
     _this = $(@)
