@@ -20,7 +20,11 @@ def comp_url(competition, url_suffix):
 # TODO(ivica): Add commit argument to all update_* methods.
 def update_ctask_task(task, competition, chain, position, commit=False):
     """Updates task.name and .source. Does not save!"""
-    task.name = u"{} - {} #{}".format(competition.name, chain.name, position)
+    if chain is None:
+        name = u"{} - (no chain)".format(competition.name)
+    else:
+        name = u"{} - {} #{}".format(competition.name, chain.name, position)
+    task.name = name
     task.source = competition.name
     if commit:
         task.save()

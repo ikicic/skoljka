@@ -22,6 +22,9 @@
   </div>
 {% endif %}
 
+<a href="{% comp_url 'task/new' %}" class="btn">{% trans "New task" %}</a>
+<br><br>
+
 <h3 class="comp-header">{% trans "Unused tasks" %}</h3>
 
 
@@ -42,12 +45,13 @@
       <th>{% trans "Date added" %}</th>
       <th>{% trans "Author" %}</th>
       <th>{% trans "Text" %}</th>
+      <th></th>
       <th style="width:30px;white-space:nowrap;" title="{{ trans_checked_title }}">
         &#10008;/&#10004;?
       </th>
       <th></th>
-      <th>{% trans "Edit" %}</th>
-      <th>{% trans "Overview" %}</th>
+      <th></th>
+      <th></th>
     </tr>
     {% for ctask in unused_ctasks %}
       {% chain_ctask_tr ctask %}
@@ -78,11 +82,13 @@
       <th title="Vrijeme otključavanja">{% anchor unlock_minutes Minute %}</th>
       <th></th>
       <th></th>
+      <th></th>
     </tr>
     <tr class="comp-tr-ctask">
       <th class="cchain-list-ctask-counter">#</th>
       <th>{% trans "Author" %}</th>
       <th>{% trans "Text" %}</th>
+      <th></th>
       <th style="width:30px;white-space:nowrap;" title="{{ trans_checked_title }}">
         &#10008;/&#10004;?
       </th>
@@ -98,11 +104,17 @@
         </td>
         <td>{{ chain.unlock_minutes }} min.</td>
         <td>
-          <button type="submit" name="action"
-                  value="delete-chain-{{ chain.id }}">
-            DELETE
+          <button type="submit" name="action" class="blank"
+                  value="delete-chain-{{ chain.id }}"
+                  title="{% trans "Delete" %}">
+            <i class="icon-trash"></i>
           </button>
-          <a href="{{ chain.get_absolute_url }}">{% trans "Edit" %}</a>
+        </td>
+        <td>
+          <div style="text-align:center;display:inline-block;">
+            <a href="{{ chain.get_absolute_url }}">{% trans "Edit chain" %}</a>
+            <br><span style="font-size:11px;">(deprecated)</span>
+          </div>
         </td>
         <td><a href="{{ chain.get_absolute_url }}overview/">
             {% trans "Overview" %}</a></td>

@@ -1,0 +1,72 @@
+{% extends "competition_base.html" %}
+{% load i18n %}
+
+{% load base_tags %}
+{% load bootstrap_toolkit %}
+{% load mathcontent_tags %}
+{% load competition_tags %}
+
+
+{% block content %}
+
+<div class="alert">
+  Vidljivo samo administratorima!
+</div>
+
+{% if is_solution_hidden %}
+  <div class="alert">
+    {% trans "Result is hidden. You can still view and edit it by clicking at the following link:" %}
+    <a href="#" class="auto-toggler" data-target="descriptor-field">
+      {% trans "Show/hide the solution" %}
+    </a><br>
+    {% trans "If you want to review the task please don't look at the solution." %}
+  </div>
+{% endif %}
+
+<i>
+  {% trans "Hint: Press <b>Ctrl+M</b> to preview the formatted text." %}
+</i>
+
+<form method="POST" action="" class="form-horizontal" id="comp-chain-edit" >
+  {% csrf_token %}
+  {% for hidden_field in form.hidden_fields %}
+    {{ hidden_field }}
+  {% endfor %}
+  {% if ctask %}
+    {% trans "Author:" %} {{ ctask.task.author|userlink }}<br>
+  {% endif %}
+  <br><br>
+  <div id="descriptor-field"
+      {% if is_solution_hidden %} style="display:none;"{% endif %}>
+    {% bootstrap_field form.descriptor %}
+  </div>
+  {% if form.score %}
+    {% bootstrap_field form.score %}
+  {% endif %}
+  {% bootstrap_field form.text layout="horizontal" %}
+  {% mathcontent_bootstrap_preview form.instance.task.content form.text.auto_id "form-ctask-text" "" %}
+  {% bootstrap_field form.comment layout="horizontal" %}
+  {% mathcontent_bootstrap_preview form.instance.comment form.comment.auto_id "form-ctask-comment" form.t_comment_extra_class  %}
+  <button type="submit" value="next" value="stay" class="btn btn-primary">
+    {% if ctask %}
+      {% trans "Save changes" %}
+    {% else %}
+      {% trans "Submit" %}
+    {% endif %}
+  </button>
+  {% if not ctask %}
+    <button type="submit" name="next" value="next" class="btn">
+      {% trans "Submit and create new task" %}
+    </button>
+  {% endif %}
+  <button type="submit" name="next" value="tasks" class="btn">
+    {% trans "Submit and go to the task list" %}
+  </button>
+  {% if ctask %}
+    <a class="btn" href="{{ ctask.get_absolute_url }}">
+      {% trans "Go to task" %}
+    </a>
+  {% endif %}
+</form>
+
+{% endblock content %}

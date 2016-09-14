@@ -9,18 +9,25 @@
     </td>
   {% endif %}
   <td>{{ ctask.task.author|userlink }}</td>
-  <td class="cchain-list-ctask-content">
-    {{ ctask.task.content.text|truncatechars:80 }}
-  </td>
+  {% if ctask.t_comment %}
+    <td class="cchain-list-ctask-content">
+      {{ ctask.task.content.text|truncatechars:80 }}
+    </td>
+    <td>{{ ctask.t_comment }}</td>
+  {% else %}
+    <td class="cchain-list-ctask-content" colspan="2">
+      {{ ctask.task.content.text|truncatechars:80 }}
+    </td>
+  {% endif %}
   <td>{{ ctask.cache_admin_solved_count|default:'' }}</td>
-  <td>{{ ctask.t_comment }}</td>
   <td>
     {% if ctask.chain_id %}
-      <button type="submit" name="action" value="detach-{{ ctask.id }}">
-        REMOVE
+      <button type="submit" name="action" class="blank"
+          value="detach-{{ ctask.id }}" title="{% trans "Remove" %}">
+        <i class="icon-remove"></i>
       </button>
     {% endif %}
-    EDIT
   </td>
-  <td><a href="{{ ctask.get_absolute_url }}">{% trans "View" %}</a></td>
+  <td><a href="{{ ctask.get_edit_url }}">{% trans "Edit" %}</a></td>
+  <td><a href="{{ ctask.get_absolute_url }}">{% trans "Open" %}</a></td>
 </tr>

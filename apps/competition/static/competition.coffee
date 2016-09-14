@@ -124,6 +124,9 @@ $ ->
   _set_html = (ctask_id, html) ->
     trs[ctask_id].find('.cchain-list-ctask-selected').html(html)
 
+  $('#cchain-unused-ctasks-table a').click (event) ->
+    event.stopImmediatePropagation()
+
   $('#cchain-unused-ctasks-table tr').click (event) ->
     me = $(@)
     id = me.attr('data-id')

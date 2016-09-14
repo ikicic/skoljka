@@ -8,6 +8,8 @@
   {% if is_admin %}
     <br>
     Autor: {{ ctask.task.author|userlink }}
+    <br>
+    <a href="{{ ctask.get_edit_url }}">{% trans "Edit" %}</a>
   {% endif %}
 {% endblock float_right_extra %}
 

@@ -2,12 +2,15 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.forms.models import BaseModelFormSet, ModelForm
+from django.utils.html import mark_safe
 from django.utils.translation import ugettext as _, ugettext_lazy
 
 from competition.models import Chain, CompetitionTask, Team, TeamMember
 from competition.evaluator import InvalidDescriptor, InvalidSolution
 from competition.evaluator import get_evaluator, get_solution_help_text
-from competition.utils import ctask_comment_class
+from competition.utils import comp_url, ctask_comment_class
+
+from skoljka.libs import xss
 
 
 class CompetitionSolutionForm(forms.Form):
@@ -36,6 +39,7 @@ class CompetitionSolutionForm(forms.Form):
         return data
 
 
+
 class BaseCompetitionTaskFormSet(BaseModelFormSet):
     def add_fields(self, form, index):
         super(BaseCompetitionTaskFormSet, self).add_fields(form, index)
@@ -43,13 +47,16 @@ class BaseCompetitionTaskFormSet(BaseModelFormSet):
         # form.fields["text"] = forms.CharField(widget=forms.Textarea,
         #         initial=initial_text)
 
+
+
 class CompetitionTaskForm(ModelForm):
     text = forms.CharField(widget=forms.Textarea)
     comment = forms.CharField(widget=forms.Textarea, required=False)
 
     def __init__(self, *args, **kwargs):
-        self.evaluator = kwargs.pop('evaluator')
-        self.fixed_score = kwargs.pop('fixed_score')
+        self.competition = kwargs.pop('competition')
+        self.evaluator = get_evaluator(self.competition.evaluator_version)
+        self.fixed_score = self.competition.fixed_task_score
         user = kwargs.pop('user')
         super(CompetitionTaskForm, self).__init__(*args, **kwargs)
 
@@ -63,6 +70,11 @@ class CompetitionTaskForm(ModelForm):
         self.fields['descriptor'].help_text = get_solution_help_text(
                 self.evaluator, self.initial.get('descriptor'),
                 error_message=_("Invalid!"), show_types=True)
+        self.fields['descriptor'].label = mark_safe(
+                xss.escape(_("Result")) + \
+                ' <a href="' + comp_url(self.competition, 'rules') +
+                '" target="_blank"><i class="icon-question-sign" title="' +
+                xss.escape(_("Help")) + '"></i></a>')
         if self.fixed_score:
             del self.fields['score']
 
@@ -138,7 +150,6 @@ class ChainTasksForm(forms.ModelForm):
     class Meta:
         model = Chain
         fields = ['name', 'category', 'unlock_minutes', 'bonus_score']
-
 
 
 
@@ -227,6 +238,7 @@ class TeamForm(forms.ModelForm):
     class Meta:
         model = Team
         fields = ['name']
+
 
 
 class TaskListAdminPanelForm(forms.Form):

@@ -33,6 +33,7 @@ from competition.utils import fix_ctask_order, update_chain_comments_cache, \
         is_ctask_comment_important, ctask_comment_verified_class, \
         detach_ctask_from_chain, delete_chain, \
         refresh_chain_cache_is_verified, \
+        update_chain_cache_is_verified, \
         refresh_ctask_cache_admin_solved_count, \
         update_ctask_cache_admin_solved_count
 from skoljka.libs.decorators import require
@@ -45,6 +46,7 @@ import re
 
 #TODO: Option for admins to create a team even if they have a private group.
 #TODO: When updating chain_position, update task name.
+#TODO: Formalize when update_ does .save() or not.
 
 @response('competition_list.html')
 def competition_list(request):
@@ -395,6 +397,59 @@ def task_detail(request, competition, data, ctask_id):
     return data
 
 
+
+@competition_view(permission=EDIT)
+@response('competition_task_new.html')
+def task_new(request, competition, data, ctask_id=None):
+    if ctask_id:
+        ctask = get_object_or_404(
+                CompetitionTask.objects.select_related('task'),
+                id=ctask_id, competition_id=competition.id)
+        edit = True
+    else:
+        ctask = None
+        edit = False
+
+    POST = request.POST if request.method == 'POST' else None
+    form = CompetitionTaskForm(POST, instance=ctask, competition=competition,
+            user=request.user)
+
+    if request.method == 'POST' and form.is_valid():
+        ctask = form.save(commit=False)
+        if not edit:
+            ctask.competition = competition
+            ctask.chain = None
+            ctask.chain_position = -1
+            ctask.max_submissions = competition.default_max_submissions
+
+        _create_or_update_task(ctask, request.user, competition,
+                ctask.chain, ctask.chain_position, ctask._text,
+                ctask._comment)
+
+        ctask.save()
+
+        if ctask.chain:
+            chain_ctasks = CompetitionTask.objects.filter(chain=ctask.chain) \
+                    .select_related('comment').only('id', 'comment')
+            update_chain_comments_cache(ctask.chain, chain_ctasks)
+            update_chain_cache_is_verified(competition, ctask.chain)
+            ctask.chain.save()
+
+        target = request.POST.get('next', 'stay')
+        if target == 'next':
+            return (comp_url(competition, 'task/new'), )
+        if target == 'tasks':
+            return (comp_url(competition, 'chain/tasks'), )
+        return (ctask.get_edit_url(), )  # stay
+
+    data['is_solution_hidden'] = \
+            ctask and ctask.task.author_id != request.user.id
+    data['form'] = form
+    data['ctask'] = ctask
+    return data
+
+
+
 @competition_view(permission=EDIT)
 @response('competition_chain_list_tasks.html')
 def chain_tasks_list(request, competition, data):
@@ -601,12 +656,11 @@ def chain_new(request, competition, data, chain_id=None):
     # CompetitionTaskFormSet = modelformset_factory(CompetitionTask,
     #         formset=BaseCompetitionTaskFormSet,
     #         fields=('descriptor', 'score'), extra=3)
-    evaluator = get_evaluator(competition.evaluator_version)
     class CompetitionTaskFormLambda(CompetitionTaskForm):
         def __init__(self, *args, **kwargs):
-            super(CompetitionTaskFormLambda, self).__init__(evaluator=evaluator,
-                    fixed_score=competition.fixed_task_score, user=request.user,
-                    *args, **kwargs)
+            super(CompetitionTaskFormLambda, self).__init__(
+                    competition=competition,
+                    user=request.user, *args, **kwargs)
 
     # TODO: Set min_num and max_num after migrating to Django 1.7.
     CompetitionTaskFormSet = modelformset_factory(CompetitionTask,
@@ -654,7 +708,7 @@ def chain_new(request, competition, data, chain_id=None):
 
             # Problems with existing formset... ahh, just refresh
             return (chain.get_absolute_url(), )
-    
+
     data.update({
         'chain_form': chain_form,
         'formset': formset,

@@ -90,6 +90,8 @@ textarea.comp-mathcontent-text {
   font-style: italic;
 }
 .chelp-type {
+  color: #888;
+  font-style: italic;
   padding-right: 1em;
 }
 
@@ -406,7 +408,9 @@ $table-cchain-bg: mix(gray, $table-bg, 15%);
 .cchain-list > th,
 .cchain-list > td {
   background-color: $table-cchain-bg !important;
-  line-height: 2em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  vertical-align: middle;
 }
 .cchain-verified-list > td {
   background-color: mix(green, $table-cchain-bg, 10%) !important;

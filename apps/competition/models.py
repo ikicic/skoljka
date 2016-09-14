@@ -158,6 +158,9 @@ class CompetitionTask(models.Model):
     def get_absolute_url(self):
         return self.competition.get_absolute_url() + 'task/{}/'.format(self.id)
 
+    def get_edit_url(self):
+        return self.get_absolute_url() + 'edit/'
+
 
 
 class Submission(models.Model):
