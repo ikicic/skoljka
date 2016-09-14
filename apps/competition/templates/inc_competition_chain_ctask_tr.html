@@ -26,6 +26,22 @@
           value="detach-{{ ctask.id }}" title="{% trans "Remove" %}">
         <i class="icon-remove"></i>
       </button>
+      {% if counter > 1 %}
+        <button type="submit" name="action" class="blank"
+            value="move-lo-{{ ctask.id }}" title="{% trans "Move up" %}">
+          <i class="icon-arrow-up"></i>
+        </button>
+      {% else %}
+        <i class="icon-placeholder"></i>
+      {% endif %}
+      {% if counter < total_ctasks %}
+        <button type="submit" name="action" class="blank"
+            value="move-hi-{{ ctask.id }}" title="{% trans "Move down" %}">
+          <i class="icon-arrow-down"></i>
+        </button>
+      {% else %}
+        <i class="icon-placeholder"></i>
+      {% endif %}
     {% endif %}
   </td>
   <td><a href="{{ ctask.get_edit_url }}">{% trans "Edit" %}</a></td>

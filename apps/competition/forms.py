@@ -114,6 +114,25 @@ class ChainForm(forms.ModelForm):
 
 
 
+def clean_unused_ctask_ids(competition, ctask_ids):
+    if not ctask_ids:
+        return [], []
+    try:
+        ctask_ids = [int(x) for x in ctask_ids.split(',')]
+    except ValueError:
+        raise ValidationError("Invalid input.")
+    ctasks_dict = CompetitionTask.objects \
+            .filter(competition=competition).in_bulk(ctask_ids)
+    if len(ctask_ids) != len(ctasks_dict):
+        raise ValidationError("Unknown competition task ID.")
+    for ctask in ctasks_dict.itervalues():
+        if ctask.chain_id is not None:
+            raise ValidationError("Some tasks were already used.")
+    ctasks = [ctasks_dict[id] for id in ctask_ids]
+    return ctask_ids, ctasks
+
+
+
 class ChainTasksForm(forms.ModelForm):
     ctask_ids = forms.CharField(widget=forms.HiddenInput(), required=False)
 
@@ -130,21 +149,9 @@ class ChainTasksForm(forms.ModelForm):
                 {'id': 'cchain-unused-ctasks-ids'})
 
     def clean_ctask_ids(self):
-        ctask_ids = self.cleaned_data['ctask_ids']
-        if not ctask_ids:
-            return []
-        try:
-            ctask_ids = [int(x) for x in ctask_ids.split(',')]
-        except ValueError:
-            raise ValidationError("Invalid input.")
-        ctasks_dict = CompetitionTask.objects \
-                .filter(competition=self.competition).in_bulk(ctask_ids)
-        if len(ctask_ids) != len(ctasks_dict):
-            raise ValidationError("Unknown competition task ID.")
-        for ctask in ctasks_dict.itervalues():
-            if ctask.chain_id is not None:
-                raise ValidationError("Some tasks were already used.")
-        self.cleaned_data['ctasks'] = [ctasks_dict[id] for id in ctask_ids]
+        ctask_ids, ctasks = clean_unused_ctask_ids(
+                self.competition, self.cleaned_data['ctask_ids'])
+        self.cleaned_data['ctasks'] = ctasks
         return ctask_ids
 
     class Meta:

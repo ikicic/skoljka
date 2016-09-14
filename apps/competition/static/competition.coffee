@@ -144,7 +144,28 @@ $ ->
       _set_html(id, '#' + selection.length)
     else
       selection.splice(pos, 1)
+    $('#used-tasks-table').toggleClass('add-ctasks-here', selection.length > 0)
     $('#cchain-unused-ctasks-ids').val(selection.join(','))
+
+  $('#used-tasks-table a').click (event) ->
+    event.stopImmediatePropagation()
+
+  $('#used-tasks-table tr').click (event) ->
+    if selection.length == 0
+      return
+    me = $(@)
+    id = me.attr('data-id')
+    ctask_ids = selection.join(',')
+    form = me.closest('form')
+    what = if me.hasClass('cchain-list') then 'chain' else 'ctask'
+    form.append(
+        '<input type="hidden" name="action" value="add-after">' +
+        '<input type="hidden" name="ctask-ids" value="' + ctask_ids + '">' +
+        '<input type="hidden" name="after-what" value="' + what + '">' +
+        '<input type="hidden" name="after-id" value="' + id + '">'
+    )
+    console.log form
+    form.submit()
 
 
 window.show_ctask_statistics = (stats, status_class, empty_class) ->

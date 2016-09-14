@@ -1,4 +1,5 @@
 @import "main";
+@import "bootstrap/mixins";
 /* General CSS */
 
 
@@ -71,6 +72,16 @@ h2, h3, h4 {
 h2, h3, h4, h4 a {
   text-shadow: 1px 1px 1px rgb(210, 210, 210);
 }
+
+/* Icon placeholder */
+.icon-placeholder {
+  // Copied from bootstrap/_sprites.scss.
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+  @include ie7-restore-right-whitespace();
+}
+
 
 /* Instructions */
 .instructions {

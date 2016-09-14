@@ -382,6 +382,30 @@ def delete_chain(chain):
     chain.delete()
 
 
+def update_chain_ctasks(competition, chain, old_ids, new_ids):
+    # TODO: Update .task name.
+    queries_args = []
+    for ctask_id in set(old_ids) - set(new_ids):
+        queries_args.append(("NULL", -1, ctask_id))
+    for k, ctask_id in enumerate(new_ids):
+        queries_args.append((chain.id, k, ctask_id))
+
+    print 'OLD NEW_IDS', old_ids, new_ids
+    print 'QUERIES', queries_args
+    if queries_args:
+        cursor = connection.cursor()
+        cursor.executemany(
+                "UPDATE `competition_competitiontask` "
+                "SET `chain_id`=%s, `chain_position`=%s "
+                "WHERE `id`=%s;", queries_args)
+        transaction.commit_unless_managed()
+
+    ctasks = CompetitionTask.objects.filter(id__in=new_ids) \
+            .select_related('comment', 'task')
+    update_chain_comments_cache(chain, ctasks)
+    update_chain_cache_is_verified(competition, chain)
+
+
 def refresh_chain_cache_is_verified(competition):
     """Refresh cache_is_verified for all chains in the given competition.
     Returns the list of IDs of the updated chains."""

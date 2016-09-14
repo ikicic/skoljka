@@ -75,7 +75,7 @@
 
 <form method="POST" action="{% comp_url 'chain/tasks/action' %}">
   {% csrf_token %}
-  <table class="table table-striped">
+  <table class="table table-striped" id="used-tasks-table">
     <tr class="cchain-list">
       <th colspan="2">{% trans "Category" %}</th>
       <th colspan="2">{% trans "Title" %}</th>
@@ -97,7 +97,8 @@
       <th></th>
     </tr>
     {% for chain in chains %}
-      <tr class="cchain-list {{ chain.t_class }}">
+      <tr class="cchain-list {{ chain.t_class }}" data-id="{{ chain.id }}"
+          id="chain-{{ chain.id }}">
         <td colspan="2">{{ chain.category }}</td>
         <td colspan="2">
           <a href="{{ chain.get_absolute_url }}">{{ chain.name }}</a>
@@ -120,7 +121,7 @@
             {% trans "Overview" %}</a></td>
       </tr>
       {% for ctask in chain.t_ctasks %}
-        {% chain_ctask_tr ctask forloop.counter %}
+        {% chain_ctask_tr ctask forloop.counter chain.t_ctasks|length %}
       {% endfor %}
     {% empty %}
       <tr><td colspan="6"><i>{% trans "Empty..." %}</i></td> </tr>

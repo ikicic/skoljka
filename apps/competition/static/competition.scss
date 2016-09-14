@@ -469,3 +469,13 @@ $table-selected-bg: mix(blue, $table-bg, 5%);
 .ctask-verified {
   @include colored-ctask-tr(green, 8%);
 }
+
+#used-tasks-table {
+  & th, & td {
+    border-top: none;
+    border-bottom: 1px solid #ddd;
+  }
+}
+#used-tasks-table.add-ctasks-here tr:hover td {
+  border-bottom-color: red;
+}

@@ -21,7 +21,8 @@ from userprofile.forms import AuthenticationFormEx
 
 from competition.decorators import competition_view
 from competition.evaluator import get_evaluator, get_solution_help_text
-from competition.forms import ChainForm, ChainTasksForm, \
+from competition.forms import ChainForm, \
+        ChainTasksForm, clean_unused_ctask_ids, \
         CompetitionSolutionForm, CompetitionTaskForm, \
         BaseCompetitionTaskFormSet, TeamForm, TaskListAdminPanelForm
 from competition.models import Chain, Competition, CompetitionTask, Team, \
@@ -35,7 +36,8 @@ from competition.utils import fix_ctask_order, update_chain_comments_cache, \
         refresh_chain_cache_is_verified, \
         update_chain_cache_is_verified, \
         refresh_ctask_cache_admin_solved_count, \
-        update_ctask_cache_admin_solved_count
+        update_ctask_cache_admin_solved_count, \
+        update_chain_ctasks
 from skoljka.libs.decorators import require
 
 from collections import defaultdict
@@ -259,14 +261,13 @@ def task_list(request, competition, data):
         chain.competition = competition # use preloaded object
 
     for ctask in all_ctasks:
-        if ctask.chain_id is None:
-            continue
-        chain = all_chains_dict[ctask.chain_id]
         ctask.competition = competition # use preloaded object
-        ctask.chain = chain
         ctask.t_submission_count = 0
         ctask.t_is_solved = False
-        chain.ctasks.append(ctask)
+        if ctask.chain_id is not None:
+            chain = all_chains_dict[ctask.chain_id]
+            ctask.chain = chain
+            chain.ctasks.append(ctask)
 
     all_my_submissions = list(Submission.objects.filter(team=data['team']) \
             .values_list('ctask_id', 'cache_is_correct'))
@@ -456,7 +457,8 @@ def chain_tasks_list(request, competition, data):
     created = False
     updated_chains_count = None
     updated_ctasks_count = None
-    form = ChainTasksForm(competition=competition)
+    empty_form = ChainTasksForm(competition=competition)
+    form = empty_form
 
     if request.POST.get('action') == 'refresh-chain-cache-is-verified':
         updated_chains_count = len(refresh_chain_cache_is_verified(competition))
@@ -470,14 +472,12 @@ def chain_tasks_list(request, competition, data):
             chain.competition = competition
             chain.save()
 
-            ctasks = form.cleaned_data['ctasks']
-            for k, ctask in enumerate(ctasks):
-                ctask.chain_id = chain.id
-                ctask.chain_position = k
-                ctask.save()
-            update_chain_comments_cache(chain, ctasks)
-            chain.save()
+            old_ids = CompetitionTask.objects \
+                    .filter(chain=chain).values_list('id', flat=True)
+            new_ids = [x.id for x in form.cleaned_data['ctasks']]
+            update_chain_ctasks(competition, chain, old_ids, new_ids)
             created = True
+            form = empty_form  # Empty the form.
 
     chains = Chain.objects.filter(competition=competition)
     order_by_field = django_sorting.middleware.get_field(request)
@@ -535,18 +535,69 @@ def chain_tasks_list(request, competition, data):
 @response()
 def chain_tasks_action(request, competition, data):
     action = request.POST['action']
+    url_suffix = ""
     if re.match('delete-chain-(\d+)', action):
+        # Delete whole chain. Does not delete ctasks, of course.
         id = int(action[len('delete-chain-'):])
         chain = get_object_or_404(Chain, id=id, competition=competition)
         delete_chain(chain)
     elif re.match('detach-(\d+)', action):
+        # Detach ctask from a chain.
         id = int(action[len('detach-'):])
         ctask = get_object_or_404(CompetitionTask,
             id=id, competition=competition)
+        url_suffix = '#chain-{}'.format(ctask.chain_id)
         detach_ctask_from_chain(ctask)
+    elif action == 'add-after':
+        # Add tasks at the beginning of a chain or after a given ctask.
+        try:
+            ctask_ids = request.POST['ctask-ids']
+            after_what = request.POST['after-what']
+            after_id = request.POST['after-id']
+        except KeyError as e:
+            return (400, "POST arguments missing " + e.message)
+        if after_what == 'chain':
+            chain = get_object_or_404(
+                    Chain, id=after_id, competition=competition)
+            position = 0
+        elif after_what == 'ctask':
+            ctask = get_object_or_404(
+                    CompetitionTask.objects.select_related('chain'),
+                    id=after_id, competition=competition)
+            chain = ctask.chain
+            position = ctask.chain_position
+        else:
+            return (400, "after_what={}?".format(after_what))
+        old_ids = list(CompetitionTask.objects.filter(chain=chain) \
+                .order_by('chain_position').values_list('id', flat=True))
+        try:
+            selected_ids, selected_ctasks = clean_unused_ctask_ids(
+                    competition, ctask_ids)
+        except ValidationError:
+            return (400, "invalid ctask_ids: {}".format(ctask_ids))
+
+        new_ids = old_ids[:position] + selected_ids + old_ids[position:]
+        update_chain_ctasks(competition, chain, old_ids, new_ids)
+        url_suffix = '#chain-{}'.format(chain.id)
+    elif re.match('move-(lo|hi)-(\d+)', action):
+        id = int(action[len('move-lo-'):])
+        ctask = get_object_or_404(
+                CompetitionTask.objects.select_related('chain'),
+                id=id, competition=competition)
+        old_ids = list(CompetitionTask.objects.filter(chain=ctask.chain) \
+                .order_by('chain_position').values_list('id', flat=True))
+        pos = ctask.chain_position
+        new_ids = old_ids[:]
+        if action[5] == 'l' and pos > 0:
+            new_ids[pos], new_ids[pos - 1] = new_ids[pos - 1], new_ids[pos]
+        elif action[5] == 'h' and pos < len(old_ids) - 1:
+            new_ids[pos], new_ids[pos + 1] = new_ids[pos + 1], new_ids[pos]
+
+        url_suffix = '#chain-{}'.format(ctask.chain.id)
+        update_chain_ctasks(competition, ctask.chain, old_ids, new_ids)
     else:
-        return 404
-    return (comp_url(competition, "chain/tasks"), )
+        return (400, "Unrecognized action " + action)
+    return (comp_url(competition, "chain/tasks") + url_suffix, )
 
 
 
