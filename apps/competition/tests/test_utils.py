@@ -6,7 +6,11 @@ from competition.models import Competition, CompetitionTask, Chain, \
 from competition.utils import is_ctask_comment_important, \
         update_chain_comments_cache, parse_chain_comments_cache, \
         refresh_teams_cache_score, update_score_on_ctask_action, \
-        detach_ctask_from_chain, delete_chain
+        detach_ctask_from_chain, delete_chain, \
+        refresh_chain_cache_is_verified, \
+        update_chain_cache_is_verified, \
+        refresh_ctask_cache_admin_solved_count, \
+        update_ctask_cache_admin_solved_count
 from mathcontent.models import MathContent
 from task.models import Task
 
@@ -261,3 +265,67 @@ class ChainsTest(TestCase):
         self.assertFalse(Chain.objects.filter(id=id1).exists())
         self.assertFalse(Chain.objects.filter(id=id2).exists())
         assertPositions(-1, -1, -1, -1, -1, -1, -1)
+
+    def test_update_ctask_cache_admin_solved_count(self):
+        c1 = create_ctask(self.admin, self.competition, self.chain1, "42", 1, "first")
+        c2 = create_ctask(self.admin, self.competition, self.chain1, "42", 1, "second")
+
+        self.assertEqual(c1.cache_admin_solved_count, 0)
+        self.assertEqual(c2.cache_admin_solved_count, 0)
+
+        # Submit a solution from a admin private team.
+        team = Team.objects.create(name="Test team", author=self.alice,
+                competition=self.competition, team_type=Team.TYPE_ADMIN_PRIVATE)
+        Submission.objects.create(ctask=c1, team=team, result="42", cache_is_correct=True)
+        update_ctask_cache_admin_solved_count(self.competition, c1, self.chain1)
+        update_ctask_cache_admin_solved_count(self.competition, c2, self.chain1)
+        self.assertEqual(c1.cache_admin_solved_count, 1)
+        self.assertEqual(c2.cache_admin_solved_count, 0)
+
+        # Regular team.
+        team = Team.objects.create(name="Test team", author=self.alice,
+                competition=self.competition)
+        Submission.objects.create(ctask=c2, team=team, result="42", cache_is_correct=True)
+        update_ctask_cache_admin_solved_count(self.competition, c1, self.chain1)
+        update_ctask_cache_admin_solved_count(self.competition, c2, self.chain1)
+        self.assertEqual(c1.cache_admin_solved_count, 1)
+        self.assertEqual(c2.cache_admin_solved_count, 0)
+
+        # Own submissions don't count.
+        team = Team.objects.create(name="Test team", author=self.admin,
+                competition=self.competition, team_type=Team.TYPE_ADMIN_PRIVATE)
+        Submission.objects.create(ctask=c1, team=team, result="42", cache_is_correct=True)
+        update_ctask_cache_admin_solved_count(self.competition, c1, self.chain1)
+        update_ctask_cache_admin_solved_count(self.competition, c2, self.chain1)
+        self.assertEqual(c1.cache_admin_solved_count, 1)
+        self.assertEqual(c2.cache_admin_solved_count, 0)
+
+        # Check if saved.
+        self.assertEqual(CompetitionTask.objects.get(id=c1.id).cache_admin_solved_count, 1)
+        self.assertEqual(CompetitionTask.objects.get(id=c2.id).cache_admin_solved_count, 0)
+
+    def test_refresh_update_chain_cache_is_verified(self):
+        self.competition.min_admin_solved_count = 1
+        self.competition.save()
+
+        c1 = create_ctask(self.admin, self.competition, self.chain1, "42", 1, "first")
+        c2 = create_ctask(self.admin, self.competition, self.chain1, "42", 1, "second")
+
+        team = Team.objects.create(name="Test team", author=self.alice,
+                competition=self.competition, team_type=Team.TYPE_ADMIN_PRIVATE)
+        Submission.objects.create(ctask=c1, team=team, result="42", cache_is_correct=True)
+        Submission.objects.create(ctask=c2, team=team, result="42", cache_is_correct=True)
+        self.assertFalse(self.chain1.cache_is_verified)
+        refresh_ctask_cache_admin_solved_count(self.competition)
+        update_chain_cache_is_verified(self.competition, self.chain1)
+        self.assertTrue(self.chain1.cache_is_verified)
+        self.assertTrue(Chain.objects.get(id=self.chain1.id).cache_is_verified)
+
+        self.chain1.cache_is_verified = False
+        self.chain1.save()
+
+        self.assertFalse(Chain.objects.get(id=self.chain1.id).cache_is_verified)
+        # self.chain2 is empty so it is fine.
+        self.assertEqual(refresh_chain_cache_is_verified(self.competition),
+                [self.chain1.id, self.chain2.id])
+        self.assertTrue(Chain.objects.get(id=self.chain1.id).cache_is_verified)

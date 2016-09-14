@@ -6,7 +6,7 @@ from competition.models import Chain, Competition, CompetitionTask, \
 from competition.evaluator import get_evaluator, InvalidSolution, \
         InvalidDescriptor
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import timedelta
 
 import re
@@ -90,7 +90,17 @@ def ctask_comment_class(ctask, current_user, is_important=None):
         if ctask.task.author_id == current_user.id:
             return 'ctask-comment-important ctask-my'
         return 'ctask-comment-important'
-    return ""
+    return ''
+
+
+def ctask_comment_verified_class(competition, ctask, current_task,
+        is_important=None):
+    result = ctask_comment_class(ctask, current_task, is_important)
+    if result:
+        return result
+    if ctask.cache_admin_solved_count >= competition.min_admin_solved_count:
+        return 'ctask-verified'
+    return ''
 
 
 def update_score_on_ctask_action(competition, team, chain, ctask, submission,
@@ -226,6 +236,7 @@ def lock_ctasks_in_chain(ctasks):
                 and ctask.t_submission_count < ctask.max_submissions:
             locked = True
 
+
 def preprocess_chain(competition, chain, team, preloaded_ctask=None):
     ctasks = list(CompetitionTask.objects.filter(chain=chain) \
             .order_by('chain_position', 'id') \
@@ -257,6 +268,7 @@ def preprocess_chain(competition, chain, team, preloaded_ctask=None):
     lock_ctasks_in_chain(ctasks)
 
     return ctasks, submissions
+
 
 def refresh_submissions_cache_is_correct(submissions=None, ctasks=None,
         competitions=None):
@@ -300,12 +312,14 @@ def refresh_submissions_cache_is_correct(submissions=None, ctasks=None,
             updated += 1
     return updated
 
+
 def get_teams_for_user_ids(user_ids):
     team_members = list(TeamMember.objects.filter(member_id__in=set(user_ids)) \
             .select_related('team') \
             .only('member', 'team'))
 
     return {x.member_id: x.team for x in team_members}
+
 
 def get_ctask_statistics(competition_id):
     """
@@ -315,9 +329,10 @@ def get_ctask_statistics(competition_id):
     max_submissions_dict = dict(CompetitionTask.objects \
             .filter(competition_id=competition_id) \
             .values_list('id', 'max_submissions'))
-    test_teams = Team.objects \
-            .filter(competition_id=competition_id, is_test=True) \
-            .values_list('id', flat=True)
+    team_types = dict(Team.objects \
+            .filter(competition_id=competition_id,
+                    team_type=Team.TYPE_ADMIN_PRIVATE) \
+            .values_list('id', 'team_type'))
     submissions = Submission.objects \
             .filter(ctask__competition_id=competition_id) \
             .values_list('team_id', 'ctask_id', 'cache_is_correct')
@@ -332,7 +347,7 @@ def get_ctask_statistics(competition_id):
     result = defaultdict(int)
     for key, submission_count in submission_count_dict.iteritems():
         is_solved = is_solved_dict[key]
-        is_test = key[0] in test_teams
+        team_type = team_types[key[0]]
 
         if is_solved:
             _key = 'S' # solved
@@ -341,7 +356,7 @@ def get_ctask_statistics(competition_id):
         else:
             _key = 'T' # tried
 
-        _key = str(int(is_test)) + _key + str(key[1])
+        _key = str(int(team_type)) + _key + str(key[1])
         result[_key] += 1
 
     return result
@@ -361,3 +376,103 @@ def delete_chain(chain):
     CompetitionTask.objects.filter(chain=chain).update(
             chain=None, chain_position=-1)
     chain.delete()
+
+
+def refresh_chain_cache_is_verified(competition):
+    """Refresh cache_is_verified for all chains in the given competition.
+    Returns the list of IDs of the updated chains."""
+    # TODO: Atomic.
+    chains_was_verified = list(Chain.objects.filter(competition=competition) \
+            .values_list('id', 'cache_is_verified'))
+    ctasks = list(CompetitionTask.objects.filter(competition=competition) \
+            .values_list('id', 'chain_id', 'cache_admin_solved_count'))
+
+    not_verified = set()
+    for ctask_id, chain_id, solved_count in ctasks:
+        if chain_id is not None and \
+                solved_count < competition.min_admin_solved_count:
+            not_verified.add(chain_id)
+
+    queries_args = []
+    for chain_id, was_verified in chains_was_verified:
+        verified = chain_id not in not_verified
+        if was_verified != verified:
+            queries_args.append((int(verified), chain_id))
+
+    if queries_args:
+        cursor = connection.cursor()
+        cursor.executemany(
+                "UPDATE `competition_chain` SET `cache_is_verified`=%s "
+                "WHERE `id`=%s;", queries_args)
+        transaction.commit_unless_managed()
+
+    return [x[1] for x in queries_args]  # Extract IDs.
+
+
+def update_chain_cache_is_verified(competition, chain):
+    """Update cache_is_verified for the given chain."""
+    verified = not CompetitionTask.objects \
+            .filter(chain=chain,
+                    cache_admin_solved_count__lt=
+                        competition.min_admin_solved_count) \
+            .exists()
+    if chain.cache_is_verified != verified:
+        chain.cache_is_verified = verified
+        Chain.objects.filter(id=chain.id).update(cache_is_verified=verified)
+
+
+def refresh_ctask_cache_admin_solved_count(competition):
+    """Refresh cache_admin_solved_count for all ctasks in the given competition.
+    Returns the list of IDs of the updated ctasks.
+    DOES NOT update chain.cache_is_verified!"""
+    # TODO: Atomic.
+    ctasks_old_count = list(CompetitionTask.objects \
+            .filter(competition=competition) \
+            .values_list('id', 'cache_admin_solved_count'))
+
+    verified_ctask_ids = set(Submission.objects \
+            .filter(team__competition_id=competition.id,
+                    team__team_type=Team.TYPE_ADMIN_PRIVATE,
+                    cache_is_correct=True) \
+            .exclude(team__author=F('ctask__task__author')) \
+            .values_list('ctask_id', flat=True))
+
+    solved_count = Counter()
+    for ctask_id in verified_ctask_ids:
+        solved_count[ctask_id] += 1
+
+    queries_args = []
+    for ctask_id, old_count in ctasks_old_count:
+        count = solved_count[ctask_id]
+        if count != old_count:
+            queries_args.append((count, ctask_id))
+
+    if queries_args:
+        cursor = connection.cursor()
+        cursor.executemany(
+                "UPDATE `competition_competitiontask` SET "
+                "`cache_admin_solved_count`=%s WHERE `id`=%s;", queries_args)
+        transaction.commit_unless_managed()
+
+    return [x[1] for x in queries_args]  # Extract IDs.
+
+
+def update_ctask_cache_admin_solved_count(competition, ctask, chain):
+    """Update cache_admin_solved_count for the given ctask.
+    Also takes care of chain.cache_is_verified."""
+    solved_count = Submission.objects \
+            .filter(ctask_id=ctask.id,
+                    team__competition_id=competition.id,
+                    team__team_type=Team.TYPE_ADMIN_PRIVATE,
+                    cache_is_correct=True) \
+            .exclude(team__author=F('ctask__task__author')) \
+            .count()
+    min_solved_count = competition.min_admin_solved_count
+
+    before = ctask.cache_admin_solved_count >= min_solved_count
+    ctask.cache_admin_solved_count = solved_count
+    ctask.save()
+    after = ctask.cache_admin_solved_count >= min_solved_count
+
+    if before != after:
+        update_chain_cache_is_verified(competition, chain)

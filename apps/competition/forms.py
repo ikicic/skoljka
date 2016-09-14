@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.forms.models import BaseModelFormSet, ModelForm
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, ugettext_lazy
 
 from competition.models import Chain, CompetitionTask, Team, TeamMember
 from competition.evaluator import InvalidDescriptor, InvalidSolution
@@ -230,7 +230,10 @@ class TeamForm(forms.ModelForm):
 
 
 class TaskListAdminPanelForm(forms.Form):
-    filter_by_is_test = forms.ChoiceField([('0', "Natjecatelji"),
-        ('1', "Administratori")])
-    filter_by_status = forms.ChoiceField([('S', "Solved"), ('F', "Failed"),
-        ('T', "Tried")])
+    filter_by_team_type = forms.ChoiceField([
+        (Team.TYPE_NORMAL, "Natjecatelji"),
+        (Team.TYPE_UNOFFICIAL, ugettext_lazy("Unofficial")),
+        (Team.TYPE_ADMIN_PRIVATE, "Administratori"),
+    ])
+    filter_by_status = forms.ChoiceField([
+        ('S', "Solved"), ('F', "Failed"), ('T', "Tried")])

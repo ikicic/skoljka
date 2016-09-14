@@ -180,11 +180,17 @@ form#comp-scoreboard-admin-refresh {
   font-weight: bold;
 }
 
-.comp-test-team {
+.comp-unofficial-team {
   color: #AAA;
-
   a {
     color: #AAA;
+  }
+}
+
+.comp-admin-private-team {
+  color: #F44;
+  a {
+    color: #F44;
   }
 }
 
@@ -396,10 +402,14 @@ tr.ctask-correct > td {
   float: right;
 }
 
+$table-cchain-bg: mix(gray, $table-bg, 15%);
 .cchain-list > th,
 .cchain-list > td {
-  background-color: mix(gray, $table-bg, 15%) !important;
+  background-color: $table-cchain-bg !important;
   line-height: 2em;
+}
+.cchain-verified-list > td {
+  background-color: mix(green, $table-cchain-bg, 10%) !important;
 }
 
 td.cchain-list-ctask-selected {
@@ -430,26 +440,28 @@ $table-selected-bg: mix(blue, $table-bg, 5%);
   background-color: $table-selected-bg;
 }
 
-.comp-tr-ctask.ctask-comment-important {
+@mixin colored-ctask-tr($color, $weight) {
   & > td,
   &:hover > td {
-    background-color: mix(red, $table-bg, 5%) !important;
+    background-color: mix($color, $table-bg, $weight) !important;
   }
   #cchain-unused-ctasks-table &:hover > td {
-    background-color: mix(red, $table-selected-bg, 5%) !important;
+    background-color: mix($color, $table-selected-bg, $weight) !important;
   }
 }
 
+.comp-tr-ctask.ctask-comment-important {
+  @include colored-ctask-tr(red, 5%);
+}
+
 .comp-tr-ctask.ctask-comment-important.ctask-my {
-  & > td,
-  &:hover > td {
-    background-color: mix(red, $table-bg, 10%) !important;
-  }
-  #cchain-unused-ctasks-table &:hover > td {
-    background-color: mix(red, $table-selected-bg, 10%) !important;
-  }
+  @include colored-ctask-tr(red, 10%);
 
   & > td {
     font-weight: bold;
   }
+}
+
+.ctask-verified {
+  @include colored-ctask-tr(green, 8%);
 }

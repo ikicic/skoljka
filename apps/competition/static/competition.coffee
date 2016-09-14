@@ -105,9 +105,9 @@ $ ->
     span.html (if span.html() then "" else a.attr 'title')
 
   $('#ctask-admin-panel select').change ->
-    is_test = $('#id_filter_by_is_test').val()
+    team_type = $('#id_filter_by_team_type').val()
     status = $('#id_filter_by_status').val()
-    prefix = is_test + status
+    prefix = team_type + status
 
     stats = {}
     for key, value of ctask_statistics
@@ -125,7 +125,6 @@ $ ->
     trs[ctask_id].find('.cchain-list-ctask-selected').html(html)
 
   $('#cchain-unused-ctasks-table tr').click (event) ->
-    event.preventDefault()
     me = $(@)
     id = me.attr('data-id')
     return if not id

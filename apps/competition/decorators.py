@@ -39,40 +39,44 @@ def competition_view(permission=VIEW):
             has_started = competition.start_date < current_time
             has_finished = competition.end_date < current_time
 
-            team = team_invitations = None
+            teams = []
+            team_invitations = []
+            team = None
             if request.user.is_authenticated():
                 team_member_entries = list(TeamMember.objects   \
                         .select_related('team', 'team__author') \
                         .filter(team__competition_id=competition.id,
                             member_id=request.user.id))
 
-                if team_member_entries:
-                    accepted = [x for x in team_member_entries
-                        if x.invitation_status ==
-                                TeamMember.INVITATION_ACCEPTED]
-                    if len(accepted) > 1:
-                        raise Exception(
-                                "User accepted more than one invitation.")
-                    if len(accepted) == 1:
-                        team = accepted[0].team
-                    else:
-                        team_invitations = [x.team for x in team_member_entries
-                            if x.invitation_status ==
-                                TeamMember.INVITATION_UNANSWERED]
+                for entry in team_member_entries:
+                    status = entry.invitation_status
+                    if status == TeamMember.INVITATION_ACCEPTED:
+                        teams.append(entry.team)
+                        if entry.is_selected:
+                            team = entry.team
+                    elif status == TeamMember.INVITATION_UNANSWERED:
+                        team_invitations.append(entry.team)
 
             minutes_passed = \
                     (current_time - competition.start_date).total_seconds() / 60
             nearly_finished = not has_finished and \
                     (competition.end_date - current_time).total_seconds() < 1800
-            data = {'competition': competition, 'team': team,
-                    'team_invitations': team_invitations, 'is_admin': is_admin,
-                    'has_started': has_started, 'has_finished': has_finished,
-                    'nearly_finished': nearly_finished,
-                    'current_time': current_time,
-                    'minutes_passed': minutes_passed,
-                    'is_scoreboard_frozen':
-                        current_time > competition.scoreboard_freeze_date}
-
+            data = {
+                'competition': competition,
+                'team': team,
+                'teams': teams,
+                'team_invitations': team_invitations,
+                'is_admin': is_admin,
+                'has_private_team': any(x for x in teams
+                        if x.team_type == team.TYPE_ADMIN_PRIVATE),
+                'has_started': has_started,
+                'has_finished': has_finished,
+                'nearly_finished': nearly_finished,
+                'current_time': current_time,
+                'minutes_passed': minutes_passed,
+                'is_scoreboard_frozen':
+                        current_time > competition.scoreboard_freeze_date,
+            }
             return func(request, competition, data, *args, **kwargs)
 
         return wraps(func)(inner)

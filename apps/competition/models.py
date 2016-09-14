@@ -38,6 +38,9 @@ class Competition(BasePermissionsModel):
     evaluator_version = models.IntegerField(default=EVALUATOR_V1)
     fixed_task_score = models.IntegerField(default=0,
             help_text="Use 0 to disable.")
+    min_admin_solved_count = models.IntegerField(default=1,
+            help_text="Min. required number of admins that solved a task "
+                      "for it to be published.")
 
     posts = PostGenericRelation(placeholder="Poruka")
 
@@ -61,13 +64,17 @@ class Competition(BasePermissionsModel):
 
 
 class Team(models.Model):
+    TYPE_NORMAL = 0
+    TYPE_UNOFFICIAL = 1
+    TYPE_ADMIN_PRIVATE = 2
+
     name = models.CharField(max_length=40)
     author = models.ForeignKey(User)
     competition = models.ForeignKey(Competition)
     cache_score = models.IntegerField(default=0, db_index=True)
     cache_score_before_freeze = models.IntegerField(default=0, db_index=True)
     cache_max_score_after_freeze = models.IntegerField(default=0)
-    is_test = models.BooleanField(default=False)
+    team_type = models.IntegerField(default=TYPE_NORMAL)
 
     posts = PostGenericRelation(placeholder="Poruka")
 
@@ -83,12 +90,26 @@ class Team(models.Model):
     def get_absolute_url(self):
         return self.competition.get_absolute_url() + 'team/{}/'.format(self.id)
 
+    def is_normal(self):
+        return self.team_type == Team.TYPE_NORMAL
+
+    def is_admin_private(self):
+        return self.team_type == Team.TYPE_ADMIN_PRIVATE
+
+    def get_type_css_class(self):
+        if self.team_type == Team.TYPE_UNOFFICIAL:
+            return 'comp-unofficial-team'
+        if self.team_type == Team.TYPE_ADMIN_PRIVATE:
+            return 'comp-admin-private-team'
+        return ''
+
 
 
 class TeamMember(models.Model):
     team = models.ForeignKey(Team)
     member = models.ForeignKey(User, blank=True, null=True)
     member_name = models.CharField(max_length=64)
+    is_selected = models.BooleanField(default=True)
 
     INVITATION_UNANSWERED = 0
     INVITATION_ACCEPTED = 1
@@ -107,6 +128,7 @@ class Chain(models.Model):
     category = models.CharField(blank=True, db_index=True, max_length=32)
     bonus_score = models.IntegerField(default=1)
     cache_ctask_comments_info = models.CharField(blank=True, max_length=255)
+    cache_is_verified = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
@@ -127,6 +149,7 @@ class CompetitionTask(models.Model):
     chain = models.ForeignKey(Chain, blank=True, null=True)
     chain_position = models.IntegerField(default=0)
     comment = models.OneToOneField(MathContent)
+    cache_admin_solved_count = models.IntegerField(default=0)
 
     def __unicode__(self):
         return "CompetitionTask #{} comp={} task={}".format(

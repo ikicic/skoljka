@@ -12,7 +12,7 @@
   <td class="cchain-list-ctask-content">
     {{ ctask.task.content.text|truncatechars:80 }}
   </td>
-  <td>{{ ctask.t_is_verified }}</td>
+  <td>{{ ctask.cache_admin_solved_count|default:'' }}</td>
   <td>{{ ctask.t_comment }}</td>
   <td>
     {% if ctask.chain_id %}

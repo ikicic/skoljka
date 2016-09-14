@@ -10,11 +10,20 @@
   Vidljivo samo administratorima!
 </div>
 
-<div id="chain-action-bar-right">
-  <a href="{% comp_url 'chain/new' %}" class="btn">Novi lanac</a>
-</div>
+{% if updated_chains_count != None %}
+  <div class="alert">
+    Updated cache_is_verified for <b>{{ updated_chains_count }}</b> chain(s).
+  </div>
+{% endif %}
+{% if updated_ctasks_count != None %}
+  <div class="alert">
+    Updated cache_admin_solved_count for <b>{{ updated_ctasks_count }}</b>
+    ctask(s).
+  </div>
+{% endif %}
 
 <h3 class="comp-header">{% trans "Unused tasks" %}</h3>
+
 
 {% if created %}
   <div class="alert alert-success">
@@ -33,10 +42,10 @@
       <th>{% trans "Date added" %}</th>
       <th>{% trans "Author" %}</th>
       <th>{% trans "Text" %}</th>
-      <th style="width:30px;" title="{{ trans_checked_title }}">
-        {% trans "Reviewed?" %}
+      <th style="width:30px;white-space:nowrap;" title="{{ trans_checked_title }}">
+        &#10008;/&#10004;?
       </th>
-      <th>{% trans "Comment" %}</th>
+      <th></th>
       <th>{% trans "Edit" %}</th>
       <th>{% trans "Overview" %}</th>
     </tr>
@@ -57,6 +66,7 @@
   </table>
 </form>
 
+<br><br>
 <h3 class="comp-header">{% trans "Chains (used tasks)" %}</h3>
 
 <form method="POST" action="{% comp_url 'chain/tasks/action' %}">
@@ -73,15 +83,15 @@
       <th class="cchain-list-ctask-counter">#</th>
       <th>{% trans "Author" %}</th>
       <th>{% trans "Text" %}</th>
-      <th style="width:30px;" title="{{ trans_checked_title }}">
-        {% trans "Reviewed?" %}
+      <th style="width:30px;white-space:nowrap;" title="{{ trans_checked_title }}">
+        &#10008;/&#10004;?
       </th>
-      <th>{% trans "Comment" %}</th>
+      <th></th>
       <th></th>
       <th></th>
     </tr>
     {% for chain in chains %}
-      <tr class="cchain-list">
+      <tr class="cchain-list {{ chain.t_class }}">
         <td colspan="2">{{ chain.category }}</td>
         <td colspan="2">
           <a href="{{ chain.get_absolute_url }}">{{ chain.name }}</a>
@@ -104,5 +114,19 @@
       <tr><td colspan="6"><i>{% trans "Empty..." %}</i></td> </tr>
     {% endfor %}
   </table>
+</form>
+
+<br><br><br>
+<form method="POST" action="">
+  {% csrf_token %}
+  <h3 class="comp-header">Here be dragons</h3>
+  <button type="submit" name="action"
+          value="refresh-ctask-cache-admin-solved-count">
+    Refresh ctask.cache_admin_solved_count
+  </button> &lt;-- (might require refreshing submission.cache_is_correct)
+  <br>
+  <button type="submit" name="action" value="refresh-chain-cache-is-verified">
+    Refresh chain.cache_is_verified
+  </button> &lt;-- (might require refreshing ctask.cache_admin_solved_count)
 </form>
 {% endblock content %}

@@ -46,10 +46,9 @@
       {% for t in teams %}
         <tr class="
             {% if t.id == team.id %}comp-my-team{% endif %}
-            {% if t.is_test %}comp-test-team{% endif %}
-            ">
+            {{ t.get_type_css_class }}">
           <td>
-            {{ t.t_position }}{{ t.is_test|yesno:"*," }}
+            {{ t.t_position }}{{ t.is_normal|yesno:",*" }}
           </td>
           <td><a href="{{ t.get_absolute_url }}">{{ t.name }}</a></td>
           <td>{% team_score t %}</td>

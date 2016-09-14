@@ -93,4 +93,20 @@
   {% endif %}
 {% endif %} {# registration open or is_admin #}
 
+{% if is_admin and not has_private_team %}
+  <br>
+  <div class="alert">
+    As an administrator, you can create a private admin team used for reviewing
+    the tasks. In parallel to that team, you can have a normal team (NOT YET).
+    Switching between the teams will be available in the menu.
+
+    <form method="POST" action="{{ request.get_full_path }}">
+      {% csrf_token %}
+      <button type="submit" name="create-admin-private-team" value="1">
+        Create the private team
+      </button>
+    </form>
+  </div>
+{% endif %}
+
 {% endblock content %}
