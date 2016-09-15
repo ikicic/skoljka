@@ -22,6 +22,39 @@
   </div>
 {% endif %}
 
+<h3 class="comp-header">
+  {% trans "Instructions" %}
+</h3>
+<div>
+  <p>
+    {% blocktrans %}To add a task, click "New task". After adding tasks, to
+    create a chain, first select the tasks you want to include in the chain (by
+    clicking anywhere on the corresponding table row), fill out the name
+    (title) and category of the chain, and click "Create chain".{% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans %}You can easily make changes to an existing chain. To insert
+    new tasks, select them, and click on the table of chains at the wanted
+    position. The position where the tasks will be inserted is marked with a
+    red line.
+    To remove a task, click the icon <i class="icon-remove"></i>. To move a
+    task up or down, click the icon <i class="icon-arrow-up"></i> or
+    <i class="icon-arrow-down"></i>.
+    To delete a chain, click <i class="icon-trash"></i>.{% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans %}Tasks marked with green color are the one that have been
+    reviewed by other administrators (solved correctly). Red colors means that
+    the task has an <code>IMPORTANT:</code> comment, telling the author
+    something is wrong with the task.{% endblocktrans %}
+  </p>
+  <p>
+    Currently, to update chain name, category or unlock minutes, use the old
+    interface (the deprecated "Edit chain" link).
+  </p>
+</div>
+
+<br><br>
 <a href="{% comp_url 'task/new' %}" class="btn">{% trans "New task" %}</a>
 <br><br>
 
@@ -36,9 +69,6 @@
 
 <form method="POST" action="" class="form-horizontal">
   {% csrf_token %}
-  <p><i>
-    {% trans "Info: To create a chain, select tasks by clicking on them, fill out the chain information and submit." %}
-  </i>
   <table class="table table-striped" id="cchain-unused-ctasks-table">
     <tr class="comp-tr-ctask">
       <th></th>

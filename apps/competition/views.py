@@ -252,9 +252,12 @@ def scoreboard(request, competition, data):
 def task_list(request, competition, data):
     all_ctasks = list(CompetitionTask.objects.filter(competition=competition))
     all_ctasks_dict = {ctask.id: ctask for ctask in all_ctasks}
-    all_chains = list(Chain.objects.filter(competition=competition) \
+    all_chains = list(Chain.objects \
+            .filter(competition=competition, cache_is_verified=True) \
             .order_by('category', 'name'))
     all_chains_dict = {chain.id: chain for chain in all_chains}
+
+    unverified_chains = set()
 
     for chain in all_chains:
         chain.ctasks = []
@@ -264,10 +267,12 @@ def task_list(request, competition, data):
         ctask.competition = competition # use preloaded object
         ctask.t_submission_count = 0
         ctask.t_is_solved = False
-        if ctask.chain_id is not None:
+        if ctask.chain_id in all_chains_dict:
             chain = all_chains_dict[ctask.chain_id]
             ctask.chain = chain
             chain.ctasks.append(ctask)
+        elif ctask.chain_id is not None:
+            unverified_chains.add(ctask.chain_id)
 
     all_my_submissions = list(Submission.objects.filter(team=data['team']) \
             .values_list('ctask_id', 'cache_is_correct'))
@@ -306,6 +311,7 @@ def task_list(request, competition, data):
             category.t_is_hidden = \
                     all(chain.t_is_hidden for chain in category.chains)
 
+    data['unverified_chains_count'] = len(unverified_chains)
     data['categories'] = sorted(categories.values(), key=lambda x: x.name)
     data['max_chain_length'] = 0 if not all_chains \
             else max(len(chain.ctasks) for chain in all_chains)
@@ -565,7 +571,7 @@ def chain_tasks_action(request, competition, data):
                     CompetitionTask.objects.select_related('chain'),
                     id=after_id, competition=competition)
             chain = ctask.chain
-            position = ctask.chain_position
+            position = ctask.chain_position - 1
         else:
             return (400, "after_what={}?".format(after_what))
         old_ids = list(CompetitionTask.objects.filter(chain=chain) \
@@ -586,7 +592,7 @@ def chain_tasks_action(request, competition, data):
                 id=id, competition=competition)
         old_ids = list(CompetitionTask.objects.filter(chain=ctask.chain) \
                 .order_by('chain_position').values_list('id', flat=True))
-        pos = ctask.chain_position
+        pos = ctask.chain_position - 1
         new_ids = old_ids[:]
         if action[5] == 'l' and pos > 0:
             new_ids[pos], new_ids[pos - 1] = new_ids[pos - 1], new_ids[pos]

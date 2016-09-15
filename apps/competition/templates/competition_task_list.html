@@ -1,6 +1,7 @@
 {% extends "competition_base.html" %}
 
 {% load competition_tags %}
+{% load i18n %}
 
 {% block content %}
 <h3 class="comp-header">Zadaci</h3>
@@ -15,6 +16,14 @@
       Trenutačno vidljivo samo administratorima!
     </div>
   {% endif %}
+{% endif %}
+
+{% if is_admin and unverified_chains_count %}
+  <div class="alert">
+    {% blocktrans %}Note to administrators: There are
+    <b>{{ unverified_chains_count }} unverified chain(s)</b> that weren't
+    shown.{% endblocktrans %}
+  </div>
 {% endif %}
 
 {% if not team and not has_finished %}

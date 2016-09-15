@@ -71,7 +71,7 @@ class CompetitionTaskForm(ModelForm):
                 self.evaluator, self.initial.get('descriptor'),
                 error_message=_("Invalid!"), show_types=True)
         self.fields['descriptor'].label = mark_safe(
-                xss.escape(_("Result")) + \
+                xss.escape(_("Solution")) + \
                 ' <a href="' + comp_url(self.competition, 'rules') +
                 '" target="_blank"><i class="icon-question-sign" title="' +
                 xss.escape(_("Help")) + '"></i></a>')

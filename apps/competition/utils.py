@@ -40,6 +40,7 @@ def fix_ctask_order(competition, chain, ctasks):
     Returns True if any changes were made.
     """
     changes = False
+
     for k, ctask in enumerate(ctasks, 1):
         if ctask.chain_position != k:
             changes = True
@@ -387,7 +388,7 @@ def update_chain_ctasks(competition, chain, old_ids, new_ids):
     queries_args = []
     for ctask_id in set(old_ids) - set(new_ids):
         queries_args.append(("NULL", -1, ctask_id))
-    for k, ctask_id in enumerate(new_ids):
+    for k, ctask_id in enumerate(new_ids, 1):
         queries_args.append((chain.id, k, ctask_id))
 
     print 'OLD NEW_IDS', old_ids, new_ids

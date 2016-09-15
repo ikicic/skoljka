@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-27 21:55+0200\n"
-"PO-Revision-Date: 2016-08-27 21:55+0200\n"
+"POT-Creation-Date: 2016-09-15 02:41+0200\n"
+"PO-Revision-Date: 2016-09-15 02:42+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -528,13 +528,59 @@ msgstr ""
 "kao dio rješenja, napišite '\\|'. Da bi dobili '\\', napišite '\\\\'.  "
 "Vodeći i prateći razmaci se uvijek ignoriraju."
 
-#: apps/competition/forms.py:35
+#: apps/competition/forms.py:38
 msgid "Descriptor error. Please notify admins!"
 msgstr "Nevaljan deskriptor. Molimo obavijestite administratore!"
 
-#: apps/competition/forms.py:65
+#: apps/competition/forms.py:72
 msgid "Invalid!"
 msgstr "Nevaljano rješenje!"
+
+#: apps/competition/forms.py:74
+msgid "Solution"
+msgstr "Rješenje"
+
+#: apps/competition/forms.py:77 apps/task/templates/task_new.html:91
+msgid "Help"
+msgstr "Pomoć"
+
+#: apps/competition/forms.py:254
+msgid "Unofficial"
+msgstr "Neslužbeni"
+
+#: apps/competition/views.py:517
+msgid "Important comment."
+msgstr "Važan komentar."
+
+#: apps/competition/views.py:517
+msgid "Comment."
+msgstr "Komentar."
+
+#: apps/competition/views.py:533
+msgid "Number of admins that solved this task."
+msgstr "Broj administratora koji su riješili ovaj zadatak."
+
+#: apps/competition/templates/competition_base.html:69
+#: apps/task/templates/inc_task_lecture_small_box.html:26
+msgid "Tasks"
+msgstr "Zadaci"
+
+#: apps/competition/templates/competition_chain_list.html:21
+#: apps/competition/templates/competition_chain_list_tasks.html:110
+msgid "Category"
+msgstr "Kategorija"
+
+#: apps/competition/templates/competition_chain_list.html:22
+msgid "Chain"
+msgstr "Lanac"
+
+#: apps/competition/templates/competition_chain_list.html:23
+msgid "Length"
+msgstr "Duljina"
+
+#: apps/competition/templates/competition_chain_list.html:25
+msgid "Author(s)"
+msgstr "Autor(i):"
 
 #: apps/competition/templates/competition_chain_list.html:26
 msgid "Comments"
@@ -542,28 +588,131 @@ msgstr "Komentari"
 
 #: apps/competition/templates/competition_chain_list.html:27
 #: apps/competition/templates/competition_chain_list.html:38
+#: apps/competition/templates/competition_task_detail.html:12
+#: apps/competition/templates/inc_competition_chain_ctask_tr.html:47
 msgid "Edit"
 msgstr "Uredi"
 
 #: apps/competition/templates/competition_chain_list.html:28
 #: apps/competition/templates/competition_chain_list.html:40
+#: apps/competition/templates/competition_chain_list_tasks.html:151
 msgid "Overview"
 msgstr "Pregled"
 
-#: apps/competition/templates/competition_chain_new.html:44
+#: apps/competition/templates/competition_chain_list_tasks.html:26
+msgid "Instructions"
+msgstr "Upute"
+
+#: apps/competition/templates/competition_chain_list_tasks.html:30
+msgid ""
+"To add a task, click \"New task\". After adding tasks, to\n"
+"    create a chain, first select the tasks you want to include in the chain "
+"(by\n"
+"    clicking anywhere on the corresponding table row), fill out the name\n"
+"    (title) and category of the chain, and click \"Create chain\"."
+msgstr ""
+"Da biste dodali zadatak, kliknite na \"Novi zadatak\". Nakon dodavanja "
+"zadataka, da biste napravili lanac, prvo odaberite zadatke koje želite "
+"uključiti (klikanjem bilo gdje na odgovarajući redak tablice), zatim "
+"ispunite ime (naslov) i kategoriju lanca te kliknite \"Napravi lanac\"."
+
+#: apps/competition/templates/competition_chain_list_tasks.html:36
+msgid ""
+"You can easily make changes to an existing chain. To insert\n"
+"    new tasks, select them, and click on the table of chains at the wanted\n"
+"    position. The position where the tasks will be inserted is marked with "
+"a\n"
+"    red line.\n"
+"    To remove a task, click the icon <i class=\"icon-remove\"></i>. To move "
+"a\n"
+"    task up or down, click the icon <i class=\"icon-arrow-up\"></i> or\n"
+"    <i class=\"icon-arrow-down\"></i>.\n"
+"    To delete a chain, click <i class=\"icon-trash\"></i>."
+msgstr ""
+"Postojećim lancima se promjene lagano rade. Da biste dodali nove zadatke, "
+"odaberite ih i kliknite na tablicu lanaca na odgovarajuće mjesto. Mjesto "
+"gdje će se zadaci dodati je označeno crvenom linijom. Za micanje zadatka iz "
+"lanca, kliknite ikonicu <i class=\"icon-remove\"></i>. Za pomicanje gore/"
+"dolje, kliknite <i class=\"icon-arrow-up\"></i> ili <i class=\"icon-arrow-"
+"down\"></i>. Za brisanje lanca, kliknite <i class=\"icon-trash\"></i>."
+
+#: apps/competition/templates/competition_chain_list_tasks.html:46
+msgid ""
+"Tasks marked with green color are the one that have been\n"
+"    reviewed by other administrators (solved correctly). Red colors means "
+"that\n"
+"    the task has an <code>IMPORTANT:</code> comment, telling the author\n"
+"    something is wrong with the task."
+msgstr ""
+"Zadaci označeni zelenom bojom su oni koje su administratori provjerili "
+"(imaju točna rješenja). Crvena boja predstavlja <code>IMPORTANT:</code> "
+"komentar, koji govori autoru da nešto ne valja sa zadatkom."
+
+#: apps/competition/templates/competition_chain_list_tasks.html:58
+msgid "New task"
+msgstr "Novi zadatak"
+
+#: apps/competition/templates/competition_chain_list_tasks.html:61
+msgid "Unused tasks"
+msgstr "Neiskorišteni zadaci"
+
+#: apps/competition/templates/competition_chain_list_tasks.html:66
+msgid "Chain successfully created."
+msgstr "Lanac je uspješno napravljen."
+
+#: apps/competition/templates/competition_chain_list_tasks.html:75
+msgid "Date added"
+msgstr "Vrijeme dodavanja"
+
+#: apps/competition/templates/competition_chain_list_tasks.html:76
+#: apps/competition/templates/competition_chain_list_tasks.html:119
+msgid "Author"
+msgstr "Autor"
+
+#: apps/competition/templates/competition_chain_list_tasks.html:77
+#: apps/competition/templates/competition_chain_list_tasks.html:120
+msgid "Text"
+msgstr "Tekst"
+
+#: apps/competition/templates/competition_chain_list_tasks.html:97
+msgid "Create chain"
+msgstr "Napravi lanac"
+
+#: apps/competition/templates/competition_chain_list_tasks.html:104
+msgid "Chains (used tasks)"
+msgstr "Lanci (iskorišteni zadaci)"
+
+#: apps/competition/templates/competition_chain_list_tasks.html:111
+msgid "Title"
+msgstr "Naslov"
+
+#: apps/competition/templates/competition_chain_list_tasks.html:140
+msgid "Delete"
+msgstr "Izbriši"
+
+#: apps/competition/templates/competition_chain_list_tasks.html:146
+msgid "Edit chain"
+msgstr "Uredi lanac"
+
+#: apps/competition/templates/competition_chain_list_tasks.html:157
+msgid "Empty..."
+msgstr "Prazno..."
+
+#: apps/competition/templates/competition_chain_new.html:48
 #, python-format
 msgid "Note: Score for the each task has been fixed to %(score)s."
 msgstr "Napomena: Bodovi za svaki zadatak su fiksirani na %(score)s."
 
-#: apps/competition/templates/competition_chain_new.html:58
+#: apps/competition/templates/competition_chain_new.html:62
 msgid "Chain overview"
 msgstr "Pregled lanca"
 
-#: apps/competition/templates/competition_chain_new.html:64
+#: apps/competition/templates/competition_chain_new.html:68
 msgid "There were some errors!"
 msgstr "Bilo je nekih grešaka!"
 
 #: apps/competition/templates/competition_chain_overview.html:17
+#: apps/competition/templates/competition_task_new.html:36
 #: apps/task/templates/inc_task_bulk_preview_single.html:19
 msgid "Author:"
 msgstr "Autor:"
@@ -572,7 +721,75 @@ msgstr "Autor:"
 msgid "Solution format description"
 msgstr "Objašnjenje formata rješenja"
 
-#: apps/competition/templatetags/competition_tags.py:93
+#: apps/competition/templates/competition_task_list.html:23
+#, python-format
+msgid ""
+"Note to administrators: There are\n"
+"    <b>%(unverified_chains_count)s unverified chain(s)</b> that weren't\n"
+"    shown."
+msgstr ""
+"Napomena administratorima: <b>%(unverified_chains_count)s neprovjeren(ih) "
+"lanac(a)</b> nije prikazano."
+
+#: apps/competition/templates/competition_task_new.html:18
+msgid ""
+"Solution is hidden. You can still view and edit it by clicking at the "
+"following link:"
+msgstr ""
+"Rješenje je sakriveno. Da biste vidjeli rješenje, kliknite na sljedeći link:"
+
+#: apps/competition/templates/competition_task_new.html:20
+msgid "Show/hide the solution"
+msgstr "Prikaži/sakrij rješenje"
+
+#: apps/competition/templates/competition_task_new.html:22
+msgid ""
+"If you want to review the task please don't look at the solution in advance."
+msgstr ""
+"Ako namjeravati pregledavati zadatak, molimo ne gledajte rješenje in advance."
+
+#: apps/competition/templates/competition_task_new.html:27
+msgid "Hint: Press <b>Ctrl+M</b> to preview the formatted text."
+msgstr "Pritisnite <b>Ctrl+M</b> za pregled formatiranog teksta."
+
+#: apps/competition/templates/competition_task_new.html:52
+msgid "Save changes"
+msgstr "Spremi promjene"
+
+#: apps/competition/templates/competition_task_new.html:54
+#: apps/task/templates/task_bulk_new_2nd.html:28
+msgid "Submit"
+msgstr "Pošalji"
+
+#: apps/competition/templates/competition_task_new.html:59
+msgid "Submit and create new task"
+msgstr "Pošalji i napravi novi zadatak"
+
+#: apps/competition/templates/competition_task_new.html:63
+msgid "Submit and go to the task list"
+msgstr "Pošalji i odi na listu zadataka"
+
+#: apps/competition/templates/competition_task_new.html:67
+msgid "Go to task"
+msgstr "Otvori zadatak"
+
+#: apps/competition/templates/inc_competition_chain_ctask_tr.html:26
+msgid "Remove"
+msgstr "Makni"
+
+#: apps/competition/templates/inc_competition_chain_ctask_tr.html:31
+msgid "Move up"
+msgstr "Pomakni gore"
+
+#: apps/competition/templates/inc_competition_chain_ctask_tr.html:39
+msgid "Move down"
+msgstr "Pomakni dolje"
+
+#: apps/competition/templates/inc_competition_chain_ctask_tr.html:48
+msgid "Open"
+msgstr "Otvori"
+
+#: apps/competition/templatetags/competition_tags.py:97
 #, python-format
 msgid "%d important"
 msgid_plural "%d important"
@@ -580,7 +797,7 @@ msgstr[0] "%d važan"
 msgstr[1] "%d važna"
 msgstr[2] "%d važnih"
 
-#: apps/competition/templatetags/competition_tags.py:96
+#: apps/competition/templatetags/competition_tags.py:100
 #, python-format
 msgid "%d my task"
 msgid_plural "%d my tasks"
@@ -900,10 +1117,6 @@ msgstr "Izvor:"
 msgid "Video"
 msgstr "Video"
 
-#: apps/task/templates/inc_task_lecture_small_box.html:26
-msgid "Tasks"
-msgstr "Zadaci"
-
 #: apps/task/templates/task_bulk_new.html:6
 #: apps/task/templates/task_bulk_new_2nd.html:6
 #: apps/task/templates/task_bulk_new_success.html:6
@@ -1057,10 +1270,6 @@ msgstr "Provjerite zadatke još jednom prije dodavanja!"
 msgid "Template name:"
 msgstr "Naziv predloška"
 
-#: apps/task/templates/task_bulk_new_2nd.html:28
-msgid "Submit"
-msgstr "Pošalji"
-
 #: apps/task/templates/task_bulk_new_2nd.html:31
 msgid "Back"
 msgstr "Natrag"
@@ -1135,10 +1344,6 @@ msgid ""
 msgstr ""
 "Ako nemate privilegije za napraviti navedene korake, molimo kontaktirajte "
 "administratore."
-
-#: apps/task/templates/task_new.html:91
-msgid "Help"
-msgstr "Pomoć"
 
 #: apps/task/templates/task_new.html:102
 msgid "Press Ctrl+M to get the preview of the text."
