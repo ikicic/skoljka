@@ -335,8 +335,7 @@ def get_ctask_statistics(competition_id):
             .filter(competition_id=competition_id) \
             .values_list('id', 'max_submissions'))
     team_types = dict(Team.objects \
-            .filter(competition_id=competition_id,
-                    team_type=Team.TYPE_ADMIN_PRIVATE) \
+            .filter(competition_id=competition_id) \
             .values_list('id', 'team_type'))
     submissions = Submission.objects \
             .filter(ctask__competition_id=competition_id) \
