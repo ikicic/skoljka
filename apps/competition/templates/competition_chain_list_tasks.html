@@ -23,9 +23,11 @@
 {% endif %}
 
 <h3 class="comp-header">
-  {% trans "Instructions" %}
+  <a href="#" class="auto-toggler" data-target="instructions">
+    {% trans "Instructions" %}
+  </a>
 </h3>
-<div>
+<div id="instructions" style="display:none;">
   <p>
     {% blocktrans %}To add a task, click "New task". After adding tasks, to
     create a chain, first select the tasks you want to include in the chain (by
@@ -52,9 +54,10 @@
     Currently, to update chain name, category or unlock minutes, use the old
     interface (the deprecated "Edit chain" link).
   </p>
+  <br>
 </div>
 
-<br><br>
+<br>
 <a href="{% comp_url 'task/new' %}" class="btn">{% trans "New task" %}</a>
 <br><br>
 
@@ -85,6 +88,8 @@
     </tr>
     {% for ctask in unused_ctasks %}
       {% chain_ctask_tr ctask %}
+    {% empty %}
+      <tr><td colspan="9"><i>{% trans "Empty..." %}</i></td> </tr>
     {% endfor %}
   </table>
 
@@ -107,9 +112,13 @@
   {% csrf_token %}
   <table class="table table-striped" id="used-tasks-table">
     <tr class="cchain-list">
-      <th colspan="2">{% trans "Category" %}</th>
+      <th style="white-space:nowrap;" colspan="2">
+        {% anchor category Category %}
+      </th>
       <th colspan="2">{% trans "Title" %}</th>
-      <th title="Vrijeme otključavanja">{% anchor unlock_minutes Minute %}</th>
+      <th style="white-space:nowrap;" title="{% trans "Unlock time" %}">
+        {% anchor unlock_minutes Minutes %}
+      </th>
       <th></th>
       <th></th>
       <th></th>
@@ -131,7 +140,7 @@
           id="chain-{{ chain.id }}">
         <td colspan="2">{{ chain.category }}</td>
         <td colspan="2">
-          <a href="{{ chain.get_absolute_url }}">{{ chain.name }}</a>
+          <a href="{{ chain.get_absolute_url }}overview/">{{ chain.name }}</a>
         </td>
         <td>{{ chain.unlock_minutes }} min.</td>
         <td>
@@ -154,7 +163,7 @@
         {% chain_ctask_tr ctask forloop.counter chain.t_ctasks|length %}
       {% endfor %}
     {% empty %}
-      <tr><td colspan="6"><i>{% trans "Empty..." %}</i></td> </tr>
+      <tr><td colspan="9"><i>{% trans "Empty..." %}</i></td> </tr>
     {% endfor %}
   </table>
 </form>

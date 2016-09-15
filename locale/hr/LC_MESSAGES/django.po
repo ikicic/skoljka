@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-15 02:41+0200\n"
-"PO-Revision-Date: 2016-09-15 02:42+0200\n"
+"POT-Creation-Date: 2016-09-15 02:57+0200\n"
+"PO-Revision-Date: 2016-09-15 02:57+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -566,7 +566,6 @@ msgid "Tasks"
 msgstr "Zadaci"
 
 #: apps/competition/templates/competition_chain_list.html:21
-#: apps/competition/templates/competition_chain_list_tasks.html:110
 msgid "Category"
 msgstr "Kategorija"
 
@@ -595,15 +594,15 @@ msgstr "Uredi"
 
 #: apps/competition/templates/competition_chain_list.html:28
 #: apps/competition/templates/competition_chain_list.html:40
-#: apps/competition/templates/competition_chain_list_tasks.html:151
+#: apps/competition/templates/competition_chain_list_tasks.html:160
 msgid "Overview"
 msgstr "Pregled"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:26
+#: apps/competition/templates/competition_chain_list_tasks.html:27
 msgid "Instructions"
 msgstr "Upute"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:30
+#: apps/competition/templates/competition_chain_list_tasks.html:32
 msgid ""
 "To add a task, click \"New task\". After adding tasks, to\n"
 "    create a chain, first select the tasks you want to include in the chain "
@@ -616,7 +615,7 @@ msgstr ""
 "uključiti (klikanjem bilo gdje na odgovarajući redak tablice), zatim "
 "ispunite ime (naslov) i kategoriju lanca te kliknite \"Napravi lanac\"."
 
-#: apps/competition/templates/competition_chain_list_tasks.html:36
+#: apps/competition/templates/competition_chain_list_tasks.html:38
 msgid ""
 "You can easily make changes to an existing chain. To insert\n"
 "    new tasks, select them, and click on the table of chains at the wanted\n"
@@ -636,7 +635,7 @@ msgstr ""
 "dolje, kliknite <i class=\"icon-arrow-up\"></i> ili <i class=\"icon-arrow-"
 "down\"></i>. Za brisanje lanca, kliknite <i class=\"icon-trash\"></i>."
 
-#: apps/competition/templates/competition_chain_list_tasks.html:46
+#: apps/competition/templates/competition_chain_list_tasks.html:48
 msgid ""
 "Tasks marked with green color are the one that have been\n"
 "    reviewed by other administrators (solved correctly). Red colors means "
@@ -648,55 +647,60 @@ msgstr ""
 "(imaju točna rješenja). Crvena boja predstavlja <code>IMPORTANT:</code> "
 "komentar, koji govori autoru da nešto ne valja sa zadatkom."
 
-#: apps/competition/templates/competition_chain_list_tasks.html:58
+#: apps/competition/templates/competition_chain_list_tasks.html:61
 msgid "New task"
 msgstr "Novi zadatak"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:61
+#: apps/competition/templates/competition_chain_list_tasks.html:64
 msgid "Unused tasks"
 msgstr "Neiskorišteni zadaci"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:66
+#: apps/competition/templates/competition_chain_list_tasks.html:69
 msgid "Chain successfully created."
 msgstr "Lanac je uspješno napravljen."
 
-#: apps/competition/templates/competition_chain_list_tasks.html:75
+#: apps/competition/templates/competition_chain_list_tasks.html:78
 msgid "Date added"
 msgstr "Vrijeme dodavanja"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:76
-#: apps/competition/templates/competition_chain_list_tasks.html:119
+#: apps/competition/templates/competition_chain_list_tasks.html:79
+#: apps/competition/templates/competition_chain_list_tasks.html:128
 msgid "Author"
 msgstr "Autor"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:77
-#: apps/competition/templates/competition_chain_list_tasks.html:120
+#: apps/competition/templates/competition_chain_list_tasks.html:80
+#: apps/competition/templates/competition_chain_list_tasks.html:129
 msgid "Text"
 msgstr "Tekst"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:97
+#: apps/competition/templates/competition_chain_list_tasks.html:92
+#: apps/competition/templates/competition_chain_list_tasks.html:166
+msgid "Empty..."
+msgstr "Prazno..."
+
+#: apps/competition/templates/competition_chain_list_tasks.html:102
 msgid "Create chain"
 msgstr "Napravi lanac"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:104
+#: apps/competition/templates/competition_chain_list_tasks.html:109
 msgid "Chains (used tasks)"
 msgstr "Lanci (iskorišteni zadaci)"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:111
+#: apps/competition/templates/competition_chain_list_tasks.html:118
 msgid "Title"
 msgstr "Naslov"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:140
+#: apps/competition/templates/competition_chain_list_tasks.html:119
+msgid "Unlock time"
+msgstr "Vrijeme otključavanja"
+
+#: apps/competition/templates/competition_chain_list_tasks.html:149
 msgid "Delete"
 msgstr "Izbriši"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:146
+#: apps/competition/templates/competition_chain_list_tasks.html:155
 msgid "Edit chain"
 msgstr "Uredi lanac"
-
-#: apps/competition/templates/competition_chain_list_tasks.html:157
-msgid "Empty..."
-msgstr "Prazno..."
 
 #: apps/competition/templates/competition_chain_new.html:48
 #, python-format
