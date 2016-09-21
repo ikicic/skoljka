@@ -60,6 +60,13 @@ form.no-table {
   }
 }
 
+/* Help text styling. */
+.help-text-gray {
+  font-style: italic;
+  color: gray;
+}
+
+
 /* History select. */
 #history-select {
   width: 350px;
@@ -155,4 +162,13 @@ h2, h3, h4, h4 a {
   padding: 10px 0 0 0;
   text-align: left;
   text-transform: uppercase;
+}
+
+/* TD short description. */
+div.td-description-container {
+  text-align: center;
+}
+span.td-description {
+  color: gray;
+  font-size: 11px;
 }

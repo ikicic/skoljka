@@ -2,6 +2,10 @@
 from django.template.loader import add_to_builtins
 from django.utils.html import mark_safe
 
+def gray_help_text(text):
+    return mark_safe(
+        u' <i class="help-text-gray">{}</i>'.format(text))
+
 def icon_help_text(text):
     return mark_safe(
         u' <i class="icon-question-sign" title="{}"></i>'.format(text))

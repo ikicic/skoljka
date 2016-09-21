@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-15 02:57+0200\n"
-"PO-Revision-Date: 2016-09-15 02:57+0200\n"
+"POT-Creation-Date: 2016-09-21 21:54+0200\n"
+"PO-Revision-Date: 2016-09-21 21:55+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -544,9 +544,13 @@ msgstr "Rješenje"
 msgid "Help"
 msgstr "Pomoć"
 
-#: apps/competition/forms.py:254
+#: apps/competition/forms.py:257
 msgid "Unofficial"
 msgstr "Neslužbeni"
+
+#: apps/competition/models.py:134
+msgid "Position in the category."
+msgstr "Pozicija u kategoriji."
 
 #: apps/competition/views.py:517
 msgid "Important comment."
@@ -570,31 +574,40 @@ msgid "Category"
 msgstr "Kategorija"
 
 #: apps/competition/templates/competition_chain_list.html:22
+msgid "Position"
+msgstr "Pozicija"
+
+#: apps/competition/templates/competition_chain_list.html:23
+msgctxt "Position"
+msgid "Pos."
+msgstr "Poz."
+
+#: apps/competition/templates/competition_chain_list.html:25
 msgid "Chain"
 msgstr "Lanac"
 
-#: apps/competition/templates/competition_chain_list.html:23
+#: apps/competition/templates/competition_chain_list.html:26
 msgid "Length"
 msgstr "Duljina"
 
-#: apps/competition/templates/competition_chain_list.html:25
+#: apps/competition/templates/competition_chain_list.html:28
 msgid "Author(s)"
 msgstr "Autor(i):"
 
-#: apps/competition/templates/competition_chain_list.html:26
+#: apps/competition/templates/competition_chain_list.html:29
 msgid "Comments"
 msgstr "Komentari"
 
-#: apps/competition/templates/competition_chain_list.html:27
-#: apps/competition/templates/competition_chain_list.html:38
+#: apps/competition/templates/competition_chain_list.html:30
+#: apps/competition/templates/competition_chain_list.html:42
 #: apps/competition/templates/competition_task_detail.html:12
 #: apps/competition/templates/inc_competition_chain_ctask_tr.html:47
 msgid "Edit"
 msgstr "Uredi"
 
-#: apps/competition/templates/competition_chain_list.html:28
-#: apps/competition/templates/competition_chain_list.html:40
-#: apps/competition/templates/competition_chain_list_tasks.html:160
+#: apps/competition/templates/competition_chain_list.html:31
+#: apps/competition/templates/competition_chain_list.html:44
+#: apps/competition/templates/competition_chain_list_tasks.html:166
 msgid "Overview"
 msgstr "Pregled"
 
@@ -674,7 +687,7 @@ msgid "Text"
 msgstr "Tekst"
 
 #: apps/competition/templates/competition_chain_list_tasks.html:92
-#: apps/competition/templates/competition_chain_list_tasks.html:166
+#: apps/competition/templates/competition_chain_list_tasks.html:172
 msgid "Empty..."
 msgstr "Prazno..."
 
@@ -694,11 +707,11 @@ msgstr "Naslov"
 msgid "Unlock time"
 msgstr "Vrijeme otključavanja"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:149
+#: apps/competition/templates/competition_chain_list_tasks.html:155
 msgid "Delete"
 msgstr "Izbriši"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:155
+#: apps/competition/templates/competition_chain_list_tasks.html:161
 msgid "Edit chain"
 msgstr "Uredi lanac"
 

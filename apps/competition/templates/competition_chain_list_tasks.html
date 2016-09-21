@@ -93,7 +93,7 @@
     {% endfor %}
   </table>
 
-  <table>
+  <table class="kill-br">
     {{ form }}
     <tr>
       <td></td>
@@ -138,7 +138,13 @@
     {% for chain in chains %}
       <tr class="cchain-list {{ chain.t_class }}" data-id="{{ chain.id }}"
           id="chain-{{ chain.id }}">
-        <td colspan="2">{{ chain.category }}</td>
+        <td colspan="2">
+          <div class="td-description-container">
+            {{ chain.category }}
+            <br>
+            <span class="td-description">(position={{ chain.position }})</span>
+          </div>
+        </td>
         <td colspan="2">
           <a href="{{ chain.get_absolute_url }}overview/">{{ chain.name }}</a>
         </td>
@@ -151,9 +157,9 @@
           </button>
         </td>
         <td>
-          <div style="text-align:center;display:inline-block;">
+          <div class="td-description-container">
             <a href="{{ chain.get_absolute_url }}">{% trans "Edit chain" %}</a>
-            <br><span style="font-size:11px;">(deprecated)</span>
+            <br><span class="td-description">(deprecated)</span>
           </div>
         </td>
         <td><a href="{{ chain.get_absolute_url }}overview/">

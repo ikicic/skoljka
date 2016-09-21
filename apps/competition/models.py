@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User, Group
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 
 from libs.string_operations import join_urls
 
@@ -9,6 +10,8 @@ from permissions.constants import EDIT
 from permissions.models import BasePermissionsModel
 from post.generic import PostGenericRelation
 from task.models import Task
+
+from skoljka.libs.models import gray_help_text
 
 from datetime import datetime
 import re
@@ -127,6 +130,8 @@ class Chain(models.Model):
     unlock_minutes = models.IntegerField(default=0)
     category = models.CharField(blank=True, db_index=True, max_length=32)
     bonus_score = models.IntegerField(default=1)
+    position = models.IntegerField(default=0,
+            help_text=gray_help_text(_("Position in the category.")))
     cache_ctask_comments_info = models.CharField(blank=True, max_length=255)
     cache_is_verified = models.BooleanField(default=False)
 

@@ -110,7 +110,8 @@ class CompetitionTaskForm(ModelForm):
 class ChainForm(forms.ModelForm):
     class Meta:
         model = Chain
-        fields = ['name', 'category', 'unlock_minutes', 'bonus_score']
+        fields = ['name', 'category', 'unlock_minutes', 'bonus_score',
+                  'position']
 
 
 
@@ -145,6 +146,7 @@ class ChainTasksForm(forms.ModelForm):
         self.fields['category'].widget.attrs.update({'class': 'span2'})
         self.fields['unlock_minutes'].widget.attrs.update({'class': 'span1'})
         self.fields['bonus_score'].widget.attrs.update({'class': 'span1'})
+        self.fields['position'].widget.attrs.update({'class': 'span1'})
         self.fields['ctask_ids'].widget.attrs.update(
                 {'id': 'cchain-unused-ctasks-ids'})
 
@@ -156,7 +158,8 @@ class ChainTasksForm(forms.ModelForm):
 
     class Meta:
         model = Chain
-        fields = ['name', 'category', 'unlock_minutes', 'bonus_score']
+        fields = ['name', 'category', 'unlock_minutes', 'bonus_score',
+                  'position']
 
 
 

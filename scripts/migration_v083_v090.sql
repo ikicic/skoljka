@@ -26,3 +26,4 @@ call AddColumnUnlessExists('competition_teammember', 'is_selected', 'TINYINT NOT
 call AddColumnUnlessExists('competition_competition', 'min_admin_solved_count', 'INT NOT NULL DEFAULT 0');
 call AddColumnUnlessExists('competition_chain', 'cache_is_verified', 'TINYINT NOT NULL DEFAULT 1');
 call AddColumnUnlessExists('competition_competitiontask', 'cache_admin_solved_count', 'INT NOT NULL DEFAULT 0');
+call AddColumnUnlessExists('competition_chain', 'position', 'INT NOT NULL DEFAULT 0 AFTER `bonus_score`');

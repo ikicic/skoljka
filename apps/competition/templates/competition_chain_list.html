@@ -19,6 +19,9 @@
 <table class="table table-striped">
   <tr>
     <th>{% trans "Category" %}</th>
+    <th title="{% trans "Position" %}" style="width:3em;">
+      {% trans "Pos." context "Position" %}
+    </th>
     <th>{% trans "Chain" %}</th>
     <th>{% trans "Length" %}</th>
     <th title="Vrijeme otključavanja">{% anchor unlock_minutes Minute %}</th>
@@ -30,6 +33,7 @@
   {% for chain in chains %}
     <tr class="{% chain_class chain %}">
       <td>{{ chain.category }}</td>
+      <td>{{ chain.position }}</td>
       <td><a href="{{ chain.get_absolute_url }}">{{ chain.name }}</a></td>
       <td>{{ chain.t_ctask_count }}</td>
       <td>{{ chain.unlock_minutes }}</td>

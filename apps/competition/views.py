@@ -254,7 +254,7 @@ def task_list(request, competition, data):
     all_ctasks_dict = {ctask.id: ctask for ctask in all_ctasks}
     all_chains = list(Chain.objects \
             .filter(competition=competition, cache_is_verified=True) \
-            .order_by('category', 'name'))
+            .order_by('category', 'position', 'name'))
     all_chains_dict = {chain.id: chain for chain in all_chains}
 
     unverified_chains = set()
@@ -488,9 +488,9 @@ def chain_tasks_list(request, competition, data):
     chains = Chain.objects.filter(competition=competition)
     order_by_field = django_sorting.middleware.get_field(request)
     if len(order_by_field) > 1:
-        chains = chains.order_by(order_by_field, 'category', 'name')
+        chains = chains.order_by(order_by_field, 'category', 'position', 'name')
     else:
-        chains = chains.order_by('category', 'name')
+        chains = chains.order_by('category', 'position', 'name')
 
     chain_dict = {chain.id: chain for chain in chains}
     ctasks = list(CompetitionTask.objects.filter(competition=competition) \
@@ -613,9 +613,9 @@ def chain_list(request, competition, data):
     chains = Chain.objects.filter(competition=competition)
     order_by_field = django_sorting.middleware.get_field(request)
     if len(order_by_field) > 1:
-        chains = chains.order_by(order_by_field, 'category', 'name')
+        chains = chains.order_by(order_by_field, 'category', 'position', 'name')
     else:
-        chains = chains.order_by('category', 'name')
+        chains = chains.order_by('category', 'position', 'name')
     chain_dict = {chain.id: chain for chain in chains}
     ctasks = list(CompetitionTask.objects.filter(competition=competition) \
             .values_list('id', 'chain_id', 'task__author_id'))
