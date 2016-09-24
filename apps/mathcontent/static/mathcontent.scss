@@ -87,6 +87,14 @@ object.latex-center {
   text-align: right;
 }
 
+.mc-hide-content {
+  // Similar to pre { ... } from Bootstrap.
+  background-color: #f5f5f5;
+  border: rgba(0, 0, 0, .15) 1px solid;
+  border-radius: 5px;
+  padding: 5px;
+}
+
 .mc-indent {
   // Default is 15pt, 17pt, 17.68pt for 10pt, 11pt, 12pt document size.
   // We support this class (to simplify testing), but the default is no

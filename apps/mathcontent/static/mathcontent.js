@@ -63,6 +63,12 @@ $(function(){
     if (event.ctrlKey && event.keyCode == 77)
       $('.mc-preview-button').click();
   });
+
+  /* Handle [hide]...[/hide] show/hide links. */
+  $('body').on('click', '.mc-hide-link', function(event) {
+      event.preventDefault();
+      $(this).next().toggle();
+  });
 });
 
 

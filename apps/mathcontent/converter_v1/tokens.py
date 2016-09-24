@@ -91,10 +91,11 @@ class TokenClosedCurly(Token):
 class TokenBBCode(Token):
     def __init__(self, name, attrs, T_start, T_end, content=None):
         self.name = name
-        self.attrs = attrs
+        self.attrs = attrs      # None if closed tag.
         self.T_start = T_start  # Original interval of the input string.
         self.T_end = T_end
-        self.content = content
+        self.content = content  # Only if the content not parsed.
+
     def __repr__(self):
         return 'TokenBBCode({}, {}, {}, {})'.format(
                 repr(self.name), repr(self.attrs), self.T_start, self.T_end)

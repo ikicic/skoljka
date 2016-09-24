@@ -784,6 +784,31 @@ class ConverterV1TestCase(TestCaseEx):
                 "The variable <code>x</code>.",
                 "The variable \\texttt{x}.")
         self.assertHTMLLatexNoPar(
+                "[hide]something[/hide]",
+                '<div><a href="#" class="mc-hide-link">+/-</a>'
+                '<div class="mc-hide-content" style="display:none;">'
+                'something'
+                '</div></div>',
+                "{\\color{gray}something}")
+        self.assertHTMLLatexNoPar(
+                "[hide=Bla]something[/hide]",
+                '<div><a href="#" class="mc-hide-link">Bla</a>'
+                '<div class="mc-hide-content" style="display:none;">'
+                'something'
+                '</div></div>',
+                "{\\color{gray}Bla: something}")
+        self.assertHTMLLatexNoPar(
+                "[hide=\"Click me\"]something[/hide]",
+                '<div><a href="#" class="mc-hide-link">Click me</a>'
+                '<div class="mc-hide-content" style="display:none;">'
+                'something'
+                '</div></div>',
+                "{\\color{gray}Click me: something}")
+        self.assertHTMLLatexNoPar(  # Error.
+                "[hide=Click me]something[/hide]",
+                "[hide=Click me]something[/hide]",
+                "[hide=Click me]something[/hide]")
+        self.assertHTMLLatexNoPar(
                 "[img attachment=1]",
                 '<img src="/mock/first.png" alt="Attachment #1" class="latex">',
                 "\\includegraphics{first.png}")

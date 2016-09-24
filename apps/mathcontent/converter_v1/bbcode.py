@@ -208,6 +208,37 @@ class BBCodeNoParseContainer(BBCodeContainer):
 
 
 
+class BBCodeHide(BBCodeTag):
+    def should_parse_content(self, token):
+        return True
+
+    def to_html(self, token, converter):
+        if not token.is_open():
+            return '</div></div>'
+        if len(token.attrs) != 1:
+            raise BBUnexpectedParameters()
+
+        if token.attrs[0][1]:
+            link_text = xss.escape(token.attrs[0][1])
+        else:
+            link_text = '+/-'
+        return u'<div><a href="#" class="mc-hide-link">{}</a>' \
+                u'<div class="mc-hide-content" style="display:none;">'.format(
+                        link_text)
+
+    def to_latex(self, token, converter):
+        if not token.is_open():
+            return '}'
+        if len(token.attrs) != 1:
+            raise BBUnexpectedParameters()
+
+        if token.attrs[0][1]:
+            return u'{\\color{gray}' + latex_escape(token.attrs[0][1]) + ': '
+        else:
+            return u'{\\color{gray}'
+
+
+
 class BBCodeImg(BBCodeTag):
     def __init__(self):
         super(BBCodeImg, self).__init__(has_close_tag=False)
@@ -343,6 +374,7 @@ bb_commands = {
     'center': BBCodeContainer('<div class="mc-center">', '</div>',
                               '\\begin{center}', '\\end{center}'),
     'code': BBCodeContainer('<code>', '</code>', '\\texttt{', '}'),
+    'hide': BBCodeHide(),
     'i': BBCodeContainer('<i>', '</i>', '\\textit{', '}'),
     'img': BBCodeImg(),
     'par': BBCodePar(),
