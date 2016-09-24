@@ -77,6 +77,9 @@ module.exports = (grunt) ->
       sass:
         files: ['apps/**/*.scss']
         tasks: ['sass']
+      jsfiles:
+        files: ['apps/**/static/**/*.js']
+        tasks: ['copy:jsfiles']
 
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-coffee'
