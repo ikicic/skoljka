@@ -1,5 +1,6 @@
 from django import template
 from django.contrib.auth.models import User
+from django.template.defaultfilters import truncatechars
 from django.utils.html import mark_safe
 from django.utils.translation import ungettext
 
@@ -9,6 +10,7 @@ from competition.utils import comp_url as utils__comp_url
 from competition.utils import ctask_comment_class as utils__ctask_comment_class
 
 import json
+import re
 
 register = template.Library()
 
@@ -107,6 +109,15 @@ def chain_ctask_comments_info(context, chain):
 @register.inclusion_tag('inc_competition_chain_ctask_tr.html')
 def chain_ctask_tr(ctask, counter=None, total_ctasks=None):
     return {'ctask': ctask, 'counter': counter, 'total_ctasks': total_ctasks}
+
+
+CHAIN_LIST_CTASK_COMMENT_PREVIEW_RE = re.compile(r'\s*\[\s*hide\s*\]')
+@register.simple_tag(takes_context=False)
+def chain_list_ctask_comment_preview(ctask):
+    truncate = 40 if ctask.chain_id else 30
+    truncated = truncatechars(ctask.comment.text or '', truncate)
+    search = CHAIN_LIST_CTASK_COMMENT_PREVIEW_RE.search(truncated)
+    return truncated[:search.start()] + '...' if search else truncated
 
 
 @register.simple_tag(takes_context=True)
