@@ -488,6 +488,8 @@ def refresh_ctask_cache_admin_solved_count(competition):
 def update_ctask_cache_admin_solved_count(competition, ctask, chain):
     """Update cache_admin_solved_count for the given ctask.
     Also takes care of chain.cache_is_verified."""
+    if chain is None:
+        return
     solved_count = Submission.objects \
             .filter(ctask_id=ctask.id,
                     team__competition_id=competition.id,

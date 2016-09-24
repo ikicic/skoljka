@@ -282,6 +282,11 @@ class ChainsTest(TestCase):
         self.assertEqual(c1.cache_admin_solved_count, 1)
         self.assertEqual(c2.cache_admin_solved_count, 0)
 
+        # Don't crash if no chain assigned.
+        ctask = create_ctask(self.admin, self.competition, None, "42", 1, "third")
+        Submission.objects.create(ctask=ctask, team=team, result="42", cache_is_correct=True)
+        update_ctask_cache_admin_solved_count(self.competition, ctask, ctask.chain)
+
         # Regular team.
         team = Team.objects.create(name="Test team", author=self.alice,
                 competition=self.competition)
