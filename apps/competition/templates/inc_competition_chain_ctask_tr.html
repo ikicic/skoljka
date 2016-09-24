@@ -9,14 +9,20 @@
     </td>
   {% endif %}
   <td>{{ ctask.task.author|userlink }}</td>
-  {% if ctask.t_comment %}
+  {% if ctask.comment.text %}
     <td class="cchain-list-ctask-content">
-      {{ ctask.task.content.text|truncatechars:80 }}
+      {{ ctask.task.content.text|truncatechars:70 }}
     </td>
-    <td>{{ ctask.t_comment }}</td>
+    <td class="cchain-list-ctask-comment">
+      {% if ctask.chain_id %}
+        {{ ctask.comment.text|truncatechars:30 }}
+      {% else %}
+        {{ ctask.comment.text|truncatechars:40 }}
+      {% endif %}
+    </td>
   {% else %}
     <td class="cchain-list-ctask-content" colspan="2">
-      {{ ctask.task.content.text|truncatechars:80 }}
+      {{ ctask.task.content.text|truncatechars:100 }}
     </td>
   {% endif %}
   <td>{{ ctask.cache_admin_solved_count|default:'' }}</td>

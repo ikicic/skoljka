@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-21 21:54+0200\n"
-"PO-Revision-Date: 2016-09-21 21:55+0200\n"
+"POT-Creation-Date: 2016-09-24 15:13+0200\n"
+"PO-Revision-Date: 2016-09-24 15:13+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -552,15 +552,7 @@ msgstr "Neslužbeni"
 msgid "Position in the category."
 msgstr "Pozicija u kategoriji."
 
-#: apps/competition/views.py:517
-msgid "Important comment."
-msgstr "Važan komentar."
-
-#: apps/competition/views.py:517
-msgid "Comment."
-msgstr "Komentar."
-
-#: apps/competition/views.py:533
+#: apps/competition/views.py:528
 msgid "Number of admins that solved this task."
 msgstr "Broj administratora koji su riješili ovaj zadatak."
 
@@ -601,7 +593,7 @@ msgstr "Komentari"
 #: apps/competition/templates/competition_chain_list.html:30
 #: apps/competition/templates/competition_chain_list.html:42
 #: apps/competition/templates/competition_task_detail.html:12
-#: apps/competition/templates/inc_competition_chain_ctask_tr.html:47
+#: apps/competition/templates/inc_competition_chain_ctask_tr.html:53
 msgid "Edit"
 msgstr "Uredi"
 
@@ -685,6 +677,10 @@ msgstr "Autor"
 #: apps/competition/templates/competition_chain_list_tasks.html:129
 msgid "Text"
 msgstr "Tekst"
+
+#: apps/competition/templates/competition_chain_list_tasks.html:81
+msgid "Comment"
+msgstr "Komentar"
 
 #: apps/competition/templates/competition_chain_list_tasks.html:92
 #: apps/competition/templates/competition_chain_list_tasks.html:172
@@ -790,19 +786,19 @@ msgstr "Pošalji i odi na listu zadataka"
 msgid "Go to task"
 msgstr "Otvori zadatak"
 
-#: apps/competition/templates/inc_competition_chain_ctask_tr.html:26
+#: apps/competition/templates/inc_competition_chain_ctask_tr.html:32
 msgid "Remove"
 msgstr "Makni"
 
-#: apps/competition/templates/inc_competition_chain_ctask_tr.html:31
+#: apps/competition/templates/inc_competition_chain_ctask_tr.html:37
 msgid "Move up"
 msgstr "Pomakni gore"
 
-#: apps/competition/templates/inc_competition_chain_ctask_tr.html:39
+#: apps/competition/templates/inc_competition_chain_ctask_tr.html:45
 msgid "Move down"
 msgstr "Pomakni dolje"
 
-#: apps/competition/templates/inc_competition_chain_ctask_tr.html:48
+#: apps/competition/templates/inc_competition_chain_ctask_tr.html:54
 msgid "Open"
 msgstr "Otvori"
 
@@ -897,33 +893,33 @@ msgstr "Traži se broj."
 msgid "Incompatible scaling."
 msgstr "Nekompatibilno skaliranje"
 
-#: apps/mathcontent/converter_v1/bbcode.py:217
+#: apps/mathcontent/converter_v1/bbcode.py:248
 #: apps/mathcontent/converter_v1/latex.py:405
 msgid "Attachments not shown in a preview."
 msgstr "U pregledu slike nisu prikazane."
 
-#: apps/mathcontent/converter_v1/bbcode.py:226
+#: apps/mathcontent/converter_v1/bbcode.py:257
 msgid "Missing an attribute:"
 msgstr "Nedostaje atribut:"
 
-#: apps/mathcontent/converter_v1/bbcode.py:228
+#: apps/mathcontent/converter_v1/bbcode.py:259
 #, python-format
 msgid "Invalid value \"%(val)s\" for the attribute \"%(attr)s\"."
 msgstr "Nevaljana vrijednost \"%(val)s\" za atribut \"%(attr)s\"."
 
-#: apps/mathcontent/converter_v1/bbcode.py:231
+#: apps/mathcontent/converter_v1/bbcode.py:262
 msgid "Unavailable attachment:"
 msgstr "Nedostupna slika:"
 
-#: apps/mathcontent/converter_v1/bbcode.py:257
+#: apps/mathcontent/converter_v1/bbcode.py:288
 msgid "Expected two attributes."
 msgstr "Traže se dva atributa."
 
-#: apps/mathcontent/converter_v1/bbcode.py:260
+#: apps/mathcontent/converter_v1/bbcode.py:291
 msgid "Unexpected attribute value:"
 msgstr "Neočekivana vrijednost atributa:"
 
-#: apps/mathcontent/converter_v1/bbcode.py:270
+#: apps/mathcontent/converter_v1/bbcode.py:301
 msgid "Unexpected attribute value."
 msgstr "Neočekivana vrijednost atributa."
 

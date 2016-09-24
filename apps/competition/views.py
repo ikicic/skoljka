@@ -511,13 +511,8 @@ def chain_tasks_list(request, competition, data):
             chain_dict[ctask.chain_id].t_ctasks.append(ctask)
 
     for ctask in ctasks:
-        if ctask.comment.text.strip():
-            is_important = is_ctask_comment_important(ctask.comment.text)
-            ctask.t_comment = \
-                    _("Important comment.") if is_important else _("Comment.")
-        else:
-            is_important = False
-            ctask.t_comment = ""
+        is_important = ctask.comment.text.strip() and \
+                is_ctask_comment_important(ctask.comment.text)
         ctask.t_class = ctask_comment_verified_class(
                 competition, ctask, request.user, is_important=is_important)
 

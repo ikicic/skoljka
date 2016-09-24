@@ -427,9 +427,9 @@ td.cchain-list-ctask-counter {
   width: 2em;
 }
 
-.cchain-list-ctask-content {
+.cchain-list-ctask-content,
+.cchain-list-ctask-comment {
   color: gray;
-  text-overflow: ellipsis;
 }
 
 td.cchain-list-ctask-date {
