@@ -115,3 +115,5 @@ FEATURED_LECTURES_FOLDER_ID = None
 FOLDER_PATH_MIGRATIONS = [
     # ('oldpath', 'newpath'),
 ]
+
+REGISTRATION_CONTACT_EMAIL = 'skoljka@mnm.hr'

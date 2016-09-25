@@ -1,3 +1,4 @@
+{% load i18n %}
 <form method="post" action="/accounts/register/" class="no-table">
   {% csrf_token %}
   {{ form.non_field_errors }}
@@ -13,5 +14,8 @@
   </label>
   <input type="checkbox" id="id-tou" name="tou">
   {{ form.tou.errors }}
-  <button class="btn btn-primary" type="submit">Registriraj</button>
+  <button class="btn btn-primary" type="submit">
+    {% trans "Register" context "action" %}
+  </button>
+  <input type="hidden" name="final_url" value="{{ final_url }}">
 </form>

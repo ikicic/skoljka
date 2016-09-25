@@ -1,6 +1,8 @@
 {% extends "competition_base.html" %}
 
+{% load base_tags %}
 {% load competition_tags %}
+{% load i18n %}
 
 {% block content %}
 
@@ -10,33 +12,20 @@
   <p>Za registraciju tima potrebno je imati račun na Školjci (dovoljno je da
   samo jedan član tima ima račun).</p>
 
-  <p>
-    Molimo vas da se prijavite, odnosno
-    <a href="{% url registration_register %}">registirate</a>
-    na Školjku ako nemate račun. Nakon prijave / registracije, moći ćete
-    kreirati svoj tim za natjecanje.
-  </p>
+  <p>Molimo vas da se prijavite, odnosno registrirate na Školjku ako nemate
+  račun. Nakon prijave / registracije, moći ćete kreirati svoj tim za
+  natjecanje.</p>
 
-  <h3>Prijava na Školjku</h3>
-  {% if form.errors %}
-    <p>Nevaljano korisničko ime ili zaporka. Molimo probajte ponovno.</p>
-  {% endif %}
-
-  <form method="post" action="{% url django.contrib.auth.views.login %}"
-      class="no-table">
-
-    {% csrf_token %}
-    {% for field in form %}
-      {{ field }}
-    {% endfor %}
-    <p>
-      <a href="{% url auth_password_reset %}">Zaboravili</a> ste lozinku?
-      <a href="{% url registration_register %}">Nemate korisnički račun</a>?
-    </p>
-
-    <button type="submit" class="btn btn-primary">Prijava</button>
-    <input type="hidden" name="next" value="{% comp_url 'registration' %}" />
-  </form>
+  <div class="row-fluid">
+    <div class="span6">
+      <h3>{% trans "Log in" context "action" %}</h3>
+      {% login_form no_new_account_link=1 %}
+    </div>
+    <div class="span6">
+      <h3>{% trans "Register an account" %}</h3>
+      {% registration_form final_url=request.get_full_path %}
+    </div>
+  </div>
 </div>
 
 {% endblock content %}

@@ -19,10 +19,13 @@ class AuthenticationFormEx(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super(AuthenticationFormEx, self).__init__(*args, **kwargs)
 
-        self.fields['username'].widget.attrs['placeholder'] = 'Korisničko ime'
-        self.fields['password'].widget.attrs['placeholder'] = 'Lozinka'
+        self.fields['username'].widget.attrs['placeholder'] = _("Username")
+        self.fields['password'].widget.attrs['placeholder'] = _("Password")
         for x in self.fields.itervalues():
             x.label = ''
+            x.widget.attrs['class'] = 'input-large'
+
+
 
 # na temelju django-registration/forms.py RegistrationForm
 
@@ -33,7 +36,7 @@ class UserCreationForm(forms.Form):
         widget=forms.TextInput(attrs=attrs_dict), label=_(u"Username"))
     email = forms.EmailField(
             widget=forms.TextInput(attrs=dict(attrs_dict, maxlength=75)),
-            label=_(u"E-mail"))
+            label=_(u"Email"))
     password1 = forms.CharField(
             widget=forms.PasswordInput(attrs=attrs_dict, render_value=False),
             label=_(u"Password"))
@@ -41,40 +44,29 @@ class UserCreationForm(forms.Form):
             widget=forms.PasswordInput(attrs=attrs_dict, render_value=False),
             label=_(u"Confirm password"))
     tou = forms.BooleanField(required=True,
-            label=mark_safe(u'Prihvaćam <a href="/tou/">uvjete korištenja</a>'),
+            label=mark_safe(
+                _(u'I accept the <a href="/tou/">Terms of Use</a>')),
             error_messages={
-                'required': 'Ukoliko ne prihvaćate uvjete korištenja, ne možete koristiti Školjku.'
+                'required': _(u"You may not use Školjka if you do not accept "
+                              u"the Terms of Use.")
             })
 
     def __init__(self, *args, **kwargs):
-        extra_class = kwargs.pop('extra_class', False)
-        placeholders = kwargs.pop('placeholders', False)
-
+        extra_class = kwargs.pop('extra_class', 'input-large')
         super(UserCreationForm, self).__init__(*args, **kwargs)
 
-        self._set_extra_class(extra_class)
-
-        if placeholders:
-            self._set_placeholders()
-        else:
-            self.fields['username'].help_text = icon_help_text(
-                u'Molimo koristite oblik iprezime ili imeprezime.')
-
-    def _set_extra_class(self, extra_class):
-        if extra_class:
-            for x in self.fields.itervalues():
-                x.widget.attrs['class'] =   \
-                    x.widget.attrs.get('class', '') + ' ' + extra_class
-
-    def _set_placeholders(self):
         for x in self.fields.itervalues():
-            if isinstance(x, forms.CharField):
-                x.widget.attrs['placeholder'] = x.label
+            if not isinstance(x, forms.CharField):
+                continue
+            x.widget.attrs['placeholder'] = x.label
+            if extra_class:
+                x.widget.attrs['class'] = \
+                    x.widget.attrs.get('class', '') + ' ' + extra_class
 
     def clean_username(self):
         username = self.cleaned_data['username']
         if User.objects.filter(username__iexact=username).exists() \
-            or Group.objects.filter(name__iexact=username).exists():
+                or Group.objects.filter(name__iexact=username).exists():
             raise forms.ValidationError(
                     _(u"This name is already reserved. Please choose another."))
         return self.cleaned_data['username']
@@ -86,11 +78,12 @@ class UserCreationForm(forms.Form):
         return self.cleaned_data['email']
 
     def clean(self):
-        if 'password1' in self.cleaned_data and 'password2' in self.cleaned_data:
+        if 'password1' in self.cleaned_data and \
+                'password2' in self.cleaned_data:
             if self.cleaned_data['password1'] != self.cleaned_data['password2']:
-                raise forms.ValidationError(
-                        _(u"Please type the same password each time!"))
+                raise forms.ValidationError(_(u"Passwords do not match!"))
         return self.cleaned_data
+
 
 
 class UserEditForm(forms.ModelForm):
@@ -103,6 +96,8 @@ class UserEditForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name']
+
+
 
 class UserProfileEditForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

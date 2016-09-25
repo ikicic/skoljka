@@ -2,6 +2,18 @@
 /* CSS for and changes to the CSS of plugins and libraries. */
 
 
+/* Bootstrap-specific Classes */
+.fix-bootstrap-form {
+  .control-group {
+    &:after {
+      /* Without this, the fields of chain edit form were aligned to the menu.
+       * Is this the right way to fix it? */
+      content: none;
+    }
+    margin-bottom: 5px;
+  }
+}
+
 /* Bootstrap Changes */
 .label {
   box-shadow: 1px 1px 3px black;

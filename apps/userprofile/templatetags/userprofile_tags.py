@@ -137,17 +137,26 @@ def useroptions(parser, token):
 
     return UserOptionsNode(nodelist, field_name, default_value[0].value, allowed_values, save_to)
 
-@register.inclusion_tag('registration/inc_registration_form.html')
-def registration_form(form=None):
-    from userprofile.forms import UserCreationForm
 
+@register.inclusion_tag('registration/inc_login_form.html',
+        takes_context=True)
+def login_form(context, no_new_account_link=False):
+    from userprofile.forms import AuthenticationFormEx
+    return {
+        'form': AuthenticationFormEx(),
+        'next': context.get('next', context['request'].get_full_path()),
+        'no_new_account_link': no_new_account_link,
+        'request': context['request'],
+    }
+
+
+@register.inclusion_tag('registration/inc_registration_form.html')
+def registration_form(form=None, final_url=None):
+    from userprofile.forms import UserCreationForm
     if form is None:
         form = UserCreationForm()
+    return {'form': form, 'final_url': final_url or '/'}
 
-    form._set_extra_class('input-block-level')
-    form._set_placeholders()
-
-    return {'form': form}
 
 @register.filter
 def userlink(user, what=None):

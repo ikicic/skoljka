@@ -1,6 +1,11 @@
 {% extends "registration/registration_base.html" %}
+{% load i18n %}
 {% block title %}{% endblock %}
 {% block content %}
-Na Vašu email adresu poslan je aktivacijski kod. Ukoliko ne primite email u roku od nekoliko minuta, javite se na <a href="mailto:ivicakicic@gmail.com">ivicakicic@gmail.com</a>.
+{% blocktrans %}
+  Thank you for signing up!<br><br>
+  We sent you an activation link to <b>{{ email }}</b>. Please follow the link
+  to complete the registration. If you do not receive the email in the next few
+  minutes, please check the spam or contact {{ contact_link }}.
+{% endblocktrans %}
 {% endblock %}
-

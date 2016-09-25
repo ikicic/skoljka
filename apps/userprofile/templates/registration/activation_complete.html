@@ -1,7 +1,20 @@
 {% extends "registration/registration_base.html" %}
-{% block title %}Aktivacija dovršena{% endblock %}
+{% load i18n %}
+
+{% block title %}{% trans "Registration complete" %}{% endblock %}
 {% block content %}
-Zahvaljujemo, aktivacija je dovršena! Možete se sada <a href='{% url auth_login %}'>prijaviti</a> koristeći svoje korisničke ime i lozinku koje ste postavili pri registraciji.
+
+{% trans "Thank you, your registration is complete!" %}
+
+<br><br>
+[{{ final_url }}]
+
+<a class="btn btn-primary" href="{{ final_url }}">
+  {% if final_url == "/" %}
+    {% trans "Continue to the homepage" %}
+  {% else %}
+    {% trans "Continue" %}
+  {% endif %}
+</a>
+
 {% endblock %}
-
-

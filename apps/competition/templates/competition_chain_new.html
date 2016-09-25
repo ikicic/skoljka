@@ -62,8 +62,8 @@
   {% trans "Chain overview" %}
 </a>
 
-<form action="{{ request.get_full_path }}" method="POST" id="comp-chain-edit"
-    class="form-horizontal">
+<form action="{{ request.get_full_path }}" method="POST"
+    class="form-horizontal uppercase-sections fix-bootstrap-form">
   {% if formset.errors %}
     <div class="alert alert-error">{% trans "There were some errors!" %}</div>
   {% endif %}

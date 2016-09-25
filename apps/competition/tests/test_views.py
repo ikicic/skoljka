@@ -207,6 +207,7 @@ class RegistrationTest(CompetitionViewsTestBase):
                 TeamMember.objects.filter(team__competition_id=3).count(), 2)
 
 
+
 class SubmissionTest(CompetitionViewsTestBase):
     def init_competition(self, competition, user):
         self.team = Team.objects.create(name="Test team", author=user,

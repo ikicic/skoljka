@@ -254,20 +254,12 @@ td.comp-chain-bonus {
   text-align: right;
 }
 
-#comp-chain-edit {
+.uppercase-sections {
   .form-section {
     text-transform: uppercase;
     color: gray;
     font-weight: bold;
     margin-top: 30px;
-  }
-  .control-group {
-    &:after {
-      /* Without this, the fields of chain edit form were aligned to the menu.
-       * Is this the right way to fix it? */
-      content: none;
-    }
-    margin-bottom: 5px;
   }
 }
 

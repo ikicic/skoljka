@@ -23,7 +23,7 @@
   <div class="alert alert-success">Izmjene spremljene!</div>
 {% endif %}
 
-{% if competition.registration_open_date <= current_time or is_admin %}
+{% if current_time >= competition.registration_open_date or is_admin %}
   {% if not has_finished and not team and team_invitations %}
     <h3 class="comp-header">Pozivnice</h3>
     <form action="{{ requst.get_full_path }}" method="POST" class="row row-fix">

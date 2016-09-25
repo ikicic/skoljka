@@ -1,7 +1,9 @@
+from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import User, Group
+from django.core.cache import cache
 from django.db.models import Max, Q
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -10,6 +12,7 @@ from django.views.decorators.debug import sensitive_post_parameters
 
 from userprofile.forms import UserCreationForm, UserEditForm, UserProfileEditForm
 from userprofile.models import UserProfile
+from userprofile.registration_backend import Backend
 
 from permissions.constants import VIEW
 from recommend.models import UserTagScore
@@ -19,6 +22,16 @@ from task.models import Task, DIFFICULTY_RATING_ATTRS
 from task.utils import check_prerequisites_for_tasks
 
 from skoljka.libs.decorators import response
+from skoljka.libs.templatetags.libs_tags import email_link
+
+from registration.views import register as _register
+
+from urllib import quote_plus
+
+
+# Note: In registration, we handle final_url separately from the
+# UserCreationForm.
+
 
 def logout(request):
     """
@@ -27,13 +40,36 @@ def logout(request):
     auth_logout(request)
     return redirect('/')
 
+
 @sensitive_post_parameters()
 def new_register(request):
     if request.user.is_authenticated():
         return HttpResponseRedirect('/')
-    from registration.views import register as _register
-    return _register(request, 'registration.backends.default.DefaultBackend',
-                     form_class=UserCreationForm)
+    if request.method == 'POST':
+        email = quote_plus(request.POST.get('email'))
+        success_url = '/accounts/register/complete/?email=' + email
+    else:
+        success_url = None
+    return _register(request,
+            'apps.userprofile.registration_backend.Backend',
+            form_class=UserCreationForm, success_url=success_url,
+            extra_context={'final_url': request.POST.get('final_url', 'asdf')})
+
+
+@sensitive_post_parameters()
+@response('registration/registration_complete.html')
+def registration_complete(request):
+    if request.user.is_authenticated():
+        return ('/', )
+    return {
+        'contact_link': email_link(settings.REGISTRATION_CONTACT_EMAIL),
+        'email': request.GET.get('email', ''),
+    }
+
+
+@response('registration/activation_complete.html')
+def activation_complete(request):
+    return {'final_url': Backend().get_final_url(request)}
 
 
 @login_required

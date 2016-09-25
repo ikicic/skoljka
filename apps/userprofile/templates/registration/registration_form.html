@@ -1,12 +1,14 @@
 {% extends "registration/registration_base.html" %}
-{% block title %}Registracija{% endblock %}
+{% load i18n %}
+
+{% block title %}{% trans "Registration" %}{% endblock %}
 {% block content %}
 
 {% load userprofile_tags %}
 
 <div class="small-page">
-  <h3>Registracija</h3>
-  {% registration_form form %}
+  <h3>{% trans "Registration" %}</h3>
+  {% registration_form form final_url=final_url %}
 </div>
 
 {% endblock %}

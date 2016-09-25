@@ -2,6 +2,7 @@
 from django.utils.datastructures import SortedDict
 from django.utils.formats import date_format
 from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext as _
 
 from skoljka.libs.string_operations import G
 from skoljka.libs.xss import escape
@@ -15,9 +16,15 @@ def encode_email(email):
     a, b = email[::2], email[1::2]
     return a + b[::-1]
 
+
 @register.simple_tag
 def email_link(email, html=''):
-    return mark_safe(u'<a href="#" class="imejl" title="Pošalji email" data-address="{0}">{1}</a>'.format(encode_email(email), html))
+    """If html not provided, JavaScript will automatically put the email
+    address instead."""
+    return mark_safe(
+            u'<a href="#" class="imejl" title="{}" data-address="{}">{}</a>' \
+                    .format(_("Send an email"), encode_email(email), html))
+
 
 # G(male, female, gender)
 register.simple_tag(G, name='gender')
@@ -39,6 +46,7 @@ def temporary_get_key(context, *args):
 
     return ''
 
+
 @register.simple_tag(takes_context=True)
 def append_get_parameters(context):
     """Generate "?a=b" part of the URL.
@@ -46,6 +54,7 @@ def append_get_parameters(context):
     Returns an empty string if GET is empty."""
     get = context['request'].GET
     return '?' + escape(get.urlencode()) if get else ''
+
 
 @register.simple_tag(takes_context=True)
 def generate_get_query_string(context, *args, **kwargs):
@@ -76,13 +85,16 @@ def localdate(value):
     """
     return date_format(value)
 
+
 @register.filter(expects_localtime=True, is_safe=False)
 def localtime(value):
     return date_format(value, "TIME_FORMAT")
 
+
 @register.filter(expects_localtime=True, is_safe=False)
 def localdatetime(value):
     return date_format(value, "DATETIME_FORMAT")
+
 
 #############################################
 # Form splitting/Fieldset templatetag
@@ -96,6 +108,7 @@ def get_fieldset(parser, token):
     return FieldSetNode(fields.split(','), variable_name, form)
 
 get_fieldset = register.tag(get_fieldset)
+
 
 class FieldSetNode(template.Node):
     def __init__(self, fields, variable_name, form_variable):
@@ -112,6 +125,8 @@ class FieldSetNode(template.Node):
         context[self.variable_name] = new_form
 
         return u''
+
+
 
 # Form splitting/Fieldset templatetag {END}
 #############################################
