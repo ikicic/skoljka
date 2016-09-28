@@ -1,18 +1,20 @@
 import subprocess, threading
 
+# TODO: Replace -1 and -2 with exceptions.
+
 class Command(object):
     '''
     Modified version of https://gist.github.com/1306188
 
     Example:
     command = Command('latex -interaction=batchmode test.tex')
-    if command.run(timeout=5):
+    if command.run(timeout=5) < 0:
         raise Exception('Error')
     else:
         return 'OK!'
 
     ----------------------------
-    
+
     Enables to run subprocess commands in a different thread
     with TIMEOUT option!
 
@@ -33,7 +35,6 @@ class Command(object):
 
         thread.join(timeout)
         if thread.is_alive():
-            print 'Terminating process: ', self.cmd
             self.process.terminate()
             thread.join()
             return -2
@@ -41,6 +42,8 @@ class Command(object):
         if not self.process:
             return -1
         return self.process.returncode
+
+
 
 def run_command(cmd, timeout=5, shell=True, **kwargs):
     # shell=True makes this method vulnerable to shell injection!

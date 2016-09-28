@@ -1,15 +1,53 @@
 from django import template
+from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.template.base import TemplateSyntaxError
 
 from search.utils import search_tasks
 
 from base.utils import get_featured_lectures
+
+from template_preprocessor import preprocess_tag
 
 register = template.Library()
 
 @register.filter
 def concat(first, second):
     return unicode(first) + unicode(second)
+
+
+class SettingsConstantNode(template.Node):
+    def __init__(self, value):
+        self.value = value
+
+    def render(self, context):
+        return self.value
+
+
+
+@preprocess_tag
+@register.tag
+def settings_constant(*args):
+    """Given a string `name`, returns settings.<name>.
+
+    After compilation of the template, this tag is completely replaced
+    with the settings.<name>. That way we don't need to process these
+    tags all the time, or as in the old implementation, we don't have to
+    add the constants to the context.
+
+    Implemented in a weird way because of the way preprocess_tag behaves.
+    """
+    if len(args) != 2:
+        raise Exception("Args doesn't have two arguments??")
+    if isinstance(args[1], basestring):
+        # Called from the template preprocessor, just return the value.
+        return getattr(settings, args[1])
+    bits = args[1].split_contents()
+    if len(bits) != 2:
+        raise TemplateSyntaxError(
+                "Expected only one parameter in 'settings_constant'!")
+    return SettingsConstantNode(getattr(settings, bits[1]))
+
 
 
 @register.simple_tag

@@ -2,12 +2,29 @@
 
 import sys
 import os.path
+import subprocess
 
+from libs import timeout
 from local import *
 
 ######################################
 # GENERAL
 ######################################
+
+
+VERSION = 'v0.8.3'
+VERSION_FOOTER = "v0.8.3"
+
+try:
+    # TODO (Python 3): http://stackoverflow.com/a/12698328/2203044
+    _cmd = 'git rev-parse --abbrev-ref HEAD'
+    _process = subprocess.Popen(_cmd, shell=True, stdout=subprocess.PIPE)
+    _branch = _process.stdout.read()
+    if _branch.strip() == 'dev_branch':
+        VERSION_FOOTER += " (dev)"
+except:
+    pass
+
 
 SITE_NAME = os.path.basename(PROJECT_ROOT)
 APPS_DIR = os.path.normpath(os.path.join(PROJECT_ROOT, 'apps'))
@@ -83,7 +100,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.request",
     "solution.context_processors.solution_constants",
     "userprofile.context_processors.userprofile",
-    "base.context_processors.add_constants",
 )
 
 # List of callables that know how to import templates from various sources.

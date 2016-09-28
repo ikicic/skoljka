@@ -1,4 +1,5 @@
 {% load compressed %}
+{% load base_tags %}
 {% load tags_tags %}
 {% load i18n %}
 
@@ -69,7 +70,7 @@
       <div id="nav-hello-user">Zdravo, {{ user|userlink:"first_name" }}!</div>
     {% endif %}
     <ul class="nav nav-list">
-      {{ EXTRA_HEADER_TOP }}
+      {% settings_constant EXTRA_HEADER_TOP %}
       <li class="nav-header">Izbornik</li>
       <li><a href="/"><i class="icon-home"></i>Početna</a></li>
 
@@ -124,7 +125,7 @@
 
 <div id="footer">
   <span>
-    Školjka v0.8.3 © 2016 Ivica Kičić &amp; <a href="http://mnm.hr/">MNM</a>.
+    Školjka {% settings_constant VERSION_FOOTER %} © 2016 Ivica Kičić &amp; <a href="http://mnm.hr/">MNM</a>.
   </span>
   <span>
     Hosting by
