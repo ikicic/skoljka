@@ -117,27 +117,20 @@
 
   <div id="content">
       {% block content %}
-        <br><br><br>
       {% endblock content %}
   </div>
 </div>
 
-
 <div id="footer">
   <span>
-    Školjka {% settings_constant VERSION_FOOTER %} © 2016 Ivica Kičić &amp; <a href="http://mnm.hr/">MNM</a>.
+    Školjka {% settings_constant VERSION_FOOTER %} © 2016 Ivica Kičić &amp;
+    <a href="http://mnm.hr/" target="_blank">MNM</a>.
   </span>
   <span>
-    Hosting by
-    <a href="http://www.kset.org/">
-      <img src="/static/images/kset_logo_white.png" alt="KSET">
-    </a>
+    <a href="/tou/" target="_blank">{% trans "Terms of Use" %}</a>
   </span>
   <span>
-    <a href="/tou/">Uvjeti korištenja</a>
-  </span>
-  <span>
-    <a href="https://github.com/ikicic/skoljka">Github</a>
+    <a href="https://github.com/ikicic/skoljka" target="_blank">GitHub</a>
   </span>
 </div>
 
