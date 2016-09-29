@@ -459,15 +459,17 @@ def refresh_ctask_cache_admin_solved_count(competition):
             .filter(competition=competition) \
             .values_list('id', 'cache_admin_solved_count'))
 
+    # Not sure why we need `id` here, but for some reason it doesn't return all
+    # the rows otherwise. (ivica)
     verified_ctask_ids = set(Submission.objects \
             .filter(team__competition_id=competition.id,
                     team__team_type=Team.TYPE_ADMIN_PRIVATE,
                     cache_is_correct=True) \
             .exclude(team__author=F('ctask__task__author')) \
-            .values_list('ctask_id', flat=True))
+            .values_list('id', 'ctask_id'))
 
     solved_count = Counter()
-    for ctask_id in verified_ctask_ids:
+    for submission_id, ctask_id in verified_ctask_ids:
         solved_count[ctask_id] += 1
 
     queries_args = []

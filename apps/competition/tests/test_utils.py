@@ -309,6 +309,28 @@ class ChainsTest(TestCase):
         self.assertEqual(CompetitionTask.objects.get(id=c1.id).cache_admin_solved_count, 1)
         self.assertEqual(CompetitionTask.objects.get(id=c2.id).cache_admin_solved_count, 0)
 
+    def test_refresh_ctask_cache_admin_solved_count(self):
+        c1 = create_ctask(self.admin, self.competition, self.chain1, "42", 1, "first")
+        c2 = create_ctask(self.admin, self.competition, self.chain1, "42", 1, "second")
+        c3 = create_ctask(self.admin, self.competition, self.chain1, "42", 1, "third")
+
+        team1 = Team.objects.create(name="Test team", author=self.alice,
+                competition=self.competition, team_type=Team.TYPE_ADMIN_PRIVATE)
+        team2 = Team.objects.create(name="Test team", author=self.alice,
+                competition=self.competition, team_type=Team.TYPE_ADMIN_PRIVATE)
+        team3 = Team.objects.create(name="Test team", author=self.alice,
+                competition=self.competition, team_type=Team.TYPE_ADMIN_PRIVATE)
+        Submission.objects.create(ctask=c1, team=team1, result="42", cache_is_correct=True)
+        Submission.objects.create(ctask=c2, team=team1, result="42", cache_is_correct=True)
+        Submission.objects.create(ctask=c1, team=team2, result="42", cache_is_correct=True)
+        Submission.objects.create(ctask=c2, team=team3, result="0", cache_is_correct=False)
+
+        refresh_ctask_cache_admin_solved_count(self.competition)
+
+        self.assertEqual(CompetitionTask.objects.get(id=c1.id).cache_admin_solved_count, 2);
+        self.assertEqual(CompetitionTask.objects.get(id=c2.id).cache_admin_solved_count, 1);
+        self.assertEqual(CompetitionTask.objects.get(id=c3.id).cache_admin_solved_count, 0);
+
     def test_refresh_update_chain_cache_is_verified(self):
         self.competition.min_admin_solved_count = 1
         self.competition.save()

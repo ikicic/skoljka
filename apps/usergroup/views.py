@@ -1,7 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.models import ContentType
-from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
@@ -107,7 +106,7 @@ def new(request, group_id=None):
             usergroup.save()
 
             return ('/usergroup/%d/' % group.id, )
-        else: # reset necessary instances...
+        elif group_id:  # Reset necessary instances.
             group = get_object_or_404(Group.objects.select_related(
                 'data', 'data__description'), id=group_id)
 
