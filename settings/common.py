@@ -54,6 +54,7 @@ TIME_ZONE = 'Europe/Zagreb'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 #LANGUAGE_CODE = 'en-us'
 LANGUAGE_CODE = 'hr'
+LOCALE_PATHS = (os.path.normpath(os.path.join(PROJECT_ROOT, 'locale')), )
 
 SITE_ID = 1
 
