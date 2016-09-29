@@ -454,6 +454,7 @@ def refresh_ctask_cache_admin_solved_count(competition):
     Returns the list of IDs of the updated ctasks.
     DOES NOT update chain.cache_is_verified!"""
     # TODO: Atomic.
+    # TODO: Fix this. Not counting multiple solutions.
     ctasks_old_count = list(CompetitionTask.objects \
             .filter(competition=competition) \
             .values_list('id', 'cache_admin_solved_count'))

@@ -56,7 +56,7 @@
     <ul class="nav nav-list">
       <li class="nav-header">Izbornik</li>
       <li><a href="{% comp_url '' %}">Početna</a></li>
-      {% if not team and not has_finished %}
+      {% if not team and not has_finished and current_time > competition.registration_open_date %}
         <li><a href="{% comp_url 'registration' %}" class="register">Registracija</a></li>
       {% endif %}
       <li><a href="{% comp_url 'task' %}">Zadaci</a></li>
