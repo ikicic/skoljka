@@ -103,8 +103,6 @@ def team_detail(request, competition, data, team_id):
     data['preview_team_members'] = TeamMember.objects.filter(team_id=team_id,
             invitation_status=TeamMember.INVITATION_ACCEPTED) \
                     .select_related('member')
-    data['show_member_links'] = request.user.is_authenticated() and (
-            data['team'] and team_id == data['team'].id or data['has_finished'])
     return data
 
 
@@ -145,7 +143,8 @@ def registration(request, competition, data):
         data['team_invitations'] = []
     elif request.method == 'POST' and 'name' in request.POST:
         team_form = TeamForm(request.POST, competition=competition,
-                max_team_size=competition.max_team_size, instance=team)
+                max_team_size=competition.max_team_size, instance=team,
+                user=request.user)
         if team_form.is_valid():
             old_team = team
             team = team_form.save(commit=False)
@@ -168,7 +167,10 @@ def registration(request, competition, data):
                 data['team'] = team
                 return ('competition_registration_complete.html', data)
             # Need to refresh data from the decorator...
-            return (request.get_full_path() + '?changes=1', )
+            url = request.get_full_path()
+            if '?changes=1' not in url:
+                url += '?changes=1'
+            return (url, )
     elif request.method == 'POST' and data['is_admin'] \
             and 'create-admin-private-team' in request.POST \
             and not data['has_private_team']:
@@ -189,12 +191,12 @@ def registration(request, competition, data):
             and not (team and team.author_id != request.user.id) \
             and not (team and team.team_type == Team.TYPE_ADMIN_PRIVATE):
         team_form = TeamForm(instance=team, competition=competition,
-                max_team_size=competition.max_team_size)
+                max_team_size=competition.max_team_size, user=request.user)
 
-    data['show_member_links'] = True
     data['team_form'] = team_form
-    data['team_members'] = \
-            TeamMember.objects.filter(team=team).select_related('member')
+    data['preview_team_members'] = TeamMember.objects.filter(
+                team=team, invitation_status=TeamMember.INVITATION_ACCEPTED) \
+            .select_related('member')
     return data
 
 

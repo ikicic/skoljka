@@ -7,17 +7,14 @@
 </div>
 
 Članovi:
-<table class="table table-striped table-bordered">
+<ol>
   {% for team_member in preview_team_members %}
-    <tr>
-      <td>{{ forloop.counter }}.</td>
-      <td>
-        {% if show_member_links and team_member.member_id %}
-          {{ team_member.member|userlink }}
-        {% else %}
-          {{ team_member.member_name }}
-        {% endif %}
-      </td>
-    </tr>
+    <li>
+      {% if user.is_authenticated and team_member.member_id %}
+        {{ team_member.member|userlink }}
+      {% else %}
+        {{ team_member.member_name }}
+      {% endif %}
+    </li>
   {% endfor %}
-</table>
+</ol>

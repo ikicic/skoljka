@@ -170,6 +170,7 @@ class TeamForm(forms.ModelForm):
         extra_fields = []
         self.max_team_size = kwargs.pop('max_team_size', 3)
         self.competition_id = kwargs.pop('competition').id
+        self.user = kwargs.pop('user')
 
         if instance:
             # Author cannot be removed from the team.
@@ -181,19 +182,19 @@ class TeamForm(forms.ModelForm):
 
         # Add extra fields for other members
         for k in xrange(2, self.max_team_size + 1):
-            label = u'{}. \u010dlan'.format(k)
             if k - 2 < len(team_members):
-                username, user_id = team_members[k - 2]
+                member_name = team_members[k - 2]
             else:
-                username = user_id = ''
-            key = 'member{}_manual'.format(k)
-            key_id = 'member{}_user_id'.format(k)
-            initial[key] = username
-            initial[key_id] = user_id
+                member_name = ''
+            field_manual = 'member{}_manual'.format(k)
+            field_username = 'member{}_username'.format(k)
+            initial[field_manual] = member_name
+            initial[field_username] = member_name
 
-            extra_fields.append((key, forms.CharField(required=False,
-                label=label, max_length=64)))
-            extra_fields.append((key_id, forms.CharField(required=False,
+            # Label empty because HTML generated via JavaScript anyway.
+            extra_fields.append((field_manual, forms.CharField(required=False,
+                label="", max_length=64)))
+            extra_fields.append((field_username, forms.CharField(required=False,
                     max_length=32, widget=forms.HiddenInput())))
 
         super(TeamForm, self).__init__(initial=initial, *args, **kwargs)
@@ -202,17 +203,30 @@ class TeamForm(forms.ModelForm):
         for key, value in extra_fields:
             self.fields[key] = value
 
-        self.fields['name'].widget.attrs['class'] = 'span3'
+        self.fields['name'].widget.attrs['class'] = 'input-large'
         self.fields['name'].error_messages['required'] = \
-                u"Ime tima ne mo\u017ee biti prazno."
+                _("Team name cannot be empty.")
 
 
     def _clean_member(self, index):
         manual = self.cleaned_data.get('member{}_manual'.format(index))
-        user_id = self.cleaned_data.get('member{}_user_id'.format(index))
+        username = self.cleaned_data.get('member{}_username'.format(index))
 
-        if user_id:
-            user = User.objects.get(id=user_id)
+        if username and username.strip():
+            username = username.strip()
+            try:
+                user = User.objects.get(username__iexact=username)
+            except User.DoesNotExist:
+                raise ValidationError(_("Unknown username \"%s\".") % username)
+            if user.id == self.user.id:
+                raise ValidationError(
+                        _("You are automatically added to the team."))
+            if TeamMember.objects.filter(
+                    team__competition_id=self.competition_id,
+                    member_id=user.id,
+                    invitation_status=TeamMember.INVITATION_ACCEPTED).exists():
+                msg = _("User \"%s\" is already a member of a team.") % username
+                raise ValidationError(msg)
             return (user.username, user)
         if manual and manual.strip():
             return (manual.strip(), None)
@@ -223,8 +237,7 @@ class TeamForm(forms.ModelForm):
         if Team.objects \
                 .filter(competition_id=self.competition_id, name__iexact=name) \
                 .exclude(id=self.instance.id).exists():
-            raise ValidationError(
-                    u"Uneseno ime tima ve\u0107 iskori\u0161teno!")
+            raise ValidationError(_("Team name already used!"))
         return name
 
     def clean(self):
@@ -253,9 +266,9 @@ class TeamForm(forms.ModelForm):
 
 class TaskListAdminPanelForm(forms.Form):
     filter_by_team_type = forms.ChoiceField([
-        (Team.TYPE_NORMAL, "Natjecatelji"),
+        (Team.TYPE_NORMAL, ugettext_lazy("Competitors")),
         (Team.TYPE_UNOFFICIAL, ugettext_lazy("Unofficial")),
-        (Team.TYPE_ADMIN_PRIVATE, "Administratori"),
+        (Team.TYPE_ADMIN_PRIVATE, ugettext_lazy("Administrators")),
     ])
     filter_by_status = forms.ChoiceField([
         ('S', "Solved"), ('F', "Failed"), ('T', "Tried")])

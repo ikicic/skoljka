@@ -4,20 +4,20 @@ window.reg_add_member_field = ->
   )
 
 
-_reg_member_field_row = (index, username, user_id, accepted) ->
+_reg_member_field_row = (index, manual, username, accepted) ->
   if accepted
-    extra = 'class="span3 creg-invitation-accepted" title="Prihvaćeno"'
+    extra = 'class="input-large creg-invitation-accepted" title="Prihvaćeno"'
   else
-    extra = 'class="span3"'
+    extra = 'class="input-large"'
   cancel_or_delete = if accepted then "Izbriši" else "Odustani"
 
   output = """<div>Član ##{index}:</div>"""
-  if user_id
+  if username
     output += """
       <div>
-        <input type="hidden" value="#{user_id}"
-          id="member#{index}_user_id" name="member#{index}_user_id">
-        <input type="text" value="#{username}" disabled="disabled" #{extra}
+        <input type="hidden" value="#{username}"
+          id="member#{index}_username" name="member#{index}_username">
+        <input type="text" value="#{manual}" disabled="disabled" #{extra}
           id="member#{index}_manual" name="member#{index}_manual">
       </div>
       <div>
@@ -30,12 +30,13 @@ _reg_member_field_row = (index, username, user_id, accepted) ->
     output += """
       <div>
         <input type="hidden" value=""
-          id="member#{index}_user_id" name="member#{index}_user_id">
-        <input type="text" value="#{username}" #{extra}
+          id="member#{index}_username" name="member#{index}_username">
+        <input type="text" value="#{manual}" #{extra}
           id="member#{index}_manual" name="member#{index}_manual">
       </div>
       <div>
-        <button type="button" class="btn creg-invite">Pozovi</button>
+        ili
+        <button type="button" class="btn creg-invite">Pozovi korisnika</button>
       </div>
     """
 
@@ -48,35 +49,19 @@ window.reg_add_listeners = ->
     row.replaceWith _reg_member_field_row row.attr('data-index'), '', '', false
 
   $('#creg-form').on 'click', '.creg-invite', ->
-    options = [
-      '<option value="">Odaberite korisnika</option>'
-      '<option value="">---------</option>'
-    ]
-    for key, value of reg_available_users
-      options.push """<option value="#{value}">#{key}</option>"""
-    options = options.join()
-
     row = $(@).closest '.creg-table-row'
     index = row.attr 'data-index'
-    username_field = $ "#member#{index}_manual"
-    username_field.val ""
-    username_field.prop 'disabled', true
+    manual_field = $("#member#{index}_manual")
+    manual_field.val ""
+    manual_field.prop 'disabled', true
+    manual_field.prop 'class', 'input-large'
 
     $(@).replaceWith """
-      <select class="creg-select-member span3">#{options}</select>
+      <input type="text" class="creg-invite-member input-large"
+        name="member#{index}_username" placeholder="Unesite korisničko ime">
       <button type="button" class="btn creg-cancel-invitation">Odustani</button>
     """
-
-  $('#creg-form').on 'change', '.creg-select-member', ->
-    row = $(@).closest '.creg-table-row'
-    index = row.attr 'data-index'
-    selected = $(@).find 'option:selected'
-
-    return unless selected.val()
-
-    row.replaceWith _reg_member_field_row(
-      row.attr('data-index'), selected.html(), selected.val(), false
-    )
+    $('.creg-invite-member').autocomplete(reg_available_users)
 
 $ ->
   $('#comp-post-target').change ->

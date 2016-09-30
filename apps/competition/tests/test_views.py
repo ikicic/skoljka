@@ -132,7 +132,7 @@ class RegistrationTest(CompetitionViewsTestBase):
         """Test full registration with two members."""
         self.login(self.alice)
         response = self.client.post('/competition/2/registration/',
-                {'name': "Team name", "member2_user_id": self.admin.id})
+                {'name': "Team name", "member2_username": self.admin.username})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'competition_registration_complete.html')
         team = response.context['team']
@@ -170,7 +170,7 @@ class RegistrationTest(CompetitionViewsTestBase):
     def test_delete_invitations_after_creating_a_team(self):
         self.login(self.alice)
         self.client.post('/competition/2/registration/',
-                {'name': "Alice's team", "member2_user_id": self.bob.id})
+                {'name': "Alice's team", "member2_username": self.bob.username})
         self.assertEqual(TeamMember.objects \
                 .filter(team_id=1, member_id=self.bob.id).count(), 1)
         self.logout()
@@ -185,13 +185,13 @@ class RegistrationTest(CompetitionViewsTestBase):
         affected."""
         self.login(self.alice)
         self.client.post('/competition/2/registration/',
-                {'name': "Alice 2", "member2_user_id": self.admin.id})
+                {'name': "Alice 2", "member2_username": self.admin.username})
         self.client.post('/competition/3/registration/',
-                {'name': "Alice 3", "member2_user_id": self.admin.id})
+                {'name': "Alice 3", "member2_username": self.admin.username})
         self.logout()
         self.login(self.bob)
         response = self.client.post('/competition/2/registration/',
-                {'name': "Bob 2", "member2_user_id": self.admin.id})
+                {'name': "Bob 2", "member2_username": self.admin.username})
         self.assertEqual(response.status_code, 200)
         self.logout()
         self.login(self.admin)
@@ -205,6 +205,70 @@ class RegistrationTest(CompetitionViewsTestBase):
                 TeamMember.objects.filter(team__competition_id=2).count(), 3)
         self.assertEqual(
                 TeamMember.objects.filter(team__competition_id=3).count(), 2)
+
+    def test_update_members(self):
+        self.login(self.alice)
+        # First add one user.
+        self.client.post('/competition/2/registration/',
+                {'name': "Alice 2", "member2_username": self.bob.username})
+        self.assertEqual(
+                TeamMember.objects.filter(team__competition_id=2).count(), 2)
+
+        # Then add another.
+        self.client.post('/competition/2/registration/', {
+                'name': "Alice 2",
+                "member2_username": self.bob.username,
+                "member3_username": self.admin.username})
+        self.assertEqual(
+                TeamMember.objects.filter(team__competition_id=2).count(), 3)
+
+        # Then update first.
+        self.client.post('/competition/2/registration/', {
+                'name': "Alice 2",
+                "member2_manual": "sarma",
+                "member3_username": self.admin.username})
+        self.assertEqual(
+                TeamMember.objects.filter(team__competition_id=2).count(), 3)
+        self.assertEqual(
+                set(TeamMember.objects.filter(team__competition_id=2) \
+                        .values_list('member_name', flat=True)),
+                set([self.alice.username, "sarma", self.admin.username]))
+
+        # Then delete first.
+        self.client.post('/competition/2/registration/', {
+                'name': "Alice 2", "member3_username": self.admin.username})
+        self.assertEqual(
+                TeamMember.objects.filter(team__competition_id=2).count(), 2)
+        self.assertEqual(
+                set(TeamMember.objects.filter(team__competition_id=2) \
+                        .values_list('member_name', flat=True)),
+                set([self.alice.username, self.admin.username]))
+
+    def test_reject_used_and_current_user(self):
+        """Reject invitation if user already has a team."""
+        self.login(self.alice)
+        # Firstly, reject him/herself...
+        self.client.post('/competition/2/registration/',
+                {'name': "Alice", "member2_username": self.alice.username})
+        self.assertEqual(Team.objects.filter(competition_id=2).count(), 0)
+
+        # Alice invites admin.
+        self.client.post('/competition/2/registration/',
+                {'name': "Alice", "member2_username": self.admin.username})
+        self.assertEqual(Team.objects.filter(competition_id=2).count(), 1)
+        self.logout()
+
+        # Admin accepts the invitation.
+        self.login(self.admin)
+        self.client.post('/competition/2/registration/',
+                {'invitation-accept': Team.objects.get(competition_id=2).id})
+        self.logout()
+
+        # Bob tries to invite admin, but fails.
+        self.login(self.bob)
+        self.client.post('/competition/2/registration/',
+                {'name': "Bob", "member2_username": self.admin.username})
+        self.assertEqual(Team.objects.filter(competition_id=2).count(), 1)
 
 
 
