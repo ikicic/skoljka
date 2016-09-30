@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-24 15:13+0200\n"
-"PO-Revision-Date: 2016-09-24 15:13+0200\n"
+"POT-Creation-Date: 2016-10-01 01:49+0200\n"
+"PO-Revision-Date: 2016-10-01 01:11+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -201,11 +201,16 @@ msgstr ""
 msgid "Some text here."
 msgstr "Neki tekst."
 
-#: apps/base/templates/base.html:80
+#: apps/base/templates/base.html:81
 #: apps/task/templates/task_lectures_list.html:8
 #: apps/task/templates/task_lectures_list.html:12
 msgid "Lectures"
 msgstr "Predavanja"
+
+#: apps/base/templates/base.html:130
+#: apps/competition/templates/competition_base.html:107
+msgid "Terms of Use"
+msgstr "Uvjeti korištenja"
 
 #: apps/base/templates/inc_featured_lectures.html:8
 msgid "Featured lectures"
@@ -544,22 +549,120 @@ msgstr "Rješenje"
 msgid "Help"
 msgstr "Pomoć"
 
-#: apps/competition/forms.py:257
+#: apps/competition/forms.py:208
+msgid "Team name cannot be empty."
+msgstr "Naziv tima ne može biti prazan."
+
+#: apps/competition/forms.py:220
+#, python-format
+msgid "Unknown username \"%s\"."
+msgstr "Nepoznato korisničko ime \"%s\"."
+
+#: apps/competition/forms.py:223
+msgid "You are automatically added to the team."
+msgstr "Vi ste automatski dodani u tim."
+
+#: apps/competition/forms.py:230
+#, python-format
+msgid "User \"%s\" is already a member of a team."
+msgstr "Korisnik \"%s\" je već član nekog tima."
+
+#: apps/competition/forms.py:242
+msgid "Team name already used!"
+msgstr "Ime tima se već koristi."
+
+#: apps/competition/forms.py:271
+msgid "Competitors"
+msgstr "Natjecatelji"
+
+#: apps/competition/forms.py:272
 msgid "Unofficial"
 msgstr "Neslužbeni"
+
+#: apps/competition/forms.py:273
+msgid "Administrators"
+msgstr "Administratori"
 
 #: apps/competition/models.py:134
 msgid "Position in the category."
 msgstr "Pozicija u kategoriji."
 
-#: apps/competition/views.py:528
+#: apps/competition/views.py:537
 msgid "Number of admins that solved this task."
 msgstr "Broj administratora koji su riješili ovaj zadatak."
 
-#: apps/competition/templates/competition_base.html:69
+#: apps/competition/templates/competition_base.html:49
+#, python-format
+msgid ""
+"\n"
+"          Hello, %(userlink)s!\n"
+"        "
+msgstr ""
+"\n"
+"Zdravo, %(userlink)s!"
+
+#: apps/competition/templates/competition_base.html:54
+#: apps/competition/templates/competition_notifications_admin.html:25
+msgid "Team:"
+msgstr "Tim:"
+
+#: apps/competition/templates/competition_base.html:60
+msgid "Menu"
+msgstr "Izbornik"
+
+#: apps/competition/templates/competition_base.html:61
+msgid "Home"
+msgstr "Početna"
+
+#: apps/competition/templates/competition_base.html:64
+#: apps/competition/templates/competition_list.html:37
+#: apps/userprofile/templates/registration/registration_form.html:4
+#: apps/userprofile/templates/registration/registration_form.html:10
+msgid "Registration"
+msgstr "Registracija"
+
+#: apps/competition/templates/competition_base.html:66
+#: apps/competition/templates/competition_base.html:74
 #: apps/task/templates/inc_task_lecture_small_box.html:26
 msgid "Tasks"
 msgstr "Zadaci"
+
+#: apps/competition/templates/competition_base.html:67
+#: apps/competition/templates/competition_list.html:41
+msgid "Results"
+msgstr "Rezultati"
+
+#: apps/competition/templates/competition_base.html:70
+#: apps/competition/templates/competition_base.html:77
+msgid "Notifications"
+msgstr "Obavijesti"
+
+#: apps/competition/templates/competition_base.html:73
+msgid "Admin"
+msgstr "Admin"
+
+#: apps/competition/templates/competition_base.html:75
+msgid "Chains"
+msgstr "Lanci"
+
+#: apps/competition/templates/competition_base.html:92
+#: apps/competition/templates/competition_list.html:11
+msgid "Time:"
+msgstr "Vrijeme:"
+
+#: apps/competition/templates/competition_base.html:111
+msgid "Competition Rules"
+msgstr "Pravila natjecanja"
+
+#: apps/competition/templates/competition_chain_list.html:10
+#: apps/competition/templates/competition_chain_list_tasks.html:10
+#: apps/competition/templates/competition_task_new.html:13
+msgid "Visible only to the admins!"
+msgstr "Vidljivo samo administratorima!"
+
+#: apps/competition/templates/competition_chain_list.html:14
+msgid "New chain"
+msgstr "Novi lanac"
 
 #: apps/competition/templates/competition_chain_list.html:21
 msgid "Category"
@@ -593,7 +696,7 @@ msgstr "Komentari"
 #: apps/competition/templates/competition_chain_list.html:30
 #: apps/competition/templates/competition_chain_list.html:42
 #: apps/competition/templates/competition_task_detail.html:12
-#: apps/competition/templates/inc_competition_chain_ctask_tr.html:53
+#: apps/competition/templates/inc_competition_chain_ctask_tr.html:50
 msgid "Edit"
 msgstr "Uredi"
 
@@ -602,6 +705,12 @@ msgstr "Uredi"
 #: apps/competition/templates/competition_chain_list_tasks.html:166
 msgid "Overview"
 msgstr "Pregled"
+
+#: apps/competition/templates/competition_chain_list.html:47
+#: apps/competition/templates/competition_chain_list_tasks.html:92
+#: apps/competition/templates/competition_chain_list_tasks.html:172
+msgid "Empty..."
+msgstr "Prazno..."
 
 #: apps/competition/templates/competition_chain_list_tasks.html:27
 msgid "Instructions"
@@ -682,11 +791,6 @@ msgstr "Tekst"
 msgid "Comment"
 msgstr "Komentar"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:92
-#: apps/competition/templates/competition_chain_list_tasks.html:172
-msgid "Empty..."
-msgstr "Prazno..."
-
 #: apps/competition/templates/competition_chain_list_tasks.html:102
 msgid "Create chain"
 msgstr "Napravi lanac"
@@ -725,14 +829,251 @@ msgid "There were some errors!"
 msgstr "Bilo je nekih grešaka!"
 
 #: apps/competition/templates/competition_chain_overview.html:17
+#: apps/competition/templates/competition_task_detail.html:10
 #: apps/competition/templates/competition_task_new.html:36
 #: apps/task/templates/inc_task_bulk_preview_single.html:19
 msgid "Author:"
 msgstr "Autor:"
 
+#: apps/competition/templates/competition_list.html:6
+msgid "Competitions"
+msgstr "Natjecanja"
+
+#: apps/competition/templates/competition_list.html:17
+msgid "Competition"
+msgstr "Natjecanje"
+
+#: apps/competition/templates/competition_list.html:18
+msgid "Registration start"
+msgstr "Početak registracije"
+
+#: apps/competition/templates/competition_list.html:19
+msgid "Start"
+msgstr "Početak"
+
+#: apps/competition/templates/competition_list.html:20
+msgid "End"
+msgstr "Kraj"
+
+#: apps/competition/templates/competition_list.html:34
+msgid "Enter"
+msgstr "Ulaz"
+
+#: apps/competition/templates/competition_list.html:45
+#: apps/competition/templates/competition_registration.html:12
+msgid "Registration not open yet."
+msgstr "Registracija još nije otvorena."
+
+#: apps/competition/templates/competition_list.html:52
+msgid "No competitions."
+msgstr "Nema natjecanja."
+
+#: apps/competition/templates/competition_notifications_admin.html:33
+msgid "Last update:"
+msgstr "Zadnja promjena:"
+
+#: apps/competition/templates/competition_notifications_admin.html:38
+msgid "No notifications."
+msgstr "Nema obavijesti."
+
+#: apps/competition/templates/competition_notifications_admin.html:58
+msgid "Globally"
+msgstr "Globalno"
+
+#: apps/competition/templates/competition_registration.html:15
+msgid "Currently visible only to admins!"
+msgstr "Trenutačno vidljivo samo administratorima!"
+
+#: apps/competition/templates/competition_registration.html:20
+msgid "Registration successful!"
+msgstr "Registracija uspješna!"
+
+#: apps/competition/templates/competition_registration.html:24
+msgid "Changes saved!"
+msgstr "Promjene spremljene!"
+
+#: apps/competition/templates/competition_registration.html:34
+#: apps/competition/templates/competition_scoreboard.html:44
+#: apps/competition/templates/inc_competition_team_detail.html:4
+msgid "Team"
+msgstr "Tim"
+
+#: apps/competition/templates/competition_registration.html:35
+msgid "Founder"
+msgstr "Osnivač"
+
+#: apps/competition/templates/competition_registration.html:45
+msgid "Accept invitation"
+msgstr "Prihvati pozivnicu"
+
+#: apps/competition/templates/competition_registration.html:56
+msgid "Edit Team"
+msgstr "Uredi tim"
+
+#: apps/competition/templates/competition_registration.html:58
+msgid "Team Registration"
+msgstr "Registracija tima"
+
+#: apps/competition/templates/competition_registration.html:62
+msgid ""
+"\n"
+"        <p>Enter the team name in the first field.</p>\n"
+"        <p>In the second and third team enter the names of other team "
+"members,\n"
+"        if any.</p>\n"
+"        <p>In the case they have an account on školjka, press \"Invite user"
+"\"\n"
+"        and enter their usernames. After submitting the form, invitations\n"
+"        will be sent to the selected users, which they will be able to\n"
+"        accept by visiting this same page (Registration) with their "
+"accounts\n"
+"        and pressing \"Accept invitation\".</p>\n"
+"      "
+msgstr ""
+"\n"
+"<p>U prvo ime napišite ime tima</p><p>U drugo i treće polja unesite imena "
+"drugih članova tima, ako postoje.</p><p>Ako imaju korisnički račun na "
+"Školjci, kliknite \"Pozovi korisnika\" i unesite njihova korisnička imena. "
+"Nakon slanja upita, poslat će se pozivnice navedenim korisnicima, koje će "
+"oni moći prihvatiti posjećivanjem ove stranice (Registracija) sa svojim "
+"korisničkim računom i pritiskom tipke \"Prihvati\".</p>"
+
+#: apps/competition/templates/competition_registration.html:82
+msgid "Team name:"
+msgstr "Ime tima:"
+
+#: apps/competition/templates/competition_registration.html:92
+#: apps/competition/templates/competition_task_detail.html:100
+#: apps/competition/templates/competition_task_new.html:54
+#: apps/task/templates/task_bulk_new_2nd.html:28
+msgid "Submit"
+msgstr "Pošalji"
+
+#: apps/competition/templates/competition_registration_complete.html:9
+msgid "Team successfully registered!"
+msgstr "Tim uspješno registriran!"
+
+#: apps/competition/templates/competition_registration_complete.html:13
+msgid "Tasks and results are available in the menu. Good luck!"
+msgstr "Zadaci i rezultati su dostupni u izborniku lijevo. Sretno!"
+
+#: apps/competition/templates/competition_registration_complete.html:15
+msgid ""
+"After the competition starts, the tasks and the results\n"
+"  will be available in the menu. Good luck!"
+msgstr ""
+"Kada počne natjecanje, zadaci i rezultati će biti dostupni u izborniku "
+"lijevo. Sretno!"
+
+#: apps/competition/templates/competition_registration_complete.html:19
+msgid "To edit the team, click on the team name in the menu."
+msgstr "Za uređivanje tima, kliknite na ime tima u izborniku."
+
+#: apps/competition/templates/competition_registration_login.html:12
+msgid ""
+"A Školjka account is required to register to the \n"
+"  competition (a single account suffices per team). "
+msgstr ""
+"Za registraciju za natjecanje potrebno je imati račun na Školjci (dovoljan "
+"je jedan račun po timu)."
+
+#: apps/competition/templates/competition_registration_login.html:15
+msgid ""
+"Please login, or register an account if you don't\n"
+"  have an account already. After logging in / registration, you will be "
+"able\n"
+"  to create your team for the competition."
+msgstr ""
+"Molimo prijavite se, ili napravite račun ako ga već nemate. Nakon prijave, "
+"odnosno registracije, moći ćete registrirati tim za natjecanje."
+
+#: apps/competition/templates/competition_registration_login.html:21
+#: apps/userprofile/templates/registration/inc_login_form.html:22
+#: apps/userprofile/templates/registration/login.html:5
+#: apps/userprofile/templates/registration/login.html:9
+msgctxt "action"
+msgid "Log in"
+msgstr "Prijava"
+
+#: apps/competition/templates/competition_registration_login.html:25
+msgid "Register an account"
+msgstr "Registracija računa"
+
 #: apps/competition/templates/competition_rules.html:13
 msgid "Solution format description"
 msgstr "Objašnjenje formata rješenja"
+
+#: apps/competition/templates/competition_scoreboard.html:11
+#: apps/competition/templates/competition_task_list.html:11
+msgid "Competition hasn't started yet!"
+msgstr "Natjecanje još nije počelo!"
+
+#: apps/competition/templates/competition_scoreboard.html:17
+#: apps/competition/templates/competition_task_detail.html:112
+#: apps/competition/templates/competition_task_list.html:37
+msgid "Competition has finished!"
+msgstr "Natjecanje je završilo!"
+
+#: apps/competition/templates/competition_scoreboard.html:23
+msgid ""
+"The results has been frozen. The final results will be\n"
+"    available after the competition."
+msgstr ""
+"Rezultati su zamrznuti. Konačni rezultati će biti dostupni nakon natjecanja."
+
+#: apps/competition/templates/competition_scoreboard.html:28
+msgid "Sort by frozen score"
+msgstr "Sortiraj po zamrznutim bodovima"
+
+#: apps/competition/templates/competition_scoreboard.html:32
+msgid "Sort by real score"
+msgstr "Sortitaj po pravim bodovima"
+
+#: apps/competition/templates/competition_scoreboard.html:45
+msgid "Total score"
+msgstr "Ukupni bodovi"
+
+#: apps/competition/templates/competition_task_detail.html:23
+#: apps/competition/templates/competition_task_list.html:16
+msgid "Currently visible only to the admins!"
+msgstr "Trenutačno vidljivo samo administratorima!"
+
+#: apps/competition/templates/competition_task_detail.html:30
+msgid ""
+"You haven't solved all the prerequisites for this task, but you're an admin."
+msgstr "Niste riješili sve preduvjete, ali ste administrator."
+
+#: apps/competition/templates/competition_task_detail.html:54
+msgid "Correct"
+msgstr "Točno"
+
+#: apps/competition/templates/competition_task_detail.html:57
+msgid "Incorrect"
+msgstr "Netočno"
+
+#: apps/competition/templates/competition_task_detail.html:64
+msgid "For admins"
+msgstr "Za administratore"
+
+#: apps/competition/templates/competition_task_detail.html:81
+msgid "You've used all the attempts."
+msgstr "Iskoristili ste sve pokušaje."
+
+#: apps/competition/templates/competition_task_detail.html:92
+msgid "Attempts left:"
+msgstr "Preostalo pokušaja:"
+
+#: apps/competition/templates/competition_task_detail.html:121
+msgid "Next task"
+msgstr "Sljedeći zadatak"
+
+#: apps/competition/templates/competition_task_detail.html:124
+msgid "Last task in the chain."
+msgstr "Zadnji zadatak u lancu."
+
+#: apps/competition/templates/competition_task_detail.html:125
+msgid "Return to the task list"
+msgstr "Natrag na listu zadataka"
 
 #: apps/competition/templates/competition_task_list.html:23
 #, python-format
@@ -743,6 +1084,50 @@ msgid ""
 msgstr ""
 "Napomena administratorima: <b>%(unverified_chains_count)s neprovjeren(ih) "
 "lanac(a)</b> nije prikazano."
+
+#: apps/competition/templates/competition_task_list.html:31
+msgid "Please register for the competition to see the tasks."
+msgstr "Molimo registrirajte se za natjecanje kako biste vidjeli zadatke."
+
+#: apps/competition/templates/competition_task_list.html:97
+msgid "Show/Hide the legend"
+msgstr "Prikaži/sakrij legendu"
+
+#: apps/competition/templates/competition_task_list.html:98
+msgid "Legend"
+msgstr "Legenda"
+
+#: apps/competition/templates/competition_task_list.html:104
+msgid "A successfully solved task"
+msgstr "Uspješno riješen zadatak"
+
+#: apps/competition/templates/competition_task_list.html:105
+msgid "Used all attempts"
+msgstr "Iskorišteni svi pokušaji"
+
+#: apps/competition/templates/competition_task_list.html:106
+msgid "An unlocked task"
+msgstr "Otključan zadatak"
+
+#: apps/competition/templates/competition_task_list.html:107
+msgid "A task with a failed attempt"
+msgstr "Zadatak s neuspjelim pokušajem"
+
+#: apps/competition/templates/competition_task_list.html:108
+msgid "A locked task"
+msgstr "Zaključan zadatak"
+
+#: apps/competition/templates/competition_task_list.html:109
+msgid "Bonus won"
+msgstr "Bonus osvojen"
+
+#: apps/competition/templates/competition_task_list.html:110
+msgid "Bonus not available anymore"
+msgstr "Bonus više nije dostupan"
+
+#: apps/competition/templates/competition_task_list.html:111
+msgid "Bonus available, but not won"
+msgstr "Bonus dostupan, ali nije osvojen"
 
 #: apps/competition/templates/competition_task_new.html:18
 msgid ""
@@ -769,11 +1154,6 @@ msgstr "Pritisnite <b>Ctrl+M</b> za pregled formatiranog teksta."
 msgid "Save changes"
 msgstr "Spremi promjene"
 
-#: apps/competition/templates/competition_task_new.html:54
-#: apps/task/templates/task_bulk_new_2nd.html:28
-msgid "Submit"
-msgstr "Pošalji"
-
 #: apps/competition/templates/competition_task_new.html:59
 msgid "Submit and create new task"
 msgstr "Pošalji i napravi novi zadatak"
@@ -786,23 +1166,31 @@ msgstr "Pošalji i odi na listu zadataka"
 msgid "Go to task"
 msgstr "Otvori zadatak"
 
-#: apps/competition/templates/inc_competition_chain_ctask_tr.html:32
+#: apps/competition/templates/inc_competition_chain_ctask_tr.html:29
 msgid "Remove"
 msgstr "Makni"
 
-#: apps/competition/templates/inc_competition_chain_ctask_tr.html:37
+#: apps/competition/templates/inc_competition_chain_ctask_tr.html:34
 msgid "Move up"
 msgstr "Pomakni gore"
 
-#: apps/competition/templates/inc_competition_chain_ctask_tr.html:45
+#: apps/competition/templates/inc_competition_chain_ctask_tr.html:42
 msgid "Move down"
 msgstr "Pomakni dolje"
 
-#: apps/competition/templates/inc_competition_chain_ctask_tr.html:54
+#: apps/competition/templates/inc_competition_chain_ctask_tr.html:51
 msgid "Open"
 msgstr "Otvori"
 
-#: apps/competition/templatetags/competition_tags.py:97
+#: apps/competition/templates/inc_competition_team_detail.html:7
+msgid "Score:"
+msgstr "Bodovi:"
+
+#: apps/competition/templates/inc_competition_team_detail.html:11
+msgid "Members:"
+msgstr "Članovi:"
+
+#: apps/competition/templatetags/competition_tags.py:98
 #, python-format
 msgid "%d important"
 msgid_plural "%d important"
@@ -810,7 +1198,7 @@ msgstr[0] "%d važan"
 msgstr[1] "%d važna"
 msgstr[2] "%d važnih"
 
-#: apps/competition/templatetags/competition_tags.py:100
+#: apps/competition/templatetags/competition_tags.py:101
 #, python-format
 msgid "%d my task"
 msgid_plural "%d my tasks"
@@ -1264,6 +1652,7 @@ msgstr ""
 "brojem, npr.:"
 
 #: apps/task/templates/task_bulk_new.html:75
+#: apps/userprofile/templates/registration/activation_complete.html:16
 msgid "Continue"
 msgstr "Nastavi"
 
@@ -1362,30 +1751,97 @@ msgstr ""
 msgid "Press Ctrl+M to get the preview of the text."
 msgstr "Pritisnite Ctrl+M za pregled teksta."
 
-#: apps/userprofile/forms.py:33
+#: apps/userprofile/forms.py:22 apps/userprofile/forms.py:36
 msgid "Username"
 msgstr "Korisničko ime"
 
-#: apps/userprofile/forms.py:36
-msgid "E-mail"
-msgstr "Email"
-
-#: apps/userprofile/forms.py:39
+#: apps/userprofile/forms.py:23 apps/userprofile/forms.py:42
 msgid "Password"
 msgstr "Lozinka"
 
-#: apps/userprofile/forms.py:42
+#: apps/userprofile/forms.py:39
+msgid "Email"
+msgstr "Email"
+
+#: apps/userprofile/forms.py:45
 msgid "Confirm password"
 msgstr "Potvrda lozinke"
 
-#: apps/userprofile/forms.py:79
+#: apps/userprofile/forms.py:48
+msgid "I accept the <a href=\"/tou/\">Terms of Use</a>"
+msgstr "Prihvaćam <a href=\"/tou/\">Uvjete korištenja</a>"
+
+#: apps/userprofile/forms.py:50
+msgid "You may not use Školjka if you do not accept the Terms of Use."
+msgstr "Ne možete koristiti Školjku ako ne prihvaćate Uvjete korištenja."
+
+#: apps/userprofile/forms.py:71
 msgid "This name is already reserved. Please choose another."
 msgstr "Navedeno ime je već iskorišteno. Molimo izaberite drugo."
 
-#: apps/userprofile/forms.py:85
+#: apps/userprofile/forms.py:77
 msgid "E-mail address already in use."
 msgstr "Email adresa se već koristi."
 
-#: apps/userprofile/forms.py:92
-msgid "Please type the same password each time!"
-msgstr "Molimo upišite istu lozinku oba puta!"
+#: apps/userprofile/forms.py:84
+msgid "Passwords do not match!"
+msgstr "Lozinke se ne slažu!"
+
+#: apps/userprofile/templates/registration/activation_complete.html:4
+msgid "Registration complete"
+msgstr "Registracija završena"
+
+#: apps/userprofile/templates/registration/activation_complete.html:7
+msgid "Thank you, your registration is complete!"
+msgstr "Hvala, vaša registracija je gotova!"
+
+#: apps/userprofile/templates/registration/activation_complete.html:14
+msgid "Continue to the homepage"
+msgstr "Nastavi na naslovnu stranicu"
+
+#: apps/userprofile/templates/registration/inc_login_form.html:3
+msgid "Invalid username or passowrd. Please try again."
+msgstr "Nevaljano korisničko ime ili lozinka. Molimo pokušajte ponovno."
+
+#: apps/userprofile/templates/registration/inc_login_form.html:11
+#, python-format
+msgid ""
+"\n"
+"      <a href=\"%(auth_password_reset_url)s\">Forgot</a> the password?\n"
+"    "
+msgstr ""
+"\n"
+"<a href=\"%(auth_password_reset_url)s\">Zaboravili</a> ste lozinku?"
+
+#: apps/userprofile/templates/registration/inc_login_form.html:16
+msgid "Do not have an account?"
+msgstr "Nemate korisnički račun"
+
+#: apps/userprofile/templates/registration/inc_registration_form.html:18
+msgctxt "action"
+msgid "Register"
+msgstr "Registracija"
+
+#: apps/userprofile/templates/registration/registration_complete.html:5
+#, python-format
+msgid ""
+"\n"
+"  Thank you for signing up!<br><br>\n"
+"  We sent you an activation link to <b>%(email)s</b>. Please follow the "
+"link\n"
+"  to complete the registration. If you do not receive the email in the next "
+"few\n"
+"  minutes, please check the spam or contact %(contact_link)s.\n"
+msgstr ""
+"\n"
+"Zahvaljujemo na registraciji!<br><br>Na vaš email <b>%(email)s</b> je poslan "
+"aktivacijski link. Molimo kliknite na taj link kako biste dovršili "
+"registraciju. Ako ne primite mail u sljedećih nekoliko minuta, molimo "
+"provjerite spam ili kontaktiraje %(contact_link)s.\n"
+
+#: libs/templatetags/libs_tags.py:26
+msgid "Send an email"
+msgstr "Pošalji email"
+
+#~ msgid "Please type the same password each time!"
+#~ msgstr "Molimo upišite istu lozinku oba puta!"

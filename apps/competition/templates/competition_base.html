@@ -46,32 +46,38 @@
   <div id="sidebar">
     {% if user.is_authenticated %}
       <div id="nav-hello-user">
-        Zdravo, {{ user|userlink:"first_name" }}!
+        {% blocktrans with userlink=user|userlink:"first_name" %}
+          Hello, {{ userlink }}!
+        {% endblocktrans %}
         {% if team %}
           <br>
-          Tim: <a href="{% comp_url 'registration' %}">{{ team.name }}</a>
+          {% trans "Team:" %}
+          <a href="{% comp_url 'registration' %}">{{ team.name }}</a>
         {% endif %}
       </div>
     {% endif %}
     <ul class="nav nav-list">
-      <li class="nav-header">Izbornik</li>
-      <li><a href="{% comp_url '' %}">Početna</a></li>
+      <li class="nav-header">{% trans "Menu" %}</li>
+      <li><a href="{% comp_url '' %}">{% trans "Home" %}</a></li>
       {% if not team and not has_finished and current_time > competition.registration_open_date %}
-        <li><a href="{% comp_url 'registration' %}" class="register">Registracija</a></li>
+        <li><a href="{% comp_url 'registration' %}" class="register">
+            {% trans "Registration" %}</a></li>
       {% endif %}
-      <li><a href="{% comp_url 'task' %}">Zadaci</a></li>
-      <li><a href="{% comp_url 'scoreboard' %}">Rezultati</a></li>
+      <li><a href="{% comp_url 'task' %}">{% trans "Tasks" %}</a></li>
+      <li><a href="{% comp_url 'scoreboard' %}">{% trans "Results" %}</a></li>
       {% if user.is_authenticated %}
-        <li><a href="{% comp_url 'notifications' %}">Obavijesti</a></li>
+        <li><a href="{% comp_url 'notifications' %}">
+            {% trans "Notifications" %}</a></li>
       {% endif %}
       {% if is_admin %}
-        <li class="nav-header">Admin</li>
+        <li class="nav-header">{% trans "Admin" %}</li>
         <li><a href="{% comp_url 'chain/tasks' %}">{% trans "Tasks" %}</a></li>
-        <li><a href="{% comp_url 'chain' %}">Lanci</a></li>
-        <li><a href="{% comp_url 'notifications/admin' %}">Obavijesti</a></li>
+        <li><a href="{% comp_url 'chain' %}">{% trans "Chains" %}</a></li>
+        <li><a href="{% comp_url 'notifications/admin' %}">
+            {% trans "Notifications" %}</a></li>
         {% if user.is_superuser %}
           <li><a href="{% my_url 'admin:app_list' 'competition' %}">
-            Admin</a></li>
+              Admin</a></li>
           {# TODO: Change to my_url/url after upgrading to Django 1.5. #}
           <li><a href="/admin/competition/competition/{{ competition.id }}/">
             Competition admin</a></li>
@@ -83,7 +89,7 @@
   <div id="content">
       <div id="comp-float-right">
         <span class="{{ nearly_finished|yesno:"nearly-finished," }}">
-          Vrijeme: {{ current_time|date:"H:i" }}
+          {% trans "Time:" %} {{ current_time|date:"H:i" }}
         </span>
         {% block float_right_extra %}{% endblock %}
       </div>

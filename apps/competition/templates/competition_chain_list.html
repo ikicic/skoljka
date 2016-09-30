@@ -7,11 +7,11 @@
 {% block content %}
 
 <div class="alert">
-  Vidljivo samo administratorima!
+  {% trans "Visible only to the admins!" %}
 </div>
 
 <div id="chain-action-bar-right">
-  <a href="{% comp_url 'chain/new' %}" class="btn">Novi lanac</a>
+  <a href="{% comp_url 'chain/new' %}" class="btn">{% trans "New chain" %}</a>
 </div>
 
 <h3 class="comp-header">Lanci</h3>
@@ -31,7 +31,7 @@
     <th>{% trans "Overview" %}</th>
   </tr>
   {% for chain in chains %}
-    <tr class="{% chain_class chain %}">
+    <tr class="{% admin_chain_class chain %}">
       <td>{{ chain.category }}</td>
       <td>{{ chain.position }}</td>
       <td><a href="{{ chain.get_absolute_url }}">{{ chain.name }}</a></td>
@@ -44,7 +44,7 @@
           {% trans "Overview" %}</a></td>
     </tr>
   {% empty %}
-    <tr><td colspan="3"><i>Prazno...</i></td> </tr>
+    <tr><td colspan="9"><i>{% trans "Empty..." %}</i></td> </tr>
   {% endfor %}
 </table>
 {% endblock content %}

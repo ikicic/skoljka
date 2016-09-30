@@ -1,12 +1,14 @@
 {% load competition_tags %}
+{% load i18n %}
 
-<h3 class="comp-header">Tim {{ preview_team.name }}</h3>
+<h3 class="comp-header">{% trans "Team" %} {{ preview_team.name }}</h3>
 
 <div class="team-score-container">
-  Bodovi: <span class="team-score">{% team_score preview_team %}</span>
+  {% trans "Score:" %}
+  <span class="team-score">{% team_score preview_team %}</span>
 </div>
 
-Članovi:
+{% trans "Members:" %}
 <ol>
   {% for team_member in preview_team_members %}
     <li>

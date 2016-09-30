@@ -7,7 +7,7 @@
 {% block float_right_extra %}
   {% if is_admin %}
     <br>
-    Autor: {{ ctask.task.author|userlink }}
+    {% trans "Author:" %}{{ ctask.task.author|userlink }}
     <br>
     <a href="{{ ctask.get_edit_url }}">{% trans "Edit" %}</a>
   {% endif %}
@@ -20,14 +20,14 @@
 
 {% if minutes_passed < chain.unlock_minutes and is_admin %}
   <div class="alert">
-    Trenutačno vidljivo samo administratorima!
+    {% trans "Currently visible only to the admins!" %}
   </div>
 {% endif %}
 
 {% if ctask.t_is_locked %}
   {# if not admin, the request would be rejected anyway #}
   <div class="alert">
-    Nisu riješeni preduvjeti za ovaj zadatak, ali imate administratska prava.
+    {% trans "You haven't solved all the prerequisites for this task, but you're an admin." %}
   </div>
 {% endif %}
 
@@ -51,15 +51,17 @@
               <td class="ctask-sub-result">{{ x.result }}</td>
               <td class="ctask-sub-correctness">
                 {% if x.cache_is_correct %}
-                  <span class="label label-success">Točno</span>
+                  <span class="label label-success">{% trans "Correct" %}</span>
                 {% else %}
-                  <span class="label label-important">Netočno</span>
+                  <span class="label label-important">
+                    {% trans "Incorrect" %}
+                  </span>
                 {% endif %}
               </td>
               {% if is_admin %}
                 <td>
-                  <button type="submit" name="delete-submission"
-                      value="{{ x.id }}" class="btn" title="Za administratore">
+                  <button type="submit" name="delete-submission" class="btn"
+                      value="{{ x.id }}" title="{% trans "For admins" %}">
                     X
                   </button>
                 </td>
@@ -76,7 +78,7 @@
 
   {% if submissions|length >= ctask.max_submissions and not is_solved %}
     <div class="ctask-submissions-count">
-      Iskoristili ste sve pokušaje.
+      {% trans "You've used all the attempts." %}
     </div>
   {% endif %}
 
@@ -87,7 +89,7 @@
           class="form-inline">
         {% csrf_token %}
         <div class="ctask-submissions-count">
-          Preostalo pokušaja: {{ submissions_left }}
+          {% trans "Attempts left:" %} {{ submissions_left }}
         </div>
         {% if help_text %}
           <div class="ctask-format-help">
@@ -95,7 +97,8 @@
           </div>
         {% endif %}
         {{ solution_form.result }}
-        <input type="submit" value="Pošalji" class="btn btn-primary">
+        <input type="submit" value="{% trans "Submit" %}"
+            class="btn btn-primary">
         {% if solution_form.errors %}
           <span class="comp-error">
             {% for error in solution_form.result.errors %}
@@ -106,7 +109,7 @@
       </form>
     {% else %}
       <div class="ctask-submit-already-finished">
-        Natjecanje je završilo!
+        {% trans "Competition has finished!" %}
       </div>
     {% endif %}
   {% endif %}
@@ -115,10 +118,12 @@
     <br><br>
     {% if ctask.t_next %}
       <a href="{{ ctask.t_next.get_absolute_url }}"
-        class="btn btn-primary"> Sljedeći zadatak</a>
+        class="btn btn-primary"> {% trans "Next task" %}</a>
     {% else %}
       <a href="{% comp_url 'task' %}" class="btn btn-primary"
-          title="Zadnji zadatak u lancu">Povratak na popis zadataka</a>
+          title="{% trans "Last task in the chain." %}">
+        {% trans "Return to the task list" %}
+      </a>
     {% endif %}
   {% endif %}
 {% endif %}

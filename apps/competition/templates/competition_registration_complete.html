@@ -1,22 +1,21 @@
 {% extends "competition_base.html" %}
+{% load i18n %}
 
 {% block content %}
 
 <h3 class="comp-header">Registracija</h3>
 
 <div class="alert alert-success">
-  Registracija tima uspješna!
+  {% trans "Team successfully registered!" %}
 </div>
 
 {% if has_started %}
-  <p>Zadaci i bodovna lista su dostupni u izborniku lijevo. Ugodno rješavanje
-    zadataka!</p>
+  <p>{% trans "Tasks and results are available in the menu. Good luck!" %}
 {% else %}
-  <p>Nakon što započne natjecanje, zadaci i bodovna lista će biti dostupni u
-    izborniku lijevo.</p>
+  <p>{% blocktrans %}After the competition starts, the tasks and the results
+  will be available in the menu. Good luck!{% endblocktrans %}</p>
 {% endif %}
 
-<p>Ukoliko želite naknadno uređivati tim, kliknite na ime tima u izborniku
-  lijevo.</p>
+<p>{% trans "To edit the team, click on the team name in the menu." %}</p>
 
 {% endblock content %}

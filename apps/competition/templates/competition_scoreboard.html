@@ -1,4 +1,5 @@
 {% extends "competition_base.html" %}
+{% load i18n %}
 {% load competition_tags %}
 
 {% block content %}
@@ -7,28 +8,28 @@
 
 {% if not has_started %}
   <div class="alert">
-    Natjecanje još nije počelo!
+    {% trans "Competition hasn't started yet!" %}
   </div>
 {% endif %}
 
 {% if has_finished %}
   <div class="alert">
-    Natjecanje je završilo!
+    {% trans "Competition has finished!" %}
   </div>
 {% endif %}
 
 {% if is_scoreboard_frozen %}
   <div class="alert">
-    Rang lista i bodovi su zamrznuti. Konačni rezultati će biti dostupni nakon
-    kraja natjecanja.
+    {% blocktrans %}The results has been frozen. The final results will be
+    available after the competition.{% endblocktrans %}
     {% if is_admin %}
       {% if sort_by_actual_score %}
         <a href="{% comp_url 'scoreboard' %}">
-          Sortiraj po zamrznutim bodovima
+          {% trans "Sort by frozen score" %}
         </a>
       {% else %}
         <a href="{% comp_url 'scoreboard' %}?sort_by_actual_score=1">
-          Sortiraj po pravim bodovima
+          {% trans "Sort by real score" %}
         </a>
       {% endif %}
     {% endif %}
@@ -40,8 +41,8 @@
     <table class="table-striped" id="comp-scoreboard-table">
       <tr>
         <th>#</th>
-        <th>Tim</th>
-        <th>Ukupno bodova</th>
+        <th>{% trans "Team" %}</th>
+        <th>{% trans "Total score" %}</th>
       </tr>
       {% for t in teams %}
         <tr class="
@@ -62,7 +63,7 @@
   <form action="" method="post" id="comp-scoreboard-admin-refresh">
     {% csrf_token %}
     <input type="submit" name="refresh" value="Refresh" class="btn">
-    -- Ne koristi ako nije nužno!
+    -- Do not use if not necessary!
   </form>
   {% if refresh_calculation_time %}
     <span>Refresh time: {{ refresh_calculation_time.total_seconds }}s</span>

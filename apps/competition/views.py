@@ -307,6 +307,13 @@ def task_list(request, competition, data):
             for ctask in chain.ctasks:
                 ctask.t_is_locked = False
 
+        chain.t_next_task = None
+        for ctask in chain.ctasks:
+            if not ctask.t_is_locked and not ctask.t_is_solved and \
+                    ctask.t_submission_count < ctask.max_submissions:
+                chain.t_next_task = ctask
+                break
+
     if data['is_admin']:
         data['admin_panel_form'] = TaskListAdminPanelForm()
         for category in categories.itervalues():

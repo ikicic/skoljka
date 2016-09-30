@@ -8,12 +8,12 @@
 
 {% if not has_started %}
   <div class="alert">
-    Natjecanje još nije počelo!
+    {% trans "Competition hasn't started yet!" %}
   </div>
 
   {% if is_admin %}
     <div class="alert">
-      Trenutačno vidljivo samo administratorima!
+      {% trans "Currently visible only to the admins!" %}
     </div>
   {% endif %}
 {% endif %}
@@ -26,16 +26,15 @@
   </div>
 {% endif %}
 
-{% if not team and not has_finished %}
+{% if not team and not has_finished and has_started %}
   <div class="alert">
-    Molimo vas, registrirajte tim za natjecanje, kako biste mogli vidjeti
-    zadatke.
+    {% trans "Please register for the competition to see the tasks." %}
   </div>
 {% endif %}
 
 {% if has_finished %}
   <div class="alert">
-    Natjecanje je završilo!
+    {% trans "Competition has finished!" %}
   </div>
 {% endif %}
 
@@ -59,12 +58,13 @@
       </tr>
       {% for chain in category.chains %}
         {# hidden visible only if admin #}
-        <tr class="comp-chain
-            {% if chain.t_is_hidden and has_started %}comp-chain-hidden{% endif %}">
+        <tr class="comp-chain {% chain_class chain %}"
+            {% if chain.t_next_task %} data-next="{{ chain.t_next_task.id }}"{% endif %}>
           <td class="comp-chain-name">{{ chain.name }}</td>
           <td class="comp-chain-tasks">
             <div class="progress"
-                style="width: {% percentage chain.ctasks|length max_chain_length %}">
+                style="width: {% percentage chain.ctasks|length max_chain_length %};
+                       max-width: {% widthratio chain.ctasks|length max_chain_length 600 %}px;">
               {% for ctask in chain.ctasks %}
                 {% if not ctask.t_is_locked or is_admin %}
                   <a data-id="{{ ctask.id }}"
@@ -94,21 +94,21 @@
   </table>
 
   <div id="ctask-legend-container">
-    <a href="#" title="Prikaži/sakrij legendu" class="auto-toggler"
-        data-target="ctask-legend">Legenda</a>
+    <a href="#" title="{% trans "Show/Hide the legend" %}" class="auto-toggler"
+        data-target="ctask-legend">{% trans "Legend" %}</a>
     <br>
     <div id="ctask-legend" style="display: none;">
       <div class="row row-fix">
         <div class="span5">
           <table>
-            {% legend_ctask "bar ctask-solved" "Uspješno riješen zadatak" %}
-            {% legend_ctask "bar ctask-failed" "Iskorišteni svi pokušaji" %}
-            {% legend_ctask "bar ctask-open" "Otvoren zadatak" %}
-            {% legend_ctask "bar ctask-tried" "Zadatak s neuspjelim pokušajem" %}
-            {% legend_ctask "ctask-locked" "Zaključan zadatak" %}
-            {% legend_chain "badge-success" "Osvojen bonus" %}
-            {% legend_chain "" "Bonus više nije dostupan" %}
-            {% legend_chain "badge-info" "Bonus dostupan, ali nije osvojen" %}
+            {% legend_ctask "bar ctask-solved" _("A successfully solved task") %}
+            {% legend_ctask "bar ctask-failed" _("Used all attempts") %}
+            {% legend_ctask "bar ctask-open" _("An unlocked task") %}
+            {% legend_ctask "bar ctask-tried" _("A task with a failed attempt") %}
+            {% legend_ctask "ctask-locked" _("A locked task") %}
+            {% legend_chain "badge-success" _("Bonus won") %}
+            {% legend_chain "" _("Bonus not available anymore") %}
+            {% legend_chain "badge-info" _("Bonus available, but not won") %}
           </table>
         </div>
       </div>

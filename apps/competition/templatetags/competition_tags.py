@@ -121,6 +121,16 @@ def chain_list_ctask_comment_preview(ctask):
 
 @register.simple_tag(takes_context=True)
 def chain_class(context, chain):
+    cls = 'comp-chain'
+    if chain.t_is_hidden and context['has_started']:
+        cls += ' comp-chain-hidden'
+    if chain.t_next_task is not None:
+        cls += ' comp-chain-unfinished'
+    return cls
+
+
+@register.simple_tag(takes_context=True)
+def admin_chain_class(context, chain):
     num_important, num_important_my = parse_chain_comments_cache(
             chain, context['user'])
     if num_important_my > 0:

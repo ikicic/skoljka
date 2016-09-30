@@ -9,7 +9,7 @@
 
 {% if competition.registration_open_date > current_time %}
   <h3 class="comp-header">Registracija</h3>
-  <div class="alert">{% trans "Registration not open yet!" %}</div>
+  <div class="alert">{% trans "Registration not open yet." %}</div>
 
   {% if is_admin %}
     <div class="alert">{% trans "Currently visible only to admins!" %}</div>
@@ -42,7 +42,7 @@
             <td>
               <button type="submit" name="invitation-accept" class="btn"
                   value="{{ tm.id }}">
-                {% trans "Accept Invitation" %}
+                {% trans "Accept invitation" %}
               </button>
             </td>
           </tr>
@@ -59,15 +59,16 @@
     {% endif %}
 
     <div class="instructions">
-      <p>U prvo polje unesite željeno ime tima.</p>
-      <p>Drugi i treće polje predstavljaju imena drugih članova tima. Ukoliko
-        želite samo navesti njihova imena, unesite ih u ta polja.</p>
-      <p>Ako pak oni imaju korisnički račun, možete ih povezati pritiskom na
-        tipku <i>Pozovi</i>. Nakon što odaberete odgovarajuća korisnička imena
-        i pritisnite <i>Pošalji</i>, odabranim korisnicima će se poslati
-        pozivnice za priključivanje vašem timu.</p>
-      <p>Ti korisnici prihvaćaju pozivnice na način da se prijave na vlastiti
-        račun te na istoj ovoj stranici pritisnu na <i>Prihvati</i>.</p>
+      {% blocktrans %}
+        <p>Enter the team name in the first field.</p>
+        <p>In the second and third team enter the names of other team members,
+        if any.</p>
+        <p>In the case they have an account on školjka, press "Invite user"
+        and enter their usernames. After submitting the form, invitations
+        will be sent to the selected users, which they will be able to
+        accept by visiting this same page (Registration) with their accounts
+        and pressing "Accept invitation".</p>
+      {% endblocktrans %}
     </div>
 
     {% reg_available_users %}

@@ -100,6 +100,15 @@ $ ->
         stats[key.substr(2)] = value
     show_ctask_statistics stats, STATUS_CLASS[status], 'ctask-locked'
 
+  $('#comp-tasks a').click (event) ->
+    event.stopImmediatePropagation()
+
+  # table#comp-tasks tr.comp-chain-unfinished
+  $('.comp-chain-unfinished').click (event) ->
+    id = $(@).attr('data-next')
+    current_url = location.protocol + '//' + location.host + location.pathname
+    window.location = current_url + id + '/'
+
 
 $ ->
   # Chain creation selection.

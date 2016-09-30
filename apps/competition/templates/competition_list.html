@@ -1,22 +1,23 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% load usergroup_tags %}
 
-{% block title %}Natjecanja{% endblock %}
+{% block title %}{% trans "Competitions" %}{% endblock %}
 
 {% block content %}
 
 <div id="comp-float-right">
-  <span>Vrijeme: {{ current_time|date:"H:i" }}</span>
+  <span>{% trans "Time:" %} {{ current_time|date:"H:i" }}</span>
 </div>
 
 <table id="comp-list" class="table-striped table-condensed">
   <tr>
     <th width="30">#</th>
-    <th>Natjecanje</th>
-    <th>Početak registracije</th>
-    <th>Početak</th>
-    <th>Kraj</th>
+    <th>{% trans "Competition" %}</th>
+    <th>{% trans "Registration start" %}</th>
+    <th>{% trans "Start" %}</th>
+    <th>{% trans "End" %}</th>
     <th>&nbsp;</th>
   </tr>
 {% for comp in competitions %}
@@ -30,25 +31,25 @@
       {% if comp.registration_open_date < current_time %}
         {% if current_time < comp.end_date %}
           {% if comp.id in member_of %}
-            <a href="{{ comp.get_absolute_url }}">Ulaz</a>
+            <a href="{{ comp.get_absolute_url }}">{% trans "Enter" %}</a>
           {% else %}
             <a href="{{ comp.get_registration_url }}" class="register">
-              Registracija
+              {% trans "Registration" %}
             </a>
           {% endif %}
         {% else %}
-          <a href="{{ comp.get_scoreboard_url }}">Rezultati</a>
+          <a href="{{ comp.get_scoreboard_url }}">{% trans "Results" %}</a>
         {% endif %}
       {% else %}
         <span class="comp-list-reg-not-open">
-          Registracija još nije otvorena
+          {% trans "Registration not open yet." %}
         </span>
       {% endif %}
     </td>
   </tr>
 {% empty %}
   <tr>
-    <td colspan="5">Nema natjecanja</td>
+    <td colspan="5">{% trans "No competitions." %}</td>
   </tr>
 {% endfor %}
 </table>

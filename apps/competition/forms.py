@@ -222,9 +222,11 @@ class TeamForm(forms.ModelForm):
                 raise ValidationError(
                         _("You are automatically added to the team."))
             if TeamMember.objects.filter(
-                    team__competition_id=self.competition_id,
-                    member_id=user.id,
-                    invitation_status=TeamMember.INVITATION_ACCEPTED).exists():
+                        team__competition_id=self.competition_id,
+                        member_id=user.id,
+                        invitation_status=TeamMember.INVITATION_ACCEPTED) \
+                    .exclude(team_id=self.instance.id) \
+                    .exists():
                 msg = _("User \"%s\" is already a member of a team.") % username
                 raise ValidationError(msg)
             return (user.username, user)
