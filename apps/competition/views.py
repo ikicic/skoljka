@@ -812,11 +812,11 @@ def notifications_admin(request, competition, data):
     team_ct = ContentType.objects.get_for_model(Team)
 
     posts = list(competition.posts.select_related('author', 'content'))
-    team_ids = list(Team.objects \
-            .filter(competition=competition).values_list('id', flat=True))
+    teams = Team.objects.filter(competition=competition)
+    team_ids_query = teams.values_list('id', flat=True)
     # Post.objects.filter(team__competition_id=id, ct=...) makes an extra JOIN.
     team_posts = list(Post.objects \
-            .filter(content_type=team_ct, object_id__in=team_ids) \
+            .filter(content_type=team_ct, object_id__in=team_ids_query) \
             .select_related('author', 'content'))
     user_id_to_team = \
             get_teams_for_user_ids([post.author_id for post in team_posts])
@@ -833,6 +833,6 @@ def notifications_admin(request, competition, data):
         'post_form': PostsForm(placeholder="Poruka"),
         'posts': posts,
         'team_ct': team_ct,
-        'teams': Team.objects.all(),
+        'teams': list(teams),
     })
     return data
