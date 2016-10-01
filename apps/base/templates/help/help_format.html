@@ -39,7 +39,7 @@ Navodimo naredbe koje su trenutačno (u potpunosti ili djelomično) podržane.
   <table class="table-striped">
     <tr><th colspan="4">{{ group.0 }}</th></tr>
     {% for cmd in group.1 %}
-      <tr>
+      <tr {% if cmd.incomplete %}style="opacity:.5;"{% endif %}>
         <td><code>{{ cmd.name }}</code></td>
         <td>{{ cmd.description|safe }}</td>
         <td>
@@ -66,7 +66,7 @@ Navodimo naredbe koje su trenutačno (u potpunosti ili djelomično) podržane.
     <th>{% trans "LaTeX" %}</th>
   </tr>
   {% for cmd in bbcode_commands_help %}
-    <tr>
+    <tr {% if cmd.incomplete %}style="opacity:.5;"{% endif %}>
       <td><code>{{ cmd.format|safe }}</code></td>
       <td>{{ cmd.description|safe }}</td>
       <td>

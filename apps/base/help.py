@@ -22,28 +22,31 @@ def help_format(request):
     INCOMPATIBLE = INFO_FORMAT.format(_("Possibly incompatible behavior."))
     VISUALLY_DIFFERENT = INFO_FORMAT.format(
             _("Visually different when exported to PDF."))
+    INCOMPLETE = "<<INCOMPLETE-IMPLEMENTATION>>"
     commands = [
         _("Basic Commands"),
-        ('\\emph', _("Emphasized text (usually italic)"), "\\emph{TEXT}"),
-        ('\\textbf', _("Bold"), "\\textbf{TEXT}"),
-        ('\\textit', _("Italic"), "\\textit{TEXT}"),
-        ('\\sout', _("Strikethrough"), "\\sout{TEXT}"),
-        ('\\uline', _("Underline"), "\\uline{TEXT}"),         # a)
+        ('\\emph', _("Emphasized text (usually italic)."), "\\emph{TEXT}"),
+        ('\\textbf', _("Bold."), "\\textbf{TEXT}"),
+        ('\\textit', _("Italic."), "\\textit{TEXT}"),
+        ('\\sout', _("Strikethrough."), "\\sout{TEXT}"),
+        ('\\uline', _("Underline."), "\\uline{TEXT}"),         # a)
         ('\\underline',
             _("Underline and disable word-wrap. "
                 "It's recommended to use <code>\\uline</code> instead."),
             "\\underline{TEXT}"), # a)
         ('\\texttt', _("Monospace font.") + VISUALLY_DIFFERENT,
             "\\texttt{TEXT}"),
-        ('\\\\', _("Newline") + INCOMPATIBLE, "a\\\\b"),
+        ('\\\\', _("Newline.") + INCOMPATIBLE, "a\\\\b"),
 
         _("Advanced Commands"),
-        ('\\includegraphics', _("Show the given image.") + PARTIAL, ""),  # b)
-        ('\\caption', _("Figure caption."), ""),      # b)
-        ('\\centering', _("Figure centering."), ""),  # b)
-        ('\\label', _("Set figure or equation label.") + PARTIAL, ""),  # b)
+        ('\\includegraphics',
+            _("Show the given image.") + PARTIAL + INCOMPLETE, ""),  # b)
+        ('\\caption', _("Figure caption.") + INCOMPLETE, ""),      # b)
+        ('\\centering', _("Figure centering.") + INCOMPLETE, ""),  # b)
+        ('\\label',
+            _("Set figure or equation label.") + PARTIAL + INCOMPLETE, ""),  # b)
         ('\\ref', _("Given a label, show a link to the related content.")
-                + PARTIAL, ""),  # TODO
+                + PARTIAL + INCOMPLETE, ""),  # TODO
         ('\\url', _("Link"), "\\url{http://www.example.com/}"),
         ('\\href', _("Link"), "\\href{http://www.example.com/}{TEXT}"),
         ('\\setlength',
@@ -106,11 +109,16 @@ def help_format(request):
     ]
 
     bbcode_commands = [
-        ('[b]...[/b]', _("Bold"), "[b]TEXT[/b]"),
-        ('[i]...[/i]', _("Italic"), "[i]TEXT[/i]"),
-        ('[s]...[/s]', _("Strikethrough"), "[s]TEXT[/s]"),
-        ('[u]...[/u]', _("Underline"), "[u]TEXT[/u]"),
-        ('[code]...[/code]', _("Code"), "[code]TEXT[/code]"),
+        ('[b]...[/b]', _("Bold."), "[b]TEXT[/b]"),
+        ('[i]...[/i]', _("Italic."), "[i]TEXT[/i]"),
+        ('[s]...[/s]', _("Strikethrough."), "[s]TEXT[/s]"),
+        ('[u]...[/u]', _("Underline."), "[u]TEXT[/u]"),
+        ('[code]...[/code]', _("Code."), "[code]TEXT[/code]"),
+        ('[hide]...[/hide]',
+            _("Hidden text.") + VISUALLY_DIFFERENT, "[hide]TEXT[/hide]"),
+        ('[hide=text]...[/hide]',
+            _("Hidden text.") + VISUALLY_DIFFERENT,
+            "[hide=\"Link text\"]TEXT[/hide]"),
         ('[par SKIP INDENT]',
             _("Shorthand for <code>\\setlength{\\parskip}{SKIP} "
                 "\\setlength{\\parindent}{INDENT}</code>. "
@@ -120,14 +128,15 @@ def help_format(request):
             _("Preformatted text. Simulates LaTeX environment "
                 "<code>verbatim</code>."),
             "[pre]TEXT\n    TEXT[/pre]"),
-        ('[quote]...[/quote]', _("Quote"), "[quote]TEXT[/quote]"),
+        ('[quote]...[/quote]', _("Quotation."), "[quote]TEXT[/quote]"),
         ('[img attachment=x '
             '<span style=\"color:gray;\">width=300px height=300px</span>]',
             _("Show the attachment #x, counting from 1. Optionally, specify "
-                "the width and height.") + " " + _("Please don't misuse."),
+                "the width and height.") + " " + _("Please don't misuse.") +
+                INCOMPLETE,
             None),
-        ('[url]...[/url]', _("Link"), "[url]http://www.google.com/[/url]"),
-        ('[url=<url>]...[/url]', _("Link"),
+        ('[url]...[/url]', _("Link."), "[url]http://www.google.com/[/url]"),
+        ('[url=<url>]...[/url]', _("Link."),
             "[url=http://www.google.com/]Google[/url]")
     ]
 
@@ -141,9 +150,11 @@ def help_format(request):
             description = _replace_text(description)
             example = name if example is None else _replace_text(example)
             self.name = name
-            self.description = description
+            self.description = description.replace(
+                    INCOMPLETE, INFO_FORMAT.format(_("Incomplete.")))
             self.example = example
             self.evaluated = example and _evaluate(TYPE_HTML, example)
+            self.incomplete = INCOMPLETE in description
 
     command_groups = []
     for cmd in commands:
@@ -159,11 +170,13 @@ def help_format(request):
     class BBCodeCommandHelp(object):
         def __init__(self, info):
             self.format = info[0]
-            self.description = info[1]
+            self.description = info[1].replace(
+                    INCOMPLETE, INFO_FORMAT.format(_("Incomplete.")))
             example = info[2] and _replace_text(info[2])
             self.example = example
             self.html = example and _evaluate(TYPE_HTML, example)
             self.latex = example and _evaluate(TYPE_LATEX, example)
+            self.incomplete = INCOMPLETE in info[1]
 
     bbcode_commands_help = [BBCodeCommandHelp(x) for x in bbcode_commands]
 
