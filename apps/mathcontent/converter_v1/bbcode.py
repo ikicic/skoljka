@@ -245,7 +245,9 @@ class BBCodeImg(BBCodeTag):
 
     def _check(self, token, converter):
         if converter.attachments is None:
-            return converter.warning(_("Attachments not shown in a preview."))
+            # return converter.warning(_("Attachments not shown in a preview."))
+            # FIXME: Finish this...
+            raise BBCodeException(_("Attachments not shown in a preview."))
         attrs_dict = dict(token.attrs)
         if attrs_dict['img'] is not None:  # "img" attribute should be None.
             raise BBUnexpectedParameters("img")

@@ -187,7 +187,7 @@ def _convert(type, T, handle_latex_func, escape_table, attachments=None,
                         else:
                             try:
                                 k = int(attrs['attachment']) - 1
-                                file = attachments.order_by('id')[k]
+                                file = attachments[k]
                                 if type == TYPE_HTML:
                                     extra += ' src="%s"' % xss.escape(file.get_url())
                                 else: # type == TYPE_LATEX
@@ -197,8 +197,7 @@ def _convert(type, T, handle_latex_func, escape_table, attachments=None,
                                     else:
                                         filename = file.get_full_path_and_filename()
                                     extra = '[%s]{%s}' % (extra[1:], filename)
-
-                            except:
+                            except IndexError:
                                 open = u'{{ Greška pri preuzimanju img datoteke. (Nevaljan broj?) }}'
                     elif tag == 'url':
                         # TODO: show icon for external URLs
