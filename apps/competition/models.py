@@ -157,11 +157,14 @@ class CompetitionTask(models.Model):
     cache_admin_solved_count = models.IntegerField(default=0)
 
     def __unicode__(self):
-        return "CompetitionTask #{} comp={} task={}".format(
-                self.id, self.competition_id, self.task_id)
+        return u"CompetitionTask {} comp={} task={}".format(
+                self.get_name(), self.competition_id, self.task_id)
 
     def get_name(self):
-        return "{} #{}".format(self.chain.name, self.chain_position)
+        if self.chain_id:
+            return u"{} #{}".format(self.chain.name, self.chain_position)
+        else:
+            return u"(No chain) id={}".format(self.id);
 
     def get_absolute_url(self):
         return self.competition.get_absolute_url() + 'task/{}/'.format(self.id)

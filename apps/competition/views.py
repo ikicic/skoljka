@@ -798,21 +798,21 @@ def notifications(request, competition, data, ctask_id=None):
         for post in team_posts:
             post.t_team = team
         posts += team_posts
+        post_form = team.posts.get_post_form()
+        if ctask_id is not None:
+            ctask = get_object_or_404(
+                    CompetitionTask.objects.select_related('chain'),
+                    id=ctask_id)
+            post_form.fields['text'].initial = \
+                    u'[b]{} [url={}]{}[/url][/b]\n\n<{}>'.format(
+                        _("Task:"), ctask.get_absolute_url(),
+                        latex_escape(ctask.get_name()),
+                        _("Write the question / message here."))
+        data['post_form'] = post_form
 
     posts.sort(key=lambda post: post.date_created, reverse=True)
 
-    post_form = team.posts.get_post_form()
-    if ctask_id is not None:
-        ctask = get_object_or_404(
-                CompetitionTask.objects.select_related('chain'), id=ctask_id)
-        post_form.fields['text'].initial = \
-                u'[b]{} [url={}]{}[/url][/b]\n\n<{}>'.format(
-                    _("Task:"), ctask.get_absolute_url(),
-                    latex_escape(ctask.get_name()),
-                    _("Write the question / message here."))
-
     data['posts'] = posts
-    data['post_form'] = post_form
     data['target_container'] = team
     data['team_member_ids'] = member_ids
     return data
