@@ -160,11 +160,18 @@ class CompetitionTask(models.Model):
         return "CompetitionTask #{} comp={} task={}".format(
                 self.id, self.competition_id, self.task_id)
 
+    def get_name(self):
+        return "{} #{}".format(self.chain.name, self.chain_position)
+
     def get_absolute_url(self):
         return self.competition.get_absolute_url() + 'task/{}/'.format(self.id)
 
     def get_edit_url(self):
         return self.get_absolute_url() + 'edit/'
+
+    def get_send_clarification_request_url(self):
+        return self.competition.get_absolute_url() + \
+                'notifications/{}/'.format(self.id)
 
 
 

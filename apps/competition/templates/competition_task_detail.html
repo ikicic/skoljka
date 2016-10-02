@@ -16,7 +16,7 @@
 {% block content %}
 
 <div class="ctask-container">
-<h4 class="ctask-title">{{ ctask.chain.name }} #{{ ctask.chain_position }}</h4>
+  <h4 class="ctask-title">{{ ctask.get_name }}</h4>
 
 {% if minutes_passed < chain.unlock_minutes and is_admin %}
   <div class="alert">
@@ -107,6 +107,9 @@
           </span>
         {% endif %}
       </form>
+      <a href="{{ ctask.get_send_clarification_request_url }}">
+        {% trans "Send a clarification request" %}
+      </a>
     {% else %}
       <div class="ctask-submit-already-finished">
         {% trans "Competition has finished!" %}

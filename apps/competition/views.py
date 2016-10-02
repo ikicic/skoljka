@@ -10,6 +10,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
 from mathcontent.models import MathContent
+from mathcontent.latex import latex_escape
 from permissions.constants import VIEW, EDIT
 from permissions.models import ObjectPermission
 from post.forms import PostsForm
@@ -784,7 +785,7 @@ def chain_edit(request, competition_id, chain_id):
 
 @competition_view()
 @response('competition_notifications.html')
-def notifications(request, competition, data):
+def notifications(request, competition, data, ctask_id=None):
     team = data['team']
 
     # This could return None as a member, but that's not a problem.
@@ -800,7 +801,18 @@ def notifications(request, competition, data):
 
     posts.sort(key=lambda post: post.date_created, reverse=True)
 
+    post_form = team.posts.get_post_form()
+    if ctask_id is not None:
+        ctask = get_object_or_404(
+                CompetitionTask.objects.select_related('chain'), id=ctask_id)
+        post_form.fields['text'].initial = \
+                u'[b]{} [url={}]{}[/url][/b]\n\n<{}>'.format(
+                    _("Task:"), ctask.get_absolute_url(),
+                    latex_escape(ctask.get_name()),
+                    _("Write the question / message here."))
+
     data['posts'] = posts
+    data['post_form'] = post_form
     data['target_container'] = team
     data['team_member_ids'] = member_ids
     return data

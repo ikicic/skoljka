@@ -6,7 +6,7 @@
 
 {% block content %}
 
-<h3 class="comp-header">Obavijesti</h3>
+<h3 class="comp-header">{% trans "Notificatons" %}</h3>
 
 <div class="instructions">
   <p>Ovdje su prikazane obavijesti u vezi zadataka ili samog natjecanja.</p>
@@ -31,7 +31,7 @@
 
     {% if post.date_created != post.last_edit_time %}
       <div class="post-last-edit">
-        Zadnja promjena: {{ post.last_edit_time }}
+        {% trans "Last update:" %} {{ post.last_edit_time }}
       </div>
     {% endif %}
   </div>
@@ -48,7 +48,7 @@
              value="{{ target_container.posts.get_content_type_id }}">
       <input type="hidden" name="post_reply_id" value="">
       <input type="hidden" name="post_redirect" value="{{ request.path }}">
-      {{ target_container.posts.get_post_form.as_p }}
+      {{ post_form.as_p }}
       <input type="submit" class="btn btn-primary" value="Pošalji poruku">
       <span id="reply-to-info" style="display:none;">
         Odgovor na <a href="#">poruku</a>.

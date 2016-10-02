@@ -31,6 +31,7 @@ _patterns = _make_patterns(
     (r'chain/(?P<chain_id>\d+)/overview/$', 'chain_overview'),
     (r'chain/new/$', 'chain_new'),
     (r'notifications/$', 'notifications'),
+    (r'notifications/(?P<ctask_id>\d+)/$', 'notifications'),
     (r'notifications/admin/$', 'notifications_admin'),
     (r'registration/$', 'registration'),
     (r'rules/$', 'rules'),
