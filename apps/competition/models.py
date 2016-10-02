@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User, Group
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.utils.safestring import mark_safe
 
 from libs.string_operations import join_urls
 
@@ -11,6 +12,7 @@ from permissions.models import BasePermissionsModel
 from post.generic import PostGenericRelation
 from task.models import Task
 
+from skoljka.libs import xss
 from skoljka.libs.models import gray_help_text
 
 from datetime import datetime
@@ -106,6 +108,11 @@ class Team(models.Model):
             return 'comp-admin-private-team'
         return ''
 
+    def get_link(self):
+        return mark_safe(u'<a href="{}" class="{}">{}</a>'.format(
+                self.get_absolute_url(), self.get_type_css_class(),
+                xss.escape(self.name)))
+
 
 
 class TeamMember(models.Model):
@@ -175,6 +182,10 @@ class CompetitionTask(models.Model):
     def get_send_clarification_request_url(self):
         return self.competition.get_absolute_url() + \
                 'notifications/{}/'.format(self.id)
+
+    def get_link(self):
+        return mark_safe(u'<a href="{}">{}</a>'.format(
+                self.get_absolute_url(), xss.escape(self.get_name())))
 
 
 

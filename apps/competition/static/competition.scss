@@ -277,6 +277,10 @@ td.comp-chain-bonus {
 .progress .ctask-solved {
   @include gradient-vertical(#62c462, #57a957);
 }
+/*tr*/.comp-chain-unfinished:hover .progress .ctask-open {
+  @include gradient-vertical(mix(cyan, #5bc0de, 20%),
+                             mix(cyan, #339bb9, 15%));
+}
 .progress .ctask-open {
   @include gradient-vertical(#5bc0de, #339bb9);
   // @include gradient-vertical(white, white);
@@ -372,15 +376,26 @@ div#ctask-legend-container {
     padding: 8px;
     line-height: 18px;
   }
-  td.ctask-sub-number {
-    text-align: left;
-  }
-  td.ctask-sub-result {
-    text-align: center;
-  }
-  td.ctask-sub-correctness {
-    text-align: right;
-  }
+}
+/*td*/.csub-number,
+/*td*/.csub-ctasks,
+/*td*/.csub-team {
+  text-align: left;
+}
+/*td*/.csub-date {
+  color: gray;
+  font-size: 11px;
+  white-space: nowrap;
+  text-align: center;
+}
+/*td*/.csub-result {
+  text-align: center;
+}
+/*td*/.csub-correctness {
+  text-align: right;
+}
+/*td*/.csub-delete {
+  text-align: right;
 }
 
 .ctask-submit-already-finished {

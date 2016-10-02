@@ -15,6 +15,8 @@ from rating.fields import RatingField
 from search.models import SearchCacheElement
 from tags.managers import TaggableManager
 from skoljka.libs.models import icon_help_text
+from skoljka.libs import xss
+
 
 import random
 
@@ -179,7 +181,8 @@ class Task(BasePermissionsModel):
             # Especially, don't put the link to the file itself!
             return mark_safe(u'<i class="icon-lock" title="Niste riješili neke '
                 u'od preduvjeta za ovaj zadatak!"></i> '
-                u'<span class="task-locked">{}</span>'.format(self.name))
+                u'<span class="task-locked">{}</span>'.format(
+                    xss.escape(self.name)))
 
         if self.file_attachment_id:
             url = self.cache_file_attachment_url
@@ -194,7 +197,7 @@ class Task(BasePermissionsModel):
         return mark_safe(u'{}<a href="/task/{}/{}" class="task{}">{}</a>'.format(
             file, self.id, url_suffix,
             ' task-tt-marker' if tooltip and self.solvable else '',
-            self.name))
+            xss.escape(self.name)))
 
     def _get_prerequisites(self):
         try:

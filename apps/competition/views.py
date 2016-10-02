@@ -104,6 +104,15 @@ def team_detail(request, competition, data, team_id):
     data['preview_team_members'] = TeamMember.objects.filter(team_id=team_id,
             invitation_status=TeamMember.INVITATION_ACCEPTED) \
                     .select_related('member')
+    if data['is_admin']:
+        data['submissions'] = list(Submission.objects \
+                .filter(team_id=team_id) \
+                .select_related('ctask', 'ctask__chain__name') \
+                .order_by('id'))
+        for submission in data['submissions']:
+            if submission.ctask.chain_id:
+                submission.ctask.chain.competition = competition
+            submission.ctask.competition = competition
     return data
 
 
@@ -406,6 +415,13 @@ def task_detail(request, competition, data, ctask_id):
         data['submissions'] = submissions
         data['submissions_left'] = ctask.max_submissions - len(submissions)
 
+    if is_admin:
+        data['all_ctask_submissions'] = list(Submission.objects \
+                .filter(ctask_id=ctask_id) \
+                .select_related('team') \
+                .order_by('id'))
+        for submission in data['all_ctask_submissions']:
+            submission.team.competition = competition
 
     data['help_text'] = get_solution_help_text(evaluator, ctask.descriptor)
     data['chain'] = ctask.chain

@@ -37,43 +37,8 @@
 
 {% if team %} {# admins are able to see this page without having a team #}
   {% if submissions %}
-    <h4>Poslana rješenja</h4>
-    {% if is_admin %}
-      <form action="{{ request.get_full_path }}" method="POST">
-      {% csrf_token %}
-    {% endif %}
-    <div class="row row-fix">
-      <div class="span5">
-        <table class="ctask-submissions-table table-striped">
-          {% for x in submissions %}
-            <tr class="{{ x.cache_is_correct|yesno:"ctask-correct," }}">
-              <td class="ctask-sub-number">#{{ forloop.counter }}</td>
-              <td class="ctask-sub-result">{{ x.result }}</td>
-              <td class="ctask-sub-correctness">
-                {% if x.cache_is_correct %}
-                  <span class="label label-success">{% trans "Correct" %}</span>
-                {% else %}
-                  <span class="label label-important">
-                    {% trans "Incorrect" %}
-                  </span>
-                {% endif %}
-              </td>
-              {% if is_admin %}
-                <td>
-                  <button type="submit" name="delete-submission" class="btn"
-                      value="{{ x.id }}" title="{% trans "For admins" %}">
-                    X
-                  </button>
-                </td>
-              {% endif %}
-            </tr>
-          {% endfor %}
-        </table>
-      </div>
-    </div>
-    {% if is_admin %}
-      </form>
-    {% endif %}
+    <h4>{% trans "Submissions:" %}</h4>
+    {% include 'inc_competition_submission_list.html' %}
   {% endif %}
 
   {% if submissions|length >= ctask.max_submissions and not is_solved %}
@@ -129,6 +94,12 @@
       </a>
     {% endif %}
   {% endif %}
+{% endif %}
+
+{% if is_admin %}
+  <br><br><br>
+  <h4>{% trans "Submissions from all the teams (for admins only):" %}</h4>
+  {% include 'inc_competition_submission_list.html' with submissions=all_ctask_submissions show_teams=1 %}
 {% endif %}
 
 </div>

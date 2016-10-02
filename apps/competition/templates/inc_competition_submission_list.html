@@ -1,0 +1,49 @@
+{% load i18n %}
+
+{% if is_admin %}
+  <form action="{{ request.get_full_path }}" method="POST">
+  {% csrf_token %}
+{% endif %}
+<div class="row row-fix">
+  <div class="{% if show_teams or show_ctasks %}span7{% else %}span5{% endif %}">
+    <table class="ctask-submissions-table table-striped">
+      {% for x in submissions %}
+        <tr class="{{ x.cache_is_correct|yesno:"ctask-correct," }}">
+          <td class="csub-number">#{{ forloop.counter }}</td>
+          {% if show_teams %}
+            <td class="csub-team">{{ x.team.get_link }}</td>
+          {% endif %}
+          {% if show_ctasks %}
+            <td class="csub-ctasks">{{ x.ctask.get_link }}</td>
+          {% endif %}
+          {% if show_teams or show_ctasks %}
+            <td class="csub-date">{{ x.date|date:"Y-m-d H:i:s" }}</td>
+          {% endif %}
+          <td class="csub-result">{{ x.result }}</td>
+          <td class="csub-correctness">
+            {% if x.cache_is_correct %}
+              <span class="label label-success">{% trans "Correct" %}</span>
+            {% else %}
+              <span class="label label-important">
+                {% trans "Incorrect" %}
+              </span>
+            {% endif %}
+          </td>
+          {% if is_admin %}
+            <td class="csub-delete">
+              <button type="submit" name="delete-submission" class="blank"
+                  value="{{ x.id }}" title="{% trans "For admins" %}">
+                <i class="icon-trash"></i>
+              </button>
+            </td>
+          {% endif %}
+        </tr>
+      {% empty %}
+        <tr><td>{% trans "Empty..." %}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% if is_admin %}
+  </form>
+{% endif %}
