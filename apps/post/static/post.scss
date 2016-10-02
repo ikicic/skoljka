@@ -1,3 +1,5 @@
+@import "main";
+
 /* Posts */
 .quote {
   background-color: #FAFAFA;
@@ -8,6 +10,10 @@
 
 .post {
   padding: 12px;
+  &:target {
+    /* greenyellow */
+    background-color: mix(#ADFF2F, $outset-bg-color, 20%);
+  }
 }
 
 .post-action {

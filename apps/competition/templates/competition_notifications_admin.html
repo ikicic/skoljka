@@ -6,7 +6,7 @@
 
 {% block content %}
 
-<h3 class="comp-header">Obavijesti - admin</h3>
+<h3 class="comp-header">{% trans "Notifications" %} - admin</h3>
 
 {% for post in posts %}
   <div class="outset outset-margin post mc-hover-area
@@ -15,9 +15,11 @@
     <div class="post-action">
       {% if post.t_team %}
         <a href="#post" class="post-reply" id="pr{{ post.pk }}"
-            data-team-id="{{ post.t_team.id }}">Odgovori</a><br>
+            data-team-id="{{ post.t_team.id }}">{% trans "Reply" %}</a>&nbsp;
       {% endif %}
-      <a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">Uredi</a>
+      <a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">
+        {% trans "Edit" %}
+      </a> &nbsp;<a href="#post{{ post.pk }}">#</a>
     </div>
 
     <div class="post-info">
@@ -53,7 +55,8 @@
     <input type="hidden" name="post_reply_id" value="">
     <input type="hidden" name="post_redirect" value="{{ request.path }}">
     {{ post_form.as_p }}
-    <input type="submit" class="btn btn-primary" value="Pošalji poruku">
+    <input type="submit" class="btn btn-primary"
+        value="{% trans "Send message" %}">
     <select name="comp-post-target" id="comp-post-target">
       <option value="">{% trans "Globally" %}</option>
       {% for team in teams %}

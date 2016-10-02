@@ -36,7 +36,7 @@
     {% endif %}
   </div>
 {% empty %}
-  <i>Nema obavijesti.</i><br><br>
+  <i>{% trans "No notifications." %}</i><br><br>
 {% endfor %}
 
 {% if team %}
@@ -49,7 +49,8 @@
       <input type="hidden" name="post_reply_id" value="">
       <input type="hidden" name="post_redirect" value="{{ request.path }}">
       {{ post_form.as_p }}
-      <input type="submit" class="btn btn-primary" value="Pošalji poruku">
+      <input type="submit" class="btn btn-primary"
+          value="{% trans "Send message" %}">
       <span id="reply-to-info" style="display:none;">
         Odgovor na <a href="#">poruku</a>.
         <a href="#post" class="icon-remove"></a>
