@@ -11,6 +11,7 @@ from competition.utils import ctask_comment_class as utils__ctask_comment_class
 
 import json
 import re
+import urllib
 
 register = template.Library()
 
@@ -175,6 +176,17 @@ def legend_chain(_class, text):
                 u'<td width="100%"><span class="badge {}">+1</span></td>' \
                 u'<td>{}</td>' \
             u'</tr>'.format(_class, text))
+
+
+@register.simple_tag(takes_context=True)
+def send_notification_link(context, team_id=None, ctask_id=None):
+    params = {}
+    if team_id: params['team'] = team_id
+    if ctask_id: params['ctask'] = ctask_id
+    end = '?{}#post'.format(urllib.urlencode(params))
+    url = utils__comp_url(context['competition'], 'notifications/admin') + end
+    return mark_safe(
+            u'<a href="{}"><i class="icon-envelope"></i></a>'.format(url))
 
 
 @register.simple_tag(takes_context=True)

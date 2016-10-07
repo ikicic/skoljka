@@ -113,6 +113,12 @@ class Team(models.Model):
                 self.get_absolute_url(), self.get_type_css_class(),
                 xss.escape(self.name)))
 
+    def get_send_notification_link(self):
+        url = '{}notifications/admin/?team={}#post'.format(
+                self.competition.get_absolute_url(), self.id)
+        return mark_safe(
+                u'<a href="{}"><i class="icon-envelope"></i></a>'.format(url))
+
 
 
 class TeamMember(models.Model):
@@ -181,7 +187,7 @@ class CompetitionTask(models.Model):
 
     def get_send_clarification_request_url(self):
         return self.competition.get_absolute_url() + \
-                'notifications/{}/'.format(self.id)
+                'notifications/{}/#post'.format(self.id)
 
     def get_link(self):
         return mark_safe(u'<a href="{}">{}</a>'.format(

@@ -1,7 +1,12 @@
 {% load competition_tags %}
 {% load i18n %}
 
-<h3 class="comp-header">{% trans "Team" %} {{ preview_team.name }}</h3>
+<h3 class="comp-header">
+  {% trans "Team" %} {{ preview_team.name }}
+  {% if is_admin %}
+    {% send_notification_link team_id=preview_team.id %}
+  {% endif %}
+</h3>
 
 <div class="team-score-container">
   {% trans "Score:" %}

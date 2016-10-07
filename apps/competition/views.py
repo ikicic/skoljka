@@ -799,6 +799,15 @@ def chain_edit(request, competition_id, chain_id):
     return chain_new(request, competition_id, chain_id=chain_id)
 
 
+def _notification_ctask_prefix(ctask, is_admin):
+    task_link = u'[b]{} [url={}]{}[/url][/b]\n\n'.format(
+            _("Task:"), ctask.get_absolute_url(),
+            latex_escape(ctask.get_name()))
+    if is_admin:
+        return task_link
+    return task_link + '<' + _("Write the question / message here.") + '>'
+
+
 @competition_view()
 @response('competition_notifications.html')
 def notifications(request, competition, data, ctask_id=None):
@@ -819,11 +828,9 @@ def notifications(request, competition, data, ctask_id=None):
             ctask = get_object_or_404(
                     CompetitionTask.objects.select_related('chain'),
                     id=ctask_id)
+            ctask.competition = competition
             post_form.fields['text'].initial = \
-                    u'[b]{} [url={}]{}[/url][/b]\n\n<{}>'.format(
-                        _("Task:"), ctask.get_absolute_url(),
-                        latex_escape(ctask.get_name()),
-                        _("Write the question / message here."))
+                    _notification_ctask_prefix(ctask, data['is_admin'])
         data['post_form'] = post_form
 
     posts.sort(key=lambda post: post.date_created, reverse=True)
@@ -842,6 +849,8 @@ def notifications_admin(request, competition, data):
     posts = list(competition.posts.select_related('author', 'content'))
     teams = Team.objects.filter(competition=competition)
     team_ids_query = teams.values_list('id', flat=True)
+    teams = list(teams)
+    teams_dict = {x.id: x for x in teams}
     # Post.objects.filter(team__competition_id=id, ct=...) makes an extra JOIN.
     team_posts = list(Post.objects \
             .filter(content_type=team_ct, object_id__in=team_ids_query) \
@@ -852,15 +861,42 @@ def notifications_admin(request, competition, data):
         post.t_team = user_id_to_team.get(post.author_id)
         if post.t_team:
             post.t_team.competition = competition
+        post.t_target_team = teams_dict.get(post.object_id)
+        if post.t_target_team:
+            post.t_target_team.competition = competition
+
+    post_form = PostsForm(placeholder=_("Message"))
+    if 'ctask' in request.GET:
+        try:
+            ctask = CompetitionTask.objects.get(
+                    competition=competition, id=request.GET['ctask'])
+        except CompetitionTask.DoesNotExist:
+            pass
+        else:
+            post_form.fields['text'].initial = \
+                    _notification_ctask_prefix(ctask, data['is_admin'])
+    if 'team' in request.GET:
+        try:
+            selected_team_id = int(request.GET['team'])
+        except ValueError:
+            pass
+        else:
+            for team in teams:
+                if team.id == selected_team_id:
+                    data['selected_team_id'] = selected_team_id
+                    team.t_selected_attr = ' selected="selected"'
+                    break
+    if 'ctask' in request.GET or 'team' in request.GET:
+        post_form.fields['text'].widget.attrs['autofocus'] = 'autofocus'
 
     posts += team_posts
     posts.sort(key=lambda post: post.date_created, reverse=True)
 
     data.update({
         'competition_ct': ContentType.objects.get_for_model(Competition),
-        'post_form': PostsForm(placeholder="Poruka"),
+        'post_form': post_form,
         'posts': posts,
         'team_ct': team_ct,
-        'teams': list(teams),
+        'teams': teams,
     })
     return data

@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load competition_tags %}
 
 {% if is_admin %}
   <form action="{{ request.get_full_path }}" method="POST">
@@ -11,7 +12,9 @@
         <tr class="{{ x.cache_is_correct|yesno:"ctask-correct," }}">
           <td class="csub-number">#{{ forloop.counter }}</td>
           {% if show_teams %}
-            <td class="csub-team">{{ x.team.get_link }}</td>
+            <td class="csub-team">
+              {{ x.team.get_link }}&nbsp;{% send_notification_link team_id=x.team_id ctask_id=x.ctask_id %}
+            </td>
           {% endif %}
           {% if show_ctasks %}
             <td class="csub-ctasks">{{ x.ctask.get_link }}</td>
