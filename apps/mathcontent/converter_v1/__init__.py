@@ -316,7 +316,7 @@ class Tokenizer(object):
                 raise ParserInternalError("Unreachable code. begin=" + begin)
 
         self.K = K
-        latex = self.read_until(end, [r'\\', r'\$'])
+        latex = self.read_until(end, [r'\\', r'\$', r'\%'])
 
         if begin == '$$$':
             format = '%s'
@@ -518,7 +518,7 @@ class Tokenizer(object):
 
                 self.state.add_token(final_token)
             except ParseError as e:
-                self.state.add_token(TokenError(e.message, self.T[self.K:]))
+                self.state.add_token(TokenError(e.message, self.T[last_K:]))
                 return self.state.tokens
 
         if self.state.break_condition is not None:

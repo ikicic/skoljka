@@ -175,6 +175,22 @@ class ConverterV1TestCase(TestCaseEx):
                 TokenMultilineWhitespace("\n\n"),
                 TokenText("bla bla"),
         ])
+        self.assertTokenization(
+            "$not finished", [
+                TokenError(SKIP, "$not finished"),
+        ])
+        self.assertTokenization(
+            "without error $before\\%after$", [
+                TokenText("without error"),
+                TokenSimpleWhitespace(" "),
+                TokenMath("$%s$", "before\\%after"),
+        ])
+        self.assertTokenization(
+            "with error $before\\\\%after$\nnext", [
+                TokenText("with error"),
+                TokenSimpleWhitespace(" "),
+                TokenError(SKIP, "$before\\\\%after$\nnext"),
+        ])
 
         self.assertTokenization("\\\\ \\\\", [
                 # Not sure about this one.
