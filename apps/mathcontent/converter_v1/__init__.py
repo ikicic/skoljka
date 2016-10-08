@@ -52,6 +52,8 @@ default_parindent = '0em'
 # TODO: \begin{eqnarray}...\end{eqnarray}
 # TODO: fix uline and sout --> support for custom usepackage
 # TODO: \<space>, and \<end of line>
+# TODO: Support for multiple lines in $...$, while still keeping inline.
+#   E.g.: "abc $first line \\ second \\ third$ continue"
 
 # MAYBE: \" \i \j \o \^ \ss \~ and other special characters
 # MAYBE: \begin{verbatim}...\end{verbatim}

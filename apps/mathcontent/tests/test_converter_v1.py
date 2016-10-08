@@ -191,6 +191,18 @@ class ConverterV1TestCase(TestCaseEx):
                 TokenSimpleWhitespace(" "),
                 TokenError(SKIP, "$before\\\\%after$\nnext"),
         ])
+        self.assertTokenization(
+            "again without error $before\\\\%after$\nnext$", [
+                TokenText("again without error"),
+                TokenSimpleWhitespace(" "),
+                TokenMath("$%s$", "before\\\\%after$\nnext"),
+        ])
+        self.assertTokenization(
+            "again again without error $before\\\\\\%after$", [
+                TokenText("again again without error"),
+                TokenSimpleWhitespace(" "),
+                TokenMath("$%s$", "before\\\\\\%after"),
+        ])
 
         self.assertTokenization("\\\\ \\\\", [
                 # Not sure about this one.
