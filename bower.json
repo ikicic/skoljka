@@ -11,7 +11,7 @@
     "jquery-form": "~3.46.0",
     "jquery.autocomplete": "https://github.com/ikicic/jQueryAutocompletePlugin.git",
     "jquery.metadata": "*",
-    "jquery-star-rating-plugin": "svn+http://jquery-star-rating-plugin.googlecode.com/svn/",
+    "jquery-star-rating-plugin": "https://github.com/fyneworks/star-rating.git",
     "bootstrap-sass": "twbs/bootstrap-sass#v2.0.3"
   }
 }

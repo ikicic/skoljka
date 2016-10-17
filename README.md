@@ -5,7 +5,7 @@ http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supe
 
 1. Go to your projects folder (e.g. `~/projects`). Run:
   ```sh
-  sudo apt-get install python2.7 python-virtualenv
+  sudo apt-get install gettext git python2.7-dev python-virtualenv
   virtualenv -p /usr/bin/python2.7 skoljka
   cd skoljka
   ```
@@ -20,7 +20,6 @@ http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supe
 
 3. Go to the virtual env, clone skoljka and run the installation script:
   ```sh
-  chmod +x profile
   source profile
 
   git clone git://github.com/ikicic/skoljka
@@ -74,6 +73,7 @@ You should now be in `~/projects/skoljka/skoljka/`.
 3. Set up `gunicorn`.
   ```sh
   chmod +x runserver.sh
+  mkdir -p logs
   pip install gunicorn
   ```
 
@@ -83,7 +83,6 @@ You should now be in `~/projects/skoljka/skoljka/`.
 1. Run the following commands:
   ```sh
   sudo apt-get install supervisor
-  mkdir -p logs
   touch logs/gunicorn_supervisor.log
   ```
 

@@ -26,7 +26,7 @@ mkdir -p local/media/m
 mkdir -p local/modules
 # TODO: do not reinstall (or do reinstall if it already exists...)
 cd local/modules
-git clone https://github.com/citylive/django-template-preprocessor.git
+git clone https://github.com/petry/django-template-preprocessor.git
 cd django-template-preprocessor
 python setup.py install
 cd ../../..
