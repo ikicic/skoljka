@@ -112,7 +112,7 @@ def select_task(request, task_id):
     folder = request.user.profile.selected_folder
     if not request.is_ajax() or folder is None:
         return HttpResponseBadRequest()
-    if not folder.editable or not folder.user_has_perm(user, EDIT):
+    if not folder.editable or not folder.user_has_perm(request.user, EDIT):
         return "Not allowed to edit this folder."
 
     task = get_object_or_404(Task, id=task_id)
