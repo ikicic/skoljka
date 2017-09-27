@@ -53,7 +53,7 @@ def new_register(request):
     return _register(request,
             'apps.userprofile.registration_backend.Backend',
             form_class=UserCreationForm, success_url=success_url,
-            extra_context={'final_url': request.POST.get('final_url', 'asdf')})
+            extra_context={'final_url': request.POST.get('final_url', '/')})
 
 
 @sensitive_post_parameters()
