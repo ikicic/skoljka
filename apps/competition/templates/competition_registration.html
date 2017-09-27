@@ -81,7 +81,12 @@
         <div>
           <div>{% trans "Team name:" %}</div>
           <div>{{ team_form.name }}</div>
-          {# <div>&nbsp;</div> #}
+        </div>
+        <div id="creg-table-category">  {# ID used by reg_add_member_field. #}
+          {% if team_form.category %}
+            <div>{% trans "Category:" context "competition-team" %}</div>
+            <div>{{ team_form.category }}</div>
+          {% endif %}
         </div>
       </div>
       {% reg_add_member_fields %}

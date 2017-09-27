@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-02 17:28+0200\n"
-"PO-Revision-Date: 2016-10-02 17:29+0200\n"
+"POT-Creation-Date: 2017-09-28 00:31+0200\n"
+"PO-Revision-Date: 2017-09-28 00:17+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -544,71 +544,80 @@ msgstr ""
 "kao dio rješenja, napišite '\\|'. Da bi dobili '\\', napišite '\\\\'.  "
 "Vodeći i prateći razmaci se uvijek ignoriraju."
 
-#: apps/competition/forms.py:38
+#: apps/competition/forms.py:40
 msgid "Descriptor error. Please notify admins!"
 msgstr "Nevaljan deskriptor. Molimo obavijestite administratore!"
 
-#: apps/competition/forms.py:72
+#: apps/competition/forms.py:74
 msgid "Invalid!"
 msgstr "Nevaljano rješenje!"
 
-#: apps/competition/forms.py:74
+#: apps/competition/forms.py:76
 msgid "Solution"
 msgstr "Rješenje"
 
-#: apps/competition/forms.py:77 apps/task/templates/task_new.html:91
+#: apps/competition/forms.py:79 apps/task/templates/task_new.html:91
 msgid "Help"
 msgstr "Pomoć"
 
-#: apps/competition/forms.py:208
+#: apps/competition/forms.py:228
 msgid "Team name cannot be empty."
 msgstr "Naziv tima ne može biti prazan."
 
-#: apps/competition/forms.py:220
+#: apps/competition/forms.py:246
 #, python-format
 msgid "Unknown username \"%s\"."
 msgstr "Nepoznato korisničko ime \"%s\"."
 
-#: apps/competition/forms.py:223
+#: apps/competition/forms.py:249
 msgid "You are automatically added to the team."
 msgstr "Vi ste automatski dodani u tim."
 
-#: apps/competition/forms.py:230
+#: apps/competition/forms.py:256
 #, python-format
 msgid "User \"%s\" is already a member of a team."
 msgstr "Korisnik \"%s\" je već član nekog tima."
 
-#: apps/competition/forms.py:242
+#: apps/competition/forms.py:268
 msgid "Team name already used!"
 msgstr "Ime tima se već koristi."
 
-#: apps/competition/forms.py:271
+#: apps/competition/forms.py:295
+#, python-format
+msgid "Unknown team category '%s'!"
+msgstr "Nepoznata timska kategorija '%s'."
+
+#: apps/competition/forms.py:307
 msgid "Competitors"
 msgstr "Natjecatelji"
 
-#: apps/competition/forms.py:272
+#: apps/competition/forms.py:308
 msgid "Unofficial"
 msgstr "Neslužbeni"
 
-#: apps/competition/forms.py:273
+#: apps/competition/forms.py:309
 msgid "Administrators"
 msgstr "Administratori"
 
-#: apps/competition/models.py:141
+#: apps/competition/models.py:152
 msgid "Position in the category."
 msgstr "Pozicija u kategoriji."
 
-#: apps/competition/views.py:554
+#: apps/competition/views.py:564
 msgid "Number of admins that solved this task."
 msgstr "Broj administratora koji su riješili ovaj zadatak."
 
-#: apps/competition/views.py:824
+#: apps/competition/views.py:814
 msgid "Task:"
 msgstr "Zadatak:"
 
-#: apps/competition/views.py:826
+#: apps/competition/views.py:818
 msgid "Write the question / message here."
 msgstr "Napišite pitanje / poruku ovdje."
+
+#: apps/competition/views.py:878
+msgid "Message"
+msgstr "Poruka"
 
 #: apps/competition/templates/competition_base.html:49
 #, python-format
@@ -621,7 +630,7 @@ msgstr ""
 "Zdravo, %(userlink)s!"
 
 #: apps/competition/templates/competition_base.html:54
-#: apps/competition/templates/competition_notifications_admin.html:27
+#: apps/competition/templates/competition_notifications_admin.html:28
 msgid "Team:"
 msgstr "Tim:"
 
@@ -685,6 +694,7 @@ msgid "New chain"
 msgstr "Novi lanac"
 
 #: apps/competition/templates/competition_chain_list.html:21
+#: apps/competition/templates/competition_scoreboard.html:45
 msgid "Category"
 msgstr "Kategorija"
 
@@ -730,7 +740,7 @@ msgstr "Pregled"
 #: apps/competition/templates/competition_chain_list.html:47
 #: apps/competition/templates/competition_chain_list_tasks.html:92
 #: apps/competition/templates/competition_chain_list_tasks.html:172
-#: apps/competition/templates/inc_competition_submission_list.html:42
+#: apps/competition/templates/inc_competition_submission_list.html:45
 msgid "Empty..."
 msgstr "Prazno..."
 
@@ -896,17 +906,17 @@ msgid "Notificatons"
 msgstr "Obavijesti"
 
 #: apps/competition/templates/competition_notifications.html:34
-#: apps/competition/templates/competition_notifications_admin.html:35
+#: apps/competition/templates/competition_notifications_admin.html:40
 msgid "Last update:"
 msgstr "Zadnja promjena:"
 
 #: apps/competition/templates/competition_notifications.html:39
-#: apps/competition/templates/competition_notifications_admin.html:40
+#: apps/competition/templates/competition_notifications_admin.html:45
 msgid "No notifications."
 msgstr "Nema obavijesti."
 
 #: apps/competition/templates/competition_notifications.html:53
-#: apps/competition/templates/competition_notifications_admin.html:59
+#: apps/competition/templates/competition_notifications_admin.html:68
 msgid "Send message"
 msgstr "Pošalji poruku"
 
@@ -914,7 +924,12 @@ msgstr "Pošalji poruku"
 msgid "Reply"
 msgstr "Odgovori"
 
-#: apps/competition/templates/competition_notifications_admin.html:61
+#: apps/competition/templates/competition_notifications_admin.html:31
+msgctxt "post"
+msgid "To:"
+msgstr "Za:"
+
+#: apps/competition/templates/competition_notifications_admin.html:70
 msgid "Globally"
 msgstr "Globalno"
 
@@ -931,8 +946,8 @@ msgid "Changes saved!"
 msgstr "Promjene spremljene!"
 
 #: apps/competition/templates/competition_registration.html:34
-#: apps/competition/templates/competition_scoreboard.html:44
-#: apps/competition/templates/inc_competition_team_detail.html:4
+#: apps/competition/templates/competition_scoreboard.html:47
+#: apps/competition/templates/inc_competition_team_detail.html:5
 msgid "Team"
 msgstr "Tim"
 
@@ -980,7 +995,12 @@ msgstr ""
 msgid "Team name:"
 msgstr "Ime tima:"
 
-#: apps/competition/templates/competition_registration.html:92
+#: apps/competition/templates/competition_registration.html:87
+msgctxt "competition-team"
+msgid "Category:"
+msgstr "Kategorija:"
+
+#: apps/competition/templates/competition_registration.html:97
 #: apps/competition/templates/competition_task_detail.html:65
 #: apps/competition/templates/competition_task_new.html:54
 #: apps/task/templates/task_bulk_new_2nd.html:28
@@ -1067,7 +1087,7 @@ msgstr "Sortiraj po zamrznutim bodovima"
 msgid "Sort by real score"
 msgstr "Sortitaj po pravim bodovima"
 
-#: apps/competition/templates/competition_scoreboard.html:45
+#: apps/competition/templates/competition_scoreboard.html:48
 msgid "Total score"
 msgstr "Ukupni bodovi"
 
@@ -1221,27 +1241,27 @@ msgstr "Pomakni dolje"
 msgid "Open"
 msgstr "Otvori"
 
-#: apps/competition/templates/inc_competition_submission_list.html:25
+#: apps/competition/templates/inc_competition_submission_list.html:28
 msgid "Correct"
 msgstr "Točno"
 
-#: apps/competition/templates/inc_competition_submission_list.html:28
+#: apps/competition/templates/inc_competition_submission_list.html:31
 msgid "Incorrect"
 msgstr "Netočno"
 
-#: apps/competition/templates/inc_competition_submission_list.html:35
+#: apps/competition/templates/inc_competition_submission_list.html:38
 msgid "For admins"
 msgstr "Za administratore"
 
-#: apps/competition/templates/inc_competition_team_detail.html:7
+#: apps/competition/templates/inc_competition_team_detail.html:12
 msgid "Score:"
 msgstr "Bodovi:"
 
-#: apps/competition/templates/inc_competition_team_detail.html:11
+#: apps/competition/templates/inc_competition_team_detail.html:16
 msgid "Members:"
 msgstr "Članovi:"
 
-#: apps/competition/templatetags/competition_tags.py:98
+#: apps/competition/templatetags/competition_tags.py:99
 #, python-format
 msgid "%d important"
 msgid_plural "%d important"
@@ -1249,7 +1269,7 @@ msgstr[0] "%d važan"
 msgstr[1] "%d važna"
 msgstr[2] "%d važnih"
 
-#: apps/competition/templatetags/competition_tags.py:101
+#: apps/competition/templatetags/competition_tags.py:102
 #, python-format
 msgid "%d my task"
 msgid_plural "%d my tasks"
@@ -1262,45 +1282,45 @@ msgstr[2] "%d mojih zadataka"
 msgid "Internal parser error. Please contact administrators."
 msgstr "Greška parsiranja. Molimo obavijestite administratore!"
 
-#: apps/mathcontent/converter_v1/__init__.py:260
-#: apps/mathcontent/converter_v1/__init__.py:272
+#: apps/mathcontent/converter_v1/__init__.py:262
+#: apps/mathcontent/converter_v1/__init__.py:274
 msgid "Ending not found:"
 msgstr "Kraj nije pronađen:"
 
-#: apps/mathcontent/converter_v1/__init__.py:289
+#: apps/mathcontent/converter_v1/__init__.py:291
 msgid "None of the endings found:"
 msgstr "Niti jedan od krajeva nije pronađen:"
 
-#: apps/mathcontent/converter_v1/__init__.py:351
+#: apps/mathcontent/converter_v1/__init__.py:353
 msgid "Unknown LaTeX command."
 msgstr "Nepoznata LaTeX naredba."
 
-#: apps/mathcontent/converter_v1/__init__.py:390
+#: apps/mathcontent/converter_v1/__init__.py:392
 msgid "Expected a '{' bracket."
 msgstr "Očekuje se '{' zagrada."
 
-#: apps/mathcontent/converter_v1/__init__.py:409
+#: apps/mathcontent/converter_v1/__init__.py:411
 #, python-format
 msgid "Expected a '%s' bracket."
 msgstr "Očekuje se '%s' zagrada."
 
-#: apps/mathcontent/converter_v1/__init__.py:500
+#: apps/mathcontent/converter_v1/__init__.py:502
 msgid "Unexpected '}'."
 msgstr "Neočekivana zagrada '}'."
 
-#: apps/mathcontent/converter_v1/__init__.py:526
+#: apps/mathcontent/converter_v1/__init__.py:528
 msgid "Expected a '}' bracket."
 msgstr "Očekuje se '}' zagrada."
 
-#: apps/mathcontent/converter_v1/__init__.py:528
+#: apps/mathcontent/converter_v1/__init__.py:530
 msgid "End delimiter missing."
 msgstr "Nedostaje krajnja oznaka."
 
-#: apps/mathcontent/converter_v1/__init__.py:556
+#: apps/mathcontent/converter_v1/__init__.py:558
 msgid "Invalid LaTeX."
 msgstr "Nevaljan LaTeX."
 
-#: apps/mathcontent/converter_v1/__init__.py:797
+#: apps/mathcontent/converter_v1/__init__.py:799
 msgid "Unexpected '}'"
 msgstr "Neočekivana zagrada '}'."
 
@@ -1703,7 +1723,7 @@ msgstr ""
 "brojem, npr.:"
 
 #: apps/task/templates/task_bulk_new.html:75
-#: apps/userprofile/templates/registration/activation_complete.html:16
+#: apps/userprofile/templates/registration/activation_complete.html:15
 msgid "Continue"
 msgstr "Nastavi"
 
@@ -1846,7 +1866,7 @@ msgstr "Registracija završena"
 msgid "Thank you, your registration is complete!"
 msgstr "Hvala, vaša registracija je gotova!"
 
-#: apps/userprofile/templates/registration/activation_complete.html:14
+#: apps/userprofile/templates/registration/activation_complete.html:13
 msgid "Continue to the homepage"
 msgstr "Nastavi na naslovnu stranicu"
 

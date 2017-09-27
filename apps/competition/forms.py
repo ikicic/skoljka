@@ -2,13 +2,15 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.forms.models import BaseModelFormSet, ModelForm
+from django.utils.encoding import force_unicode
 from django.utils.html import mark_safe
 from django.utils.translation import ugettext as _, ugettext_lazy
 
 from competition.models import Chain, CompetitionTask, Team, TeamMember
 from competition.evaluator import InvalidDescriptor, InvalidSolution
 from competition.evaluator import get_evaluator, get_solution_help_text
-from competition.utils import comp_url, ctask_comment_class
+from competition.utils import comp_url, ctask_comment_class, \
+        parse_team_categories
 
 from skoljka.libs import xss
 
@@ -163,24 +165,33 @@ class ChainTasksForm(forms.ModelForm):
 
 
 
+class TeamCategoryRadioSelectRenderer(forms.widgets.RadioFieldRenderer):
+    def render(self):
+        """Customize radio select render, not to use <ul>."""
+        return mark_safe(u'\n'.join([force_unicode(w) for w in self]))
+
+
+
 class TeamForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         instance = kwargs.get('instance', None)
-        initial = kwargs.pop('initial', {})
+        initial = dict(kwargs.pop('initial', {}))
         extra_fields = []
+        competition = kwargs.pop('competition')
+        self.competition_id = competition.id
         self.max_team_size = kwargs.pop('max_team_size', 3)
-        self.competition_id = kwargs.pop('competition').id
         self.user = kwargs.pop('user')
 
         if instance:
             # Author cannot be removed from the team.
-            team_members = list(TeamMember.objects.filter(team=instance) \
+            team_members = list(
+                    TeamMember.objects.filter(team=instance) \
                     .exclude(member_id=instance.author_id) \
                     .values_list('member_name', 'member_id'))
         else:
             team_members = []
 
-        # Add extra fields for other members
+        # Add extra fields for other members.
         for k in xrange(2, self.max_team_size + 1):
             if k - 2 < len(team_members):
                 member_name = team_members[k - 2]
@@ -197,9 +208,18 @@ class TeamForm(forms.ModelForm):
             extra_fields.append((field_username, forms.CharField(required=False,
                     max_length=32, widget=forms.HiddenInput())))
 
+        # Parse team category string.
+        try:
+            categories = parse_team_categories(competition.team_categories)
+        except ValueError as e:
+            categories = [(1, "team_categories invalid!!! " + e.message)]
+        self.team_categories = categories
+        if categories and (not instance or not instance.category):
+            initial['category'] = categories[-1][0]  # For simplicity.
+
         super(TeamForm, self).__init__(initial=initial, *args, **kwargs)
 
-        # Preserve order
+        # Preserve order.
         for key, value in extra_fields:
             self.fields[key] = value
 
@@ -207,6 +227,12 @@ class TeamForm(forms.ModelForm):
         self.fields['name'].error_messages['required'] = \
                 _("Team name cannot be empty.")
 
+        if categories:
+            self.fields['category'].widget = forms.RadioSelect(
+                    choices=categories,
+                    renderer=TeamCategoryRadioSelectRenderer)
+        else:
+            del self.fields['category']
 
     def _clean_member(self, index):
         manual = self.cleaned_data.get('member{}_manual'.format(index))
@@ -258,11 +284,21 @@ class TeamForm(forms.ModelForm):
 
         self._members = members
 
+        if self.team_categories:
+            try:
+                category = self.cleaned_data['category']
+            except KeyError:
+                self.cleaned_data['category'] = self.team_categories[-1][0]
+            else:
+                if not any(category == k for k, v in self.team_categories):
+                    raise ValidationError(
+                            _("Unknown team category '%s'!") % category)
+
         return self.cleaned_data
 
     class Meta:
         model = Team
-        fields = ['name']
+        fields = ['name', 'category']
 
 
 

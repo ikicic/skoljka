@@ -506,3 +506,22 @@ def update_ctask_cache_admin_solved_count(competition, ctask, chain):
 
     if before != after and chain is not None:
         update_chain_cache_is_verified(competition, chain)
+
+
+def parse_team_categories(team_categories):
+    """Parse `competition.team_categories` formatted string.
+
+    Raises ValueError if format invalid."""
+    # Format is "ID1:name1 | ID2:name2 | ...", where the last item is
+    # considered the default.
+    categories = []
+    for category in team_categories.split('|'):
+        if not category.strip():
+            continue
+        category = category.split(':')
+        if len(category) != 2:
+            raise ValueError("Invalid format of team_categories!")
+        ID = int(category[0])  # Might raise a ValueError.
+        name = category[1].strip()
+        categories.append((ID, name))
+    return categories

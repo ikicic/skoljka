@@ -38,7 +38,7 @@ from competition.utils import fix_ctask_order, update_chain_comments_cache, \
         update_chain_cache_is_verified, \
         refresh_ctask_cache_admin_solved_count, \
         update_ctask_cache_admin_solved_count, \
-        update_chain_ctasks
+        update_chain_ctasks, parse_team_categories
 from skoljka.libs.decorators import require
 
 from collections import defaultdict
@@ -240,7 +240,14 @@ def scoreboard(request, competition, data):
     teams = list(Team.objects.filter(competition=competition, **extra) \
             .order_by(order_by, 'id') \
             .only('id', 'name', 'cache_score', 'cache_score_before_freeze',
-                  'cache_max_score_after_freeze', 'team_type'))
+                  'cache_max_score_after_freeze', 'team_type', 'category'))
+
+    try:
+        team_categories = parse_team_categories(competition.team_categories)
+    except ValueError:
+        team_categories = []
+    team_categories_dict = dict(team_categories)
+    data['team_categories_title'] = u", ".join(team_categories_dict.values())
 
     last_score = -1
     last_position = 1
@@ -250,6 +257,9 @@ def scoreboard(request, competition, data):
         if team.is_normal() and team.cache_score_before_freeze != last_score:
             last_position = position
         team.t_position = last_position
+        if team_categories:
+            team.t_category = team_categories_dict.get(team.category,
+                                                       team_categories[-1][1])
         if team.is_normal():
             last_score = team.cache_score_before_freeze
             position += 1

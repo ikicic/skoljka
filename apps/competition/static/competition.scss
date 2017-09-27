@@ -140,6 +140,15 @@ textarea.comp-mathcontent-text {
   }
 }
 
+#creg-table-category {
+  > div > label {
+    display: inline;
+    > input[type=radio] {
+      display: inline;
+    }
+  }
+}
+
 @media (max-width: $screen-xs-max) {
   #creg-table {
     > div {

@@ -41,6 +41,9 @@
     <table class="table-striped" id="comp-scoreboard-table">
       <tr>
         <th>#</th>
+        {% if competition.team_categories %}
+          <th title="{{ team_categories_title }}">{% trans "Category" %}</th>
+        {% endif %}
         <th>{% trans "Team" %}</th>
         <th>{% trans "Total score" %}</th>
       </tr>
@@ -48,9 +51,10 @@
         <tr class="
             {% if t.id == team.id %}comp-my-team{% endif %}
             {{ t.get_type_css_class }}">
-          <td>
-            {{ t.t_position }}{{ t.is_normal|yesno:",*" }}
-          </td>
+          <td>{{ t.t_position }}{{ t.is_normal|yesno:",*" }}</td>
+          {% if competition.team_categories %}
+            <td>{{ t.t_category }}</td>
+          {% endif %}
           <td>{{ t.get_link }}</td>
           <td>{% team_score t %}</td>
         </tr>

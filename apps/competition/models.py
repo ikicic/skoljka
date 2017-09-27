@@ -46,6 +46,10 @@ class Competition(BasePermissionsModel):
     min_admin_solved_count = models.IntegerField(default=1,
             help_text="Min. required number of admins that solved a task "
                       "for it to be published.")
+    team_categories = models.CharField(
+            blank=True, max_length=255,
+            help_text="Format: \"ID1:name1 | ID2:name2 | ... \". " \
+                      "Last category is considered the default.")
 
     posts = PostGenericRelation(placeholder="Poruka")
 
@@ -80,6 +84,7 @@ class Team(models.Model):
     cache_score_before_freeze = models.IntegerField(default=0, db_index=True)
     cache_max_score_after_freeze = models.IntegerField(default=0)
     team_type = models.IntegerField(default=TYPE_NORMAL)
+    category = models.IntegerField(default=0)
 
     posts = PostGenericRelation(placeholder="Poruka")
 

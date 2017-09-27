@@ -1,11 +1,11 @@
 (function() {
   window.reg_add_member_field = function() {
     // Pass all arguments to _reg_member_field_row and append the result.
-    $('#creg-table').append(_reg_member_field_row.apply(null, arguments));
+    $('#creg-table-category').before(_reg_member_field_row.apply(null, arguments));
   };
 
   var _reg_member_field_row = function(index, manual, username, accepted) {
-    var extra = accept
+    var extra = accepted
         ? 'class="input-large creg-invitation-accepted" title="Prihvaćeno"'
         : 'class="input-large"';
     var cancel_or_delete = accepted ? "Izbriši" : "Odustani";
