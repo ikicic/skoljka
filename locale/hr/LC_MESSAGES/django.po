@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-09-28 00:31+0200\n"
-"PO-Revision-Date: 2017-09-28 00:17+0200\n"
+"POT-Creation-Date: 2017-09-30 21:30+0200\n"
+"PO-Revision-Date: 2017-09-30 21:31+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -366,7 +366,7 @@ msgid ""
 "that number of decimals."
 msgstr ""
 "Rješenje mora imati barem toliko decimala koliko piše u opisu, i mora biti "
-"točno jednako službenom rješenju kada se zaokruži ta taj broj decimala."
+"točno jednako službenom rješenju kada se zaokruži na taj broj decimala."
 
 #: apps/competition/evaluator_v1.py:201
 msgid "Write the solution in the form a/b, where a and b are integers."
@@ -607,15 +607,15 @@ msgstr "Pozicija u kategoriji."
 msgid "Number of admins that solved this task."
 msgstr "Broj administratora koji su riješili ovaj zadatak."
 
-#: apps/competition/views.py:814
+#: apps/competition/views.py:766
 msgid "Task:"
 msgstr "Zadatak:"
 
-#: apps/competition/views.py:818
+#: apps/competition/views.py:770
 msgid "Write the question / message here."
 msgstr "Napišite pitanje / poruku ovdje."
 
-#: apps/competition/views.py:878
+#: apps/competition/views.py:830
 msgid "Message"
 msgstr "Poruka"
 
@@ -733,13 +733,13 @@ msgstr "Uredi"
 
 #: apps/competition/templates/competition_chain_list.html:31
 #: apps/competition/templates/competition_chain_list.html:44
-#: apps/competition/templates/competition_chain_list_tasks.html:166
+#: apps/competition/templates/competition_chain_list_tasks.html:162
 msgid "Overview"
 msgstr "Pregled"
 
 #: apps/competition/templates/competition_chain_list.html:47
-#: apps/competition/templates/competition_chain_list_tasks.html:92
-#: apps/competition/templates/competition_chain_list_tasks.html:172
+#: apps/competition/templates/competition_chain_list_tasks.html:91
+#: apps/competition/templates/competition_chain_list_tasks.html:168
 #: apps/competition/templates/inc_competition_submission_list.html:45
 msgid "Empty..."
 msgstr "Prazno..."
@@ -793,73 +793,64 @@ msgstr ""
 "(imaju točna rješenja). Crvena boja predstavlja <code>IMPORTANT:</code> "
 "komentar, koji govori autoru da nešto ne valja sa zadatkom."
 
-#: apps/competition/templates/competition_chain_list_tasks.html:61
+#: apps/competition/templates/competition_chain_list_tasks.html:60
 msgid "New task"
 msgstr "Novi zadatak"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:64
+#: apps/competition/templates/competition_chain_list_tasks.html:63
 msgid "Unused tasks"
 msgstr "Neiskorišteni zadaci"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:69
+#: apps/competition/templates/competition_chain_list_tasks.html:68
 msgid "Chain successfully created."
 msgstr "Lanac je uspješno napravljen."
 
-#: apps/competition/templates/competition_chain_list_tasks.html:78
+#: apps/competition/templates/competition_chain_list_tasks.html:77
 msgid "Date added"
 msgstr "Vrijeme dodavanja"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:79
-#: apps/competition/templates/competition_chain_list_tasks.html:128
+#: apps/competition/templates/competition_chain_list_tasks.html:78
+#: apps/competition/templates/competition_chain_list_tasks.html:127
 msgid "Author"
 msgstr "Autor"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:80
-#: apps/competition/templates/competition_chain_list_tasks.html:129
+#: apps/competition/templates/competition_chain_list_tasks.html:79
+#: apps/competition/templates/competition_chain_list_tasks.html:128
 msgid "Text"
 msgstr "Tekst"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:81
+#: apps/competition/templates/competition_chain_list_tasks.html:80
 #: apps/post/forms.py:7
 msgid "Comment"
 msgstr "Komentar"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:102
+#: apps/competition/templates/competition_chain_list_tasks.html:101
 msgid "Create chain"
 msgstr "Napravi lanac"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:109
+#: apps/competition/templates/competition_chain_list_tasks.html:108
 msgid "Chains (used tasks)"
 msgstr "Lanci (iskorišteni zadaci)"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:118
+#: apps/competition/templates/competition_chain_list_tasks.html:117
 msgid "Title"
 msgstr "Naslov"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:119
+#: apps/competition/templates/competition_chain_list_tasks.html:118
 msgid "Unlock time"
 msgstr "Vrijeme otključavanja"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:155
+#: apps/competition/templates/competition_chain_list_tasks.html:154
 msgid "Delete"
 msgstr "Izbriši"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:161
+#: apps/competition/templates/competition_chain_list_tasks.html:159
 msgid "Edit chain"
 msgstr "Uredi lanac"
 
-#: apps/competition/templates/competition_chain_new.html:48
-#, python-format
-msgid "Note: Score for the each task has been fixed to %(score)s."
-msgstr "Napomena: Bodovi za svaki zadatak su fiksirani na %(score)s."
-
-#: apps/competition/templates/competition_chain_new.html:62
+#: apps/competition/templates/competition_chain_new.html:23
 msgid "Chain overview"
 msgstr "Pregled lanca"
-
-#: apps/competition/templates/competition_chain_new.html:68
-msgid "There were some errors!"
-msgstr "Bilo je nekih grešaka!"
 
 #: apps/competition/templates/competition_chain_overview.html:17
 #: apps/competition/templates/competition_task_detail.html:10
@@ -1913,9 +1904,3 @@ msgstr ""
 #: libs/templatetags/libs_tags.py:26
 msgid "Send an email"
 msgstr "Pošalji email"
-
-#~ msgid "Quote"
-#~ msgstr "Citat"
-
-#~ msgid "Please type the same password each time!"
-#~ msgstr "Molimo upišite istu lozinku oba puta!"

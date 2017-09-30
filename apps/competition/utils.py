@@ -30,32 +30,6 @@ def update_ctask_task(task, competition, chain, position, commit=False):
         task.save()
 
 
-def fix_ctask_order(competition, chain, ctasks):
-    """Fix ctask chain_position if not correctly set.
-
-    Method checks if chain positions are consecutive, unique and start from 1.
-    If not, the chain positions are fixed and an appropriate comment is added
-    to each of the tasks affected.
-
-    Returns True if any changes were made.
-    """
-    changes = False
-
-    for k, ctask in enumerate(ctasks, 1):
-        if ctask.chain_position != k:
-            changes = True
-            ctask.chain_position = k
-            update_ctask_task(ctask.task, competition, chain, k, commit=True)
-            ctask.comment.text += "\nIMPORTANT: Please check whether the " \
-                                  "tasks are in the right order! (automatic)"
-            ctask.comment.html = None
-            ctask.comment.save()
-            ctask.save()
-    if changes:
-        update_chain_comments_cache(chain, ctasks, commit=True)
-    return changes
-
-
 _is_important_re = re.compile(r'^IMPORTANT:', re.MULTILINE)
 def is_ctask_comment_important(comment):
     return bool(_is_important_re.search(comment))

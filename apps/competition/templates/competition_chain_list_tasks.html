@@ -51,8 +51,7 @@
     something is wrong with the task.{% endblocktrans %}
   </p>
   <p>
-    Currently, to update chain name, category or unlock minutes, use the old
-    interface (the deprecated "Edit chain" link).
+    To update chain name, category or unlock minutes, use the "Edit chain" link.
   </p>
   <br>
 </div>
@@ -157,10 +156,7 @@
           </button>
         </td>
         <td>
-          <div class="td-description-container">
-            <a href="{{ chain.get_absolute_url }}">{% trans "Edit chain" %}</a>
-            <br><span class="td-description">(deprecated)</span>
-          </div>
+          <a href="{{ chain.get_absolute_url }}">{% trans "Edit chain" %}</a>
         </td>
         <td><a href="{{ chain.get_absolute_url }}overview/">
             {% trans "Overview" %}</a></td>

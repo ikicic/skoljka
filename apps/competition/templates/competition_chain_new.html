@@ -6,10 +6,6 @@
 
 {% block content %}
 
-<div class="alert alert-danger">
-  THIS PAGE IS DEPRECATED! DO NOT LOOK AT THE SOLUTIONS!
-</div>
-
 <div class="instructions">
   <h4>Upute</h4>
   <p>Kategorija je bilo kakav string. Po unesenim kategorijama automatski će se
@@ -21,42 +17,7 @@
 
   <p><i>Bonus score</i> predstavlja dodatne bodove koje natjecateljski tim
     dobije ako u potpunosti riješi sve zadatke iz lanca.</p>
-
-  <p>Za mijenjenje rasporeda, unesite odgovarajuće redne brojeve u polja
-    <i>Redoslijed</i>. Napomena: Postavljanje redoslijeda je trenutačno bugovito.
-    Dodavanje novih zadataka u postojeći lanac će vjerojatno poremetiti poredak.
-    </p>
-
-  <p>Za brisanje, označite odgovarajuće polje <i>Izbriši</i>, te pritisnite
-    <i>Pošalji</i>.</p>
-
-  <p>Za svaki zadatak, u polje <i>komentar</i> možete napisati bilo kakvu
-    dodatnu informaciju ili upit vezan uz zadatak. Taj komentar je vidljiv samo
-    administratorima. Dodatno, dodajte <i>IMPORTANT: </i> negdje u tekst (na
-    početak reda) kako bi dodatno istaknuli komentar.</p>
-
-  <p>Polje <i>descriptor</i> označava rješenje zadatka. Za detalje, pogledajte
-    <a href="{% comp_url "rules" %}">pravila natjecanja</a>.</p>
-
-  <p>Kombinacijom <b>Ctrl+M</b> osvježavaju se svi pregledi tekstova zadataka.
-  </p>
 </div>
-
-{% if competition.fixed_task_score %}
-  <div class="alert">
-    {# Whitespace problem fixed in 1.7. #}
-    {% blocktrans with score=competition.fixed_task_score %}Note: Score for the each task has been fixed to {{ score }}.{% endblocktrans %}
-  </div>
-{% endif %}
-
-{% if was_order_fixed %}
-  <div class="alert alert-danger">
-    Neki zadaci nisu imali dobro definirane pozicije u lancu, pa su automatski
-    popravljene (postojale su duple pozicije, nisu počinjale od 1, ili nisu
-    bile uzastopne). Molimo provjerite je li poredak zadataka točan i maknite
-    odgovarajuće komentare.
-  </div>
-{% endif %}
 
 <a href="{{ chain.get_absolute_url }}overview/" target="_new">
   {% trans "Chain overview" %}
@@ -64,21 +25,11 @@
 
 <form action="{{ request.get_full_path }}" method="POST"
     class="form-horizontal uppercase-sections fix-bootstrap-form">
-  {% if formset.errors %}
-    <div class="alert alert-error">{% trans "There were some errors!" %}</div>
-  {% endif %}
   {% csrf_token %}
-  {{ formset.management_form }}
   <div class="form-section">Lanac</div>
   {% bootstrap_form chain_form layout="horizontal" %}
-  {% for form in formset %}
-    {% include 'inc_competition_chain_form.html' with form=form index=forloop.counter %}
-  {% endfor %}
   <div class="controls">
     <input type="submit" value="Pošalji" class="btn btn-primary">
-    <button type="button" class="btn mc-preview-all">
-      Pregled svih zadataka
-    </button>
   </div>
 </form>
 

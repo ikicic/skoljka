@@ -28,7 +28,7 @@ from competition.forms import ChainForm, \
         BaseCompetitionTaskFormSet, TeamForm, TaskListAdminPanelForm
 from competition.models import Chain, Competition, CompetitionTask, Team, \
         TeamMember, Submission
-from competition.utils import fix_ctask_order, update_chain_comments_cache, \
+from competition.utils import update_chain_comments_cache, \
         comp_url, update_score_on_ctask_action, preprocess_chain, \
         get_teams_for_user_ids, lock_ctasks_in_chain, \
         refresh_teams_cache_score, update_ctask_task, \
@@ -741,67 +741,19 @@ def chain_new(request, competition, data, chain_id=None):
         chain = None
         edit = False
 
-    # CompetitionTaskFormSet = modelformset_factory(CompetitionTask,
-    #         formset=BaseCompetitionTaskFormSet,
-    #         fields=('descriptor', 'score'), extra=3)
-    class CompetitionTaskFormLambda(CompetitionTaskForm):
-        def __init__(self, *args, **kwargs):
-            super(CompetitionTaskFormLambda, self).__init__(
-                    competition=competition,
-                    user=request.user, *args, **kwargs)
-
-    # TODO: Set min_num and max_num after migrating to Django 1.7.
-    CompetitionTaskFormSet = modelformset_factory(CompetitionTask,
-            form=CompetitionTaskFormLambda, formset=BaseCompetitionTaskFormSet,
-            extra=5, can_order=True, can_delete=True)
-
     POST = request.POST if request.method == 'POST' else None
     chain_form = ChainForm(data=POST, instance=chain)
-    if chain_id is None:
-        queryset = CompetitionTask.objects.none()
-    else:
-        queryset = CompetitionTask.objects.filter(chain_id=chain_id) \
-                .select_related('task__content', 'comment') \
-                .order_by('chain_position', 'id')
-    was_order_fixed = fix_ctask_order(competition, chain, list(queryset))
-    formset = CompetitionTaskFormSet(data=POST, queryset=queryset)
 
     if request.method == 'POST':
-        if chain_form.is_valid() and formset.is_valid():
+        if chain_form.is_valid():
             chain = chain_form.save(commit=False)
             if not edit:
                 chain.competition = competition
-                chain.save()  # Save to get an ID.
-
-            instances = formset.save(commit=False)
-            for form in formset.ordered_forms:
-                _index = form.cleaned_data['ORDER']
-                if _index:
-                    form.instance._index = _index
-            for index, instance in enumerate(instances):
-                instance.competition = competition
-                instance.chain = chain
-                instance.chain_position = getattr(instance, '_index', index)
-                instance.max_submissions = competition.default_max_submissions
-
-                _create_or_update_task(instance, request.user, competition,
-                        chain, index, instance._text, instance._comment)
-
-                instance.save()
-
-            chain_ctasks = CompetitionTask.objects.filter(chain=chain) \
-                    .select_related('comment').only('id', 'comment')
-            update_chain_comments_cache(chain, chain_ctasks)
             chain.save()
 
-            # Problems with existing formset... ahh, just refresh
             return (chain.get_absolute_url(), )
 
-    data.update({
-        'chain_form': chain_form,
-        'formset': formset,
-        'was_order_fixed': was_order_fixed,
-    })
+    data['chain_form'] = chain_form
     return data
 
 
