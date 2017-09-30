@@ -10,6 +10,12 @@
   {% trans "Visible only to the admins!" %}
 </div>
 
+{% if updated_submissions_cache_is_correct != None %}
+  <div class="alert">
+    Updated submission.cache_is_correct for
+    <b>{{ updated_submissions_cache_is_correct }}</b> submission(s).
+  </div>
+{% endif %}
 {% if updated_chains_count != None %}
   <div class="alert">
     Updated cache_is_verified for <b>{{ updated_chains_count }}</b> chain(s).
@@ -174,6 +180,11 @@
 <form method="POST" action="">
   {% csrf_token %}
   <h3 class="comp-header">Here be dragons</h3>
+  <button type="submit" name="action"
+          value="refresh-submission-cache-is-correct">
+    Refresh submission.cache_is_correct
+  </button>
+  <br>
   <button type="submit" name="action"
           value="refresh-ctask-cache-admin-solved-count">
     Refresh ctask.cache_admin_solved_count

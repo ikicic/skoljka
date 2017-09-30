@@ -38,7 +38,9 @@ from competition.utils import update_chain_comments_cache, \
         update_chain_cache_is_verified, \
         refresh_ctask_cache_admin_solved_count, \
         update_ctask_cache_admin_solved_count, \
-        update_chain_ctasks, parse_team_categories
+        update_chain_ctasks, parse_team_categories, \
+        refresh_submissions_cache_is_correct
+
 from skoljka.libs.decorators import require
 
 from collections import defaultdict
@@ -499,6 +501,7 @@ def chain_tasks_list(request, competition, data):
     created = False
     updated_chains_count = None
     updated_ctasks_count = None
+    updated_submissions_cache_is_correct = None
     empty_form = ChainTasksForm(competition=competition)
     form = empty_form
 
@@ -507,6 +510,9 @@ def chain_tasks_list(request, competition, data):
     elif request.POST.get('action') == 'refresh-ctask-cache-admin-solved-count':
         updated_ctasks_count = len(
                 refresh_ctask_cache_admin_solved_count(competition))
+    elif request.POST.get('action') == 'refresh-submission-cache-is-correct':
+        updated_submissions_cache_is_correct = \
+                refresh_submissions_cache_is_correct(competitions=[competition])
     elif request.method == 'POST':
         form = ChainTasksForm(request.POST, competition=competition)
         if form.is_valid():
@@ -564,6 +570,8 @@ def chain_tasks_list(request, competition, data):
     data['trans_checked_title'] = _("Number of admins that solved this task.")
     data['updated_chains_count'] = updated_chains_count
     data['updated_ctasks_count'] = updated_ctasks_count
+    data['updated_submissions_cache_is_correct'] = \
+            updated_submissions_cache_is_correct
     return data
 
 
