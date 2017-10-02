@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-09-30 21:30+0200\n"
-"PO-Revision-Date: 2017-09-30 21:31+0200\n"
+"POT-Creation-Date: 2017-10-03 01:49+0200\n"
+"PO-Revision-Date: 2017-10-03 01:49+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
@@ -251,9 +251,13 @@ msgstr "HTML"
 msgid "LaTeX"
 msgstr "LaTeX"
 
-#: apps/competition/evaluator.py:40
+#: apps/competition/evaluator.py:48 apps/competition/evaluator.py:63
 msgid "OR"
 msgstr "ILI"
+
+#: apps/competition/evaluator.py:58 apps/competition/evaluator.py:62
+msgid "Error!"
+msgstr "Greška!"
 
 #: apps/competition/evaluator_base.py:9
 msgid "Invalid solution!"
@@ -263,7 +267,7 @@ msgstr "Nevaljano rješenje!"
 msgid "Invalid solution descriptor!"
 msgstr "Nevaljan opis rješenja!"
 
-#: apps/competition/evaluator_v0.py:29
+#: apps/competition/evaluator_v0.py:36
 msgid ""
 "Follow the instructions in the problem description. In the case the result "
 "is a number, please make sure to use the exact number of decimals as "
@@ -272,7 +276,7 @@ msgstr ""
 "Pratite instrukcije u tekstu zadatka. U slučaju da je rješenje broj, molimo "
 "pripazite da ste unijeli točan broj decimala."
 
-#: apps/competition/evaluator_v0.py:52
+#: apps/competition/evaluator_v0.py:59
 msgid ""
 "Split different correct results with a '|' character. Character '|' cannot "
 "be a part of the result. Trailing and leading spaces are always ignored."
@@ -320,11 +324,11 @@ msgstr "Članovi moraju biti razdvojeni zarezom!"
 msgid "Denominator cannot be 0!"
 msgstr "Nazivnik ne može biti 0!"
 
-#: apps/competition/evaluator_v1.py:102
+#: apps/competition/evaluator_v1.py:105
 msgid "Integer"
 msgstr "Cijeli broj"
 
-#: apps/competition/evaluator_v1.py:110
+#: apps/competition/evaluator_v1.py:113
 msgid ""
 "A simple number, positive or negative. In general, all numbers mentioned "
 "below can be positive or negative."
@@ -332,7 +336,7 @@ msgstr ""
 "Običan broj, pozitivan ili negativan. Općenito, svi dolje spomenuti brojevi "
 "mogu biti pozitivni ili negativni."
 
-#: apps/competition/evaluator_v1.py:150
+#: apps/competition/evaluator_v1.py:153
 #, python-format
 msgid "Write the result rounded to %(count)d decimal."
 msgid_plural "Write the result rounded to %(count)d decimals."
@@ -340,11 +344,11 @@ msgstr[0] "Napišite rezultat zaokružen na %(count)d decimalu."
 msgstr[1] "Napišite rezultat zaokružen na %(count)d decimale."
 msgstr[2] "Napišite rezultat zaokružen na %(count)d decimala."
 
-#: apps/competition/evaluator_v1.py:156
+#: apps/competition/evaluator_v1.py:163
 msgid "Decimal number"
 msgstr "Decimalni broj"
 
-#: apps/competition/evaluator_v1.py:160
+#: apps/competition/evaluator_v1.py:167
 msgid ""
 "The solution is required to have at least as many decimals as entered by the "
 "author, otherwise it will be rejected. The solution is accepted if and only "
@@ -359,7 +363,7 @@ msgstr ""
 "točno zaokružiti broj, molimo provjerite ručno prihvaća li se rješenje s "
 "više decimala. Preferirajte decimalne točke umjesto zareza."
 
-#: apps/competition/evaluator_v1.py:171
+#: apps/competition/evaluator_v1.py:178
 msgid ""
 "The solution must have as least as many decimals as written in the "
 "description, and has to exactly match the official solution when rounded to "
@@ -368,15 +372,15 @@ msgstr ""
 "Rješenje mora imati barem toliko decimala koliko piše u opisu, i mora biti "
 "točno jednako službenom rješenju kada se zaokruži na taj broj decimala."
 
-#: apps/competition/evaluator_v1.py:201
+#: apps/competition/evaluator_v1.py:208
 msgid "Write the solution in the form a/b, where a and b are integers."
 msgstr "Rješenje napišite u obliku a/b, gdje su a i b cijeli brojevi."
 
-#: apps/competition/evaluator_v1.py:206
+#: apps/competition/evaluator_v1.py:216
 msgid "Fraction"
 msgstr "Razlomak"
 
-#: apps/competition/evaluator_v1.py:210
+#: apps/competition/evaluator_v1.py:220
 msgid ""
 "Fraction is written in the format a/b, where a and b are integers. The "
 "competitors solution will be accepted if it is an integer or a fraction "
@@ -386,7 +390,7 @@ msgstr ""
 "rješenje će  biti prihvaćeno ako se radi o cijelom broju ili razlomku "
 "jednakom traženoj vrijednosti. Neskraćeni razlomci su također prihvaćaju."
 
-#: apps/competition/evaluator_v1.py:217
+#: apps/competition/evaluator_v1.py:227
 msgid ""
 "Fractions are written in the format a/b, where a and b are integers. "
 "Reducible fractions are accepted. You can also write a single integer if you "
@@ -396,11 +400,11 @@ msgstr ""
 "razlomci se također prihvaćaju. Možete napisati i sami cijeli broj ako ste "
 "sigurni da rješenje jest cijeli broj. Decimalni brojevi se ne prihvaćaju."
 
-#: apps/competition/evaluator_v1.py:302 apps/competition/evaluator_v1.py:317
+#: apps/competition/evaluator_v1.py:316 apps/competition/evaluator_v1.py:331
 msgid "Write the results in the correct order, separated with a comma."
 msgstr "Rezultate napišite u točnom poretku, razdvojene zarezom."
 
-#: apps/competition/evaluator_v1.py:307
+#: apps/competition/evaluator_v1.py:321
 #, python-format
 msgid ""
 "Write the results in the correct order, round to %(decimals)d decimal and "
@@ -418,7 +422,7 @@ msgstr[2] ""
 "Rezultate napišite u točnom poretku, zaokružene na %(decimals)d decimala i "
 "razdvojene zarezom."
 
-#: apps/competition/evaluator_v1.py:313
+#: apps/competition/evaluator_v1.py:327
 msgid ""
 "Write the results in in the form a/b, where a and b are integers. Separate "
 "the results with a comma, and write them in the correct order."
@@ -426,15 +430,15 @@ msgstr ""
 "Rezultate napišite u obliku a/b, gdje su a i b cijeli brojevi. Rezultate "
 "razdvojite zarezom te ih napišite u točnom poretku."
 
-#: apps/competition/evaluator_v1.py:320 apps/competition/evaluator_v1.py:405
+#: apps/competition/evaluator_v1.py:334 apps/competition/evaluator_v1.py:419
 msgid "Number of elements:"
 msgstr "Broj članova:"
 
-#: apps/competition/evaluator_v1.py:325
+#: apps/competition/evaluator_v1.py:339
 msgid "List"
 msgstr "Niz"
 
-#: apps/competition/evaluator_v1.py:329
+#: apps/competition/evaluator_v1.py:343
 msgid ""
 "A list can contain integers, decimal numbers, fractions or strings (anything "
 "else). All elements must have the same type. Elements are separated with a "
@@ -448,7 +452,7 @@ msgstr ""
 "članova niz ima, stavit prefix '#:'. Da bi napravili jednočlanu listu, "
 "stavite član unutar [ ] zagrada."
 
-#: apps/competition/evaluator_v1.py:338
+#: apps/competition/evaluator_v1.py:352
 msgid ""
 "A list can contain integers, decimal numbers, fractions or strings (anything "
 "else). If not obvious, the type of elements will be specified, together with "
@@ -462,11 +466,11 @@ msgstr ""
 "traženi broj članova će biti specificiran ili ne. Niz također može "
 "sadržavati jedan član! Razdvajajte članove zarezom."
 
-#: apps/competition/evaluator_v1.py:389 apps/competition/evaluator_v1.py:403
+#: apps/competition/evaluator_v1.py:403 apps/competition/evaluator_v1.py:417
 msgid "Write the results in any order, separated with a comma."
 msgstr "Napišite rezultate u bilo kojem poretku, razdvojene zarezom."
 
-#: apps/competition/evaluator_v1.py:393
+#: apps/competition/evaluator_v1.py:407
 #, python-format
 msgid ""
 "Write the results in any order, round to %(decimals)d decimal and separated "
@@ -484,7 +488,7 @@ msgstr[2] ""
 "Napišite rezultate u bilo kojem poretku, zaokružene na %(decimals)d decimala "
 "i razdvojene zarezom."
 
-#: apps/competition/evaluator_v1.py:399
+#: apps/competition/evaluator_v1.py:413
 msgid ""
 "Write the results in the form a/b, where a and b are integers. Separate the "
 "results with a comma. List them in any order."
@@ -492,11 +496,11 @@ msgstr ""
 "Rezultate napišite u obliku a/b, gdje su a i b cijeli brojevi. Rezultate "
 "razdvojite zarezom i navedite ih u bilo kojem poretku."
 
-#: apps/competition/evaluator_v1.py:410
+#: apps/competition/evaluator_v1.py:424
 msgid "Set"
 msgstr "Skup"
 
-#: apps/competition/evaluator_v1.py:414
+#: apps/competition/evaluator_v1.py:428
 msgid ""
 "Acts similarly to lists, only the elements are treated as unordered. Put the "
 "comma separated values inside the { } brackets. Same as for lists, use #: "
@@ -510,15 +514,15 @@ msgstr ""
 "ponašaju kao multiskupovi, molimo navedite u tekstu zadatka direktno ako se "
 "očekuje više jednakih vrijednosti."
 
-#: apps/competition/evaluator_v1.py:423
+#: apps/competition/evaluator_v1.py:437
 msgid "Same as for lists, just the order does not matter."
 msgstr "Isto kao i za nizove, samo što poredak nije bitan."
 
-#: apps/competition/evaluator_v1.py:439
+#: apps/competition/evaluator_v1.py:456
 msgid "String"
 msgstr "String"
 
-#: apps/competition/evaluator_v1.py:443
+#: apps/competition/evaluator_v1.py:460
 msgid ""
 "Anything that does not match any other type. To force the type to be a "
 "string, use = prefix."
@@ -526,7 +530,7 @@ msgstr ""
 "Bilo što što ne odgovara drugim tipovima. Ukoliko želite forsirati tip da "
 "bude string, stavite = prefiks."
 
-#: apps/competition/evaluator_v1.py:448
+#: apps/competition/evaluator_v1.py:465
 msgid ""
 "Anything that does not match any other type. That can include words, special "
 "formats, or even numbers of special forms."
@@ -534,7 +538,7 @@ msgstr ""
 "Bilo što što ne odgovara drugim tipovima. To može uključivati riječi, "
 "specijalne formate, ili čak brojeve u specijalnim oblicima."
 
-#: apps/competition/evaluator_v1.py:544
+#: apps/competition/evaluator_v1.py:567
 msgid ""
 "Split different accepted solutions by a '|' character. To use the '|' "
 "character, write '\\|'. To use '\\', write '\\\\'. Trailing and leading "
@@ -548,74 +552,74 @@ msgstr ""
 msgid "Descriptor error. Please notify admins!"
 msgstr "Nevaljan deskriptor. Molimo obavijestite administratore!"
 
-#: apps/competition/forms.py:74
+#: apps/competition/forms.py:75
 msgid "Invalid!"
 msgstr "Nevaljano rješenje!"
 
-#: apps/competition/forms.py:76
+#: apps/competition/forms.py:77
 msgid "Solution"
 msgstr "Rješenje"
 
-#: apps/competition/forms.py:79 apps/task/templates/task_new.html:91
+#: apps/competition/forms.py:80 apps/task/templates/task_new.html:91
 msgid "Help"
 msgstr "Pomoć"
 
-#: apps/competition/forms.py:228
+#: apps/competition/forms.py:229
 msgid "Team name cannot be empty."
 msgstr "Naziv tima ne može biti prazan."
 
-#: apps/competition/forms.py:246
+#: apps/competition/forms.py:247
 #, python-format
 msgid "Unknown username \"%s\"."
 msgstr "Nepoznato korisničko ime \"%s\"."
 
-#: apps/competition/forms.py:249
+#: apps/competition/forms.py:250
 msgid "You are automatically added to the team."
 msgstr "Vi ste automatski dodani u tim."
 
-#: apps/competition/forms.py:256
+#: apps/competition/forms.py:257
 #, python-format
 msgid "User \"%s\" is already a member of a team."
 msgstr "Korisnik \"%s\" je već član nekog tima."
 
-#: apps/competition/forms.py:268
+#: apps/competition/forms.py:269
 msgid "Team name already used!"
 msgstr "Ime tima se već koristi."
 
-#: apps/competition/forms.py:295
+#: apps/competition/forms.py:296
 #, python-format
 msgid "Unknown team category '%s'!"
 msgstr "Nepoznata timska kategorija '%s'."
 
-#: apps/competition/forms.py:307
+#: apps/competition/forms.py:308
 msgid "Competitors"
 msgstr "Natjecatelji"
 
-#: apps/competition/forms.py:308
+#: apps/competition/forms.py:309
 msgid "Unofficial"
 msgstr "Neslužbeni"
 
-#: apps/competition/forms.py:309
+#: apps/competition/forms.py:310
 msgid "Administrators"
 msgstr "Administratori"
 
-#: apps/competition/models.py:152
+#: apps/competition/models.py:155
 msgid "Position in the category."
 msgstr "Pozicija u kategoriji."
 
-#: apps/competition/views.py:564
+#: apps/competition/views.py:576
 msgid "Number of admins that solved this task."
 msgstr "Broj administratora koji su riješili ovaj zadatak."
 
-#: apps/competition/views.py:766
+#: apps/competition/views.py:780
 msgid "Task:"
 msgstr "Zadatak:"
 
-#: apps/competition/views.py:770
+#: apps/competition/views.py:784
 msgid "Write the question / message here."
 msgstr "Napišite pitanje / poruku ovdje."
 
-#: apps/competition/views.py:830
+#: apps/competition/views.py:844
 msgid "Message"
 msgstr "Poruka"
 
@@ -733,22 +737,22 @@ msgstr "Uredi"
 
 #: apps/competition/templates/competition_chain_list.html:31
 #: apps/competition/templates/competition_chain_list.html:44
-#: apps/competition/templates/competition_chain_list_tasks.html:162
+#: apps/competition/templates/competition_chain_list_tasks.html:168
 msgid "Overview"
 msgstr "Pregled"
 
 #: apps/competition/templates/competition_chain_list.html:47
-#: apps/competition/templates/competition_chain_list_tasks.html:91
-#: apps/competition/templates/competition_chain_list_tasks.html:168
+#: apps/competition/templates/competition_chain_list_tasks.html:97
+#: apps/competition/templates/competition_chain_list_tasks.html:174
 #: apps/competition/templates/inc_competition_submission_list.html:45
 msgid "Empty..."
 msgstr "Prazno..."
 
-#: apps/competition/templates/competition_chain_list_tasks.html:27
+#: apps/competition/templates/competition_chain_list_tasks.html:33
 msgid "Instructions"
 msgstr "Upute"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:32
+#: apps/competition/templates/competition_chain_list_tasks.html:38
 msgid ""
 "To add a task, click \"New task\". After adding tasks, to\n"
 "    create a chain, first select the tasks you want to include in the chain "
@@ -761,7 +765,7 @@ msgstr ""
 "uključiti (klikanjem bilo gdje na odgovarajući redak tablice), zatim "
 "ispunite ime (naslov) i kategoriju lanca te kliknite \"Napravi lanac\"."
 
-#: apps/competition/templates/competition_chain_list_tasks.html:38
+#: apps/competition/templates/competition_chain_list_tasks.html:44
 msgid ""
 "You can easily make changes to an existing chain. To insert\n"
 "    new tasks, select them, and click on the table of chains at the wanted\n"
@@ -781,7 +785,7 @@ msgstr ""
 "dolje, kliknite <i class=\"icon-arrow-up\"></i> ili <i class=\"icon-arrow-"
 "down\"></i>. Za brisanje lanca, kliknite <i class=\"icon-trash\"></i>."
 
-#: apps/competition/templates/competition_chain_list_tasks.html:48
+#: apps/competition/templates/competition_chain_list_tasks.html:54
 msgid ""
 "Tasks marked with green color are the one that have been\n"
 "    reviewed by other administrators (solved correctly). Red colors means "
@@ -793,58 +797,58 @@ msgstr ""
 "(imaju točna rješenja). Crvena boja predstavlja <code>IMPORTANT:</code> "
 "komentar, koji govori autoru da nešto ne valja sa zadatkom."
 
-#: apps/competition/templates/competition_chain_list_tasks.html:60
+#: apps/competition/templates/competition_chain_list_tasks.html:66
 msgid "New task"
 msgstr "Novi zadatak"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:63
+#: apps/competition/templates/competition_chain_list_tasks.html:69
 msgid "Unused tasks"
 msgstr "Neiskorišteni zadaci"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:68
+#: apps/competition/templates/competition_chain_list_tasks.html:74
 msgid "Chain successfully created."
 msgstr "Lanac je uspješno napravljen."
 
-#: apps/competition/templates/competition_chain_list_tasks.html:77
+#: apps/competition/templates/competition_chain_list_tasks.html:83
 msgid "Date added"
 msgstr "Vrijeme dodavanja"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:78
-#: apps/competition/templates/competition_chain_list_tasks.html:127
+#: apps/competition/templates/competition_chain_list_tasks.html:84
+#: apps/competition/templates/competition_chain_list_tasks.html:133
 msgid "Author"
 msgstr "Autor"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:79
-#: apps/competition/templates/competition_chain_list_tasks.html:128
+#: apps/competition/templates/competition_chain_list_tasks.html:85
+#: apps/competition/templates/competition_chain_list_tasks.html:134
 msgid "Text"
 msgstr "Tekst"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:80
+#: apps/competition/templates/competition_chain_list_tasks.html:86
 #: apps/post/forms.py:7
 msgid "Comment"
 msgstr "Komentar"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:101
+#: apps/competition/templates/competition_chain_list_tasks.html:107
 msgid "Create chain"
 msgstr "Napravi lanac"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:108
+#: apps/competition/templates/competition_chain_list_tasks.html:114
 msgid "Chains (used tasks)"
 msgstr "Lanci (iskorišteni zadaci)"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:117
+#: apps/competition/templates/competition_chain_list_tasks.html:123
 msgid "Title"
 msgstr "Naslov"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:118
+#: apps/competition/templates/competition_chain_list_tasks.html:124
 msgid "Unlock time"
 msgstr "Vrijeme otključavanja"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:154
+#: apps/competition/templates/competition_chain_list_tasks.html:160
 msgid "Delete"
 msgstr "Izbriši"
 
-#: apps/competition/templates/competition_chain_list_tasks.html:159
+#: apps/competition/templates/competition_chain_list_tasks.html:165
 msgid "Edit chain"
 msgstr "Uredi lanac"
 
@@ -1122,6 +1126,14 @@ msgid "Return to the task list"
 msgstr "Natrag na listu zadataka"
 
 #: apps/competition/templates/competition_task_detail.html:101
+msgid "Hide solution"
+msgstr "Sakrij rješenje"
+
+#: apps/competition/templates/competition_task_detail.html:102
+msgid "Show solution"
+msgstr "Prikaži rješenje"
+
+#: apps/competition/templates/competition_task_detail.html:112
 msgid "Submissions from all the teams (for admins only):"
 msgstr "Rješenja svih korisnika (samo za administratore):"
 

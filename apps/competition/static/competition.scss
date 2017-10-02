@@ -499,3 +499,9 @@ $table-selected-bg: mix(blue, $table-bg, 5%);
 #used-tasks-table.add-ctasks-here tr:hover td {
   border-bottom-color: red;
 }
+
+#ctask-sample-solution {
+  /* Modify .alert's padding and margin. */
+  padding: 3px 25px 3px 8px;
+  margin-bottom: 0px;
+}

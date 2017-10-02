@@ -40,6 +40,10 @@ class Variable(object):
         """Returns a string describing the solution format to the user."""
         raise NotImplementedError
 
+    def get_sample_solution(self):
+        """Returns a string representing a sample correct solution."""
+        raise NotImplementedError
+
     @staticmethod
     def help_type():
         """Name of the variable type."""

@@ -186,6 +186,19 @@
       );
       form.submit();
     });
+
+    /* Show/hide sample solution button. */
+    $('#ctask-show-sample-solution').click(function(event) {
+      // Show-text is first stored as .html(), and hide-text as
+      // data-toggle-text. After each click, these are swapped.
+      var me = $(this);
+      var new_text = me.attr('data-toggle-text');
+      me.attr('data-toggle-text', me.html());
+      me.html(new_text);
+      var div = $('#ctask-sample-solution');
+      div.css('display',
+              div.css('display') == 'inline-block' ? 'none' : 'inline-block');
+    });
   });
 
   window.show_ctask_statistics = function(stats, status_class, empty_class) {

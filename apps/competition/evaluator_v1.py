@@ -97,6 +97,9 @@ class Integer(Variable):
     def help_text(self):
         return ""
 
+    def get_sample_solution(self):
+        return str(self.value)
+
     @staticmethod
     def help_type():
         return _("Integer")
@@ -151,6 +154,10 @@ class Float(Variable):
                 "Write the result rounded to %(count)d decimals.",
                 self.decimal_count) % {'count': self.decimal_count}
 
+    def get_sample_solution(self):
+        return "{}{}.{}".format('-' if self.sign == -1 else '',
+                                self.integer, self.fractional)
+
     @staticmethod
     def help_type():
         return _("Decimal number")
@@ -200,6 +207,9 @@ class Fraction(Variable):
     def help_text(self):
         return _("Write the solution in the form a/b, where a and b are "
                  "integers.")
+
+    def get_sample_solution(self):
+        return "{}/{}".format(self.num, self.den)
 
     @staticmethod
     def help_type():
@@ -253,6 +263,10 @@ class BaseList(Variable):
                 if item.decimal_count != self.items[0].decimal_count:
                     raise MixedPrecisions
         self.element_type = list(contained)[0]
+
+    def get_sample_solution(self):
+        return u",".join(item.get_sample_solution() for item in self.items)
+
 
 
 class List(BaseList):
@@ -434,6 +448,9 @@ class String(Variable):
     def help_text(self):
         return ""
 
+    def get_sample_solution(self):
+        return self.value
+
     @staticmethod
     def help_type():
         return _("String")
@@ -526,15 +543,21 @@ def parse_descriptor(descriptor):
 def check_result(descriptor, result):
     """Implementation of check_result for v1 evaluator."""
     variables = parse_descriptor(descriptor)
-    exception = False
+    exception = None
+    ignore_exception = False
+
     for variable in variables:
         try:
             if variable.evaluate_solution(result):
                 return True
-        except InvalidSolution:
-            exception = True
-    if exception:
-        raise
+        except InvalidSolution as e:
+            exception = e
+        else:
+            # If at least one variable matches the format, don't warn the user
+            # with InvalidSolution, just return False (incorrect solution).
+            ignore_exception = True
+    if exception and not ignore_exception:
+        raise exception
     return False
 
 def get_variable_types():

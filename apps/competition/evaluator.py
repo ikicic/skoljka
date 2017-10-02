@@ -14,16 +14,24 @@ def get_evaluator(evaluator_version):
     raise Exception("Unknown evaluator version!")
 
 
-# Default Evaluator method. Internal.
-def get_solution_help_text(evaluator, descriptor, error_message="",
-        show_types=False):
-    """Generates help text for the given solution descriptor."""
-    if not descriptor:
-        return ""
+def safe_parse_descriptor(evaluator, descriptor):
+    """Tries to parse the descriptor. If fails, returns the exception."""
     try:
-        variables = evaluator.parse_descriptor(descriptor)
-    except InvalidDescriptor:
+        return evaluator.parse_descriptor(descriptor)
+    except InvalidDescriptor as e:
+        return e
+
+
+# Default Evaluator method. Internal.
+def get_solution_help_text(variables, error_message="", show_types=False):
+    """Generates help text for the given solution descriptor variables.
+
+    Works in pair with safe_parse_descriptor, i.e. if parsing failed, expects
+    variables to be an Exception instance."""
+    if isinstance(variables, Exception):
         return error_message
+    if not variables:
+        return ""
 
     help_type = u""
     help_texts = []
@@ -39,3 +47,18 @@ def get_solution_help_text(evaluator, descriptor, error_message="",
     help_texts = list(set(help_texts))
     delimiter = u" " + _(u"OR") + u" "
     return mark_safe(delimiter.join(help_texts))
+
+
+def get_sample_solution(variables):
+    """Concatenate all .get_sample_solutions() of the given variables.
+
+    Catches all exceptions from .get_sample_solutions().
+    Compatible with safe_parse_descriptor."""
+    if isinstance(variables, Exception):
+        return _("Error!")
+    try:
+        samples = [var.get_sample_solution() for var in variables]
+    except:
+        return _("Error!")
+    delimiter = u" " + _(u"OR") + u" "
+    return delimiter.join(samples)

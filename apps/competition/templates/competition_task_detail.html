@@ -94,6 +94,17 @@
       </a>
     {% endif %}
   {% endif %}
+
+  {% if sample_solution %}
+    {# Note: Check JavaScript if modifying. #}
+    <button id="ctask-show-sample-solution" type="button" class="btn"
+            data-toggle-text="{% trans "Hide solution" %}">
+      {% trans "Show solution" %}
+    </button>
+    <div id="ctask-sample-solution" style="display:none;" class="alert">
+      {{ sample_solution }}
+    </div>
+  {% endif %}
 {% endif %}
 
 {% if is_admin %}

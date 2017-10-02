@@ -7,8 +7,8 @@ from django.utils.html import mark_safe
 from django.utils.translation import ugettext as _, ugettext_lazy
 
 from competition.models import Chain, CompetitionTask, Team, TeamMember
-from competition.evaluator import InvalidDescriptor, InvalidSolution
-from competition.evaluator import get_evaluator, get_solution_help_text
+from competition.evaluator import InvalidDescriptor, InvalidSolution, \
+        get_evaluator, get_solution_help_text, safe_parse_descriptor
 from competition.utils import comp_url, ctask_comment_class, \
         parse_team_categories
 
@@ -69,9 +69,10 @@ class CompetitionTaskForm(ModelForm):
             self.t_comment_extra_class += \
                     " " + ctask_comment_class(self.instance, user)
 
+        variables = safe_parse_descriptor(
+                self.evaluator, self.initial.get('descriptor'))
         self.fields['descriptor'].help_text = get_solution_help_text(
-                self.evaluator, self.initial.get('descriptor'),
-                error_message=_("Invalid!"), show_types=True)
+                variables, error_message=_("Invalid!"), show_types=True)
         self.fields['descriptor'].label = mark_safe(
                 xss.escape(_("Solution")) + \
                 ' <a href="' + comp_url(self.competition, 'rules') +

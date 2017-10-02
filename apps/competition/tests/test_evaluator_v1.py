@@ -1,3 +1,5 @@
+from competition.evaluator import get_sample_solution, safe_parse_descriptor
+from competition import evaluator_v1
 from competition.evaluator_v1 import InvalidSolution, MixedTypes, \
         MixedPrecisions, IncorrectNumberOfElements, TooFewDecimals, \
         InvalidDescriptor, UnallowedCharacter, InvalidModifiers, \
@@ -47,6 +49,21 @@ class EvaluatorV1Test(TestCaseEx):
                         e, type(e), test_case)
                 raise
 
+    def assertGetSampleSolution(self, tests):
+        """Given a list of `(descriptor, result)` test cases, check if the
+        `descriptor` sample solution is equal to `result`.
+        """
+        for descriptor, result in tests:
+            variables = safe_parse_descriptor(evaluator_v1, descriptor)
+            sample = get_sample_solution(variables)
+            if sample != result:
+                print "DESCRIPTOR", descriptor
+                print "VARIABLES", variables
+                print "SAMPLE", sample
+                print "EXPECTED", result
+            self.assertEqual(sample, result)
+
+
     def test_validate_descriptor_integer(self):
         self.assertMultipleVariableTypesOrRaises([Integer], [
             ("0", None),
@@ -83,6 +100,17 @@ class EvaluatorV1Test(TestCaseEx):
         self.assertVariableTypes([Integer], [x[0] for x in tests])
         self.assertMultipleEqualOrRaise(check_result, tests)
 
+    def test_sample_solution_integer(self):
+        tests = [
+            ("0", "0"),
+            ("-0", "0"),
+            ("123", "123"),
+            ("+123", "123"),
+            ("-123", "-123"),
+        ]
+        self.assertGetSampleSolution(tests)
+
+
     def test_validate_descriptor_float(self):
         self.assertMultipleVariableTypesOrRaises([Float], [
             ("0012.23", AmbiguousNumberOrString),
@@ -106,6 +134,12 @@ class EvaluatorV1Test(TestCaseEx):
             ("0.00", "0.0049999999999999999999", True),
             ("0.00", "-0.0049999999999999999999", True),
             ("0.00", "-0.005", False),
+            ("-0.00", "0.005", False),
+            ("-0.00", "0.004", True),
+            ("-0.00", "0.0049999999999999999999", True),
+            ("-0.00", "-0.0049999999999999999999", True),
+            ("-0.00", "-0.005", False),
+            ("-0.00", "0.00", True),
             ("0.53", ".53", True),
             (".53", ".53", True),
             ("-.53", "-.53", True),
@@ -145,6 +179,16 @@ class EvaluatorV1Test(TestCaseEx):
         self.assertVariableTypes([Float], [x[0] for x in tests])
         self.assertMultipleEqualOrRaise(check_result, tests)
 
+    def test_sample_solution_float(self):
+        tests = [
+            ("0.00", "0.00"),
+            ("-0.00", "-0.00"),
+            ("123.120000", "123.120000"),
+            ("-456.0123", "-456.0123"),
+        ]
+        self.assertGetSampleSolution(tests)
+
+
     def test_validate_descriptor_fraction(self):
         self.assertMultipleVariableTypesOrRaises([Fraction], [
             ("0/1", None),
@@ -172,6 +216,19 @@ class EvaluatorV1Test(TestCaseEx):
         ]
         self.assertVariableTypes([Fraction], [x[0] for x in tests])
         self.assertMultipleEqualOrRaise(check_result, tests)
+
+    def test_sample_solution_fraction(self):
+        tests = [
+            ("0/1", "0/1"),
+            ("5/3", "5/3"),
+            ("6/4", "6/4"),
+            ("-6/4", "-6/4"),
+            ("6/-4", "6/-4"),
+            ("-6/-4", "-6/-4"),
+            ("6000/7123", "6000/7123"),
+        ]
+        self.assertGetSampleSolution(tests)
+
 
     def test_validate_descriptor_list(self):
         self.assertMultipleVariableTypesOrRaises([List], [
@@ -216,9 +273,22 @@ class EvaluatorV1Test(TestCaseEx):
         self.assertVariableTypes([List], [x[0] for x in tests])
         self.assertMultipleEqualOrRaise(check_result, tests)
 
+    def test_sample_solution_list(self):
+        tests = [
+            ("1,2,3,4,5", "1,2,3,4,5"),
+            ("1,2  ,3,4, 5", "1,2,3,4,5"),
+            ("1.0, 2.0, 3.0, 4.0, 5.0", "1.0,2.0,3.0,4.0,5.0"),
+            ("aa,bb,cc,dd", "aa,bb,cc,dd"),
+            ("#:aa,bb,cc,dd", "aa,bb,cc,dd"),
+            ("1/2,3/4,5/6", "1/2,3/4,5/6"),
+        ]
+        self.assertGetSampleSolution(tests)
+
+
     def test_validate_descriptor_multiset(self):
         self.assertMultipleVariableTypesOrRaises([MultiSet], [
             ("{12}", None),
+            ("{12,12,12}", None),
             ("#:{12}", InvalidModifiers),
             ("{12,123,1234}", None),
             ("{12, 123}", None),
@@ -231,6 +301,30 @@ class EvaluatorV1Test(TestCaseEx):
             ("{abc,def,ghi}", None),
             ("{abc,5,ghi}", MixedTypes),
         ])
+
+    def test_evaluate_multiset(self):
+        tests = [
+            ("{1,2,3,4,5}", "1, 2, 3, 4, 5", True),
+            ("{1,2}", "1,2", True),
+            ("{1,2}", "1,1,2", False),
+            ("{1,1,1,2}", "1,2", False),
+            ("{1,1,1,2}", "1,2,1,1", True),
+            ("{2/3, 1/2, 1/2}", "1/2, 2/3, 3/6", True),
+            ("{1.0,2.0,3.0,4.5}", "1.001, 2.00, 3.01, 4.500", True),
+        ]
+        self.assertVariableTypes([MultiSet], [x[0] for x in tests])
+        self.assertMultipleEqualOrRaise(check_result, tests)
+
+    def test_sample_solution_multiset(self):
+        tests = [
+            ("{1,2,3,4,5}", "1,2,3,4,5"),
+            ("1,2  ,3,4, 5", "1,2,3,4,5"),
+            ("1.0, 2.0, 3.0, 4.0, 5.0", "1.0,2.0,3.0,4.0,5.0"),
+            ("aa,bb,cc,dd", "aa,bb,cc,dd"),
+            ("1/2,3/4,5/6", "1/2,3/4,5/6"),
+        ]
+        self.assertGetSampleSolution(tests)
+
 
     def test_evaluate_string(self):
         tests = [
@@ -245,3 +339,54 @@ class EvaluatorV1Test(TestCaseEx):
         ]
         self.assertVariableTypes([String], [x[0] for x in tests])
         self.assertMultipleEqualOrRaise(check_result, tests)
+
+    def test_sample_solution_string(self):
+        tests = [
+            ("00:50", "00:50"),
+            ("sarma", "sarma"),
+            ("=002", "002"),
+        ]
+        self.assertGetSampleSolution(tests)
+
+
+    def test_evaluate_multiple(self):
+        from django.utils.translation import deactivate_all
+        deactivate_all()  # So that we can test this "OR".
+
+        # Descriptor, solution, is_correct, variable_types.
+        tests = [
+            ("100 | -100", "100", True, [Integer, Integer]),
+            ("100 | -100", "-100", True, [Integer, Integer]),
+            ("100 | -100", "200", False, [Integer, Integer]),
+            ("100 | -100", "kifla", InvalidSolution, [Integer, Integer]),
+            ("100 | sarma", "kifla", False, [Integer, String]),
+            ("100 | sarma", "100", True, [Integer, String]),
+            ("100 | sarma", "sarma", True, [Integer, String]),
+            ("{1,2} | {1}", "1,2", True, [MultiSet, MultiSet]),
+            ("{1,2} | {1}", "1", True, [MultiSet, MultiSet]),
+            ("{1,2} | {1}", "2", False, [MultiSet, MultiSet]),
+            ("sarma|sarma", "sarma", True, [String, String]),
+            ("sarma|sarma", "sarma|sarma", False, [String, String]),
+            ("sarma\\|sarma", "sarma|sarma", True, [String]),
+            ("sarma\\|sarma", "sarma", False, [String]),
+            ("sarma\\|sarma", "sarma|sarma", True, [String]),
+            ("sarma\\\\|kifla", "kifla", True, [String, String]),
+            ("sarma\\\\|kifla", "sarma\\", True, [String, String]),
+            ("sarma\\\\|kifla", "sarma", False, [String, String]),
+        ]
+
+        for descriptor, solution, is_correct, variable_types in tests:
+            self.assertVariableTypes(variable_types, [descriptor])
+
+        _tests = [(a, b, c) for a, b, c, d in tests]
+        self.assertMultipleEqualOrRaise(check_result, _tests)
+
+
+    def test_get_sample_solution_multiple(self):
+        from django.utils.translation import deactivate_all
+        deactivate_all()  # So that we can test this "OR".
+        tests = [
+            ("00:50 | sarma | [biftek, kifla]", "00:50 OR sarma OR biftek,kifla"),
+            ("100 | 100.00 | -100", "100 OR 100.00 OR -100"),
+        ]
+        self.assertGetSampleSolution(tests)

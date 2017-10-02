@@ -50,6 +50,9 @@ class Competition(BasePermissionsModel):
             blank=True, max_length=255,
             help_text="Format: \"ID1:name1 | ID2:name2 | ... \". " \
                       "Last category is considered the default.")
+    show_solutions = models.BooleanField(
+            default=False,
+            help_text="Show solutions after the competition ends.")
 
     posts = PostGenericRelation(placeholder="Poruka")
 

@@ -21,7 +21,8 @@ from task.models import Task
 from userprofile.forms import AuthenticationFormEx
 
 from competition.decorators import competition_view
-from competition.evaluator import get_evaluator, get_solution_help_text
+from competition.evaluator import get_evaluator, get_solution_help_text, \
+        get_sample_solution, safe_parse_descriptor
 from competition.forms import ChainForm, \
         ChainTasksForm, clean_unused_ctask_ids, \
         CompetitionSolutionForm, CompetitionTaskForm, \
@@ -366,6 +367,7 @@ def task_detail(request, competition, data, ctask_id):
             raise Http404
 
     evaluator = get_evaluator(competition.evaluator_version)
+    variables = safe_parse_descriptor(evaluator, ctask.descriptor)
     if team:
         ctasks, chain_submissions = preprocess_chain(
                 competition, ctask.chain, team, preloaded_ctask=ctask)
@@ -435,9 +437,13 @@ def task_detail(request, competition, data, ctask_id):
         for submission in data['all_ctask_submissions']:
             submission.team.competition = competition
 
-    data['help_text'] = get_solution_help_text(evaluator, ctask.descriptor)
+    data['help_text'] = get_solution_help_text(variables)
     data['chain'] = ctask.chain
     data['ctask'] = ctask
+
+    if competition.show_solutions and data['has_finished'] \
+            and not data.get('is_solved', False):
+        data['sample_solution'] = get_sample_solution(variables)
 
     return data
 

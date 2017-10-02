@@ -6,6 +6,10 @@ import re
 
 # Here Variable takes care of different solutions, and not the evaluator.
 class VariableV0(Variable):
+    """Case insensitive solutions, where all whitespace is ignored.
+
+    Different solutions can be split using a vertical bar '|'.
+    """
     def __init__(self, descriptor):
         self.descriptor = re.sub(r'\s+', '', descriptor).lower().split('|')
 
@@ -15,6 +19,9 @@ class VariableV0(Variable):
 
     def help_text(self):
         return ""
+
+    def get_sample_solution(self):
+        return self.descriptor[0]
 
     @staticmethod
     def help_type():
