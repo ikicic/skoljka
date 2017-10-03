@@ -140,8 +140,10 @@ def generate_png(hash, format, latex):
 
 tex_preamble_svg = r'''
 \documentclass[12pt]{article}
+\usepackage{lmodern}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
+\usepackage[croatian]{babel}
 \usepackage[centertags,intlimits,namelimits,sumlimits]{amsmath}
 \usepackage{amsthm}
 \usepackage{amssymb}
