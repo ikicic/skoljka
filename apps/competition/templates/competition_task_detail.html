@@ -94,17 +94,17 @@
       </a>
     {% endif %}
   {% endif %}
+{% endif %}
 
-  {% if sample_solution %}
-    {# Note: Check JavaScript if modifying. #}
-    <button id="ctask-show-sample-solution" type="button" class="btn"
-            data-toggle-text="{% trans "Hide solution" %}">
-      {% trans "Show solution" %}
-    </button>
-    <div id="ctask-sample-solution" style="display:none;" class="alert">
-      {{ sample_solution }}
-    </div>
-  {% endif %}
+{% if sample_solution %}
+  {# Note: Check JavaScript if modifying. #}
+  <button id="ctask-show-sample-solution" type="button" class="btn"
+          data-toggle-text="{% trans "Hide solution" %}">
+    {% trans "Show solution" %}
+    {# Yes, leave this space between button and div. #}
+  </button> <div id="ctask-sample-solution" style="display:none;" class="alert">
+    {{ sample_solution }}
+  </div>
 {% endif %}
 
 {% if is_admin %}
