@@ -116,7 +116,7 @@ def select_task(request, task_id):
         return "Not allowed to edit this folder."
 
     task = get_object_or_404(Task, id=task_id)
-    if not task.user_has_perm(user, VIEW):
+    if not task.user_has_perm(request.user, VIEW):
         return "Not allowed to view this task."
 
     add = request.POST['checked'] == 'true'
