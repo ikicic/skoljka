@@ -120,7 +120,7 @@ def select_task(request, task_id):
         return "Not allowed to view this task."
 
     add = request.POST['checked'] == 'true'
-    error = add_or_remove_folder_task(folder, task, add)
+    error = add_or_remove_folder_task(folder.id, task.id, add)
     if error:
         return HttpResponseBadRequest(error)
 
