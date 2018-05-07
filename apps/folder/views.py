@@ -124,7 +124,7 @@ def select_task(request, task_id):
     if error:
         return HttpResponseBadRequest(error)
 
-    return HttpResponse('1' if is_checked else '0')
+    return HttpResponse('1' if add else '0')
 
 
 # TODO: check ancestor VIEW permissions?
