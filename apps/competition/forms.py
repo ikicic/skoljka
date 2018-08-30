@@ -69,10 +69,11 @@ class CompetitionTaskForm(ModelForm):
             self.t_comment_extra_class += \
                     " " + ctask_comment_class(self.instance, user)
 
-        variables = safe_parse_descriptor(
-                self.evaluator, self.initial.get('descriptor'))
-        self.fields['descriptor'].help_text = get_solution_help_text(
-                variables, error_message=_("Invalid!"), show_types=True)
+        descriptor = self.initial.get('descriptor')
+        if descriptor:
+            variables = safe_parse_descriptor(self.evaluator, descriptor)
+            self.fields['descriptor'].help_text = get_solution_help_text(
+                    variables, error_message=_("Invalid!"), show_types=True)
         self.fields['descriptor'].label = mark_safe(
                 xss.escape(_("Solution")) + \
                 ' <a href="' + comp_url(self.competition, 'rules') +
