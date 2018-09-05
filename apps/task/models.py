@@ -49,12 +49,17 @@ class TaskBulkTemplate(BasePermissionsModel):
     name = models.CharField(blank=True, max_length=100, verbose_name=_("Name"))
     source_code = models.TextField(max_length=100000)
 
+    def __unicode__(self):
+        return u"#{} {} ({})".format(self.id, self.name, self.date_created)
+
+
 
 # ovdje ili u recommend?
 class SimilarTask(models.Model):
     task = models.ForeignKey('Task', db_index=True, related_name='from')
     similar = models.ForeignKey('Task', db_index=True, related_name='to')
     score = models.FloatField(db_index=True)
+
 
 
 class Task(BasePermissionsModel):
@@ -132,7 +137,7 @@ class Task(BasePermissionsModel):
 
 
     def __unicode__(self):
-        return '#%d %s' % (self.id, self.name)
+        return u'#%d %s' % (self.id, self.name)
 
     def get_absolute_url(self):
         return '/task/%d/' % self.id
