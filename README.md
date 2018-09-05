@@ -14,7 +14,7 @@ http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supe
 
 2. Clone skoljka and run the installation script:
   ```sh
-  git clone git://github.com/ikicic/skoljka
+  git clone https://github.com/ikicic/skoljka.git
   cd skoljka
   scripts/install.sh
   ```
