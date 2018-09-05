@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from folder.models import Folder, FolderTask
 from folder.utils import get_task_folder_ids, invalidate_cache_for_folders, \
         prepare_folder_menu
@@ -10,6 +12,8 @@ from tags.models import Tag, TaggedItem
 from tags.utils import set_tags
 
 from task.models import Task
+
+import time
 
 CORRECT = SolutionDetailedStatus.SUBMITTED_CORRECT
 
@@ -181,9 +185,16 @@ def create_tasks_from_json(description):
     folder_tasks = []
     object_permissions = []
 
+    # Measure time.
+    start_time = time.time()
+
+    def elapsed_time():
+        return "{:.6f}".format(time.time() - start_time)
+
     try:
         for k, desc in enumerate(description):
-            message_list.append('Creating {}. task...'.format(k + 1))
+            message_list.append("Creating task #0.".format(k + 1))
+            print(elapsed_time(), "Creating task #{}.".format(k + 1))
 
             # First, prepare data to be able to create Task.
             # --- math content ---
@@ -192,6 +203,7 @@ def create_tasks_from_json(description):
             message_list.append(desc['_content'])
             math_content.save()
             created_objects.append(math_content)
+            print(elapsed_time(), "    ", "Saved math content.")
 
             # Second, create Task.
             task = Task()
@@ -202,17 +214,20 @@ def create_tasks_from_json(description):
             task.save()
             created_objects.append(task)
             created_tasks.append(task)
+            print(elapsed_time(), "    ", "Saved task.")
 
             # Third, save other data.
 
             # --- tags ---
             tags = desc.get('_tags', '')
             set_tags(task, tags)
+            print(elapsed_time(), "    ", "Saved tags.")
 
             # --- difficulty ---
             difficulty = desc.get('_difficulty')
             if difficulty:
                 task.difficulty_rating.update(task.author, int(difficulty))
+            print(elapsed_time(), "    ", "Saved difficulty.")
 
             # --- folder ids ---
             folder_id = desc.get('_folder_id')
@@ -228,18 +243,24 @@ def create_tasks_from_json(description):
                             content_object=task, group_id=group_id,
                             permission_type=perm))
 
+        print(elapsed_time(), "Done storing tasks.")
 
         FolderTask.objects.bulk_create(folder_tasks)
+        print(elapsed_time(), "Done storing folder tasks.")
         ObjectPermission.objects.bulk_create(object_permissions)
+        print(elapsed_time(), "Done storing object permissions.")
     except Exception as e:
         # This should remove all dependend objects.
         for obj in created_objects:
             obj.delete()
 
+        print(elapsed_time(), "Exception:", e)
         message_list.append("Reverting changes...")
         message = "\n".join(message_list) + "\n\n" + traceback.format_exc()
         raise type(e)(message)
     finally:
+        print(elapsed_time(), "Starting folder cache invalidation.")
         # SPEED: Don't invalidate everything.
         invalidate_cache_for_folders(Folder.objects.all())
+        print(elapsed_time(), "Folders invalidated. Done.")
     return created_tasks
