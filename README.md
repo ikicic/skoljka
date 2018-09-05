@@ -3,44 +3,36 @@
 This procedure is based on the following tutorial:
 http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supervisor/
 
-1. Go to your projects folder (e.g. `~/projects`). Run:
+1. Go to your projects folder (e.g. `~/projects`). Create and go to a virtual environment:
   ```sh
   sudo apt-get install gettext git python2.7-dev python-virtualenv
-  virtualenv -p /usr/bin/python2.7 skoljka
+  virtualenv -p `which python2` skoljka
   cd skoljka
-  ```
-
-2. In the current folder, create a file `profile` containing:
-  ```sh
-  export PYTHONPATH=$PWD:$PWD/skoljka:$PYTHONPATH
-  export PROD=true
-
-  source bin/activate
-  ```
-
-3. Go to the virtual env, clone skoljka and run the installation script:
-  ```sh
+  echo -e "export PYTHONPATH=\$PWD:\$PWD/skoljka:\$PYTHONPATH\nexport PROD=true\n\nsource bin/activate" > profile
   source profile
+  ```
 
+2. Clone skoljka and run the installation script:
+  ```sh
   git clone git://github.com/ikicic/skoljka
   cd skoljka
   scripts/install.sh
   ```
 
-4. Create an empty `UTF8` database (use your **username**):
+3. Create an empty `UTF8` database (use your **username**):
   ```sh
   mysql -e "CREATE DATABASE skoljka CHARACTER SET utf8 COLLATE utf8_general_ci;" -u username -p
   ```
 
-5. Fill out `settings/local.py`, at least the fields marked as `REQUIRED`.
+4. Fill out `settings/local.py`, at least the fields marked as `REQUIRED`.
 
-6. Initialize database and build:
+5. Initialize database and build:
   ```sh
-  python manage.py syncdb --noinput
-  python manage.py loaddata folders userprofiles
-  python b.py
+  python2 manage.py syncdb --noinput
+  python2 manage.py loaddata folders userprofiles
+  python2 b.py
   ```
-  You can now use Django test server by running `python manage.py runserver`. The database is pre-filled with superuser `arhiva` whose password is `a`. Note that by default, `DEBUG` is `False`, so static files won't be loaded correctly.
+  You can now use Django test server by running `python2 manage.py runserver`. The database is pre-filled with superuser `arhiva` whose password is `a`. Note that by default, `DEBUG` is `False`, so static files won't be loaded correctly.
 
 # Configuring gunicorn
 
