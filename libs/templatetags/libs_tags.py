@@ -133,4 +133,4 @@ class FieldSetNode(template.Node):
 
 @register.simple_tag
 def percentage(part, total):
-    return "{}%".format(100. * part / total)
+    return "{}%".format(100. * part / total) if total else "NaN%"
