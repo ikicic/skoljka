@@ -531,12 +531,15 @@ def parse_descriptor(descriptor):
                 k += 2
                 continue
         elif current == '|':
-            variables.append(parse_variable(part))
-            part = ""
+            part = part.strip()
+            if part:
+                variables.append(parse_variable(part))
+                part = ""
             k += 1
             continue
         part += current
         k += 1
+
     return variables
 
 

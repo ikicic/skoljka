@@ -71,6 +71,13 @@ class EvaluatorV1Test(TestCaseEx):
             ("0012", AmbiguousNumberOrString),
         ])
 
+    def test_parse_descriptor(self):
+        """Test |-separation and whitespace trim."""
+        self.assertEqual(len(parse_descriptor("1 | 2")), 2)
+        self.assertEqual(len(parse_descriptor("1 || 2")), 2)
+        self.assertEqual(len(parse_descriptor("|||1 ||")), 1)
+        self.assertEqual(len(parse_descriptor("|||||")), 0)
+
     def test_evaluate_integer(self):
         tests = [
             ("0", "0", True),
