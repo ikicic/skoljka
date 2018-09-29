@@ -135,8 +135,6 @@ TEMPLATE_DIRS = (
 
 AUTH_PROFILE_MODULE = 'userprofile.UserProfile'
 
-INTERNAL_IPS = ('127.0.0.1',)
-
 # Where the loging happens
 LOGIN_URL = '/accounts/login/'
 

@@ -17,6 +17,13 @@ class Post(models.Model):
     last_edit_by = models.ForeignKey(User, related_name='+')
     last_edit_time = models.DateTimeField(auto_now=True)
 
+    # Used to attached extra information to a post. Intentionally an Integer,
+    # in order to add constant size to the field (not to increase its
+    # complexity much). To allow for counting, a db index (content_type_id,
+    # object_id, extra) should be included in the database.
+    extra = models.IntegerField(
+            default=0, help_text="Application-specific additional information.")
+
     def __unicode__(self):
         return u'Post #{}'.format(self.id)
 

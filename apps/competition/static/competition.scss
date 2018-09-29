@@ -77,8 +77,16 @@ textarea.comp-mathcontent-text {
   float: right;
 }
 
-.comp-global-notification {
+.cpost-global-notification {
   background-color: #f8f6f4 !important;
+}
+
+.cpost-answered {
+  background-color: #f5fceb !important;
+}
+
+.cpost-answered.cpost-global-notification {
+  background-color: #f0ebfc !important;
 }
 
 .chelp-authors-general, .chelp-var-authors {

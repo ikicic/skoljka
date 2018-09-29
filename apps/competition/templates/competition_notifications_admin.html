@@ -8,42 +8,61 @@
 
 <h3 class="comp-header">{% trans "Notifications" %} - admin</h3>
 
-{% for post in posts %}
-  <div class="outset outset-margin post mc-hover-area
-          {% if not post.t_team %}comp-global-notification{% endif %}"
-      id="post{{ post.pk }}">
-    <div class="post-action">
-      {% if post.t_team %}
-        <a href="#post" class="post-reply" id="pr{{ post.pk }}"
-            data-team-id="{{ post.t_team.id }}">{% trans "Reply" %}</a>&nbsp;
-      {% endif %}
-      <a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">
-        {% trans "Edit" %}
-      </a> &nbsp;<a href="#post{{ post.pk }}">#</a>
-    </div>
+{% if show_answered %}
+    <a href="{{ request.path }}">{% trans "Hide answered posts." %}</a>
+{% else %}
+    <a href="{{ request.path }}?answered=1">{% trans "Show answered posts." %}</a>
+{% endif %}
 
-    <div class="post-info">
-      {{ post.author|userlink }}
-      {% if post.t_team %}
-        ({% trans "Team:" %}
-        <a href="{{ post.t_team.get_absolute_url }}">{{ post.t_team.name }}</a>){% endif %},
-      {% if post.t_target_team %}
-        {% trans "To:" context "post" %} {{ post.t_target_team.get_link }},
-      {% endif %}
-      {{ post.date_created }}
-    </div>
-
-    {% mathcontent_render post.content %}
-
-    {% if post.date_created != post.last_edit_time %}
-      <div class="post-last-edit">
-        {% trans "Last update:" %} {{ post.last_edit_time }}
+<form action="{{ request.get_full_path }}" method="post">
+  {% csrf_token %}
+  {% for post in posts %}
+    <div class="outset outset-margin post mc-hover-area
+          {% if post.extra %}cpost-answered{% endif %}
+          {% if not post.t_team %}cpost-global-notification{% endif %}"
+         id="post{{ post.pk }}">
+      <div class="post-action">
+        {% if post.t_team %}
+          <a href="#post" class="post-reply" id="pr{{ post.pk }}"
+              data-team-id="{{ post.t_team.id }}">{% trans "Reply" %}</a>&nbsp;
+        {% endif %}
+        <a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">
+          {% trans "Edit" %}
+        </a> &nbsp;<a href="#post{{ post.pk }}">#</a>
+        {% if post.extra %}
+          {# answered / hidden #}
+          <button name="action" class="btn-link" value="show-{{ post.id }}"
+                  title="{% trans "Show / mark as unanswered." %}">⎌</button>
+        {% else %}
+          {# not answered / visible #}
+          <button name="action" class="btn-link" value="hide-{{ post.id }}"
+                  title="{% trans "Hide / mark as answered." %}">✓</button>
+        {% endif %}
       </div>
-    {% endif %}
-  </div>
-{% empty %}
-  <i>{% trans "No notifications." %}</i><br><br>
-{% endfor %}
+
+      <div class="post-info">
+        {{ post.author|userlink }}
+        {% if post.t_team %}
+          ({% trans "Team:" %}
+          <a href="{{ post.t_team.get_absolute_url }}">{{ post.t_team.name }}</a>){% endif %},
+        {% if post.t_target_team %}
+          {% trans "To:" context "post" %} {{ post.t_target_team.get_link }},
+        {% endif %}
+        {{ post.date_created }}
+      </div>
+
+      {% mathcontent_render post.content %}
+
+      {% if post.date_created != post.last_edit_time %}
+        <div class="post-last-edit">
+          {% trans "Last update:" %} {{ post.last_edit_time }}
+        </div>
+      {% endif %}
+    </div>
+  {% empty %}
+    <i>{% trans "No notifications." %}</i><br><br>
+  {% endfor %}
+</form>
 
 <div id="post" class="comp-post">
   <script>

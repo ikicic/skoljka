@@ -18,7 +18,7 @@
 
 {% for post in posts %}
   <div class="outset outset-margin post mc-hover-area
-          {% if not post.t_team %}comp-global-notification{% endif %}"
+          {% if not post.t_team %}cpost-global-notification{% endif %}"
       id="post{{ post.pk }}">
     <div class="post-info">
       {% if post.t_team and post.author_id in team_member_ids %}
