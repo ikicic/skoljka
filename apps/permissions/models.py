@@ -137,7 +137,7 @@ class BasePermissionsModel(models.Model):
         permissions = get_permissions_for_object(user, self)
         if not getattr(self, 'hidden', True):
             permissions.append(VIEW)
-            if user.is_staff:
+            if user.is_superuser:
                 permissions.append(EDIT)
         return permissions
 
