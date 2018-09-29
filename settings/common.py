@@ -12,8 +12,8 @@ from local import *
 ######################################
 
 
-VERSION = 'v0.8.3'
-VERSION_FOOTER = "v0.8.3"
+VERSION = 'v0.9.2'
+VERSION_FOOTER = "v0.9.2"
 
 try:
     # TODO (Python 3): http://stackoverflow.com/a/12698328/2203044
