@@ -35,6 +35,12 @@
   {% mathcontent_render ctask.task.content %}
 </div>
 
+{% if ctask.t_score_text %}
+  <div class="ctask-score-text">
+    {{ ctask.t_score_text }}
+  </div>
+{% endif %}
+
 {% if team %} {# admins are able to see this page without having a team #}
   {% if submissions %}
     <h4>{% trans "Submissions:" %}</h4>

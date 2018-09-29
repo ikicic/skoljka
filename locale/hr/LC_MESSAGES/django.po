@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-03 01:49+0200\n"
+"POT-Creation-Date: 2018-09-29 20:22+0200\n"
 "PO-Revision-Date: 2017-10-03 01:49+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
@@ -538,7 +538,7 @@ msgstr ""
 "Bilo što što ne odgovara drugim tipovima. To može uključivati riječi, "
 "specijalne formate, ili čak brojeve u specijalnim oblicima."
 
-#: apps/competition/evaluator_v1.py:567
+#: apps/competition/evaluator_v1.py:570
 msgid ""
 "Split different accepted solutions by a '|' character. To use the '|' "
 "character, write '\\|'. To use '\\', write '\\\\'. Trailing and leading "
@@ -552,54 +552,54 @@ msgstr ""
 msgid "Descriptor error. Please notify admins!"
 msgstr "Nevaljan deskriptor. Molimo obavijestite administratore!"
 
-#: apps/competition/forms.py:75
+#: apps/competition/forms.py:76
 msgid "Invalid!"
 msgstr "Nevaljano rješenje!"
 
-#: apps/competition/forms.py:77
+#: apps/competition/forms.py:78
 msgid "Solution"
 msgstr "Rješenje"
 
-#: apps/competition/forms.py:80 apps/task/templates/task_new.html:91
+#: apps/competition/forms.py:81 apps/task/templates/task_new.html:91
 msgid "Help"
 msgstr "Pomoć"
 
-#: apps/competition/forms.py:229
+#: apps/competition/forms.py:230
 msgid "Team name cannot be empty."
 msgstr "Naziv tima ne može biti prazan."
 
-#: apps/competition/forms.py:247
+#: apps/competition/forms.py:248
 #, python-format
 msgid "Unknown username \"%s\"."
 msgstr "Nepoznato korisničko ime \"%s\"."
 
-#: apps/competition/forms.py:250
+#: apps/competition/forms.py:251
 msgid "You are automatically added to the team."
 msgstr "Vi ste automatski dodani u tim."
 
-#: apps/competition/forms.py:257
+#: apps/competition/forms.py:258
 #, python-format
 msgid "User \"%s\" is already a member of a team."
 msgstr "Korisnik \"%s\" je već član nekog tima."
 
-#: apps/competition/forms.py:269
+#: apps/competition/forms.py:270
 msgid "Team name already used!"
 msgstr "Ime tima se već koristi."
 
-#: apps/competition/forms.py:296
+#: apps/competition/forms.py:297
 #, python-format
 msgid "Unknown team category '%s'!"
 msgstr "Nepoznata timska kategorija '%s'."
 
-#: apps/competition/forms.py:308
+#: apps/competition/forms.py:309
 msgid "Competitors"
 msgstr "Natjecatelji"
 
-#: apps/competition/forms.py:309
+#: apps/competition/forms.py:310
 msgid "Unofficial"
 msgstr "Neslužbeni"
 
-#: apps/competition/forms.py:310
+#: apps/competition/forms.py:311
 msgid "Administrators"
 msgstr "Administratori"
 
@@ -607,19 +607,27 @@ msgstr "Administratori"
 msgid "Position in the category."
 msgstr "Pozicija u kategoriji."
 
-#: apps/competition/views.py:576
+#: apps/competition/views.py:298 apps/competition/views.py:377
+#, python-format
+msgid "This task is worth %d point."
+msgid_plural "This task is worth %d points."
+msgstr[0] "Ovaj zadatak vrijedi %d bod."
+msgstr[1] "Ovaj zadatak vrijedi %d boda."
+msgstr[2] "Ovaj zadatak vrijedi %d bodova."
+
+#: apps/competition/views.py:588
 msgid "Number of admins that solved this task."
 msgstr "Broj administratora koji su riješili ovaj zadatak."
 
-#: apps/competition/views.py:780
+#: apps/competition/views.py:792
 msgid "Task:"
 msgstr "Zadatak:"
 
-#: apps/competition/views.py:784
+#: apps/competition/views.py:796
 msgid "Write the question / message here."
 msgstr "Napišite pitanje / poruku ovdje."
 
-#: apps/competition/views.py:844
+#: apps/competition/views.py:856
 msgid "Message"
 msgstr "Poruka"
 
@@ -996,7 +1004,7 @@ msgid "Category:"
 msgstr "Kategorija:"
 
 #: apps/competition/templates/competition_registration.html:97
-#: apps/competition/templates/competition_task_detail.html:65
+#: apps/competition/templates/competition_task_detail.html:71
 #: apps/competition/templates/competition_task_new.html:54
 #: apps/task/templates/task_bulk_new_2nd.html:28
 msgid "Submit"
@@ -1062,7 +1070,7 @@ msgid "Competition hasn't started yet!"
 msgstr "Natjecanje još nije počelo!"
 
 #: apps/competition/templates/competition_scoreboard.html:17
-#: apps/competition/templates/competition_task_detail.html:80
+#: apps/competition/templates/competition_task_detail.html:86
 #: apps/competition/templates/competition_task_list.html:37
 msgid "Competition has finished!"
 msgstr "Natjecanje je završilo!"
@@ -1096,44 +1104,44 @@ msgid ""
 "You haven't solved all the prerequisites for this task, but you're an admin."
 msgstr "Niste riješili sve preduvjete, ali ste administrator."
 
-#: apps/competition/templates/competition_task_detail.html:40
+#: apps/competition/templates/competition_task_detail.html:46
 #: apps/competition/templates/competition_team_detail.html:12
 msgid "Submissions:"
 msgstr "Poslana rješenja:"
 
-#: apps/competition/templates/competition_task_detail.html:46
+#: apps/competition/templates/competition_task_detail.html:52
 msgid "You've used all the attempts."
 msgstr "Iskoristili ste sve pokušaje."
 
-#: apps/competition/templates/competition_task_detail.html:57
+#: apps/competition/templates/competition_task_detail.html:63
 msgid "Attempts left:"
 msgstr "Preostalo pokušaja:"
 
-#: apps/competition/templates/competition_task_detail.html:76
+#: apps/competition/templates/competition_task_detail.html:82
 msgid "Send a clarification request"
 msgstr "Pošalji pitanje vezano uz zadatak"
 
-#: apps/competition/templates/competition_task_detail.html:89
+#: apps/competition/templates/competition_task_detail.html:95
 msgid "Next task"
 msgstr "Sljedeći zadatak"
 
-#: apps/competition/templates/competition_task_detail.html:92
+#: apps/competition/templates/competition_task_detail.html:98
 msgid "Last task in the chain."
 msgstr "Zadnji zadatak u lancu."
 
-#: apps/competition/templates/competition_task_detail.html:93
+#: apps/competition/templates/competition_task_detail.html:99
 msgid "Return to the task list"
 msgstr "Natrag na listu zadataka"
 
-#: apps/competition/templates/competition_task_detail.html:101
+#: apps/competition/templates/competition_task_detail.html:108
 msgid "Hide solution"
 msgstr "Sakrij rješenje"
 
-#: apps/competition/templates/competition_task_detail.html:102
+#: apps/competition/templates/competition_task_detail.html:109
 msgid "Show solution"
 msgstr "Prikaži rješenje"
 
-#: apps/competition/templates/competition_task_detail.html:112
+#: apps/competition/templates/competition_task_detail.html:118
 msgid "Submissions from all the teams (for admins only):"
 msgstr "Rješenja svih korisnika (samo za administratore):"
 
@@ -1151,43 +1159,43 @@ msgstr ""
 msgid "Please register for the competition to see the tasks."
 msgstr "Molimo registrirajte se za natjecanje kako biste vidjeli zadatke."
 
-#: apps/competition/templates/competition_task_list.html:97
+#: apps/competition/templates/competition_task_list.html:102
 msgid "Show/Hide the legend"
 msgstr "Prikaži/sakrij legendu"
 
-#: apps/competition/templates/competition_task_list.html:98
+#: apps/competition/templates/competition_task_list.html:103
 msgid "Legend"
 msgstr "Legenda"
 
-#: apps/competition/templates/competition_task_list.html:104
+#: apps/competition/templates/competition_task_list.html:109
 msgid "A successfully solved task"
 msgstr "Uspješno riješen zadatak"
 
-#: apps/competition/templates/competition_task_list.html:105
+#: apps/competition/templates/competition_task_list.html:110
 msgid "Used all attempts"
 msgstr "Iskorišteni svi pokušaji"
 
-#: apps/competition/templates/competition_task_list.html:106
+#: apps/competition/templates/competition_task_list.html:111
 msgid "An unlocked task"
 msgstr "Otključan zadatak"
 
-#: apps/competition/templates/competition_task_list.html:107
+#: apps/competition/templates/competition_task_list.html:112
 msgid "A task with a failed attempt"
 msgstr "Zadatak s neuspjelim pokušajem"
 
-#: apps/competition/templates/competition_task_list.html:108
+#: apps/competition/templates/competition_task_list.html:113
 msgid "A locked task"
 msgstr "Zaključan zadatak"
 
-#: apps/competition/templates/competition_task_list.html:109
+#: apps/competition/templates/competition_task_list.html:114
 msgid "Bonus won"
 msgstr "Bonus osvojen"
 
-#: apps/competition/templates/competition_task_list.html:110
+#: apps/competition/templates/competition_task_list.html:115
 msgid "Bonus not available anymore"
 msgstr "Bonus više nije dostupan"
 
-#: apps/competition/templates/competition_task_list.html:111
+#: apps/competition/templates/competition_task_list.html:116
 msgid "Bonus available, but not won"
 msgstr "Bonus dostupan, ali nije osvojen"
 
@@ -1437,7 +1445,7 @@ msgid "Warning:"
 msgstr "Upozorenje:"
 
 #: apps/mathcontent/templates/inc_mathcontent_bootstrap_preview.html:8
-#: apps/task/templates/task_bulk_new.html:79
+#: apps/task/templates/task_bulk_new.html:86
 msgid "Preview"
 msgstr "Pregled"
 
@@ -1568,7 +1576,7 @@ msgstr "Skriven"
 msgid "Name"
 msgstr "Naziv"
 
-#: apps/task/models.py:128
+#: apps/task/models.py:133
 msgid "Lecture video URL"
 msgstr "URL videa predavanja"
 
@@ -1599,23 +1607,23 @@ msgstr "Video"
 msgid "Bulk add"
 msgstr "Višestruko dodavanje"
 
-#: apps/task/templates/task_bulk_new.html:12
+#: apps/task/templates/task_bulk_new.html:19
 msgid "Short instructions"
 msgstr "Kratke upute"
 
-#: apps/task/templates/task_bulk_new.html:15
+#: apps/task/templates/task_bulk_new.html:22
 msgid "Separate different tasks with at least 3 empty lines."
 msgstr "Razdvojite zadatke s barem 3 prazna retka."
 
-#: apps/task/templates/task_bulk_new.html:16
+#: apps/task/templates/task_bulk_new.html:23
 msgid "To specify the name and other fields, write for example:"
 msgstr "Kako biste postavili vrijednosti polja, napišite npr.:"
 
-#: apps/task/templates/task_bulk_new.html:18
+#: apps/task/templates/task_bulk_new.html:25
 msgid "You can also specify your own variables:"
 msgstr "Možete također specificirati vlastite varijable:"
 
-#: apps/task/templates/task_bulk_new.html:23
+#: apps/task/templates/task_bulk_new.html:30
 msgid ""
 "All additions will be saved for future use and shown in the list at the "
 "bottom of this page."
@@ -1623,81 +1631,81 @@ msgstr ""
 "Sva dodavanja će biti spremljena za kasniju uporabu te će biti prikazana na "
 "dnu ove stranice."
 
-#: apps/task/templates/task_bulk_new.html:24
+#: apps/task/templates/task_bulk_new.html:31
 msgid "So, please specify the <i>Name</i>."
 msgstr "Tako da molimo da postavite <i>Naziv</i>."
 
-#: apps/task/templates/task_bulk_new.html:25
+#: apps/task/templates/task_bulk_new.html:32
 msgid ""
 "Also, if you check <i>Hidden</i>, the template will be visible to you only."
 msgstr ""
 "Također, označite li <i>Skriven</i>, predložak će biti vidljiv samo vama."
 
-#: apps/task/templates/task_bulk_new.html:26
+#: apps/task/templates/task_bulk_new.html:33
 msgid "Please look at the previous additions for further information."
 msgstr "Molimo pogledajte postojeća dodavanja za daljnje informacije."
 
-#: apps/task/templates/task_bulk_new.html:28
+#: apps/task/templates/task_bulk_new.html:35
 msgid "Press <b>Ctrl+M</b> for a preview."
 msgstr "Pritisnite <b>Ctrl+M</b> za pregled teksta."
 
-#: apps/task/templates/task_bulk_new.html:30
+#: apps/task/templates/task_bulk_new.html:37
 msgid "Standard fields:"
 msgstr "Standardna polja:"
 
-#: apps/task/templates/task_bulk_new.html:32
+#: apps/task/templates/task_bulk_new.html:39
 msgid "Username of the author (default: current user)."
 msgstr "Korisničko ime autora (default: trenutačni korisnik)."
 
-#: apps/task/templates/task_bulk_new.html:33
+#: apps/task/templates/task_bulk_new.html:40
 msgid "0 or 1."
 msgstr "0 ili 1."
 
-#: apps/task/templates/task_bulk_new.html:34
+#: apps/task/templates/task_bulk_new.html:41
 msgid "Task name/title (must be nonempty)."
 msgstr "Naziv/naslov zadatka (mora biti neprazan)."
 
-#: apps/task/templates/task_bulk_new.html:35
+#: apps/task/templates/task_bulk_new.html:42
 msgid "Task source."
 msgstr "Izvor zadatka."
 
-#: apps/task/templates/task_bulk_new.html:36
+#: apps/task/templates/task_bulk_new.html:43
 msgid "Comma-separated list of tags."
 msgstr "Popis oznaka odvojenih zarezom."
 
-#: apps/task/templates/task_bulk_new.html:38
+#: apps/task/templates/task_bulk_new.html:45
 msgid "Special values:"
 msgstr "Specijalne vrijednosti:"
 
-#: apps/task/templates/task_bulk_new.html:40
+#: apps/task/templates/task_bulk_new.html:47
 msgid "Difficulty rating to automatically assign by the author."
 msgstr "Ocjena težine zadatka koja se automatski doda za autora."
 
-#: apps/task/templates/task_bulk_new.html:41
+#: apps/task/templates/task_bulk_new.html:48
 msgid "ID of the target container folder."
 msgstr "ID ciljanog direktorija."
 
-#: apps/task/templates/task_bulk_new.html:42
+#: apps/task/templates/task_bulk_new.html:49
 msgid "Position of the task in the folder."
 msgstr "Pozicija u direktoriju."
 
-#: apps/task/templates/task_bulk_new.html:44
+#: apps/task/templates/task_bulk_new.html:51
 msgid "Automatically specified variables:"
 msgstr "Automatski postavljene varijable:"
 
-#: apps/task/templates/task_bulk_new.html:46
+#: apps/task/templates/task_bulk_new.html:53
 msgid "Task number, affected by @CLEAR_PERM."
 msgstr "Broj zadatka, ovisi o @CLEAR_PERM."
 
-#: apps/task/templates/task_bulk_new.html:47
+#: apps/task/templates/task_bulk_new.html:54
 msgid "Task number, not affected by @CLEAR_PERM."
 msgstr "Broj zadatka, ne ovisi o @CLEAR_PERM."
 
-#: apps/task/templates/task_bulk_new.html:49
+#: apps/task/templates/task_bulk_new.html:56
 msgid "Commands:"
 msgstr "Naredbe:"
 
-#: apps/task/templates/task_bulk_new.html:52
+#: apps/task/templates/task_bulk_new.html:59
 msgid ""
 "Grant the user/group a permission. Users and permissions are separated by a "
 "plus sign. Permissions are:"
@@ -1705,19 +1713,19 @@ msgstr ""
 "Dodijeljuje korisniku/grupi privilegiju. Korisnici i privilegije se odvajaju "
 "znakom plus. Privilegije su:"
 
-#: apps/task/templates/task_bulk_new.html:54
+#: apps/task/templates/task_bulk_new.html:61
 msgid "Resets the permissions list."
 msgstr "Resetira popis privilegija."
 
-#: apps/task/templates/task_bulk_new.html:55
+#: apps/task/templates/task_bulk_new.html:62
 msgid "Resets COUNTER variable to 1."
 msgstr "Resetira varijablu COUNTER na 1."
 
-#: apps/task/templates/task_bulk_new.html:57
+#: apps/task/templates/task_bulk_new.html:64
 msgid "Other special features:"
 msgstr "Ostale specijalne opcije:"
 
-#: apps/task/templates/task_bulk_new.html:59
+#: apps/task/templates/task_bulk_new.html:66
 msgid ""
 "You can multiply a variable (only if an integer) with a constant integer "
 "factor, e.g.:"
@@ -1725,16 +1733,16 @@ msgstr ""
 "Možete množiti varijablu (samo ako je cijeli broj) konstantnim cijelim "
 "brojem, npr.:"
 
-#: apps/task/templates/task_bulk_new.html:75
+#: apps/task/templates/task_bulk_new.html:82
 #: apps/userprofile/templates/registration/activation_complete.html:15
 msgid "Continue"
 msgstr "Nastavi"
 
-#: apps/task/templates/task_bulk_new.html:81
+#: apps/task/templates/task_bulk_new.html:88
 msgid "Loading..."
 msgstr "Učitavanje..."
 
-#: apps/task/templates/task_bulk_new.html:88
+#: apps/task/templates/task_bulk_new.html:95
 msgid "Previous additions"
 msgstr "Prethodna dodavanja"
 

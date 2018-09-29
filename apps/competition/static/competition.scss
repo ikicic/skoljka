@@ -260,6 +260,7 @@ td.comp-chain-tasks {
     display: block;
     float: left;
     height: 18px;
+    text-align: center;
   }
 }
 
@@ -372,7 +373,7 @@ div#ctask-legend-container {
   margin: 8px 0px 23px 0px;
 }
 
-.ctask-submissions-count, .ctask-format-help {
+.ctask-submissions-count, .ctask-format-help, .ctask-score-text {
   color: gray;
   font-size: 12px;
   font-style: italic;

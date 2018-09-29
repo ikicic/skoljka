@@ -70,10 +70,15 @@
                   <a data-id="{{ ctask.id }}"
                       class="ctask {% ctask_class ctask %}"
                       style="width: {% percentage 1 chain.ctasks|length %}"
-                      href="{{ ctask.get_absolute_url }}"></a>
+                      title="{{ ctask.t_title }}"
+                      href="{{ ctask.get_absolute_url }}">
+                    {{ ctask.t_link_text }}
+                  </a>
                 {% else %}
                   <div class="ctask {% ctask_class ctask %}"
-                      style="width: {% percentage 1 chain.ctasks|length %}">
+                       style="width: {% percentage 1 chain.ctasks|length %}"
+                       title="{{ ctask.t_title }}">
+                    {{ ctask.t_link_text }}
                   </div>
                 {% endif %}
               {% endfor %}

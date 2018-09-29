@@ -7,7 +7,7 @@ from django.forms.models import modelformset_factory
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, ungettext
 
 from mathcontent.models import MathContent
 from mathcontent.latex import latex_escape
@@ -292,6 +292,12 @@ def task_list(request, competition, data):
         ctask.competition = competition # use preloaded object
         ctask.t_submission_count = 0
         ctask.t_is_solved = False
+        if ctask.score > 1:
+            ctask.t_link_text = ctask.score
+            ctask.t_title = ungettext(
+                    "This task is worth %d point.",
+                    "This task is worth %d points.",
+                    ctask.score) % ctask.score
         if ctask.chain_id in all_chains_dict:
             chain = all_chains_dict[ctask.chain_id]
             ctask.chain = chain
@@ -365,6 +371,12 @@ def task_detail(request, competition, data, ctask_id):
         if (not team and not data['has_finished']) or not data['has_started'] \
                 or ctask.chain.unlock_minutes > data['minutes_passed']:
             raise Http404
+
+    if ctask.score > 1:
+        ctask.t_score_text = ungettext(
+                "This task is worth %d point.",
+                "This task is worth %d points.",
+                ctask.score) % ctask.score
 
     evaluator = get_evaluator(competition.evaluator_version)
     variables = safe_parse_descriptor(evaluator, ctask.descriptor)
