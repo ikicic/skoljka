@@ -23,10 +23,6 @@
   </div>
 {% endif %}
 
-<i>
-  {% trans "Hint: Press <b>Ctrl+M</b> to preview the formatted text." %}
-</i>
-
 <form method="POST" action="" class="form-horizontal fix-bootstrap-form">
   {% csrf_token %}
   {% for hidden_field in form.hidden_fields %}
@@ -68,5 +64,20 @@
     </a>
   {% endif %}
 </form>
+
+<br>
+<i>
+  {% trans "Hint: Press <b>Ctrl+M</b> to preview the formatted text." %}<br>
+  {% trans "Format instructions can be found here:" %} <a href="/help/format/" target="_blank">link</a><br>
+  <br>
+  {% trans "Instructions to add images:" %}
+  <ol>
+    <li>{% trans "Click here:" %} <a href="/mathcontent/{{ ctask.task.content_id }}/attachments/" target="_blank">{% trans "Attachments" %}</a></li>
+    <li>{% trans "Upload the image." %}</li>
+    <li>{% trans "Add the following code to the text:" %}<code>\includegraphics{filename.png}</code></li>
+  </ol>
+  {% trans "Note 1: Probably only the author of the task can edit the attachments..." %}<br>
+  {% trans "Note 2: The image will not be available in the preview mode, you have to save changes to see the result." %}
+</i>
 
 {% endblock content %}

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-29 20:22+0200\n"
+"POT-Creation-Date: 2018-09-29 20:35+0200\n"
 "PO-Revision-Date: 2017-10-03 01:49+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
@@ -866,7 +866,7 @@ msgstr "Pregled lanca"
 
 #: apps/competition/templates/competition_chain_overview.html:17
 #: apps/competition/templates/competition_task_detail.html:10
-#: apps/competition/templates/competition_task_new.html:36
+#: apps/competition/templates/competition_task_new.html:32
 #: apps/task/templates/inc_task_bulk_preview_single.html:19
 msgid "Author:"
 msgstr "Autor:"
@@ -1005,7 +1005,7 @@ msgstr "Kategorija:"
 
 #: apps/competition/templates/competition_registration.html:97
 #: apps/competition/templates/competition_task_detail.html:71
-#: apps/competition/templates/competition_task_new.html:54
+#: apps/competition/templates/competition_task_new.html:50
 #: apps/task/templates/task_bulk_new_2nd.html:28
 msgid "Submit"
 msgstr "Pošalji"
@@ -1216,25 +1216,64 @@ msgid ""
 msgstr ""
 "Ako namjeravati pregledavati zadatak, molimo ne gledajte rješenje in advance."
 
-#: apps/competition/templates/competition_task_new.html:27
-msgid "Hint: Press <b>Ctrl+M</b> to preview the formatted text."
-msgstr "Pritisnite <b>Ctrl+M</b> za pregled formatiranog teksta."
-
-#: apps/competition/templates/competition_task_new.html:52
+#: apps/competition/templates/competition_task_new.html:48
 msgid "Save changes"
 msgstr "Spremi promjene"
 
-#: apps/competition/templates/competition_task_new.html:59
+#: apps/competition/templates/competition_task_new.html:55
 msgid "Submit and create new task"
 msgstr "Pošalji i napravi novi zadatak"
 
-#: apps/competition/templates/competition_task_new.html:63
+#: apps/competition/templates/competition_task_new.html:59
 msgid "Submit and go to the task list"
 msgstr "Pošalji i odi na listu zadataka"
 
-#: apps/competition/templates/competition_task_new.html:67
+#: apps/competition/templates/competition_task_new.html:63
 msgid "Go to task"
 msgstr "Otvori zadatak"
+
+#: apps/competition/templates/competition_task_new.html:70
+msgid "Hint: Press <b>Ctrl+M</b> to preview the formatted text."
+msgstr "Pritisnite <b>Ctrl+M</b> za pregled formatiranog teksta."
+
+#: apps/competition/templates/competition_task_new.html:71
+msgid "Format instructions can be found here:"
+msgstr "Upute o formatu možete pronaći ovdje:"
+
+#: apps/competition/templates/competition_task_new.html:73
+msgid "Instructions to add images:"
+msgstr "Upute za dodavanje slika"
+
+#: apps/competition/templates/competition_task_new.html:75
+msgid "Click here:"
+msgstr "Pritisnite ovdje:"
+
+#: apps/competition/templates/competition_task_new.html:75
+msgid "Attachments"
+msgstr "Datoteke"
+
+#: apps/competition/templates/competition_task_new.html:76
+msgid "Upload the image."
+msgstr "Uploadajte sliku."
+
+#: apps/competition/templates/competition_task_new.html:77
+msgid "Add the following code to the text:"
+msgstr "Dodajte sljedeći tekst:"
+
+#: apps/competition/templates/competition_task_new.html:79
+msgid ""
+"Note 1: Probably only the author of the task can edit the attachments..."
+msgstr ""
+"Komentar 1: Vjerojatno samo autor zadatka može pristupiti datotekama "
+"(slikama)..."
+
+#: apps/competition/templates/competition_task_new.html:80
+msgid ""
+"Note 2: The image will not be available in the preview mode, you have to "
+"save changes to see the result."
+msgstr ""
+"Komentar 2: Slika neće biti vidljiva u pregledu, morate spremiti promjene "
+"kako biste vidjeli konačan rezultat."
 
 #: apps/competition/templates/inc_competition_chain_ctask_tr.html:29
 msgid "Remove"
