@@ -59,7 +59,7 @@
     <ul class="nav nav-list">
       <li class="nav-header">{% trans "Menu" %}</li>
       <li><a href="{% comp_url '' %}">{% trans "Home" %}</a></li>
-      {% if not team and not has_finished and current_time > competition.registration_open_date %}
+      {% if not team and not has_finished and current_time > competition.registration_open_date or is_admin %}
         <li><a href="{% comp_url 'registration' %}" class="register">
             {% trans "Registration" %}</a></li>
       {% endif %}
