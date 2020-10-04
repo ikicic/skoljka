@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 # Run this from the skoljka's (repository) root folder!
 
 # subversion (svn): used to install jquery-star-rating-plugin

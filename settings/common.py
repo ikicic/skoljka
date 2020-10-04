@@ -31,6 +31,7 @@ APPS_DIR = os.path.normpath(os.path.join(PROJECT_ROOT, 'apps'))
 LOCAL_DIR = os.path.normpath(os.path.join(PROJECT_ROOT, 'local'))
 SECRET_FILE = os.path.normpath(os.path.join(LOCAL_DIR, 'SECRET'))
 
+# TODO: Remove this from path.
 sys.path.append(APPS_DIR)
 
 
