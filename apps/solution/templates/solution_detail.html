@@ -19,14 +19,14 @@
       <div class="btn-group">
         {% if can_mark_as_official %}
           {% if solution.is_official %}
-            <button class="btn btn-mini" name="action" value="official0">{% trans "Unmark as official" context "solution" %} Makni oznaku službeno</button>
+            <button class="btn btn-mini" name="action" value="official0">{% trans "Unmark as official" context "solution" %}</button>
           {% else %}
             <button class="btn btn-mini" name="action" value="official1">{% trans "Mark as official" context "solution" %}</button>
           {% endif %}
         {% endif %}
         {% ifequal solution.author.id user.id %}
           <button class="btn btn-mini" name="action" value="blank" title="Staro rješenje će ostati spremljeno za ponovno slanje, ali neće biti inače vidljivo.">Izbriši rješenje</button>
-          <button class="btn btn-mini" name="action" value="as_solved" title="Tekst rješenja neće biti vidljiv.">Označi kao riješeno</button>
+          <button class="btn btn-mini" name="action" value="as_solved" title="Tekst rješenja neće biti vidljiv.">{% trans "Mark as solved" %}</button>
           <button class="btn btn-mini" name="action" value="todo" title="Tekst rješenja neće biti vidljiv.">To Do</button>
           <a class="btn btn-mini" href="/solution/{{ solution.pk }}/edit/">{% trans "Edit" context "action" %}</a>
         {% endifequal %}
@@ -34,7 +34,7 @@
     </form>
   {% endif %}
   {% if solution.is_official %}
-    <span class="label label-info">Službeno rješenje</span>
+    <span class="label label-info">{% trans "Official solution" %}</span>
   {% endif %}
   {% if user.is_authenticated and user != solution.author %}
       {% rating_box "Točnost" solution.correctness 1 %}

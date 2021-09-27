@@ -1,6 +1,6 @@
 {% extends "usergroup_base.html" %}
 
-{% block title %}Članovi grupe {{ group.name }}{% endblock %}
+{% block title %}{% blocktrans %}Members of group {{ group.name }}{% endblocktrans %}{% endblock %}
 
 {% block inner_content %}
 
@@ -11,7 +11,7 @@
     <td>{{ forloop.counter }}</td>
     <td>{{ x|userlink }}</td>
     <td>
-      {% if x == group.data.author %}Autor{% endif %}
+      {% if x == group.data.author %}{% trans "Author" %}{% endif %}
     </td>
     <td>
       <a href="/pm/new/{{ x.username }}/" title="Pošalji poruku">
@@ -20,24 +20,24 @@
     </td>
   </tr>
 {% empty %}
-  <tr><td><i>Nema članova</i></td></tr>
+  <tr><td><i>{% trans "No members" %}</i></td></tr>
 {% endfor %}
 </table>
 
 {% if can_edit_permissions %}
   <a href="/permissions/edit/{{ group_content_type.id }}/{{ group.id }}/"
      class="btn">
-    Privilegije
+    {% trans "Permissions" %}
   </a>
 {% endif %}
 
 {% if can_add_members %}
   <br><br><br>
-  Dodaj nove članove:
+  {% trans "Add new members" %}
   <form action="/usergroup/{{ group.pk }}/members/" method="POST">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn">Dodaj</button>    
+    <button type="submit" class="btn">{% trans "Add" %}</button>
   </form>
 {% endif %}
 

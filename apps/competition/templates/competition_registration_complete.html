@@ -3,16 +3,16 @@
 
 {% block content %}
 
-<h3 class="comp-header">Registracija</h3>
+<h3 class="comp-header">{% trans "Registration" %}</h3>
 
 <div class="alert alert-success">
   {% trans "Team successfully registered!" %}
 </div>
 
 {% if has_started %}
-  <p>{% trans "Tasks and results are available in the menu. Good luck!" %}
+  <p>{% trans "Problems and results are available in the menu. Good luck!" %}
 {% else %}
-  <p>{% blocktrans %}After the competition starts, the tasks and the results
+  <p>{% blocktrans %}Once the competition starts, the problems and the results
   will be available in the menu. Good luck!{% endblocktrans %}</p>
 {% endif %}
 

@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Memberlist{% endblock %}
+{% block title %}{% trans "Memberlist" %}{% endblock %}
 
 {% block content %}
 
 <table id="memberlist" class="table-striped table-condensed">
   <tr>
     <th>#</th>
-    <th>Korisnik</th>
-    <th>Ime</th>
-    <th>Prezime</th>
-    <th>Član od</th>
+    <th>{% trans "User" %}</th>
+    <th>{% trans "First name" %}</th>
+    <th>{% trans "Last name" %}</th>
+    <th>{% trans "Member since" %}</th>
   </tr>
   {% for x in user_list %}
     <tr>
@@ -22,7 +22,7 @@
     </tr>
   {% empty %}
     <tr>
-      <td colspan="6">Nema registriranih korisnika</td>
+      <td colspan="6">{% trans "No registered users" %}</td>
     </tr>
   {% endfor %}
 </table>

@@ -27,7 +27,7 @@
 {% if ctask.t_is_locked %}
   {# if not admin, the request would be rejected anyway #}
   <div class="alert">
-    {% trans "You haven't solved all the prerequisites for this task, but you're an admin." %}
+    {% trans "You see this problem as an admin, despite not having solved all prerequisites." %}
   </div>
 {% endif %}
 
@@ -49,7 +49,7 @@
 
   {% if submissions|length >= ctask.max_submissions and not is_solved %}
     <div class="ctask-submissions-count">
-      {% trans "You've used all the attempts." %}
+      {% trans "You've used up all available attempts." %}
     </div>
   {% endif %}
 
@@ -79,7 +79,7 @@
         {% endif %}
       </form>
       <a href="{{ ctask.get_send_clarification_request_url }}">
-        {% trans "Send a clarification request" %}
+        {% trans "Ask for a clarification" %}
       </a>
     {% else %}
       <div class="ctask-submit-already-finished">
@@ -92,11 +92,11 @@
     <br><br>
     {% if ctask.t_next %}
       <a href="{{ ctask.t_next.get_absolute_url }}"
-        class="btn btn-primary"> {% trans "Next task" %}</a>
+        class="btn btn-primary"> {% trans "Next problem" %}</a>
     {% else %}
       <a href="{% comp_url 'task' %}" class="btn btn-primary"
-          title="{% trans "Last task in the chain." %}">
-        {% trans "Return to the task list" %}
+          title="{% trans "Last problem in the chain." %}">
+        {% trans "Return to the problem list" %}
       </a>
     {% endif %}
   {% endif %}

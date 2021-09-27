@@ -8,7 +8,7 @@
 {# This template not reachable for has_finished=True case. #}
 
 {% if competition.registration_open_date > current_time %}
-  <h3 class="comp-header">Registracija</h3>
+  <h3 class="comp-header">{% trans "Registration" %}</h3>
   <div class="alert">{% trans "Registration not open yet." %}</div>
 
   {% if is_admin %}
@@ -26,7 +26,7 @@
 
 {% if current_time >= competition.registration_open_date or is_admin %}
   {% if not has_finished and not team and team_invitations %}
-    <h3 class="comp-header">Pozivnice</h3>
+    <h3 class="comp-header">{% trans "Invitations" %}</h3>
     <form action="{{ requst.get_full_path }}" method="POST" class="row row-fix">
       {% csrf_token %}
       <table id="creg-invitations-table" class="span6">
@@ -65,9 +65,9 @@
         if any.</p>
         <p>In the case they have an account on školjka, press "Invite user"
         and enter their usernames. After submitting the form, invitations
-        will be sent to the selected users, which they will be able to
-        accept by visiting this same page (Registration) with their accounts
-        and pressing "Accept invitation".</p>
+        will be sent to the selected users. To accept the invitation, the
+        invited users should visit this same page (Registration) from their
+        accounts and press "Accept invitation".</p>
       {% endblocktrans %}
     </div>
 
@@ -105,8 +105,8 @@
   <br>
   <div class="alert">
     As an administrator, you can create a private admin team used for reviewing
-    the tasks. In parallel to that team, you can have a normal team (NOT YET).
-    Switching between the teams will be available in the menu.
+    the problems. In parallel to that team, you can have a normal team (NOT YET
+    IMPLEMENTED). Switching between the teams will be available in the menu.
 
     <form method="POST" action="{{ request.get_full_path }}">
       {% csrf_token %}

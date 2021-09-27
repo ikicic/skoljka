@@ -19,7 +19,7 @@
     <a href="#" class="auto-toggler" data-target="descriptor-field">
       {% trans "Show/hide the solution" %}
     </a><br>
-    {% trans "If you want to review the task please don't look at the solution in advance." %}
+    {% trans "If you want to review the problem please don't look at the solution in advance." %}
   </div>
 {% endif %}
 
@@ -52,15 +52,15 @@
   </button>
   {% if not ctask %}
     <button type="submit" name="next" value="next" class="btn">
-      {% trans "Submit and create new task" %}
+      {% trans "Submit and create new problem" %}
     </button>
   {% endif %}
   <button type="submit" name="next" value="tasks" class="btn">
-    {% trans "Submit and go to the task list" %}
+    {% trans "Submit and go to the problem list" %}
   </button>
   {% if ctask %}
     <a class="btn" href="{{ ctask.get_absolute_url }}">
-      {% trans "Go to task" %}
+      {% trans "Go to problem" %}
     </a>
   {% endif %}
 </form>
@@ -76,7 +76,7 @@
     <li>{% trans "Upload the image." %}</li>
     <li>{% trans "Add the following code to the text:" %}<code>\includegraphics{filename.png}</code></li>
   </ol>
-  {% trans "Note 1: Probably only the author of the task can edit the attachments..." %}<br>
+  {% trans "Note 1: Probably only the author of the problem can edit the attachments..." %}<br>
   {% trans "Note 2: The image will not be available in the preview mode, you have to save changes to see the result." %}
 </i>
 

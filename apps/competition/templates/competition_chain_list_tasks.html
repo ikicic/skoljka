@@ -35,7 +35,7 @@
 </h3>
 <div id="instructions" style="display:none;">
   <p>
-    {% blocktrans %}To add a task, click "New task". After adding tasks, to
+    {% blocktrans %}To add a task (problem), click "New task". After adding tasks, to
     create a chain, first select the tasks you want to include in the chain (by
     clicking anywhere on the corresponding table row), fill out the name
     (title) and category of the chain, and click "Create chain".{% endblocktrans %}
@@ -111,7 +111,7 @@
 </form>
 
 <br><br>
-<h3 class="comp-header">{% trans "Chains (used tasks)" %}</h3>
+<h3 class="comp-header">{% trans "Chains (used problems)" %}</h3>
 
 <form method="POST" action="{% comp_url 'chain/tasks/action' %}">
   {% csrf_token %}

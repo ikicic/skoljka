@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<h3 class="comp-header">Pravila natjecanja</h3>
+<h3 class="comp-header">{% trans "Competition rules" %}</h3>
 
 {% if competition.rules_template_filename %}
   {% include competition.rules_template_filename %}

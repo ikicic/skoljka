@@ -10,8 +10,8 @@
     {% if user.is_authenticated %}
       <div class="post-action">
         {# Again... no whitespace here... #}
-        <a href="#post" class="post-reply" id="pr{{ post.pk }}">Odgovori</a>{% if post.cache_can_edit %}<br>
-          <a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">Uredi</a>
+        <a href="#post" class="post-reply" id="pr{{ post.pk }}">{% trans "Reply" %}</a>{% if post.cache_can_edit %}<br>
+          <a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">{% trans "Edit" %}</a>
         {% endif %}
       </div>
     {% endif %}

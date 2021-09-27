@@ -25,7 +25,7 @@
         <button type="submit" class="btn btn-primary">
           {% if edit %}Pošalji{% else %}Napravi novu grupu{% endif %}
         </button>
-        <a href="/usergroup/{% if edit %}{{ group.id }}/{% endif %}" class="btn">Odustani</a>
+        <a href="/usergroup/{% if edit %}{{ group.id }}/{% endif %}" class="btn">{% trans "Cancel" %}</a>
       </td>
     </tr>
   </table>
