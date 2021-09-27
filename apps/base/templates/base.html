@@ -56,6 +56,11 @@
           ><input type="submit" class="btn" value="Prijava">
         </form>
       {% endif %}
+      <form action="/i18n/setlang/" method="POST" id="hbar-flags" class="hidden-phone">
+        {% csrf_token %}
+        <button name="language" value="en" class="btn-link"><img src="/static/images/flags/uk.png" alt="[en]" title="English"></button>
+        <button name="language" value="hr" class="btn-link"><img src="/static/images/flags/hr.png" alt="[hr]" title="Hrvatski"></button>
+      </form>
       <a id="hbar-collapse-sidebar" class="collapse-button btn"
           data-target="sidebar" href="#">
       </a>
@@ -123,7 +128,7 @@
 
 <div id="footer">
   <span>
-    Školjka {% settings_constant VERSION_FOOTER %} © 2018 Ivica Kičić &amp;
+    Školjka {% settings_constant VERSION_FOOTER %} © 2014-2021 Ivica Kičić &amp;
     <a href="http://mnm.hr/" target="_blank">MNM</a>.
   </span>
   <span>

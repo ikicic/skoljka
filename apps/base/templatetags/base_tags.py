@@ -2,6 +2,7 @@ from django import template
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.template.base import TemplateSyntaxError
+from django.utils.translation import ugettext as _
 
 from search.utils import search_tasks
 
@@ -80,7 +81,7 @@ def show_news(context, div_class=None, title=None):
     return {
         'news': news,
         'div_class': div_class,
-        'title': title,
+        'title': _(title),
         'user': context['user'],
     }
 

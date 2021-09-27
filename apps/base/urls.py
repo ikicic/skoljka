@@ -20,6 +20,8 @@ urlpatterns = patterns('',
     (r'^featured_lecture/', 'base.views.featured_lecture'),
     (r'^tou/$', direct_to_template, {'template': 'terms_of_use.html'}),
 
+    (r'^i18n/', include('django.conf.urls.i18n')),
+
     *_EXTRA_URLS
 )
 

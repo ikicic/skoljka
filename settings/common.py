@@ -149,8 +149,9 @@ LOGIN_REDIRECT_URL = '/'
 ######################################
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -283,11 +284,12 @@ ACCOUNT_ACTIVATION_DAYS = 7
 ######################################
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#languages
+# https://django.readthedocs.io/en/1.4.X/topics/i18n/translation.html#how-django-discovers-language-preference
 gettext_dummy = lambda s: s
 
 # Define languages -> otherwise templates will be compiled in all possible languages
 LANGUAGES = (
-     # ('en', gettext_dummy('English')),
+     ('en', gettext_dummy('English')),
      ('hr', gettext_dummy('Croatian')),
 )
 

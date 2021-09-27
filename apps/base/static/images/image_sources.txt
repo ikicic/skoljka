@@ -16,3 +16,7 @@ tex16.png - http://findicons.com/icon/238048/text_x_bibtex
 
 findicons.com (jg-visuals)
 recycle_bin_full.png - http://findicons.com/icon/92368/recycle_bin_full
+
+flagpedia.net
+flags/hr.png - https://flagpedia.net/download/icons
+flags/uk.png - https://flagpedia.net/download/icons (gb.png)
