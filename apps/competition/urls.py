@@ -7,7 +7,8 @@ def _make_patterns(*patterns):
     result = []
     shorthands = settings.COMPETITION_URLS
     for competition_id, url_path_prefix in shorthands.iteritems():
-        for _regex, view in patterns:
+        special = settings.COMPETITION_SPECIAL_URLS.get(competition_id, [])
+        for _regex, view in list(patterns) + list(special):
             regex = '^' + join_urls(url_path_prefix, _regex)
             result.append(url(regex, view, {'competition_id': competition_id}))
 

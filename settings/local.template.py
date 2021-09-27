@@ -108,6 +108,10 @@ COMPETITION_URLS = {  # no leading slashes!
     # 1: 'marinada/',
 }
 
+COMPETITION_SPECIAL_URLS = {
+    # 1: [(r'something1/', view1), (r'something2/', view2)],
+}
+
 DISABLE_PREF_COOKIES = True
 
 EXTRA_HEADER_TOP = ""
