@@ -2,11 +2,11 @@
 
 {% load mathcontent_tags %}
 
-{% block title %}Slanje rješenja{% endblock %}
+{% block title %}{% trans "Submit a solution" context "title" %}{% endblock %}
 
 {% block content %}
 
-Zadatak: {{ task.get_link }}
+{% trans "Task" %}: {{ task.get_link }}
 <div class="task-container mc-hover-area outset">
   {% mathcontent_render task.content %}
 </div>
@@ -14,7 +14,7 @@ Zadatak: {{ task.get_link }}
 <form id="solution-submit-form" action="{{ action_url }}" method="post">
   {% csrf_token %}
   {{ form.text }}
-  <input type="submit" class="btn btn-primary" value="Submit" />
+  <input type="submit" class="btn btn-primary" value="{% trans "Submit" %}" />
 </form>
 
 {% endblock content %}

@@ -13,7 +13,7 @@
 {% if can_edit or can_select_as_featured %}
   <div id="task-detail-top-action" class="btn-group">
     {% if can_edit %}
-      <a href="/task/{{ task.pk }}/edit/" class="btn">Uredi</a>
+      <a href="/task/{{ task.pk }}/edit/" class="btn">{% trans "Edit" context "action" %}</a>
     {% endif %}
     {% if can_select_as_featured %}
       <form action="/featured_lecture/" method="POST" style="display: inline;">
@@ -55,10 +55,10 @@
     {% tag_list task %}
     <div>
       <a href="/task/export/latex/{{ task.id }}/">
-        <img src="/static/images/tex16.png" alt="LaTeX" title="Export to LaTeX">
+        <img src="/static/images/tex16.png" alt="LaTeX" title="{% trans "Export to LaTeX" %}">
       </a>
       <a href="/task/export/pdf/{{ task.id }}/">
-        <img src="/static/images/pdf16.png" alt="PDF" title="Export to PDF">
+        <img src="/static/images/pdf16.png" alt="PDF" title="{% trans "Export to PDF" %}">
       </a>
     </div>
   </div>

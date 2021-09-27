@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-29 23:42+0200\n"
+"POT-Creation-Date: 2021-09-27 23:55+0200\n"
 "PO-Revision-Date: 2017-10-03 01:49+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
@@ -14,6 +14,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2\n"
+
+#: apps/activity/templates/inc_recent_activity.html:21
+msgid "No recent activities"
+msgstr "Nema nedavnih aktivnosti"
 
 #: apps/base/help.py:21
 msgid "Partially supported."
@@ -212,20 +216,207 @@ msgstr "Neki tekst."
 msgid "Incomplete."
 msgstr "Nedovršeno."
 
-#: apps/base/templates/base.html:81
+#: apps/base/templates/about.html:3 apps/base/templates/base.html:114
+msgid "About"
+msgstr "O nama"
+
+#: apps/base/templates/about.html:16
+msgid "Online archive of tasks from mathematical competitions"
+msgstr "Online arhiva natjecateljskih zadataka iz matematike"
+
+#: apps/base/templates/about.html:23
+msgid "Developers"
+msgstr "Developeri"
+
+#: apps/base/templates/about.html:28
+msgid "Maintained by"
+msgstr "Održava"
+
+#: apps/base/templates/about.html:31
+msgid "Sources"
+msgstr "Izvori"
+
+#: apps/base/templates/about.html:34
+msgid "Contact"
+msgstr "Kontakt"
+
+#: apps/base/templates/base.html:18
+msgid "Web archive of math problems"
+msgstr "Web arhiva zadataka iz matematike"
+
+#: apps/base/templates/base.html:21
+msgid ""
+"Web archive of math problems, including previous state and regional "
+"competitions and International and Middle-european math olympiads. Školjka "
+"can help any student training for math competitions."
+msgstr ""
+"Web arhiva zadataka iz matematike. Sadrži zadatke s prijašnjih državnih, "
+"županijskih, općinskih natjecanja te Međunarodnih i Srednjoeuropskih "
+"olimpijada. Školjka može poslužiti svakom učeniku koji se želi pripremati za "
+"natjecanja iz matematike."
+
+#: apps/base/templates/base.html:37
+msgid "Map editing"
+msgstr "Uređivanje mape"
+
+#: apps/base/templates/base.html:52 apps/userprofile/forms.py:22
+#: apps/userprofile/forms.py:36
+msgid "Username"
+msgstr "Korisničko ime"
+
+#: apps/base/templates/base.html:55 apps/userprofile/forms.py:23
+#: apps/userprofile/forms.py:42
+msgid "Password"
+msgstr "Lozinka"
+
+#: apps/base/templates/base.html:56 apps/base/templates/base.html.py:101
+#: apps/base/templates/homepage_offline.html:17
+msgid "Sign in"
+msgstr "Prijava"
+
+#: apps/base/templates/base.html:75
+msgid "Hello"
+msgstr "Zdravo"
+
+#: apps/base/templates/base.html:79
+#: apps/competition/templates/competition_base.html:60
+msgid "Menu"
+msgstr "Izbornik"
+
+#: apps/base/templates/base.html:80
+#: apps/competition/templates/competition_base.html:61
+msgid "Home"
+msgstr "Početna"
+
+#: apps/base/templates/base.html:82
+msgid "Task archive"
+msgstr "Arhiva zadataka"
+
+#: apps/base/templates/base.html:86
 #: apps/task/templates/task_lectures_list.html:8
 #: apps/task/templates/task_lectures_list.html:12
 msgid "Lectures"
 msgstr "Predavanja"
 
-#: apps/base/templates/base.html:130
+#: apps/base/templates/base.html:87
+#: apps/competition/templates/competition_list.html:6
+msgid "Competitions"
+msgstr "Natjecanja"
+
+#: apps/base/templates/base.html:96
+msgid "Users"
+msgstr "Korisnici"
+
+#: apps/base/templates/base.html:98
+msgid "Groups"
+msgstr "Grupe"
+
+#: apps/base/templates/base.html:100
+#: apps/base/templates/homepage_offline.html:12
+#: apps/base/templates/homepage_offline.html:20
+#: apps/competition/templates/competition_base.html:64
+#: apps/competition/templates/competition_list.html:37
+#: apps/userprofile/templates/registration/registration_form.html:4
+#: apps/userprofile/templates/registration/registration_form.html:10
+msgid "Registration"
+msgstr "Registracija"
+
+#: apps/base/templates/base.html:104
+msgid "All tasks"
+msgstr "Svi zadaci"
+
+#: apps/base/templates/base.html:105
+#: apps/solution/templates/inc_solution_list.html:27
+#: apps/solution/templates/solution_list.html:3
+msgid "Solutions"
+msgstr "Rješenja"
+
+#: apps/base/templates/base.html:106
+#: apps/search/templates/inc_search_inline.html:3
+#: apps/search/templates/search.html:6
+msgctxt "menu"
+msgid "Search"
+msgstr "Pretraživanje"
+
+#: apps/base/templates/base.html:109
+msgid "Sign out"
+msgstr "Odjava"
+
+#: apps/base/templates/base.html:113 apps/competition/forms.py:81
+#: apps/task/templates/task_new.html:91
+msgid "Help"
+msgstr "Pomoć"
+
+#: apps/base/templates/base.html:135
 #: apps/competition/templates/competition_base.html:107
 msgid "Terms of Use"
 msgstr "Uvjeti korištenja"
 
+#: apps/base/templates/homepage_offline.html:24
+msgid "What is Školjka?"
+msgstr "Što je Školjka?"
+
+#: apps/base/templates/homepage_offline.html:26
+msgid ""
+"Školjka is a web archive of math problems, a tool intended\n"
+"    for primary and high school students training for math contests. It\n"
+"    contains thousands of problems from various math contests in recent two\n"
+"    decades."
+msgstr ""
+"Školjka je web arhiva zadataka iz matematike, pomoćni alat i sredstvo "
+"motivacije namijenjen učenicima i studentima pri pripremi za natjecanja. "
+"Sadrži tisuće i tisuće zadataka s raznih matematičkih natjecanja u "
+"prethodnih dvadesetak godina te se redovito nadopunjava novim zadacima i "
+"natjecanjima."
+
+#: apps/base/templates/homepage_offline.html:32
+msgid "Why Školjka?"
+msgstr ""
+
+#: apps/base/templates/homepage_offline.html:34
+msgid ""
+"Školjka supports searching by categories and difficulty,\n"
+"    allowing students to quickly find the exact problems they are "
+"interested\n"
+"    in. Likewise, Školjka can be helpful to mentors and teachers for "
+"preparing\n"
+"    lectures."
+msgstr ""
+"Osim što služi kao baza zadataka, Školjka omogućuje pretraživanje istih po "
+"kategorijama i po težini. Učenici tako mogu jednostavno pronaći zadatke "
+"točno onog tipa koji ih zanima. Također, Školjka može biti od velike pomoći "
+"njihovim mentorima pri organizaciji priprema i predavanja."
+
+#: apps/base/templates/homepage_offline.html:40
+#: apps/base/templates/homepage_online.html:13
+msgid "Selected competitions"
+msgstr "Odabrana natjecanja"
+
+#: apps/base/templates/homepage_offline.html:50
+#: apps/base/templates/homepage_online.html:44
+msgid "Recently added tasks"
+msgstr "Nedavno dodati zadaci"
+
+#: apps/base/templates/homepage_offline.html:59
+#: apps/base/templates/homepage_online.html:53
+msgid "Recent activities"
+msgstr "Nedavne aktivnosti"
+
+#: apps/base/templates/homepage_online.html:22
+msgid "Recommendations"
+msgstr "Preporuke"
+
+#: apps/base/templates/homepage_online.html:33
+msgid "To do list"
+msgstr "To do popis"
+
 #: apps/base/templates/inc_featured_lectures.html:8
 msgid "Featured lectures"
 msgstr "Odabrana predavanja"
+
+#: apps/base/templates/inc_news_list.html:17
+msgid "Added by"
+msgstr "Dodao/la"
 
 #: apps/base/templates/help/help_format.html:60
 msgid "BB code commands"
@@ -557,12 +748,9 @@ msgid "Invalid!"
 msgstr "Nevaljano rješenje!"
 
 #: apps/competition/forms.py:78
+#: apps/solution/templates/inc_solution_list.html:34
 msgid "Solution"
 msgstr "Rješenje"
-
-#: apps/competition/forms.py:81 apps/task/templates/task_new.html:91
-msgid "Help"
-msgstr "Pomoć"
 
 #: apps/competition/forms.py:230
 msgid "Team name cannot be empty."
@@ -646,21 +834,6 @@ msgstr ""
 msgid "Team:"
 msgstr "Tim:"
 
-#: apps/competition/templates/competition_base.html:60
-msgid "Menu"
-msgstr "Izbornik"
-
-#: apps/competition/templates/competition_base.html:61
-msgid "Home"
-msgstr "Početna"
-
-#: apps/competition/templates/competition_base.html:64
-#: apps/competition/templates/competition_list.html:37
-#: apps/userprofile/templates/registration/registration_form.html:4
-#: apps/userprofile/templates/registration/registration_form.html:10
-msgid "Registration"
-msgstr "Registracija"
-
 #: apps/competition/templates/competition_base.html:66
 #: apps/competition/templates/competition_base.html:74
 #: apps/task/templates/inc_task_lecture_small_box.html:26
@@ -720,6 +893,7 @@ msgid "Pos."
 msgstr "Poz."
 
 #: apps/competition/templates/competition_chain_list.html:25
+#: apps/competition/templates/competition_chain_new.html:29
 msgid "Chain"
 msgstr "Lanac"
 
@@ -732,6 +906,7 @@ msgid "Author(s)"
 msgstr "Autor(i):"
 
 #: apps/competition/templates/competition_chain_list.html:29
+#: apps/post/templates/inc_post_list_small.html:5
 msgid "Comments"
 msgstr "Komentari"
 
@@ -740,6 +915,7 @@ msgstr "Komentari"
 #: apps/competition/templates/competition_notifications_admin.html:30
 #: apps/competition/templates/competition_task_detail.html:12
 #: apps/competition/templates/inc_competition_chain_ctask_tr.html:50
+#: apps/folder/templates/folder_detail.html:35
 msgid "Edit"
 msgstr "Uredi"
 
@@ -757,6 +933,7 @@ msgid "Empty..."
 msgstr "Prazno..."
 
 #: apps/competition/templates/competition_chain_list_tasks.html:33
+#: apps/competition/templates/competition_chain_new.html:10
 msgid "Instructions"
 msgstr "Upute"
 
@@ -864,16 +1041,24 @@ msgstr "Uredi lanac"
 msgid "Chain overview"
 msgstr "Pregled lanca"
 
+#: apps/competition/templates/competition_chain_new.html:32
+#: apps/competition/templates/competition_registration.html:97
+#: apps/competition/templates/competition_task_detail.html:71
+#: apps/competition/templates/competition_task_new.html:50
+#: apps/mathcontent/templates/mathcontent_edit_attachments.html:37
+#: apps/solution/templates/solution_submit.html:17
+#: apps/tags/templates/tags_list.html:57
+#: apps/task/templates/task_bulk_new_2nd.html:28
+#: apps/task/templates/task_json_new.html:11
+msgid "Submit"
+msgstr "Pošalji"
+
 #: apps/competition/templates/competition_chain_overview.html:17
 #: apps/competition/templates/competition_task_detail.html:10
 #: apps/competition/templates/competition_task_new.html:32
 #: apps/task/templates/inc_task_bulk_preview_single.html:19
 msgid "Author:"
 msgstr "Autor:"
-
-#: apps/competition/templates/competition_list.html:6
-msgid "Competitions"
-msgstr "Natjecanja"
 
 #: apps/competition/templates/competition_list.html:17
 msgid "Competition"
@@ -908,20 +1093,38 @@ msgstr "Nema natjecanja."
 msgid "Notificatons"
 msgstr "Obavijesti"
 
-#: apps/competition/templates/competition_notifications.html:34
+#: apps/competition/templates/competition_notifications.html:12
+msgid "Notifications related to the competition and tasks are shown here."
+msgstr "Ovdje su prikazane obavijesti u vezi zadataka ili samog natjecanja."
+
+#: apps/competition/templates/competition_notifications.html:14
+msgid ""
+"Use the form below to submit questions or messages to\n"
+"    the moderators. Your messages will not be visible to other teams.\n"
+"    "
+msgstr ""
+"Koristite formu na dnu stranice za slanje pitanja ili poruka moderatorima. "
+"Vaše poruke nisu vidljive drugim timovima."
+
+#: apps/competition/templates/competition_notifications.html:35
 #: apps/competition/templates/competition_notifications_admin.html:58
 msgid "Last update:"
 msgstr "Zadnja promjena:"
 
-#: apps/competition/templates/competition_notifications.html:39
+#: apps/competition/templates/competition_notifications.html:40
 #: apps/competition/templates/competition_notifications_admin.html:63
 msgid "No notifications."
 msgstr "Nema obavijesti."
 
-#: apps/competition/templates/competition_notifications.html:53
+#: apps/competition/templates/competition_notifications.html:54
 #: apps/competition/templates/competition_notifications_admin.html:87
 msgid "Send message"
 msgstr "Pošalji poruku"
+
+#: apps/competition/templates/competition_notifications.html:56
+#: apps/competition/templates/competition_notifications_admin.html:97
+msgid "A reply to <a href='#'>the message</a>."
+msgstr "Odgovor na <a href='#'>poruku</a>."
 
 #: apps/competition/templates/competition_notifications_admin.html:12
 msgid "Hide answered posts."
@@ -1019,13 +1222,6 @@ msgctxt "competition-team"
 msgid "Category:"
 msgstr "Kategorija:"
 
-#: apps/competition/templates/competition_registration.html:97
-#: apps/competition/templates/competition_task_detail.html:71
-#: apps/competition/templates/competition_task_new.html:50
-#: apps/task/templates/task_bulk_new_2nd.html:28
-msgid "Submit"
-msgstr "Pošalji"
-
 #: apps/competition/templates/competition_registration_complete.html:9
 msgid "Team successfully registered!"
 msgstr "Tim uspješno registriran!"
@@ -1093,7 +1289,7 @@ msgstr "Natjecanje je završilo!"
 
 #: apps/competition/templates/competition_scoreboard.html:23
 msgid ""
-"The results has been frozen. The final results will be\n"
+"The results have been frozen. The final results will be\n"
 "    available after the competition."
 msgstr ""
 "Rezultati su zamrznuti. Konačni rezultati će biti dostupni nakon natjecanja."
@@ -1307,6 +1503,13 @@ msgstr "Pomakni dolje"
 msgid "Open"
 msgstr "Otvori"
 
+#: apps/competition/templates/inc_competition_chain_form.html:5
+#: apps/solution/templates/inc_solution_list.html:32
+#: apps/solution/templates/solution_detail.html:46
+#: apps/solution/templates/solution_submit.html:9
+msgid "Task"
+msgstr "Zadatak"
+
 #: apps/competition/templates/inc_competition_submission_list.html:28
 msgid "Correct"
 msgstr "Točno"
@@ -1342,6 +1545,26 @@ msgid_plural "%d my tasks"
 msgstr[0] "%d moj zadatak"
 msgstr[1] "%d moja zadatka"
 msgstr[2] "%d mojih zadataka"
+
+#: apps/folder/templates/folder_advanced_new.html:4
+msgid "Advanced folder add"
+msgstr "Napredno dodavanje kolekcija"
+
+#: apps/folder/templates/folder_detail.html:23
+msgid "Select"
+msgstr "Odaberi"
+
+#: apps/folder/templates/folder_detail.html:27
+msgid "Close"
+msgstr "Zatvori"
+
+#: apps/folder/templates/folder_detail.html:40
+msgid "Create a collection"
+msgstr "Napravi kolekciju"
+
+#: apps/folder/templates/folder_detail.html:43
+msgid "My collections"
+msgstr "Moje kolekcije"
 
 #: apps/mathcontent/utils.py:34
 #: apps/mathcontent/templates/inc_mathcontent_render.html:9
@@ -1499,6 +1722,10 @@ msgstr "Nepodržana vrijednost \"%(value)s\" za naredbu \"%(cmd)s\"."
 msgid "Warning:"
 msgstr "Upozorenje:"
 
+#: apps/mathcontent/templates/inc_mathcontent_attachments.html:3
+msgid "Attachments:"
+msgstr "Datoteke:"
+
 #: apps/mathcontent/templates/inc_mathcontent_bootstrap_preview.html:8
 #: apps/task/templates/task_bulk_new.html:86
 msgid "Preview"
@@ -1508,7 +1735,152 @@ msgstr "Pregled"
 msgid "Original text:"
 msgstr "Originalni tekst:"
 
+#: apps/mathcontent/templates/mathcontent_edit_attachments.html:5
+msgid "Editing of attachments"
+msgstr "Uređivanje datoteka"
+
+#: apps/mathcontent/templates/mathcontent_edit_attachments.html:17
+msgid "Existing attachments"
+msgstr "Postojeće datoteke"
+
+#: apps/mathcontent/templates/mathcontent_edit_attachments.html:27
+msgid "No attachments."
+msgstr "Nema datoteka."
+
+#: apps/mathcontent/templates/mathcontent_edit_attachments.html:33
+msgid "Upload an attachment"
+msgstr "Dodaj datoteku"
+
+#: apps/permissions/templates/permissions_edit.html:5
+msgid "Editing permissions"
+msgstr "Uređivanje privilegija"
+
+#: apps/permissions/templates/permissions_edit.html:9
+msgid "Go back"
+msgstr "Vrati se"
+
+#: apps/permissions/templates/permissions_edit.html:16
+msgid "Group or user"
+msgstr "Grupe ili korisnici"
+
+#: apps/permissions/templates/permissions_edit.html:29
+msgid "Revoke permission"
+msgstr "Makni privilegiju"
+
+#: apps/permissions/templates/permissions_edit.html:36
+msgid "No custom permissions"
+msgstr "Nema privilegija"
+
+#: apps/permissions/templates/permissions_edit.html:44
+#: apps/permissions/templates/permissions_edit.html:52
+msgid "Add permissions"
+msgstr "Dodaj privilegije"
+
+#: apps/pm/templates/pm_new.html:3
+msgid "New message"
+msgstr "Nova poruka"
+
+#: apps/post/templates/inc_post_list_small.html:27
+msgid "Last modified:"
+msgstr "Zadnja promjena:"
+
+#: apps/post/templates/inc_post_list_small.html:44
+msgctxt "action"
+msgid "Comment"
+msgstr "Komentar"
+
+#: apps/post/templates/inc_post_list_small.html:46
+msgid "A reply to the <a href='#'>comment</a>."
+msgstr "Odgovor na <a href='#'>komentar</a>."
+
+#: apps/post/templates/post_edit.html:3 apps/post/templates/post_edit.html:6
+msgid "Edit a message"
+msgstr "Uredi poruku"
+
+#: apps/post/templates/post_edit.html:12
+msgid "Save"
+msgstr "Spremi"
+
+#: apps/rating/templates/inc_rating_box_bool.html:23
+msgid "Delete rating"
+msgstr "Izbriši ocjenu"
+
+#: apps/search/templates/search.html:21
+msgid "Show advanced filters"
+msgstr "Prikaži napredne filtre"
+
+#: apps/search/templates/search.html:24
+msgid "Hide advanced filters"
+msgstr "Sakrij napredne filtre"
+
+#: apps/search/templates/search.html:35
+msgctxt "action"
+msgid "Search"
+msgstr "Pretraži"
+
+#: apps/solution/templates/inc_solution_list.html:33
+#: apps/solution/templates/solution_detail.html:45
+#: apps/solution/templates/solution_list.html:11
+msgid "User"
+msgstr "Korisnik"
+
+#: apps/solution/templates/inc_solution_list.html:35
+msgid "Correctness"
+msgstr "Točnost"
+
+#: apps/solution/templates/inc_solution_list.html:47
+msgctxt "solution"
+msgid "Official"
+msgstr "Službeni"
+
+#: apps/solution/templates/inc_solution_list.html:68
+msgid "empty"
+msgstr "prazno"
+
+#: apps/solution/templates/inc_solution_list.html:69
+msgid "to do"
+msgstr "to do"
+
+#: apps/solution/templates/solution_detail.html:7
+#, python-format
+msgid ""
+"Solution of task &quot;%(solution.task.name)s&quot; by user &quot;"
+"%(solution.author)s&quot;"
+msgstr ""
+"Rješenja zadatka &quot;%(solution.task.name)s&quot; korisnika &quot;"
+"%(solution.author)s&quot;"
+
+#: apps/solution/templates/solution_detail.html:22
+msgctxt "solution"
+msgid "Unmark as official"
+msgstr "Makni oznaku službenog"
+
+#: apps/solution/templates/solution_detail.html:24
+msgctxt "solution"
+msgid "Mark as official"
+msgstr "Označi kao službeno"
+
+#: apps/solution/templates/solution_detail.html:31
+#: apps/task/templates/task_detail.html:16
+msgctxt "action"
+msgid "Edit"
+msgstr "Uredi"
+
+#: apps/solution/templates/solution_detail.html:81
+msgid "Ratings"
+msgstr "Ocjene"
+
+#: apps/solution/templates/solution_list.html:8
+msgid "Solution of the task"
+msgstr "Rješenja zadatka"
+
+#: apps/solution/templates/solution_submit.html:5
+msgctxt "title"
+msgid "Submit a solution"
+msgstr "Pošalji rješenje"
+
 #: apps/tags/managers.py:24 apps/tags/models.py:17
+#: apps/task/templates/inc_task_list_table.html:13
 msgid "Tags"
 msgstr "Oznake"
 
@@ -1523,6 +1895,10 @@ msgstr "Označeni predmet"
 #: apps/tags/models.py:35
 msgid "Tagged Items"
 msgstr "Označeni predmeti"
+
+#: apps/tags/templates/tags_list.html:5 apps/tags/templates/tags_list.html:9
+msgid "List of tags"
+msgstr "Popis oznaka"
 
 #: apps/task/bulk_format.py:126
 #, python-format
@@ -1654,6 +2030,25 @@ msgstr "Izvor:"
 #: apps/task/templates/inc_task_lecture_small_box.html:19
 msgid "Video"
 msgstr "Video"
+
+#: apps/task/templates/inc_task_list.html:45
+msgid "Options"
+msgstr "Opcije"
+
+#: apps/task/templates/inc_task_list.html:58
+#: apps/task/templates/task_detail.html:58
+msgid "Export to LaTeX"
+msgstr "Pretvori u LaTeX"
+
+#: apps/task/templates/inc_task_list.html:59
+#: apps/task/templates/task_detail.html:61
+msgid "Export to PDF"
+msgstr "Pretvori u PDF"
+
+#: apps/task/templates/inc_task_list.html:70
+#: apps/task/templates/task_list.html:4
+msgid "Task list"
+msgstr "Zadaci"
 
 #: apps/task/templates/task_bulk_new.html:6
 #: apps/task/templates/task_bulk_new_2nd.html:6
@@ -1833,6 +2228,12 @@ msgstr "Makni s naslovne"
 msgid "Click here to open the file."
 msgstr "Kliknite ovdje kako biste otvorili datoteku."
 
+#: apps/task/templates/task_export.html:6
+#: apps/task/templates/task_export.html:10
+#, python-format
+msgid "Export to %(format)s"
+msgstr "Pretvori u %(format)s"
+
 #: apps/task/templates/task_export.html:22
 msgid "There were some internal errors while converting the following tasks:"
 msgstr "Došlo je do internih grešaka pri pretvaranju sljedećih zadataka:"
@@ -1855,6 +2256,14 @@ msgstr "Popis"
 #: apps/task/templates/task_list.html:32 apps/task/templates/task_new.html:10
 msgid "New lecture"
 msgstr "Novo predavanje"
+
+#: apps/task/templates/task_list.html:21
+msgid "Add task"
+msgstr "Dodaj zadatak"
+
+#: apps/task/templates/task_list.html:24
+msgid "Add file"
+msgstr "Dodaj datoteku"
 
 #: apps/task/templates/task_list.html:28
 msgid "Thumbnails"
@@ -1887,14 +2296,6 @@ msgstr ""
 #: apps/task/templates/task_new.html:102
 msgid "Press Ctrl+M to get the preview of the text."
 msgstr "Pritisnite Ctrl+M za pregled teksta."
-
-#: apps/userprofile/forms.py:22 apps/userprofile/forms.py:36
-msgid "Username"
-msgstr "Korisničko ime"
-
-#: apps/userprofile/forms.py:23 apps/userprofile/forms.py:42
-msgid "Password"
-msgstr "Lozinka"
 
 #: apps/userprofile/forms.py:39
 msgid "Email"

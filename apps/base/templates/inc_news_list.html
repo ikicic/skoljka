@@ -14,7 +14,7 @@
         </div>
         {% mathcontent_render x.content %}
         <div class="added-by">
-          Dodao/la {{ x.author|userlink }} {{ x.date_created }}
+          {% trans "Added by" %} {{ x.author|userlink }} {{ x.date_created }}
         </div>
       </div>
     {% endfor %}

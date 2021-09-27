@@ -2,7 +2,7 @@
 
 <div class="post-list-small">
 {% if user.is_authenticated or posts %}
-  <h4>Komentari:</h4>
+  <h4>{% trans "Comments" %}:</h4>
 {% endif %}
 
 {% for post in posts %}
@@ -24,7 +24,7 @@
 
     {% if post.date_created != post.last_edit_time %}
       <div class="post-last-edit">
-        Zadnja promjena:
+        {% trans "Last modified:" %}
         {{ post.last_edit_by|userlink }}, {{ post.last_edit_time }}
       </div>
     {% endif %}
@@ -41,9 +41,9 @@
       <input type="hidden" name="post_reply_id" value="">
       <input type="hidden" name="post_redirect" value="{{ request.path }}">
       {{ container.posts.get_post_form.as_p }}
-      <input type="submit" class="btn btn-primary" value="Pošalji komentar">
+      <input type="submit" class="btn btn-primary" value="{% trans "Comment" context "action" %}">
       <span id="reply-to-info" style="display:none;">
-        Odgovor na <a href="#">komentar</a>.
+        {% trans "A reply to the <a href='#'>comment</a>." %}
         <a href="#post" class="icon-remove"></a>
       </span>
     </form>

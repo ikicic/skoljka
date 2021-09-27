@@ -9,46 +9,45 @@
 
 <div class="outdiv">
   <div id="homepage-registration" class="hidden-xs-phone">
-    <h3>Registracija</h3>
+    <h3>{% trans "Registration" %}</h3>
     {% registration_form %}
   </div>
   <div id="homepage-auth-xs-phone" class="visible-xs-phone">
     <a class="homepage-auth" href="{% url django.contrib.auth.views.login %}">
-      Prijava
+      {% trans "Sign in" %}
     </a>
     <a class="homepage-auth" href="{% url registration_register %}">
-      Registracija
+      {% trans "Registration" %}
     </a>
   </div>
 
-  <h3>Što je Školjka?</h3>
+  <h3>{% trans "What is Školjka?" %}</h3>
   <p class="homepage-info">
-    Školjka je web arhiva zadataka iz matematike, pomoćni alat
-    i sredstvo motivacije namijenjen učenicima i studentima pri pripremi
-    za natjecanja. Sadrži tisuće i tisuće zadataka s raznih
-    matematičkih natjecanja u prethodnih dvadesetak godina te se redovito
-    nadopunjava novim zadacima i natjecanjima.
+    {% blocktrans %}Školjka is a web archive of math problems, a tool intended
+    for primary and high school students training for math contests. It
+    contains thousands of problems from various math contests in recent two
+    decades.{% endblocktrans %}
   </p>
 
-  <h3>Zašto Školjka?</h3>
+  <h3>{% trans "Why Školjka?" %}</h3>
   <p class="homepage-info">
-    Osim što služi kao baza zadataka, Školjka omogućuje pretraživanje istih
-    po kategorijama i po težini. Učenici tako mogu jednostavno pronaći zadatke
-    točno onog tipa koji ih zanima. Također, Školjka može biti od velike pomoći
-    njihovim mentorima pri organizaciji priprema i predavanja.
+    {% blocktrans %}Školjka supports searching by categories and difficulty,
+    allowing students to quickly find the exact problems they are interested
+    in. Likewise, Školjka can be helpful to mentors and teachers for preparing
+    lectures.{% endblocktrans %}
   </p>
 
-  <h3>Odabrana natjecanja</h3>
+  <h3>{% trans "Selected competitions" %}</h3>
   {% folder_inline_year_shortcuts folder_shortcut_desc %}
 </div>
 
-{% show_news 'outdiv' 'Novosti' %}
+{% show_news 'outdiv' 'News' %}
 
 {% show_featured_lectures %}
 
 <div style="padding: 0 0px;">
   {% if recent_tasks %}
-    <h2>Nedavno objavljeni zadaci</h2>
+    <h2>{% trans "Recently added tasks" %}</h2>
     <div class="row-fluid">
       {% for x in recent_tasks %}
         {% task_small_box x 'span6' '' 'timesince' %}
@@ -57,7 +56,7 @@
   {% endif %}
 
   <br><br><br>
-  <h3>Nedavne aktivnosti:</h3>
+  <h3>{% trans "Recent activities" %}:</h3>
   {% activity_list user %}
 </div>
 

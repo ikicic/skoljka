@@ -24,15 +24,15 @@
 
   <table width="100%" class="table-condensed sol-table" style="text-align: center;">
     <tr>
-      <th colspan="6">Lista rješenja</th>
+      <th colspan="6">{% trans "Solutions" %}</th>
     </tr>
     <tr>
       <th class="hidden-xs-phone" width="30">#</th>
       <th class="hidden-xs-phone">{% anchor date_created Vrijeme %}</th>
-      <th>Zadatak</th>
-      <th>Korisnik</th>
-      <th>Rješenje</th>
-      <th>Točnost</th>
+      <th>{% trans "Task" %}</th>
+      <th>{% trans "User" %}</th>
+      <th>{% trans "Solution" %}</th>
+      <th>{% trans "Correctness" %}</th>
     </tr>
     {% for s in solutions %}
       {% check_solution_for_accessibility s s.content.short %}
@@ -44,7 +44,7 @@
         {% if s.is_submitted %}
           <td>
             {% if s.is_official %}
-              <span class="label label-info">Službeno</span>
+              <span class="label label-info">{% trans "Official" context "solution" %}</span>
             {% endif %}
             {% if can_view_solution %}
               <a href="/solution/{{ s.id }}/" {{ obfuscation_title }}>
@@ -65,8 +65,8 @@
             {% if s.author == user %}
               <a href="/task/{{ s.task_id }}/submit/">
             {% endif %}
-            {% if s.is_as_solved %}<i>prazno</i>{% endif %}
-            {% if s.is_todo %}<i>to do</i>{% endif %}
+            {% if s.is_as_solved %}<i>{% trans "empty" %}</i>{% endif %}
+            {% if s.is_todo %}<i>{% trans "to do" %}</i>{% endif %}
             {% if s.author == user %}
               </a>
             {% endif %}

@@ -3,7 +3,7 @@
 {% load tags_tags %}
 
 {% block title %}
-  Pretraživanje{% if tags %}: {{ tags|join:', ' }}{% endif %}
+{% trans "Search" context "menu" %}{% if tags %}: {{ tags|join:', ' }}{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -18,10 +18,10 @@
         <td colspan="2">
           <a href="#" class="toggler toggle"
               {% if search_solved_count %} style="display:none;"{% endif %}>
-            Prikaži napredne opcije</a>
+            {% trans "Show advanced filters" %}</a>
           <a href="#" class="toggler toggle"
               {% if not search_solved_count %} style="display:none;"{% endif %}>
-            Sakrij napredne opcije</a>
+            {% trans "Hide advanced filters" %}</a>
           <div class="toggle"
               {% if not groups_error and not search_solved_count %}
                 style="display:none;"
@@ -32,7 +32,7 @@
       </tr>
     {% endif %}
     <tr><td colspan="2">
-        <button type="submit" class="btn btn-primary"><i class="icon-search"></i> Pretraži</button>
+        <button type="submit" class="btn btn-primary"><i class="icon-search"></i> {% trans "Search" context "action" %}</button>
     </td></tr>
   </table>
 </form>

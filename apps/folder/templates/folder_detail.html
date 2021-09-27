@@ -20,11 +20,11 @@
           {% if not this_folder_selected %}
             <button class="btn" type="submit" id="select_folder"
                 title="Aktivirajte kako biste mogli dodavati i brisati zadatke iz kolekcije">
-              <i class="icon-check"></i> Odaberi
+              <i class="icon-check"></i> {% trans "Select" %}
             </button>
           {% else %}
             <button class="btn" type="submit" id="select_folder">
-              <i class="icon-check"></i> Zatvori
+              <i class="icon-check"></i> {% trans "Close" %}
             </button>
           {% endif %}
           {% csrf_token %}
@@ -32,15 +32,15 @@
       {% endif %}
       {% if edit_link %}
         <a href="/folder/{{ folder.id }}/edit/" class="btn">
-          <i class="icon-edit"></i> Uredi
+          <i class="icon-edit"></i> {% trans "Edit" %}
         </a>
       {% endif %}
       {% if user.is_authenticated %}
         <a href="/folder/new/" class="btn">
-          <i class="icon-plus"></i> Napravi kolekciju
+          <i class="icon-plus"></i> {% trans "Create a collection" %}
         </a>
         <a href="/folder/my/" class="btn">
-          <i class="icon-list-alt"></i> Moje kolekcije
+          <i class="icon-list-alt"></i> {% trans "My collections" %}
         </a>
       {% endif %}
     </div>

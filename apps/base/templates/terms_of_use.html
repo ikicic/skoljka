@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 
+{% if LANGUAGE_CODE == 'hr' %}
 {% block title %}Pomoć - Uvjeti korištenja i pravila privatnosti{% endblock %}
+{% else %}
+{% block title %}Help - Rules and Terms of Use{% endblock %}
+{% endif %}
+
 
 {% block content %}
 
+{% if LANGUAGE_CODE == 'hr' %}
 <h3>Pravila i uvjeti korištenja</h3>
-
 <ul>
   <li>Korisnik je dužan poštivati Pravila i uvjete korištenja. Korištenjem
   Školjke, korisnik automatski prihvaća Pravila i uvjete korištenja.</li>
@@ -70,4 +75,66 @@
 
   <li>Na kraju, Školjku koristite na vlastitu odgovornost... Uživajte!</li>
 </ul>
+
+{% else %}
+
+<h3>Rules and Terms of Use</h3>
+<ul>
+  <li>Users are required to adhere to the Terms of Use. By using Školjka, the
+  user automatically accepts Rules and Terms of Use.</li>
+
+  <li>We reserve the right to change the Terms of Use without a prior notice.
+  However, in the case of a major change, a notice will be displayed on the
+  home page.</li>
+
+  <li>Misuse of security or other bugs is forbidden. We ask the users to report
+  any bugs they find.</li>
+
+  <li>Users are allowed to upload own or 3rd party tasks. In the case of 3rd
+  party tasks, the user is responsible for checking whether the tasks are
+  allowed to be published on a public website. Moderators have a right to
+  remove without a prior notice any content (tasks, solutions, message or
+  other) they consider to be copyright infringement.</li>
+
+  <li>Users that fill out their profile should be aware that all the
+  information will be publicly visible.</li>
+
+  <li>Školjka currently does not track or keep statistics on activities of
+  individual users. However, we reserve the right to log the visited URLs for
+  the purposes of improving the service, fixing interface and security bugs. We
+  also reserve the right to gather anonymous statistics like total number of
+  page views.<li>
+
+  <li>Školjka automatically analyzes the tasks that a user solves, puts on the
+  to-do list or submits a solution to, with the purpose of generating
+  recommendations.</li>
+
+  <li>Despite the authors of Školjka trying to remove any security bugs, we
+  cannot guarantee the safety of private data like the e-mail address, private
+  messages, hidden tasks and other non-public data. We recommend against using
+  Školjka as a storage of competition task drafts or any other sensitive
+  information. We further recommend against using passwords used on other
+  websites or services.</li>
+
+  <li>Private messages, hidden tasks and hidden collections are visible only to
+  those users with explicitly given view permissions (given through the
+  interface). However, none of these tasks are encrypted and it may happen
+  that administration inadvertently see the data due to current technical
+  limitations. Školjka is not a place for storing or sending private data.</li>
+
+  <li>Users are not allowed to public offensive, unethical or illegal or in any
+  other sense inappropriate content. Moderators have a right to remove such
+  content without prior notice.</li>
+
+  <li>Moderators reserve the right to perform minor changes to publicly visible
+  tasks without prior notice, which may include fixing typos, improving text
+  clarity, fixing LaTeX errors, fixing incorrectly transcribed text of existing
+  tasks and so on.</li>
+
+  <li>Moderators may block access to any user not adhering to the Terms of Use.</li>
+
+  <li>In the end, use Školjka at your own risk... Enjoy!</li>
+</ul>
+{% endif %}
+
 {% endblock %}

@@ -41,7 +41,7 @@
         {% if user.is_staff %}
           <a href="?{% generate_get_query_string options='' %}"
              class="btn btn-mini{% if options_mode %} active{% endif %}">
-            <i class="icon-cog"></i> Opcije
+            <i class="icon-cog"></i> {% trans "Options" %}
           </a>
         {% endif %}
       {% enduseroptions %}
@@ -54,8 +54,8 @@
             <form action="/task/export/" method="post">
               {% csrf_token %}
               <input type="hidden" name="ids" value="{{ task_ids|join:',' }}">
-              <button type="submit" class="blank" name="format" value="latex"><img src="/static/images/tex16.png" alt="LaTeX" title="Pretvori u LaTeX"></button>
-              <button type="submit" class="blank" name="format" value="pdf"><img src="/static/images/pdf16.png" alt="PDF" title="Pretvori u PDF"></button>
+              <button type="submit" class="blank" name="format" value="latex"><img src="/static/images/tex16.png" alt="LaTeX" title="{% trans "Export to LaTeX" %}"></button>
+              <button type="submit" class="blank" name="format" value="pdf"><img src="/static/images/pdf16.png" alt="PDF" title="{% trans "Export to PDF" %}"></button>
             </form>
           </div>
         </div>
@@ -66,7 +66,7 @@
       <div> {# vertical center fix #}
         <div>
           <div>
-            Lista zadataka
+            {% trans "Task list" %}
           </div>
         </div>
       </div>

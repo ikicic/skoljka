@@ -2,7 +2,7 @@
 
 {% load mathcontent_tags %}
 
-{% block title %}Uređivanje datoteka{% endblock %}
+{% block title %}{% trans "Editing of attachments" %}{% endblock %}
 
 {% block content %}
 
@@ -14,7 +14,7 @@
 </div>
 
 <div class="outset outset-margin">
-  <h4>Postojeće datoteke</h4>
+  <h4>{% trans "Existing attachments" %}</h4>
   <table class="table-striped table-condensed" style="width: 40%">
 
   {% for x in content.attachments.all %}
@@ -24,17 +24,17 @@
       <td><a class="mc-attachment-delete" data-id="{{ x.id }}" data-name="{{ x.get_filename }}" href="#" title="Izbiši">Izbriši</a></td>
     </tr>
   {% empty %}
-    <tr><td><i>Nema datoteka.</i></td></tr>
+    <tr><td><i>{% trans "No attachments." %}</i></td></tr>
   {% endfor %}
   </table>
 </div>
 
 <div class="outset">
-  <h4>Dodavanje novih datoteka</h4>
+  <h4>{% trans "Upload an attachment" %}</h4>
   <form enctype="multipart/form-data" method="post" action="/mathcontent/{{ content.id }}/attachments/">
     {% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" value="Pošalji" class="btn-primary">
+    <input type="submit" value="{% trans "Submit" %}" class="btn-primary">
   </form>
 </div>
 

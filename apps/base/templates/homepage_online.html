@@ -7,10 +7,10 @@
 {% load folder_tags %}
 {% load task_tags %}
 
-{% show_news 'outdiv' 'Novosti' %}
+{% show_news 'outdiv' 'News' %}
 
 <div class="outdiv">
-  <h3>Odabrana natjecanja</h3>
+  <h3>{% trans "Selected competitions" %}</h3>
   {% folder_inline_year_shortcuts folder_shortcut_desc split=3 %}
 </div>
 
@@ -19,7 +19,7 @@
 {# TODO: DRY, napraviti tag ili nesto, ovo se ponavlja #}
 
 {% if recommend %}
-  <h2>Preporuke</h2>
+  <h2>{% trans "Recommendations" %}</h2>
   <div class="row-fluid">
     {% for task in recommend %}
       {% cycle '<div class="row-fluid">' '' %}
@@ -30,7 +30,7 @@
 {% endif %}
 
 {% if todo %}
-  <h2>To Do Popis</h2>
+  <h2>{% trans "To do list" %}</h2>
   <div class="row-fluid">
     {% for task in todo %}
       {% cycle '<div class="row-fluid">' '' %}
@@ -41,7 +41,7 @@
 {% endif %}
 
 {% if recent_tasks %}
-  <h2>Nedavno objavljeni zadaci</h2>
+  <h2>{% trans "Recently added tasks" %}</h2>
   <div class="row-fluid">
     {% for x in recent_tasks %}
       {% task_small_box x 'span6' '' 'timesince' %}
@@ -50,7 +50,7 @@
 {% endif %}
 
 <br><br><br>
-<h3>Nedavne aktivnosti:</h3>
+<h3>{% trans "Recent activities" %}</h3>
 {% activity_list user %}
 
 {% endblock %}

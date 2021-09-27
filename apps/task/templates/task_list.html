@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}Lista zadataka{% endblock %}
+{% block title %}{% trans "Task list" %}{% endblock %}
 
 {% block content %}
 
@@ -18,10 +18,10 @@
         </a>
       {% endif %}
       <a href="/task/new/" class="btn">
-        <i class="icon-pencil"></i> Dodaj zadatak
+        <i class="icon-pencil"></i> {% trans "Add task" %}
       </a>
       <a href="/task/new/file/" class="btn">
-        <i class="icon-file"></i> Dodaj datoteku
+        <i class="icon-file"></i> {% trans "Add file" %}
       </a>
     {% else %}
       <a href="/lectures/{% append_get_parameters %}" class="btn">

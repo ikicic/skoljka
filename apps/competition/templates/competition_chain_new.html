@@ -7,7 +7,7 @@
 {% block content %}
 
 <div class="instructions">
-  <h4>Upute</h4>
+  <h4>{% trans "Instructions" %}</h4>
   <p>Kategorija je bilo kakav string. Po unesenim kategorijama automatski će se
     grupirati lanci u pregledu zadataka.</p>
   <p><i>Unlock minutes</i> predstavlja broj minuta nakon početka natjecanja
@@ -26,10 +26,10 @@
 <form action="{{ request.get_full_path }}" method="POST"
     class="form-horizontal uppercase-sections fix-bootstrap-form">
   {% csrf_token %}
-  <div class="form-section">Lanac</div>
+  <div class="form-section">{% trans "Chain" %}</div>
   {% bootstrap_form chain_form layout="horizontal" %}
   <div class="controls">
-    <input type="submit" value="Pošalji" class="btn btn-primary">
+    <input type="submit" value="{% trans "Submit" %}" class="btn btn-primary">
   </div>
 </form>
 

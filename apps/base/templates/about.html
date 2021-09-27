@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}O nama - Školjka{% endblock %}
+{% block title %}{% trans "About" %} - Školjka{% endblock %}
 
 {% block header_list %}
 <style>
@@ -13,29 +13,25 @@
 
 
 <h2>Školjka</h2>
-online arhiva zadataka iz matematike
+{% trans "Online archive of tasks from mathematical competitions" %}
 
 
 <h4>Ideja</h4>
 <p>Ivica Kičić - {% email_link 'ivicakicic@gmail.com' '<i class="icon-envelope"></i>' %}</p>
 
 
-<h4>Programeri</h4>
-<p>Ivica Kičić (glavni programer)<br>
+<h4>{% trans "Developers" %}</h4>
+<p>Ivica Kičić<br>
 Ivan Kokan</p>
 
 
-<h4>Podrška</h4>
+<h4>{% trans "Maintained by" %}</h4>
 <p>Udruga Mladi nadareni matematičari "Marin Getaldić" - <a href="http://mnm.hr/">MNM</a></p>
 
+<h4>{% trans "Sources" %}</h4>
+<p><a href="/static/images/image_sources.txt">{% List of icons %}</a></p>
 
-<h4>Hosting</h4>
-<p>Klub studenata elektrotehnike - <a href="http://www.kset.org/">KSET</a></p>
-
-<h4>Ostalo</h4>
-<p><a href="/static/images/image_sources.txt">Popis ikona</a></p>
-
-<h4>Kontakt</h4>
+<h4>{% trans "Contact" %}</h4>
 <p>{% email_link 'skoljka@skoljka.org' %}</p>
 
 {% endblock %}

@@ -2,11 +2,11 @@
 
 {% load sorting_tags %}
 
-{% block title %}Popis oznaka{% endblock %}
+{% block title %}{% trans "List of tags" %}{% endblock %}
 
 {% block content %}
 
-<h3>Popis oznaka</h3>
+<h3>{% trans "List of tags" %}</h3>
 
 <br>
 
@@ -54,7 +54,7 @@
 
 {# FORM END #}
 {% if can_edit %}
-    <input type="submit" value="Pošalji" class="btn btn-primary">
+    <input type="submit" value="{% trans "Submit" %}" class="btn btn-primary">
   </form>
 {% endif %}
 

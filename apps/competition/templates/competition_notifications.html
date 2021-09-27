@@ -9,10 +9,11 @@
 <h3 class="comp-header">{% trans "Notificatons" %}</h3>
 
 <div class="instructions">
-  <p>Ovdje su prikazane obavijesti u vezi zadataka ili samog natjecanja.</p>
+  <p>{% trans "Notifications related to the competition and tasks are shown here." %}</p>
   {% if team %}
-    <p>Također, odavde možete poslati svoja pitanja ili poruke administatorima.
-      Vaše poruke neće biti vidljive drugim timovima.</p>
+    <p>{% blocktrans %}Use the form below to submit questions or messages to
+    the moderators. Your messages will not be visible to other teams.
+    {% endblocktrans %}</p>
   {% endif %}
 </div>
 
@@ -52,7 +53,7 @@
       <input type="submit" class="btn btn-primary"
           value="{% trans "Send message" %}">
       <span id="reply-to-info" style="display:none;">
-        Odgovor na <a href="#">poruku</a>.
+        {% trans "A reply to <a href='#'>the message</a>." %}
         <a href="#post" class="icon-remove"></a>
       </span>
     </form>

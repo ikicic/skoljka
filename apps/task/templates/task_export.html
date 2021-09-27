@@ -3,11 +3,11 @@
 {% load i18n %}
 {% load mathcontent_tags %}
 
-{% block title %}Pretvaranje u {{ format }}{% endblock %}
+{% block title %}{% blocktrans %}Export to {{ format }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 
-<h3>Pretvaranje u {{ format }}</h3>
+<h3>{% blocktrans %}Export to {{ format }}{% endblocktrans %}</h3>
 <br><br>
 
 <form action="/task/export/" method="POST">

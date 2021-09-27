@@ -15,10 +15,10 @@
     <link href="/static/images/favicon.ico" rel="shortcut icon">
 
     {% block header_list %} {% endblock %} {# manually put more head stuff here #}
-    <title>{% block title %}Školjka - Web arhiva zadataka iz matematike{% endblock %}</title>
+    <title>{% block title %}Školjka - {% trans "Web archive of math problems" %}{% endblock %}</title>
 
     <meta name="content-language" content="hr">
-    <meta name="description" content="Web arhiva zadataka iz matematike. Sadrži zadatke s prijašnjih državnih, županijskih, općinskih natjecanja te Međunarodnih i Srednjoeuropskih olimpijada. Školjka može poslužiti svakom učeniku koji se želi pripremati za natjecanja iz matematike.">
+    <meta name="description" content="{% trans "Web archive of math problems, including previous state and regional competitions and International and Middle-european math olympiads. Školjka can help any student training for math competitions." %}">
     <meta name="viewport" content="width=device-width">
   </head>
 <body>
@@ -34,7 +34,7 @@
     <div class="row-fluid">
       <div id="hbar-sel-folder">
         {% if user.profile.selected_folder %}
-          Uređivanje mape
+          {% trans "Map editing" %}
           <a href="/folder/{{ user.profile.selected_folder.id }}/">
             {{ user.profile.selected_folder.name }}
           </a>
@@ -49,11 +49,11 @@
           {% csrf_token %}
           {# No whitespace between inline-block elements, CSS used instead. #}
           <input id="id_username" name="username" type="text"
-              class="input-small" placeholder="Korisničko ime" accesskey="l"
+              class="input-small" placeholder="{% trans "Username" %}" accesskey="l"
               {% if homepage %} autofocus{% endif %}
           ><input id="id_password" name="password" type="password"
-              class="input-small" placeholder="Lozinka"
-          ><input type="submit" class="btn" value="Prijava">
+            class="input-small" placeholder="{% trans "Password" %}"
+          ><input type="submit" class="btn" value="{% trans "Sign in" %}">
         </form>
       {% endif %}
       <form action="/i18n/setlang/" method="POST" id="hbar-flags" class="hidden-phone">
@@ -72,19 +72,19 @@
   <div id="sidebar"
       {% if dont_hide_sidebar %}style="display: block;"{% endif %}>
     {% if user.is_authenticated %}
-      <div id="nav-hello-user">Zdravo, {{ user|userlink:"first_name" }}!</div>
+      <div id="nav-hello-user">{% trans "Hello" %}, {{ user|userlink:"first_name" }}!</div>
     {% endif %}
     <ul class="nav nav-list">
       {% settings_constant EXTRA_HEADER_TOP %}
-      <li class="nav-header">Izbornik</li>
-      <li><a href="/"><i class="icon-home"></i>Početna</a></li>
+      <li class="nav-header">{% trans "Menu" %}</li>
+      <li><a href="/"><i class="icon-home"></i>{% trans "Home" %}</a></li>
 
-      <li><a href="/folder/"><i class="icon-folder-close"></i>Arhiva zadataka</a></li>
+      <li><a href="/folder/"><i class="icon-folder-close"></i>{% trans "Task archive" %}</a></li>
       {% block menu_folder_container %}
         {{ folder_tree|safe }}
       {% endblock %}
       <li><a href="/lectures/"><i class="icon-book"></i>{% trans "Lectures" %}</a></li>
-      <li><a href="/competition/"><i class="icon-flag"></i>Natjecanja</a></li>
+      <li><a href="/competition/"><i class="icon-flag"></i>{% trans "Competitions" %}</a></li>
       <li><br></li>
       {% if user.is_authenticated %}
         <li><a href="/pm/"><i class="icon-inbox"></i>Inbox
@@ -93,25 +93,25 @@
           {% endif %}
         </a></li>
         <li><br></li>
-        <li><a href="/memberlist/"><i class="icon-user"></i>Korisnici</a></li>
-        {# <li><a href="/ranks/"><i class="icon-list"></i>Rang lista</a></li> #}
-        <li><a href="/usergroup/"><i class="icon-glass"></i>Grupe</a></li>
+        <li><a href="/memberlist/"><i class="icon-user"></i>{% trans "Users" %}</a></li>
+        {# <li><a href="/ranks/"><i class="icon-list"></i>{% trans "Ranking" %}</a></li> #}
+        <li><a href="/usergroup/"><i class="icon-glass"></i>{% trans "Groups" %}</a></li>
       {% else %}
-        <li><a href="/accounts/register/" class="register"><i class="icon-arrow-right"></i>Registracija</a></li>
-        <li><a href="/accounts/login/"><i class="icon-arrow-right"></i>Prijava</a></li>
+        <li><a href="/accounts/register/" class="register"><i class="icon-arrow-right"></i>{% trans "Registration" %}</a></li>
+        <li><a href="/accounts/login/"><i class="icon-arrow-right"></i>{% trans "Sign in" %}</a></li>
       {% endif %}
       <li><br></li>
-      <li><a href="/task/"><i class="icon-th-list"></i>Svi zadaci</a></li>
-      <li><a href="/solution/"><i class="icon-pencil"></i>Rješenja {{ unrated_solutions_html }}</a></li>
-      <li><a href="/search/"><i class="icon-search"></i>Pretraživanje</a></li>
+      <li><a href="/task/"><i class="icon-th-list"></i>{% trans "All tasks" %}</a></li>
+      <li><a href="/solution/"><i class="icon-pencil"></i>{% trans "Solutions" %} {{ unrated_solutions_html }}</a></li>
+      <li><a href="/search/"><i class="icon-search"></i>{% trans "Search" context "menu" %}</a></li>
       <li><br></li>
       {% if user.is_authenticated %}
-        <li><a href="/accounts/logout/"><i class="icon-off"></i>Odjava</a></li>
+        <li><a href="/accounts/logout/"><i class="icon-off"></i>{% trans "Sign out" %}</a></li>
         <li><br></li>
       {% endif %}
       <li><br></li>
-      <li><a href="/help/"><i class="icon-question-sign"></i> Pomoć</a></li>
-      <li><a href="/about/"><i class="icon-flag"></i> O nama</a></li>
+      <li><a href="/help/"><i class="icon-question-sign"></i> {% trans "Help" %}</a></li>
+      <li><a href="/about/"><i class="icon-flag"></i> {% trans "About" %}</a></li>
       {% if user.is_staff %}
         <li><br></li>
         <li class="nav-header">Admin</li>

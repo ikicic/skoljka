@@ -2,7 +2,7 @@
 {% load mathcontent_tags %}
 {% load bootstrap_toolkit %}
 
-<div class="form-section">Zadatak #{{ index }}</div>
+<div class="form-section">{% trans "Task" %} #{{ index }}</div>
 {% for hidden_field in form.hidden_fields %}
   {{ hidden_field }}
 {% endfor %}

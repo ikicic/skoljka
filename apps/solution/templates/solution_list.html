@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}Rješenja{% endblock %}
+{% block title %}{% trans "Solutions" %}{% endblock %}
 
 {% block content %}
 
 {% if task %}
-  Rješenja zadatka: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br>
+  {% trans "Solution of the task" %}: <a href="/task/{{ task.id }}/">{{ task.name }}</a><br>
 {% endif %}
 {% if author %}
-  Korisnik: {{ author|userlink }}<br>
+  {% trans "User" %}: {{ author|userlink }}<br>
 {% endif %}
 
 {% include "inc_solution_list.html" with solutions=solutions %}

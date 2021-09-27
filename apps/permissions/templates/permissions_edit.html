@@ -2,18 +2,18 @@
 
 {% load permissions_tags %}
 
-{% block title %}Uređivanje privilegija{% endblock %}
+{% block title %}{% trans "Editing permissions" %}{% endblock %}
 
 {% block content %}
 
-<a href="javascript: history.go(-1)">« Vrati se</a><br><br>
+<a href="javascript: history.go(-1)">« {% trans "Go back" %}</a><br><br>
 
 <form action="{{ request.get_full_path }}" method="POST">
   {% csrf_token %}
   <input type="hidden" id="action" name="action" value="remove-permissions">
   <table width="60%" class="table-striped table-condensed" style="text-align: center;">
     <tr>
-      <th>Grupa / korisnik</th>
+      <th>{% trans "Group or user" %}</th>
       {% for permission in applicable_permissions %}
         <th>{{ permission.0 }}</th>
       {% endfor %}
@@ -26,14 +26,14 @@
           <td>{{ x|cached_permission:permission.1 }}</td>
         {% endfor %}
         <td>
-          <button type="submit" class="blank" id="group-id" name="group-id" value="{{ x.id }}" title="Makni privilegiju">
+          <button type="submit" class="blank" id="group-id" name="group-id" value="{{ x.id }}" title="{% trans "Revoke permission" %}">
             <i class="icon-remove"></i>
           </button>
         </td>
       </tr>
     {% empty %}
       <tr>
-        <td colspan="{{ applicable_permissions|length|add:'2' }}">Nema specifičnih dozvola</td>
+        <td colspan="{{ applicable_permissions|length|add:'2' }}">{% trans "No custom permissions" %}</td>
       </tr>
     {% endfor %}
   </table>
@@ -41,7 +41,7 @@
 
 <br><br><br>
 
-Dodavanje privilegija:<br><br>
+{% trans "Add permissions" %}:<br><br>
 <form action="" method="POST">
   {% for x in applicable_permissions %}
     <input type="checkbox"{% if x.1 in selected_types %} checked="checked"{% endif %} id="perm-{{ x.1 }}" name="perm-{{ x.1 }}"> {{ x.0 }}<br>
@@ -49,7 +49,7 @@ Dodavanje privilegija:<br><br>
   <br>
   {% csrf_token %}
   {{ form.as_p }}
-  <input type="submit" value="Dodaj" class="btn btn-primary">
+  <input type="submit" value="{% trans "Add permissions" %}" class="btn btn-primary">
 </form>
 
 {{ message }}

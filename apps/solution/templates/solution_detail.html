@@ -4,7 +4,7 @@
 {% load post_tags %}
 {% load rating_tags %}
 
-{% block title %}Rješenje zadatka &quot;{{ solution.task.name }}&quot; korisnika &quot;{{ solution.author }}&quot;{% endblock %}
+{% block title %}{% blocktrans %}Solution of task &quot;{{ solution.task.name }}&quot; by user &quot;{{ solution.author }}&quot;{% endblocktrans %}{% endblock %}
 
 {% block content %}
 
@@ -19,16 +19,16 @@
       <div class="btn-group">
         {% if can_mark_as_official %}
           {% if solution.is_official %}
-            <button class="btn btn-mini" name="action" value="official0">Makni oznaku službenog</button>
+            <button class="btn btn-mini" name="action" value="official0">{% trans "Unmark as official" context "solution" %} Makni oznaku službeno</button>
           {% else %}
-            <button class="btn btn-mini" name="action" value="official1">Označi kao službeno</button>
+            <button class="btn btn-mini" name="action" value="official1">{% trans "Mark as official" context "solution" %}</button>
           {% endif %}
         {% endif %}
         {% ifequal solution.author.id user.id %}
           <button class="btn btn-mini" name="action" value="blank" title="Staro rješenje će ostati spremljeno za ponovno slanje, ali neće biti inače vidljivo.">Izbriši rješenje</button>
           <button class="btn btn-mini" name="action" value="as_solved" title="Tekst rješenja neće biti vidljiv.">Označi kao riješeno</button>
           <button class="btn btn-mini" name="action" value="todo" title="Tekst rješenja neće biti vidljiv.">To Do</button>
-          <a class="btn btn-mini" href="/solution/{{ solution.pk }}/edit/">Uredi</a>
+          <a class="btn btn-mini" href="/solution/{{ solution.pk }}/edit/">{% trans "Edit" context "action" %}</a>
         {% endifequal %}
       </div>
     </form>
@@ -42,8 +42,8 @@
 </div>
 
 <div id="solution-info-left">
-  <i>Korisnik: {{ solution.author|userlink }}</i><br>
-  <i>Zadatak: {{ solution.task.get_link }}</i>
+  <i>{% trans "User" %}: {{ solution.author|userlink }}</i><br>
+  <i>{% trans "Task" %}: {{ solution.task.get_link }}</i>
   <a href="#" id="solution-toggle-task">
     (Sakrij tekst zadatka)
   </a>
@@ -78,7 +78,7 @@
 {% if solution.correctness_avg %}
   <br>
   <h5>
-    <a href="#" id="solution-ratings-toggle">Ocjene: ({{ ratings|length }})</a>
+    <a href="#" id="solution-ratings-toggle">{% trans "Ratings" %}: ({{ ratings|length }})</a>
   </h5>
   <table class="table-striped table-condensed"
          style="text-align:center;width:400px;display:none;"
