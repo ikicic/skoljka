@@ -15,7 +15,8 @@ $(function(){
         ' <button type="button" class="btn mc-preview-button" ' +
             'data-source="' + source_id + '" ' +
             'data-target="' + target_id + '">' +
-          'Pregled</button> ' +
+          'Pregled</button> '
+        /*
         '<span style="color:gray;font-style:italic;">' +
             'U tijeku je testiranje (nedovršenog) ' +
             '<a href="/help/format/" target="_blank">' +
@@ -23,7 +24,9 @@ $(function(){
             '</a>, koji bi trebao biti kompatibilniji samom LaTeX-u. ' +
             'Ukoliko vam ovaj format ne radi ili ako iz bilo kojeg razloga ' +
             'želite stari format, dodajte <code>%V0</code> na početak teksta.' +
-        '</span>');
+        '</span>'
+        */
+    );
     form.append(
       '<div class="mc-preview outset" id="' + target_id + '" ' +
         'style="display:none;"></div>');
@@ -70,5 +73,3 @@ $(function(){
       $(this).next().toggle();
   });
 });
-
-
