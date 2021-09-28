@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-28 00:31+0200\n"
+"POT-Creation-Date: 2021-09-28 10:21+0200\n"
 "PO-Revision-Date: 2017-10-03 01:49+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
@@ -235,6 +235,10 @@ msgstr "Održava"
 #: apps/base/templates/about.html:31
 msgid "Sources"
 msgstr "Izvori"
+
+#: apps/base/templates/about.html:32
+msgid "List of icons"
+msgstr "Popis ikona"
 
 #: apps/base/templates/about.html:34
 msgid "Contact"
