@@ -147,9 +147,9 @@ class TeamMember(models.Model):
 
 class Chain(models.Model):
     competition = models.ForeignKey(Competition)
-    name = models.CharField(max_length=40)
+    name = models.CharField(max_length=200)
     unlock_minutes = models.IntegerField(default=0)
-    category = models.CharField(blank=True, db_index=True, max_length=32)
+    category = models.CharField(blank=True, db_index=True, max_length=100)
     bonus_score = models.IntegerField(default=1)
     position = models.IntegerField(default=0,
             help_text=gray_help_text(_("Position in the category.")))
