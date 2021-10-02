@@ -56,11 +56,7 @@
           ><input type="submit" class="btn" value="{% trans "Sign in" %}">
         </form>
       {% endif %}
-      <form action="/i18n/setlang/" method="POST" id="hbar-flags" class="hidden-phone">
-        {% csrf_token %}
-        <button name="language" value="en" class="btn-link"><img src="/static/images/flags/uk.png" alt="[en]" title="English"></button>
-        <button name="language" value="hr" class="btn-link"><img src="/static/images/flags/hr.png" alt="[hr]" title="Hrvatski"></button>
-      </form>
+      {% include 'inc_header_languages.html' %}
       <a id="hbar-collapse-sidebar" class="collapse-button btn"
           data-target="sidebar" href="#">
       </a>
