@@ -73,6 +73,14 @@ class Competition(BasePermissionsModel):
     def get_scoreboard_url(self):
         return join_urls(self.get_absolute_url(), 'scoreboard')
 
+    def get_languages(self):
+        """Return the languages this competition is translated to.
+
+        Defines the languages of chain names.
+        """
+        # Currently hardcoded, should be a DB column.
+        return ['hr', 'en']
+
 
 
 class Team(models.Model):

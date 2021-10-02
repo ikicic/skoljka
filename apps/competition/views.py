@@ -273,6 +273,29 @@ def scoreboard(request, competition, data):
     return data
 
 
+def pick_chain_name_translation(name, competition, lang):
+    """Pick the correct chain name translation.
+
+    Parse a string of form "translation1 | ... | translationN" and pick the
+    translation matching the current language. The order of languages is
+    defined at the competition level.
+
+    The original string is returned if
+        - the current language does not match any competition language, or
+        - the number of translations in `name` does not match the number of
+          competition languages.
+    """
+    languages = competition.get_languages()
+    try:
+        index = languages.index(lang)
+    except ValueError:
+        return name
+    translations = name.split('|')
+    if len(translations) != len(languages):
+        return name
+    return translations[index].strip()
+
+
 @competition_view()
 @response('competition_task_list.html')
 def task_list(request, competition, data):
@@ -349,6 +372,10 @@ def task_list(request, competition, data):
         for category in categories.itervalues():
             category.t_is_hidden = \
                     all(chain.t_is_hidden for chain in category.chains)
+
+    for chain in all_chains:
+        chain.t_translated_name = pick_chain_name_translation(
+                chain.name, competition, request.LANGUAGE_CODE)
 
     data['unverified_chains_count'] = len(unverified_chains)
     data['categories'] = sorted(categories.values(), key=lambda x: x.name)

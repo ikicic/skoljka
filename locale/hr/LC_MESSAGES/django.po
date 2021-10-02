@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-02 23:28+0200\n"
+"POT-Creation-Date: 2021-10-02 23:59+0200\n"
 "PO-Revision-Date: 2017-10-03 01:49+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
@@ -798,11 +798,11 @@ msgstr "Neslužbeni"
 msgid "Administrators"
 msgstr "Administratori"
 
-#: apps/competition/models.py:155
+#: apps/competition/models.py:163
 msgid "Position in the category."
 msgstr "Pozicija u kategoriji."
 
-#: apps/competition/views.py:299 apps/competition/views.py:378
+#: apps/competition/views.py:322 apps/competition/views.py:405
 #, python-format
 msgid "This task is worth %d point."
 msgid_plural "This task is worth %d points."
@@ -810,19 +810,19 @@ msgstr[0] "Ovaj zadatak vrijedi %d bod."
 msgstr[1] "Ovaj zadatak vrijedi %d boda."
 msgstr[2] "Ovaj zadatak vrijedi %d bodova."
 
-#: apps/competition/views.py:589
+#: apps/competition/views.py:616
 msgid "Number of admins that solved this task."
 msgstr "Broj administratora koji su riješili ovaj zadatak."
 
-#: apps/competition/views.py:793
+#: apps/competition/views.py:820
 msgid "Task:"
 msgstr "Zadatak:"
 
-#: apps/competition/views.py:797
+#: apps/competition/views.py:824
 msgid "Write the question / message here."
 msgstr "Napišite pitanje / poruku ovdje."
 
-#: apps/competition/views.py:881
+#: apps/competition/views.py:908
 msgid "Message"
 msgstr "Poruka"
 
@@ -868,8 +868,8 @@ msgid "Chains"
 msgstr "Lanci"
 
 #: apps/competition/templates/competition_base.html:89
-msgid "Show all translations"
-msgstr "Prikaži sve prijevode"
+msgid "Debug translations"
+msgstr "Debug prijevoda"
 
 #: apps/competition/templates/competition_base.html:97
 #: apps/competition/templates/competition_list.html:11
