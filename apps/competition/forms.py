@@ -83,7 +83,7 @@ class CompetitionTaskForm(ModelForm):
             del self.fields['score']
 
         self.fields['text'].widget.attrs.update(
-                {'class': 'comp-mathcontent-text', 'rows': 5})
+                {'class': 'comp-mathcontent-text', 'rows': 15})
         self.fields['comment'].widget.attrs.update(
                 {'class': 'comp-mathcontent-text ctask-comment', 'rows': 3})
 
