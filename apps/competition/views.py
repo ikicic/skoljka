@@ -337,15 +337,16 @@ def task_list(request, competition, data):
         ctask.t_submission_count += 1
         ctask.t_is_solved |= is_correct
 
+    category_translations = competition.get_task_categories_translations(
+            request.LANGUAGE_CODE)
 
     class Category(object):
         def __init__(self, name):
-            self.name = name
+            self.name = category_translations.get(name, name)
             self.chains = []
             self.t_is_hidden = None
 
     categories = {}
-
     for chain in all_chains:
         chain.t_is_hidden = data['minutes_passed'] < chain.unlock_minutes
 

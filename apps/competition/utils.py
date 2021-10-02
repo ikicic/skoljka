@@ -9,6 +9,7 @@ from competition.evaluator import get_evaluator, InvalidSolution, \
 from collections import Counter, defaultdict
 from datetime import timedelta
 
+import json
 import re
 
 def comp_url(competition, url_suffix):
@@ -496,7 +497,6 @@ def parse_team_categories(team_categories, lang):
     if not team_categories.startswith('{'):
         return _parse_team_categories_old(team_categories)
 
-    import json
     parsed = json.loads(team_categories)
     categories = parsed[lang]
     out = [(int(id), name) for id, name in categories.items()]

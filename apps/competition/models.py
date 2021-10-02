@@ -16,6 +16,7 @@ from skoljka.libs import xss
 from skoljka.libs.models import gray_help_text
 
 from datetime import datetime
+import json
 import re
 
 class Competition(BasePermissionsModel):
@@ -52,6 +53,11 @@ class Competition(BasePermissionsModel):
                       "old format is \"ID1:name1 | ID2:name2 | ... \", " \
                       "where ID is a number. " \
                       "Last category is considered the default.")
+    task_categories_trans = models.CharField(
+            blank=False, default='', max_length=255,
+            help_text="Translations of task category names. " \
+                      "E.g. {\"en\": {\"Geometrija\": \"Geometry\"}}. " \
+                      "If a translation is not available, the original name is used.")
     show_solutions = models.BooleanField(
             default=False,
             help_text="Show solutions after the competition ends.")
@@ -82,6 +88,16 @@ class Competition(BasePermissionsModel):
         """
         # Currently hardcoded, should be a DB column.
         return ['hr', 'en']
+
+    def get_task_categories_translations(self, lang):
+        """Return the dictionary of translations for the given language.
+
+        In case of an invalid task_categories_trans field or missing
+        translations, an empty dictionary is returned."""
+        try:
+            return json.loads(self.task_categories_trans)[lang]
+        except:
+            return {}
 
 
 
