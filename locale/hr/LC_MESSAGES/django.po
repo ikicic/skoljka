@@ -849,8 +849,9 @@ msgstr "Zadaci"
 
 #: apps/competition/templates/competition_base.html:69
 #: apps/competition/templates/competition_list.html:41
-msgid "Results"
-msgstr "Rezultati"
+#: apps/competition/templates/competition_scoreboard.html:7
+msgid "Scoreboard"
+msgstr "Bodovna lista"
 
 #: apps/competition/templates/competition_base.html:72
 #: apps/competition/templates/competition_base.html:79
@@ -1294,10 +1295,6 @@ msgstr "Pravila natjecanja"
 #: apps/competition/templates/competition_rules.html:13
 msgid "Solution format description"
 msgstr "Objašnjenje formata rješenja"
-
-#: apps/competition/templates/competition_scoreboard.html:7
-msgid "Scoreboard"
-msgstr "Bodovna lista"
 
 #: apps/competition/templates/competition_scoreboard.html:11
 #: apps/competition/templates/competition_task_list.html:11
