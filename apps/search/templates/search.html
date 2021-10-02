@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load tags_tags %}
+{% load i18n %}
 
 {% block title %}
 {% trans "Search" context "menu" %}{% if tags %}: {{ tags|join:', ' }}{% endif %}
