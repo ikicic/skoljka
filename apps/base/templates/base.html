@@ -23,7 +23,7 @@
     {% language_preference_style %}
   </head>
 <body>
-
+{% settings_constant EXTRA_HEADER_TOP %}
 <div id="header" class="row">
   <h1 id="sitename">
     <a href="/">
@@ -72,7 +72,7 @@
       <div id="nav-hello-user">{% trans "Hello" %}, {{ user|userlink:"first_name" }}!</div>
     {% endif %}
     <ul class="nav nav-list">
-      {% settings_constant EXTRA_HEADER_TOP %}
+      {% settings_constant EXTRA_MENU_TOP %}
       <li class="nav-header">{% trans "Menu" %}</li>
       <li><a href="/"><i class="icon-home"></i>{% trans "Home" %}</a></li>
 

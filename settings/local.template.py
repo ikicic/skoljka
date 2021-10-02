@@ -114,7 +114,8 @@ COMPETITION_SPECIAL_URLS = {
 
 DISABLE_PREF_COOKIES = True
 
-EXTRA_HEADER_TOP = ""
+EXTRA_HEADER_TOP = "<div style=\"text-align: center; background-color: orange;\">example of EXTRA_HEADER_TOP</div>"
+EXTRA_MENU_TOP = "--EXTRA_MENU_TOP--"
 
 LECTURES_FOLDER_URL = "/folder/<ID NOT SET>/"
 FEATURED_LECTURES_FOLDER_ID = None
