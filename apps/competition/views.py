@@ -342,7 +342,8 @@ def task_list(request, competition, data):
 
     class Category(object):
         def __init__(self, name):
-            self.name = category_translations.get(name, name)
+            self.name = name
+            self.translated_name = category_translations.get(name, name)
             self.chains = []
             self.t_is_hidden = None
 
