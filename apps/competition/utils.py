@@ -482,10 +482,29 @@ def update_ctask_cache_admin_solved_count(competition, ctask, chain):
         update_chain_cache_is_verified(competition, chain)
 
 
-def parse_team_categories(team_categories):
+def parse_team_categories(team_categories, lang):
     """Parse `competition.team_categories` formatted string.
 
-    Raises ValueError if format invalid."""
+    New format (JSON):
+        '{"lang": {"ID1": "name", ...}, ...}'
+    Old format:
+        "ID1: name | ..."
+
+    Returns a list `[(id, name), ...]`, where `id` is an `int`.
+
+    Raises ValueError, KeyError or TypeError if the format is invalid."""
+    if not team_categories.startswith('{'):
+        return _parse_team_categories_old(team_categories)
+
+    import json
+    parsed = json.loads(team_categories)
+    categories = parsed[lang]
+    out = [(int(id), name) for id, name in categories.items()]
+    out.sort(key=lambda f: f[0])
+    return out
+
+
+def _parse_team_categories_old(team_categories):
     # Format is "ID1:name1 | ID2:name2 | ...", where the last item is
     # considered the default.
     categories = []

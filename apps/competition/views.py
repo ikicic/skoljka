@@ -247,7 +247,8 @@ def scoreboard(request, competition, data):
                   'cache_max_score_after_freeze', 'team_type', 'category'))
 
     try:
-        team_categories = parse_team_categories(competition.team_categories)
+        team_categories = parse_team_categories(
+                competition.team_categories, request.LANGUAGE_CODE)
     except ValueError:
         team_categories = []
     team_categories_dict = dict(team_categories)

@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.forms.models import BaseModelFormSet, ModelForm
 from django.utils.encoding import force_unicode
 from django.utils.html import mark_safe
-from django.utils.translation import ugettext as _, ugettext_lazy
+from django.utils.translation import get_language, ugettext as _, ugettext_lazy
 
 from competition.models import Chain, CompetitionTask, Team, TeamMember
 from competition.evaluator import InvalidDescriptor, InvalidSolution, \
@@ -176,6 +176,7 @@ class TeamCategoryRadioSelectRenderer(forms.widgets.RadioFieldRenderer):
 
 class TeamForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
+        lang = get_language()
         instance = kwargs.get('instance', None)
         initial = dict(kwargs.pop('initial', {}))
         extra_fields = []
@@ -212,8 +213,8 @@ class TeamForm(forms.ModelForm):
 
         # Parse team category string.
         try:
-            categories = parse_team_categories(competition.team_categories)
-        except ValueError as e:
+            categories = parse_team_categories(competition.team_categories, lang)
+        except (ValueError, KeyError, TypeError) as e:
             categories = [(1, "team_categories invalid!!! " + e.message)]
         self.team_categories = categories
         if categories and (not instance or not instance.category):

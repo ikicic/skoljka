@@ -48,7 +48,9 @@ class Competition(BasePermissionsModel):
                       "for it to be published.")
     team_categories = models.CharField(
             blank=True, max_length=255,
-            help_text="Format: \"ID1:name1 | ID2:name2 | ... \". " \
+            help_text="Format is {\"lang\": {\"ID1\": \"name1\", ...}, ...}, "
+                      "old format is \"ID1:name1 | ID2:name2 | ... \", " \
+                      "where ID is a number. " \
                       "Last category is considered the default.")
     show_solutions = models.BooleanField(
             default=False,
