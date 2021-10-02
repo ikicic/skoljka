@@ -2,7 +2,7 @@ from django import template
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.template.base import TemplateSyntaxError
-from django.utils.translation import ugettext as _
+from django.utils.translation import get_language, ugettext as _
 
 from search.utils import search_tasks
 
@@ -17,13 +17,29 @@ def concat(first, second):
     return unicode(first) + unicode(second)
 
 
-class SettingsConstantNode(template.Node):
+class ConstantNode(template.Node):
     def __init__(self, value):
         self.value = value
 
     def render(self, context):
         return self.value
 
+
+
+@preprocess_tag
+@register.tag
+def language_preference_style(*args):
+    current = get_language()
+    all_lang = [lang for lang, dummy in settings.LANGUAGES]
+    inactive = [lang for lang in all_lang if lang != current]
+    if not inactive:
+        return ''
+    selector = ','.join('.ctask-content .lang-{}'.format(lang) for lang in inactive)
+    out = '<style>{}{{display:none;}}</style>'.format(selector)
+    if isinstance(args[0], basestring):
+        # Called from the template preprocessor, just return the value.
+        return out
+    return ConstantNode(out)
 
 
 @preprocess_tag
@@ -40,14 +56,14 @@ def settings_constant(*args):
     """
     if len(args) != 2:
         raise Exception("Args doesn't have two arguments??")
-    if isinstance(args[1], basestring):
+    if isinstance(args[0], basestring):
         # Called from the template preprocessor, just return the value.
         return getattr(settings, args[1])
     bits = args[1].split_contents()
     if len(bits) != 2:
         raise TemplateSyntaxError(
                 "Expected only one parameter in 'settings_constant'!")
-    return SettingsConstantNode(getattr(settings, bits[1]))
+    return ConstantNode(getattr(settings, bits[1]))
 
 
 

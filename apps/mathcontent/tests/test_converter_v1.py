@@ -875,6 +875,16 @@ class ConverterV1TestCase(TestCaseEx):
                 '<a href="http://example.com/" rel="nofollow">click here</a>',
                 "\\href{http://example.com/}{click here}")
 
+    def test_bbcode_lang(self):
+        self.assertHTMLLatexNoPar(
+                "[lang=en]asdf[/lang]",
+                '<div class="lang lang-en">asdf</div>',
+                "{asdf}")
+        self.assertHTMLLatexNoPar(
+                "[lang=hr]asdf[/lang]",
+                '<div class="lang lang-hr">asdf</div>',
+                "{asdf}")
+
     def test_latex_formula(self):  # Test $ ... $ etc.
         self.assertHTMLLatexNoPar(
                 "$bla$",

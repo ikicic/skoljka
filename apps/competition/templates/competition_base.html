@@ -18,8 +18,9 @@
 
     <title>{% block title %}{{ competition.name }} - Školjka{% endblock %}</title>
 
-    <meta name="content-language" content="hr">
+    <meta name="content-language" content="{{ LANGUAGE_CODE }}">
     <meta name="viewport" content="width=device-width">
+    {% language_preference_style %}
   </head>
 <body>
 
@@ -83,6 +84,9 @@
           <li><a href="/admin/competition/competition/{{ competition.id }}/">
             Competition admin</a></li>
         {% endif %}
+        <li><label class="checkbox">
+            <input type="checkbox" id="all-langs" checked>
+            {% trans "Show all translations" %}</label></li>
       {% endif %}
     </ul>
   </div>

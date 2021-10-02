@@ -209,4 +209,20 @@
       _this.html(count || '');
     });
   };
+
+  // Option for admins to show all translations.
+  $(function() {
+    var enabled = localStorage.getItem('all-langs');
+    if (enabled === '0') {
+      $('body').removeClass('all-langs');
+      $('#all-langs').prop('checked', false);
+    } else {
+      $('body').addClass('all-langs');  // Default.
+    }
+
+    $('#all-langs').click(function() {
+      localStorage.setItem('all-langs', this.checked ? '1' : '0');
+      $('body').toggleClass('all-langs');
+    });
+  });
 }).call(this);

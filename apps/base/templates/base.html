@@ -17,9 +17,10 @@
     {% block header_list %} {% endblock %} {# manually put more head stuff here #}
     <title>{% block title %}Školjka - {% trans "Web archive of math problems" %}{% endblock %}</title>
 
-    <meta name="content-language" content="hr">
+    <meta name="content-language" content="{{ LANGUAGE_CODE }}">
     <meta name="description" content="{% trans "Web archive of math problems, including previous state and regional competitions and International and Middle-european math olympiads. Školjka can help any student training for math competitions." %}">
     <meta name="viewport" content="width=device-width">
+    {% language_preference_style %}
   </head>
 <body>
 

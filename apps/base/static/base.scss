@@ -218,3 +218,12 @@ a.register {
     display: none;
   }
 }
+
+/* Task translations */
+.lang {
+  display: inline-block;
+}
+.all-langs .lang {
+  display: inline-block !important;
+  border: purple 1px solid;
+}

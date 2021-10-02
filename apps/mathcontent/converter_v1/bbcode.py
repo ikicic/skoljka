@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils.translation import ugettext as _
 
 from skoljka.libs import xss
@@ -277,6 +278,31 @@ class BBCodeImg(BBCodeTag):
 
 
 
+class BBCodeLanguage(BBCodeTag):
+    def should_parse_content(self, token):
+        return True
+
+    def to_html(self, token, converter):
+        if not token.is_open():
+            return '</div>'
+        if token.attrs is None or len(token.attrs) != 1:
+            raise BBUnexpectedParameters()
+        lang = dict(token.attrs)['lang'];
+        if lang is None:
+            raise BBCodeException("Language not specified, use e.g. '[lang=en]...[/lang]'.")
+        if not any(lang == lang_ for lang_, name in settings.LANGUAGES):
+            raise BBCodeException(
+                    "Unrecognized language code '{}'.".format(xss.escape(lang)))
+        return u'<div class="lang lang-{}">'.format(lang)
+
+    def to_latex(self, token, converter):
+        if not token.is_open():
+            return u'}'
+        if len(token.attrs) != 1:
+            raise BBUnexpectedParameters()
+        return u'{'  # For now export all translations.
+
+
 class BBCodePar(BBCodeTag):
     """[par <skip> <indent>], a shorthand for
         \\setlength{\\parskip}{<skip>}
@@ -379,6 +405,7 @@ bb_commands = {
     'hide': BBCodeHide(),
     'i': BBCodeContainer('<i>', '</i>', '\\textit{', '}'),
     'img': BBCodeImg(),
+    'lang': BBCodeLanguage(),
     'par': BBCodePar(),
     'pre': BBCodeNoParseContainer(
             '<pre class="mc-verbatim">', '</pre>',
