@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
+from django.utils.cache import patch_response_headers
+from django.views.i18n import javascript_catalog
 
 from activity.models import Action
 from base.utils import can_edit_featured_lectures
@@ -114,3 +116,11 @@ def homepage(request):
         return homepage_online(request, recent_tasks)
     else:
         return homepage_offline(request, recent_tasks)
+
+
+def cached_javascript_catalog(*args, **kwargs):
+    """Wrapper around django.views.i18n.javascript_catalog which adds
+    cache_timeout."""
+    response = javascript_catalog(*args, **kwargs)
+    patch_response_headers(response, cache_timeout=300)
+    return response

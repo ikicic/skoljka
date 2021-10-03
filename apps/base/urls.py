@@ -4,6 +4,11 @@ from django.views.generic.simple import direct_to_template
 
 _EXTRA_URLS = [(x[0], direct_to_template, {'template': x[1]}) for x in settings.EXTRA_BASE_URLS]
 
+js_info_dict = {
+    'packages': ('competition', ),
+}
+
+
 urlpatterns = patterns('',
     (r'^$', 'base.views.homepage'),
     (r'^robots\.txt$', direct_to_template, {'template': 'robots.txt', 'mimetype': 'text/plain'}),
@@ -21,6 +26,7 @@ urlpatterns = patterns('',
     (r'^tou/$', direct_to_template, {'template': 'terms_of_use.html'}),
 
     (r'^i18n/', include('django.conf.urls.i18n')),
+    (r'^jsi18n/$', 'base.views.cached_javascript_catalog', js_info_dict),
 
     *_EXTRA_URLS
 )

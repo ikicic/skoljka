@@ -6,10 +6,10 @@
 
   var _reg_member_field_row = function(index, manual, username, accepted) {
     var extra = accepted
-        ? 'class="input-large creg-invitation-accepted" title="Prihvaćeno"'
+        ? 'class="input-large creg-invitation-accepted" title="' + gettext("Accepted")+ '"'
         : 'class="input-large"';
-    var cancel_or_delete = accepted ? "Izbriši" : "Odustani";
-    var output = "<div>Član #" + index + ":</div>";
+    var cancel_or_delete = accepted ? gettext("Delete") : gettext("Cancel");
+    var output = "<div>" + gettext("Member") + " #" + index + ":</div>";
 
     if (username) {
       output +=
@@ -36,9 +36,9 @@
                 ' name="member' + index + '_manual">' +
           '</div>\n' +
           '<div>' +
-            'ili ' +
+            gettext('or') + ' ' +
             '<button type="button" class="btn creg-invite">' +
-              'Pozovi korisnika' +
+              gettext("Invite user") +
             '</button>' +
           '</div>';
     }
@@ -64,9 +64,9 @@
       $(this).replaceWith(
           '<input type="text" class="creg-invite-member input-large"' +
               ' name="member' + index + '_username"' +
-              ' placeholder="Unesite korisničko ime">\n' +
+              ' placeholder="' + gettext("Enter username") + '">\n' +
           '<button type="button" class="btn creg-cancel-invitation">' +
-            'Odustani' +
+            gettext("Cancel") +
           '</button>'
       );
       $('.creg-invite-member').autocomplete(reg_available_users);
