@@ -22,6 +22,7 @@
     <meta name="content-language" content="{{ LANGUAGE_CODE }}">
     <meta name="viewport" content="width=device-width">
     {% language_preference_style %}
+    {% if is_admin %}<script>window.is_admin = true;</script>{% endif %}
   </head>
 <body>
 {% settings_constant EXTRA_HEADER_TOP %}
