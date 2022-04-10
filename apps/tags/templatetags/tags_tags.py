@@ -83,7 +83,7 @@ def tag_list(context, owner, plus_exclude=None):
             fmt = plus
         (v0 if name[0] != '$' else v1).append(fmt % attr)
 
-    # Update apps/tags/static/tags.coffee and .scss if changing this!
+    # Update apps/tags/static/tags.js and .scss if changing this!
     return mark_safe(
             u'<div class="tag-list tag-list-tooltip" data-content-type-id="{}" '
             u'data-object-id="{}">{}</div>'.format(
