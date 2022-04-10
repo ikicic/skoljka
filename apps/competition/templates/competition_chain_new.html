@@ -8,12 +8,20 @@
 
 <div class="instructions">
   <h4>{% trans "Instructions" %}</h4>
-  <p>Kategorija je bilo kakav string. Po unesenim kategorijama automatski će se
-    grupirati lanci u pregledu zadataka.</p>
-  <p><i>Unlock minutes</i> predstavlja broj minuta nakon početka natjecanja
-    nakon kojih lanac postaje vidljiv. Npr. ako želite da se zadatak vidi tek
-    nakon 2 sata, stavite 120. Administratorima će takvi lanci za vrijeme
-    natjecanja biti prikazani uvijek, ali transparentno.</p>
+  <p>Kategorija je bilo kakav string. Po unesenim kategorijama automatski će se grupirati lanci u pregledu zadataka.</p>
+  {% if competition.is_course %}
+    <p>
+      <i>Unlock days</i> predstavlja broj dana nakon početka kursa nakon kojih lanac postaje vidljiv.
+      Npr. ako želite da se zadatak vidi tek nakon 2 tjedna, stavite 14.
+      Administratorima će takvi lanci biti vidljivi uvijek.
+    </p>
+  {% else %}
+    <p>
+      <i>Unlock minutes</i> predstavlja broj minuta nakon početka natjecanja nakon kojih lanac postaje vidljiv.
+      Npr. ako želite da se zadatak vidi tek nakon 2 sata, stavite 120.
+      Administratorima će takvi lanci biti vidljivi uvijek.
+    </p>
+  {% endif %}
 
   <p><i>Bonus score</i> predstavlja dodatne bodove koje natjecateljski tim
     dobije ako u potpunosti riješi sve zadatke iz lanca.</p>

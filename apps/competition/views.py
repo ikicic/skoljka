@@ -135,7 +135,7 @@ def registration(request, competition, data):
     team = data['team']
     edit = team is not None
     team_form = None
-    is_course = competition.kind == competition.KIND_COURSE
+    is_course = competition.is_course
 
     if team and is_course:
         return (competition.get_absolute_url(), )
@@ -818,7 +818,7 @@ def chain_new(request, competition, data, chain_id=None):
         edit = False
 
     POST = request.POST if request.method == 'POST' else None
-    chain_form = ChainForm(data=POST, instance=chain)
+    chain_form = ChainForm(POST, competition=competition, instance=chain)
 
     if request.method == 'POST':
         if chain_form.is_valid():

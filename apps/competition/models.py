@@ -104,6 +104,7 @@ class Competition(BasePermissionsModel):
         except:
             return {}
 
+    @property
     def is_course(self):
         return self.kind == self.KIND_COURSE
 
@@ -194,6 +195,10 @@ class Chain(models.Model):
 
     def get_absolute_url(self):
         return self.competition.get_absolute_url() + 'chain/{}/'.format(self.id)
+
+    @property
+    def unlock_days(self):
+        return self.unlock_minutes / (24 * 60.)
 
 
 

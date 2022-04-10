@@ -278,22 +278,47 @@ class RegistrationTest(CompetitionViewsTestBase):
         self.assertEqual(Team.objects.filter(competition_id=2).count(), 1)
 
 
-class CourseRegistrationTest(CompetitionViewsTestBase):
+class CourseTest(CompetitionViewsTestBase):
     def test_registration(self):
         """Course registration is simpler -- there is no team."""
         # Test registration. Check that the name kwarg is ignored.
         self.login(self.alice)
         response = self.client.post('/competition/6/registration/',
                                     {'name': "should be ignored"})
-        templates = [t.name for t in response.template]
         self.assertEqual(response.status_code, 200)
-        self.assertIn('competition_registration_complete_course.html', templates)
+        self.assertTemplateUsed(response, 'competition_registration_complete_course.html')
         team = Team.objects.get(competition=self.competitions[6], author=self.alice)
         self.assertEqual(team.name, self.alice.username)  # name is ignored
 
         # Test re-registration, should be rejected.
         response = self.client.post('/competition/6/registration/', {})
         self.assertRedirects(response, '/competition/6/')
+        self.logout()
+
+    def test_chain_new(self):
+        self.login(self.admin)
+
+        # Test that 'unlock_minutes' was replaced with 'unlock_days'.
+        response = self.client.get('/competition/6/chain/new/')
+        self.assertNotContains(response, 'unlock_minutes')
+        self.assertContains(response, 'unlock_days')
+
+        # Test that days are multiplied with 24*60.
+        response = self.client.post('/competition/6/chain/new/', {
+            'name': "Chain-ABC",
+            'category': "Category-DEF",
+            'bonus_score': "2",
+            'unlock_days': "14",
+            'position': "0",
+        })
+        chain = Chain.objects.get(name="Chain-ABC")
+        self.assertEqual(chain.unlock_minutes, 14 * 24 * 60)
+        self.assertRedirects(response, chain.get_absolute_url())
+
+        # Test that recovering days from minutes works.
+        response = self.client.get(chain.get_absolute_url())
+        self.assertContains(response, 'value="14.0"')
+
         self.logout()
 
 

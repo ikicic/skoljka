@@ -8,11 +8,12 @@ settings/local.py
 templates/local/
 
 # These files are either temporary, or backups, so we don't want them either
-*.pyc
 *.bak
-*~
-*.swp
 *.exe
+*.pyc
+*.swp
+*~
+.DS_Store
 Thumbs.db
 
 # Auto-generated files.

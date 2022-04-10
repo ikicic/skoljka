@@ -112,10 +112,33 @@ class CompetitionTaskForm(ModelForm):
 
 
 class ChainForm(forms.ModelForm):
+    """Form for creating or editing chains.
+
+    For course-like competitions, the `unlock_minutes` field is replaced with
+    an `unlock_days` field.
+    """
     class Meta:
         model = Chain
         fields = ['name', 'category', 'unlock_minutes', 'bonus_score',
                   'position']
+
+    def __init__(self, *args, **kwargs):
+        self.competition = kwargs.pop('competition')
+        super(ChainForm, self).__init__(*args, **kwargs)
+        if self.competition.is_course:
+            del self.fields['unlock_minutes']
+            days = self.instance.unlock_minutes / (24 * 60.) \
+                    if self.instance else 0
+            self.fields['unlock_days'] = forms.FloatField(
+                    label=_("Unlock days"), min_value=0, initial=days)
+
+    def clean(self):
+        data = self.cleaned_data
+        if self.competition.is_course:
+            self.cleaned_data['unlock_minutes'] = \
+                    int((data['unlock_days'] or 0) * 24 * 60)
+            del data['unlock_days']
+        return data
 
 
 
@@ -138,17 +161,18 @@ def clean_unused_ctask_ids(competition, ctask_ids):
 
 
 
-class ChainTasksForm(forms.ModelForm):
+class ChainTasksForm(ChainForm):
     ctask_ids = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     def __init__(self, *args, **kwargs):
-        competition = kwargs.pop('competition')
         super(ChainTasksForm, self).__init__(*args, **kwargs)
-        self.competition = competition
 
         self.fields['name'].widget.attrs.update({'class': 'span6'})
         self.fields['category'].widget.attrs.update({'class': 'span2'})
-        self.fields['unlock_minutes'].widget.attrs.update({'class': 'span1'})
+        if 'unlock_minutes' in self.fields:
+            self.fields['unlock_minutes'].widget.attrs.update({'class': 'span1'})
+        else:
+            self.fields['unlock_days'].widget.attrs.update({'class': 'span1'})
         self.fields['bonus_score'].widget.attrs.update({'class': 'span1'})
         self.fields['position'].widget.attrs.update({'class': 'span1'})
         self.fields['ctask_ids'].widget.attrs.update(
@@ -159,11 +183,6 @@ class ChainTasksForm(forms.ModelForm):
                 self.competition, self.cleaned_data['ctask_ids'])
         self.cleaned_data['ctasks'] = ctasks
         return ctask_ids
-
-    class Meta:
-        model = Chain
-        fields = ['name', 'category', 'unlock_minutes', 'bonus_score',
-                  'position']
 
 
 
