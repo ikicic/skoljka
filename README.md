@@ -1,7 +1,53 @@
+# Installation (Docker)
+
+Note: docker-based installation is work in progress.
+The docker files are not optimal nor secure for production.
+
+In the current setup, the container is given read-write access to the repository root folder, because media files are stored in `local/` and similar subfolders.
+
+First, build the image and start the container:
+```sh
+./docker/build.sh
+./docker/run_mount.sh
+```
+
+Then, attach to the container:
+```sh
+docker attach skoljka
+```
+(This command might look stuck, press enter to see the interactive shell.)
+
+Within the container, run the following:
+```sh
+cd /app
+./docker/build_internal.sh
+./docker/setup_internal.sh
+```
+The default mysql root password is empty.
+
+To run skoljka, run
+```sh
+cd /app
+python2 manage.py runserver 0.0.0.0:8000
+```
+and open http://localhost:8000/ .
+Set `DEBUG` in `settings/local.py` to `True` for CSS and JS files to work.
+
+After closing the container, run the following to resume it:
+```sh
+docker start skoljka
+docker attach skoljka
+service mysql start  # Fails for some reason.
+service mysql start  # Try again.
+```
+
 # Installation
 
 This procedure is based on the following tutorial:
 http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supervisor/
+
+NOTE: Consider using Docker installation above.
+The following installation procedure might be broken.
 
 1. Go to your projects folder (e.g. `~/projects`). Create and go to a virtual environment:
   ```sh
@@ -16,7 +62,8 @@ http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supe
   ```sh
   git clone https://github.com/ikicic/skoljka.git
   cd skoljka
-  scripts/install.sh
+  scripts/install_dependencies.sh
+  scripts/setup.sh
   ```
 
 3. Create an empty `UTF8` database (use your **username**):
@@ -32,7 +79,10 @@ http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supe
   python2 manage.py loaddata folders userprofiles
   python2 b.py
   ```
-  You can now use Django test server by running `python2 manage.py runserver`. The database is pre-filled with superuser `arhiva` whose password is `a`. Note that by default, `DEBUG` is `False`, so static files won't be loaded correctly.
+  You can now use Django test server by running `python2 manage.py runserver`.
+  The database is pre-filled with superuser `arhiva` whose password is `a`.
+  Note that in `settings/local.py` the variable `DEBUG` is `False` by default, so static files won't be loaded correctly.
+
 
 # Configuring gunicorn
 

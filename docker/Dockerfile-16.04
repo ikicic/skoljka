@@ -1,0 +1,41 @@
+FROM docker.io/ubuntu:16.04
+
+# WARNING: DEBIAN_FRONTEND=noninteractive disables the root password prompt of
+# mysql-server installation. That means the root password will be empty! Do NOT
+# use in production!
+
+# subversion (svn): used to install jquery-star-rating-plugin
+RUN set -ex \
+        && apt-get update \
+        && (DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            mysql-client-core-5.7 \
+            mysql-server-5.7) \
+        && apt-get install -y \
+            gettext \
+            git \
+            libmysqlclient-dev \
+            memcached \
+            nodejs-legacy \
+            npm \
+            python-pip \
+            python-setuptools \
+            python2.7-dev \
+            ruby-dev \
+            subversion \
+        && apt-get clean
+
+RUN set -ex \
+        && apt-get update \
+        && apt-get install -y --no-install-recommends texlive-latex-extra \
+        && apt-get clean
+
+# These are the latest versions of pip and setuptools that support Python 2.
+RUN python2 -m pip install --upgrade \
+        pip==20.3.4 \
+        setuptools==44.0.0
+COPY requirements.txt /tmp/
+
+# TODO: How to add git repos to requirements.txt?
+RUN python2 -m pip install -r /tmp/requirements.txt \
+        && python2 -m pip install git+https://github.com/ikicic/django-bootstrap-toolkit \
+        && python2 -m pip cache purge

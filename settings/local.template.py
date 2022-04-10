@@ -10,6 +10,7 @@ import os
 # (REQUIRED) Full project (repository) path. For example:
 #   PROJECT_ROOT = 'C:/dev/skoljka/skoljka'
 #   PROJECT_ROOT = '/home/user/projects/skoljka/skoljka/'
+PROJECT_ROOT = '/app'  # <-- if using docker container
 
 ADMINS = (
 #    ('Pajo Patak', 'pajopatak@gmail.com'),
@@ -17,19 +18,29 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-SECRET_KEY = ''     # (REQUIRED) secret key here
+# If docker is used, automatically filled by docker/build_internal.sh.
+SECRET_KEY = 'KEY_SHOULD_BE_SOMETHING_COMPLICATED'  # (REQUIRED)
+
+def _get_mysql_options():
+    # TODO: Investigate which engine to use -- MyISAM or InnoDB
+    # Different engines for different tables might cause problems to
+    # foreign key relations.
+    import subprocess
+    version = subprocess.check_output(['mysql', '--version'])
+    if ' 5.5.' in version:
+        return {'init_command': 'SET storage_engine=MyISAM;'}
+    else:  # 5.7+
+        return {'init_command': 'SET default_storage_engine=MyISAM;'}
+
 
 INTERNAL_IPS = ('127.0.0.1', )
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        # TODO: Investigate which engine to use -- MyISAM or InnoDB
-        # Different engines for different tables might cause problems to
-        # foreign key relations.
-        'OPTIONS': { 'init_command': 'SET storage_engine=MyISAM;' },
-        'NAME': '',                 # (REQUIRED) enter database name here
-        'USER': '',                 # (REQUIRED) enter mysql username here
-        'PASSWORD': '',             # (REQUIRED) enter password here
+        'OPTIONS': _get_mysql_options(),
+        'NAME': 'skoljka',      # (REQUIRED) enter database name here
+        'USER': 'root',         # (REQUIRED) enter mysql username here
+        'PASSWORD': '',         # (REQUIRED) enter password here
         'HOST': 'localhost',
         'PORT': '',
     }

@@ -1,4 +1,6 @@
 Django==1.4.22
+# django-debug-toolbar puts sqlparse as dependency, without specifying the version.
+sqlparse==0.3.1
 django-debug-toolbar==1.2.1
 django-pipeline==1.3.23
 django-taggit==0.10a1
