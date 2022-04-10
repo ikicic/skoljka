@@ -28,7 +28,12 @@ class Competition(BasePermissionsModel):
         admin_group must have VIEW and EDIT permissions for the competition
         object.
     """
+    KIND_COMPETITION = 1
+    KIND_COURSE = 2
+
     name = models.CharField(max_length=64)
+    kind = models.SmallIntegerField(
+            default=1, help_text="1=competition, 2=course")
     hidden = models.BooleanField(default=True)
     registration_open_date = models.DateTimeField()
     start_date = models.DateTimeField()
@@ -99,6 +104,8 @@ class Competition(BasePermissionsModel):
         except:
             return {}
 
+    def is_course(self):
+        return self.kind == self.KIND_COURSE
 
 
 class Team(models.Model):

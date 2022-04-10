@@ -1,0 +1,19 @@
+{% extends "competition_base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<h3 class="comp-header">{% trans "Registration" %}</h3>
+
+<div class="alert alert-success">
+  {% trans "Course registration successful!" %}
+</div>
+
+{% if has_started %}
+  <p>{% trans "Course materials and homework problems are available in the menu. Enjoy!" %}
+{% else %}
+  <p>{% blocktrans %}Once the course starts, course materials and homework problems
+  will be available in the menu. Enjoy!{% endblocktrans %}</p>
+{% endif %}
+
+{% endblock content %}

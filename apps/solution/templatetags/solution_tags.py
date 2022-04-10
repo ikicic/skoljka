@@ -11,7 +11,7 @@ from skoljka.libs.string_operations import obfuscate_text
 from solution.models import HTML_INFO, Solution, SolutionStatus, \
         SolutionDetailedStatus, SOLUTION_STATUS_BY_NAME
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 register = template.Library()
 

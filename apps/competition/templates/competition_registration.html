@@ -50,7 +50,7 @@
     </form>
   {% endif %}
 
-  {% if team_form %}
+  {% if team_form and not competition.is_course %}
     {% if team %}
       <h3 class="comp-header">{% trans "Edit Team" %}</h3>
     {% else %}
@@ -94,6 +94,19 @@
       </script>
       <br>
       <input type="submit" class="btn btn-primary" value="{% trans "Submit" %}">
+    </form>
+  {% elif team_form and competition.is_course %}
+    <h3 class="comp-header">{% trans "Course Registration" %}</h3>
+
+    <div class="instructions">
+      {% blocktrans %}
+        <p>Please register to get access to the course content and to be able to submit solutions and receive feedback.</p>
+      {% endblocktrans %}
+    </div>
+
+    <form action="{{ request.get_full_path }}" method="POST" id="creg-form">
+      {% csrf_token %}
+      <input type="submit" class="btn btn-primary" value="{% trans "Register" %}">
     </form>
   {% elif team %}
     {% include 'inc_competition_team_detail.html' with preview_team=team %}

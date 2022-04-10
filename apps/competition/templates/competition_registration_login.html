@@ -7,14 +7,23 @@
 {% block content %}
 
 <div class="small-page">
-  <h3 class="comp-header">{% trans "Registration" %}</h3>
 
-  <p>{% blocktrans %}A Školjka account is required to register to the 
-  competition (a single account suffices per team). {% endblocktrans %}</p>
+  {% if competition.is_course %}
+    <h3 class="comp-header">{% trans "Course registration" %}</h3>
+    <p>{% blocktrans %}A Školjka account is required to register for the course.{% endblocktrans %}</p>
 
-  <p>{% blocktrans %}Please login, or register an account if you don't
-  have an account already. After logging in / registration, you will be able
-  to create your team for the competition.{% endblocktrans %}</p>
+    <p>{% blocktrans %}Please log in with your account or sign up if you do not
+    have one already. After logging in, you will be able to register for the
+    course.{% endblocktrans %}</p>
+  {% else %}
+    <h3 class="comp-header">{% trans "Competition registration" %}</h3>
+    <p>{% blocktrans %}A Školjka account is required to register for the
+    competition (a single account per team suffices).{% endblocktrans %}</p>
+
+    <p>{% blocktrans %}Please log in with your account or sign up if you do not
+    have one already. After logging in, you will be able to register your team
+    for the competition.{% endblocktrans %}</p>
+  {% endif %}
 
   <div class="row-fluid">
     <div class="span6">

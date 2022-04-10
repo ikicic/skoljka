@@ -50,6 +50,7 @@ sys.path.append(APPS_DIR)
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
 TIME_ZONE = 'Europe/Zagreb'
+# USE_TZ = True  # <-- Not so trivial to use and we do not need it anyway.
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html

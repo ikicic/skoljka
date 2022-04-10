@@ -41,19 +41,25 @@ class CompetitionViewsTestBase(TestCase):
         future2 = future1 + DAY
         future3 = future2 + DAY
 
-        # ID, hidden, registration_open_date, start_date, end_date.
+        COMPETITION = Competition.KIND_COMPETITION
+        COURSE = Competition.KIND_COURSE
+
+        # ID, max_team_size, kind, hidden, registration_open_date,
+        # start_date, end_date.
         competitions = [
-            (1, False, future1, future2, future3),
-            (2, False, past1, future2, future3),
-            (3, False, past2, past1, future3),
-            (4, False, past3, past2, past1),
-            (5, True, past2, past1, future3),
+            (1, 3, COMPETITION, False, future1, future2, future3),
+            (2, 3, COMPETITION, False, past1, future2, future3),
+            (3, 3, COMPETITION, False, past2, past1, future3),
+            (4, 3, COMPETITION, False, past3, past2, past1),
+            (5, 3, COMPETITION, True, past2, past1, future3),
+            (6, 3, COURSE, False, past2, past1, future3),  # Course.
         ]
         competitions = [
-            Competition(name="Test competition #{}".format(a), hidden=b,
-                registration_open_date=c, start_date=d, end_date=e,
-                scoreboard_freeze_date=e - HOUR)
-            for a, b, c, d, e in competitions
+            Competition(name="Test competition #{}".format(id_),
+                max_team_size=team_size, kind=kind, hidden=hidden,
+                registration_open_date=open_, start_date=start, end_date=end,
+                scoreboard_freeze_date=end - HOUR)
+            for id_, team_size, kind, hidden, open_, start, end in competitions
         ]
         Competition.objects.bulk_create(competitions)
         self.competitions = {x.id: x for x in Competition.objects.all()}
@@ -94,6 +100,7 @@ class RegistrationTest(CompetitionViewsTestBase):
 
         # It doesn't have to work even for admin_group if no explicit
         # permission is given. That's why we have permission system.
+        # TODO: Test not finished.
 
     def test_registration_unopened_redirect(self):
         """If registration unopened, redirect to competition homepage."""
@@ -270,6 +277,24 @@ class RegistrationTest(CompetitionViewsTestBase):
                 {'name': "Bob", "member2_username": self.admin.username})
         self.assertEqual(Team.objects.filter(competition_id=2).count(), 1)
 
+
+class CourseRegistrationTest(CompetitionViewsTestBase):
+    def test_registration(self):
+        """Course registration is simpler -- there is no team."""
+        # Test registration. Check that the name kwarg is ignored.
+        self.login(self.alice)
+        response = self.client.post('/competition/6/registration/',
+                                    {'name': "should be ignored"})
+        templates = [t.name for t in response.template]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('competition_registration_complete_course.html', templates)
+        team = Team.objects.get(competition=self.competitions[6], author=self.alice)
+        self.assertEqual(team.name, self.alice.username)  # name is ignored
+
+        # Test re-registration, should be rejected.
+        response = self.client.post('/competition/6/registration/', {})
+        self.assertRedirects(response, '/competition/6/')
+        self.logout()
 
 
 class SubmissionTest(CompetitionViewsTestBase):

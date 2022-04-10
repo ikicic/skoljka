@@ -135,8 +135,13 @@ def registration(request, competition, data):
     team = data['team']
     edit = team is not None
     team_form = None
+    is_course = competition.kind == competition.KIND_COURSE
+
+    if team and is_course:
+        return (competition.get_absolute_url(), )
 
     if not team and request.method == 'POST' \
+            and not is_course \
             and 'invitation-accept' in request.POST:
         team = get_object_or_404(Team, id=request.POST['invitation-accept'])
         team_member = get_object_or_404(TeamMember, team=team,
@@ -155,7 +160,9 @@ def registration(request, competition, data):
                 .update(is_selected=False)
         data['team'] = team
         data['team_invitations'] = []
-    elif request.method == 'POST' and 'name' in request.POST:
+    elif request.method == 'POST' \
+            and 'name' in request.POST \
+            and not is_course:
         team_form = TeamForm(request.POST, competition=competition,
                 max_team_size=competition.max_team_size, instance=team,
                 user=request.user)
@@ -199,6 +206,18 @@ def registration(request, competition, data):
                 member_name=name, is_selected=True,
                 invitation_status=TeamMember.INVITATION_ACCEPTED)
         return (request.get_full_path() + '?created=1', )
+    elif request.method == 'POST' and is_course:
+        assert not team
+        name = request.user.username
+        team = Team(name=name, author=request.user, competition=competition,
+                    team_type=Team.TYPE_NORMAL)
+        team.save()
+        TeamMember.objects.create(
+                team=team, member=request.user, member_name=name,
+                is_selected=True,
+                invitation_status=TeamMember.INVITATION_ACCEPTED)
+        data['team'] = team
+        return ('competition_registration_complete_course.html', data)
 
 
     if team_form is None \

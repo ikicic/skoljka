@@ -53,7 +53,7 @@
         {% blocktrans with userlink=user|userlink:"first_name" %}
           Hello, {{ userlink }}!
         {% endblocktrans %}
-        {% if team %}
+        {% if team and not competition.is_course %}
           <br>
           {% trans "Team:" %}
           <a href="{% comp_url 'registration' %}">{{ team.name }}</a>
