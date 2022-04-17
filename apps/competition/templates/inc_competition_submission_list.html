@@ -24,21 +24,33 @@
           {% endif %}
           <td class="csub-result">{{ x.result }}</td>
           <td class="csub-correctness">
-            {% if x.cache_is_correct %}
-              <span class="label label-success">{% trans "Correct" %}</span>
+            {% if ctask.is_automatically_graded %}
+              {% if x.cache_is_correct %}
+                <span class="label label-success">{% trans "Correct" %}</span>
+              {% else %}
+                <span class="label label-important">
+                  {% trans "Incorrect" %}
+                </span>
+              {% endif %}
             {% else %}
-              <span class="label label-important">
-                {% trans "Incorrect" %}
-              </span>
+              {{ x.score }}/{{ ctask.score }}
             {% endif %}
           </td>
           {% if is_admin %}
-            <td class="csub-delete">
-              <button type="submit" name="delete-submission" class="blank"
-                  value="{{ x.id }}" title="{% trans "For admins" %}">
-                <i class="icon-trash"></i>
-              </button>
-            </td>
+            {% if ctask.is_automatically_graded %}
+              <td class="csub-delete">
+                <button type="submit" name="delete-submission" class="blank"
+                    value="{{ x.id }}" title="{% trans "For admins" %}">
+                  <i class="icon-trash"></i>
+                </button>
+              </td>
+            {% else %}
+              <td class="csub-grade">
+                <a href="{{ competition.get_absolute_url }}submission/{{ x.id }}/">
+                  {% trans "Grade" %}
+                </button>
+              </td>
+            {% endif %}
           {% endif %}
         </tr>
       {% empty %}

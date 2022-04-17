@@ -424,12 +424,6 @@ def task_detail(request, competition, data, ctask_id):
                 or ctask.chain.unlock_minutes > data['minutes_passed']:
             raise Http404
 
-    if ctask.score > 1:
-        ctask.t_score_text = ungettext(
-                "This task is worth %d point.",
-                "This task is worth %d points.",
-                ctask.score) % ctask.score
-
     evaluator = get_evaluator(competition.evaluator_version)
     variables = safe_parse_descriptor(evaluator, ctask.descriptor)
 
@@ -541,6 +535,36 @@ def task_detail(request, competition, data, ctask_id):
 
     return data
 
+
+@competition_view(permission=EDIT)
+@response('competition_submission_detail.html')
+def submission_detail(request, competition, data, submission_id=None):
+    submission = get_object_or_404(
+            Submission.objects.select_related('content', 'ctask', 'team'),
+            id=submission_id)
+    ctask = submission.ctask
+    team = submission.team
+    if ctask.competition_id != competition.id \
+            or not ctask.is_manually_graded() \
+            or submission.content is None:
+        raise Http404
+
+    if request.method == 'POST' and 'score_number' in request.POST:
+        # TODO: Make a proper form with a custom range widget. For now the
+        # interface relies on browser side validation.
+        try:
+            score = int(request.POST['score_number'])
+        except ValueError:
+            return (400, "score_number must be an integer")
+        if score < 0 or score > ctask.score:
+            return (400, "score_number must be between 0 and " + str(ctask.score))
+        submission.update_score(score)
+        data['updated_score'] = True
+
+    data['submission'] = submission
+    data['ctask'] = ctask
+    data['team'] = team
+    return data
 
 
 @competition_view(permission=EDIT)

@@ -1,0 +1,45 @@
+{% extends "competition_base.html" %}
+
+{% load competition_tags %}
+{% load mathcontent_tags %}
+{% load i18n %}
+
+{% block content %}
+<div class="ctask-container">
+
+<h4 class="ctask-title">
+  <a href="{{ ctask.get_absolute_url }}">{{ ctask.get_name }}</a>
+</h4>
+
+<div class="outset ctask-content">
+  {% mathcontent_render ctask.task.content %}
+</div>
+
+<h4>{% trans "Team:" %} {{ team.get_link }}</h4>
+<div class="outset">
+  {% mathcontent_render submission.content %}
+</div>
+<br>
+
+<h4>{% trans "Score:" %}</h4>
+{% ctask_score_text ctask %}
+
+<form action="{{ request.get_full_path }}" method="POST" class="form-inline">
+  {% csrf_token %}
+  {# Hide range input if JS is disabled. Do not even submit it. #}
+  <input type="range" id="score_range" class="span2" style="display:none;"
+         min="0" max="{{ ctask.score }}" value="{{ submission.score }}"
+         oninput="document.getElementById('score_number').value=this.value" />
+  <input type="number" id="score_number" name="score_number" class="span1"
+         min="0" max="{{ ctask.score }}" value="{{ submission.score }}"
+         oninput="document.getElementById('score_range').value=this.value" />
+  <input type="submit" class="btn btn-primary" value="{% trans "Submit" %}" />
+</form>
+<script type="text/javascript">
+  document.getElementById('score_range').style.display='inline-block';
+</script>
+
+{% if updated_score %}{% trans "Score updated." %} {% endif %}
+
+</div>
+{% endblock content %}

@@ -40,6 +40,7 @@ _patterns = _make_patterns(
     (r'task/$', 'task_list'),
     (r'task/new/$', 'task_new'),
     (r'task/(?P<ctask_id>\d+)/$', 'task_detail'),
+    (r'submission/(?P<submission_id>\d+)/$', 'submission_detail'),
     (r'task/(?P<ctask_id>\d+)/edit/$', 'task_new'),
     (r'team/(?P<team_id>\d+)/$', 'team_detail'),
 )

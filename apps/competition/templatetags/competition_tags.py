@@ -149,6 +149,15 @@ def ctask_comment_class(context, ctask):
 
 
 @register.simple_tag()
+def ctask_score_text(ctask):
+    text = ungettext(
+            "This task is worth %d point.",
+            "This task is worth %d points.",
+            ctask.score) % ctask.score
+    return u'<div class="ctask-score-text">{}</div>'.format(text)
+
+
+@register.simple_tag()
 def chain_badge_class(chain):
     if all(ctask.t_is_solved for ctask in chain.ctasks):
         return "badge-success"

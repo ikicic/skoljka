@@ -255,6 +255,7 @@ class Submission(models.Model):
     # TODO: Rename `result` to `answer`?
     result = models.CharField(max_length=255)
     content = models.ForeignKey(MathContent, blank=True, null=True)
+    score = models.IntegerField(default=0)
     cache_is_correct = models.BooleanField()
 
     def save(self, *args, **kwargs):
@@ -262,6 +263,11 @@ class Submission(models.Model):
         if self.date is None:
             self.date = datetime.now()
         super(Submission, self).save(*args, **kwargs)
+
+    def update_score(self, new_score):
+        # TODO: Update total team score.
+        self.score = new_score
+        self.save()
 
     def __unicode__(self):
         return "ctask={} team={} {}".format(

@@ -35,10 +35,8 @@
   {% mathcontent_render ctask.task.content %}
 </div>
 
-{% if ctask.t_score_text %}
-  <div class="ctask-score-text">
-    {{ ctask.t_score_text }}
-  </div>
+{% if ctask.score > 1 %}
+  {% ctask_score_text ctask %}
 {% endif %}
 
 {# Admins are able to see this page without having a team. #}

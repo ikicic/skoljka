@@ -172,3 +172,9 @@ span.td-description {
   color: gray;
   font-size: 11px;
 }
+
+/* Fix bootstrap's default CSS for inputs. */
+input[type=range] {
+  padding: initial;
+  border: initial;
+}
