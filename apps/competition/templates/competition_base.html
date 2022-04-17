@@ -1,7 +1,6 @@
 {% load compressed %}
 {% load base_tags %}
 {% load competition_tags %}
-{% load tags_tags %}
 
 {% load i18n %}
 
@@ -12,7 +11,6 @@
     <script>is_authenticated={{ user.is_authenticated|lower }};</script>
     {% compressed_css 'style' %}
     {% compressed_js 'scripts' %}
-    <script type="text/javascript" src="{% url base.views.cached_javascript_catalog %}"></script>
 
     {# TODO: move to /favicon.ico. More a server configuration problem, but still... #}
     <link href="/static/images/favicon.ico" rel="shortcut icon">
