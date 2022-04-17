@@ -338,8 +338,29 @@ PIPELINE_CSS_COMPRESSOR = 'libs.csscompressor.CSSCompressor'
 PIPELINE_CSS = {
     'style': {
         'source_filenames': (
+            # Don't use globs (asterisk) because:
+            # - they incredibly slow down django-pipeline in debug mode
+            #   within docker containers,
+            # - they complicate excluding files.
             'bootstrap_custom.css',
-            '*.css',
+            'activity.css',
+            'base.css',
+            'competition.css',
+            'folder.css',
+            'general.css',
+            'homepage.css',
+            'jquery.autocomplete.css',
+            'lecture.css',
+            'mathcontent.css',
+            'plugins.css',
+            'pm.css',
+            'post.css',
+            'rating.css',
+            'solution.css',
+            'tags.css',
+            'task.css',
+            'usergroup.css',
+            'userprofile.css',
         ),
         'output_filename': 'style.min.css',
     },
@@ -351,24 +372,22 @@ PIPELINE_JS_COMPRESSOR = 'libs.jscompressor.JSCompressor'
 PIPELINE_JS = {
     'scripts': {
         'source_filenames': (
+            # Don't use globs, see comment for PIPELINE_CSS above.
             'jquery.min.js',
-            'jquery.[!t]*.js',
-            'b[!o]*/*.js',
-            'b[!o]*/*/*.js',
-            '[!abdt]*/*.js',
-            '[!abdt]*/*/*.js',
-            'a[!d]*/*.js',
-            'a[!d]*/*/*.js',
-            'ad[!m]*/*.js',
-            'ad[!m]*/*/*.js',
-            't[!e]*/*.js',
-            't[!e]*/*/*.js',
-            # Don't include *.js, because we have to exclude:
-            #  - duplicates of script.js and jquery.tools.min.js
-            #  - admin scripts
-            #  - bootstrap_toolkit/** and datepicker/**, both from
-            #       django-bootstrap-toolkit module.
-            #  - template_preprocessor/**
+            'jquery.autocomplete.js',
+            'jquery.form.js',
+            'jquery.metadata.js',
+            'jquery.rating.js',
+            'base/static/base.js',
+            'base/static/jquery.tools.min.js',
+            'base/static/script.js',
+            'competition/static/competition.js',
+            'folder/static/folder.js',
+            'mathcontent/static/mathcontent.js',
+            'rating/static/rating.js',
+            'solution/static/solution.js',
+            'tags/static/tags.js',
+            'task/static/task.js',
         ),
         'output_filename': 'scripts.min.js',
     },
