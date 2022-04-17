@@ -37,13 +37,17 @@ def remove(actor, type, **kwargs):
 
 # SPEED: rucno napraviti upite
 # shortcut
-def add(actor, type_desc, **kwargs):
+def add(actor, type_desc, fake_action_object=False, **kwargs):
+    """
+    Set fake_action_object to True if the action_object is used in a hacky way
+    with a fake action_object_content_type_id and action_object_id.
+    """
     type, subtype = type_desc
     action = Action(actor=actor, type=type, subtype=subtype, **kwargs)
 
     # can this be DRY-ed somehow?
     # ----- global -----
-    if action.action_object:
+    if not fake_action_object and action.action_object:
         if hasattr(action.action_object, "name"):
             action.action_object_cache = action.action_object.name
         elif hasattr(action.action_object, "username"):

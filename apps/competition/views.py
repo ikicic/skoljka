@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _, ungettext
 
+from activity import action as _action
 from mathcontent.forms import MathContentForm
 from mathcontent.latex import latex_escape
 from mathcontent.models import MathContent
@@ -339,11 +340,15 @@ def task_list(request, competition, data):
         ctask.t_submission_count = 0
         ctask.t_is_solved = False
         if ctask.score > 1:
-            ctask.t_link_text = ctask.score
+            ctask.t_link_text = str(ctask.score)
             ctask.t_title = ungettext(
                     "This task is worth %d point.",
                     "This task is worth %d points.",
                     ctask.score) % ctask.score
+        else:
+            ctask.t_link_text = ""
+            ctask.t_title = ""
+
         if ctask.chain_id in all_chains_dict:
             chain = all_chains_dict[ctask.chain_id]
             ctask.chain = chain
@@ -352,11 +357,15 @@ def task_list(request, competition, data):
             unverified_chains.add(ctask.chain_id)
 
     all_my_submissions = list(Submission.objects.filter(team=data['team']) \
-            .values_list('ctask_id', 'cache_is_correct'))
-    for ctask_id, is_correct in all_my_submissions:
+            .values_list('ctask_id', 'cache_is_correct', 'latest_unseen_admin_activity'))
+    for ctask_id, is_correct, latest_unseen_admin_activity in all_my_submissions:
         ctask = all_ctasks_dict[ctask_id]
         ctask.t_submission_count += 1
         ctask.t_is_solved |= is_correct
+        if latest_unseen_admin_activity != Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
+            ctask.t_link_text = mark_safe(
+                    ctask.t_link_text + ' <i class="icon-comment"></i>')
+            ctask.t_title += " " + _("There are new messages.")
 
     category_translations = competition.get_task_categories_translations(
             request.LANGUAGE_CODE)
@@ -513,6 +522,12 @@ def task_detail(request, competition, data, ctask_id):
 
             # Prevent form resubmission.
             return (ctask.get_absolute_url(), )
+        elif submission and submission.latest_unseen_admin_activity \
+                    != Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
+            data['unread_newer_than'] = submission.latest_unseen_admin_activity
+            submission.latest_unseen_admin_activity = \
+                    Submission.NO_UNSEEN_ACTIVITIES_DATETIME
+            submission.save()
 
         data['content_form'] = content_form
         data['submission'] = submission
@@ -539,6 +554,7 @@ def task_detail(request, competition, data, ctask_id):
 @competition_view(permission=EDIT)
 @response('competition_submission_detail.html')
 def submission_detail(request, competition, data, submission_id=None):
+    """Competition admin view of a submission for grading purposes."""
     submission = get_object_or_404(
             Submission.objects.select_related('content', 'ctask', 'team'),
             id=submission_id)
@@ -558,8 +574,19 @@ def submission_detail(request, competition, data, submission_id=None):
             return (400, "score_number must be an integer")
         if score < 0 or score > ctask.score:
             return (400, "score_number must be between 0 and " + str(ctask.score))
-        submission.update_score(score)
-        data['updated_score'] = True
+        if score != submission.score:
+            submission.latest_unseen_admin_activity = datetime.now()
+            submission.update_score(score)
+
+            # We need to store a single number, so we hack it into
+            # action_object_id and use a fake action_object_content_type_id.
+            _action.add(request.user, _action.COMPETITION_UPDATE_SUBMISSION_SCORE,
+                        action_object_content_type_id=-1,
+                        action_object_id=score, target=submission,
+                        fake_action_object=True)
+
+            # Prevent form resubmission.
+            return (request.get_full_path(), )
 
     data['submission'] = submission
     data['ctask'] = ctask

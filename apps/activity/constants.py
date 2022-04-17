@@ -21,6 +21,8 @@ GROUP_CHANGE = 400
 GROUP_ADD = (GROUP_CHANGE, 1)       # group
 GROUP_LEAVE = (GROUP_CHANGE, 2)     # group
 
+COMPETITION_UPDATE_SUBMISSION_SCORE = (500, 1)
+
 action_label = {
     TASK_ADD: ('label-success', 'Novi zadatak'),
     FILE_ADD: ('label-success', 'Nova datoteka'),

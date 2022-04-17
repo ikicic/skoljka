@@ -1,8 +1,9 @@
+{# This template is for admins, see competition_task_detail.html for user-side page. #}
 {% extends "competition_base.html" %}
+{% load i18n %}
 
 {% load competition_tags %}
 {% load mathcontent_tags %}
-{% load i18n %}
 
 {% block content %}
 <div class="ctask-container">
@@ -39,7 +40,7 @@
   document.getElementById('score_range').style.display='inline-block';
 </script>
 
-{% if updated_score %}{% trans "Score updated." %} {% endif %}
+{% show_submission_posts submission unread_newer_than %}
 
 </div>
 {% endblock content %}

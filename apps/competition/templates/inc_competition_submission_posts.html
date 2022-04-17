@@ -1,0 +1,19 @@
+{% load i18n %}
+{% load competition_tags %}
+
+{% if user.is_authenticated or events %}
+  <h4>{% trans "Comments" %}:</h4>
+{% endif %}
+
+{% for event in events %}
+  {% if event.t_is_post %}
+    {% include 'inc_post.html' with post=event %}
+  {% else %}
+    <div class="caction outset outset-margin{% if event.t_unread %} unread{% endif %}">
+      <span class="caction-info">{{ event.date_created }}</span>
+      <i>{{ event.t_message }}</i>
+    </div>
+  {% endif %}
+{% endfor %}
+
+{% include 'inc_post_form.html' with container=submission %}

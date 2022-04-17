@@ -1,8 +1,9 @@
+{# This template is for users, see competition_submission_detail.html for admin-side page. #}
 {% extends "competition_base.html" %}
+{% load i18n %}
 
 {% load competition_tags %}
 {% load mathcontent_tags %}
-{% load i18n %}
 
 {% block float_right_extra %}
   {% if is_admin %}
@@ -35,12 +36,12 @@
   {% mathcontent_render ctask.task.content %}
 </div>
 
-{% if ctask.score > 1 %}
-  {% ctask_score_text ctask %}
-{% endif %}
-
 {# Admins are able to see this page without having a team. #}
 {% if team and ctask.is_automatically_graded %}
+  {% if ctask.score > 1 %}
+    {% ctask_score_text ctask %}
+  {% endif %}
+
   {% if submissions %}
     <h4>{% trans "Submissions:" %}</h4>
     {% include 'inc_competition_submission_list.html' %}
@@ -100,12 +101,25 @@
     {% endif %}
   {% endif %}
 {% elif team and ctask.is_manually_graded %}
+  <h4>{% trans "Answer:" %}</h4>
   <form action="{{ request.get_full_path }}" method="POST" class="form-inline">
     {% csrf_token %}
     {{ content_form.text }}
     <input type="hidden" name="action" value="solution">
-    <input type="submit" class="btn btn-primary" value="{% trans "Submit" %}" />
+    {% if submission %}
+      <input type="submit" class="btn btn-primary" value="{% trans "Edit" %}" />
+    {% else %}
+      <input type="submit" class="btn btn-primary" value="{% trans "Submit" %}" />
+    {% endif %}
   </form>
+  {% if submission %}
+    <div>
+      <h4>{% trans "Score:" %}</h4>
+      {{ submission.score }}/{{ ctask.score }}<br><br>
+    </div>
+  {% else %}
+    {% ctask_score_text ctask %}
+  {% endif %}
 {% endif %}
 
 {% if sample_solution %}
@@ -123,6 +137,10 @@
   <br><br><br>
   <h4>{% trans "Submissions from all the teams (for admins only):" %}</h4>
   {% include 'inc_competition_submission_list.html' with submissions=all_ctask_submissions show_teams=1 %}
+{% endif %}
+
+{% if submission and ctask.is_manually_graded %}
+  {% show_submission_posts submission unread_newer_than %}
 {% endif %}
 
 </div>

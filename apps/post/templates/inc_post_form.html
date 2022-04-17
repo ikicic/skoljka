@@ -1,0 +1,20 @@
+{% load i18n %}
+
+{% if user.is_authenticated %}
+  <div id="post">
+    <form action="/post/add/" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="object_id" value="{{ container.pk }}">
+      <input type="hidden" name="content_type_id"
+             value="{{ container.posts.get_content_type_id }}">
+      <input type="hidden" name="post_reply_id" value="">
+      <input type="hidden" name="post_redirect" value="{{ request.path }}">
+      {{ container.posts.get_post_form.as_p }}
+      <input type="submit" class="btn btn-primary" value="{% trans "Comment" context "action" %}">
+      <span id="reply-to-info" style="display:none;">
+        {% trans "A reply to the <a href='#'>comment</a>." %}
+        <a href="#post" class="icon-remove"></a>
+      </span>
+    </form>
+  </div>
+{% endif %}

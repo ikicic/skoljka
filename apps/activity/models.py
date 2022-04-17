@@ -39,6 +39,10 @@ class Action(models.Model):
     action_object = generic.GenericForeignKey('action_object_content_type', 'action_object_id')
     action_object_cache = models.CharField(max_length=250, blank=True)
 
+    @property
+    def type_pair(self):
+        return (self.type, self.subtype)
+
     def A(self, model, text=None):
         if text is None:
             text = self.action_object_cache

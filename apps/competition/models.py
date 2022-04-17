@@ -73,8 +73,8 @@ class Competition(BasePermissionsModel):
     def __unicode__(self):
         return self.name
 
-    def can_send_post(self, user): # PostGenericRelation
-        return self.user_has_perm(user, EDIT)
+    def can_send_post(self, user):  # For PostGenericRelation.
+        return self.is_user_admin(user)
 
     def get_absolute_url(self):
         return self.url_path_prefix or '/competition/{}/'.format(self.id)
@@ -109,6 +109,9 @@ class Competition(BasePermissionsModel):
     def is_course(self):
         return self.kind == self.KIND_COURSE
 
+    def is_user_admin(self, user):
+        return self.user_has_perm(user, EDIT)
+
 
 class Team(models.Model):
     TYPE_NORMAL = 0
@@ -129,11 +132,12 @@ class Team(models.Model):
     def __unicode__(self):
         return self.name
 
-    def can_send_post(self, user): # PostGenericRelation
-        # Only members and and admins can post messages to team.posts.
+    def can_send_post(self, user):  # For PostGenericRelation.
+        # Only members and admins can post messages to team.posts.
+        # Note: Submission.can_send_post relies on this logic.
         if TeamMember.objects.filter(member=user, team=self).exists():
             return True
-        return self.competition.user_has_perm(user, EDIT)
+        return self.competition.is_user_admin(user)
 
     def get_absolute_url(self):
         return self.competition.get_absolute_url() + 'team/{}/'.format(self.id)
@@ -249,6 +253,10 @@ class CompetitionTask(models.Model):
 
 
 class Submission(models.Model):
+    # Arbitrary point in the past, used as a blank value in
+    # `latest_unseen_admin_activity` in order to avoid having null=True.
+    NO_UNSEEN_ACTIVITIES_DATETIME = datetime(year=2000, month=1, day=1)
+
     ctask = models.ForeignKey(CompetitionTask)
     team = models.ForeignKey(Team)
     date = models.DateTimeField()
@@ -256,13 +264,20 @@ class Submission(models.Model):
     result = models.CharField(max_length=255)
     content = models.ForeignKey(MathContent, blank=True, null=True)
     score = models.IntegerField(default=0)
+    latest_unseen_admin_activity = models.DateTimeField(
+            default=NO_UNSEEN_ACTIVITIES_DATETIME)
     cache_is_correct = models.BooleanField()
+
+    posts = PostGenericRelation(placeholder=_("Message"))
 
     def save(self, *args, **kwargs):
         # Using auto_add_now would break tests.
         if self.date is None:
             self.date = datetime.now()
         super(Submission, self).save(*args, **kwargs)
+
+    def can_send_post(self, user):  # For PostGenericRelation.
+        return self.team.can_send_post(user)
 
     def update_score(self, new_score):
         # TODO: Update total team score.

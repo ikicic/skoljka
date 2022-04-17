@@ -1,13 +1,17 @@
 from django import template
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import truncatechars
 from django.utils.html import mark_safe
-from django.utils.translation import ungettext
+from django.utils.translation import ugettext as _, ungettext
 
-from competition.models import TeamMember
+from activity import action as _action
+from activity.models import Action
+from competition.models import Submission, TeamMember
 from competition.utils import parse_chain_comments_cache, get_ctask_statistics
 from competition.utils import comp_url as utils__comp_url
 from competition.utils import ctask_comment_class as utils__ctask_comment_class
+from userprofile.templatetags.userprofile_tags import userlink
 
 import json
 import re
@@ -215,3 +219,48 @@ def team_score(context, team):
             if context['team'] == team or context['is_admin']:
                 result += " ({})".format(team.cache_score)
     return result
+
+
+def _action_message(action):
+    if action.type_pair == _action.COMPETITION_UPDATE_SUBMISSION_SCORE:
+        # action_object_id is used in a hacky way to store the score.
+        msg = _("%(actor)s updated the score to %(score)d.") \
+                % {'actor': userlink(action.actor), 'score': action.action_object_id}
+    else:
+        msg = u"Unknown action {}!".format(action)
+    return mark_safe(msg)
+
+
+@register.inclusion_tag('inc_competition_submission_posts.html', takes_context=True)
+def show_submission_posts(context, submission, unread_newer_than=None):
+    posts = list(submission.posts
+            .select_related('author', 'content', 'last_edit_by')
+            .order_by('-date_created'))
+    user = context['user']
+    for x in posts:
+        x.cache_can_edit = x.can_edit(user, submission)
+        if unread_newer_than \
+                and x.last_edit_time >= unread_newer_than \
+                and x.last_edit_by_id != context['user'].id:
+            x.t_unread = True
+        x.t_is_post = True
+
+    content_type_id = ContentType.objects.get_for_model(Submission).id
+    actions = list(Action.objects
+            .filter(target_content_type_id=content_type_id,
+                    target_id=submission.id)
+            .exclude(type=_action.POST_SEND[0]))
+    for action in actions:
+        if unread_newer_than and action.date_created >= unread_newer_than:
+            action.t_unread = True
+        action.t_message = _action_message(action)
+
+    events = actions + posts
+    events.sort(key=lambda x: x.date_created, reverse=True)
+
+    return {
+        'events': events,
+        'submission': submission,
+        'request': context['request'],
+        'user': user,
+    }

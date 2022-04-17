@@ -52,9 +52,9 @@ def get_recent_activities(user, max_count, exclude_user=None, target=None,
     for x in activity:
         ttype = (x.type, x.subtype)
 
-        # Hide 'marked as official' messages.
+        # Hide 'marked as official' and all competition-related messages.
         # TODO: create a general way to hide solutions.
-        if ttype == SOLUTION_AS_OFFICIAL:
+        if ttype in [SOLUTION_AS_OFFICIAL, COMPETITION_UPDATE_SUBMISSION_SCORE]:
             kill.add(x.id)
             continue
 

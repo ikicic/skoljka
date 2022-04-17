@@ -1,0 +1,27 @@
+{% load i18n %}
+
+{% load mathcontent_tags %}
+
+<div class="outset outset-margin post mc-hover-area{% if post.t_unread %} unread{% endif %}" id="post{{ post.pk }}">
+  {% if user.is_authenticated %}
+    <div class="post-action">
+      {# Again... no whitespace here... #}
+      <a href="#post" class="post-reply" id="pr{{ post.pk }}">{% trans "Reply" %}</a>{% if post.cache_can_edit %}<br>
+        <a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">{% trans "Edit" %}</a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div class="post-info">
+    {{ post.author|userlink }}, {{ post.date_created }}
+  </div>
+
+  {% mathcontent_render post.content %}
+
+  {% if post.date_created != post.last_edit_time %}
+    <div class="post-last-edit">
+      {% trans "Last modified:" %}
+      {{ post.last_edit_by|userlink }}, {{ post.last_edit_time }}
+    </div>
+  {% endif %}
+</div>

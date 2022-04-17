@@ -1,4 +1,3 @@
-{% load mathcontent_tags %}
 {% load i18n %}
 
 <div class="post-list-small">
@@ -7,47 +6,9 @@
 {% endif %}
 
 {% for post in posts %}
-  <div class="outset outset-margin post mc-hover-area" id="post{{ post.pk }}">
-    {% if user.is_authenticated %}
-      <div class="post-action">
-        {# Again... no whitespace here... #}
-        <a href="#post" class="post-reply" id="pr{{ post.pk }}">{% trans "Reply" %}</a>{% if post.cache_can_edit %}<br>
-          <a href="/post/{{ post.pk }}/edit/?next={{ request.path }}">{% trans "Edit" %}</a>
-        {% endif %}
-      </div>
-    {% endif %}
-
-    <div class="post-info">
-      {{ post.author|userlink }}, {{ post.date_created }}
-    </div>
-
-    {% mathcontent_render post.content %}
-
-    {% if post.date_created != post.last_edit_time %}
-      <div class="post-last-edit">
-        {% trans "Last modified:" %}
-        {{ post.last_edit_by|userlink }}, {{ post.last_edit_time }}
-      </div>
-    {% endif %}
-  </div>
+  {% include 'inc_post.html' with post=post %}
 {% endfor %}
 
-{% if user.is_authenticated %}
-  <div id="post">
-    <form action="/post/add/" method="post">
-      {% csrf_token %}
-      <input type="hidden" name="object_id" value="{{ container.pk }}">
-      <input type="hidden" name="content_type_id"
-             value="{{ container.posts.get_content_type_id }}">
-      <input type="hidden" name="post_reply_id" value="">
-      <input type="hidden" name="post_redirect" value="{{ request.path }}">
-      {{ container.posts.get_post_form.as_p }}
-      <input type="submit" class="btn btn-primary" value="{% trans "Comment" context "action" %}">
-      <span id="reply-to-info" style="display:none;">
-        {% trans "A reply to the <a href='#'>comment</a>." %}
-        <a href="#post" class="icon-remove"></a>
-      </span>
-    </form>
-  </div>
-{% endif %}
+{% include 'inc_post_form.html' with container=container %}
+
 </div>
