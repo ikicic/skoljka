@@ -123,6 +123,8 @@ COMPETITION_SPECIAL_URLS = {
     # 1: [(r'something1/', view1), (r'something2/', view2)],
 }
 
+COMPETITION_MANUAL_GRADING_TAG = 'MANUAL'
+
 DISABLE_PREF_COOKIES = True
 
 EXTRA_HEADER_TOP = "<div style=\"text-align: center; background-color: orange;\">example of EXTRA_HEADER_TOP</div>"

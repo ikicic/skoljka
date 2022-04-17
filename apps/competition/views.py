@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
@@ -10,8 +11,9 @@ from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _, ungettext
 
-from mathcontent.models import MathContent
+from mathcontent.forms import MathContentForm
 from mathcontent.latex import latex_escape
+from mathcontent.models import MathContent
 from permissions.constants import VIEW, EDIT
 from permissions.models import ObjectPermission
 from post.forms import PostsForm
@@ -430,6 +432,7 @@ def task_detail(request, competition, data, ctask_id):
 
     evaluator = get_evaluator(competition.evaluator_version)
     variables = safe_parse_descriptor(evaluator, ctask.descriptor)
+
     if team:
         ctasks, chain_submissions = preprocess_chain(
                 competition, ctask.chain, team, preloaded_ctask=ctask)
@@ -442,6 +445,7 @@ def task_detail(request, competition, data, ctask_id):
         if ctask.t_is_locked and not is_admin:
             raise Http404
 
+    if team and ctask.is_automatically_graded():
         if request.method == 'POST' and (not data['has_finished'] or is_admin):
             solution_form = CompetitionSolutionForm(request.POST,
                     descriptor=ctask.descriptor, evaluator=evaluator)
@@ -490,6 +494,34 @@ def task_detail(request, competition, data, ctask_id):
         data['solution_form'] = solution_form
         data['submissions'] = submissions
         data['submissions_left'] = ctask.max_submissions - len(submissions)
+
+    if team and ctask.is_manually_graded():
+        if submissions:
+            # If it somehow happens that there is more than one submission,
+            # consider only the first one.
+            submission = submissions[0]
+            content = submission.content
+        else:
+            submission = content = None
+
+        content_form = MathContentForm(request.POST or None, instance=content)
+        if request.method == 'POST' \
+                and (not data['has_finished'] or is_admin) \
+                and content_form.is_valid():
+            content_form = MathContentForm(request.POST, instance=content)
+            content = content_form.save()
+            if not submission:
+                submission = Submission(
+                        ctask=ctask, team=team, content=content,
+                        result=settings.COMPETITION_MANUAL_GRADING_TAG,
+                        cache_is_correct=False)
+                submission.save()
+
+            # Prevent form resubmission.
+            return (ctask.get_absolute_url(), )
+
+        data['content_form'] = content_form
+        data['submission'] = submission
 
     if is_admin:
         data['all_ctask_submissions'] = list(Submission.objects \

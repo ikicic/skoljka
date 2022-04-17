@@ -41,7 +41,8 @@
   </div>
 {% endif %}
 
-{% if team %} {# admins are able to see this page without having a team #}
+{# Admins are able to see this page without having a team. #}
+{% if team and ctask.is_automatically_graded %}
   {% if submissions %}
     <h4>{% trans "Submissions:" %}</h4>
     {% include 'inc_competition_submission_list.html' %}
@@ -100,6 +101,13 @@
       </a>
     {% endif %}
   {% endif %}
+{% elif team and ctask.is_manually_graded %}
+  <form action="{{ request.get_full_path }}" method="POST" class="form-inline">
+    {% csrf_token %}
+    {{ content_form.text }}
+    <input type="hidden" name="action" value="solution">
+    <input type="submit" class="btn btn-primary" value="{% trans "Submit" %}" />
+  </form>
 {% endif %}
 
 {% if sample_solution %}

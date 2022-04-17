@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -239,13 +240,21 @@ class CompetitionTask(models.Model):
         return mark_safe(u'<a href="{}">{}</a>'.format(
                 self.get_absolute_url(), xss.escape(self.get_name())))
 
+    def is_automatically_graded(self):
+        return self.descriptor != settings.COMPETITION_MANUAL_GRADING_TAG
+
+    def is_manually_graded(self):
+        return self.descriptor == settings.COMPETITION_MANUAL_GRADING_TAG
+
 
 
 class Submission(models.Model):
     ctask = models.ForeignKey(CompetitionTask)
     team = models.ForeignKey(Team)
     date = models.DateTimeField()
+    # TODO: Rename `result` to `answer`?
     result = models.CharField(max_length=255)
+    content = models.ForeignKey(MathContent, blank=True, null=True)
     cache_is_correct = models.BooleanField()
 
     def save(self, *args, **kwargs):
