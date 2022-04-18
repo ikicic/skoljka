@@ -254,7 +254,7 @@ class CompetitionTask(models.Model):
 
 class Submission(models.Model):
     # Arbitrary point in the past, used as a blank value in
-    # `latest_unseen_admin_activity` in order to avoid having null=True.
+    # `oldest_unseen_admin_activity` in order to avoid having null=True.
     NO_UNSEEN_ACTIVITIES_DATETIME = datetime(year=2000, month=1, day=1)
 
     ctask = models.ForeignKey(CompetitionTask)
@@ -264,7 +264,9 @@ class Submission(models.Model):
     result = models.CharField(max_length=255)
     content = models.ForeignKey(MathContent, blank=True, null=True)
     score = models.IntegerField(default=0)
-    latest_unseen_admin_activity = models.DateTimeField(
+    oldest_unseen_admin_activity = models.DateTimeField(
+            default=NO_UNSEEN_ACTIVITIES_DATETIME)
+    oldest_unseen_team_activity = models.DateTimeField(
             default=NO_UNSEEN_ACTIVITIES_DATETIME)
 
     posts = PostGenericRelation(placeholder=_("Message"))
@@ -279,14 +281,41 @@ class Submission(models.Model):
         return self.team.can_send_post(user)
 
     def get_tr_class(self):
-        """Get <tr>...</tr> class in submissions list."""
+        """Get <tr>...</tr> class in admin submissions list."""
         if self.score == self.ctask.max_score:
-            return 'ctask-correct'
+            out = ['ctask-correct']
         elif self.score > 0:
             # Only for manually graded tasks.
-            return 'ctask-partially-correct'
+            out = ['ctask-partially-correct']
         else:
-            return ''
+            out = []
+
+        if self.has_new_team_activity():
+            out.append('csub-unseen-team-activity')
+        return ' '.join(out)
+
+    def has_new_team_activity(self):
+        return self.oldest_unseen_team_activity != self.NO_UNSEEN_ACTIVITIES_DATETIME
+
+    def mark_unseen_admin_activity(self):
+        """Update oldest_unseen_admin_activity if is not already set. Return
+        whether the field was updated. Does not save."""
+        if self.oldest_unseen_admin_activity \
+                == Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
+            self.oldest_unseen_admin_activity = datetime.now()
+            return True
+        else:
+            return False
+
+    def mark_unseen_team_activity(self, save=True):
+        """Update oldest_unseen_team_activity if is not already set. Return
+        whether the field was updated. Does not save."""
+        if self.oldest_unseen_team_activity \
+                == Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
+            self.oldest_unseen_team_activity = datetime.now()
+            return True
+        else:
+            return False
 
     def __unicode__(self):
         return "ctask={} team={} {}".format(

@@ -24,7 +24,7 @@
           {% endif %}
           <td class="csub-result">{{ x.result }}</td>
           <td class="csub-correctness">
-            {% if ctask.is_automatically_graded %}
+            {% if x.ctask.is_automatically_graded %}
               {% if x.score > 0 %}
                 <span class="label label-success">{% trans "Correct" %}</span>
               {% else %}
@@ -33,11 +33,11 @@
                 </span>
               {% endif %}
             {% else %}
-              {{ x.score }}/{{ ctask.max_score }}
+              {{ x.score }}/{{ x.ctask.max_score }}
             {% endif %}
           </td>
           {% if is_admin %}
-            {% if ctask.is_automatically_graded %}
+            {% if x.ctask.is_automatically_graded %}
               <td class="csub-delete">
                 <button type="submit" name="delete-submission" class="blank"
                     value="{{ x.id }}" title="{% trans "For admins" %}">
@@ -48,7 +48,12 @@
               <td class="csub-grade">
                 <a href="{{ competition.get_absolute_url }}submission/{{ x.id }}/">
                   {% trans "Grade" %}
-                </button>
+                  {% if x.has_new_team_activity %}
+                    <span class="csub-new-activity">
+                      ({% trans "New activity" %})
+                    </span>
+                  {% endif %}
+                </a>
               </td>
             {% endif %}
           {% endif %}

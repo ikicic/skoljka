@@ -357,12 +357,12 @@ def task_list(request, competition, data):
             unverified_chains.add(ctask.chain_id)
 
     all_my_submissions = list(Submission.objects.filter(team=data['team']) \
-            .values_list('ctask_id', 'score', 'latest_unseen_admin_activity'))
-    for ctask_id, score, latest_unseen_admin_activity in all_my_submissions:
+            .values_list('ctask_id', 'score', 'oldest_unseen_admin_activity'))
+    for ctask_id, score, oldest_unseen_admin_activity in all_my_submissions:
         ctask = all_ctasks_dict[ctask_id]
         ctask.t_submission_count += 1
         ctask.t_is_solved |= score == ctask.max_score  # Only for automatic grading.
-        if latest_unseen_admin_activity != Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
+        if oldest_unseen_admin_activity != Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
             ctask.t_link_text = mark_safe(
                     ctask.t_link_text + ' <i class="icon-comment"></i>')
             ctask.t_title += " " + _("There are new messages.")
@@ -515,14 +515,15 @@ def task_detail(request, competition, data, ctask_id):
                 submission = Submission(
                         ctask=ctask, team=team, content=content,
                         result=settings.COMPETITION_MANUAL_GRADING_TAG)
-                submission.save()
+            submission.mark_unseen_team_activity()
+            submission.save()
 
             # Prevent form resubmission.
             return (ctask.get_absolute_url(), )
-        elif submission and submission.latest_unseen_admin_activity \
+        elif submission and submission.oldest_unseen_admin_activity \
                     != Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
-            data['unread_newer_than'] = submission.latest_unseen_admin_activity
-            submission.latest_unseen_admin_activity = \
+            data['unread_newer_than'] = submission.oldest_unseen_admin_activity
+            submission.oldest_unseen_admin_activity = \
                     Submission.NO_UNSEEN_ACTIVITIES_DATETIME
             submission.save()
 
@@ -536,6 +537,7 @@ def task_detail(request, competition, data, ctask_id):
                 .order_by('id'))
         for submission in data['all_ctask_submissions']:
             submission.team.competition = competition
+            submission.ctask = ctask
 
     data['help_text'] = get_solution_help_text(variables)
     data['chain'] = ctask.chain
@@ -572,8 +574,8 @@ def submission_detail(request, competition, data, submission_id=None):
         if score < 0 or score > ctask.max_score:
             return (400, "score_number must be between 0 and " + str(ctask.max_score))
         if score != submission.score:
-            submission.latest_unseen_admin_activity = datetime.now()
             submission.score = score
+            submission.mark_unseen_admin_activity()
             submission.save()
 
             # For now, just refresh whole team. A faster solution would be to
@@ -589,6 +591,12 @@ def submission_detail(request, competition, data, submission_id=None):
 
             # Prevent form resubmission.
             return (request.get_full_path(), )
+
+    if submission.has_new_team_activity():
+        data['unread_newer_than'] = submission.oldest_unseen_team_activity
+        submission.oldest_unseen_team_activity = \
+                Submission.NO_UNSEEN_ACTIVITIES_DATETIME
+        submission.save()
 
     data['submission'] = submission
     data['ctask'] = ctask

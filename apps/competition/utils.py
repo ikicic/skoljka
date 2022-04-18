@@ -1,13 +1,17 @@
+from django.contrib.contenttypes.models import ContentType
 from django.db import connection, transaction
 from django.db.models import F
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from competition.models import Chain, Competition, CompetitionTask, \
         Submission, Team, TeamMember
 from competition.evaluator import get_evaluator, InvalidSolution, \
         InvalidDescriptor
+from post.models import Post
 
 from collections import Counter, defaultdict
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import json
 import re
@@ -521,3 +525,18 @@ def _parse_team_categories_old(team_categories):
         name = category[1].strip()
         categories.append((ID, name))
     return categories
+
+
+@receiver(post_save, sender=Post)
+def _mark_submission_as_unseen(sender, instance, **kwargs):
+    """Mark the submission as unseen, either to the team if the post was
+    admin's or to the admin if the post was team's."""
+    submission_content_type = ContentType.objects.get_for_model(Submission)
+    if instance.content_type_id == submission_content_type.id:
+        submission = instance.content_object
+        if submission.ctask.competition.is_user_admin(instance.last_edit_by):
+            if submission.mark_unseen_admin_activity():
+                submission.save()
+        else:
+            if submission.mark_unseen_team_activity():
+                submission.save()

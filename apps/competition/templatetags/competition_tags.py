@@ -249,7 +249,8 @@ def show_submission_posts(context, submission, unread_newer_than=None):
     actions = list(Action.objects
             .filter(target_content_type_id=content_type_id,
                     target_id=submission.id)
-            .exclude(type=_action.POST_SEND[0]))
+            .exclude(type=_action.POST_SEND[0])
+            .select_related('actor'))
     for action in actions:
         if unread_newer_than and action.date_created >= unread_newer_than:
             action.t_unread = True

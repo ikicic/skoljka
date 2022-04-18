@@ -53,7 +53,6 @@ def add_post(request):
         content = math_content_form.save()
         post = Post.objects.create(content_object=object, author=request.user,
                 last_edit_by=request.user, content=content)
-        post.save()
 
         if reply_to:
             try:
