@@ -429,6 +429,9 @@ h4.ctask-submit {
 tr.ctask-correct > td {
   background-color: #dff0d8!important;
 }
+tr.ctask-partially-correct > td {
+  background-color: #f0ebd8!important;
+}
 
 .chain-overview-ctask-author {
   color: lightgray;

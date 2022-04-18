@@ -29,10 +29,10 @@
   {% csrf_token %}
   {# Hide range input if JS is disabled. Do not even submit it. #}
   <input type="range" id="score_range" class="span2" style="display:none;"
-         min="0" max="{{ ctask.score }}" value="{{ submission.score }}"
+         min="0" max="{{ ctask.max_score }}" value="{{ submission.score }}"
          oninput="document.getElementById('score_number').value=this.value" />
   <input type="number" id="score_number" name="score_number" class="span1"
-         min="0" max="{{ ctask.score }}" value="{{ submission.score }}"
+         min="0" max="{{ ctask.max_score }}" value="{{ submission.score }}"
          oninput="document.getElementById('score_range').value=this.value" />
   <input type="submit" class="btn btn-primary" value="{% trans "Submit" %}" />
 </form>

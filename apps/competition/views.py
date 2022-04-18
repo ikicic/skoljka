@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.db.models import Count
+from django.db.models import Count, F
 from django.forms.models import modelformset_factory
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -44,7 +44,7 @@ from competition.utils import update_chain_comments_cache, \
         refresh_ctask_cache_admin_solved_count, \
         update_ctask_cache_admin_solved_count, \
         update_chain_ctasks, parse_team_categories, \
-        refresh_submissions_cache_is_correct
+        refresh_submissions_score
 
 from skoljka.libs.decorators import require
 
@@ -339,12 +339,12 @@ def task_list(request, competition, data):
         ctask.competition = competition # use preloaded object
         ctask.t_submission_count = 0
         ctask.t_is_solved = False
-        if ctask.score > 1:
-            ctask.t_link_text = str(ctask.score)
+        if ctask.max_score > 1:
+            ctask.t_link_text = str(ctask.max_score)
             ctask.t_title = ungettext(
                     "This task is worth %d point.",
                     "This task is worth %d points.",
-                    ctask.score) % ctask.score
+                    ctask.max_score) % ctask.max_score
         else:
             ctask.t_link_text = ""
             ctask.t_title = ""
@@ -357,11 +357,11 @@ def task_list(request, competition, data):
             unverified_chains.add(ctask.chain_id)
 
     all_my_submissions = list(Submission.objects.filter(team=data['team']) \
-            .values_list('ctask_id', 'cache_is_correct', 'latest_unseen_admin_activity'))
-    for ctask_id, is_correct, latest_unseen_admin_activity in all_my_submissions:
+            .values_list('ctask_id', 'score', 'latest_unseen_admin_activity'))
+    for ctask_id, score, latest_unseen_admin_activity in all_my_submissions:
         ctask = all_ctasks_dict[ctask_id]
         ctask.t_submission_count += 1
-        ctask.t_is_solved |= is_correct
+        ctask.t_is_solved |= score == ctask.max_score  # Only for automatic grading.
         if latest_unseen_admin_activity != Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
             ctask.t_link_text = mark_safe(
                     ctask.t_link_text + ' <i class="icon-comment"></i>')
@@ -452,17 +452,15 @@ def task_detail(request, competition, data, ctask_id):
         if request.method == 'POST' and (not data['has_finished'] or is_admin):
             solution_form = CompetitionSolutionForm(request.POST,
                     descriptor=ctask.descriptor, evaluator=evaluator)
-            submission = None
-            delete = False
+            new_chain_submissions = None
             if is_admin and 'delete-submission' in request.POST:
                 try:
                     submission = Submission.objects.get(
                             id=request.POST['delete-submission'])
-                    chain_submissions = \
+                    new_chain_submissions = \
                             [x for x in chain_submissions if x != submission]
                     submissions = [x for x in submissions if x != submission]
                     submission.delete()
-                    delete = True
                 except Submission.DoesNotExist:
                     pass
             elif solution_form.is_valid():
@@ -472,19 +470,19 @@ def task_detail(request, competition, data, ctask_id):
                     is_correct = evaluator.check_result(
                             ctask.descriptor, result)
                     submission = Submission(ctask=ctask, team=team,
-                            result=result, cache_is_correct=is_correct)
+                            result=result, score=is_correct * ctask.max_score)
                     submission.save()
-                    chain_submissions.append(submission)
+                    new_chain_submissions = chain_submissions + [submission]
                     submissions.append(submission)
 
-            if delete or submission:
+            if new_chain_submissions is not None:
                 if is_admin and team.is_admin_private():
                     update_ctask_cache_admin_solved_count(
                             competition, ctask, ctask.chain)
-                update_score_on_ctask_action(competition, team, ctask.chain,
-                        ctask, submission, delete,
-                        chain_ctask_ids=[x.id for x in ctasks],
-                        chain_submissions=chain_submissions)
+                update_score_on_ctask_action(
+                        competition, team, ctask.chain, chain_ctasks=ctasks,
+                        old_chain_submissions=chain_submissions,
+                        new_chain_submissions=new_chain_submissions)
 
                 # Prevent form resubmission.
                 return (ctask.get_absolute_url(), )
@@ -493,7 +491,7 @@ def task_detail(request, competition, data, ctask_id):
             solution_form = CompetitionSolutionForm(
                     descriptor=ctask.descriptor, evaluator=evaluator)
 
-        data['is_solved'] = any(x.cache_is_correct for x in submissions)
+        data['is_solved'] = any(x.score for x in submissions)
         data['solution_form'] = solution_form
         data['submissions'] = submissions
         data['submissions_left'] = ctask.max_submissions - len(submissions)
@@ -516,8 +514,7 @@ def task_detail(request, competition, data, ctask_id):
             if not submission:
                 submission = Submission(
                         ctask=ctask, team=team, content=content,
-                        result=settings.COMPETITION_MANUAL_GRADING_TAG,
-                        cache_is_correct=False)
+                        result=settings.COMPETITION_MANUAL_GRADING_TAG)
                 submission.save()
 
             # Prevent form resubmission.
@@ -572,11 +569,16 @@ def submission_detail(request, competition, data, submission_id=None):
             score = int(request.POST['score_number'])
         except ValueError:
             return (400, "score_number must be an integer")
-        if score < 0 or score > ctask.score:
-            return (400, "score_number must be between 0 and " + str(ctask.score))
+        if score < 0 or score > ctask.max_score:
+            return (400, "score_number must be between 0 and " + str(ctask.max_score))
         if score != submission.score:
             submission.latest_unseen_admin_activity = datetime.now()
-            submission.update_score(score)
+            submission.score = score
+            submission.save()
+
+            # For now, just refresh whole team. A faster solution would be to
+            # refresh the score based on chain only.
+            refresh_teams_cache_score([team])
 
             # We need to store a single number, so we hack it into
             # action_object_id and use a fake action_object_content_type_id.
@@ -652,7 +654,7 @@ def chain_tasks_list(request, competition, data):
     created = False
     updated_chains_count = None
     updated_ctasks_count = None
-    updated_submissions_cache_is_correct = None
+    updated_submissions_score_count = None
     empty_form = ChainTasksForm(competition=competition)
     form = empty_form
 
@@ -661,9 +663,9 @@ def chain_tasks_list(request, competition, data):
     elif request.POST.get('action') == 'refresh-ctask-cache-admin-solved-count':
         updated_ctasks_count = len(
                 refresh_ctask_cache_admin_solved_count(competition))
-    elif request.POST.get('action') == 'refresh-submission-cache-is-correct':
-        updated_submissions_cache_is_correct = \
-                refresh_submissions_cache_is_correct(competitions=[competition])
+    elif request.POST.get('action') == 'refresh-submission-is-correct':
+        updated_submissions_score_count = \
+                refresh_submissions_score(competitions=[competition])
     elif request.method == 'POST':
         form = ChainTasksForm(request.POST, competition=competition)
         if form.is_valid():
@@ -721,8 +723,8 @@ def chain_tasks_list(request, competition, data):
     data['trans_checked_title'] = _("Number of admins that solved this task.")
     data['updated_chains_count'] = updated_chains_count
     data['updated_ctasks_count'] = updated_ctasks_count
-    data['updated_submissions_cache_is_correct'] = \
-            updated_submissions_cache_is_correct
+    data['updated_submissions_score_count'] = \
+            updated_submissions_score_count
     return data
 
 
@@ -816,7 +818,7 @@ def chain_list(request, competition, data):
     verified_ctask_ids = set(Submission.objects \
             .filter(team__competition_id=competition.id,
                     team__team_type=Team.TYPE_ADMIN_PRIVATE,
-                    cache_is_correct=True) \
+                    score=F('ctask__max_score')) \
             .values_list('ctask_id', flat=True))
 
     for chain in chains:

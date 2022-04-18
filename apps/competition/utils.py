@@ -83,50 +83,73 @@ def ctask_comment_verified_class(competition, ctask, current_task,
     return ''
 
 
-def update_score_on_ctask_action(competition, team, chain, ctask, submission,
-        delete, chain_ctask_ids=None, chain_submissions=None):
-    """Updates team score for a given submit/delete action."""
-    if not submission:
-        return
-    if chain_ctask_ids is None:
-        chain_ctask_ids = CompetitionTask.objects \
-                .filter(chain=chain).values_list('id', flat=True)
-    if chain_submissions is None:
-        chain_submissions = Submission.objects.filter(
-                team=team, ctask_id__in=chain_ctask_ids)
+def _compute_chain_score(chain_bonus, ctask_infos, submission_infos):
+    """Compute total score for a given chain.
 
-    save = [False]  # Inner method will be able to edit save[0].
-    def _calc_score_delta(should_count_func):
-        _should_count_submission = should_count_func(submission)
-        if not _should_count_submission:
-            return 0
-        _potential_solutions_count = defaultdict(int)
-        for _submission in chain_submissions:
-            if should_count_func(_submission):
-                _potential_solutions_count[_submission.ctask_id] += 1
+    The chain bonus is applied only if for each ctasks there is a full score
+    submission.
 
-        if not delete and _potential_solutions_count.get(ctask.id) == 1:
-            _delta = ctask.score
-            if len(_potential_solutions_count) == len(chain_ctask_ids):
-                _delta += chain.bonus_score
-        elif delete and ctask.id not in _potential_solutions_count:
-            _delta = -ctask.score
-            if len(_potential_solutions_count) == len(chain_ctask_ids) - 1:
-                _delta -= chain.bonus_score
-        else:
-            return 0
+    Arguments:
+        chain_bonus: int
+        ctask_infos: list of pairs (ctask_id, max_score)
+        submission_infos: list of pairs (ctask_id, score)
+    """
+    best = {}
+    for ctask_id, score in submission_infos:
+        best[ctask_id] = max(best.get(ctask_id, 0), score)
 
-        save[0] = True
-        return _delta
+    total = sum(best.values())
+    if all(best.get(ctask_id) == max_score
+           for ctask_id, max_score in ctask_infos):
+        total += chain_bonus
+    return total
 
+
+def compute_chain_score_variants(
+        competition, chain, chain_ctasks, chain_submissions):
+    """Compute three variants of score for a given chain:
+    - the actual score
+    - the score before the freeze
+    - the maximum theoretical score after the freeze.
+    """
     freeze_date = competition.scoreboard_freeze_date
-    team.cache_score += _calc_score_delta(lambda x: x.cache_is_correct)
-    team.cache_score_before_freeze += _calc_score_delta(
-            lambda x: x.cache_is_correct and x.date <= freeze_date)
-    team.cache_max_score_after_freeze += _calc_score_delta(
-            lambda x: x.cache_is_correct or x.date > freeze_date)
+    ctask_infos = [(ctask.id, ctask.max_score) for ctask in chain_ctasks]
+    max_ctask_scores = dict(ctask_infos)
 
-    if save[0]:
+    # True score.
+    infos = [(x.ctask_id, x.score) for x in chain_submissions]
+    score0 = _compute_chain_score(chain.bonus_score, ctask_infos, infos)
+
+    # Score before freeze.
+    infos = [(x.ctask_id, x.score) for x in chain_submissions
+             if x.date <= freeze_date]
+    score1 = _compute_chain_score(chain.bonus_score, ctask_infos, infos)
+
+    # Max score after freeze.
+    infos = [
+        (x.ctask_id, max_ctask_scores[x.ctask_id]) \
+                if x.date > freeze_date else (x.ctask_id, x.score)
+        for x in chain_submissions
+    ]
+    score2 = _compute_chain_score(chain.bonus_score, ctask_infos, infos)
+
+    return score0, score1, score2
+
+
+def update_score_on_ctask_action(
+        competition, team, chain,
+        chain_ctasks, old_chain_submissions, new_chain_submissions):
+    """Updates team score after one or more submissions have been updated."""
+
+    old = compute_chain_score_variants(
+            competition, chain, chain_ctasks, old_chain_submissions)
+    new = compute_chain_score_variants(
+            competition, chain, chain_ctasks, new_chain_submissions)
+
+    if old != new:
+        team.cache_score += new[0] - old[0]
+        team.cache_score_before_freeze += new[1] - old[1]
+        team.cache_max_score_after_freeze += new[2] - old[2]
         team.save()
 
 
@@ -139,67 +162,42 @@ def refresh_teams_cache_score(teams):
     team_ids = [team.id for team in teams]
     competition_ids = list(set([team.competition_id for team in teams]))
 
-    all_competitions = list(Competition.objects.filter(id__in=competition_ids))
-    all_ctasks = list(CompetitionTask.objects.filter(
-            competition_id__in=competition_ids))
-    all_chains = list(Chain.objects.filter(competition_id__in=competition_ids))
+    competitions_dict = Competition.objects.in_bulk(competition_ids)
+    all_ctasks = CompetitionTask.objects.filter(
+            competition_id__in=competition_ids)
     all_submissions = list(Submission.objects \
             .filter(team_id__in=team_ids) \
-            .values_list('team_id', 'ctask_id', 'date', 'cache_is_correct'))
+            .only('team', 'ctask', 'date', 'score'))
 
-    competitions_dict = {comp.id: comp for comp in all_competitions}
-    ctasks_dict = {ctask.id: ctask for ctask in all_ctasks}
-    chains_dict = {chain.id: chain for chain in all_chains}
-    chains_by_comp = defaultdict(list)
-    ctasks_by_chain = defaultdict(list)
-
-    for chain in all_chains:
-        chains_by_comp[chain.competition_id].append(chain)
+    chain_ctasks = defaultdict(list)
+    ctasks_chain = {}
     for ctask in all_ctasks:
-        ctasks_by_chain[ctask.chain_id].append(ctask)
+        chain_ctasks[ctask.chain_id].append(ctask)
+        ctasks_chain[ctask.id] = ctask.chain_id
 
-    def _calculate_score(is_solved):
-        """is_solved is a list/set of pairs (team_id, ctask_id)."""
-        is_solved = set(is_solved)
-        teams_score = {}
-        for team in teams:
-            score = 0
-            for chain in chains_by_comp[team.competition_id]:
-                all_solved = True
-                for ctask in ctasks_by_chain[chain.id]:
-                    if (team.id, ctask.id) in is_solved:
-                        score += ctask.score
-                    else:
-                        all_solved = False
-                if all_solved:
-                    score += chain.bonus_score
-            teams_score[team.id] = score
-        return teams_score
-
-    submissions_correct = []
-    submissions_correct_before = []
-    submissions_correct_or_after = []
+    team_chain_submissions = defaultdict(lambda: defaultdict(list))
     for submission in all_submissions:
-        pair = (submission[0], submission[1])  # team_id, ctask_id
-        ctask = ctasks_dict[submission[1]]     # ctask_id
-        competition = competitions_dict[ctask.competition_id]
-        if submission[3]:                      # cache_is_correct
-            submissions_correct.append(pair)
-            if submission[2] <= competition.scoreboard_freeze_date:  # date
-                submissions_correct_before.append(pair)
-        if submission[3] or submission[2] > competition.scoreboard_freeze_date:
-            submissions_correct_or_after.append(pair)
-    score_before = _calculate_score(submissions_correct_before)
-    score_all = _calculate_score(submissions_correct)
-    score_max = _calculate_score(submissions_correct_or_after)
+        chain_id = ctasks_chain[submission.ctask_id]
+        team_chain_submissions[submission.team_id][chain_id].append(submission)
+
+    chains_dict = Chain.objects.in_bulk(list(chain_ctasks.keys()))
 
     queries_args = []
-    for team in teams:
-        team.cache_score = score_all.get(team.id, 0)
-        team.cache_score_before_freeze = score_before.get(team.id, 0)
-        team.cache_max_score_after_freeze = score_max.get(team.id, 0)
-        queries_args.append((team.cache_score, team.cache_score_before_freeze,
-                team.cache_max_score_after_freeze, int(team.id)))
+    for team_id, chain_submissions in team_chain_submissions.items():
+        S0, S1, S2 = 0, 0, 0
+        for chain_id, chain_sub in chain_submissions.items():
+            chain = chains_dict[chain_id]
+            s0, s1, s2 = compute_chain_score_variants(
+                    competitions_dict[chain.competition_id], chain,
+                    chain_ctasks[chain_id], chain_sub)
+            S0 += s0
+            S1 += s1
+            S2 += s2
+
+        team.cache_score = S0
+        team.cache_score_before_freeze = S1
+        team.cache_max_score_after_freeze = S2
+        queries_args.append((S0, S1, S2, int(team.id)))
     cursor = connection.cursor()
     cursor.executemany(
             "UPDATE `competition_team` SET `cache_score`=%s, "
@@ -243,21 +241,21 @@ def preprocess_chain(competition, chain, team, preloaded_ctask=None):
     for submission in submissions:
         ctask = ctasks_dict[submission.ctask_id]
         ctask.t_submission_count += 1
-        ctask.t_is_solved |= submission.cache_is_correct
+        ctask.t_is_solved |= submission.score == ctask.max_score
 
     lock_ctasks_in_chain(ctasks)
 
     return ctasks, submissions
 
 
-def refresh_submissions_cache_is_correct(submissions=None, ctasks=None,
-        competitions=None):
-    """Returns the number of solutions updated."""
+def refresh_submissions_score(submissions=None, ctasks=None, competitions=None):
+    """Refresh submissions cores for automatically graded tasks.
+
+    Returns the number of solutions updated."""
     if not submissions and not ctasks and not competitions:
         raise ValueError
     # TODO: simplify this
     if competitions:
-        competitions = list(competitions)
         id_to_comp = {x.id: x for x in competitions}
         if ctasks is None:
             ctasks = CompetitionTask.objects \
@@ -280,14 +278,17 @@ def refresh_submissions_cache_is_correct(submissions=None, ctasks=None,
     updated = 0
     for submission in submissions:
         ctask = ctasks_dict[submission.ctask_id]
+        if not ctask.is_automatically_graded():
+            continue
         evaluator = get_evaluator(ctask.competition.evaluator_version)
-        old = submission.cache_is_correct
+        old = submission.score
         try:
             new = evaluator.check_result(ctask.descriptor, submission.result)
+            new *= ctask.max_score
         except InvalidSolution, InvalidDescriptor:
-            new = False
+            new = 0
         if old != new:
-            submission.cache_is_correct = new
+            submission.score = new
             submission.save()
             updated += 1
     return updated
@@ -306,22 +307,24 @@ def get_ctask_statistics(competition_id):
     # TODO: documentation
     """
     # TODO: cache!
-    max_submissions_dict = dict(CompetitionTask.objects \
+    ctask_infos = list(CompetitionTask.objects \
             .filter(competition_id=competition_id) \
-            .values_list('id', 'max_submissions'))
+            .values_list('id', 'max_submissions', 'max_score'))
+    max_submissions_dict = {ctask_id: sub for ctask_id, sub, max_score in ctask_infos}
+    max_scores_dict = {ctask_id: max_score for ctask_id, sub, max_score in ctask_infos}
     team_types = dict(Team.objects \
             .filter(competition_id=competition_id) \
             .values_list('id', 'team_type'))
     submissions = Submission.objects \
             .filter(ctask__competition_id=competition_id) \
-            .values_list('team_id', 'ctask_id', 'cache_is_correct')
+            .values_list('team_id', 'ctask_id', 'score')
 
     submission_count_dict = defaultdict(int)
     is_solved_dict = defaultdict(bool)
-    for team_id, ctask_id, cache_is_correct in submissions:
+    for team_id, ctask_id, score in submissions:
         key = (team_id, ctask_id)
         submission_count_dict[key] += 1
-        is_solved_dict[key] |= cache_is_correct
+        is_solved_dict[key] |= score == max_scores_dict[ctask_id]
 
     result = defaultdict(int)
     for key, submission_count in submission_count_dict.iteritems():
@@ -438,7 +441,7 @@ def refresh_ctask_cache_admin_solved_count(competition):
     verified_ctask_ids = set(Submission.objects \
             .filter(team__competition_id=competition.id,
                     team__team_type=Team.TYPE_ADMIN_PRIVATE,
-                    cache_is_correct=True) \
+                    score=F('ctask__max_score')) \
             .exclude(team__author=F('ctask__task__author')) \
             .values_list('id', 'ctask_id'))
 
@@ -469,7 +472,7 @@ def update_ctask_cache_admin_solved_count(competition, ctask, chain):
             .filter(ctask_id=ctask.id,
                     team__competition_id=competition.id,
                     team__team_type=Team.TYPE_ADMIN_PRIVATE,
-                    cache_is_correct=True) \
+                    score=F('ctask__max_score')) \
             .exclude(team__author=F('ctask__task__author')) \
             .count()
     min_solved_count = competition.min_admin_solved_count

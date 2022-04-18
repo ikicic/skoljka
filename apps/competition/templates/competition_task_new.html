@@ -35,8 +35,8 @@
       {% if is_solution_hidden %} style="display:none;"{% endif %}>
     {% bootstrap_field form.descriptor %}
   </div>
-  {% if form.score %}
-    {% bootstrap_field form.score %}
+  {% if form.max_score %}
+    {% bootstrap_field form.max_score %}
   {% endif %}
   {% bootstrap_field form.text layout="horizontal" %}
   {% mathcontent_bootstrap_preview form.instance.task.content form.text.auto_id "form-ctask-text" "" %}

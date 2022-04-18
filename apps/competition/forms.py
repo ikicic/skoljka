@@ -80,7 +80,7 @@ class CompetitionTaskForm(ModelForm):
                 '" target="_blank"><i class="icon-question-sign" title="' +
                 xss.escape(_("Help")) + '"></i></a>')
         if self.fixed_score:
-            del self.fields['score']
+            del self.fields['max_score']
 
         self.fields['text'].widget.attrs.update(
                 {'class': 'comp-mathcontent-text', 'rows': 15})
@@ -92,7 +92,7 @@ class CompetitionTaskForm(ModelForm):
         self.instance._text = self.cleaned_data.get('text')
         self.instance._comment = self.cleaned_data.get('comment')
         if self.fixed_score:
-            self.instance.score = self.fixed_score
+            self.instance.max_score = self.fixed_score
         return self.cleaned_data
 
     def clean_descriptor(self):
@@ -107,7 +107,7 @@ class CompetitionTaskForm(ModelForm):
 
     class Meta:
         model = CompetitionTask
-        fields = ('descriptor', 'score')
+        fields = ('descriptor', 'max_score')
 
 
 

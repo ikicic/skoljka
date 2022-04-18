@@ -214,7 +214,7 @@ class CompetitionTask(models.Model):
     task = models.ForeignKey(Task)
     descriptor = models.CharField(max_length=255)
     max_submissions = models.IntegerField(default=3)
-    score = models.IntegerField(default=1)
+    max_score = models.IntegerField(default=1)
     chain = models.ForeignKey(Chain, blank=True, null=True)
     chain_position = models.IntegerField(default=0)
     comment = models.OneToOneField(MathContent)
@@ -266,7 +266,6 @@ class Submission(models.Model):
     score = models.IntegerField(default=0)
     latest_unseen_admin_activity = models.DateTimeField(
             default=NO_UNSEEN_ACTIVITIES_DATETIME)
-    cache_is_correct = models.BooleanField()
 
     posts = PostGenericRelation(placeholder=_("Message"))
 
@@ -279,10 +278,15 @@ class Submission(models.Model):
     def can_send_post(self, user):  # For PostGenericRelation.
         return self.team.can_send_post(user)
 
-    def update_score(self, new_score):
-        # TODO: Update total team score.
-        self.score = new_score
-        self.save()
+    def get_tr_class(self):
+        """Get <tr>...</tr> class in submissions list."""
+        if self.score == self.ctask.max_score:
+            return 'ctask-correct'
+        elif self.score > 0:
+            # Only for manually graded tasks.
+            return 'ctask-partially-correct'
+        else:
+            return ''
 
     def __unicode__(self):
         return "ctask={} team={} {}".format(

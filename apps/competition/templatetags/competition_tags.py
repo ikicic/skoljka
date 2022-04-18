@@ -157,7 +157,7 @@ def ctask_score_text(ctask):
     text = ungettext(
             "This task is worth %d point.",
             "This task is worth %d points.",
-            ctask.score) % ctask.score
+            ctask.max_score) % ctask.max_score
     return u'<div class="ctask-score-text">{}</div>'.format(text)
 
 

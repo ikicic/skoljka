@@ -16,7 +16,7 @@ from task.models import Task
 
 import datetime
 
-def create_ctask(author, competition, chain, descriptor, score, comment=""):
+def create_ctask(author, competition, chain, descriptor, max_score, comment=""):
     # TODO: make a test util for creating tasks
     content = MathContent.objects.create(text="Test text", html="Test text")
     task = Task.objects.create(name="Test task", content=content,
@@ -24,7 +24,7 @@ def create_ctask(author, competition, chain, descriptor, score, comment=""):
     comment = MathContent.objects.create(text=comment, html=None)
     chain_position = CompetitionTask.objects.filter(chain=chain).count()
     return CompetitionTask.objects.create(competition=competition, task=task,
-            descriptor=descriptor, max_submissions=3, score=score, chain=chain,
+            descriptor=descriptor, max_submissions=3, max_score=max_score, chain=chain,
             chain_position=chain_position, comment=comment)
 
 CHAIN_BONUS_SCORE = 1000000
@@ -74,23 +74,27 @@ class TeamScoreTest(TestCase):
             int x -> ID of the solution (assume 1-based).
         """
         team = self.team
+        chain_ctasks = list(CompetitionTask.objects.filter(chain=self.chain))
         for index, test_case in enumerate(submissions):
             try:
                 ctask, date, action, expected_score_triple = test_case
+                old_chain_submissions = \
+                        list(Submission.objects.filter(ctask__chain=self.chain))
                 if isinstance(action, bool):
                     is_correct = action
                     result = "42" if is_correct else "0"
                     submission = Submission.objects.create(ctask=ctask,
                             team=team, date=date, result=result,
-                            cache_is_correct=is_correct)
-                    update_score_on_ctask_action(self.competition, team,
-                            self.chain, ctask, submission, False)
+                            score=is_correct * ctask.max_score)
                 else:
                     # Raise an exception if not found.
                     submission = Submission.objects.get(id=action)
                     submission.delete()
-                    update_score_on_ctask_action(self.competition, team,
-                            self.chain, ctask, None, True)
+                new_chain_submissions = \
+                        list(Submission.objects.filter(ctask__chain=self.chain))
+                update_score_on_ctask_action(
+                        self.competition, team, self.chain, chain_ctasks,
+                        old_chain_submissions, new_chain_submissions)
                 score_triple = (team.cache_score_before_freeze,
                         team.cache_score, team.cache_max_score_after_freeze)
 
@@ -276,7 +280,7 @@ class ChainsTest(TestCase):
         # Submit a solution from a admin private team.
         team = Team.objects.create(name="Test team", author=self.alice,
                 competition=self.competition, team_type=Team.TYPE_ADMIN_PRIVATE)
-        Submission.objects.create(ctask=c1, team=team, result="42", cache_is_correct=True)
+        Submission.objects.create(ctask=c1, team=team, result="42", score=c1.max_score)
         update_ctask_cache_admin_solved_count(self.competition, c1, self.chain1)
         update_ctask_cache_admin_solved_count(self.competition, c2, self.chain1)
         self.assertEqual(c1.cache_admin_solved_count, 1)
@@ -284,13 +288,13 @@ class ChainsTest(TestCase):
 
         # Don't crash if no chain assigned.
         ctask = create_ctask(self.admin, self.competition, None, "42", 1, "third")
-        Submission.objects.create(ctask=ctask, team=team, result="42", cache_is_correct=True)
+        Submission.objects.create(ctask=ctask, team=team, result="42", score=ctask.max_score)
         update_ctask_cache_admin_solved_count(self.competition, ctask, ctask.chain)
 
         # Regular team.
         team = Team.objects.create(name="Test team", author=self.alice,
                 competition=self.competition)
-        Submission.objects.create(ctask=c2, team=team, result="42", cache_is_correct=True)
+        Submission.objects.create(ctask=c2, team=team, result="42", score=c2.max_score)
         update_ctask_cache_admin_solved_count(self.competition, c1, self.chain1)
         update_ctask_cache_admin_solved_count(self.competition, c2, self.chain1)
         self.assertEqual(c1.cache_admin_solved_count, 1)
@@ -299,7 +303,7 @@ class ChainsTest(TestCase):
         # Own submissions don't count.
         team = Team.objects.create(name="Test team", author=self.admin,
                 competition=self.competition, team_type=Team.TYPE_ADMIN_PRIVATE)
-        Submission.objects.create(ctask=c1, team=team, result="42", cache_is_correct=True)
+        Submission.objects.create(ctask=c1, team=team, result="42", score=c1.max_score)
         update_ctask_cache_admin_solved_count(self.competition, c1, self.chain1)
         update_ctask_cache_admin_solved_count(self.competition, c2, self.chain1)
         self.assertEqual(c1.cache_admin_solved_count, 1)
@@ -320,10 +324,10 @@ class ChainsTest(TestCase):
                 competition=self.competition, team_type=Team.TYPE_ADMIN_PRIVATE)
         team3 = Team.objects.create(name="Test team", author=self.alice,
                 competition=self.competition, team_type=Team.TYPE_ADMIN_PRIVATE)
-        Submission.objects.create(ctask=c1, team=team1, result="42", cache_is_correct=True)
-        Submission.objects.create(ctask=c2, team=team1, result="42", cache_is_correct=True)
-        Submission.objects.create(ctask=c1, team=team2, result="42", cache_is_correct=True)
-        Submission.objects.create(ctask=c2, team=team3, result="0", cache_is_correct=False)
+        Submission.objects.create(ctask=c1, team=team1, result="42", score=c1.max_score)
+        Submission.objects.create(ctask=c2, team=team1, result="42", score=c2.max_score)
+        Submission.objects.create(ctask=c1, team=team2, result="42", score=c1.max_score)
+        Submission.objects.create(ctask=c2, team=team3, result="0", score=0)
 
         refresh_ctask_cache_admin_solved_count(self.competition)
 
@@ -340,8 +344,8 @@ class ChainsTest(TestCase):
 
         team = Team.objects.create(name="Test team", author=self.alice,
                 competition=self.competition, team_type=Team.TYPE_ADMIN_PRIVATE)
-        Submission.objects.create(ctask=c1, team=team, result="42", cache_is_correct=True)
-        Submission.objects.create(ctask=c2, team=team, result="42", cache_is_correct=True)
+        Submission.objects.create(ctask=c1, team=team, result="42", score=c1.max_score)
+        Submission.objects.create(ctask=c2, team=team, result="42", score=c2.max_score)
         self.assertFalse(self.chain1.cache_is_verified)
         refresh_ctask_cache_admin_solved_count(self.competition)
         update_chain_cache_is_verified(self.competition, self.chain1)
