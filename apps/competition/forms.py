@@ -52,6 +52,7 @@ class BaseCompetitionTaskFormSet(BaseModelFormSet):
 
 
 class CompetitionTaskForm(ModelForm):
+    name = forms.CharField()
     text = forms.CharField(widget=forms.Textarea)
     comment = forms.CharField(widget=forms.Textarea, required=False)
 
@@ -64,6 +65,7 @@ class CompetitionTaskForm(ModelForm):
 
         self.t_comment_extra_class = "ctask-comment"
         if self.instance.pk:
+            self.fields['name'].initial = self.instance.task.name
             self.fields['text'].initial = self.instance.task.content.text
             self.fields['comment'].initial = self.instance.comment.text
             self.t_comment_extra_class += \
@@ -79,6 +81,8 @@ class CompetitionTaskForm(ModelForm):
                 ' <a href="' + comp_url(self.competition, 'rules') +
                 '" target="_blank"><i class="icon-question-sign" title="' +
                 xss.escape(_("Help")) + '"></i></a>')
+        if not self.competition.use_custom_ctask_names():
+            del self.fields['name']
         if self.fixed_score:
             del self.fields['max_score']
 

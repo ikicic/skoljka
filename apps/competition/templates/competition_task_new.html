@@ -31,6 +31,9 @@
     {% trans "Author:" %} {{ ctask.task.author|userlink }}<br>
   {% endif %}
   <br><br>
+  {% if form.name %}
+    {% bootstrap_field form.name %}
+  {% endif %}
   <div id="descriptor-field"
       {% if is_solution_hidden %} style="display:none;"{% endif %}>
     {% bootstrap_field form.descriptor %}

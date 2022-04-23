@@ -17,9 +17,7 @@
       {% trans "Author:" %} {{ ctask.task.author|userlink }}
     </div>
     <h4 class="ctask-title">
-      <a href="{{ ctask.get_absolute_url }}">
-        {{ chain.name }} #{{ ctask.chain_position }}
-      </a>
+      <a href="{{ ctask.get_absolute_url }}">{{ ctask.get_name }}</a>
     </h4>
     <div class="outset ctask-content">
       {% mathcontent_render ctask.task.content %}

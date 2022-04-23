@@ -112,6 +112,11 @@ class Competition(BasePermissionsModel):
     def is_user_admin(self, user):
         return self.user_has_perm(user, EDIT)
 
+    def use_custom_ctask_names(self):
+        """Whether CompetitionTask names are determined automatically or are
+        manual. For now, manual names are used for and only for courses.""" 
+        return self.kind == self.KIND_COURSE
+
 
 class Team(models.Model):
     TYPE_NORMAL = 0
@@ -225,7 +230,9 @@ class CompetitionTask(models.Model):
                 self.get_name(), self.competition_id, self.task_id)
 
     def get_name(self):
-        if self.chain_id:
+        if self.competition.use_custom_ctask_names():
+            return self.task.name
+        elif self.chain_id:
             return u"{} #{}".format(self.chain.name, self.chain_position)
         else:
             return u"(No chain) id={}".format(self.id);

@@ -139,7 +139,7 @@
     <tr class="comp-tr-ctask">
       <th class="cchain-list-ctask-counter">#</th>
       <th>{% trans "Author" %}</th>
-      <th>{% trans "Text" %}</th>
+      <th>{% if competition.use_custom_ctask_names %}{% trans "Title:" %}{% endif %} {% trans "Text" %}</th>
       <th></th>
       <th style="width:30px;white-space:nowrap;" title="{{ trans_checked_title }}">
         &#10008;/&#10004;?

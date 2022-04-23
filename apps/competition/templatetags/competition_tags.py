@@ -12,6 +12,7 @@ from competition.utils import parse_chain_comments_cache, get_ctask_statistics
 from competition.utils import comp_url as utils__comp_url
 from competition.utils import ctask_comment_class as utils__ctask_comment_class
 from userprofile.templatetags.userprofile_tags import userlink
+from skoljka.libs import xss
 
 import json
 import re
@@ -113,6 +114,16 @@ def chain_ctask_comments_info(context, chain):
 @register.inclusion_tag('inc_competition_chain_ctask_tr.html')
 def chain_ctask_tr(ctask, counter=None, total_ctasks=None):
     return {'ctask': ctask, 'counter': counter, 'total_ctasks': total_ctasks}
+
+
+@register.simple_tag(takes_context=False)
+def chain_list_ctask_name_text(ctask, truncate):
+    truncated = truncatechars(ctask.task.content.text or '', truncate)
+    if ctask.competition.use_custom_ctask_names():
+        return mark_safe("<b>{}:</b> {}".format(
+            xss.escape(ctask.task.name), xss.escape(truncated)))
+    else:
+        return truncated
 
 
 CHAIN_LIST_CTASK_COMMENT_PREVIEW_RE = re.compile(r'\s*\[\s*hide\s*\]')

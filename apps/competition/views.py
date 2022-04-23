@@ -426,6 +426,7 @@ def task_detail(request, competition, data, ctask_id):
             CompetitionTask.objects.select_related('chain', 'task',
                 'task__content', *extra),
             competition=competition, id=ctask_id)
+    ctask.competition = competition
     ctask_id = int(ctask_id)
     team = data['team']
     if not is_admin:
@@ -630,7 +631,7 @@ def task_new(request, competition, data, ctask_id=None):
 
         _create_or_update_task(ctask, request.user, competition,
                 ctask.chain, ctask.chain_position, ctask._text,
-                ctask._comment)
+                ctask._comment, form.cleaned_data.get('name'))
 
         ctask.save()
 
@@ -854,7 +855,7 @@ def chain_list(request, competition, data):
 
 
 def _create_or_update_task(
-        ctask, user, competition, chain, index, text, comment):
+        ctask, user, competition, chain, index, text, comment, name):
     edit = bool(ctask.task_id)
     if not edit:
         content = MathContent(text=text)
@@ -870,7 +871,7 @@ def _create_or_update_task(
         ctask.comment.text = comment
         ctask.comment.save()
 
-    update_ctask_task(task, competition, chain, index + 1, commit=True)
+    update_ctask_task(task, competition, chain, index + 1, name, commit=True)
 
     if not edit:
         if competition.automatic_task_tags:
