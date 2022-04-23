@@ -120,7 +120,7 @@ def chain_ctask_tr(ctask, counter=None, total_ctasks=None):
 def chain_list_ctask_name_text(ctask, truncate):
     truncated = truncatechars(ctask.task.content.text or '', truncate)
     if ctask.competition.use_custom_ctask_names():
-        return mark_safe("<b>{}:</b> {}".format(
+        return mark_safe(u"<b>{}:</b> {}".format(
             xss.escape(ctask.task.name), xss.escape(truncated)))
     else:
         return truncated
