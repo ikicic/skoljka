@@ -329,6 +329,8 @@ def task_list(request, competition, data):
             .filter(competition=competition, cache_is_verified=True) \
             .order_by('category', 'position', 'name'))
     all_chains_dict = {chain.id: chain for chain in all_chains}
+    all_my_submissions = list(Submission.objects.filter(team=data['team']) \
+            .only('id', 'ctask', 'score', 'oldest_unseen_admin_activity'))
 
     unverified_chains = set()
     for chain in all_chains:
@@ -336,9 +338,22 @@ def task_list(request, competition, data):
         chain.submissions = []
         chain.competition = competition  # Use preloaded object.
 
+    for submission in all_my_submissions:
+        ctask = all_ctasks_dict[submission.ctask_id]
+        chain = all_chains_dict.get(ctask.chain_id)
+        ctask.submission = submission
+        if chain:
+            chain.submissions.append(submission)
+
     for ctask in all_ctasks:
-        if ctask.max_score > 1:
-            ctask.t_link_text = str(ctask.max_score)
+        submission = getattr(ctask, 'submission', None)
+        if ctask.max_score > 1 or competition.is_course:
+            if ctask.is_manually_graded() and submission:
+                ctask.t_link_text = "{}/{}".format(
+                        submission.score if submission else 0,
+                        ctask.max_score)
+            else:
+                ctask.t_link_text = str(ctask.max_score)
             ctask.t_title = ungettext(
                     "This task is worth %d point.",
                     "This task is worth %d points.",
@@ -347,25 +362,18 @@ def task_list(request, competition, data):
             ctask.t_link_text = ""
             ctask.t_title = ""
 
+        if submission and submission.oldest_unseen_admin_activity \
+                != Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
+            ctask.t_link_text = mark_safe(
+                    ctask.t_link_text + ' <i class="icon-comment"></i>')
+            ctask.t_title += " " + _("There are new messages.")
+
         if ctask.chain_id in all_chains_dict:
             chain = all_chains_dict[ctask.chain_id]
             ctask.chain = chain
             chain.ctasks.append(ctask)
         elif ctask.chain_id is not None:
             unverified_chains.add(ctask.chain_id)
-
-    all_my_submissions = list(Submission.objects.filter(team=data['team']) \
-            .only('id', 'ctask', 'score', 'oldest_unseen_admin_activity'))
-    for submission in all_my_submissions:
-        ctask = all_ctasks_dict[submission.ctask_id]
-        chain = all_chains_dict.get(ctask.chain_id)
-        if chain:
-            chain.submissions.append(submission)
-        if submission.oldest_unseen_admin_activity \
-                != Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
-            ctask.t_link_text = mark_safe(
-                    ctask.t_link_text + ' <i class="icon-comment"></i>')
-            ctask.t_title += " " + _("There are new messages.")
 
     for chain in all_chains:
         chain.ctasks.sort(key=lambda ctask: ctask.chain_position)
@@ -532,8 +540,9 @@ def task_detail(request, competition, data, ctask_id):
 
         data['content_form'] = content_form
         data['submission'] = submission
-        data['submission_actions'], data['not_graded'] = \
-                get_submission_actions(submission)
+        if submission:
+            data['submission_actions'], data['not_graded'] = \
+                    get_submission_actions(submission)
 
     if is_admin:
         data['all_ctask_submissions'] = list(Submission.objects \
