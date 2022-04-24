@@ -55,7 +55,6 @@
 
   {% if submissions|length < ctask.max_submissions and not is_solved %}
     {% if not has_finished %}
-      {# <h4 class="ctask-submit">Slanje rješenja</h4> #}
       <form action="{{ request.get_full_path }}" method="POST"
           class="form-inline">
         {% csrf_token %}
@@ -115,7 +114,8 @@
   {% if submission %}
     <div>
       <h4>{% trans "Score:" %}</h4>
-      {{ submission.score }}/{{ ctask.max_score }}<br><br>
+      {{ submission.score }}/{{ ctask.max_score }} {% if not_graded %}({% trans "not graded" %}){% endif %}
+      <br><br>
     </div>
   {% else %}
     {% ctask_score_text ctask %}
@@ -140,7 +140,7 @@
 {% endif %}
 
 {% if submission and ctask.is_manually_graded %}
-  {% show_submission_posts submission unread_newer_than %}
+  {% show_submission_posts submission unread_newer_than submission_actions %}
 {% endif %}
 
 </div>

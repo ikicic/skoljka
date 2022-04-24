@@ -242,8 +242,21 @@ def _action_message(action):
     return mark_safe(msg)
 
 
+def get_submission_actions(submission):
+    content_type_id = ContentType.objects.get_for_model(Submission).id
+    actions = list(Action.objects
+            .filter(target_content_type_id=content_type_id,
+                    target_id=submission.id)
+            .exclude(type=_action.POST_SEND[0])
+            .select_related('actor'))
+    not_graded = all(
+            action.type_pair != _action.COMPETITION_UPDATE_SUBMISSION_SCORE
+            for action in actions)
+    return actions, not_graded
+
+
 @register.inclusion_tag('inc_competition_submission_posts.html', takes_context=True)
-def show_submission_posts(context, submission, unread_newer_than=None):
+def show_submission_posts(context, submission, unread_newer_than, actions=None):
     posts = list(submission.posts
             .select_related('author', 'content', 'last_edit_by')
             .order_by('-date_created'))
@@ -256,12 +269,8 @@ def show_submission_posts(context, submission, unread_newer_than=None):
             x.t_unread = True
         x.t_is_post = True
 
-    content_type_id = ContentType.objects.get_for_model(Submission).id
-    actions = list(Action.objects
-            .filter(target_content_type_id=content_type_id,
-                    target_id=submission.id)
-            .exclude(type=_action.POST_SEND[0])
-            .select_related('actor'))
+    if not actions:
+        actions, not_graded = get_submission_actions(submission)
     for action in actions:
         if unread_newer_than and action.date_created >= unread_newer_than:
             action.t_unread = True

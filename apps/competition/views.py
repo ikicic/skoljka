@@ -33,9 +33,10 @@ from competition.forms import ChainForm, \
         BaseCompetitionTaskFormSet, TeamForm, TaskListAdminPanelForm
 from competition.models import Chain, Competition, CompetitionTask, Team, \
         TeamMember, Submission
+from competition.templatetags.competition_tags import get_submission_actions
 from competition.utils import update_chain_comments_cache, \
-        comp_url, update_score_on_ctask_action, preprocess_chain, \
-        get_teams_for_user_ids, lock_ctasks_in_chain, \
+        comp_url, update_score_on_ctask_action, load_and_preprocess_chain, \
+        preprocess_chain, get_teams_for_user_ids, lock_ctasks_in_chain, \
         refresh_teams_cache_score, update_ctask_task, \
         is_ctask_comment_important, ctask_comment_verified_class, \
         detach_ctask_from_chain, delete_chain, \
@@ -330,15 +331,12 @@ def task_list(request, competition, data):
     all_chains_dict = {chain.id: chain for chain in all_chains}
 
     unverified_chains = set()
-
     for chain in all_chains:
         chain.ctasks = []
-        chain.competition = competition # use preloaded object
+        chain.submissions = []
+        chain.competition = competition  # Use preloaded object.
 
     for ctask in all_ctasks:
-        ctask.competition = competition # use preloaded object
-        ctask.t_submission_count = 0
-        ctask.t_is_solved = False
         if ctask.max_score > 1:
             ctask.t_link_text = str(ctask.max_score)
             ctask.t_title = ungettext(
@@ -357,15 +355,21 @@ def task_list(request, competition, data):
             unverified_chains.add(ctask.chain_id)
 
     all_my_submissions = list(Submission.objects.filter(team=data['team']) \
-            .values_list('ctask_id', 'score', 'oldest_unseen_admin_activity'))
-    for ctask_id, score, oldest_unseen_admin_activity in all_my_submissions:
-        ctask = all_ctasks_dict[ctask_id]
-        ctask.t_submission_count += 1
-        ctask.t_is_solved |= score == ctask.max_score  # Only for automatic grading.
-        if oldest_unseen_admin_activity != Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
+            .only('id', 'ctask', 'score', 'oldest_unseen_admin_activity'))
+    for submission in all_my_submissions:
+        ctask = all_ctasks_dict[submission.ctask_id]
+        chain = all_chains_dict.get(ctask.chain_id)
+        if chain:
+            chain.submissions.append(submission)
+        if submission.oldest_unseen_admin_activity \
+                != Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
             ctask.t_link_text = mark_safe(
                     ctask.t_link_text + ' <i class="icon-comment"></i>')
             ctask.t_title += " " + _("There are new messages.")
+
+    for chain in all_chains:
+        chain.ctasks.sort(key=lambda ctask: ctask.chain_position)
+        preprocess_chain(competition, chain, chain.ctasks, chain.submissions)
 
     category_translations = competition.get_task_categories_translations(
             request.LANGUAGE_CODE)
@@ -380,6 +384,8 @@ def task_list(request, competition, data):
     categories = {}
     for chain in all_chains:
         chain.t_is_hidden = data['minutes_passed'] < chain.unlock_minutes
+        chain.t_translated_name = pick_chain_name_translation(
+                chain.name, competition, request.LANGUAGE_CODE)
 
         if not chain.t_is_hidden or data['is_admin']:
             if chain.category not in categories:
@@ -405,10 +411,6 @@ def task_list(request, competition, data):
         for category in categories.itervalues():
             category.t_is_hidden = \
                     all(chain.t_is_hidden for chain in category.chains)
-
-    for chain in all_chains:
-        chain.t_translated_name = pick_chain_name_translation(
-                chain.name, competition, request.LANGUAGE_CODE)
 
     data['unverified_chains_count'] = len(unverified_chains)
     data['categories'] = sorted(categories.values(), key=lambda x: x.name)
@@ -438,7 +440,7 @@ def task_detail(request, competition, data, ctask_id):
     variables = safe_parse_descriptor(evaluator, ctask.descriptor)
 
     if team:
-        ctasks, chain_submissions = preprocess_chain(
+        ctasks, chain_submissions = load_and_preprocess_chain(
                 competition, ctask.chain, team, preloaded_ctask=ctask)
         submissions = [x for x in chain_submissions if x.ctask_id == ctask_id]
         submissions.sort(key=lambda x: x.date)
@@ -530,6 +532,8 @@ def task_detail(request, competition, data, ctask_id):
 
         data['content_form'] = content_form
         data['submission'] = submission
+        data['submission_actions'], data['not_graded'] = \
+                get_submission_actions(submission)
 
     if is_admin:
         data['all_ctask_submissions'] = list(Submission.objects \
@@ -565,6 +569,8 @@ def submission_detail(request, competition, data, submission_id=None):
             or submission.content is None:
         raise Http404
 
+    data['submission_actions'], not_graded = get_submission_actions(submission)
+
     if request.method == 'POST' and 'score_number' in request.POST:
         # TODO: Make a proper form with a custom range widget. For now the
         # interface relies on browser side validation.
@@ -574,7 +580,7 @@ def submission_detail(request, competition, data, submission_id=None):
             return (400, "score_number must be an integer")
         if score < 0 or score > ctask.max_score:
             return (400, "score_number must be between 0 and " + str(ctask.max_score))
-        if score != submission.score:
+        if score != submission.score or (score == 0 and not_graded):
             submission.score = score
             submission.mark_unseen_admin_activity()
             submission.save()

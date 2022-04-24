@@ -467,12 +467,12 @@ td.cchain-list-ctask-counter {
 .cchain-list-ctask-content,
 .cchain-list-ctask-comment {
   color: gray;
+  white-space: normal;
 }
 
 td.cchain-list-ctask-date {
   color: gray;
   font-size: 11px;
-  white-space: nowrap;
   width: 90px;
 }
 
@@ -491,6 +491,9 @@ $table-selected-bg: mix(blue, $table-bg, 5%);
   }
 }
 
+.comp-tr-ctask {
+  white-space: nowrap;
+}
 .comp-tr-ctask.ctask-comment-important {
   @include colored-ctask-tr(red, 5%);
 }
