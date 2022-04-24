@@ -402,7 +402,7 @@ def task_list(request, competition, data):
 
         chain.ctasks.sort(key=lambda ctask: (ctask.chain_position, ctask.id))
         if not data['has_finished']:
-            lock_ctasks_in_chain(chain.ctasks)
+            lock_ctasks_in_chain(chain, chain.ctasks)
         else:
             for ctask in chain.ctasks:
                 ctask.t_is_locked = False

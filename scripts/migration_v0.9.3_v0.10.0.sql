@@ -6,6 +6,7 @@ call AddForeignKeyUnlessExists('competition_submission', 'content_id', 'mathcont
 call AddColumnUnlessExists('competition_submission', 'score', 'INT NULL DEFAULT 0 AFTER content_id');
 call AddColumnUnlessExists('competition_submission', 'oldest_unseen_admin_activity', 'DATETIME NOT NULL DEFAULT "2000-01-01" AFTER score');
 call AddColumnUnlessExists('competition_submission', 'oldest_unseen_team_activity', 'DATETIME NOT NULL DEFAULT "2000-01-01" AFTER score');
+call AddColumnUnlessExists('competition_chain', 'unlock_mode', 'SMALLINT NOT NULL DEFAULT 1 AFTER `position`');
 
 DROP PROCEDURE IF EXISTS rename_competition_submission_cache_is_correct;
 DELIMITER //

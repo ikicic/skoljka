@@ -211,11 +211,12 @@ def refresh_teams_cache_score(teams):
     transaction.commit_unless_managed()
 
 
-def lock_ctasks_in_chain(ctasks):
+def lock_ctasks_in_chain(chain, ctasks):
     locked = False
     for ctask in ctasks:
         ctask.t_is_locked = locked and not ctask.t_is_partially_solved
-        if not ctask.t_is_partially_solved \
+        if chain.unlock_mode == Chain.UNLOCK_GRADUAL \
+                and not ctask.t_is_partially_solved \
                 and ctask.t_submission_count < ctask.max_submissions:
             locked = True
 
@@ -261,7 +262,7 @@ def preprocess_chain(competition, chain, ctasks, submissions):
         ctask.t_is_partially_solved |= submission.score > 0
         ctask.t_is_solved |= submission.score == ctask.max_score
 
-    lock_ctasks_in_chain(ctasks)
+    lock_ctasks_in_chain(chain, ctasks)
 
 
 def refresh_submissions_score(submissions=None, ctasks=None, competitions=None):

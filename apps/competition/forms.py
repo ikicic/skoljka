@@ -124,7 +124,7 @@ class ChainForm(forms.ModelForm):
     class Meta:
         model = Chain
         fields = ['name', 'category', 'unlock_minutes', 'bonus_score',
-                  'position']
+                  'position', 'unlock_mode']
 
     def __init__(self, *args, **kwargs):
         self.competition = kwargs.pop('competition')

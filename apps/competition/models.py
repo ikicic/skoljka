@@ -126,7 +126,7 @@ class Competition(BasePermissionsModel):
 
     def use_custom_ctask_names(self):
         """Whether CompetitionTask names are determined automatically or are
-        manual. For now, manual names are used for and only for courses.""" 
+        manual. For now, manual names are used for and only for courses."""
         return self.kind == self.KIND_COURSE
 
 
@@ -202,6 +202,13 @@ class TeamMember(models.Model):
 
 
 class Chain(models.Model):
+    UNLOCK_GRADUAL = 1
+    UNLOCK_ALL = 2
+    UNLOCK_MODES = (
+        (UNLOCK_GRADUAL, ugettext_lazy("Gradual unlocking")),
+        (UNLOCK_ALL, ugettext_lazy("All tasks unlocked")),
+    )
+
     competition = models.ForeignKey(Competition)
     name = models.CharField(max_length=200)
     unlock_minutes = models.IntegerField(default=0)
@@ -209,6 +216,8 @@ class Chain(models.Model):
     bonus_score = models.IntegerField(default=1)
     position = models.IntegerField(default=0,
             help_text=gray_help_text(ugettext_lazy("Position in the category.")))
+    unlock_mode = models.SmallIntegerField(
+            choices=UNLOCK_MODES, default=UNLOCK_GRADUAL)
     cache_ctask_comments_info = models.CharField(blank=True, max_length=255)
     cache_is_verified = models.BooleanField(default=False)
 
