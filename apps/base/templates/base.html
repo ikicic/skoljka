@@ -2,7 +2,6 @@
 {% load base_tags %}
 {% load tags_tags %}
 {% load i18n %}
-
 <!DOCTYPE html>
 
 <html>
@@ -108,7 +107,7 @@
       {% endif %}
       <li><br></li>
       <li><a href="/help/"><i class="icon-question-sign"></i> {% trans "Help" %}</a></li>
-      <li><a href="/about/"><i class="icon-flag"></i> {% trans "About" %}</a></li>
+      <li><a href="/about/"><i class="icon-flag"></i> {% trans "About us" %}</a></li>
       {% if user.is_staff %}
         <li><br></li>
         <li class="nav-header">Admin</li>
@@ -124,16 +123,10 @@
 </div>
 
 <div id="footer">
-  <span>
-    Školjka {% settings_constant VERSION_FOOTER %} © 2014-2021 Ivica Kičić &amp;
-    <a href="http://mnm.hr/" target="_blank">MNM</a>.
-  </span>
-  <span>
-    <a href="/tou/" target="_blank">{% trans "Terms of Use" %}</a>
-  </span>
-  <span>
-    <a href="https://github.com/ikicic/skoljka" target="_blank">GitHub</a>
-  </span>
+  <span class="footer">Školjka {% settings_constant VERSION_FOOTER %} 2014-2022</span>
+  <a class="footer" href="/about/">{% trans "About Us" %}</a>
+  <a class="footer" href="/tou/" target="_blank">{% trans "Terms of Use" %}</a>
+  <a class="footer" href="https://github.com/ikicic/skoljka" target="_blank">GitHub</a>
 </div>
 
 <script src="{% tags_autocomplete_js_src %}"></script>

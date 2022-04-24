@@ -131,18 +131,14 @@ body {
   text-align: right;
   font-size: 12px;
   color: #D0D0D0;
-
-  > span {
-    padding: 0px 5px;
-    > a {
-      color: #C0D0F0;
-      > img {
-          vertical-align: -2px;
-      }
-    }
-  }
 }
-
+.footer {
+  padding: 0px 5px;
+  white-space: nowrap;
+}
+a.footer {
+  color: #C0D0F0;
+}
 
 a.register {
   color: red;
@@ -186,9 +182,6 @@ a.register {
 
   #footer {
     text-align: center;
-    > span {
-      white-space: nowrap;
-    }
   }
 
   #site-container {

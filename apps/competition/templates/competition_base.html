@@ -1,9 +1,7 @@
 {% load compressed %}
 {% load base_tags %}
 {% load competition_tags %}
-
 {% load i18n %}
-
 <!DOCTYPE html>
 
 <html>
@@ -104,18 +102,16 @@
 </div>
 
 <div id="footer">
-  <span>
-    Školjka {% settings_constant VERSION_FOOTER %} © 2014-2021 Ivica Kičić &amp;
-    <a href="http://mnm.hr/" target="_blank">MNM</a>.
-  </span>
-  <span>
-    <a href="/tou/" target="_blank">{% trans "Terms of Use" %}</a>
-  </span>
-  <span>
-    <a href="{% comp_url 'rules' %}" target="_blank">
+  <span class="footer">Školjka {% settings_constant VERSION_FOOTER %} 2014-2022</span>
+  <a class="footer" href="/about/">{% trans "About Us" %}</a>
+  <a class="footer" href="/tou/" target="_blank">{% trans "Terms of Use" %}</a>
+  <a class="footer" href="{% comp_url 'rules' %}" target="_blank">
+    {% if competition.is_course %}
+      {% trans "Course Rules" %}
+    {% else %}
       {% trans "Competition Rules" %}
-    </a>
-  </span>
+    {% endif %}
+  </a>
 </div>
 
 </body>
