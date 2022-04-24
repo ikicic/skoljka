@@ -4,7 +4,12 @@
 
 {% block content %}
 
-<h3 class="comp-header">{% trans "Competition rules" %}</h3>
+{# TODO: The title should probably be a part of the individual template files. #}
+{% if competition.is_course %}
+  <h2 class="comp-header">{% trans "Course instructions" %}</h2>
+{% else %}
+  <h2 class="comp-header">{% trans "Competition rules" %}</h2>
+{% endif %}
 
 {% if competition.rules_template_filename %}
   {% include competition.rules_template_filename %}
@@ -15,19 +20,18 @@
   <p class="chelp-authors-general">{{ help_authors_general }}</p>
 {% endif %}
 
-{% for var in variable_types %}
-  <div class="chelp-var">
-    {% if var.help_type %}
-      <h4>{{ var.help_type }}</h4>
-    {% endif %}
-    {% if is_admin and var.help_for_authors %}
-      <p class="chelp-var-authors">{{ var.help_for_authors }}</p>
-    {% endif %}
-    {% if var.help_for_competitors %}
-      <p class="chelp-var-competitors">{{ var.help_for_competitors }}</p>
-    {% endif %}
-  </div>
-{% endfor %}
+<table class="chelp-var">
+  {% for var in variable_types %}
+    <tr>
+      <td class="chelp-var-type">{{ var.help_type }}</td>
+      <td>
+        {{ var.help_for_competitors }}
+        {% if var.help_for_authors %}
+          <p class="chelp-var-authors">({{ var.help_for_authors }})</p>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+</table>
 
 {% endblock content %}
-

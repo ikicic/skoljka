@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from django.conf import settings
 from django.utils.translation import ugettext as _, ungettext
 
 from evaluator_base import InvalidSolution, NotThisFormat, InvalidDescriptor
@@ -468,12 +469,39 @@ class String(Variable):
 
 
 
+class ManuallyGraded(Variable):
+    def evaluate_solution(self, value):
+        raise NotImplementedError()
+
+    def help_text(self):
+        return ""
+
+    def get_sample_solution(self):
+        return ""
+
+    @staticmethod
+    def help_type():
+        return _("Textual")
+
+    @staticmethod
+    def help_for_authors():
+        return _("To enable textual (manually graded) answer, set task solution to %s.") \
+                % settings.COMPETITION_MANUAL_GRADING_TAG
+
+    @staticmethod
+    def help_for_competitors():
+        return _("Textual answer, manually graded by the organizers.")
+
+
 def parse_variable(descriptor):
     descriptor = descriptor.strip()
     try:
         str(descriptor)
     except UnicodeEncodeError:
         raise UnallowedCharacter
+
+    if descriptor == settings.COMPETITION_MANUAL_GRADING_TAG:
+        return ManuallyGraded(descriptor)
 
     if descriptor.startswith('='):
         return String(descriptor[1:])
@@ -564,7 +592,7 @@ def check_result(descriptor, result):
     return False
 
 def get_variable_types():
-    return [Integer, Float, Fraction, List, MultiSet, String]
+    return [Integer, Float, Fraction, List, MultiSet, String, ManuallyGraded]
 
 def help_authors_general():
     return _("Split different accepted solutions by a '|' character. "

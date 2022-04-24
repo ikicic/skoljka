@@ -4,18 +4,26 @@
 {% load i18n %}
 
 {% block content %}
-<h3 class="comp-header">{% trans "Problems" %}</h3>
+<h3 class="comp-header">
+  {% if competition.is_course %}
+    {% trans "Lectures and problems" %}
+  {% else %}
+    {% trans "Problems" %}
+  {% endif %}
+</h3>
 
 {% if not has_started %}
-  <div class="alert">
-    {% trans "Competition hasn't started yet!" %}
-  </div>
+  <div class="alert">{{ competition.msg_has_not_started }}</div>
+{% endif %}
 
-  {% if is_admin %}
-    <div class="alert">
-      {% trans "Currently visible only to the admins!" %}
-    </div>
-  {% endif %}
+{% if has_finished %}
+  <div class="alert">{{ competition.msg_has_finished }}</div>
+{% endif %}
+
+{% if not has_started and is_admin %}
+  <div class="alert">
+    {% trans "Currently visible only to the admins!" %}
+  </div>
 {% endif %}
 
 {% if is_admin and unverified_chains_count %}
@@ -28,13 +36,11 @@
 
 {% if not team and not has_finished and has_started %}
   <div class="alert">
-    {% trans "Please register for the competition to see the problems." %}
-  </div>
-{% endif %}
-
-{% if has_finished %}
-  <div class="alert">
-    {% trans "Competition has finished!" %}
+    {% if competition.is_course %}
+      {% trans "Please register for the course to see the problems." %}
+    {% else %}
+      {% trans "Please register for the competition to see the problems." %}
+    {% endif %}
   </div>
 {% endif %}
 

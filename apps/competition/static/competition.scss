@@ -91,9 +91,7 @@ textarea.comp-mathcontent-text {
 
 .chelp-authors-general, .chelp-var-authors {
   color: gray;
-  margin-left: 10px;
 }
-
 .chelp-text {
   font-style: italic;
 }
@@ -102,14 +100,16 @@ textarea.comp-mathcontent-text {
   font-style: italic;
   padding-right: 1em;
 }
-
 .chelp-var {
   margin-left: 10px;
-  margin-bottom: 10px;
+  margin-top: 10px;
 }
-
-.chelp-var-competitors {
-  margin-left: 10px;
+.chelp-var-type {
+  font-style: italic;
+  font-weight: bold;
+  padding-right: 10px;
+  vertical-align: top;
+  white-space: nowrap;
 }
 
 #creg-invitations-table {

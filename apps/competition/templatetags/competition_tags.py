@@ -235,8 +235,11 @@ def team_score(context, team):
 def _action_message(action):
     if action.type_pair == _action.COMPETITION_UPDATE_SUBMISSION_SCORE:
         # action_object_id is used in a hacky way to store the score.
-        msg = _("%(actor)s updated the score to %(score)d.") \
-                % {'actor': userlink(action.actor), 'score': action.action_object_id}
+        score = action.action_object_id
+        msg = ungettext(
+                "%(actor)s updated the score to %(score)d.",
+                "%(actor)s updated the score to %(score)d.",
+                score) % {'score': score, 'actor': userlink(action.actor)}
     else:
         msg = u"Unknown action {}!".format(action)
     return mark_safe(msg)

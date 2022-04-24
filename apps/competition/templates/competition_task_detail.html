@@ -82,7 +82,7 @@
       </a>
     {% else %}
       <div class="ctask-submit-already-finished">
-        {% trans "Competition has finished!" %}
+        {{ competition.msg_has_finished }}
       </div>
     {% endif %}
   {% endif %}

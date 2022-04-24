@@ -7,21 +7,16 @@
 <h3 class="comp-header">{% trans "Scoreboard" %}</h3>
 
 {% if not has_started %}
-  <div class="alert">
-    {% trans "Competition hasn't started yet!" %}
-  </div>
+  <div class="alert">{{ competition.msg_has_not_started }}</div>
 {% endif %}
 
 {% if has_finished %}
-  <div class="alert">
-    {% trans "Competition has finished!" %}
-  </div>
+  <div class="alert">{{ competition.msg_has_finished }}</div>
 {% endif %}
 
 {% if is_scoreboard_frozen %}
   <div class="alert">
-    {% blocktrans %}The results have been frozen. The final results will be
-    available shortly after the competition.{% endblocktrans %}
+    {% trans "The results have been frozen. The final results will be available shortly after the competition." %}
     {% if is_admin %}
       {% if sort_by_actual_score %}
         <a href="{% comp_url 'scoreboard' %}">

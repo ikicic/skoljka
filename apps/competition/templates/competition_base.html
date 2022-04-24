@@ -63,7 +63,15 @@
         <li><a href="{% comp_url 'registration' %}" class="register">
             {% trans "Registration" %}</a></li>
       {% endif %}
-      <li><a href="{% comp_url 'task' %}">{% trans "Problems" %}</a></li>
+      <li>
+        <a href="{% comp_url 'task' %}">
+          {% if competition.is_course %}
+            {% trans "Lectures and problems" %}
+          {% else %}
+            {% trans "Problems" %}
+          {% endif %}
+        </a>
+      </li>
       <li><a href="{% comp_url 'scoreboard' %}">{% trans "Scoreboard" %}</a></li>
       {% if user.is_authenticated %}
         <li><a href="{% comp_url 'notifications' %}">

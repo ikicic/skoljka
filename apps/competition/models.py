@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext as _, ugettext_lazy
 from django.utils.safestring import mark_safe
 
 from libs.string_operations import join_urls
@@ -68,7 +68,7 @@ class Competition(BasePermissionsModel):
             default=False,
             help_text="Show solutions after the competition ends.")
 
-    posts = PostGenericRelation(placeholder="Poruka")
+    posts = PostGenericRelation(placeholder=ugettext_lazy("Message"))
 
     def __unicode__(self):
         return self.name
@@ -112,6 +112,18 @@ class Competition(BasePermissionsModel):
     def is_user_admin(self, user):
         return self.user_has_perm(user, EDIT)
 
+    def msg_has_finished(self):
+        if self.is_course:
+            return _("Course has finished.")
+        else:
+            return _("Competition has finished.")
+
+    def msg_has_not_started(self):
+        if self.is_course:
+            return _("Course has not started yet.")
+        else:
+            return _("Competition has not started yet.")
+
     def use_custom_ctask_names(self):
         """Whether CompetitionTask names are determined automatically or are
         manual. For now, manual names are used for and only for courses.""" 
@@ -132,7 +144,7 @@ class Team(models.Model):
     team_type = models.IntegerField(default=TYPE_NORMAL)
     category = models.IntegerField(default=0)
 
-    posts = PostGenericRelation(placeholder="Poruka")
+    posts = PostGenericRelation(placeholder=ugettext_lazy("Message"))
 
     def __unicode__(self):
         return self.name
@@ -196,7 +208,7 @@ class Chain(models.Model):
     category = models.CharField(blank=True, db_index=True, max_length=100)
     bonus_score = models.IntegerField(default=1)
     position = models.IntegerField(default=0,
-            help_text=gray_help_text(_("Position in the category.")))
+            help_text=gray_help_text(ugettext_lazy("Position in the category.")))
     cache_ctask_comments_info = models.CharField(blank=True, max_length=255)
     cache_is_verified = models.BooleanField(default=False)
 
@@ -276,7 +288,7 @@ class Submission(models.Model):
     oldest_unseen_team_activity = models.DateTimeField(
             default=NO_UNSEEN_ACTIVITIES_DATETIME)
 
-    posts = PostGenericRelation(placeholder=_("Message"))
+    posts = PostGenericRelation(placeholder=ugettext_lazy("Message"))
 
     def save(self, *args, **kwargs):
         # Using auto_add_now would break tests.

@@ -99,9 +99,7 @@
     <h3 class="comp-header">{% trans "Course Registration" %}</h3>
 
     <div class="instructions">
-      {% blocktrans %}
-        <p>Please register to get access to the course content and to be able to submit solutions and receive feedback.</p>
-      {% endblocktrans %}
+      <p>{% blocktrans %}Please register to get access to the course content and to be able to submit solutions and receive feedback.{% endblocktrans %}</p>
     </div>
 
     <form action="{{ request.get_full_path }}" method="POST" id="creg-form">

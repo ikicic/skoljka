@@ -47,7 +47,7 @@
             {% else %}
               <td class="csub-grade">
                 <a href="{{ competition.get_absolute_url }}submission/{{ x.id }}/">
-                  {% trans "Grade" %}
+                  {% trans "Grade" context "verb" %}
                   {% if x.has_new_team_activity %}
                     <span class="csub-new-activity">
                       ({% trans "New activity" %})

@@ -9,11 +9,15 @@
 <h3 class="comp-header">{% trans "Notifications" %}</h3>
 
 <div class="instructions">
-  <p>{% trans "Notifications related to the competition and problems are shown here." %}</p>
+  <p>
+    {% if competition.is_course %}
+      {% trans "Notifications related to the course materials and problems are shown here." %}
+    {% else %}
+      {% trans "Notifications related to the competition and problems are shown here." %}
+    {% endif %}
+  </p>
   {% if team %}
-    <p>{% blocktrans %}Use the form below to submit questions or messages to
-    the moderators. Your messages will not be visible to other teams.
-    {% endblocktrans %}</p>
+    <p>{% blocktrans %}Use the form below to submit questions or messages to the moderators. Your messages will not be visible to other participants.{% endblocktrans %}</p>
   {% endif %}
 </div>
 
