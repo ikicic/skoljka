@@ -309,6 +309,7 @@ class CourseTest(CompetitionViewsTestBase):
             'category': "Category-DEF",
             'bonus_score': "2",
             'unlock_days': "14",
+            'unlock_mode': "1",
             'position': "0",
         })
         chain = Chain.objects.get(name="Chain-ABC")

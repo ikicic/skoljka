@@ -164,14 +164,14 @@ def refresh_teams_cache_score(teams):
     if not teams:
         return
 
-    team_ids = [team.id for team in teams]
-    competition_ids = list(set([team.competition_id for team in teams]))
+    competition_ids = list(set(team.competition_id for team in teams))
+    teams = {team.id: team for team in teams}
 
     competitions_dict = Competition.objects.in_bulk(competition_ids)
     all_ctasks = CompetitionTask.objects.filter(
             competition_id__in=competition_ids)
     all_submissions = list(Submission.objects \
-            .filter(team_id__in=team_ids) \
+            .filter(team_id__in=teams.keys()) \
             .only('team', 'ctask', 'date', 'score'))
 
     chain_ctasks = defaultdict(list)
@@ -180,7 +180,7 @@ def refresh_teams_cache_score(teams):
         chain_ctasks[ctask.chain_id].append(ctask)
         ctasks_chain[ctask.id] = ctask.chain_id
 
-    team_chain_submissions = defaultdict(lambda: defaultdict(list))
+    team_chain_submissions = {team_id: defaultdict(list) for team_id in teams.keys()}
     for submission in all_submissions:
         chain_id = ctasks_chain[submission.ctask_id]
         team_chain_submissions[submission.team_id][chain_id].append(submission)
@@ -199,10 +199,11 @@ def refresh_teams_cache_score(teams):
             S1 += s1
             S2 += s2
 
+        team = teams[team_id]
         team.cache_score = S0
         team.cache_score_before_freeze = S1
         team.cache_max_score_after_freeze = S2
-        queries_args.append((S0, S1, S2, int(team.id)))
+        queries_args.append((S0, S1, S2, int(team_id)))
     cursor = connection.cursor()
     cursor.executemany(
             "UPDATE `competition_team` SET `cache_score`=%s, "
