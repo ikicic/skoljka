@@ -216,7 +216,7 @@ def lock_ctasks_in_chain(chain, ctasks):
     locked = False
     for ctask in ctasks:
         ctask.t_is_locked = locked and not ctask.t_is_partially_solved
-        if chain.unlock_mode == Chain.UNLOCK_GRADUAL \
+        if chain and chain.unlock_mode == Chain.UNLOCK_GRADUAL \
                 and not ctask.t_is_partially_solved \
                 and ctask.t_submission_count < ctask.max_submissions:
             locked = True
