@@ -1026,8 +1026,8 @@ def notifications_admin(request, competition, data):
             .filter(content_type=team_ct, object_id__in=team_ids_query,
                     **extra_filter) \
             .select_related('author', 'content'))
-    user_id_to_team = \
-            get_teams_for_user_ids([post.author_id for post in team_posts])
+    user_ids = [post.author_id for post in team_posts]
+    user_id_to_team = get_teams_for_user_ids(competition, user_ids)
     for post in team_posts:
         post.t_team = user_id_to_team.get(post.author_id)
         if post.t_team:

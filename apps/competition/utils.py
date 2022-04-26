@@ -312,9 +312,12 @@ def refresh_submissions_score(submissions=None, ctasks=None, competitions=None):
     return updated
 
 
-def get_teams_for_user_ids(user_ids):
-    team_members = list(TeamMember.objects.filter(member_id__in=set(user_ids)) \
-            .select_related('team') \
+def get_teams_for_user_ids(competition, user_ids):
+    team_members = list(
+            TeamMember.objects
+            .filter(team__competition_id=competition.id,
+                    member_id__in=set(user_ids))
+            .select_related('team')
             .only('member', 'team'))
 
     return {x.member_id: x.team for x in team_members}

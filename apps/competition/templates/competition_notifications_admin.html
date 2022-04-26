@@ -41,8 +41,7 @@
       </div>
 
       <div class="post-info">
-        {{ post.author|userlink }}
-        {% if post.t_team %}
+        {{ post.author|userlink }}{% if post.t_team %}
           ({% trans "Team:" %}
           <a href="{{ post.t_team.get_absolute_url }}">{{ post.t_team.name }}</a>){% endif %},
         {% if post.t_target_team %}
