@@ -407,7 +407,7 @@ msgstr "Odabrana natjecanja"
 #: apps/base/templates/homepage_offline.html:52
 #: apps/base/templates/homepage_online.html:46
 msgid "Recently added tasks"
-msgstr "Nedavno dodati zadaci"
+msgstr "Nedavno objavljeni zadaci"
 
 #: apps/base/templates/homepage_offline.html:61
 #: apps/base/templates/homepage_online.html:55
