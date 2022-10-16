@@ -128,7 +128,10 @@ COMPETITION_MANUAL_GRADING_TAG = 'MANUAL'
 DISABLE_PREF_COOKIES = True
 
 EXTRA_HEADER_TOP = "<div style=\"text-align: center; background-color: orange;\">example of EXTRA_HEADER_TOP</div>"
+
 EXTRA_MENU_TOP = "--EXTRA_MENU_TOP--"
+# OR
+EXTRA_MENU_TOP = {'hr': "--EXTRA_MENU_TOP--", None: "--default language EXTRA_MENU_TOP--"}
 
 LECTURES_FOLDER_URL = "/folder/<ID NOT SET>/"
 FEATURED_LECTURES_FOLDER_ID = None

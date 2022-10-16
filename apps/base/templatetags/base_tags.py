@@ -22,8 +22,15 @@ class ConstantNode(template.Node):
         self.value = value
 
     def render(self, context):
-        return self.value
-
+        value = self.value
+        if isinstance(value, dict):
+            current = get_language()
+            try:
+                value = value[current]
+            except KeyError:
+                value = value[None]
+        assert isinstance(value, (str, unicode))
+        return value
 
 
 @preprocess_tag
@@ -58,7 +65,10 @@ def settings_constant(*args):
         raise Exception("Args doesn't have two arguments??")
     if isinstance(args[0], basestring):
         # Called from the template preprocessor, just return the value.
-        return getattr(settings, args[1])
+        out = getattr(settings, args[1])
+        if isinstance(out, dict):
+            out = out[get_language()]
+        return out
     bits = args[1].split_contents()
     if len(bits) != 2:
         raise TemplateSyntaxError(
