@@ -191,6 +191,8 @@ def refresh_teams_cache_score(teams):
     for team_id, chain_submissions in team_chain_submissions.items():
         S0, S1, S2 = 0, 0, 0
         for chain_id, chain_sub in chain_submissions.items():
+            if chain_id is None:
+                continue
             chain = chains_dict[chain_id]
             s0, s1, s2 = compute_chain_score_variants(
                     competitions_dict[chain.competition_id], chain,
