@@ -25,13 +25,13 @@
 {% endif %}
 
 <table width="40%" class="table-striped table-condensed" style="text-align: center;">
+  {% autosort tags 'name,taggeditem_count,weight' '-name' %}
   <tr>
-    <th>{% anchor name Oznaka %}</th>
-    <th>{% anchor taggeditem_count "Broj zadataka" %}</th>
-    <th>{% anchor weight Težina %}</th>
-    {% if can_edit %}<th>Nova težina</th>{% endif %}
+    <th>{% anchor 'name' _("Tag") %}</th>
+    <th>{% anchor 'taggeditem_count' _("Problem count") %}</th>
+    <th>{% anchor 'weight' _("Difficulty") %}</th>
+    {% if can_edit %}<th>{% trans "New difficulty" %}</th>{% endif %}
   </tr>
-  {% autosort tags %}
   {% for x in tags %}
     {# using task- classes to make less mess in base.css #}
     {# TODO: create specific css classes for tags, do not use classes from unrelated parts of the code #}

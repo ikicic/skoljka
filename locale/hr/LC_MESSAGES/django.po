@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-24 17:26+0000\n"
+"POT-Creation-Date: 2022-10-25 20:07+0200\n"
 "PO-Revision-Date: 2017-10-03 01:49+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
@@ -842,7 +842,15 @@ msgstr "Tečaj još nije počeo!"
 msgid "Competition has not started yet."
 msgstr "Natjecanje još nije počelo!"
 
-#: apps/competition/models.py:211
+#: apps/competition/models.py:213
+msgid "Gradual unlocking"
+msgstr "Postepeno otključavanje"
+
+#: apps/competition/models.py:214
+msgid "All tasks unlocked"
+msgstr "Svi zadaci otključani"
+
+#: apps/competition/models.py:223
 msgid "Position in the category."
 msgstr "Pozicija u kategoriji."
 
@@ -946,11 +954,6 @@ msgstr "Vidljivo samo administratorima!"
 msgid "New chain"
 msgstr "Novi lanac"
 
-#: apps/competition/templates/competition_chain_list.html:21
-#: apps/competition/templates/competition_scoreboard.html:40
-msgid "Category"
-msgstr "Kategorija"
-
 #: apps/competition/templates/competition_chain_list.html:22
 msgid "Position"
 msgstr "Pozicija"
@@ -975,6 +978,16 @@ msgid "Unlock time"
 msgstr "Vrijeme otključavanja"
 
 #: apps/competition/templates/competition_chain_list.html:28
+#: apps/competition/templates/competition_chain_list_tasks.html:130
+msgid "Days"
+msgstr "Dani"
+
+#: apps/competition/templates/competition_chain_list.html:30
+#: apps/competition/templates/competition_chain_list_tasks.html:132
+msgid "Minutes"
+msgstr "Minute"
+
+#: apps/competition/templates/competition_chain_list.html:32
 msgid "Author(s)"
 msgstr "Autor(i):"
 
@@ -1097,6 +1110,11 @@ msgstr "Napravi lanac"
 #: apps/competition/templates/competition_chain_list_tasks.html:118
 msgid "Chains (used problems)"
 msgstr "Lanci (iskorišteni zadaci)"
+
+#: apps/competition/templates/competition_chain_list_tasks.html:125
+#: apps/competition/templates/competition_scoreboard.html:46
+msgid "Category"
+msgstr "Kategorija"
 
 #: apps/competition/templates/competition_chain_list_tasks.html:127
 msgid "Title"
@@ -1982,6 +2000,10 @@ msgctxt "action"
 msgid "Search"
 msgstr "Pretraži"
 
+#: apps/solution/templates/inc_solution_list.html:32
+msgid "Time"
+msgstr "Vrijeme"
+
 #: apps/solution/templates/inc_solution_list.html:33
 #: apps/solution/templates/solution_detail.html:47
 #: apps/solution/templates/solution_submit.html:10
@@ -2078,6 +2100,19 @@ msgstr "Označeni predmeti"
 #: apps/tags/templates/tags_list.html:6 apps/tags/templates/tags_list.html:10
 msgid "List of tags"
 msgstr "Popis oznaka"
+
+#: apps/tags/templates/tags_list.html:31
+msgid "Problem count"
+msgstr "Broj zadataka"
+
+#: apps/tags/templates/tags_list.html:32
+#: apps/task/templates/inc_task_list_table.html:18
+msgid "Difficulty"
+msgstr "Težina"
+
+#: apps/tags/templates/tags_list.html:33
+msgid "New difficulty"
+msgstr "Nova težina"
 
 #: apps/task/bulk_format.py:126
 #, python-format
@@ -2232,6 +2267,22 @@ msgstr "Pretvori u PDF"
 #: apps/task/templates/task_list.html:4
 msgid "Task list"
 msgstr "Zadaci"
+
+#: apps/task/templates/inc_task_list_table.html:11
+msgid "In map"
+msgstr "U mapi"
+
+#: apps/task/templates/inc_task_list_table.html:15
+msgid "Sol."
+msgstr "Rj."
+
+#: apps/task/templates/inc_task_list_table.html:16
+msgid "(Sol.)"
+msgstr "(Rj.)"
+
+#: apps/task/templates/inc_task_list_table.html:17
+msgid "Quality"
+msgstr "Kvaliteta"
 
 #: apps/task/templates/task_bulk_new.html:6
 #: apps/task/templates/task_bulk_new_2nd.html:6

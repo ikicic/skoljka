@@ -18,13 +18,17 @@
 
 <table class="table table-striped">
   <tr>
-    <th>{% trans "Category" %}</th>
+    <th>{% anchor 'category' "Category" %}</th>
     <th title="{% trans "Position" %}" style="width:3em;">
       {% trans "Pos." context "Position" %}
     </th>
     <th>{% trans "Chain" %}</th>
     <th>{% trans "Length" %}</th>
-    <th title="{% trans "Unlock time" %}">{% anchor unlock_minutes Minute %}</th>
+    {% if competition.is_course %}
+      <th title="{% trans "Unlock time" %}">{% anchor 'unlock_minutes' _("Days") %}</th>
+    {% else %}
+      <th title="{% trans "Unlock time" %}">{% anchor 'unlock_minutes' _("Minutes") %}</th>
+    {% endif %}
     <th>{% trans "Author(s)" %}</th>
     <th>{% trans "Comments" %}</th>
     <th>{% trans "Edit" %}</th>

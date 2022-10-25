@@ -23,7 +23,7 @@
 </div>
 <br><br>
 
-{% autosort lectures %}
+{% autosort lectures 'id,name,solved_count,quality_rating_avg,difficulty_rating_avg' '-id' %}
 {% autopaginate lectures 30 %}
 {% cache_task_info lectures %}
 

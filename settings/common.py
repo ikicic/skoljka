@@ -157,7 +157,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 #    'sentry.client.middleware.Sentry404CatchMiddleware',
-    'django_sorting.middleware.SortingMiddleware',
     'pagination.middleware.PaginationMiddleware',
 )
 

@@ -11,8 +11,7 @@ cssmin==0.2.0
 python-memcached==1.53
 slimit==0.8.1
 
-# Consider to replace with agiliq/django-sorting
-django-sorting==0.1
+git+https://github.com/ikicic/django-sorting.git
 
 # Consider to replace with linaro-django-pagination
 django-pagination==1.0.7

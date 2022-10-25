@@ -317,7 +317,7 @@ def solution_list(request, task_id=None, user_id=None, status=None):
         'empty_message': empty_message,
         'filter_by_status': status,
         'is_status_filterable': is_status_filterable,
-        'solutions': L.order_by('-date_created'),
+        'solutions': L,
         'task': task,
         'author': author,
         'submitted_active': 'active' if status == [u'submitted'] else '',

@@ -51,9 +51,20 @@ from skoljka.libs.decorators import require
 
 from collections import defaultdict
 from datetime import datetime
-import django_sorting
 
 import re
+
+def _sort_chains(request, chains):
+    """Hacky way to sort chains with extra order columns, and before rendering
+    the template."""
+    order_by = ('category', 'position', 'name')
+    # Only 'category' and 'unlock_minutes' enabled.
+    if request.GET.get('sort', 'category') == 'unlock_minutes':
+        order_by = ('unlock_minutes',) + order_by
+    if request.GET.get('direction', 'asc') == 'desc':
+        order_by = tuple('-' + column for column in order_by)
+    return chains.order_by(*order_by)
+
 
 #TODO: Option for admins to create a team even if they have a private group.
 #TODO: When updating chain_position, update task name.
@@ -705,11 +716,7 @@ def chain_tasks_list(request, competition, data):
             form = empty_form  # Empty the form.
 
     chains = Chain.objects.filter(competition=competition)
-    order_by_field = django_sorting.middleware.get_field(request)
-    if len(order_by_field) > 1:
-        chains = chains.order_by(order_by_field, 'category', 'position', 'name')
-    else:
-        chains = chains.order_by('category', 'position', 'name')
+    chains = _sort_chains(request, chains)
 
     chain_dict = {chain.id: chain for chain in chains}
     ctasks = list(CompetitionTask.objects.filter(competition=competition) \
@@ -827,11 +834,7 @@ def chain_tasks_action(request, competition, data):
 @response('competition_chain_list.html')
 def chain_list(request, competition, data):
     chains = Chain.objects.filter(competition=competition)
-    order_by_field = django_sorting.middleware.get_field(request)
-    if len(order_by_field) > 1:
-        chains = chains.order_by(order_by_field, 'category', 'position', 'name')
-    else:
-        chains = chains.order_by('category', 'position', 'name')
+    chains = _sort_chains(request, chains)
     chain_dict = {chain.id: chain for chain in chains}
     ctasks = list(CompetitionTask.objects.filter(competition=competition) \
             .values_list('id', 'chain_id', 'task__author_id'))

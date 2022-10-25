@@ -17,7 +17,7 @@
 {# filter queryset if filter_status is not None #}
 {% filter_solutions_by_status solutions filter_by_status %}
 
-{% autosort solutions %}
+{% autosort solutions 'date_created' 'date_created' %}
 {% autopaginate solutions %}
 
 {% if solutions %}
@@ -29,7 +29,7 @@
     </tr>
     <tr>
       <th class="hidden-xs-phone" width="30">#</th>
-      <th class="hidden-xs-phone">{% anchor date_created Vrijeme %}</th>
+      <th class="hidden-xs-phone">{% anchor 'date_created' _("Time") %}</th>
       <th>{% trans "Task" %}</th>
       <th>{% trans "User" %}</th>
       <th>{% trans "Solution" %}</th>

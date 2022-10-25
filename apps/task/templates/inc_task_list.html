@@ -12,7 +12,7 @@
 {% temporary_get_key 'options' 'task_view_type' %}
 
 {% if not no_autosort %}
-  {% autosort tasks %}
+  {% autosort tasks 'id,name,solved_count,quality_rating_avg,difficulty_rating_avg' '-id' %}
 {% endif %}
 
 {% if options_mode %}

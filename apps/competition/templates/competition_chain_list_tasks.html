@@ -122,14 +122,14 @@
   <table class="table table-striped" id="used-tasks-table">
     <tr class="cchain-list">
       <th style="white-space:nowrap;" colspan="2">
-        {% anchor category Category %}
+        {% anchor 'category' _("Category") %}
       </th>
       <th colspan="2">{% trans "Title" %}</th>
       <th style="white-space:nowrap;" title="{% trans "Unlock time" %}">
         {% if competition.is_course %}
-          {% anchor unlock_minutes Days %}
+          {% anchor 'unlock_minutes' _("Days") %}
         {% else %}
-          {% anchor unlock_minutes Minutes %}
+          {% anchor 'unlock_minutes' _("Minutes") %}
         {% endif %}
       </th>
       <th></th>
