@@ -4,7 +4,13 @@
 
 {% block content %}
 
-<h3 class="comp-header">{% trans "Scoreboard" %}</h3>
+<h3 class="comp-header">
+  {% if as_participants %}
+    {% trans "Participants" %}
+  {% else %}
+    {% trans "Scoreboard" %}
+  {% endif %}
+</h3>
 
 {% if not has_started %}
   <div class="alert">{{ competition.msg_has_not_started }}</div>
@@ -18,12 +24,12 @@
   <div class="alert">
     {% trans "The results have been frozen. The final results will be available shortly after the competition." %}
     {% if is_admin %}
-      {% if sort_by_actual_score %}
-        <a href="{% comp_url 'scoreboard' %}">
+      {% if request.GET.sort == 'actual_score' %}
+        <a href="{{ competition.get_scoreboard_url }}?sort=score">
           {% trans "Sort by frozen score" %}
         </a>
       {% else %}
-        <a href="{% comp_url 'scoreboard' %}?sort_by_actual_score=1">
+        <a href="{{ competition.get_scoreboard_url }}?sort=actual_score">
           {% trans "Sort by real score" %}
         </a>
       {% endif %}
@@ -39,8 +45,14 @@
         {% if competition.team_categories %}
           <th title="{{ team_categories_title }}">{% trans "Category" %}</th>
         {% endif %}
-        <th>{% trans "Team" %}</th>
-        <th>{% trans "Total score" %}</th>
+        <th><a href="{{ competition.get_scoreboard_url }}?sort=name">
+          {% if as_participants %}
+            {% trans "Participant" %}
+          {% else %}
+            {% trans "Team" %}
+          {% endif %}
+        </a></th>
+        <th><a href="{{ competition.get_scoreboard_url }}?sort=score">{% trans "Total score" %}</a></th>
       </tr>
       {% for t in teams %}
         <tr class="

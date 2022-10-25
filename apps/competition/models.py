@@ -84,8 +84,21 @@ class Competition(BasePermissionsModel):
         # (self.url_path_prefix is the problem here...)
         return join_urls(self.get_absolute_url(), 'registration')
 
+    def get_scoreboard_link(self):
+        """Return the <a ...>...</a> HTML tag for either the scoreboard (for
+        competitions) or the participants list (for courses), with proper
+        translation and URL."""
+        title = _("Participants") if self.is_course else _("Scoreboard")
+        return mark_safe(u'<a href="{}/">{}</a>'.format(
+                self.get_scoreboard_url(), xss.escape(title)))
+
     def get_scoreboard_url(self):
-        return join_urls(self.get_absolute_url(), 'scoreboard')
+        """Return the URL for either the scoreboard (for competitions) or the
+        participants list (for courses)."""
+        if self.is_course:
+            return join_urls(self.get_absolute_url(), 'participants')
+        else:
+            return join_urls(self.get_absolute_url(), 'scoreboard')
 
     def get_languages(self):
         """Return the languages this competition is translated to.

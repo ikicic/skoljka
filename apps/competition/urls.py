@@ -34,6 +34,7 @@ _patterns = _make_patterns(
     (r'notifications/$', 'notifications'),
     (r'notifications/(?P<ctask_id>\d+)/$', 'notifications'),
     (r'notifications/admin/$', 'notifications_admin'),
+    (r'participants/$', 'participants'),
     (r'registration/$', 'registration'),
     (r'rules/$', 'rules'),
     (r'scoreboard/$', 'scoreboard'),

@@ -261,9 +261,20 @@ def rules(request, competition, data):
     return data
 
 
+def participants(*args, **kwargs):
+    return scoreboard(*args, as_participants=True, **kwargs)
+
+
 @competition_view()
 @response('competition_scoreboard.html')
-def scoreboard(request, competition, data):
+def scoreboard(request, competition, data, as_participants=False):
+    """Joint view for scoreboard and participants list.
+
+    The two are identical, up to the default sorting and terminology.
+    """
+    if competition.is_course != as_participants:
+        return (competition.get_scoreboard_url(),)
+
     if data['is_admin'] and 'refresh' in request.POST:
         start = datetime.now()
         teams = Team.objects.filter(competition=data['competition'])
@@ -271,10 +282,19 @@ def scoreboard(request, competition, data):
         data['refresh_calculation_time'] = datetime.now() - start
 
     extra = {} if data['is_admin'] else {'team_type': Team.TYPE_NORMAL}
-    sort_by_actual_score = data['is_admin'] and \
-            request.GET.get('sort_by_actual_score') == '1'
-    order_by = '-cache_score' if sort_by_actual_score \
-            else '-cache_score_before_freeze'
+
+    sort_by = request.GET.get('sort')
+    if sort_by == 'actual_score' and data['is_admin']:
+        order_by = '-cache_score'
+    elif sort_by == 'name':
+        order_by = 'name'
+    elif sort_by == 'score':
+        order_by = '-cache_score_before_freeze'
+    elif as_participants:
+        order_by = 'name'
+    else:
+        order_by = '-cache_score_before_freeze'
+
     teams = list(Team.objects.filter(competition=competition, **extra) \
             .order_by(order_by, 'id') \
             .only('id', 'name', 'cache_score', 'cache_score_before_freeze',
@@ -291,11 +311,11 @@ def scoreboard(request, competition, data):
     last_score = -1
     last_position = 1
     position = 1
-    for team in teams:
+    for i, team in enumerate(teams):
         team.competition = competition
         if team.is_normal() and team.cache_score_before_freeze != last_score:
             last_position = position
-        team.t_position = last_position
+        team.t_position = i + 1 if order_by == 'name' else last_position
         if team_categories:
             team.t_category = team_categories_dict.get(team.category,
                                                        team_categories[-1][1])
@@ -304,7 +324,7 @@ def scoreboard(request, competition, data):
             position += 1
 
     data['teams'] = teams
-    data['sort_by_actual_score'] = sort_by_actual_score
+    data['as_participants'] = as_participants
     return data
 
 

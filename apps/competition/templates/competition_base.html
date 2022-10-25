@@ -73,7 +73,7 @@
           {% endif %}
         </a>
       </li>
-      <li><a href="{% comp_url 'scoreboard' %}">{% trans "Scoreboard" %}</a></li>
+      <li>{{ competition.get_scoreboard_link }}</li>
       {% if user.is_authenticated %}
         <li><a href="{% comp_url 'notifications' %}">
             {% trans "Notifications" %}</a></li>

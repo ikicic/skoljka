@@ -826,7 +826,17 @@ msgstr "Administratori"
 msgid "Message"
 msgstr "Poruka"
 
-#: apps/competition/models.py:117
+#: apps/competition/models.py:91
+#: apps/competition/templates/competition_scoreboard.html:9
+msgid "Participants"
+msgstr "Polaznici"
+
+#: apps/competition/models.py:91
+#: apps/competition/templates/competition_scoreboard.html:11
+msgid "Scoreboard"
+msgstr "Bodovna lista"
+
+#: apps/competition/models.py:130
 msgid "Course has finished."
 msgstr "Tečaj je završio!"
 
@@ -906,14 +916,8 @@ msgstr "Lekcije i zadaci"
 msgid "Problems"
 msgstr "Zadaci"
 
-#: apps/competition/templates/competition_base.html:75
-#: apps/competition/templates/competition_list.html:41
-#: apps/competition/templates/competition_scoreboard.html:7
-msgid "Scoreboard"
-msgstr "Bodovna lista"
-
-#: apps/competition/templates/competition_base.html:78
-#: apps/competition/templates/competition_base.html:85
+#: apps/competition/templates/competition_base.html:79
+#: apps/competition/templates/competition_base.html:86
 #: apps/competition/templates/competition_notifications.html:9
 #: apps/competition/templates/competition_notifications_admin.html:9
 msgid "Notifications"
@@ -1452,7 +1456,11 @@ msgstr "Sortiraj po zamrznutim bodovima"
 msgid "Sort by real score"
 msgstr "Sortitaj po pravim bodovima"
 
-#: apps/competition/templates/competition_scoreboard.html:43
+#: apps/competition/templates/competition_scoreboard.html:50
+msgid "Participant"
+msgstr "Polaznik"
+
+#: apps/competition/templates/competition_scoreboard.html:55
 msgid "Total score"
 msgstr "Ukupni bodovi"
 
