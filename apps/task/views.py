@@ -41,11 +41,22 @@ from task.utils import check_prerequisites_for_task, \
         get_task_folder_data
 
 import codecs, datetime, hashlib, json, os, sys, traceback, zipfile
-import django_sorting
 
 # TODO: promijeniti nacin na koji se Task i MathContent generiraju.
 # vrijednosti koje ne ovise o samom formatu se direktno trebaju
 # postaviti na vrijednosti iz forme.
+
+def _sort_tasks(request, tasks):
+    """Hacky way to sort tasks before rendering the template, i.e. without the
+    autosort tag."""
+    sort = request.GET.get('sort', 'id')
+    # The list here depends on inc_task_list.html and inc_task_list_table.html.
+    if sort not in ('id', 'name', 'solved_count',
+                    'quality_rating_avg', 'difficulty_rating_avg'):
+        sort = 'id'
+    if request.GET.get('direction', 'asc') == 'desc':
+        sort = '-' + sort
+    return tasks.order_by(sort)
 
 
 @response('task_json_new.html')
@@ -353,11 +364,7 @@ def similar(request, task_id):
     similar_ids = [id for p, id in sorted_tasks[:6]]
     similar = Task.objects.for_user(request.user, VIEW) \
             .filter(id__in=similar_ids).select_related('content')
-
-    order_by_field = django_sorting.middleware.get_field(request)
-    if len(order_by_field) > 1:
-        similar = similar.order_by(order_by_field)
-
+    similar = _sort_tasks(request, similar)
     similar = list(similar)
 
     return {

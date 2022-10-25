@@ -12,6 +12,7 @@
 {% temporary_get_key 'options' 'task_view_type' %}
 
 {% if not no_autosort %}
+  {# Update apps/task/views.py:_sort_tasks if updating this. #}
   {% autosort tasks 'id,name,solved_count,quality_rating_avg,difficulty_rating_avg' '-id' %}
 {% endif %}
 

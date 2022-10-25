@@ -9,6 +9,7 @@
   <thead>
   <tr>
     {% if user.profile.selected_folder %}<th width="50">{% trans "In map" %}</th>{% endif %}
+    {# Update autosort in inc_task_list.html if updating anchors here. #}
     <th class="hidden-phone" width="30">{% anchor 'id' "#" %}</th>
     <th>{% anchor 'name' _("Title") %}</th>
     <th>{% trans "Tags" %}</th>
