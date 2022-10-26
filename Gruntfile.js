@@ -21,7 +21,7 @@ module.exports = function(grunt) {
         files: [
           {
             expand: true,
-            cwd: 'apps',
+            cwd: 'skoljka',
             dest: BUILD_DEST,
             src: ['**/static/**/*.js']
           }
@@ -52,12 +52,12 @@ module.exports = function(grunt) {
         options: {
           'includePaths': [
             './bower_components/bootstrap-sass/vendor/assets/stylesheets',
-          ].concat(grunt.file.expand('./apps/**/static/'))
+          ].concat(grunt.file.expand('./skoljka/**/static/'))
         },
         files: [
           {
             expand: true,
-            cwd: 'apps',
+            cwd: 'skoljka',
             flatten: true,
             src: ['**/*.scss'],
             dest: BUILD_DEST,
@@ -70,11 +70,11 @@ module.exports = function(grunt) {
     },
     watch: {
       sass: {
-        files: ['apps/**/*.scss'],
+        files: ['skoljka/**/*.scss'],
         tasks: ['sass']
       },
       jsfiles: {
-        files: ['apps/**/static/**/*.js'],
+        files: ['skoljka/**/static/**/*.js'],
         tasks: ['copy:jsfiles']
       }
     }

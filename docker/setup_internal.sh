@@ -13,4 +13,4 @@ ln -sf /app $(python -c 'import site; print(site.getsitepackages())[0]')/skoljka
 
 python2 manage.py syncdb --noinput
 python2 manage.py loaddata folders userprofiles
-(cd "$SCRIPTDIR/.." && python2 b.py)
+(cd "$SCRIPTDIR/.." && python2 build.py)

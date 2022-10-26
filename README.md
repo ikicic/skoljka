@@ -77,7 +77,7 @@ The following installation procedure might be broken.
   ```sh
   python2 manage.py syncdb --noinput
   python2 manage.py loaddata folders userprofiles
-  python2 b.py
+  python2 build.py
   ```
   You can now use Django test server by running `python2 manage.py runserver`.
   The database is pre-filled with superuser `arhiva` whose password is `a`.
