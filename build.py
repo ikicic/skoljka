@@ -18,7 +18,7 @@ def main(argv):
         sys.stdout.flush()
         time.sleep(1)
 
-    run_command("grunt")
+    run_command("./node_modules/grunt-cli/bin/grunt")
     run_command("python manage.py collectstatic --noinput")
 
     # For some reason, the cmdline argument --settings=skoljka.settings does not work.
