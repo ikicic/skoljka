@@ -37,7 +37,7 @@ DIFFICULTY_RATING_ATTRS = {
     'titles': [u'Neodređeno', u'OŠ lakši', u'OŠ teži', u'SŠ lakši', u'SŠ teži',
         u'Srednje težine', u'Shortlist 1/2', u'Shortlist 3/4', u'Shortlist 5/6',
         u'Shortlist 7/8', u'Nerješiv'],
-    'on_update': 'userprofile.models.task_difficulty_on_update',
+    'on_update': 'skoljka.userprofile.models.task_difficulty_on_update',
 }
 
 
