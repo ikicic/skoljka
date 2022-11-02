@@ -4,7 +4,7 @@ bower_components/
 build/
 local/
 node_modules/
-settings/local.py
+skoljka/settings/local.py
 templates/local/
 
 # These files are either temporary, or backups, so we don't want them either
