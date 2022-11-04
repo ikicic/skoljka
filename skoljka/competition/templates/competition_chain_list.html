@@ -40,7 +40,11 @@
       <td>{{ chain.position }}</td>
       <td><a href="{{ chain.get_absolute_url }}">{{ chain.name }}</a></td>
       <td>{{ chain.t_ctask_count }}</td>
-      <td>{{ chain.unlock_minutes }}</td>
+      {% if competition.is_course %}
+        <td>{{ chain.unlock_days|floatformat }}</td>
+      {% else %}
+        <td>{{ chain.unlock_minutes }}</td>
+      {% endif %}
       <td>{{ chain.t_authors }}</td>
       <td>{% chain_ctask_comments_info chain %}</td>
       <td><a href="{{ chain.get_absolute_url }}">{% trans "Edit" %}</a></td>
