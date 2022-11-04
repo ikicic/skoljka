@@ -112,10 +112,10 @@ $(function(){
   if (!( $('a.task').length)) return;
   $('body').append(
       '<div id="task-tooltip" class="btn-group">'
-    + '<a id="task-tt-submit" href="#" title="Pošalji rješenje" class="btn btn-mini"><i class="icon-file"></i></a>'
-    + '<a id="task-tt-as-solved" href="#" title="Označi kao riješeno" class="btn btn-mini"><i class="icon-ok"></i></a>'
-    + '<a id="task-tt-todo" href="#" title="To Do" class="btn btn-mini"><i class="icon-tag"></i></a>'
-    + '<a id="task-tt-blank" href="#" title="Izbriši" class="btn btn-mini"><i class="icon-remove"></i></a>'
+    + '<a id="task-tt-submit" href="#" title="' + gettext("Submit a solution") + '" class="btn btn-mini"><i class="icon-file"></i></a>'
+    + '<a id="task-tt-as-solved" href="#" title="' + gettext("Mark as solved") + '" class="btn btn-mini"><i class="icon-ok"></i></a>'
+    + '<a id="task-tt-todo" href="#" title="' + gettext("To do") + '" class="btn btn-mini"><i class="icon-tag"></i></a>'
+    + '<a id="task-tt-blank" href="#" title="' + gettext("Delete solution") + '" class="btn btn-mini"><i class="icon-remove"></i></a>'
     + '</div>'
   );
 
@@ -155,9 +155,9 @@ $(function(){
         }
     }).fail(function() {
       if (label)
-        label.html('Greška');
+        label.html(gettext("Error!"));
       else /* Table view */
-        container.children(':first-child').css('color', 'red').attr('title', 'Greška!');
+        container.children(':first-child').css('color', 'red').attr('title', gettext("Error!"));
     });
   };
 
@@ -204,7 +204,9 @@ $(function() {
   $('.mc-attachment-delete').click(function() {
     var id = $(this).attr('data-id');
     var name = $(this).attr('data-name');
-    if (confirm('Jeste li sigurni da želite izbrisati datoteku \'' + name + '\'?')) {
+    var msg = gettext("Are you sure you want to delete 'FILENAME'?")
+        .replace('FILENAME', name);
+    if (confirm(msg)) {
       $.ajax({
         url: '/attachment/' + id + '/delete/',
         success: function() {
@@ -215,9 +217,10 @@ $(function() {
   });
 
   /* Replace "Cancel Rating" with translation */
+  // TODO: Translation not working, invoked too early. Fork and put gettext there?
   $('.rating-cancel > a').each(function() {
     /* This works only if the following code is evaluated after jquery.rating.js */
-    $(this).attr('title', 'Poništi ocjenu');
+    $(this).attr('title', gettext("Cancel rating"));
   });
 
   /* Search toggler */

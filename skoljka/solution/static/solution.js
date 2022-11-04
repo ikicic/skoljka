@@ -3,8 +3,8 @@ $(function() {
   $('#solution-toggle-task').click(function(event) {
     event.preventDefault();
     var div = $('#solution-task');
-    $(this).html(div.is(':visible') ? '(Prikaži tekst zadatka)'
-                                    : '(Sakrij tekst zadatka)');
+    $(this).html(div.is(':visible') ? gettext("(Show task text)")
+                                    : gettext("(Hide task text)"));
     div.toggle();
   });
 

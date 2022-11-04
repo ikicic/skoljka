@@ -26,13 +26,13 @@
     });
     $('body').append(
         '<div id="tag-tooltip" class="tag-tooltip">\n' +
-          '<a id="tt-plus" href="#" title="Valjan">' +
+          '<a id="tt-plus" href="#" title="' + pgettext("Tag", "Valid") + '">' +
             '<img src="/static/images/plus_circle.png">' +
           '</a>\n' +
-          '<a id="tt-minus" href="#" title="Nevaljan">' +
+          '<a id="tt-minus" href="#" title="' + pgettext("Tag", "Invalid") + '">' +
             '<img src="/static/images/minus_circle.png">' +
           '</a>\n' +
-          '<a id="tt-delete-vote" href="#" title="Izbriši moju ocjenu">' +
+          '<a id="tt-delete-vote" href="#" title="' + pgettext("Tag", "Delete my rating") + '">' +
             '<img src="/static/images/cross.png">' +
           '</a>\n' +
           '<span id="tt-info"></span><br>\n' +
@@ -65,7 +65,7 @@
         tag.toggleClass('tag-wrong', parseInt(vote_count) <= VOTE_WRONG);
         refresh_tag_votes(tag);
       }).fail(function() {
-        tt_info.html("Greška!");
+        tt_info.html(gettext("Error!"));
       });
     };
 

@@ -15,7 +15,7 @@ $(function(){
         ' <button type="button" class="btn mc-preview-button" ' +
             'data-source="' + source_id + '" ' +
             'data-target="' + target_id + '">' +
-          'Pregled</button> '
+          gettext("Preview") + '</button> '
         /*
         '<span style="color:gray;font-style:italic;">' +
             'U tijeku je testiranje (nedovršenog) ' +
@@ -44,7 +44,7 @@ $(function(){
       return;
     var preview = $('#' + $(this).attr('data-target'));
     if (text.length) {
-      preview.html("Učitavanje...");
+      preview.html(gettext("Loading..."));
       preview.attr('style', '');
       $.get('/ajax/mathcontent/preview/', {text: text}, function(result){
         source.data('mc-last-refresh', text);
@@ -57,7 +57,6 @@ $(function(){
 
   /* Trigger click on all preview buttons. */
   $('.mc-preview-all').click(function() {
-    console.log('adfasdf');
     $('.mc-preview-button').click();
   });
 
