@@ -273,6 +273,9 @@ def scoreboard(request, competition, data, as_participants=False):
     if competition.is_course != as_participants:
         return (competition.get_scoreboard_url(),)
 
+    if not competition.public_scoreboard and not data['is_admin']:
+        return (competition.get_absolute_url(),)  # Redirect to home.
+
     if data['is_admin'] and 'refresh' in request.POST:
         start = datetime.now()
         teams = Team.objects.filter(competition=data['competition'])

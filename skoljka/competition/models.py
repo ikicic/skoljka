@@ -66,6 +66,10 @@ class Competition(BasePermissionsModel):
     show_solutions = models.BooleanField(
             default=False,
             help_text="Show solutions after the competition ends.")
+    public_scoreboard = models.BooleanField(
+            default=True,
+            help_text="Show scoreboard (for competitions) or the "
+                      "participants list (for courses) publicly?")
 
     posts = PostGenericRelation(placeholder=ugettext_lazy("Message"))
 

@@ -12,6 +12,12 @@
   {% endif %}
 </h3>
 
+{% if is_admin and not competition.public_scoreboard %}
+  <div class="alert">
+    {% trans "Visible only to the admins!" %}
+  </div>
+{% endif %}
+
 {% if not has_started %}
   <div class="alert">{{ competition.msg_has_not_started }}</div>
 {% endif %}

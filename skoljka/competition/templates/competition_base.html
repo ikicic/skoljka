@@ -73,7 +73,9 @@
           {% endif %}
         </a>
       </li>
-      <li>{{ competition.get_scoreboard_link }}</li>
+      {% if competition.public_scoreboard %}
+        <li>{{ competition.get_scoreboard_link }}</li>
+      {% endif %}
       {% if user.is_authenticated %}
         <li><a href="{% comp_url 'notifications' %}">
             {% trans "Notifications" %}</a></li>
@@ -84,6 +86,9 @@
         <li><a href="{% comp_url 'chain' %}">{% trans "Chains" %}</a></li>
         <li><a href="{% comp_url 'notifications/admin' %}">
             {% trans "Notifications" %}</a></li>
+        {% if not competition.public_scoreboard %}
+          <li>{{ competition.get_scoreboard_link }}</li>
+        {% endif %}
         {% if user.is_superuser %}
           <li><a href="{% my_url 'admin:app_list' 'competition' %}">
               Admin</a></li>
