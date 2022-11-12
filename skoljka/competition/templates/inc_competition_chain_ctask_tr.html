@@ -22,7 +22,20 @@
       {% chain_list_ctask_name_text ctask 100 %}
     </td>
   {% endif %}
-  <td>{{ ctask.cache_admin_solved_count|default:'' }}</td>
+  <td>
+    {% if ctask.cache_admin_solved_count > 0 %}
+      <span title="{% trans "Number of admin solutions." %}">
+        {{ ctask.cache_admin_solved_count }}
+      </span>
+    {% endif %}
+    {% if ctask.cache_new_activities_count > 0 %}
+      <a href="{{ ctask.get_absolute_url }}#submissions"
+         style="color:#d00;"
+         title="{% trans "Number of new activities." %}">
+          {{ ctask.cache_new_activities_count }}
+      </a>
+    {% endif %}
+  </td>
   <td>
     {% if ctask.chain_id %}
       <button type="submit" name="action" class="blank"

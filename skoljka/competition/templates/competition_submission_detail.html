@@ -16,11 +16,18 @@
   {% mathcontent_render ctask.task.content %}
 </div>
 
-<h4>{% trans "Team:" %} {{ team.get_link }}</h4>
+<h4>{{ team.get_link }}</h4>
 <div class="outset">
   {% mathcontent_render submission.content %}
 </div>
-<br>
+<form action="{{ request.get_full_path }}" method="POST" class="form-inline" style="margin-top:0.5em;">
+  {% csrf_token %}
+  {% if submission.has_new_team_activities %}
+    <button class="btn" name="mark_new" value="0">{% trans "Mark as read" %}</button>
+  {% else %}
+    <button class="btn" name="mark_new" value="1">{% trans "Mark as unread" %}</button>
+  {% endif %}
+</form>
 
 <h4>{% trans "Score:" %}</h4>
 {% ctask_score_text ctask %}

@@ -23,8 +23,7 @@
 {% endif %}
 {% if updated_ctasks_count != None %}
   <div class="alert">
-    Updated cache_admin_solved_count for <b>{{ updated_ctasks_count }}</b>
-    ctask(s).
+    Updated <b>{{ updated_ctasks_count }}</b> ctask(s).
   </div>
 {% endif %}
 
@@ -204,5 +203,9 @@
   <button type="submit" name="action" value="refresh-chain-cache-is-verified">
     Refresh chain.cache_is_verified
   </button> &lt;-- (might require refreshing ctask.cache_admin_solved_count)
+  <br>
+  <button type="submit" name="action" value="refresh-ctask-cache-new-activities-count">
+    Refresh ctask.cache_new_activities_count
+  </button>
 </form>
 {% endblock content %}

@@ -49,6 +49,7 @@ from skoljka.competition.utils import update_chain_comments_cache, \
         update_chain_cache_is_verified, \
         refresh_ctask_cache_admin_solved_count, \
         update_ctask_cache_admin_solved_count, \
+        refresh_ctask_cache_new_activities_count, \
         update_chain_ctasks, parse_team_categories, \
         refresh_submissions_score
 
@@ -624,6 +625,7 @@ def submission_detail(request, competition, data, submission_id=None):
         if score != submission.score or (score == 0 and not_graded):
             submission.score = score
             submission.mark_unseen_admin_activity()
+            submission.reset_unseen_team_activities()
             submission.save()
 
             # For now, just refresh whole team. A faster solution would be to
@@ -637,14 +639,20 @@ def submission_detail(request, competition, data, submission_id=None):
                         action_object_id=score, target=submission,
                         fake_action_object=True)
 
-            # Prevent form resubmission.
-            return (request.get_full_path(), )
+            return (request.get_full_path(), )  # Prevent form resubmission.
 
-    if submission.has_new_team_activity():
-        data['unread_newer_than'] = submission.oldest_unseen_team_activity
-        submission.oldest_unseen_team_activity = \
-                Submission.NO_UNSEEN_ACTIVITIES_DATETIME
+    if request.method == 'POST' and 'mark_new' in request.POST:
+        as_unread = request.POST['mark_new'] == '1'
+        if as_unread:
+            submission.mark_unseen_team_activity()
+        else:
+            submission.reset_unseen_team_activities()
         submission.save()
+        return (request.get_full_path(), )  # Prevent form resubmission.
+
+    if submission.oldest_unseen_team_activity != \
+            Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
+        data['unread_newer_than'] = submission.oldest_unseen_team_activity
 
     data['submission'] = submission
     data['ctask'] = ctask
@@ -719,6 +727,9 @@ def chain_tasks_list(request, competition, data):
     elif request.POST.get('action') == 'refresh-ctask-cache-admin-solved-count':
         updated_ctasks_count = len(
                 refresh_ctask_cache_admin_solved_count(competition))
+    elif request.POST.get('action') == 'refresh-ctask-cache-new-activities-count':
+        updated_ctasks_count = len(
+                refresh_ctask_cache_new_activities_count(competition))
     elif request.POST.get('action') == 'refresh-submission-is-correct':
         updated_submissions_score_count = \
                 refresh_submissions_score(competitions=[competition])

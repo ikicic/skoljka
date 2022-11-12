@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-04 23:17+0100\n"
+"POT-Creation-Date: 2022-11-13 00:43+0100\n"
 "PO-Revision-Date: 2017-10-03 01:49+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
@@ -887,7 +887,6 @@ msgstr ""
 
 #: competition/templates/competition_base.html:55
 #: competition/templates/competition_notifications_admin.html:45
-#: competition/templates/competition_submission_detail.html:19
 msgid "Team:"
 msgstr "Tim:"
 
@@ -936,6 +935,7 @@ msgstr "Pravila natjecanja"
 
 #: competition/templates/competition_chain_list.html:10
 #: competition/templates/competition_chain_list_tasks.html:10
+#: competition/templates/competition_scoreboard.html:17
 #: competition/templates/competition_task_new.html:12
 msgid "Visible only to the admins!"
 msgstr "Vidljivo samo administratorima!"
@@ -992,8 +992,7 @@ msgstr "Komentari"
 #: competition/templates/competition_chain_list.html:50
 #: competition/templates/competition_notifications_admin.html:30
 #: competition/templates/competition_task_detail.html:13
-#: competition/templates/competition_task_detail.html:109
-#: competition/templates/inc_competition_chain_ctask_tr.html:50
+#: competition/templates/inc_competition_chain_ctask_tr.html:63
 #: folder/templates/folder_detail.html:36 post/templates/inc_post.html:10
 msgid "Edit"
 msgstr "Uredi"
@@ -1449,8 +1448,16 @@ msgstr "Polaznik"
 msgid "Total score"
 msgstr "Ukupni bodovi"
 
-#: competition/templates/competition_submission_detail.html:25
-#: competition/templates/competition_task_detail.html:116
+#: competition/templates/competition_submission_detail.html:26
+msgid "Mark as read"
+msgstr "Označi kao pročitano"
+
+#: competition/templates/competition_submission_detail.html:28
+msgid "Mark as unread"
+msgstr "Označi kao nepročitano"
+
+#: competition/templates/competition_submission_detail.html:32
+#: competition/templates/competition_task_detail.html:125
 #: competition/templates/inc_competition_team_detail.html:12
 msgid "Score:"
 msgstr "Bodovi:"
@@ -1502,6 +1509,11 @@ msgid "Answer:"
 msgstr "Odgovor:"
 
 #: competition/templates/competition_task_detail.html:117
+#: post/templates/post_edit.html:13
+msgid "Save"
+msgstr "Spremi"
+
+#: competition/templates/competition_task_detail.html:126
 msgid "not graded"
 msgstr "neocijenjeno"
 
@@ -1652,7 +1664,15 @@ msgstr ""
 "Komentar 2: Slika neće biti vidljiva u pregledu, morate spremiti promjene "
 "kako biste vidjeli konačan rezultat."
 
-#: competition/templates/inc_competition_chain_ctask_tr.html:29
+#: competition/templates/inc_competition_chain_ctask_tr.html:27
+msgid "Number of admin solutions."
+msgstr "Broj admin rješenja."
+
+#: competition/templates/inc_competition_chain_ctask_tr.html:34
+msgid "Number of new activities."
+msgstr "Broj novih aktivnosti."
+
+#: competition/templates/inc_competition_chain_ctask_tr.html:42
 msgid "Remove"
 msgstr "Makni"
 
@@ -1690,7 +1710,7 @@ msgid "Grade"
 msgstr "Ocijeni"
 
 #: competition/templates/inc_competition_submission_list.html:53
-msgid "New activity"
+msgid "New activities"
 msgstr "Nove aktivnosti"
 
 #: competition/templates/inc_competition_team_detail.html:16
@@ -1966,10 +1986,6 @@ msgstr "Odgovor na <a href='#'>komentar</a>."
 #: post/templates/post_edit.html:4 post/templates/post_edit.html.py:7
 msgid "Edit a message"
 msgstr "Uredi poruku"
-
-#: post/templates/post_edit.html:13
-msgid "Save"
-msgstr "Spremi"
 
 #: rating/templates/inc_rating_box_bool.html:24
 msgid "Delete rating"

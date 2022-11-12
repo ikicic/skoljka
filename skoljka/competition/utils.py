@@ -5,7 +5,7 @@ import re
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import connection, transaction
-from django.db.models import F
+from django.db.models import Count, F
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -507,6 +507,35 @@ def update_ctask_cache_admin_solved_count(competition, ctask, chain):
 
     if before != after and chain is not None:
         update_chain_cache_is_verified(competition, chain)
+
+
+@transaction.commit_on_success
+def refresh_ctask_cache_new_activities_count(competition):
+    """Refresh cache_new_activities_count for all ctasks of a given competition.
+    Returns the list of IDs of the updated ctasks."""
+    old = dict(CompetitionTask.objects.select_for_update() \
+            .filter(competition_id=competition.id) \
+            .values_list('id', 'cache_new_activities_count'))
+    new = dict(CompetitionTask.objects.filter(competition_id=competition.id) \
+            .values('id') \
+            .filter(submission__oldest_unseen_team_activity__gt=
+                    Submission.NO_UNSEEN_ACTIVITIES_DATETIME) \
+            .annotate(new_count=Count('submission')) \
+            .values_list('id', 'new_count'))
+
+    args = []
+    for id in (set(new.keys()) | set(old.keys())):
+        new_cnt = new.get(id, 0)
+        if new_cnt != old.get(id, 0):
+            args.append((new_cnt, id))
+    if args:
+        connection.cursor().executemany(
+                "UPDATE `competition_competitiontask` "
+                "SET `cache_new_activities_count`=%s "
+                "WHERE `id`=%s;", args)
+
+    ids = [id for new_cnt, id in args]
+    return ids
 
 
 def parse_team_categories(team_categories, lang):

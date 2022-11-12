@@ -5,6 +5,7 @@ import re
 from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.db import models
+from django.db.models import F
 from django.utils.translation import ugettext as _, ugettext_lazy
 from django.utils.safestring import mark_safe
 
@@ -262,6 +263,10 @@ class CompetitionTask(models.Model):
     comment = models.OneToOneField(MathContent)
     cache_admin_solved_count = models.IntegerField(default=0)
 
+    cache_new_activities_count = models.IntegerField(
+            default=0,
+            help_text="Number of solutions with an ungraded or unread update.")
+
     def __unicode__(self):
         return u"CompetitionTask {} comp={} task={}".format(
                 self.get_name(), self.competition_id, self.task_id)
@@ -294,6 +299,16 @@ class CompetitionTask(models.Model):
     def is_manually_graded(self):
         return self.descriptor == settings.COMPETITION_MANUAL_GRADING_TAG
 
+    def update_cache_new_activities_count(self, delta):
+        """Atomically perform `cache_new_activities_count += delta` in the
+        database.
+
+        The local value of `self.cache_new_activities_count` is updated as well,
+        but non-atomically and may mismatch the final database value."""
+        CompetitionTask.objects.filter(id=self.id) \
+                .update(cache_new_activities_count=
+                        F('cache_new_activities_count') + delta)
+        self.cache_new_activities_count += delta
 
 
 class Submission(models.Model):
@@ -308,6 +323,10 @@ class Submission(models.Model):
     result = models.CharField(max_length=255)
     content = models.ForeignKey(MathContent, blank=True, null=True)
     score = models.IntegerField(default=0)
+
+    # Note: the team activity date is reset either manually by clicking on
+    # "Mark as read" or by grading the solution. The admin activity is reset
+    # immediately when viewed.
     oldest_unseen_admin_activity = models.DateTimeField(
             default=NO_UNSEEN_ACTIVITIES_DATETIME)
     oldest_unseen_team_activity = models.DateTimeField(
@@ -324,6 +343,10 @@ class Submission(models.Model):
     def can_send_post(self, user):  # For PostGenericRelation.
         return self.team.can_send_post(user)
 
+    def get_admin_url(self):
+        return '{}submission/{}/'.format(
+                self.ctask.competition.get_absolute_url(), self.id)
+
     def get_tr_class(self):
         """Get <tr>...</tr> class in admin submissions list."""
         if self.score == self.ctask.max_score:
@@ -334,12 +357,15 @@ class Submission(models.Model):
         else:
             out = []
 
-        if self.has_new_team_activity():
-            out.append('csub-unseen-team-activity')
+        if self.has_new_team_activities():
+            out.append('csub-unseen-team-activities')
         return ' '.join(out)
 
-    def has_new_team_activity(self):
-        return self.oldest_unseen_team_activity != self.NO_UNSEEN_ACTIVITIES_DATETIME
+    def has_new_team_activities(self):
+        # Note: update refresh_ctask_cache_new_activities_count if this logic
+        # is being updated.
+        return self.oldest_unseen_team_activity \
+                != self.NO_UNSEEN_ACTIVITIES_DATETIME
 
     def mark_unseen_admin_activity(self):
         """Update oldest_unseen_admin_activity if is not already set. Return
@@ -351,15 +377,27 @@ class Submission(models.Model):
         else:
             return False
 
-    def mark_unseen_team_activity(self, save=True):
-        """Update oldest_unseen_team_activity if is not already set. Return
-        whether the field was updated. Does not save."""
+    def mark_unseen_team_activity(self):
+        """Update oldest_unseen_team_activity if is not already set.
+        Update the competition task's activity counter accordingly.
+        Return whether the field was updated. Does not save the submission,
+        does update the competition task."""
         if self.oldest_unseen_team_activity \
                 == Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
             self.oldest_unseen_team_activity = datetime.now()
+            self.ctask.update_cache_new_activities_count(+1)
             return True
         else:
             return False
+
+    def reset_unseen_team_activities(self):
+        """Reset oldest_unseen_team_activity.
+        Update the corresponding competition task's activity counter.
+        Does not save the submission, does update the competition task."""
+        if self.has_new_team_activities():
+            self.ctask.update_cache_new_activities_count(-1)
+            self.oldest_unseen_team_activity = \
+                    Submission.NO_UNSEEN_ACTIVITIES_DATETIME
 
     def __unicode__(self):
         return "ctask={} team={} {}".format(

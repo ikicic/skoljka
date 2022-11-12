@@ -380,6 +380,10 @@ div#ctask-legend-container {
   margin: 8px 0px 23px 0px;
 }
 
+.outset.ctask-answer {
+  margin: 0.5em 0 1em 0;
+}
+
 .ctask-submissions-count, .ctask-format-help, .ctask-score-text {
   color: gray;
   font-size: 12px;
@@ -394,7 +398,7 @@ div#ctask-legend-container {
     line-height: 18px;
   }
 }
-/*tr*/.csub-unseen-team-activity {
+/*tr*/.csub-unseen-team-activities {
   font-weight: bold;
 }
 /*td*/.csub-number,

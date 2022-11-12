@@ -1,6 +1,8 @@
 import datetime
 
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.http import HttpResponseRedirect
 from django.test import TestCase
 from django.test.client import Client
 
@@ -13,6 +15,12 @@ from skoljka.competition.tests.test_utils import create_ctask
 
 DAY = datetime.timedelta(days=1)
 HOUR = datetime.timedelta(hours=1)
+MANUAL = settings.COMPETITION_MANUAL_GRADING_TAG
+
+def db_reload(obj):
+    """Reload the given object from the database. Returns a new object."""
+    return obj.__class__.objects.get(id=obj.id)
+
 
 class CompetitionViewsTestBase(TestCase):
     fixtures = ['skoljka/userprofile/fixtures/test_userprofiles.json']
@@ -30,8 +38,8 @@ class CompetitionViewsTestBase(TestCase):
 
         # TODO: make a base class for users
         self.admin = User.objects.get(id=1)
-        self.alice = User.objects.get(id=2)
-        self.bob = User.objects.get(id=3)
+        self.alice = self.user1 = User.objects.get(id=2)
+        self.bob = self.user2 = User.objects.get(id=3)
         self.client = Client()
 
         now = datetime.datetime.now()
@@ -461,3 +469,67 @@ class SubmissionTest(CompetitionViewsTestBase):
         self.logout()
 
     # TODO: Test submission with frozen scoreboard.
+
+
+class ManualGradingTest(CompetitionViewsTestBase):
+    def init_competition(self, competition):
+        self.competition = competition
+        self.team1 = Team.objects.create(
+                name="Test team 1", author=self.user1, competition=competition)
+        self.team2 = Team.objects.create(
+                name="Test team 2", author=self.user2, competition=competition)
+        TeamMember.objects.create(team=self.team1, member=self.user1,
+                member_name=self.user1.username,
+                invitation_status=TeamMember.INVITATION_ACCEPTED)
+        TeamMember.objects.create(team=self.team2, member=self.user2,
+                member_name=self.user2.username,
+                invitation_status=TeamMember.INVITATION_ACCEPTED)
+        chain1 = Chain.objects.create(competition=competition, name="Test chain 1")
+        chain2 = Chain.objects.create(competition=competition, name="Test chain 2")
+        self.ctask1 = create_ctask(self.admin, competition, chain1, MANUAL, 1)
+        self.ctask2 = create_ctask(self.admin, competition, chain2, MANUAL, 10)
+
+    def send_manual_solution(self, task, answer):
+        """Send a manual answer and return the new submission object."""
+        response = self.client.post(task.get_absolute_url(), {'text': answer})
+        self.assertIsInstance(response, HttpResponseRedirect)
+        return Submission.objects.all().order_by('-id')[0]
+
+    def test_marking_as_read_and_unread(self):
+        self.init_competition(self.competitions[3])
+
+        self.login(self.user1)
+        sub1 = self.send_manual_solution(self.ctask1, "answer 1 by 1")
+        sub2 = self.send_manual_solution(self.ctask2, "answer 2 by 1")
+
+        self.login(self.user2)
+        sub3 = self.send_manual_solution(self.ctask1, "answer 1 by 2")
+
+        # Test that a non-admin cannot view the submission detail admin page.
+        self.assertEqual(self.client.get(sub1.get_admin_url()).status_code, 403)
+        self.assertEqual(
+                self.client.post(sub1.get_admin_url(), {'mark_new': 0}).status_code, 403)
+
+        # Test current values of counters.
+        self.login(self.admin)
+        self.assertEqual(db_reload(self.ctask1).cache_new_activities_count, 2)
+        self.assertEqual(db_reload(self.ctask2).cache_new_activities_count, 1)
+
+        # Test marking as read.
+        self.client.post(sub1.get_admin_url(), {'mark_new': 0})
+        self.assertEqual(db_reload(self.ctask1).cache_new_activities_count, 1)
+        self.assertEqual(db_reload(self.ctask2).cache_new_activities_count, 1)
+
+        # Test marking as unread.
+        self.client.post(sub1.get_admin_url(), {'mark_new': 1})
+        self.assertEqual(db_reload(self.ctask1).cache_new_activities_count, 2)
+        self.assertEqual(db_reload(self.ctask2).cache_new_activities_count, 1)
+
+        # Test refreshing the cache.
+        self.ctask1.cache_new_activities_count = 10
+        self.ctask1.save()
+        self.assertEqual(db_reload(self.ctask1).cache_new_activities_count, 10)
+        self.client.post(self.competition.get_absolute_url() + 'chain/tasks/',
+                         {'action': 'refresh-ctask-cache-new-activities-count'})
+        self.assertEqual(db_reload(self.ctask1).cache_new_activities_count, 2)
+        self.assertEqual(db_reload(self.ctask2).cache_new_activities_count, 1)
