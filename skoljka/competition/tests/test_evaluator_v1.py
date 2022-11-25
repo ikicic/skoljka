@@ -1,4 +1,4 @@
-from skoljka.utils.testcase import TestCaseEx
+from skoljka.utils.testcase import TestCase
 
 from skoljka.competition.evaluator import \
         get_sample_solution, safe_parse_descriptor
@@ -13,8 +13,8 @@ from skoljka.competition.evaluator_v1 import Integer, Float, Fraction, \
 from skoljka.competition.evaluator_v1 import check_result, parse_descriptor
 
 
-class EvaluatorV1Test(TestCaseEx):
-    # TODO: Document and move to TestCaseEx.
+class EvaluatorV1Test(TestCase):
+    # TODO: Document and move to utils.testcase.TestCase.
     def assertVariableTypes(self, variable_types, tests):
         for test in tests:
             try:
@@ -29,7 +29,7 @@ class EvaluatorV1Test(TestCaseEx):
                         msg="test={} k={} expected={} result={}".format(
                             test, k, variable_types[k], result[k]))
 
-    # TODO: Document and move to TestCaseEx.
+    # TODO: Document and move to utils.testcase.TestCase.
     def assertMultipleVariableTypesOrRaises(self, variable_types, tests):
         for test_case in tests:
             descriptor, exception = test_case

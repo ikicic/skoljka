@@ -61,7 +61,7 @@ class Competition(BasePermissionsModel):
                       "Last category is considered the default.")
     task_categories_trans = models.CharField(
             blank=False, default='', max_length=255,
-            help_text="Translations of task category names. " \
+            help_text="Deprecated! Translations of task category names. " \
                       "E.g. {\"en\": {\"Geometrija\": \"Geometry\"}}. " \
                       "If a translation is not available, the original name is used.")
     show_solutions = models.BooleanField(
@@ -110,6 +110,8 @@ class Competition(BasePermissionsModel):
         Defines the languages of chain names.
         """
         # Currently hardcoded, should be a DB column.
+        # If updating, update the competition_chain_list_tasks.html text about
+        # the category input.
         return ['hr', 'en']
 
     def get_task_categories_translations(self, lang):
@@ -229,7 +231,12 @@ class Chain(models.Model):
     competition = models.ForeignKey(Competition)
     name = models.CharField(max_length=200)
     unlock_minutes = models.IntegerField(default=0)
-    category = models.CharField(blank=True, db_index=True, max_length=100)
+
+    # Category is currently a string which stores the category name (title),
+    # translations and ordering. See views.py for more info. Categories are
+    # considered equal if the strings match exactly. In the future, we may
+    # consider adding a new model Category. So far this suffices.
+    category = models.CharField(blank=True, db_index=True, max_length=200)
     bonus_score = models.IntegerField(default=1)
     position = models.IntegerField(default=0,
             help_text=gray_help_text(ugettext_lazy("Position in the category.")))

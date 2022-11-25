@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from skoljka.utils.testcase import TestCaseEx
+from skoljka.utils.testcase import TestCase
 
 from skoljka.mathcontent.converter_v1 import Tokenizer, Converter
 from skoljka.mathcontent.converter_v1.bbcode import parse_bbcode, BBCodeException
@@ -51,7 +51,7 @@ def _mock__get_latex_html(element, force_inline):
     return ("INLINE:" if force_inline else "") + element.hash
 
 
-class ConverterV1TestCase(TestCaseEx):
+class ConverterV1TestCase(TestCase):
     def setUp(self):
         self.attachments = [
             _mock__attachment("first.png"),

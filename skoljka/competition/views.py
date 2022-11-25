@@ -53,16 +53,117 @@ from skoljka.competition.utils import update_chain_comments_cache, \
         update_chain_ctasks, parse_team_categories, \
         refresh_submissions_score
 
-def _sort_chains(request, chains):
-    """Hacky way to sort chains with extra order columns, and before rendering
-    the template."""
-    order_by = ('category', 'position', 'name')
-    # Only 'category' and 'unlock_minutes' enabled.
-    if request.GET.get('sort', 'category') == 'unlock_minutes':
-        order_by = ('unlock_minutes',) + order_by
-    if request.GET.get('direction', 'asc') == 'desc':
-        order_by = tuple('-' + column for column in order_by)
-    return chains.order_by(*order_by)
+
+# [order=-10] asdf --> ('-10', ' asdf')
+_CATEGORY_RE = re.compile(r'\[order=([-+]?\d+)\](.+)')
+
+class _Category(object):
+    """
+    Helper class representing a chain category.
+
+    Attribute `name` is a string of one of the following formats:
+        "name"
+        "name for language 1 | name for language 2"
+        "[order=123] name"
+        "[order=123] name | name"              <-- same order for all languages
+        "[order=123] name | [order=132] name"  <-- custom order per language
+
+    The order number may be negative.
+    """
+    def __init__(self, name, competition, lang, category_translations):
+        translated_name = pick_name_translation(name, competition, lang)
+        order, translated_name = self.split_order_name(translated_name)
+        if order is None:
+            # If there was no [order=...] for the current language, check if it
+            # was specified for the first language.
+            order, _ = self.split_order_name(name)
+            if order is None:
+                order = 0
+
+        translated_name = translated_name.strip()
+        if category_translations:  # Legacy, deprecated.
+            translated_name = category_translations.get(
+                    translated_name, translated_name)
+
+        self.name = name
+        self.order = order
+        self.translated_name = translated_name
+        self.chains = []
+        self.t_is_locked = None
+
+    @property
+    def sort_key(self):
+        return (self.order, self.translated_name)
+
+    @staticmethod
+    def split_order_name(name):
+        """Split a string "[order=213] Name" into a tuple (123, "Name").
+
+        If there is no valid "[order=...]" prefix, (None, name) is returned
+        instead.
+        """
+        match = _CATEGORY_RE.match(name)
+        if match:
+            try:
+                order, name = match.groups()
+                order = int(order)
+                return order, name
+            except:
+                pass
+        return None, name
+
+
+def _init_categories_and_sort_chains(
+        competition, chains, language_code,
+        sort_by='category', sort_descending=False):
+    """Find unique categories, fill chain.t_category and sort chains.
+
+    Attributes:
+        chains: a sequence of Chain objects
+        competition: a Competition object
+        language_code: an optional string representing the language
+        sort_by: 'category' or 'unlock_minutes', 'category' by default
+        sort_descending: whether to sort in the reverse order, False by default
+
+    Returns a tuple (sorted categories list, sorted chains list).
+    Note that if chains are not sorted according to the category, the category
+    sorting will be unrelated to the sorting of chains.
+    """
+    chains = list(chains)
+
+    # First sort by position and name, such that they are appended to
+    # categories in the correct order.
+    chains.sort(key=lambda chain: (chain.position, chain.name))
+
+    # Deprecated.
+    category_translations = competition.get_task_categories_translations(
+            language_code)
+
+    categories = {}
+    for chain in chains:
+        category = categories.get(chain.category)
+        if not category:
+            category = categories[chain.category] = _Category(
+                    chain.category, competition, language_code,
+                    category_translations)
+        chain.t_category = category
+        category.chains.append(chain)
+
+    # Once categories are known, sort either by categories or by
+    # unlock_minutes. The sort is stable.
+    if sort_by == 'unlock_minutes':
+        chains.sort(key=lambda chain: chain.unlock_minutes)
+    else:
+        chains.sort(key=lambda chain: chain.t_category.sort_key)
+
+    categories = categories.values()
+    categories.sort(key=lambda cat: cat.sort_key)
+
+    if sort_descending:
+        chains = chains[::-1]
+        categories = categories[::-1]
+
+    return categories, chains
 
 
 #TODO: Option for admins to create a team even if they have a private group.
@@ -330,8 +431,8 @@ def scoreboard(request, competition, data, as_participants=False):
     return data
 
 
-def pick_chain_name_translation(name, competition, lang):
-    """Pick the correct chain name translation.
+def pick_name_translation(name, competition, lang):
+    """Pick the correct chain or category name translation.
 
     Parse a string of form "translation1 | ... | translationN" and pick the
     translation matching the current language. The order of languages is
@@ -359,8 +460,7 @@ def task_list(request, competition, data):
     all_ctasks = list(CompetitionTask.objects.filter(competition=competition))
     all_ctasks_dict = {ctask.id: ctask for ctask in all_ctasks}
     all_chains = list(Chain.objects \
-            .filter(competition=competition, cache_is_verified=True) \
-            .order_by('category', 'position', 'name'))
+            .filter(competition=competition, cache_is_verified=True))
     all_chains_dict = {chain.id: chain for chain in all_chains}
     all_my_submissions = list(Submission.objects.filter(team=data['team']) \
             .only('id', 'ctask', 'score', 'oldest_unseen_admin_activity'))
@@ -412,26 +512,10 @@ def task_list(request, competition, data):
         chain.ctasks.sort(key=lambda ctask: ctask.chain_position)
         preprocess_chain(competition, chain, chain.ctasks, chain.submissions)
 
-    category_translations = competition.get_task_categories_translations(
-            request.LANGUAGE_CODE)
-
-    class Category(object):
-        def __init__(self, name):
-            self.name = name
-            self.translated_name = category_translations.get(name, name)
-            self.chains = []
-            self.t_is_hidden = None
-
-    categories = {}
     for chain in all_chains:
-        chain.t_is_hidden = data['minutes_passed'] < chain.unlock_minutes
-        chain.t_translated_name = pick_chain_name_translation(
+        chain.t_is_locked = data['minutes_passed'] < chain.unlock_minutes
+        chain.t_translated_name = pick_name_translation(
                 chain.name, competition, request.LANGUAGE_CODE)
-
-        if not chain.t_is_hidden or data['is_admin']:
-            if chain.category not in categories:
-                categories[chain.category] = Category(chain.category)
-            categories[chain.category].chains.append(chain)
 
         chain.ctasks.sort(key=lambda ctask: (ctask.chain_position, ctask.id))
         if not data['has_finished']:
@@ -447,14 +531,21 @@ def task_list(request, competition, data):
                 chain.t_next_task = ctask
                 break
 
+    if not data['is_admin']:
+        all_chains = [chain for chain in all_chains if not chain.t_is_locked]
+
+    categories, all_chains = _init_categories_and_sort_chains(
+            competition, all_chains, request.LANGUAGE_CODE,
+            sort_by='category', sort_descending=False)
+
     if data['is_admin']:
         data['admin_panel_form'] = TaskListAdminPanelForm()
-        for category in categories.itervalues():
-            category.t_is_hidden = \
-                    all(chain.t_is_hidden for chain in category.chains)
+        for category in categories:
+            category.t_is_locked = \
+                    all(chain.t_is_locked for chain in category.chains)
 
     data['unverified_chains_count'] = len(unverified_chains)
-    data['categories'] = sorted(categories.values(), key=lambda x: x.name)
+    data['categories'] = categories
     data['max_chain_length'] = 0 if not all_chains \
             else max(len(chain.ctasks) for chain in all_chains)
     return data
@@ -748,7 +839,10 @@ def chain_tasks_list(request, competition, data):
             form = empty_form  # Empty the form.
 
     chains = Chain.objects.filter(competition=competition)
-    chains = _sort_chains(request, chains)
+    categories, chains = _init_categories_and_sort_chains(
+            competition, chains, request.LANGUAGE_CODE,
+            sort_by=request.GET.get('sort', 'category'),
+            sort_descending=request.GET.get('direction', 'asc') == 'desc')
 
     chain_dict = {chain.id: chain for chain in chains}
     ctasks = list(CompetitionTask.objects.filter(competition=competition) \
@@ -866,7 +960,10 @@ def chain_tasks_action(request, competition, data):
 @response('competition_chain_list.html')
 def chain_list(request, competition, data):
     chains = Chain.objects.filter(competition=competition)
-    chains = _sort_chains(request, chains)
+    categories, chains = _init_categories_and_sort_chains(
+            competition, chains, language_code=None,
+            sort_by=request.GET.get('sort', 'category'),
+            sort_descending=request.GET.get('direction', 'asc') == 'desc')
     chain_dict = {chain.id: chain for chain in chains}
     ctasks = list(CompetitionTask.objects.filter(competition=competition) \
             .values_list('id', 'chain_id', 'task__author_id'))
@@ -884,6 +981,7 @@ def chain_list(request, competition, data):
         chain.competition = competition
         chain.t_ctask_count = 0
         chain._author_ids = set()
+        # TODO: remove t_is_verified and use cache_is_verified?
         chain.t_is_verified = True
 
     for ctask_id, chain_id, author_id in ctasks:

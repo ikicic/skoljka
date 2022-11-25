@@ -3,11 +3,11 @@ import datetime
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
-from django.test import TestCase
 from django.test.client import Client
 
 from skoljka.permissions.constants import VIEW
 from skoljka.permissions.models import ObjectPermission
+from skoljka.utils.testcase import TestCase
 
 from skoljka.competition.models import Competition, CompetitionTask, Chain, \
         Submission, Team, TeamMember
@@ -72,12 +72,140 @@ class CompetitionViewsTestBase(TestCase):
         ]
         Competition.objects.bulk_create(competitions)
         self.competitions = {x.id: x for x in Competition.objects.all()}
+        self.competition = None
 
     def login(self, user):
         self.assertTrue(self.client.login(username=user.username, password="a"))
 
     def logout(self):
         self.client.logout()
+
+    def comp_get(self, suffix, *args, **kwargs):
+        """Equivalent to self.client.get with the competition's URL prepended."""
+        assert self.competition
+        return self.client.get(
+                self.competition.get_absolute_url() + suffix, *args, **kwargs)
+
+    def comp_post(self, suffix, *args, **kwargs):
+        """Equivalent to self.client.post with the competition's URL prepended."""
+        assert self.competition
+        return self.client.get(
+                self.competition.get_absolute_url() + suffix, *args, **kwargs)
+
+    def create_chain(self, **kwargs):
+        assert self.competition
+        return Chain.objects.create(competition=self.competition, **kwargs)
+
+    def create_ctask(self, chain, *args, **kwargs):
+        """Shorthand for the global create_ctask, uses admin as author and
+        self.competition as competition."""
+        assert self.competition
+        return create_ctask(self.admin, self.competition, chain, *args, **kwargs)
+
+
+class ChainSortingTest(CompetitionViewsTestBase):
+    """Test chain sorting in the public tasks view."""
+    def init_competition(self, competition):
+        self.competition = competition
+        self.team1 = Team.objects.create(
+                name="Test team 1", author=self.user1, competition=competition)
+        TeamMember.objects.create(team=self.team1, member=self.user1,
+                member_name=self.user1.username,
+                invitation_status=TeamMember.INVITATION_ACCEPTED)
+
+    def test_ordering_by_category(self):
+        self.init_competition(self.competitions[3])
+        chain1 = self.create_chain(name="Chain A", category="AAA", cache_is_verified=True)
+        chain2 = self.create_chain(name="Chain B", category="AAA", cache_is_verified=True)
+        chain3 = self.create_chain(name="Chain C", category="AAA", cache_is_verified=True)
+        self.create_ctask(chain1, '123', 1)
+        self.create_ctask(chain2, '123', 1)
+        self.create_ctask(chain3, '123', 1)
+        self.login(self.alice)
+
+        # Test that sorting by name works.
+        content = self.comp_get('task/').content
+        self.assertMultilineRegex(content, r'AAA.*Chain A.*Chain B.*Chain C')
+
+        chain1.name = "Chain DA"
+        chain1.save()
+        content = self.comp_get('task/').content
+        self.assertMultilineRegex(content, r'AAA.*Chain B.*Chain C.*Chain DA')
+
+        # Test that sorting by category works.
+        chain2.category = "BBB"
+        chain2.save()
+        content = self.comp_get('task/').content
+        self.assertMultilineRegex(content, r'AAA.*Chain C.*Chain DA.*BBB.*Chain B')
+
+    def test_ordering_view_locked_unlocked(self):
+        self.init_competition(self.competitions[3])
+        chain1 = self.create_chain(name="Chain A", category="AAA", cache_is_verified=True)
+        chain2 = self.create_chain(name="Chain B", category="BBB", cache_is_verified=False)
+        chain3 = self.create_chain(name="Chain C", category="AAA", cache_is_verified=True, unlock_minutes=1000000000)
+        self.create_ctask(chain1, '123', 1)
+        self.create_ctask(chain2, '123', 1)
+        self.create_ctask(chain3, '123', 1)
+
+        # Alice should see only verified and unlocked chains.
+        self.login(self.alice)
+        content = self.comp_get('task/').content
+        self.assertMultilineRegex(content, r'AAA.*Chain A')
+        self.assertNotRegexpMatches(content, r'(BBB|Chain B|Chain C)')
+
+        # Admin should see all verified chains.
+        self.login(self.admin)
+        content = self.comp_get('task/').content
+        self.assertMultilineRegex(content, r'AAA.*Chain A.*Chain C')
+        self.assertNotRegexpMatches(content, r'(BBB|Chain B)')
+
+    def test_custom_ordering(self):
+        self.init_competition(self.competitions[3])
+        chain1 = self.create_chain(name="Lanac A | Chain A", category="[order=10] AAA | aaa", cache_is_verified=True)
+        chain2 = self.create_chain(name="Lanac B | Chain B", category="[order=30] BBB | bbb", cache_is_verified=True)
+        chain3 = self.create_chain(name="Lanac C | Chain C", category="[order=+20] CCC | ccc", cache_is_verified=True)
+        self.create_ctask(chain1, '123', 1)
+        self.create_ctask(chain2, '123', 1)
+        self.create_ctask(chain3, '123', 1)
+        self.login(self.alice)
+
+        assert self.competition.get_languages() == ['hr', 'en']
+        # Test the first language. Note that order follows the numbers in
+        # [order=...], not the category names!
+        self.client.post('/i18n/setlang/', {'language': 'hr'})
+        content = self.comp_get('task/').content
+        self.assertMultilineRegex(content, r'AAA.*Lanac A.*CCC.*Lanac C.*BBB.*Lanac B')
+        self.assertNotRegexpMatches(content, r'(aaa|bbb|ccc|Chain)')
+
+        # Test the second language.
+        self.client.post('/i18n/setlang/', {'language': 'en'})
+        content = self.comp_get('task/').content
+        self.assertMultilineRegex(content, r'aaa.*Chain A.*ccc.*Chain C.*bbb.*Chain B')
+        self.assertNotRegexpMatches(content, r'(AAA|BBB|CCC|Lanac)')
+
+    def test_different_ordering_for_different_languages(self):
+        self.init_competition(self.competitions[3])
+        chain1 = self.create_chain(name="Lanac A | Chain A", category="[order=10] AAA | [order=-10] aaa", cache_is_verified=True)
+        chain2 = self.create_chain(name="Lanac B | Chain B", category="[order=30] BBB | [order=-30] bbb", cache_is_verified=True)
+        chain3 = self.create_chain(name="Lanac C | Chain C", category="[order=+20] CCC | [order=-20] ccc", cache_is_verified=True)
+        self.create_ctask(chain1, '123', 1)
+        self.create_ctask(chain2, '123', 1)
+        self.create_ctask(chain3, '123', 1)
+        self.login(self.alice)
+
+        assert self.competition.get_languages() == ['hr', 'en']
+        # Test the first language. Note that order follows the numbers in
+        # [order=...], not the category names!
+        self.client.post('/i18n/setlang/', {'language': 'hr'})
+        content = self.comp_get('task/').content
+        self.assertMultilineRegex(content, r'AAA.*Lanac A.*CCC.*Lanac C.*BBB.*Lanac B')
+        self.assertNotRegexpMatches(content, r'(aaa|bbb|ccc|Chain)')
+
+        # Test the second language.
+        self.client.post('/i18n/setlang/', {'language': 'en'})
+        content = self.comp_get('task/').content
+        self.assertMultilineRegex(content, r'bbb.*Chain B.*ccc.*Chain C.*aaa.*Chain A')
+        self.assertNotRegexpMatches(content, r'(AAA|BBB|CCC|Lanac)')
 
 
 class RegistrationTest(CompetitionViewsTestBase):

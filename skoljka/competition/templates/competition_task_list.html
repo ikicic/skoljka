@@ -57,9 +57,9 @@
   <table id="comp-tasks">
     {% for category in categories %}
       {# hidden visible only if admin #}
-      <tr class="comp-category {{ category.t_is_hidden|yesno:"comp-category-hidden," }}">
+      <tr class="comp-category {{ category.t_is_locked|yesno:"comp-category-hidden," }}">
         <td colspan="2">
-          {{ category.translated_name }} {% if category.t_is_hidden %}<i class="icon-lock" style="vertical-align:baseline;"></i>{% endif %}
+          {{ category.translated_name }} {% if category.t_is_locked %}<i class="icon-lock" style="vertical-align:baseline;"></i>{% endif %}
         </td>
       </tr>
       {% for chain in category.chains %}

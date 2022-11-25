@@ -72,7 +72,7 @@ BEGIN
 
     SELECT COUNT(1) INTO IndexIsThere
     FROM INFORMATION_SCHEMA.STATISTICS
-    WHERE table_schema = 'skoljka'
+    WHERE table_schema = DATABASE()
     AND   table_name   = given_table
     AND   index_name   = given_index;
 
@@ -89,4 +89,29 @@ BEGIN
 
 END $$
 
+DELIMITER ;
+
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS ResizeVarcharIfShorter $$
+CREATE PROCEDURE ResizeVarcharIfShorter(
+    given_table   VARCHAR(64),
+    given_column  VARCHAR(64),
+    new_length    INTEGER)
+BEGIN
+    DECLARE column_len INTEGER;
+    SELECT CHARACTER_MAXIMUM_LENGTH INTO column_len
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE table_schema = DATABASE()
+        AND   table_name   = given_table
+        AND   column_name  = given_column;
+
+    IF column_len < new_length THEN
+        SET @statement = CONCAT('ALTER TABLE ', given_table, ' MODIFY COLUMN ', given_column, ' VARCHAR(', new_length, ')');
+        PREPARE st FROM @statement;
+        EXECUTE st;
+        DEALLOCATE PREPARE st;
+        SELECT CONCAT('Executed: ', @statement) AS '';
+    END IF;
+END $$
 DELIMITER ;
