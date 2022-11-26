@@ -103,7 +103,7 @@
   {% if submission or not has_finished %}
     <h4>{% trans "Answer:" %}</h4>
   {% endif %}
-  {% if submission %}
+  {% if submission and submission.content %}
     <div class="outset ctask-answer">
       {% mathcontent_render submission.content %}
     </div>
