@@ -1934,10 +1934,14 @@ msgid "Existing attachments"
 msgstr "Postojeće datoteke"
 
 #: mathcontent/templates/mathcontent_edit_attachments.html:28
+msgid "Are you sure you want to delete the file?"
+msgstr "Želite li sigurno izbrisati datoteku?"
+
+#: mathcontent/templates/mathcontent_edit_attachments.html:33
 msgid "No attachments."
 msgstr "Nema datoteka."
 
-#: mathcontent/templates/mathcontent_edit_attachments.html:34
+#: mathcontent/templates/mathcontent_edit_attachments.html:40
 msgid "Upload an attachment"
 msgstr "Dodaj datoteku"
 

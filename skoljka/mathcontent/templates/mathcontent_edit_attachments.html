@@ -16,23 +16,29 @@
 
 <div class="outset outset-margin">
   <h4>{% trans "Existing attachments" %}</h4>
-  <table class="table-striped table-condensed" style="width: 40%">
-
-  {% for x in content.attachments.all %}
-    <tr>
-      <td><a href="{{ x.get_url }}">{{ x.get_filename }}</a></td>
-      <td>{{ x.cache_file_size|filesizeformat }}</td>
-      <td><a class="mc-attachment-delete" data-id="{{ x.id }}" data-name="{{ x.get_filename }}" href="#" title="Izbiši">Izbriši</a></td>
-    </tr>
-  {% empty %}
-    <tr><td><i>{% trans "No attachments." %}</i></td></tr>
-  {% endfor %}
-  </table>
+  <form method="POST" action="{{ content.get_edit_attachments_url }}">
+    {% csrf_token %}
+    <table class="table-striped table-condensed" style="width: 40%">
+    {% for x in content.attachments.all %}
+      <tr>
+        <td><a href="{{ x.get_url }}">{{ x.get_filename }}</a></td>
+        <td>{{ x.cache_file_size|filesizeformat }}</td>
+        {# TODO: Django 1.9: use {% blocktrans asvar ... %} #}
+        {# {% blocktrans with filename=x.get_filename as msg %}Are you sure you want to delete '{{ filename }}'""?{% endblocktrans %} #}
+        {% trans "Are you sure you want to delete the file?" as msg %}
+        <td><button class="btn-link" name="delete_attachment_id" value="{{ x.id }}"
+                    onclick="return confirm('{{ msg|escapejs }} {{ x.get_filename|escapejs }}')">{% trans "Delete" %}</button></td>
+      </tr>
+    {% empty %}
+      <tr><td><i>{% trans "No attachments." %}</i></td></tr>
+    {% endfor %}
+    </table>
+  </form>
 </div>
 
 <div class="outset">
   <h4>{% trans "Upload an attachment" %}</h4>
-  <form enctype="multipart/form-data" method="post" action="/mathcontent/{{ content.id }}/attachments/">
+  <form enctype="multipart/form-data" method="post" action="{{ content.get_edit_attachments_url }}">
     {% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="{% trans "Submit" %}" class="btn-primary">

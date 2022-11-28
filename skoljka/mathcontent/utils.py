@@ -51,6 +51,33 @@ def convert_to_latex(*args, **kwargs):
     return convert(TYPE_LATEX, *args, **kwargs)
 
 
+class _CheckEditAttachmentsPermissionsResult:
+    """Placeholder for potentially more complicated attachment logic, in case
+    we want to allow not only tasks but other models as well."""
+    def __init__(self, allowed, task):
+        self.allowed = allowed
+        self.task = task
+
+
+def check_edit_attachments_permissions(user, content):
+    """Check whether the user is allowed to add and delete attachments.
+
+    Currently, only Task MathContents are allowed to have attachments.
+    Only users with Task EDIT permission can upload or delete them.
+    """
+    # If updating this, update edit_attachments as well.
+
+    # Type-specific customization.
+    from skoljka.task.models import Task
+    try:
+        task = Task.objects.get(content_id=content.id)
+    except Task.DoesNotExist:
+        return _CheckEditAttachmentsPermissionsResult(False, None)
+
+    allowed = task.is_allowed_to_edit(user)
+    return _CheckEditAttachmentsPermissionsResult(allowed, task)
+
+
 def check_and_save_attachment(request, content):
     """
         Check if AttachmentForm is valid and, if it is, automatically save
@@ -61,29 +88,36 @@ def check_and_save_attachment(request, content):
     """
 
     form = AttachmentForm(request.POST, request.FILES)
-
     if form.is_valid():
-        # First generate attachment instance, so that file name generation works.
+        # First generate attachment instance, to generate the target path.
         attachment = Attachment(content=content)
         attachment.save()
 
-        # Generate path and file name etc.
-        form = AttachmentForm(request.POST, request.FILES, instance=attachment)
-        attachment = form.save(commit=False)
+        try:
+            # Generate path and file name etc.
+            form = AttachmentForm(
+                    request.POST, request.FILES, instance=attachment)
+            attachment = form.save(commit=False)
 
-        # Make file name compatible with LaTeX.
-        name = attachment.file.name.replace(' ', '')
-        if '.' in name:
-            name, ext = name.rsplit('.', 1)
-            name = name.replace('.', '') + '.' + ext
-        attachment.file.name = name
-        attachment.cache_file_size = attachment.file.size
-        attachment.save()
+            # Make file name compatible with LaTeX.
+            name = attachment.file.name.replace(' ', '')
+            if '.' in name:
+                name, ext = name.rsplit('.', 1)
+                name = name.replace('.', '') + '.' + ext
+            attachment.file.name = name
+            attachment.cache_file_size = attachment.file.size
+            attachment.save()
 
-        # Refresh HTML
-        # TODO: use signals!
-        content.html = None
-        content.save()
+            try:
+                content.html = None
+                content.save()
+            except:
+                # The file is not saved until .save(commit=True).
+                attachment.delete_file()
+                raise
+        except:
+            attachment.delete()
+            raise
     else:
         attachment = None
 

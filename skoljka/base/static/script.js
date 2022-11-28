@@ -200,22 +200,6 @@ $(function() {
     a.attr('href', 'mailto:' + email);
   });
 
-  /* Delete attachments */
-  $('.mc-attachment-delete').click(function() {
-    var id = $(this).attr('data-id');
-    var name = $(this).attr('data-name');
-    var msg = gettext("Are you sure you want to delete 'FILENAME'?")
-        .replace('FILENAME', name);
-    if (confirm(msg)) {
-      $.ajax({
-        url: '/attachment/' + id + '/delete/',
-        success: function() {
-          window.location.reload();
-        }
-      });
-    }
-  });
-
   /* Replace "Cancel Rating" with translation */
   // TODO: Translation not working, invoked too early. Fork and put gettext there?
   $('.rating-cancel > a').each(function() {

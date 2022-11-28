@@ -24,9 +24,9 @@ class LatexElement(models.Model):
     text = models.TextField()
     format = models.CharField(max_length=64)
     depth = models.IntegerField()
-    date_created = models.DateTimeField(auto_now=True, help_text=('If something goes wrong, you would like to have this information.'))
-    # Mjera sigurnosti, dogodilo se da se latex zblokira.
-    # Ne znam razlog, ovime se nadam da ce se olaksati debugiranje.
+    date_created = models.DateTimeField(
+            auto_now=True,
+            help_text="If something goes wrong, date might be useful.")
 
 
 @autoconnect
@@ -39,7 +39,7 @@ class MathContent(models.Model):
     def __unicode__(self):
         return self.short()
 
-    def short(self, length=50):
+    def short(self, length=30):
         return self.text[:length] + "..." if len(self.text) > length else self.text
 
     def is_empty(self):
@@ -49,6 +49,8 @@ class MathContent(models.Model):
         if not hasattr(self, '_no_html_reset'):
             self.html = None
 
+    def get_edit_attachments_url(self):
+        return '/mathcontent/{}/attachments/'.format(self.id)
 
 
 def attachment_upload_to(instance, filename):
@@ -60,9 +62,9 @@ def attachment_upload_to(instance, filename):
         filename
     )
 
+
 class Attachment(models.Model):
-    file = models.FileField(max_length=500, upload_to=attachment_upload_to,
-            blank=True)
+    file = models.FileField(max_length=500, upload_to=attachment_upload_to)
     content = models.ForeignKey(MathContent, related_name='attachments')
     date_created = models.DateTimeField(auto_now_add=True)
 
@@ -82,3 +84,12 @@ class Attachment(models.Model):
 
     def get_full_path_and_filename(self):
         return self.file.name
+
+    def delete_file(self):
+        """Delete the file and its parent folder."""
+        path = self.file.name
+        if path:
+            # Empty path can happen when the state is corrupt.
+            # TODO: Error log?
+            self.file.delete()
+            os.rmdir(os.path.dirname(path))

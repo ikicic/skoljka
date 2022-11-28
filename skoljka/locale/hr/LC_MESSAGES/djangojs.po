@@ -34,10 +34,6 @@ msgid "Error!"
 msgstr "Greška!"
 
 #: base/static/script.js:207
-msgid "Are you sure you want to delete 'FILENAME'?"
-msgstr "Želite li sigurno izbrisati 'FILENAME'?"
-
-#: base/static/script.js:223
 msgid "Cancel rating"
 msgstr "Izbriši ocjenu"
 
