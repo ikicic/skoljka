@@ -24,9 +24,18 @@ RUN set -ex \
             subversion \
         && apt-get clean
 
+# - lmodern and textlive-fonts-recommended are both required by our LaTex template.
+# - texlive-lang-european is required for \usepackage[croatian]{babel}.
+#   In principle, we could remove line instead.
+# - dvipng is used to convert latex output to pngs.
 RUN set -ex \
         && apt-get update \
-        && apt-get install -y --no-install-recommends texlive-latex-extra \
+        && apt-get install -y --no-install-recommends \
+            texlive-latex-extra \
+            texlive-lang-european \
+            texlive-fonts-recommended
+            lmodern \
+            dvipng \
         && apt-get clean
 
 # These are the latest versions of pip and setuptools that support Python 2.

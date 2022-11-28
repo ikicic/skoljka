@@ -10,10 +10,9 @@ from skoljka.mathcontent.templatetags.mathcontent_tags import mathcontent_render
 
 @ajax(get='text')
 def preview(request):
-    # TODO: POST method!
     text = request.GET['text']
 
     if len(text) > MAX_LENGTH:
-        return HttpResponseBadRequest('Message too long.')
+        return HttpResponseBadRequest("Message too long.")
 
     return convert_to_html_safe(text)

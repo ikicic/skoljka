@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from skoljka.utils.testcase import TestCase
+from skoljka.utils.testcase import SimpleTestCase
 
 from skoljka.mathcontent.converter_v1 import Tokenizer, Converter
 from skoljka.mathcontent.converter_v1.bbcode import parse_bbcode, BBCodeException
@@ -20,45 +20,43 @@ from skoljka.mathcontent.models import TYPE_HTML, TYPE_LATEX, LatexElement
 #     def get_latex_picture(self, format, latex):
 #         return "<<{}||{}>>".format(format, latex)
 
-def _mock__attachment(filename):
-    class File(object):
-        def __init__(self, fn):
-            self.filename = fn
-
-    class Attachment(object):
-        def __init__(self, fn):
-            self.file = File(fn)
-
-        def get_url(self):
-            return "/mock/" + self.file.filename
-
-        def get_filename(self):
-            return self.file.filename
-
-    return Attachment(filename)
+class MockFile(object):
+    def __init__(self, fn):
+        self.filename = fn
 
 
-def _mock__generate_png(hash, format, latex):
-    return LatexElement(hash=hash, format=format, text=latex, depth=0)
+class MockAttachment(object):
+    def __init__(self, fn):
+        self.file = MockFile(fn)
 
-def _mock__generate_latex_hash(format, latex):
-    return "<<{}||{}>>".format(format, latex)
+    def get_url(self):
+        return "/mock/" + self.file.filename
 
-def _mock__get_available_latex_elements(formulas):
-    return {}
-
-def _mock__get_latex_html(element, force_inline):
-    return ("INLINE:" if force_inline else "") + element.hash
+    def get_filename(self):
+        return self.file.filename
 
 
-class ConverterV1TestCase(TestCase):
+class MockConverter(Converter):
+    def generate_png(self, hash, format, latex):
+        return LatexElement(hash=hash, format=format, text=latex, depth=0)
+
+    def generate_latex_hash(self, format, latex):
+        return "<<{}||{}>>".format(format, latex)
+
+    def get_available_latex_elements(self, formulas):
+        return {}
+
+    def get_latex_html(self, element, force_inline):
+        return ("INLINE:" if force_inline else "") + element.hash
+
+
+class ConverterV1TestCase(SimpleTestCase):
     def setUp(self):
         self.attachments = [
-            _mock__attachment("first.png"),
-            _mock__attachment("second.png"),
+            MockAttachment('first.png'),
+            MockAttachment('second.png'),
         ]
 
-    # TODO: move to skoljka custom TestCase
     def assertEqualPrint(self, received, expected):
         if received != expected:
             print
@@ -83,13 +81,9 @@ class ConverterV1TestCase(TestCase):
             converter_kwargs={}, *args, **kwargs):
         tokenizer = Tokenizer(input)
         tokens = tokenizer.tokenize()
-        converter = Converter(tokens, tokenizer, attachments=self.attachments,
+        converter = MockConverter(
+                tokens, tokenizer, attachments=self.attachments,
                 **converter_kwargs)
-        converter.generate_png__func = _mock__generate_png
-        converter.generate_latex_hash__func = _mock__generate_latex_hash
-        converter.get_available_latex_elements__func = \
-                _mock__get_available_latex_elements
-        converter.get_latex_html__func = _mock__get_latex_html
         if output_html is not None:
             self.assertEqualPrint(converter.convert_to_html(), output_html)
         if output_latex is not None:
@@ -634,7 +628,7 @@ class ConverterV1TestCase(TestCase):
                 '<p class="mc-noindent">INLINE:<<%s||\\TeX>>')
 
         # Depending on the whitespace after environment, put indent or noindent.
-        # (test HTMLConverterState.last_was_block)
+        # (test _HTMLConverterState.last_was_block)
         self.assertHTMLAutoLatex(
                 "\\begin{center}bla\\end{center}\nno indent here",
                 '<div class="mc-center">'

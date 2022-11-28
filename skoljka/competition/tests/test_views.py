@@ -74,12 +74,6 @@ class CompetitionViewsTestBase(TestCase):
         self.competitions = {x.id: x for x in Competition.objects.all()}
         self.competition = None
 
-    def login(self, user):
-        self.assertTrue(self.client.login(username=user.username, password="a"))
-
-    def logout(self):
-        self.client.logout()
-
     def comp_get(self, suffix, *args, **kwargs):
         """Equivalent to self.client.get with the competition's URL prepended."""
         assert self.competition

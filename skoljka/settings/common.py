@@ -137,7 +137,7 @@ LOGIN_URL = '/accounts/login/'
 # Where is a user redirected after a successful log in
 LOGIN_REDIRECT_URL = '/'
 
-
+TEST_RUNNER = 'skoljka.utils.testrunner.TemporaryMediaRootRunner'
 
 ######################################
 # Middleware

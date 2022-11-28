@@ -69,7 +69,6 @@ default_parindent = '0em'
 RE_ASCII_ALPHA_SINGLE_CHAR = re.compile('[a-zA-Z]')
 _NT__READ_TEXT__END_CHAR = set('{}[]$\n\r\\%')
 
-
 class ParserInternalError(Exception):
     pass
 
@@ -601,6 +600,18 @@ class _BBTemporaryOpenTag(object):
         return converter.tokenizer.T[self.token.T_start : self.token.T_end]
 
 
+class _HTMLConverterState(object):
+    def __init__(self):
+        self.any_content_yet = False
+        self.is_in_paragraph = False
+        self.indent_next = False
+        self.all_no_indent = False
+
+        # List of all supported lengths. None stands for the default
+        # value. These are the HTML values.
+        self.lengths_html = {'\\parindent': None, '\\parskip': None}
+
+
 class Converter(object):
     ERRORS_DISABLED = 0
     ERRORS_ENABLED = 1
@@ -622,15 +633,26 @@ class Converter(object):
         self.errors_mode = errors_mode
         self.paragraphs_disabled = paragraphs_disabled
 
-        self.generate_png__func = generate_png
-        self.generate_latex_hash__func = generate_latex_hash
-        self.get_available_latex_elements__func = get_available_latex_elements
-        self.get_latex_html__func = get_latex_html
-
         self.bb_stack = []
 
         self._state_stack = []
         self.state = None
+
+    # To be able to mock it.
+    def generate_png(self, *args, **kwargs):
+        return generate_png(*args, **kwargs)
+
+    # To be able to mock it.
+    def generate_latex_hash(self, *args, **kwargs):
+        return generate_latex_hash(*args, **kwargs)
+
+    # To be able to mock it.
+    def get_available_latex_elements(self, *args, **kwargs):
+        return get_available_latex_elements(*args, **kwargs)
+
+    # To be able to mock it.
+    def get_latex_html(self, *args, **kwargs):
+        return get_latex_html(*args, **kwargs)
 
     def push_state(self):
         self._state_stack.append(copy.deepcopy(self._state_stack[-1]))
@@ -659,20 +681,20 @@ class Converter(object):
                             force_inline=True)
 
             if isinstance(token, TokenMath):
-                latex_hash = self.generate_latex_hash__func(
+                latex_hash = self.generate_latex_hash(
                         token.format, token.content)
                 formulas.append((latex_hash, token.format, token.content))
 
             tokens.append(token)
 
         latex_elements = {x.hash: x \
-                for x in self.get_available_latex_elements__func(formulas)}
+                for x in self.get_available_latex_elements(formulas)}
 
         self.maths = {}
         for hash, format, content in formulas:
             element = latex_elements.get(hash)
             if element is None:
-                element = self.generate_png__func(hash, format, content)
+                element = self.generate_png(hash, format, content)
             self.maths[(format, content)] = element
 
         return tokens
@@ -741,19 +763,7 @@ class Converter(object):
         else:
             error_func = lambda token: u""
 
-        class HTMLConverterState(object):
-            def __init__(self):
-                self.any_content_yet = False
-                self.is_in_paragraph = False
-                self.indent_next = False
-                self.all_no_indent = False
-
-                # List of all supported lengths. None stands for the default
-                # value. These are the HTML values.
-                self.lengths_html = {'\\parindent': None, '\\parskip': None}
-
-
-        self._state_stack = [HTMLConverterState()]
+        self._state_stack = [_HTMLConverterState()]
         self.state = self._state_stack[-1]
 
         output = []
@@ -803,7 +813,7 @@ class Converter(object):
             elif isinstance(token, TokenMath):
                 element = self.maths[(token.format, token.content)]
                 add_content_par(
-                        self.get_latex_html__func(element, token.force_inline))
+                        self.get_latex_html(element, token.force_inline))
             elif isinstance(token, TokenText):
                 add_content_par(xss.escape(token.text).replace('~', '&nbsp;'))
             elif isinstance(token, TokenSimpleWhitespace):
