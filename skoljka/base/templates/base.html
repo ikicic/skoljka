@@ -1,3 +1,4 @@
+{% load url from future %}
 {% load compressed %}
 {% load base_tags %}
 {% load tags_tags %}
@@ -7,7 +8,7 @@
 <html>
   <head>
     <script>is_authenticated={{ user.is_authenticated|lower }};</script>
-    <script type="text/javascript" src="{% url base.views.cached_javascript_catalog %}"></script>
+    <script type="text/javascript" src="{% url 'skoljka.base.views.cached_javascript_catalog' %}"></script>
     {% compressed_css 'style' %}
     {% compressed_js 'scripts' %}
 

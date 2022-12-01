@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load url from future %}
 
 {% block content %}
 
@@ -15,10 +16,10 @@
     {% registration_form %}
   </div>
   <div id="homepage-auth-xs-phone" class="visible-xs-phone">
-    <a class="homepage-auth" href="{% url django.contrib.auth.views.login %}">
+    <a class="homepage-auth" href="{% url 'django.contrib.auth.views.login' %}">
       {% trans "Sign in" %}
     </a>
-    <a class="homepage-auth" href="{% url registration_register %}">
+    <a class="homepage-auth" href="{% url 'registration_register' %}">
       {% trans "Registration" %}
     </a>
   </div>

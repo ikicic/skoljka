@@ -1,33 +1,40 @@
 from django.conf import settings
 from django.conf.urls.defaults import *
-from django.views.generic.simple import direct_to_template
+from django.views.generic import TemplateView
 
-_EXTRA_URLS = [(x[0], direct_to_template, {'template': x[1]}) for x in settings.EXTRA_BASE_URLS]
+_EXTRA_URLS = [(x[0], TemplateView.as_view(template_name=x[1])) for x in settings.EXTRA_BASE_URLS]
 
 js_info_dict = {
     'packages': ('competition', ),
 }
 
+# TODO: Remove after switching to Django 1.5, use TemplateView.as_view(..., content_type=...).
+# https://stackoverflow.com/questions/6867468/setting-up-mimetype-when-using-templateview-in-django
+class TextTemplateView(TemplateView):
+    def render_to_response(self, context, **response_kwargs):
+        response_kwargs['content_type'] = 'text/plain'
+        return super(TemplateView, self).render_to_response(
+                context, **response_kwargs)
+
 
 urlpatterns = patterns('',
     (r'^$', 'skoljka.base.views.homepage'),
-    (r'^robots\.txt$', direct_to_template, {'template': 'robots.txt', 'mimetype': 'text/plain'}),
+    (r'^robots\.txt$', TextTemplateView.as_view(template_name='robots.txt')),
 
-    (r'^help/$', direct_to_template, {'template': 'help/help.html'}),
-    (r'^help/folders/$', direct_to_template, {'template': 'help/help_folders.html'}),
+    (r'^help/$', TemplateView.as_view(template_name='help/help.html')),
+    (r'^help/folders/$', TemplateView.as_view(template_name='help/help_folders.html')),
     (r'^help/format/$', 'skoljka.base.help.help_format'),
-    (r'^help/instructions/$', direct_to_template, {'template': 'help/help_instructions.html'}),
-    (r'^help/other/$', direct_to_template, {'template': 'help/help_other.html'}),
-    (r'^help/permissions/$', direct_to_template, {'template': 'help/help_permissions.html'}),
-    (r'^help/upload/$', direct_to_template, {'template': 'help/help_upload.html'}),
+    (r'^help/instructions/$', TemplateView.as_view(template_name='help/help_instructions.html')),
+    (r'^help/other/$', TemplateView.as_view(template_name='help/help_other.html')),
+    (r'^help/permissions/$', TemplateView.as_view(template_name='help/help_permissions.html')),
+    (r'^help/upload/$', TemplateView.as_view(template_name='help/help_upload.html')),
 
-    (r'^about/$', direct_to_template, {'template': 'about.html'}),
+    (r'^about/$', TemplateView.as_view(template_name='about.html')),
     (r'^featured_lecture/', 'skoljka.base.views.featured_lecture'),
-    (r'^tou/$', direct_to_template, {'template': 'terms_of_use.html'}),
+    (r'^tou/$', TemplateView.as_view(template_name='terms_of_use.html')),
 
     (r'^i18n/', include('django.conf.urls.i18n')),
     (r'^jsi18n/$', 'skoljka.base.views.cached_javascript_catalog', js_info_dict),
 
     *_EXTRA_URLS
 )
-
