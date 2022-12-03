@@ -2,6 +2,8 @@ from django.conf import settings
 from django.conf.urls.defaults import *
 from django.views.generic import TemplateView
 
+from skoljka.base.views_test import IS_TESTDB
+
 _EXTRA_URLS = [(x[0], TemplateView.as_view(template_name=x[1])) for x in settings.EXTRA_BASE_URLS]
 
 js_info_dict = {
@@ -38,3 +40,9 @@ urlpatterns = patterns('',
 
     *_EXTRA_URLS
 )
+
+if IS_TESTDB:
+    urlpatterns += patterns('',
+        (r'^test/resetdb/', 'skoljka.base.views_test.reset_testdb'),
+        (r'^test/latest_email/', 'skoljka.base.views_test.get_latest_email'),
+    )

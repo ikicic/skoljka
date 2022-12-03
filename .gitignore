@@ -2,6 +2,7 @@
 apps/base/templates/local/
 bower_components/
 build/
+cypress/videos/
 local/
 node_modules/
 skoljka/settings/local.py

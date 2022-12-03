@@ -50,13 +50,17 @@ DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 ENABLE_DEBUG_TOOLBAR = True  # Works only if DEBUG is True.
 MATHCONTENT_DEBUG = False    # Not dependent on DEBUG.
+TEST_MODE = False
+TEST_SITE_DOMAIN = 'localhost:8000'  # Used by reset_testdb.
+TEST_SITE_NAME = 'localhost:8000'    # Used by reset_testdb.
 
 # Set this if latex is not in PATH
 # LATEX_BIN_DIR = 'C:\\Program Files\\texlive\\2011\\bin\\win32\\'
 
 # Use this for development:
+# EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 # EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-# EMAIL_FILE_PATH = os.path.join(PROJECT_ROOT, "local", "email")
+# EMAIL_FILE_PATH = os.path.join(PROJECT_ROOT, 'local', 'email')
 
 EMAIL_HOST = ''
 EMAIL_HOST_USER = ''
