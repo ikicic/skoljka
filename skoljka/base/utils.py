@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -29,7 +31,7 @@ def _get_featured_lectures_cached():
     tasks = list(folder.get_queryset(None, no_perm_check=True))
     if any(task.hidden for task in tasks):
         # TODO: log
-        print "WARNING! Some featured lectures are hidden! Ignoring them."
+        print("WARNING! Some featured lectures are hidden! Ignoring them.")
         tasks = [task for task in tasks if not task.hidden]
 
     return tasks

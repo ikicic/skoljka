@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from hashlib import sha1
 import codecs
 import os
@@ -113,7 +115,7 @@ def generate_tags_autocomplete_js():
 
         Returns js file URL / relative file path.
     """
-    print 'Refreshing tags autocomplete js...'
+    print("Refreshing tags autocomplete js...")
 
     names = u'","'.join(Tag.objects.values_list('name', flat=True))
 
@@ -147,7 +149,7 @@ def generate_tags_autocomplete_js():
     f.write(content)
     f.close()
 
-    print 'Filename:', filename
+    print("Filename:", filename)
     return '/' + filename
 
 @register.simple_tag()

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from textwrap import dedent
 
 from django.contrib.auth.models import User

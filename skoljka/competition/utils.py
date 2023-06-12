@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 import json
@@ -391,8 +393,8 @@ def update_chain_ctasks(competition, chain, old_ids, new_ids):
     for k, ctask_id in enumerate(new_ids, 1):
         queries_args.append((chain.id, k, ctask_id))
 
-    print 'OLD NEW_IDS', old_ids, new_ids
-    print 'QUERIES', queries_args
+    print("OLD NEW_IDS", old_ids, new_ids)
+    print("QUERIES", queries_args)
     if queries_args:
         cursor = connection.cursor()
         cursor.executemany(

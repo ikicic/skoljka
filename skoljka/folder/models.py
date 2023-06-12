@@ -1,4 +1,6 @@
-﻿import itertools
+﻿from __future__ import print_function
+
+import itertools
 import time
 
 from django.db import connection, models, transaction
@@ -319,7 +321,7 @@ class Folder(BasePermissionsModel):
                 if detailed_status is not None:
                     ref[2][detailed_status] += 1    # Solution statistics
 
-        print 'user solution stats for %d folders found in %lfs' % (len(folders), time.time() - start_time)
+        print("user solution stats for %d folders found in %lfs" % (len(folders), time.time() - start_time))
         return result
 
 

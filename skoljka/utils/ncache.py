@@ -7,6 +7,8 @@ counter and given key (i.e. subkey). Note that you need the counter to
 access the final cached value (that's how the namespace mechanism works).
 """
 
+from __future__ import print_function
+
 from django.conf import settings
 from django.core.cache import cache
 
@@ -104,7 +106,7 @@ def invalidate_full_key(full_key):
     Use with caution, be sure to use the latest namespace counter!
     """
     if settings.DEBUG:
-        print 'Invalidating full key "%s"' % full_key  # TODO: log
+        print("Invalidating full key \"%s\"" % full_key)  # TODO: log
     cache.delete(full_key)
 
 
@@ -112,7 +114,7 @@ def invalidate_namespace(namespace):
     """Invalidate given namespace."""
     try:
         if settings.DEBUG:
-            print 'Invalidating namespace "%s"' % namespace  # TODO: log
+            print("Invalidating namespace \"%s\"" % namespace)  # TODO: log
         cache.incr(namespace)
     except ValueError:
         pass  # Cache does not exist. Ignore.

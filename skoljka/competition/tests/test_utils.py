@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import datetime
 
 from django.contrib.auth.models import User
@@ -104,7 +106,7 @@ class TeamScoreTest(TestCase):
                         team.cache_score, team.cache_max_score_after_freeze)
                 self.assertEqual(score_triple, expected_score_triple)
             except:
-                print "Test case #{}: {}".format(index, test_case)
+                print("Test case #{}: {}".format(index, test_case))
                 raise
 
     def test_refresh_score_no_submissions(self):

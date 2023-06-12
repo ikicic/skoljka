@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 from skoljka.utils.testcase import SimpleTestCase
 
 from skoljka.mathcontent.converter_v1 import Tokenizer, Converter
@@ -59,11 +61,11 @@ class ConverterV1TestCase(SimpleTestCase):
 
     def assertEqualPrint(self, received, expected):
         if received != expected:
-            print
-            print "Received: ", repr(unicode(received))
-            print "Expected: ", repr(unicode(expected))
-            # print "Received: ", received
-            # print "Expected: ", expected
+            print()
+            print("Received: ", repr(unicode(received)))
+            print("Expected: ", repr(unicode(expected)))
+            # print("Received: ", received)
+            # print("Expected: ", expected)
             self.fail("Received != Expected")
 
     def assertTokenization(self, input, expected_tokens, *args, **kwargs):

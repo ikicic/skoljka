@@ -1,3 +1,5 @@
+from __future__ import print_function 
+
 from collections import defaultdict
 from urlparse import urljoin
 import copy
@@ -533,15 +535,15 @@ class Tokenizer(object):
 
     def tokenize(self):
         tokens = list(flatten_ignore_none(self.parse()))
-        # print
-        # print "Tokenization"
-        # print "-----------"
-        # print self.T
-        # print "-----------"
-        # print repr(self.T)
-        # print "-----------"
+        # print()
+        # print("Tokenization")
+        # print("-----------")
+        # print(self.T)
+        # print("-----------")
+        # print(repr(self.T))
+        # print("-----------")
         # for token in tokens:
-        #     print repr(token)
+        #     print(repr(token))
         return tokens
 
 

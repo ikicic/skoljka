@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from skoljka.utils.testcase import SimpleTestCase
 
 from skoljka.competition.evaluator import \
@@ -19,7 +21,7 @@ class EvaluatorV1Test(SimpleTestCase):
             try:
                 result = parse_descriptor(test)
             except:
-                print "Failed on the test case {}.".format(test)
+                print("Failed on the test case {}.".format(test))
                 raise
             self.assertEqual(len(result), len(variable_types),
                     msg="Descriptor: {}".format(test))
@@ -44,8 +46,8 @@ class EvaluatorV1Test(SimpleTestCase):
                         descriptor, k, variable_types[k], result[k])
                     self.assertIsInstance(result[k], variable_types[k], msg)
             except Exception as e:
-                print "Unexpected exception '{}' ({}) for test case {}.".format(
-                        e, type(e), test_case)
+                print("Unexpected exception '{}' ({}) for test case {}.".format(
+                        e, type(e), test_case))
                 raise
 
     def assertGetSampleSolution(self, tests):
@@ -56,10 +58,10 @@ class EvaluatorV1Test(SimpleTestCase):
             variables = safe_parse_descriptor(evaluator_v1, descriptor)
             sample = get_sample_solution(variables)
             if sample != result:
-                print "DESCRIPTOR", descriptor
-                print "VARIABLES", variables
-                print "SAMPLE", sample
-                print "EXPECTED", result
+                print("DESCRIPTOR", descriptor)
+                print("VARIABLES", variables)
+                print("SAMPLE", sample)
+                print("EXPECTED", result)
             self.assertEqual(sample, result)
 
 

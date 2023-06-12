@@ -1,4 +1,6 @@
-﻿import re
+﻿from __future__ import print_function
+
+import re
 
 from django.conf import settings
 from django.contrib.admin.models import LogEntry, CHANGE
@@ -490,7 +492,7 @@ def advanced_new(request):
                 object_repr=ADVANCED_NEW_OBJECT_REPR, action_flag=CHANGE,
                 change_message=structure)
 
-            print 'Creating folders...'
+            print("Creating folders...")
             created, existing = \
                 _create_folders(request.user, parent, structure, None)
 

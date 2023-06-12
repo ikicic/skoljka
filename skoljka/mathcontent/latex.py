@@ -1,4 +1,6 @@
-﻿from collections import defaultdict
+﻿from __future__ import print_function
+
+from collections import defaultdict
 import codecs
 import hashlib
 import os
@@ -123,7 +125,7 @@ def generate_png(hash, format, latex):
         if depth > MAX_DEPTH:
             depth = ERROR_DEPTH_VALUE
         if depth == ERROR_DEPTH_VALUE:
-            print 'ERROR stdout:', stdout
+            print("ERROR stdout:", stdout)
 
     if not error and status == 0:
         os.remove(filename + '.tex')
