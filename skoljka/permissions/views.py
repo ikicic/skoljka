@@ -21,17 +21,15 @@ from skoljka.permissions.signals import objectpermissions_changed
 @login_required
 @response('permissions_edit.html')
 def edit(request, id, type_id):
-    """
-        Check if there are any special requirements for given content type.
+    """Check if there are any special requirements for given content type.
 
-        Currently, only Folders use special kind of permission check
-        (and data preparation).
+    Currently, only `Folders` use a special kind of permission check
+    (and data preparation).
     """
     content_type = get_object_or_404(ContentType, id=type_id)
 
     # Model specific tuning:
     if content_type.app_label == 'folder' and content_type.model == 'folder':
-        # If folder, make sure to call folder_view first.
         return _folder_edit(request, id, type_id, content_type)
 
     try:
@@ -40,39 +38,34 @@ def edit(request, id, type_id):
         raise Http404
 
     # Check if the user has the permission to *edit permissions* (not just
-    # to view it). Note that object has to be PermissionsModel.
+    # to view it). Note that the object has to be PermissionsModel.
     if not object.user_has_perm(request.user, EDIT_PERMISSIONS):
         return 403
     return _edit(request, {}, id, object, type_id, content_type)
 
+
 @folder_view(permission=EDIT_PERMISSIONS)
 def _folder_edit(request, folder, data, *args, **kwargs):
-    """
-        Wrapper for folders.
-    """
+    """Wrapper for folders."""
     # Ok, user can really edit permissions. Continue with generated data.
     return _edit(request, data, folder.id, folder, *args, **kwargs)
 
 
 def _edit(request, data, id, object, type_id, content_type):
-    """
-        Actual edit view.
-    """
+    """Actual edit view."""
 
     model = object.__class__
 
-    # Convert list of strings (permission names) to list of permission types
+    # Convert list of strings (permission names) to the list of permission types.
     object_permissions = getattr(model, 'object_permissions', ['default'])
 
     permission_types = convert_permission_names_to_values(object_permissions)
 
-    # Get (name, value) pairs in the specific order.
+    # Get the (name, value) pairs in the specific order.
     applicable_permissions = [(name, value)
         for name, value in PERMISSIONS if value in permission_types]
 
-
     selected_types = [VIEW]
-
     form = None
     message = u''
     if request.method == 'POST':
@@ -122,16 +115,15 @@ def _edit(request, data, id, object, type_id, content_type):
                 objectpermissions_changed.send(sender=model, instance=object,
                     content_type=content_type)
 
-                message = u'Promjene spremljene.'
+                message = _("Changes saved.")
 
-                form = None # reset
-
+                form = None  # Reset.
 
     if form is None:
         form = GroupEntryForm(user=request.user)
 
     perms = ObjectPermission.objects.filter(object_id=id, content_type=content_type)
-    groups = dict()
+    groups = {}
     for perm in perms:
         group = perm.group
         if group.id in groups:
@@ -139,7 +131,6 @@ def _edit(request, data, id, object, type_id, content_type):
         else:
             groups[group.id] = group
             groups[group.id]._cache_permissions = [perm.permission_type]
-
 
     data.update({
         'object': object,
