@@ -213,11 +213,14 @@
   // Option for admins to show all translations.
   $(function() {
     var enabled = localStorage.getItem('all-langs');
+    const body = $('body');
     if (enabled === '0' || !window.is_admin) {
-      $('body').removeClass('all-langs');
+      if (body.hasClass('all-langs')) {
+        body.removeClass('all-langs');
+      }
       $('#all-langs').prop('checked', false);
     } else {
-      $('body').addClass('all-langs');  // Default.
+      body.addClass('all-langs');  // Default.
     }
 
     $('#all-langs').click(function() {
