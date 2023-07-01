@@ -41,6 +41,16 @@ service mysql start  # Fails for some reason.
 service mysql start  # Try again.
 ```
 
+
+# Development environment setup
+
+```sh
+# Install outside of the Python environment, to get the newest version.
+python3 -m pip install pre-commit
+pre-commit install
+```
+
+
 # Installation
 
 This procedure is based on the following tutorial:

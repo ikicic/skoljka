@@ -1,0 +1,24 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v2.3.0
+  hooks:
+  - id: check-yaml
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
+- repo: https://github.com/PyCQA/isort
+  rev: 5.12.0
+  hooks:
+  - id: isort
+    args: [--profile=black]
+- repo: https://github.com/psf/black
+  rev: 21.9b0
+  hooks:
+  - id: black
+    args: [--skip-string-normalization]
+    # For some reason the dependency is not resolved automatically.
+    additional_dependencies: [click==7.1.2]
+- repo: https://github.com/pycqa/flake8
+  rev: 3.9.2  # Python2-compatible.
+  hooks:
+  - id: flake8
+    args: ["--ignore=E203,E266,E302,E402,E501,W503"]
