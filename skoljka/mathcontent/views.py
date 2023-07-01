@@ -1,13 +1,15 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 
+from skoljka.mathcontent.forms import AttachmentForm
+from skoljka.mathcontent.models import Attachment, MathContent
+from skoljka.mathcontent.utils import (
+    check_and_save_attachment,
+    check_edit_attachments_permissions,
+)
 from skoljka.task.utils import get_task_folder_data
 from skoljka.utils.decorators import response
 
-from skoljka.mathcontent.forms import AttachmentForm
-from skoljka.mathcontent.models import MathContent, Attachment
-from skoljka.mathcontent.utils import \
-        check_edit_attachments_permissions, check_and_save_attachment
 
 @login_required
 @response('mathcontent_edit_attachments.html')
@@ -22,7 +24,8 @@ def edit_attachments(request, id):
         if 'delete_attachment_id' in request.POST:
             try:
                 attachment = Attachment.objects.get(
-                        id=request.POST['delete_attachment_id'])
+                    id=request.POST['delete_attachment_id']
+                )
             except Attachment.DoesNotExist:
                 return 403  # Always 403.
             if attachment.content_id != content.id:
@@ -44,8 +47,9 @@ def edit_attachments(request, id):
     else:
         form = AttachmentForm()
 
-    assert result.task is not None, \
-           "assuming for now only Task MathContents can have attachments"
+    assert (
+        result.task is not None
+    ), "assuming for now only Task MathContents can have attachments"
     data = {
         'content': content,
         'form': form,

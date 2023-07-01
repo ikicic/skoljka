@@ -1,16 +1,26 @@
 from django.utils.translation import ugettext as _
 
+from skoljka.mathcontent.converter_v1.basics import (
+    COUNTER_EQUATION,
+    COUNTER_FIGURE,
+    ParseError,
+    State,
+    img_params_to_html,
+    test_eq,
+)
+from skoljka.mathcontent.converter_v1.tokens import (
+    TOKEN_CLOSED_CURLY,
+    TokenCommand,
+    TokenError,
+    TokenMath,
+    TokenWarning,
+)
 from skoljka.utils import xss
-
-from skoljka.mathcontent.converter_v1.basics import \
-        img_params_to_html, State, COUNTER_EQUATION, COUNTER_FIGURE, \
-        test_eq, ParseError
-from skoljka.mathcontent.converter_v1.tokens import \
-        TokenError, TokenCommand, TokenMath, TokenWarning, TOKEN_CLOSED_CURLY
 
 
 class LatexValueError(Exception):
     pass
+
 
 ########################################################
 # LaTeX Commands
@@ -27,12 +37,13 @@ _convert_tex_length_to_html__map = {
     'in': None,
     'ex': None,
     'em': None,
-    'bp': (1. / 72, 'in'),
+    'bp': (1.0 / 72, 'in'),
     'pc': (12 * _TEX_PT_TO_HTML, 'pt'),
     'dd': (1238 / 1157 * _TEX_PT_TO_HTML, 'pt'),
     'cc': (12 * 1238 / 1157 * _TEX_PT_TO_HTML, 'pt'),
-    'sp': (_TEX_PT_TO_HTML / 65536., 'pt'),
+    'sp': (_TEX_PT_TO_HTML / 65536.0, 'pt'),
 }
+
 
 def convert_tex_length_to_html(value):
     value = value.strip()
@@ -64,7 +75,7 @@ def _parse_argument__url(tokenizer):
         K += 1
     tokenizer.K = K
     if braces > 0:
-        return TokenError(_("Closing '}' bracket not found."), T[start : K])
+        return TokenError(_("Closing '}' bracket not found."), T[start:K])
     return T[start : K - 1]  # Don't include }.
 
 
@@ -81,7 +92,6 @@ def _parse_latex_params(val):
             raise BBCodeException(_("Invalid format:") + " " + val)
         result[name.strip()] = val.strip()
     return result
-
 
 
 class Command(object):
@@ -137,8 +147,7 @@ class Command(object):
         tokenizer.state.add_token(TokenCommand(name, 0, args, whitespace))
         for part in range(1, len(self.P_indices) - 1):
             tokenizer.state.add_token(args[self.P_indices[part]])
-            tokenizer.state.add_token(
-                    TokenCommand(name, part, args, whitespace))
+            tokenizer.state.add_token(TokenCommand(name, part, args, whitespace))
 
     def to_html(self, token, converter):
         raise NotImplementedError(repr(token))
@@ -171,14 +180,12 @@ class Command(object):
         return u"".join(output)
 
 
-
 class _LatexEnvironmentReadUntil(object):
     def __init__(self):
         super(_LatexEnvironmentReadUntil, self).__init__()
         # Ignore everything after \end{...} until the end of line.
         # E.g. "LaTeX Warning: Characters dropped after `\end{verbatim}' (...)"
         self.ignore_until_eol = False
-
 
 
 class LatexBegin(Command):
@@ -203,26 +210,31 @@ class LatexBegin(Command):
         if isinstance(environment, _LatexEnvironmentReadUntil):
             end = '\\end{%s}' % args[0]
             latex = tokenizer.read_until_exact(end)
-            tokenizer.state.add_token(TokenCommand(
-                    name, 0, [args[0], environment, latex], whitespace))
+            tokenizer.state.add_token(
+                TokenCommand(name, 0, [args[0], environment, latex], whitespace)
+            )
             if environment.ignore_until_eol:
                 try:
                     ignored = tokenizer.read_until_exact_any(['\r', '\n'])
                     tokenizer.K -= 1  # Do not skip the newline.
                 except ParseError as e:
-                    ignored = tokenizer.T[tokenizer.K:]
+                    ignored = tokenizer.T[tokenizer.K :]
                     tokenizer.K = len(tokenizer.T)
                 if ignored.strip():
-                    tokenizer.state.add_token(TokenWarning(
-                        _("Ignored the rest of the line after %s!") % end,
-                        ignored))
+                    tokenizer.state.add_token(
+                        TokenWarning(
+                            _("Ignored the rest of the line after %s!") % end, ignored
+                        )
+                    )
             return
 
         # Pass environment as the arg.
         tokenizer.state.add_token(
-                TokenCommand(name, 0, [args[0], environment], whitespace))
-        tokenizer.push_state(State(break_condition='begin-' + args[0],
-                environment=environment))
+            TokenCommand(name, 0, [args[0], environment], whitespace)
+        )
+        tokenizer.push_state(
+            State(break_condition='begin-' + args[0], environment=environment)
+        )
 
     def to_html(self, token, converter):
         environment = token.args[1]
@@ -235,7 +247,6 @@ class LatexBegin(Command):
         if isinstance(environment, _LatexEnvironmentReadUntil):
             return result + token.args[2] + '\\end{%s}' % token.args[0]
         return result
-
 
 
 class LatexEnd(Command):
@@ -251,30 +262,30 @@ class LatexEnd(Command):
     def apply_command(self, tokenizer, name, args, whitespace):
         """Simply add itself to the current state."""
         break_condition = tokenizer.state.break_condition
-        if not isinstance(break_condition, basestring) or \
-                not break_condition.startswith('begin-'):
+        if not isinstance(
+            break_condition, basestring
+        ) or not break_condition.startswith('begin-'):
             return TokenError(_("Unexpected \\end."), "")
         expected = break_condition[6:]
         if expected != args[0]:
             return TokenError(
-                    _("Expected '%(expected)s', received '%(received)s'.") %
-                            {'expected': expected, 'received': args[0]}, "")
+                _("Expected '%(expected)s', received '%(received)s'.")
+                % {'expected': expected, 'received': args[0]},
+                "",
+            )
         environment = tokenizer.state.environment
         assert environment is not None
         result = tokenizer.pop_state().tokens
-        return [
-                result,
-                TokenCommand(name, 0, [args[0], environment], whitespace)
-        ]
+        return [result, TokenCommand(name, 0, [args[0], environment], whitespace)]
 
     def to_html(self, token, converter):
         environment = token.args[1]
         return environment.to_html(False, token, converter)
 
 
-
 class LatexCaption(Command):
     """Handle \\caption{...}."""
+
     def __init__(self):
         super(LatexCaption, self).__init__(args_desc="{P}")
 
@@ -287,14 +298,17 @@ class LatexCaption(Command):
         tag = str(tokenizer.counters[COUNTER_FIGURE])
         tokenizer.state.environment.tag = tag
         return super(LatexCaption, self).apply_command(
-                tokenizer, name, args + [tag], whitespace)
+            tokenizer, name, args + [tag], whitespace
+        )
 
     def to_html(self, token, converter):
         if token.part == 0:
             # TODO: Translation to other languages.
             tag_text = u"Slika {}:".format(token.args[-1])
-            return u'<div class="mc-caption">' \
-                    '<span class="mc-caption-tag">{}</span> '.format(tag_text)
+            return (
+                u'<div class="mc-caption">'
+                '<span class="mc-caption-tag">{}</span> '.format(tag_text)
+            )
         return '</div>'
 
     # def contribute(self, converter, name, content, params):
@@ -315,9 +329,9 @@ class LatexCaption(Command):
     #         return r"\caption{" + content + "}"
 
 
-
 class LatexCentering(Command):
     """Set block variable 'centering' to True."""
+
     def __init__(self):
         super(LatexCentering, self).__init__()
 
@@ -340,7 +354,6 @@ class LatexCentering(Command):
     #         return r"\centering"
 
 
-
 class LatexContainer(Command):
     def __init__(self, html_open, html_close):
         super(LatexContainer, self).__init__(args_desc="{P}")
@@ -357,7 +370,6 @@ class LatexContainer(Command):
         return self.html_open if token.part == 0 else self.html_close
 
 
-
 class LatexEscapeCharacter(Command):
     def __init__(self, char):
         self.html = xss.escape(char)
@@ -367,7 +379,6 @@ class LatexEscapeCharacter(Command):
 
     def to_latex(self, token, converter):
         return '\\' + token.command  # Speed up things.
-
 
 
 class LatexHref(Command):
@@ -382,16 +393,15 @@ class LatexHref(Command):
 
     def to_html(self, token, converter):
         if token.part == 0:
-            return u'<a href="{}" rel="nofollow">'.format(
-                xss.escape(token.args[0]))
+            return u'<a href="{}" rel="nofollow">'.format(xss.escape(token.args[0]))
         else:
             return '</a>'
+
     # def contribute(self, converter, name, contents, params):
     #     url, desc = contents
     #     if converter.type == TYPE_HTML:
     #     elif converter.type == TYPE_LATEX:
     #         return u'\\href{%s}{%s}' % (latex_escape(url), latex_escape(desc))
-
 
 
 class LatexIncludeGraphics(Command):
@@ -412,15 +422,16 @@ class LatexIncludeGraphics(Command):
 
         params = _parse_latex_params(token.args[0] or '')
         return u'<img src="{}" alt="Attachment {}" class="latex"{}>'.format(
-                xss.escape(attachment.get_url()),
-                xss.escape(filename),
-                img_params_to_html(params.iteritems()))
-
+            xss.escape(attachment.get_url()),
+            xss.escape(filename),
+            img_params_to_html(params.iteritems()),
+        )
 
 
 class LatexInlineMathCommand(Command):
     """Command to be treated as an inline math when generating HTML, where it is
     replaced with $\\<command name>$. Leaves as-is when generating LaTeX."""
+
     def __init__(self, format, content):
         super(LatexInlineMathCommand, self).__init__()
         self.format = format
@@ -428,13 +439,12 @@ class LatexInlineMathCommand(Command):
 
     def to_html(self, token, converter):
         # Handled manually in Converter.
-        raise ParserInternalError(
-                "LatexInlineMathCommand.to_html is unreachable.")
-
+        raise ParserInternalError("LatexInlineMathCommand.to_html is unreachable.")
 
 
 class LatexLabel(Command):
     """Handle \\label{...}."""
+
     def __init__(self):
         super(LatexLabel, self).__init__(args_desc="{U}")
 
@@ -447,7 +457,8 @@ class LatexLabel(Command):
             error = TokenError(_("Unexpected '\\label'."), "")
         elif environment.tag is None:
             error = TokenError(
-                    _("Tag missing, did you put \\label before \\caption?"), "")
+                _("Tag missing, did you put \\label before \\caption?"), ""
+            )
         else:
             error = u""
         tokenizer.refs[args[0]] = environment.tag
@@ -471,11 +482,11 @@ class LatexLabel(Command):
     #         return warning + r"\label{" + content + "}"
 
 
-
 class LatexNoop(Command):
     """Ignored when converting to HTML, printed without any logic when
     converting to LaTeX. Used for commonly used commands whose purpose is
     specific to LaTeX."""
+
     def __init__(self):
         super(LatexNoop, self).__init__()
 
@@ -483,9 +494,9 @@ class LatexNoop(Command):
         return ""
 
 
-
 class LatexRef(Command):
     """Manually processed by Converter."""
+
     def __init__(self):
         super(LatexRef, self).__init__(args_desc="{U}")
 
@@ -493,9 +504,9 @@ class LatexRef(Command):
         raise ParserInternalError("LatexRef.to_html is unreachable.")
 
 
-
 class LatexSetLength(Command):
     """Set length of the given property. Limited to very few properties."""
+
     def __init__(self):
         super(LatexSetLength, self).__init__(args_desc="{U}{U}")
 
@@ -504,9 +515,7 @@ class LatexSetLength(Command):
         if var not in converter.state.lengths_html:
             msg = _("Unsupported value \"%(value)s\" for the command \"%(cmd)s\".")
             raise LatexValueError(msg % {'cmd': '\\setlength', 'value': var})
-        converter.state.lengths_html[var] = \
-                convert_tex_length_to_html(token.args[1])
-
+        converter.state.lengths_html[var] = convert_tex_length_to_html(token.args[1])
 
 
 class LatexSpecialSymbol(Command):
@@ -519,7 +528,6 @@ class LatexSpecialSymbol(Command):
 
     def to_html(self, token, converter):
         return self.html
-
 
 
 class LatexURL(Command):
@@ -535,10 +543,10 @@ class LatexURL(Command):
 # LaTeX Environments
 ########################################################
 
+
 class LatexEnvironment(object):
     def __eq__(self, other):
         return test_eq(self, other)
-
 
 
 class LatexEnvironmentDiv(LatexEnvironment):
@@ -562,11 +570,8 @@ class LatexEnvironmentDiv(LatexEnvironment):
             return "</div>"
 
 
-
 def latex_environment_div_factory(html_class):
-    return lambda : LatexEnvironmentDiv(html_class=html_class)
-
-
+    return lambda: LatexEnvironmentDiv(html_class=html_class)
 
 
 # class LatexEnvironmentEquation(Command):
@@ -589,9 +594,9 @@ def latex_environment_div_factory(html_class):
 #             return u'\\begin{%s}%s%s\\end{%s}' % (name, params, content, name)
 
 
-
 class LatexEnvironmentFigure(LatexEnvironment):
     """Handles \\begin{figure}...\\end{figure}."""
+
     def __init__(self, centering=False, tag=None):
         super(LatexEnvironmentFigure, self).__init__()
         self.centering = centering
@@ -599,7 +604,8 @@ class LatexEnvironmentFigure(LatexEnvironment):
 
     def __repr__(self):
         return u'LatexEnvironmentFigure(centering={}, tag={})'.format(
-                self.centering, repr(self.tag))
+            self.centering, repr(self.tag)
+        )
 
     def to_html(self, begin, token, converter):
         if begin:
@@ -607,7 +613,6 @@ class LatexEnvironmentFigure(LatexEnvironment):
                 return u'<div class="mc-figure mc-center">'
             return u'<div class="mc-figure">'
         return u'</div>'
-
 
     # def contribute(self, converter, name, content, params):
     #     if converter.type == TYPE_HTML:
@@ -623,9 +628,9 @@ class LatexEnvironmentFigure(LatexEnvironment):
     #         return u'\\begin{%s}%s%s\\end{%s}' % (name, params, content, name)
 
 
-
 class LatexEnvironmentVerbatim(LatexEnvironment, _LatexEnvironmentReadUntil):
     """Handles \\begin{verbatim}...\\end{verbatim} and the starred version."""
+
     def __init__(self):
         super(LatexEnvironmentVerbatim, self).__init__()
         self.ignore_until_eol = True
@@ -662,7 +667,7 @@ latex_commands = {
     'centering': LatexCentering(),
     'end': LatexEnd(),
     'emph': LatexContainer('<em>', '</em>'),
-#     # TODO: eqref
+    #     # TODO: eqref
     'fbox': LatexContainer('<span class="mc-fbox">', '</span>'),
     'href': LatexHref(),
     'includegraphics': LatexIncludeGraphics(),

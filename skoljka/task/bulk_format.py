@@ -1,46 +1,56 @@
-from collections import defaultdict
 import re
+from collections import defaultdict
 
+from django.contrib.auth.models import Group, User
 from django.utils.translation import ugettext as _
-from django.contrib.auth.models import User, Group
 
 from skoljka.folder.models import Folder
 from skoljka.permissions.constants import EDIT, PERMISSION_GROUPS
-
 from skoljka.task.models import DIFFICULTY_RATING_ATTRS, Task
 
 SEPARATION_EMPTY_LINES = 3  # Minimum number of separation lines between tasks.
 VALUE_LENGTH_LIMIT = 10000
 
+
 class BulkFormatError(Exception):
     pass
+
 
 class ParseError(BulkFormatError):
     pass
 
+
 class InvalidParameter(BulkFormatError):
     pass
+
 
 class FolderNotFound(BulkFormatError):
     pass
 
+
 class FolderNotEditable(BulkFormatError):
     pass
+
 
 class InvalidValue(BulkFormatError):
     pass
 
+
 class UserNotFound(BulkFormatError):
     pass
+
 
 class GroupNotFound(BulkFormatError):
     pass
 
+
 class UnknownVariable(BulkFormatError):
     pass
 
+
 class CyclicDependency(BulkFormatError):
     pass
+
 
 class ValueTooLong(BulkFormatError):
     pass
@@ -74,17 +84,16 @@ class PrefetchData(object):
         self.groups = {x.name.lower(): x for x in groups}
 
         # Folders.
-        folders = Folder.objects.for_user(user, EDIT) \
-                .filter(id__in=set(self.folder_ids))
+        folders = Folder.objects.for_user(user, EDIT).filter(
+            id__in=set(self.folder_ids)
+        )
         self.folders = {x.id: x for x in folders}
-
 
 
 class TaskInfo(object):
     def __init__(self, json, template_data):
         self.json = json
         self.template_data = template_data
-
 
 
 class InternalTaskInfo(object):
@@ -145,18 +154,15 @@ class InternalTaskInfo(object):
                 # Ahh, keys in JSON must be a string.
                 perm_group_ids[str(perm)].append(group.id)
             except KeyError:
-                raise GroupNotFound(
-                        _(u"User or group \"%s\" not found.") % group_name)
+                raise GroupNotFound(_(u"User or group \"%s\" not found.") % group_name)
         # Sort to be make unittests simpler.
-        self.json['_permissions'] = {perm_id: sorted(ids) \
-                for perm_id, ids in perm_group_ids.iteritems()}
+        self.json['_permissions'] = {
+            perm_id: sorted(ids) for perm_id, ids in perm_group_ids.iteritems()
+        }
         template_data['groups'] = prefetch.groups
         template_data['permissions'] = dict(perm_groups)
 
         return TaskInfo(self.json, template_data)
-
-
-
 
 
 def _precheck_task_var_value(var, value, prefetch):
@@ -180,8 +186,7 @@ def _precheck_task_var_value(var, value, prefetch):
             raise InvalidValue(msg)
     elif var == 'FOLDER_ID' and value.strip():
         if not is_int or int(value) < 0:
-            raise InvalidValue(
-                    _("Expected a nonnegative integer or an empty string."))
+            raise InvalidValue(_("Expected a nonnegative integer or an empty string."))
         prefetch.folder_ids.append(int(value))
     elif var == 'FOLDER_POSITION':
         if value.strip() and not is_int:
@@ -213,7 +218,7 @@ def split_expression(s):
             current.append(s[k + 1])
             k += 2
             continue
-        if s[k:k + 2] != '@{':
+        if s[k : k + 2] != '@{':
             current.append(s[k])
             k += 1
             continue
@@ -223,7 +228,7 @@ def split_expression(s):
         end = s.find('}', k + 2)
         if end == -1:
             raise ParseError(_("Missing a '}' brace."))
-        inner = s[k + 2:end]
+        inner = s[k + 2 : end]
         if inner.strip():
             result.append((True, inner.strip()))
         else:
@@ -281,7 +286,6 @@ def parse_variables(variables):
         values[var] = u''.join(result)
         return values[var]
 
-
     for var in variables:
         _generate(var)
 
@@ -333,21 +337,19 @@ def parse_bulk(user, full_content):
         'NAME': "",
         # 'SOLUTION_SETTINGS': 'ALWAYS',
         'SOURCE': "",
-
         # Values with some logic (that have an underscore in the name in json).
         'DIFFICULTY': 0,
         'FOLDER_ID': 0,
         'FOLDER_POSITION': 0,
         'TAGS': "",
         # 'PREREQUISITES': '',
-
         # Built-in values.
         'COUNTER': 1,
         'TOTAL_COUNTER': 1,
     }
 
     empty_counter = 0
-    content = []    # Task lines.
+    content = []  # Task lines.
     task_infos = []
     current_perms = []  # List of pairs (permission type, group name).
 
@@ -359,8 +361,9 @@ def parse_bulk(user, full_content):
             try:
                 _precheck_task_var_value(var, value, prefetch)
             except BulkFormatError as e:
-                msg = (u"{} \"{}\"=\"{}\"<br>{}".format(
-                    _("Invalid variable:"), var, value, e.message))
+                msg = u"{} \"{}\"=\"{}\"<br>{}".format(
+                    _("Invalid variable:"), var, value, e.message
+                )
                 raise type(e)(msg)
 
         # if var_values['PREREQUISITES'].strip() and \
@@ -370,11 +373,10 @@ def parse_bulk(user, full_content):
         #             "cannot be set to ALWAYS."))
         return InternalTaskInfo(text, var_values, current_perms)
 
-
     def _line_error(message):
         return u"{} {}<br>{}".format(
-                _("Error at line number %d:") % line_number, line, message)
-
+            _("Error at line number %d:") % line_number, line, message
+        )
 
     # Parse and check for any errors.
     prefetch = PrefetchData()
@@ -394,8 +396,10 @@ def parse_bulk(user, full_content):
                 try:
                     task_infos.append(_prepare_task_info(text))
                 except BulkFormatError as e:
-                    prefix = _("Parsing error for the task #%d:") \
-                            % variables['TOTAL_COUNTER']
+                    prefix = (
+                        _("Parsing error for the task #%d:")
+                        % variables['TOTAL_COUNTER']
+                    )
                     msg = u'{}<br><br>{}<br><br><div class="tb-error">{}</div>'
                     raise type(e)(msg.format(prefix, text, e.message))
                 variables['COUNTER'] += 1
@@ -437,7 +441,8 @@ def parse_bulk(user, full_content):
         except BulkFormatError as e:
             prefix = _("Invalid value(s) for the task #%d:") % (k + 1)
             msg = u'{}<br><br>{}<br><br><div class="tb-error">{}</div>'.format(
-                    prefix, text, e.message)
+                prefix, text, e.message
+            )
             raise type(e)(msg)
 
     return result

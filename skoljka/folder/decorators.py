@@ -4,30 +4,30 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 
-from skoljka.permissions.constants import VIEW
-
 from skoljka.folder.models import Folder
 from skoljka.folder.utils import prepare_folder_menu
+from skoljka.permissions.constants import VIEW
+
 
 def folder_view(permission=VIEW):
     """
-        Decorator for folder views. Checks if the user has the access to the
-        given folder and calls prepare_folder_menu.
+    Decorator for folder views. Checks if the user has the access to the
+    given folder and calls prepare_folder_menu.
 
-        Expected function parameters:
-            request, folder_id, (...)
-        Decorated function parameters:
-            request, folder, data, (...)
+    Expected function parameters:
+        request, folder_id, (...)
+    Decorated function parameters:
+        request, folder, data, (...)
 
-        Decorator arguments:
-            permission - permission to check
+    Decorator arguments:
+        permission - permission to check
 
-        Additional info added to the data dictionary:
-            folder - the folder itself
-            has_subfolders - boolean, True if given folder has any visible
-                subfolder
-            has_subfolders_strict = boolean, True if given folder has *any*
-                subfolder
+    Additional info added to the data dictionary:
+        folder - the folder itself
+        has_subfolders - boolean, True if given folder has any visible
+            subfolder
+        has_subfolders_strict = boolean, True if given folder has *any*
+            subfolder
     """
 
     def decorator(func):
@@ -73,10 +73,12 @@ def folder_view(permission=VIEW):
                 data['has_subfolders_strict'] = True
             else:
                 # TODO: put in prepare_folder_menu?
-                data['has_subfolders_strict'] = \
-                    Folder.objects.filter(parent_id=folder.id).exists()
+                data['has_subfolders_strict'] = Folder.objects.filter(
+                    parent_id=folder.id
+                ).exists()
 
             return func(request, folder, data, *args, **kwargs)
 
         return wraps(func)(inner)
+
     return decorator

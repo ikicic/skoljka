@@ -4,10 +4,10 @@
 
 from django.contrib.contenttypes.models import ContentType
 
+from skoljka.activity.constants import *
+from skoljka.activity.models import Action
 from skoljka.utils import xss
 
-from skoljka.activity.models import Action
-from skoljka.activity.constants import *
 
 def _filter(**kwargs):
     action_object = kwargs.pop('action_object', None)
@@ -24,6 +24,7 @@ def _filter(**kwargs):
 
     return Action.objects.filter(**kwargs)
 
+
 def remove(actor, type, **kwargs):
     """
     Removes SINGLE action. Throws except in the case multiple activities match
@@ -35,6 +36,7 @@ def remove(actor, type, **kwargs):
         action.delete()
     except Action.DoesNotExist:
         return
+
 
 # SPEED: rucno napraviti upite
 # shortcut
@@ -53,7 +55,7 @@ def add(actor, type_desc, fake_action_object=False, **kwargs):
             action.action_object_cache = action.action_object.name
         elif hasattr(action.action_object, "username"):
             action.action_object_cache = action.action_object.username
-        elif hasattr(action.action_object, "value"):    # rating
+        elif hasattr(action.action_object, "value"):  # rating
             action.action_object_cache = str(action.action_object.value)
 
     if action.target:
@@ -61,7 +63,10 @@ def add(actor, type_desc, fake_action_object=False, **kwargs):
             action.target_cache = action.target.name
         elif hasattr(action.target, "username"):
             action.target_cache = action.target.username
-        elif action.target._meta.app_label == 'solution' and action.target._meta.module_name == 'solution':
+        elif (
+            action.target._meta.app_label == 'solution'
+            and action.target._meta.module_name == 'solution'
+        ):
             data = [
                 action.target.author_id,
                 action.target.author.username,
@@ -70,7 +75,9 @@ def add(actor, type_desc, fake_action_object=False, **kwargs):
                 action.target.task.author_id,
             ]
             # 250 chars should be enough for this
-            action.target_cache = POST_SEND_CACHE_SEPARATOR.join([xss.escape(unicode(x)) for x in data])
+            action.target_cache = POST_SEND_CACHE_SEPARATOR.join(
+                [xss.escape(unicode(x)) for x in data]
+            )
 
     # ----- type specific -----
     if type == POST_SEND:
@@ -78,6 +85,7 @@ def add(actor, type_desc, fake_action_object=False, **kwargs):
         action.action_object_cache = T[:78] + '...' if len(T) > 80 else T
 
     action.save()
+
 
 def replace_or_add(actor, type_desc, **kwargs):
     """

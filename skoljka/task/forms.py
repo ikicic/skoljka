@@ -1,14 +1,15 @@
 ﻿from django import forms
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext
+from django.utils.translation import ugettext_lazy as _
 
 from skoljka.permissions.constants import VIEW
 from skoljka.permissions.utils import filter_objects_with_permission
-from skoljka.utils.models import icon_help_text
-
 from skoljka.task.bulk_format import BulkFormatError, parse_bulk
 from skoljka.task.models import Task, TaskBulkTemplate
+from skoljka.utils.models import icon_help_text
 
 EXPORT_FORMAT_CHOICES = (('latex', 'LaTeX'), ('pdf', 'PDF'))
+
 
 class TaskBulkTemplateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -16,7 +17,8 @@ class TaskBulkTemplateForm(forms.ModelForm):
         self.user = kwargs.pop('user')
         super(TaskBulkTemplateForm, self).__init__(*args, **kwargs)
         self.fields['source_code'].widget.attrs.update(
-                {'rows': 20, 'cols': 100, 'class': 'uneditable-textarea'})
+            {'rows': 20, 'cols': 100, 'class': 'uneditable-textarea'}
+        )
 
     def clean_name(self):
         name = self.cleaned_data['name']
@@ -56,30 +58,35 @@ class TaskExportForm(forms.Form):
         super(TaskExportForm, self).__init__(*args, **kwargs)
         self.fields['format'].widget.attrs.update({'class': 'input-small'})
 
+
 class TaskJSONForm(forms.Form):
     description = forms.CharField(widget=forms.Textarea)
 
     def __init__(self, *args, **kwargs):
         super(TaskJSONForm, self).__init__(*args, **kwargs)
 
-        self.fields['description'].widget.attrs.update({
-            'rows': 10,
-            'cols': 100,
-            'class': 'uneditable-textarea', # bootstrap...
-        })
+        self.fields['description'].widget.attrs.update(
+            {
+                'rows': 10,
+                'cols': 100,
+                'class': 'uneditable-textarea',  # bootstrap...
+            }
+        )
 
 
 class TaskAdvancedForm(forms.ModelForm):
     _tags = forms.CharField(max_length=200)
     _difficulty = forms.CharField(max_length=50)
+
     class Meta:
         model = Task
         fields = ['name', 'source', 'hidden']
 
+
 def check_prerequisites(prerequisites, user, task_id):
     """
-        Check if all given ids are accessible.
-        Returns the list of ids and list of accessible task instances.
+    Check if all given ids are accessible.
+    Returns the list of ids and list of accessible task instances.
     """
     if not prerequisites.strip():
         return [], []
@@ -98,15 +105,20 @@ def check_prerequisites(prerequisites, user, task_id):
 
     if len(ids) != len(accessible):
         diff = ids - set(x.id for x in accessible)
-        raise forms.ValidationError('Nepoznati ili nedostupni zadaci: {}' \
-            .format(', '.join(str(x) for x in diff)))
+        raise forms.ValidationError(
+            'Nepoznati ili nedostupni zadaci: {}'.format(
+                ', '.join(str(x) for x in diff)
+            )
+        )
 
     for x in accessible:
         if not x.solvable:
             raise forms.ValidationError(
-                u'Nije moguće slati rješenja za zadatak #{}!'.format(x.id))
+                u'Nije moguće slati rješenja za zadatak #{}!'.format(x.id)
+            )
 
     return ids, accessible
+
 
 class TaskForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -116,17 +128,21 @@ class TaskForm(forms.ModelForm):
 
         task_id = str(self.instance.id) if self.instance and self.instance.id else ''
         self.fields['prerequisites'].widget.attrs.update(
-            {'class': 'task-prerequisites', 'data-task-id': task_id})
+            {'class': 'task-prerequisites', 'data-task-id': task_id}
+        )
         self.fields['tags'].widget.attrs.update({'class': 'ac-tags span6'})
         for x in ['name', 'source']:
             self.fields[x].widget.attrs.update({'class': 'span6'})
 
     def clean(self):
         cleaned_data = super(TaskForm, self).clean()
-        if self.cleaned_data['solution_settings'] == Task.SOLUTIONS_VISIBLE \
-                and self.cleaned_data.get('prerequisites'):
-            raise forms.ValidationError(u'Ukoliko su postavljeni preduvjeti, '
-                u'rješenja ne mogu biti \'uvijek vidljiva\'!')
+        if self.cleaned_data[
+            'solution_settings'
+        ] == Task.SOLUTIONS_VISIBLE and self.cleaned_data.get('prerequisites'):
+            raise forms.ValidationError(
+                u'Ukoliko su postavljeni preduvjeti, '
+                u'rješenja ne mogu biti \'uvijek vidljiva\'!'
+            )
         return self.cleaned_data
 
     def clean_tags(self):
@@ -143,17 +159,24 @@ class TaskForm(forms.ModelForm):
         self.cleaned_data['prerequisites'] = prerequisites
 
         # This will raise an exception if something is wrong.
-        check_prerequisites(prerequisites, self.user,
-            self.instance and self.instance.id)
+        check_prerequisites(
+            prerequisites, self.user, self.instance and self.instance.id
+        )
 
         return prerequisites
 
     class Meta:
         # Currently, you will have to manually add new fields to the template.
         model = Task
-        fields = ['name', 'tags', 'source', 'hidden', 'solvable',
-            'solution_settings', 'prerequisites']
-
+        fields = [
+            'name',
+            'tags',
+            'source',
+            'hidden',
+            'solvable',
+            'solution_settings',
+            'prerequisites',
+        ]
 
 
 class TaskFileForm(TaskForm):
@@ -163,25 +186,31 @@ class TaskFileForm(TaskForm):
         self.fields['solvable'].initial = False
 
 
-
 class TaskLectureForm(TaskFileForm):
-    folder_id = forms.IntegerField(required=False, help_text=icon_help_text(_(
-            u"ID of the folder containing the problems and files related to "
-            u"this lecture.")))
+    folder_id = forms.IntegerField(
+        required=False,
+        help_text=icon_help_text(
+            _(
+                u"ID of the folder containing the problems and files related to "
+                u"this lecture."
+            )
+        ),
+    )
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.get('instance', None)
         super(TaskFileForm, self).__init__(*args, **kwargs)
 
-        self.fields['folder_id'].initial = \
-                instance.lecture_folder_id or '' if instance else ''
+        self.fields['folder_id'].initial = (
+            instance.lecture_folder_id or '' if instance else ''
+        )
 
     def save(self, commit=True, *args, **kwargs):
         task = super(TaskLectureForm, self).save(commit=False, *args, **kwargs)
         task.is_lecture = True
         try:
             task.lecture_folder_id = int(self.cleaned_data['folder_id'])
-        except TypeError, ValueError:
+        except (TypeError, ValueError):
             task.lecture_folder_id = None
         if commit:
             task.save()

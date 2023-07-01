@@ -2,10 +2,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count
 
+from skoljka.tags.models import Tag
 from skoljka.task.models import Task
 from skoljka.utils.decorators import response
 
-from skoljka.tags.models import Tag
 
 @login_required
 @response('tags_list.html')
@@ -48,11 +48,10 @@ def list(request):
             alert_class = 'alert-success'
             message = 'Promjene spremljene.'
 
-
     task_content_type = ContentType.objects.get_for_model(Task)
-    tags = Tag.objects \
-            .filter(tags_taggeditem_items__content_type=task_content_type) \
-            .annotate(taggeditem_count=Count('tags_taggeditem_items'))
+    tags = Tag.objects.filter(
+        tags_taggeditem_items__content_type=task_content_type
+    ).annotate(taggeditem_count=Count('tags_taggeditem_items'))
 
     return {
         'tags': tags,

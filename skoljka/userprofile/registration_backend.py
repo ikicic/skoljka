@@ -8,8 +8,9 @@ from django.dispatch import receiver
 from registration.backends.default import DefaultBackend
 from registration.signals import user_activated
 
-
 FINAL_URL_CACHE_PREFIX = '@final-url-'
+
+
 class Backend(DefaultBackend):
     """Cache registration final url.
 
@@ -20,6 +21,7 @@ class Backend(DefaultBackend):
     but that doesn't seem to be possible with the current implementation of
     django-registration...
     """
+
     def register(self, request, **kwargs):
         """Intercept new_user from the original `register` method and save the
         final_url into the cache."""
@@ -37,7 +39,6 @@ class Backend(DefaultBackend):
         final_url = cache.get(FINAL_URL_CACHE_PREFIX + str(request.user.id))
         print(request.user, request.user.id, final_url, final_url or '/')
         return final_url or '/'
-
 
 
 @receiver(user_activated)

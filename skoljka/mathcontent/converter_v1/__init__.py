@@ -1,32 +1,55 @@
-from __future__ import print_function 
+from __future__ import print_function
 
-from collections import defaultdict
-from urlparse import urljoin
 import copy
 import re
+from collections import defaultdict
 
 from django.utils.translation import ugettext as _
+from urlparse import urljoin
 
+from skoljka.mathcontent.converter_v1.basics import ParseError, State
+from skoljka.mathcontent.converter_v1.bbcode import (
+    BBCodeException,
+    bb_commands,
+    parse_bbcode,
+)
+from skoljka.mathcontent.converter_v1.latex import (
+    LatexInlineMathCommand,
+    LatexValueError,
+    latex_commands,
+    latex_environments,
+    latex_escape_chars,
+)
+from skoljka.mathcontent.converter_v1.tokens import (
+    TOKEN_CLOSED_CURLY,
+    TOKEN_CLOSED_SQUARE,
+    TOKEN_COMMAND,
+    TOKEN_OPEN_CURLY,
+    TOKEN_OPEN_SQUARE,
+    Token,
+    TokenBBCode,
+    TokenClosedCurly,
+    TokenCommand,
+    TokenComment,
+    TokenError,
+    TokenMath,
+    TokenMultilineWhitespace,
+    TokenOpenCurly,
+    TokenSimpleWhitespace,
+    TokenText,
+)
+from skoljka.mathcontent.latex import (
+    generate_latex_hash,
+    generate_png,
+    get_available_latex_elements,
+)
+from skoljka.mathcontent.models import (
+    ERROR_DEPTH_VALUE,
+    IMG_URL_PATH,
+    TYPE_HTML,
+    TYPE_LATEX,
+)
 from skoljka.utils import flatten_ignore_none, xss
-
-from skoljka.mathcontent.models import ERROR_DEPTH_VALUE, IMG_URL_PATH, \
-        TYPE_HTML, TYPE_LATEX
-from skoljka.mathcontent.latex import generate_png, generate_latex_hash, \
-        get_available_latex_elements
-
-from skoljka.mathcontent.converter_v1.basics import State, ParseError
-from skoljka.mathcontent.converter_v1.tokens import \
-        Token, TokenText, TokenCommand, TokenMultilineWhitespace, \
-        TokenSimpleWhitespace, TokenMath, TokenError, TokenComment, \
-        TokenOpenCurly, TokenClosedCurly, TokenBBCode
-from skoljka.mathcontent.converter_v1.tokens import \
-        TOKEN_COMMAND, TOKEN_OPEN_CURLY, TOKEN_CLOSED_CURLY, \
-        TOKEN_OPEN_SQUARE, TOKEN_CLOSED_SQUARE
-from skoljka.mathcontent.converter_v1.bbcode import \
-        bb_commands, parse_bbcode, BBCodeException
-from skoljka.mathcontent.converter_v1.latex import \
-        latex_commands, latex_escape_chars, latex_environments, \
-        LatexValueError, LatexInlineMathCommand
 
 # If changing these note that all the MathContents not setting these values
 # manually will be affected. Also, don't forget to update mathcontent.scss
@@ -71,6 +94,7 @@ default_parindent = '0em'
 RE_ASCII_ALPHA_SINGLE_CHAR = re.compile('[a-zA-Z]')
 _NT__READ_TEXT__END_CHAR = set('{}[]$\n\r\\%')
 
+
 class ParserInternalError(Exception):
     pass
 
@@ -78,6 +102,7 @@ class ParserInternalError(Exception):
 ########################################################
 # Tokenizer
 ########################################################
+
 
 class Tokenizer(object):
     def __init__(self, T):
@@ -88,7 +113,7 @@ class Tokenizer(object):
         self.state_stack = [self.state]
 
         self.counters = defaultdict(int)
-        self.refs = {}      # References, dict label -> tag.
+        self.refs = {}  # References, dict label -> tag.
 
         self._last_token = None
         self._undoed_token = None
@@ -124,7 +149,7 @@ class Tokenizer(object):
             while K > start and T[K - 1].isspace():
                 K -= 1
         self.K = K
-        return T[start : K]
+        return T[start:K]
 
     def _nt__read_whitespace(self):
         """(next_token helper function) Read until a non-whitespace character
@@ -141,11 +166,11 @@ class Tokenizer(object):
                 line_breaks += 1
             K += 1
         self.K = K
-        return T[start : K], line_breaks
+        return T[start:K], line_breaks
 
     def _nt__read_command_name(self):
         """(next_token helper function) Read command name according to
-        http://tex.stackexchange.com/a/66671 """
+        http://tex.stackexchange.com/a/66671"""
         T = self.T
         K = self.K
         assert K < len(T)
@@ -159,7 +184,7 @@ class Tokenizer(object):
             # Or a single non-[a-zA-Z] character.
             K += 1
         self.K = K
-        return T[start : K]
+        return T[start:K]
 
     def _nt__read_comment(self):
         """(next_token helper function) Read until a newline and all whitespace
@@ -175,8 +200,7 @@ class Tokenizer(object):
         while K < len(T) and T[K].isspace():
             K += 1
         self.K = K
-        return T[start : K]
-
+        return T[start:K]
 
     def _next_token(self):
         """Get the next token. If the logic is trivial, immediately return a
@@ -231,10 +255,11 @@ class Tokenizer(object):
     def undo_token(self):
         if self._undoed_token:
             raise ParserInternalError(
-                    "Cannot perform undo twice in a row. Old={} New={}".format(
-                        self._undoed_token, self._last_token))
+                "Cannot perform undo twice in a row. Old={} New={}".format(
+                    self._undoed_token, self._last_token
+                )
+            )
         self._undoed_token = self._last_token
-
 
     def read_until(self, end, skip_patterns):
         """Read everything until `end` is reached. Skips all patterns in the
@@ -263,7 +288,7 @@ class Tokenizer(object):
         if T[K : K + len(end)] != end:
             raise ParseError(_("Ending not found:") + " " + end)
         self.K = K + len(end)
-        return T[start : K]
+        return T[start:K]
 
     def read_until_exact(self, end):
         """Read everything until `end` is reached, without any complications.
@@ -275,7 +300,7 @@ class Tokenizer(object):
         if K == -1:
             raise ParseError(_("Ending not found:") + " " + end)
         self.K = K + len(end)
-        return self.T[start : K]
+        return self.T[start:K]
 
     def read_until_exact_any(self, endings):
         """Similar to read_until_exact, just picks the closest ending.
@@ -289,11 +314,9 @@ class Tokenizer(object):
                 minK = K
                 closest = end
         if not closest:
-            raise ParseError(
-                    _("None of the endings found:") + " " + u", ".join(end))
+            raise ParseError(_("None of the endings found:") + " " + u", ".join(end))
         self.K = K + len(end)
-        return self.T[start : K]
-
+        return self.T[start:K]
 
     def handle_math_mode(self):
         """Handle $...$, $$...$$, \(...\), \[...\] and $$$ ... $$$."""
@@ -391,10 +414,13 @@ class Tokenizer(object):
                         return args[-1]
                     continue
                 else:
-                    return TokenError(_("Expected a '{' bracket."),
-                            full_name + self.T[start : last_K])
-            while len(args) < command.argc and \
-                    command.get_arg_open_bracket(len(args)) == '[':
+                    return TokenError(
+                        _("Expected a '{' bracket."), full_name + self.T[start:last_K]
+                    )
+            while (
+                len(args) < command.argc
+                and command.get_arg_open_bracket(len(args)) == '['
+            ):
                 args.append(None)  # Skip optional arguments.
                 whitespace.append(current_whitespace)
                 current_whitespace = ""
@@ -410,8 +436,9 @@ class Tokenizer(object):
             else:
                 self.undo_token()
                 return TokenError(
-                        _("Expected a '%s' bracket.") % expected_bracket,
-                        full_name + self.T[start : last_K])
+                    _("Expected a '%s' bracket.") % expected_bracket,
+                    full_name + self.T[start:last_K],
+                )
 
         # Manually handle no-argument commands and their trailing whitespace.
         if command.argc == 0:
@@ -451,8 +478,11 @@ class Tokenizer(object):
 
         token = TokenBBCode(name, attrs, start, K)
         command = bb_commands[name]
-        if token.is_open() and command.has_close_tag and \
-                not command.should_parse_content(token):
+        if (
+            token.is_open()
+            and command.has_close_tag
+            and not command.should_parse_content(token)
+        ):
             end_pattern = '[/{}]'.format(name)
             content = []
             while K < len(T):
@@ -482,9 +512,10 @@ class Tokenizer(object):
             try:
                 if self.K <= last_K:
                     repeat_count += 1
-                    if repeat_count > 1:    # Handle undo.
+                    if repeat_count > 1:  # Handle undo.
                         raise ParserInternalError(
-                                "Infinite loop at K={}?".format(self.K))
+                            "Infinite loop at K={}?".format(self.K)
+                        )
                 else:
                     repeat_count = 0
                 last_K = self.K
@@ -508,11 +539,7 @@ class Tokenizer(object):
                         return self.pop_state().tokens
                 elif type == TOKEN_OPEN_CURLY:
                     self.push_state(State(break_condition=TOKEN_CLOSED_CURLY))
-                    final_token = [
-                            TokenOpenCurly(),
-                            self.parse(),
-                            TokenClosedCurly()
-                    ]
+                    final_token = [TokenOpenCurly(), self.parse(), TokenClosedCurly()]
                 elif type == TOKEN_OPEN_SQUARE:
                     final_token = self.handle_bbcode()
                 elif type == TOKEN_CLOSED_SQUARE:
@@ -547,7 +574,6 @@ class Tokenizer(object):
         return tokens
 
 
-
 def get_latex_html(latex_element, force_inline):
     """Given LatexElement instance generate <img> HTML."""
     inline = force_inline or latex_element.format in ['$%s$', '\(%s\)']
@@ -557,17 +583,19 @@ def get_latex_html(latex_element, force_inline):
     if depth == ERROR_DEPTH_VALUE:
         # TODO: link to the log file.
         return u'<span class="mc-error-source" title="{}">{}</span>'.format(
-                xss.escape(_("Invalid LaTeX.")),
-                xss.escape(latex_element.format % latex_element.text))
+            xss.escape(_("Invalid LaTeX.")),
+            xss.escape(latex_element.format % latex_element.text),
+        )
 
     hash = latex_element.hash
     url = '%s%s/%s/%s/%s.png' % (IMG_URL_PATH, hash[0], hash[1], hash[2], hash)
     if inline:
-        return u'<img src="%s" alt="%s" class="latex" ' \
-                'style="vertical-align:%dpx">' % (url, latex_escaped, -depth)
+        return (
+            u'<img src="%s" alt="%s" class="latex" '
+            'style="vertical-align:%dpx">' % (url, latex_escaped, -depth)
+        )
     else:
-        return u'<img src="%s" alt="%s" class="latex-center">' % \
-                (url, latex_escaped)
+        return u'<img src="%s" alt="%s" class="latex-center">' % (url, latex_escaped)
 
     # # FIXME: don't save error message to depth
     # hash, depth = generate_svg(latex, format, inline)
@@ -591,6 +619,7 @@ class _BBTemporaryOpenTag(object):
     closing tag exists. If it exists, the token is replaced with .result,
     otherwise the original text is shown (.token has the interval of the
     original string)."""
+
     def __init__(self, result, token):
         self.result = result
         self.token = token
@@ -619,8 +648,14 @@ class Converter(object):
     ERRORS_ENABLED = 1
     ERRORS_TESTING = 2
 
-    def __init__(self, tokens, tokenizer, attachments=None,
-            errors_mode=True, paragraphs_disabled=False):
+    def __init__(
+        self,
+        tokens,
+        tokenizer,
+        attachments=None,
+        errors_mode=True,
+        paragraphs_disabled=False,
+    ):
         # TODO: attachments_path
         # TODO: url_prefix (what is this?)
 
@@ -678,19 +713,20 @@ class Converter(object):
                 if token.command == 'ref':
                     ref = self.refs.get(token.args[0])
                     token = TokenMath('$%s$', ref if ref is not None else '??')
-                elif isinstance(command , LatexInlineMathCommand):
-                    token = TokenMath(command.format, command.content,
-                            force_inline=True)
+                elif isinstance(command, LatexInlineMathCommand):
+                    token = TokenMath(
+                        command.format, command.content, force_inline=True
+                    )
 
             if isinstance(token, TokenMath):
-                latex_hash = self.generate_latex_hash(
-                        token.format, token.content)
+                latex_hash = self.generate_latex_hash(token.format, token.content)
                 formulas.append((latex_hash, token.format, token.content))
 
             tokens.append(token)
 
-        latex_elements = {x.hash: x \
-                for x in self.get_available_latex_elements(formulas)}
+        latex_elements = {
+            x.hash: x for x in self.get_available_latex_elements(formulas)
+        }
 
         self.maths = {}
         for hash, format, content in formulas:
@@ -721,10 +757,12 @@ class Converter(object):
                 else:
                     return result
             else:  # Closed tag.
-                if not bb.has_close_tag or len(self.bb_stack) == 0 or \
-                        not hasattr(self.bb_stack[-1], 'token') or \
-                        getattr(self.bb_stack[-1].token, 'name', None) != \
-                                token.name:
+                if (
+                    not bb.has_close_tag
+                    or len(self.bb_stack) == 0
+                    or not hasattr(self.bb_stack[-1], 'token')
+                    or getattr(self.bb_stack[-1].token, 'name', None) != token.name
+                ):
                     raise BBCodeException()
                 self.bb_stack[-1].approved = True
                 self.bb_stack.pop()
@@ -751,15 +789,19 @@ class Converter(object):
                 final.append(x)
             elif x is not None:
                 raise ParserInternalError(
-                        "Unrecognized value in the final step: " + repr(x))
+                    "Unrecognized value in the final step: " + repr(x)
+                )
         return u"".join(final)
 
     def convert_to_html(self):
         tokens = self._pre_convert_to_html()
         if self.errors_mode == Converter.ERRORS_ENABLED:
-            error_func = lambda token: u'<span class="mc-error">' \
-                    u'<span class="mc-error-source">{}</span> {}</span>'.format(
-                        token.content, token.error_message)
+            error_func = (
+                lambda token: u'<span class="mc-error">'
+                u'<span class="mc-error-source">{}</span> {}</span>'.format(
+                    token.content, token.error_message
+                )
+            )
         elif self.errors_mode == Converter.ERRORS_TESTING:
             error_func = lambda token: u"<<ERROR>>"
         else:
@@ -769,6 +811,7 @@ class Converter(object):
         self.state = self._state_stack[-1]
 
         output = []
+
         def add_content_par(content):
             """First check if paragraph should be added and then add content.
             No-op if content evaluates to False."""
@@ -796,9 +839,12 @@ class Converter(object):
                 else:
                     css_class = "mc-noindent"
 
-                output.append("<p{}{}>".format(
-                    " class=\"{}\"".format(css_class) if css_class else "",
-                    " style=\"{}\"".format(css_style) if css_style else ""))
+                output.append(
+                    "<p{}{}>".format(
+                        " class=\"{}\"".format(css_class) if css_class else "",
+                        " style=\"{}\"".format(css_style) if css_style else "",
+                    )
+                )
             output.append(content)
             state.is_in_paragraph = True
 
@@ -814,8 +860,7 @@ class Converter(object):
                     self.pop_state()
             elif isinstance(token, TokenMath):
                 element = self.maths[(token.format, token.content)]
-                add_content_par(
-                        self.get_latex_html(element, token.force_inline))
+                add_content_par(self.get_latex_html(element, token.force_inline))
             elif isinstance(token, TokenText):
                 add_content_par(xss.escape(token.text).replace('~', '&nbsp;'))
             elif isinstance(token, TokenSimpleWhitespace):
@@ -848,15 +893,18 @@ class Converter(object):
     def convert_to_latex(self):
         output = []
         if self.errors_mode == Converter.ERRORS_ENABLED:
-            error_func = lambda token: "\\textbf{%s} %s" % \
-                    (token.error_message, token.content)
+            error_func = lambda token: "\\textbf{%s} %s" % (
+                token.error_message,
+                token.content,
+            )
         elif self.errors_mode == Converter.ERRORS_TESTING:
             error_func = lambda token: u"<<ERROR>>"
         else:
             error_func = lambda token: u""
         for token in self.tokens:
-            if isinstance(token, (TokenText, TokenSimpleWhitespace, \
-                    TokenMultilineWhitespace)):
+            if isinstance(
+                token, (TokenText, TokenSimpleWhitespace, TokenMultilineWhitespace)
+            ):
                 output.append(token.text)
             elif isinstance(token, TokenComment):
                 output.append("%")
@@ -878,7 +926,6 @@ class Converter(object):
                 raise NotImplementedError(repr(token))
 
         return self.finalize_output(output, error_func)
-
 
 
 def convert(type, text, attachments=None, attachments_path=None, url_prefix=""):

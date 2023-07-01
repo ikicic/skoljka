@@ -5,17 +5,23 @@ from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.test.client import Client
 
+from skoljka.competition.models import (
+    Chain,
+    Competition,
+    CompetitionTask,
+    Submission,
+    Team,
+    TeamMember,
+)
+from skoljka.competition.tests.test_utils import create_ctask
 from skoljka.permissions.constants import VIEW
 from skoljka.permissions.models import ObjectPermission
 from skoljka.utils.testcase import TestCase
 
-from skoljka.competition.models import Competition, CompetitionTask, Chain, \
-        Submission, Team, TeamMember
-from skoljka.competition.tests.test_utils import create_ctask
-
 DAY = datetime.timedelta(days=1)
 HOUR = datetime.timedelta(hours=1)
 MANUAL = settings.COMPETITION_MANUAL_GRADING_TAG
+
 
 def db_reload(obj):
     """Reload the given object from the database. Returns a new object."""
@@ -64,10 +70,16 @@ class CompetitionViewsTestBase(TestCase):
             (6, 3, COURSE, False, past2, past1, future3),  # Course.
         ]
         competitions = [
-            Competition(name="Test competition #{}".format(id_),
-                max_team_size=team_size, kind=kind, hidden=hidden,
-                registration_open_date=open_, start_date=start, end_date=end,
-                scoreboard_freeze_date=end - HOUR)
+            Competition(
+                name="Test competition #{}".format(id_),
+                max_team_size=team_size,
+                kind=kind,
+                hidden=hidden,
+                registration_open_date=open_,
+                start_date=start,
+                end_date=end,
+                scoreboard_freeze_date=end - HOUR,
+            )
             for id_, team_size, kind, hidden, open_, start, end in competitions
         ]
         Competition.objects.bulk_create(competitions)
@@ -78,13 +90,15 @@ class CompetitionViewsTestBase(TestCase):
         """Equivalent to self.client.get with the competition's URL prepended."""
         assert self.competition
         return self.client.get(
-                self.competition.get_absolute_url() + suffix, *args, **kwargs)
+            self.competition.get_absolute_url() + suffix, *args, **kwargs
+        )
 
     def comp_post(self, suffix, *args, **kwargs):
         """Equivalent to self.client.post with the competition's URL prepended."""
         assert self.competition
         return self.client.get(
-                self.competition.get_absolute_url() + suffix, *args, **kwargs)
+            self.competition.get_absolute_url() + suffix, *args, **kwargs
+        )
 
     def create_chain(self, **kwargs):
         assert self.competition
@@ -99,19 +113,30 @@ class CompetitionViewsTestBase(TestCase):
 
 class ChainSortingTest(CompetitionViewsTestBase):
     """Test chain sorting in the public tasks view."""
+
     def init_competition(self, competition):
         self.competition = competition
         self.team1 = Team.objects.create(
-                name="Test team 1", author=self.user1, competition=competition)
-        TeamMember.objects.create(team=self.team1, member=self.user1,
-                member_name=self.user1.username,
-                invitation_status=TeamMember.INVITATION_ACCEPTED)
+            name="Test team 1", author=self.user1, competition=competition
+        )
+        TeamMember.objects.create(
+            team=self.team1,
+            member=self.user1,
+            member_name=self.user1.username,
+            invitation_status=TeamMember.INVITATION_ACCEPTED,
+        )
 
     def test_ordering_by_category(self):
         self.init_competition(self.competitions[3])
-        chain1 = self.create_chain(name="Chain A", category="AAA", cache_is_verified=True)
-        chain2 = self.create_chain(name="Chain B", category="AAA", cache_is_verified=True)
-        chain3 = self.create_chain(name="Chain C", category="AAA", cache_is_verified=True)
+        chain1 = self.create_chain(
+            name="Chain A", category="AAA", cache_is_verified=True
+        )
+        chain2 = self.create_chain(
+            name="Chain B", category="AAA", cache_is_verified=True
+        )
+        chain3 = self.create_chain(
+            name="Chain C", category="AAA", cache_is_verified=True
+        )
         self.create_ctask(chain1, '123', 1)
         self.create_ctask(chain2, '123', 1)
         self.create_ctask(chain3, '123', 1)
@@ -134,9 +159,18 @@ class ChainSortingTest(CompetitionViewsTestBase):
 
     def test_ordering_view_locked_unlocked(self):
         self.init_competition(self.competitions[3])
-        chain1 = self.create_chain(name="Chain A", category="AAA", cache_is_verified=True)
-        chain2 = self.create_chain(name="Chain B", category="BBB", cache_is_verified=False)
-        chain3 = self.create_chain(name="Chain C", category="AAA", cache_is_verified=True, unlock_minutes=1000000000)
+        chain1 = self.create_chain(
+            name="Chain A", category="AAA", cache_is_verified=True
+        )
+        chain2 = self.create_chain(
+            name="Chain B", category="BBB", cache_is_verified=False
+        )
+        chain3 = self.create_chain(
+            name="Chain C",
+            category="AAA",
+            cache_is_verified=True,
+            unlock_minutes=1000000000,
+        )
         self.create_ctask(chain1, '123', 1)
         self.create_ctask(chain2, '123', 1)
         self.create_ctask(chain3, '123', 1)
@@ -155,9 +189,21 @@ class ChainSortingTest(CompetitionViewsTestBase):
 
     def test_custom_ordering(self):
         self.init_competition(self.competitions[3])
-        chain1 = self.create_chain(name="Lanac A | Chain A", category="[order=10] AAA | aaa", cache_is_verified=True)
-        chain2 = self.create_chain(name="Lanac B | Chain B", category="[order=30] BBB | bbb", cache_is_verified=True)
-        chain3 = self.create_chain(name="Lanac C | Chain C", category="[order=+20] CCC | ccc", cache_is_verified=True)
+        chain1 = self.create_chain(
+            name="Lanac A | Chain A",
+            category="[order=10] AAA | aaa",
+            cache_is_verified=True,
+        )
+        chain2 = self.create_chain(
+            name="Lanac B | Chain B",
+            category="[order=30] BBB | bbb",
+            cache_is_verified=True,
+        )
+        chain3 = self.create_chain(
+            name="Lanac C | Chain C",
+            category="[order=+20] CCC | ccc",
+            cache_is_verified=True,
+        )
         self.create_ctask(chain1, '123', 1)
         self.create_ctask(chain2, '123', 1)
         self.create_ctask(chain3, '123', 1)
@@ -179,9 +225,21 @@ class ChainSortingTest(CompetitionViewsTestBase):
 
     def test_different_ordering_for_different_languages(self):
         self.init_competition(self.competitions[3])
-        chain1 = self.create_chain(name="Lanac A | Chain A", category="[order=10] AAA | [order=-10] aaa", cache_is_verified=True)
-        chain2 = self.create_chain(name="Lanac B | Chain B", category="[order=30] BBB | [order=-30] bbb", cache_is_verified=True)
-        chain3 = self.create_chain(name="Lanac C | Chain C", category="[order=+20] CCC | [order=-20] ccc", cache_is_verified=True)
+        chain1 = self.create_chain(
+            name="Lanac A | Chain A",
+            category="[order=10] AAA | [order=-10] aaa",
+            cache_is_verified=True,
+        )
+        chain2 = self.create_chain(
+            name="Lanac B | Chain B",
+            category="[order=30] BBB | [order=-30] bbb",
+            cache_is_verified=True,
+        )
+        chain3 = self.create_chain(
+            name="Lanac C | Chain C",
+            category="[order=+20] CCC | [order=-20] ccc",
+            cache_is_verified=True,
+        )
         self.create_ctask(chain1, '123', 1)
         self.create_ctask(chain2, '123', 1)
         self.create_ctask(chain3, '123', 1)
@@ -225,9 +283,11 @@ class RegistrationTest(CompetitionViewsTestBase):
     def test_hidden_with_permission(self):
         """With explicit permission, it should work."""
         competition = Competition.objects.get(id=5)
-        ObjectPermission.objects.create(content_object=competition,
-                permission_type=VIEW,
-                group=self.alice.get_profile().private_group)
+        ObjectPermission.objects.create(
+            content_object=competition,
+            permission_type=VIEW,
+            group=self.alice.get_profile().private_group,
+        )
 
         # It doesn't have to work even for admin_group if no explicit
         # permission is given. That's why we have permission system.
@@ -249,16 +309,18 @@ class RegistrationTest(CompetitionViewsTestBase):
         """If registration closed, registration requests should be ignored and
         redirected to competition homepage."""
         self.login(self.alice)
-        response = self.client.post('/competition/4/registration/',
-                {'name': "Team name"})
+        response = self.client.post(
+            '/competition/4/registration/', {'name': "Team name"}
+        )
         self.assertRedirects(response, '/competition/4/')
         self.logout()
 
     def test_registration_single_member(self):
         """Test registration without any additional members."""
         self.login(self.alice)
-        response = self.client.post('/competition/2/registration/',
-                {'name': "Team name"})
+        response = self.client.post(
+            '/competition/2/registration/', {'name': "Team name"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'competition_registration_complete.html')
         self.assertIsNotNone(response.context['team'])
@@ -269,27 +331,46 @@ class RegistrationTest(CompetitionViewsTestBase):
     def test_registration_one_invite_and_accept(self):
         """Test full registration with two members."""
         self.login(self.alice)
-        response = self.client.post('/competition/2/registration/',
-                {'name': "Team name", "member2_username": self.admin.username})
+        response = self.client.post(
+            '/competition/2/registration/',
+            {'name': "Team name", "member2_username": self.admin.username},
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'competition_registration_complete.html')
         team = response.context['team']
         self.assertIsNotNone(team)
         self.assertEqual(team.name, "Team name")
-        self.assertEqual(TeamMember.objects.filter(
-            invitation_status=TeamMember.INVITATION_ACCEPTED).count(), 1)
-        self.assertEqual(TeamMember.objects.filter(
-            invitation_status=TeamMember.INVITATION_UNANSWERED).count(), 1)
+        self.assertEqual(
+            TeamMember.objects.filter(
+                invitation_status=TeamMember.INVITATION_ACCEPTED
+            ).count(),
+            1,
+        )
+        self.assertEqual(
+            TeamMember.objects.filter(
+                invitation_status=TeamMember.INVITATION_UNANSWERED
+            ).count(),
+            1,
+        )
         self.logout()
 
         self.login(self.admin)
-        response = self.client.post('/competition/2/registration/',
-                {'invitation-accept': team.id})
+        response = self.client.post(
+            '/competition/2/registration/', {'invitation-accept': team.id}
+        )
         self.assertIsNotNone(response.context['team'])
-        self.assertEqual(TeamMember.objects.filter(
-            invitation_status=TeamMember.INVITATION_ACCEPTED).count(), 2)
-        self.assertEqual(TeamMember.objects.filter(
-            invitation_status=TeamMember.INVITATION_UNANSWERED).count(), 0)
+        self.assertEqual(
+            TeamMember.objects.filter(
+                invitation_status=TeamMember.INVITATION_ACCEPTED
+            ).count(),
+            2,
+        )
+        self.assertEqual(
+            TeamMember.objects.filter(
+                invitation_status=TeamMember.INVITATION_UNANSWERED
+            ).count(),
+            0,
+        )
         self.logout()
 
     def test_same_user_in_two_competitions(self):
@@ -299,113 +380,143 @@ class RegistrationTest(CompetitionViewsTestBase):
         self.client.post('/competition/2/registration/', {'name': "same-name"})
         self.assertEqual(Team.objects.all().count(), 1)
         self.assertEqual(TeamMember.objects.all().count(), 1)
-        response = self.client.post('/competition/3/registration/',
-                {'name': "same-name"})
+        response = self.client.post(
+            '/competition/3/registration/', {'name': "same-name"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Team.objects.all().count(), 2)
         self.assertEqual(TeamMember.objects.all().count(), 2)
 
     def test_delete_invitations_after_creating_a_team(self):
         self.login(self.alice)
-        self.client.post('/competition/2/registration/',
-                {'name': "Alice's team", "member2_username": self.bob.username})
-        self.assertEqual(TeamMember.objects \
-                .filter(team_id=1, member_id=self.bob.id).count(), 1)
+        self.client.post(
+            '/competition/2/registration/',
+            {'name': "Alice's team", "member2_username": self.bob.username},
+        )
+        self.assertEqual(
+            TeamMember.objects.filter(team_id=1, member_id=self.bob.id).count(), 1
+        )
         self.logout()
         self.login(self.bob)
         self.client.post('/competition/2/registration/', {'name': "Bob's team"})
-        self.assertEqual(TeamMember.objects \
-                .filter(team_id=1, member_id=self.bob.id).count(), 0)
+        self.assertEqual(
+            TeamMember.objects.filter(team_id=1, member_id=self.bob.id).count(), 0
+        )
 
     def test_delete_other_invitations_after_accepting_one(self):
         """Other invitations in the same competition should be deleted after
         selecting one. Invitations from other competition shouldn't be
         affected."""
         self.login(self.alice)
-        self.client.post('/competition/2/registration/',
-                {'name': "Alice 2", "member2_username": self.admin.username})
-        self.client.post('/competition/3/registration/',
-                {'name': "Alice 3", "member2_username": self.admin.username})
+        self.client.post(
+            '/competition/2/registration/',
+            {'name': "Alice 2", "member2_username": self.admin.username},
+        )
+        self.client.post(
+            '/competition/3/registration/',
+            {'name': "Alice 3", "member2_username": self.admin.username},
+        )
         self.logout()
         self.login(self.bob)
-        response = self.client.post('/competition/2/registration/',
-                {'name': "Bob 2", "member2_username": self.admin.username})
+        response = self.client.post(
+            '/competition/2/registration/',
+            {'name': "Bob 2", "member2_username": self.admin.username},
+        )
         self.assertEqual(response.status_code, 200)
         self.logout()
         self.login(self.admin)
-        self.assertEqual(
-                TeamMember.objects.filter(team__competition_id=2).count(), 4)
-        self.assertEqual(
-                TeamMember.objects.filter(team__competition_id=3).count(), 2)
-        self.client.post('/competition/2/registration/',
-                {'invitation-accept': 1})
-        self.assertEqual(
-                TeamMember.objects.filter(team__competition_id=2).count(), 3)
-        self.assertEqual(
-                TeamMember.objects.filter(team__competition_id=3).count(), 2)
+        self.assertEqual(TeamMember.objects.filter(team__competition_id=2).count(), 4)
+        self.assertEqual(TeamMember.objects.filter(team__competition_id=3).count(), 2)
+        self.client.post('/competition/2/registration/', {'invitation-accept': 1})
+        self.assertEqual(TeamMember.objects.filter(team__competition_id=2).count(), 3)
+        self.assertEqual(TeamMember.objects.filter(team__competition_id=3).count(), 2)
 
     def test_update_members(self):
         self.login(self.alice)
         # First add one user.
-        self.client.post('/competition/2/registration/',
-                {'name': "Alice 2", "member2_username": self.bob.username})
-        self.assertEqual(
-                TeamMember.objects.filter(team__competition_id=2).count(), 2)
+        self.client.post(
+            '/competition/2/registration/',
+            {'name': "Alice 2", "member2_username": self.bob.username},
+        )
+        self.assertEqual(TeamMember.objects.filter(team__competition_id=2).count(), 2)
 
         # Then add another.
-        self.client.post('/competition/2/registration/', {
+        self.client.post(
+            '/competition/2/registration/',
+            {
                 'name': "Alice 2",
                 "member2_username": self.bob.username,
-                "member3_username": self.admin.username})
-        self.assertEqual(
-                TeamMember.objects.filter(team__competition_id=2).count(), 3)
+                "member3_username": self.admin.username,
+            },
+        )
+        self.assertEqual(TeamMember.objects.filter(team__competition_id=2).count(), 3)
 
         # Then update first.
-        self.client.post('/competition/2/registration/', {
+        self.client.post(
+            '/competition/2/registration/',
+            {
                 'name': "Alice 2",
                 "member2_manual": "sarma",
-                "member3_username": self.admin.username})
+                "member3_username": self.admin.username,
+            },
+        )
+        self.assertEqual(TeamMember.objects.filter(team__competition_id=2).count(), 3)
         self.assertEqual(
-                TeamMember.objects.filter(team__competition_id=2).count(), 3)
-        self.assertEqual(
-                set(TeamMember.objects.filter(team__competition_id=2) \
-                        .values_list('member_name', flat=True)),
-                set([self.alice.username, "sarma", self.admin.username]))
+            set(
+                TeamMember.objects.filter(team__competition_id=2).values_list(
+                    'member_name', flat=True
+                )
+            ),
+            set([self.alice.username, "sarma", self.admin.username]),
+        )
 
         # Then delete first.
-        self.client.post('/competition/2/registration/', {
-                'name': "Alice 2", "member3_username": self.admin.username})
+        self.client.post(
+            '/competition/2/registration/',
+            {'name': "Alice 2", "member3_username": self.admin.username},
+        )
+        self.assertEqual(TeamMember.objects.filter(team__competition_id=2).count(), 2)
         self.assertEqual(
-                TeamMember.objects.filter(team__competition_id=2).count(), 2)
-        self.assertEqual(
-                set(TeamMember.objects.filter(team__competition_id=2) \
-                        .values_list('member_name', flat=True)),
-                set([self.alice.username, self.admin.username]))
+            set(
+                TeamMember.objects.filter(team__competition_id=2).values_list(
+                    'member_name', flat=True
+                )
+            ),
+            set([self.alice.username, self.admin.username]),
+        )
 
     def test_reject_used_and_current_user(self):
         """Reject invitation if user already has a team."""
         self.login(self.alice)
         # Firstly, reject him/herself...
-        self.client.post('/competition/2/registration/',
-                {'name': "Alice", "member2_username": self.alice.username})
+        self.client.post(
+            '/competition/2/registration/',
+            {'name': "Alice", "member2_username": self.alice.username},
+        )
         self.assertEqual(Team.objects.filter(competition_id=2).count(), 0)
 
         # Alice invites admin.
-        self.client.post('/competition/2/registration/',
-                {'name': "Alice", "member2_username": self.admin.username})
+        self.client.post(
+            '/competition/2/registration/',
+            {'name': "Alice", "member2_username": self.admin.username},
+        )
         self.assertEqual(Team.objects.filter(competition_id=2).count(), 1)
         self.logout()
 
         # Admin accepts the invitation.
         self.login(self.admin)
-        self.client.post('/competition/2/registration/',
-                {'invitation-accept': Team.objects.get(competition_id=2).id})
+        self.client.post(
+            '/competition/2/registration/',
+            {'invitation-accept': Team.objects.get(competition_id=2).id},
+        )
         self.logout()
 
         # Bob tries to invite admin, but fails.
         self.login(self.bob)
-        self.client.post('/competition/2/registration/',
-                {'name': "Bob", "member2_username": self.admin.username})
+        self.client.post(
+            '/competition/2/registration/',
+            {'name': "Bob", "member2_username": self.admin.username},
+        )
         self.assertEqual(Team.objects.filter(competition_id=2).count(), 1)
 
 
@@ -414,10 +525,13 @@ class CourseTest(CompetitionViewsTestBase):
         """Course registration is simpler -- there is no team."""
         # Test registration. Check that the name kwarg is ignored.
         self.login(self.alice)
-        response = self.client.post('/competition/6/registration/',
-                                    {'name': "should be ignored"})
+        response = self.client.post(
+            '/competition/6/registration/', {'name': "should be ignored"}
+        )
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'competition_registration_complete_course.html')
+        self.assertTemplateUsed(
+            response, 'competition_registration_complete_course.html'
+        )
         team = Team.objects.get(competition=self.competitions[6], author=self.alice)
         self.assertEqual(team.name, self.alice.username)  # name is ignored
 
@@ -435,14 +549,17 @@ class CourseTest(CompetitionViewsTestBase):
         self.assertContains(response, 'unlock_days')
 
         # Test that days are multiplied with 24*60.
-        response = self.client.post('/competition/6/chain/new/', {
-            'name': "Chain-ABC",
-            'category': "Category-DEF",
-            'bonus_score': "2",
-            'unlock_days': "14",
-            'unlock_mode': "1",
-            'position': "0",
-        })
+        response = self.client.post(
+            '/competition/6/chain/new/',
+            {
+                'name': "Chain-ABC",
+                'category': "Category-DEF",
+                'bonus_score': "2",
+                'unlock_days': "14",
+                'unlock_mode': "1",
+                'position': "0",
+            },
+        )
         chain = Chain.objects.get(name="Chain-ABC")
         self.assertEqual(chain.unlock_minutes, 14 * 24 * 60)
         self.assertRedirects(response, chain.get_absolute_url())
@@ -456,13 +573,18 @@ class CourseTest(CompetitionViewsTestBase):
 
 class SubmissionTest(CompetitionViewsTestBase):
     def init_competition(self, competition, user):
-        self.team = Team.objects.create(name="Test team", author=user,
-                competition=competition)
-        TeamMember.objects.create(team=self.team, member=user,
-                member_name=user.username,
-                invitation_status=TeamMember.INVITATION_ACCEPTED)
-        self.chain = Chain.objects.create(competition=competition,
-                name="Test chain", bonus_score=1000)
+        self.team = Team.objects.create(
+            name="Test team", author=user, competition=competition
+        )
+        TeamMember.objects.create(
+            team=self.team,
+            member=user,
+            member_name=user.username,
+            invitation_status=TeamMember.INVITATION_ACCEPTED,
+        )
+        self.chain = Chain.objects.create(
+            competition=competition, name="Test chain", bonus_score=1000
+        )
         self.ctask1 = create_ctask(self.admin, competition, self.chain, "42", 1)
         self.ctask2 = create_ctask(self.admin, competition, self.chain, "42", 10)
         self.ctask3 = create_ctask(self.admin, competition, self.chain, "42", 100)
@@ -471,8 +593,9 @@ class SubmissionTest(CompetitionViewsTestBase):
         return self.client.post(task.get_absolute_url(), {'result': result})
 
     def _delete_solution(self, task, submission_id):
-        return self.client.post(task.get_absolute_url(),
-                {'delete-submission': submission_id})
+        return self.client.post(
+            task.get_absolute_url(), {'delete-submission': submission_id}
+        )
 
     def test_before_contest_start(self):
         self.init_competition(self.competitions[2], self.alice)
@@ -597,15 +720,23 @@ class ManualGradingTest(CompetitionViewsTestBase):
     def init_competition(self, competition):
         self.competition = competition
         self.team1 = Team.objects.create(
-                name="Test team 1", author=self.user1, competition=competition)
+            name="Test team 1", author=self.user1, competition=competition
+        )
         self.team2 = Team.objects.create(
-                name="Test team 2", author=self.user2, competition=competition)
-        TeamMember.objects.create(team=self.team1, member=self.user1,
-                member_name=self.user1.username,
-                invitation_status=TeamMember.INVITATION_ACCEPTED)
-        TeamMember.objects.create(team=self.team2, member=self.user2,
-                member_name=self.user2.username,
-                invitation_status=TeamMember.INVITATION_ACCEPTED)
+            name="Test team 2", author=self.user2, competition=competition
+        )
+        TeamMember.objects.create(
+            team=self.team1,
+            member=self.user1,
+            member_name=self.user1.username,
+            invitation_status=TeamMember.INVITATION_ACCEPTED,
+        )
+        TeamMember.objects.create(
+            team=self.team2,
+            member=self.user2,
+            member_name=self.user2.username,
+            invitation_status=TeamMember.INVITATION_ACCEPTED,
+        )
         chain1 = Chain.objects.create(competition=competition, name="Test chain 1")
         chain2 = Chain.objects.create(competition=competition, name="Test chain 2")
         self.ctask1 = create_ctask(self.admin, competition, chain1, MANUAL, 1)
@@ -630,7 +761,8 @@ class ManualGradingTest(CompetitionViewsTestBase):
         # Test that a non-admin cannot view the submission detail admin page.
         self.assertEqual(self.client.get(sub1.get_admin_url()).status_code, 403)
         self.assertEqual(
-                self.client.post(sub1.get_admin_url(), {'mark_new': 0}).status_code, 403)
+            self.client.post(sub1.get_admin_url(), {'mark_new': 0}).status_code, 403
+        )
 
         # Test current values of counters.
         self.login(self.admin)
@@ -651,7 +783,9 @@ class ManualGradingTest(CompetitionViewsTestBase):
         self.ctask1.cache_new_activities_count = 10
         self.ctask1.save()
         self.assertEqual(db_reload(self.ctask1).cache_new_activities_count, 10)
-        self.client.post(self.competition.get_absolute_url() + 'chain/tasks/',
-                         {'action': 'refresh-ctask-cache-new-activities-count'})
+        self.client.post(
+            self.competition.get_absolute_url() + 'chain/tasks/',
+            {'action': 'refresh-ctask-cache-new-activities-count'},
+        )
         self.assertEqual(db_reload(self.ctask1).cache_new_activities_count, 2)
         self.assertEqual(db_reload(self.ctask2).cache_new_activities_count, 1)

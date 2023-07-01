@@ -2,14 +2,15 @@ from django import template
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.template.base import TemplateSyntaxError
-from django.utils.translation import get_language, ugettext as _
+from django.utils.translation import get_language
+from django.utils.translation import ugettext as _
 from template_preprocessor import preprocess_tag
 
+from skoljka.base.utils import get_featured_lectures
 from skoljka.search.utils import search_tasks
 
-from skoljka.base.utils import get_featured_lectures
-
 register = template.Library()
+
 
 @register.filter
 def concat(first, second):
@@ -70,10 +71,8 @@ def settings_constant(*args):
         return out
     bits = args[1].split_contents()
     if len(bits) != 2:
-        raise TemplateSyntaxError(
-                "Expected only one parameter in 'settings_constant'!")
+        raise TemplateSyntaxError("Expected only one parameter in 'settings_constant'!")
     return ConstantNode(getattr(settings, bits[1]))
-
 
 
 @register.simple_tag

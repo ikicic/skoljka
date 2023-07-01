@@ -12,8 +12,9 @@ from __future__ import print_function
 from django.conf import settings
 from django.core.cache import cache
 
+
 def make_full_key(namespace, counter, key):
-    """Generate full key from namespace, counter and (sub)key. """
+    """Generate full key from namespace, counter and (sub)key."""
     return '{}-{}-{}'.format(namespace, counter, key)
 
 

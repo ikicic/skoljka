@@ -1,11 +1,12 @@
 from django.utils.translation import ugettext as _
 
-from skoljka.competition.evaluator_base import *
 import skoljka.competition.evaluator_v0 as evaluator_v0
 import skoljka.competition.evaluator_v1 as evaluator_v1
+from skoljka.competition.evaluator_base import *
 
 EVALUATOR_V0 = 0
 EVALUATOR_V1 = 1
+
 
 def get_evaluator(evaluator_version):
     if evaluator_version == EVALUATOR_V0:
@@ -38,8 +39,7 @@ def get_solution_help_text(variables, error_message="", show_types=False):
     help_texts = []
     for var in variables:
         if show_types:
-            help_type = u'<span class="chelp-type">{}</span> '.format(
-                    var.help_type())
+            help_type = u'<span class="chelp-type">{}</span> '.format(var.help_type())
         help_text = var.help_text()
         if help_text:
             help_text = u'<span class="chelp-text">{}</span>'.format(help_text)

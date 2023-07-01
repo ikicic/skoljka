@@ -1,9 +1,9 @@
 ﻿from django import forms
 
-from skoljka.permissions.constants import VIEW
-
 from skoljka.folder.models import Folder
 from skoljka.folder.utils import get_visible_folder_tree
+from skoljka.permissions.constants import VIEW
+
 
 class FolderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -34,8 +34,11 @@ class FolderForm(forms.ModelForm):
 
         # Check all permissions. Remove inaccessible folders.
         # WARNING: Remove the subtree of the given folder!
-        data = get_visible_folder_tree(Folder.objects.filter(editable=True),
-            self.user, exclude_subtree=self.instance)
+        data = get_visible_folder_tree(
+            Folder.objects.filter(editable=True),
+            self.user,
+            exclude_subtree=self.instance,
+        )
 
         # WARNING: Do not forget to remove self.instance from the list!
         exclude_id = self.instance.id if self.instance else None
@@ -45,11 +48,12 @@ class FolderForm(forms.ModelForm):
         root = Folder.objects.get(parent_id__isnull=True)
         root._depth = 0
         self._parent_choices = [root]
-        self._parent_choices.extend(filter(
-            lambda x: x.editable and x.id != exclude_id, data['sorted_folders']
-        ))
-        choices = [(x.id, '-- ' * (x._depth - 1) + x.name)
-            for x in self._parent_choices]
+        self._parent_choices.extend(
+            filter(lambda x: x.editable and x.id != exclude_id, data['sorted_folders'])
+        )
+        choices = [
+            (x.id, '-- ' * (x._depth - 1) + x.name) for x in self._parent_choices
+        ]
 
         # Make sure initial parent exist and it's accessible
         self.initial_parent = next(
@@ -62,19 +66,24 @@ class FolderForm(forms.ModelForm):
 
         # If parent is inaccessible, notify user.
         if self.instance and self.instance.parent_id:
-            parent_ok = next((x for x in self._parent_choices
-                if self.instance.parent_id == x.id), None)
+            parent_ok = next(
+                (x for x in self._parent_choices if self.instance.parent_id == x.id),
+                None,
+            )
 
             if not parent_ok:
                 # hackish, is there any more formal way to do this?
                 if 'parent' not in self.errors:
                     self.errors.update(parent=[])
-                self.errors['parent'].append('Trenutačna roditeljska kolekcija '
+                self.errors['parent'].append(
+                    'Trenutačna roditeljska kolekcija '
                     'nije dostupna! Kako bi ova kolekcija bila dostupna iz '
-                    'izbornika, premjestite je u neku dostupnu kolekciju.')
+                    'izbornika, premjestite je u neku dostupnu kolekciju.'
+                )
 
         self.fields['parent'] = forms.ChoiceField(
-            choices=choices, label='Roditelj', initial=self.initial_parent_id)
+            choices=choices, label='Roditelj', initial=self.initial_parent_id
+        )
 
     def clean_parent(self):
         data = self.cleaned_data.get('parent')
@@ -97,6 +106,7 @@ class FolderForm(forms.ModelForm):
         model = Folder
         fields = ['name', 'short_name', 'parent', 'tags', 'hidden']
 
+
 class FolderAdvancedCreateForm(forms.Form):
     structure = forms.CharField(widget=forms.Textarea(), label='Struktura')
     # parent = added in init...
@@ -107,10 +117,16 @@ class FolderAdvancedCreateForm(forms.Form):
         super(FolderAdvancedCreateForm, self).__init__(*args, **kwargs)
 
         # bootstrap fix
-        self.fields['structure'].widget.attrs.update({
-            'rows': 10, 'cols': 100, 'class': 'uneditable-textarea',
-        })
+        self.fields['structure'].widget.attrs.update(
+            {
+                'rows': 10,
+                'cols': 100,
+                'class': 'uneditable-textarea',
+            }
+        )
         self.fields['parent'] = forms.ModelChoiceField(
-            queryset=Folder.objects.for_user(user, VIEW)    \
-                .filter(editable=True).distinct(),
-            label='Roditelj')
+            queryset=Folder.objects.for_user(user, VIEW)
+            .filter(editable=True)
+            .distinct(),
+            label='Roditelj',
+        )

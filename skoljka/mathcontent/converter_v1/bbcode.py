@@ -1,13 +1,13 @@
 from django.conf import settings
 from django.utils.translation import ugettext as _
 
-from skoljka.utils import xss
-
+from skoljka.mathcontent.converter_v1.basics import img_params_to_html, img_parse_length
+from skoljka.mathcontent.converter_v1.latex import (
+    LatexValueError,
+    convert_tex_length_to_html,
+)
 from skoljka.mathcontent.latex import latex_escape
-from skoljka.mathcontent.converter_v1.basics import \
-        img_parse_length, img_params_to_html
-from skoljka.mathcontent.converter_v1.latex import \
-        convert_tex_length_to_html, LatexValueError
+from skoljka.utils import xss
 
 
 class BBCodeException(Exception):
@@ -37,6 +37,7 @@ class BBUnexpectedParameters(BBCodeException):
 #         else:
 #             return u'\\url{%s}' % latex_escape(content)
 
+
 def _img_params_to_latex(params):
     out = {}
     scale = []
@@ -63,8 +64,7 @@ def _img_params_to_latex(params):
     if scale:
         out['scale'] = scale[0]
     if out:
-        result = u",".join(
-                "{}={}".format(key, value) for key, value in out.iteritems())
+        result = u",".join("{}={}".format(key, value) for key, value in out.iteritems())
         return "[{}]".format(result)
     else:
         return ""
@@ -101,7 +101,7 @@ def parse_bbcode(T, K):
         if K == start:
             # No special characters allowed in the variable name.
             raise BBCodeException()
-        attr_name = T[start : K]
+        attr_name = T[start:K]
         if tag_name is None:
             tag_name = attr_name
         elif not open:
@@ -125,8 +125,11 @@ def parse_bbcode(T, K):
                 K += 1
                 value = []
                 while K < len(T) and T[K] != quot:
-                    if T[K] == '\\' and K + 1 < len(T) and \
-                            (T[K + 1] == '\\' or T[K + 1] == quot):
+                    if (
+                        T[K] == '\\'
+                        and K + 1 < len(T)
+                        and (T[K + 1] == '\\' or T[K + 1] == quot)
+                    ):
                         value.append(T[K + 1])
                         K += 2
                     else:
@@ -140,14 +143,13 @@ def parse_bbcode(T, K):
                 start = K
                 while K < len(T) and T[K] not in ' \t\r\n]':
                     K += 1
-                attrs.append((attr_name, T[start : K]))
+                attrs.append((attr_name, T[start:K]))
         else:
             attrs.append((attr_name, None))
     if K == len(T):
         raise BBCodeException()
 
     return tag_name, (attrs if open else None), K + 1
-
 
 
 class BBCodeTag(object):
@@ -158,9 +160,8 @@ class BBCodeTag(object):
         """Some tags might have parsing enabled or disabled depending on the
         attributes (e.g. [url]not parsed[/url], [url=...]parsed[/url]).
         Return True to use normal LaTeX parses, False to read until the end
-        tag. """
+        tag."""
         raise NotImplementedError()
-
 
 
 class BBCodeContainer(BBCodeTag):
@@ -189,11 +190,11 @@ class BBCodeContainer(BBCodeTag):
         return self.latex_close
 
 
-
 class BBCodeNoParseContainer(BBCodeContainer):
     def __init__(self, html_open, html_close, latex_open, latex_close):
         super(BBCodeNoParseContainer, self).__init__(
-                html_open, html_close, latex_open, latex_close)
+            html_open, html_close, latex_open, latex_close
+        )
 
     def should_parse_content(self, token):
         return False
@@ -207,7 +208,6 @@ class BBCodeNoParseContainer(BBCodeContainer):
         if len(token.attrs) != 1 or token.attrs[0][1] is not None:
             raise BBUnexpectedParameters()
         return self.latex_open + token.content + self.latex_close
-
 
 
 class BBCodeHide(BBCodeTag):
@@ -224,9 +224,10 @@ class BBCodeHide(BBCodeTag):
             link_text = xss.escape(token.attrs[0][1])
         else:
             link_text = '+/-'
-        return u'<div><a href="#" class="mc-hide-link">{}</a>' \
-                u'<div class="mc-hide-content" style="display:none;">'.format(
-                        link_text)
+        return (
+            u'<div><a href="#" class="mc-hide-link">{}</a>'
+            u'<div class="mc-hide-content" style="display:none;">'.format(link_text)
+        )
 
     def to_latex(self, token, converter):
         if not token.is_open():
@@ -238,7 +239,6 @@ class BBCodeHide(BBCodeTag):
             return u'{\\color{gray}' + latex_escape(token.attrs[0][1]) + ': '
         else:
             return u'{\\color{gray}'
-
 
 
 class BBCodeImg(BBCodeTag):
@@ -269,14 +269,15 @@ class BBCodeImg(BBCodeTag):
     def to_html(self, token, converter):
         val, index, attachment = self._check(token, converter)
         return u'<img src="{}" alt="Attachment #{}" class="latex"{}>'.format(
-                xss.escape(attachment.get_url()), val,
-                img_params_to_html(token.attrs))
+            xss.escape(attachment.get_url()), val, img_params_to_html(token.attrs)
+        )
 
     def to_latex(self, token, converter):
         val, index, attachment = self._check(token, converter)
-        return u'\\includegraphics%s{%s}' % \
-                (_img_params_to_latex(token.attrs), attachment.get_filename())
-
+        return u'\\includegraphics%s{%s}' % (
+            _img_params_to_latex(token.attrs),
+            attachment.get_filename(),
+        )
 
 
 class BBCodeLanguage(BBCodeTag):
@@ -288,12 +289,15 @@ class BBCodeLanguage(BBCodeTag):
             return '</div>'
         if token.attrs is None or len(token.attrs) != 1:
             raise BBUnexpectedParameters()
-        lang = dict(token.attrs)['lang'];
+        lang = dict(token.attrs)['lang']
         if lang is None:
-            raise BBCodeException("Language not specified, use e.g. '[lang=en]...[/lang]'.")
+            raise BBCodeException(
+                "Language not specified, use e.g. '[lang=en]...[/lang]'."
+            )
         if not any(lang == lang_ for lang_, name in settings.LANGUAGES):
             raise BBCodeException(
-                    "Unrecognized language code '{}'.".format(xss.escape(lang)))
+                "Unrecognized language code '{}'.".format(xss.escape(lang))
+            )
         return u'<div class="lang lang-{}">'.format(lang)
 
     def to_latex(self, token, converter):
@@ -306,9 +310,10 @@ class BBCodeLanguage(BBCodeTag):
 
 class BBCodePar(BBCodeTag):
     """[par <skip> <indent>], a shorthand for
-        \\setlength{\\parskip}{<skip>}
-        \\setlength{\\parindent}{<indent>}.
+    \\setlength{\\parskip}{<skip>}
+    \\setlength{\\parindent}{<indent>}.
     """
+
     def __init__(self):
         super(BBCodePar, self).__init__(has_close_tag=False)
 
@@ -317,12 +322,15 @@ class BBCodePar(BBCodeTag):
             raise BBCodeException(_("Expected two attributes."))
         for k in range(3):
             if token.attrs[k][1] is not None:
-                raise BBUnexpectedParameters(_("Unexpected attribute value:") +
-                                             "%s=%s" % token.attrs[k])
+                raise BBUnexpectedParameters(
+                    _("Unexpected attribute value:") + "%s=%s" % token.attrs[k]
+                )
         skip = token.attrs[1][0]
         indent = token.attrs[2][0]
-        if skip == '0': skip = '0pt'
-        if indent == '0': indent = '0pt'
+        if skip == '0':
+            skip = '0pt'
+        if indent == '0':
+            indent = '0pt'
         try:
             html_skip = convert_tex_length_to_html(skip)
             html_indent = convert_tex_length_to_html(indent)
@@ -338,8 +346,10 @@ class BBCodePar(BBCodeTag):
 
     def to_latex(self, token, converter):
         skip, indent = self._check(token, converter, True)
-        return u"\\setlength{\\parskip}{%s}\n\\setlength{\\parindent}{%s}\n" % \
-                (skip, indent)
+        return u"\\setlength{\\parskip}{%s}\n\\setlength{\\parindent}{%s}\n" % (
+            skip,
+            indent,
+        )
 
 
 # class BBCodeRef(BBCodeTag):
@@ -366,7 +376,6 @@ class BBCodePar(BBCodeTag):
 #                 bb_code_link(converter.type, url, content)
 
 
-
 class BBCodeURL(BBCodeTag):
     def should_parse_content(self, token):
         # [url=...]...[/url --> parse normally
@@ -379,9 +388,11 @@ class BBCodeURL(BBCodeTag):
                 raise BBUnexpectedParameters()
             if token.content is not None:
                 return u'<a href="{}" rel="nofollow">{}</a>'.format(
-                        xss.escape(token.content), xss.escape(token.content))
+                    xss.escape(token.content), xss.escape(token.content)
+                )
             return u'<a href="{}" rel="nofollow">'.format(
-                    xss.escape(dict(token.attrs)['url']))
+                xss.escape(dict(token.attrs)['url'])
+            )
         return '</a>'
 
     def to_latex(self, token, converter):
@@ -397,11 +408,11 @@ class BBCodeURL(BBCodeTag):
         return '}'
 
 
-
 bb_commands = {
     'b': BBCodeContainer('<b>', '</b>', '\\textbf{', '}'),
-    'center': BBCodeContainer('<div class="mc-center">', '</div>',
-                              '\\begin{center}', '\\end{center}'),
+    'center': BBCodeContainer(
+        '<div class="mc-center">', '</div>', '\\begin{center}', '\\end{center}'
+    ),
     'code': BBCodeContainer('<code>', '</code>', '\\texttt{', '}'),
     'hide': BBCodeHide(),
     'i': BBCodeContainer('<i>', '</i>', '\\textit{', '}'),
@@ -409,8 +420,8 @@ bb_commands = {
     'lang': BBCodeLanguage(),
     'par': BBCodePar(),
     'pre': BBCodeNoParseContainer(
-            '<pre class="mc-verbatim">', '</pre>',
-            '\\begin{verbatim}', '\\end{verbatim}\n'),  # The \n is important!
+        '<pre class="mc-verbatim">', '</pre>', '\\begin{verbatim}', '\\end{verbatim}\n'
+    ),  # The \n is important!
     # TODO: Quote for LaTeX.
     # TODO: Quote parameters.
     'quote': BBCodeContainer('<div class="mc-quote">', '</div>', '', ''),
@@ -420,4 +431,3 @@ bb_commands = {
     'u': BBCodeContainer('<u>', '</u>', '\\uline{', '}'),
     'url': BBCodeURL(),
 }
-

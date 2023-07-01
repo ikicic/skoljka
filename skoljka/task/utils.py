@@ -3,8 +3,11 @@ from __future__ import print_function
 import time
 
 from skoljka.folder.models import Folder, FolderTask
-from skoljka.folder.utils import get_task_folder_ids, invalidate_cache_for_folders, \
-        prepare_folder_menu
+from skoljka.folder.utils import (
+    get_task_folder_ids,
+    invalidate_cache_for_folders,
+    prepare_folder_menu,
+)
 from skoljka.mathcontent.models import MathContent
 from skoljka.permissions.constants import VIEW_SOLUTIONS
 from skoljka.permissions.models import ObjectPermission
@@ -12,12 +15,12 @@ from skoljka.permissions.utils import get_object_ids_with_exclusive_permission
 from skoljka.solution.models import Solution, SolutionDetailedStatus
 from skoljka.tags.models import Tag, TaggedItem
 from skoljka.tags.utils import set_tags
-
 from skoljka.task.models import Task
 
 CORRECT = SolutionDetailedStatus.SUBMITTED_CORRECT
 
 # TODO: does EDIT imply VIEW_SOLUTIONS?
+
 
 def check_prerequisites_for_task(task, user, perm=None):
     """
@@ -42,16 +45,16 @@ def check_prerequisites_for_task(task, user, perm=None):
             task.cache_prerequisites_met = True
         elif user.is_anonymous():
             task.cache_prerequisites_met = False
-        elif (perm is not None and VIEW_SOLUTIONS in perm) \
-                or (perm is None and task.user_has_perm(user, VIEW_SOLUTIONS)):
+        elif (perm is not None and VIEW_SOLUTIONS in perm) or (
+            perm is None and task.user_has_perm(user, VIEW_SOLUTIONS)
+        ):
             task.cache_prerequisites_met = True
         else:
-            solved_tasks = Solution.objects.filter(author_id=user.id,
-                    task_id__in=prerequisites, detailed_status=CORRECT) \
-                .values_list('task_id', flat=True)
+            solved_tasks = Solution.objects.filter(
+                author_id=user.id, task_id__in=prerequisites, detailed_status=CORRECT
+            ).values_list('task_id', flat=True)
 
-            task.cache_prerequisites_met = \
-                    set(solved_tasks) == set(prerequisites)
+            task.cache_prerequisites_met = set(solved_tasks) == set(prerequisites)
 
     return task.cache_prerequisites_met
 
@@ -75,7 +78,7 @@ def check_prerequisites_for_tasks(tasks, user):
         c) user solved all of the prerequisites
         d) user has the VIEW_SOLUTION permission
     """
-    to_check = [] # for solutions or VIEW_SOLUTIONS
+    to_check = []  # for solutions or VIEW_SOLUTIONS
     for x in tasks:
         x._cache_prerequisites = x._get_prerequisites()
         if not x._cache_prerequisites or x.author_id == user.id:
@@ -92,11 +95,13 @@ def check_prerequisites_for_tasks(tasks, user):
         # All tasks for which solutions we are interested in.
         all_tasks = sum([x._cache_prerequisites for x in tasks], [])
 
-        solved_tasks = set(Solution.objects.filter(author_id=user.id,
-                task_id__in=all_tasks, detailed_status=CORRECT) \
-            .values_list('task_id', flat=True))
+        solved_tasks = set(
+            Solution.objects.filter(
+                author_id=user.id, task_id__in=all_tasks, detailed_status=CORRECT
+            ).values_list('task_id', flat=True)
+        )
 
-        another_check = [] # VIEW_SOLUTIONS check
+        another_check = []  # VIEW_SOLUTIONS check
         for x in to_check:
             if set(x._cache_prerequisites).issubset(solved_tasks):
                 x.cache_prerequisites_met = True
@@ -107,15 +112,19 @@ def check_prerequisites_for_tasks(tasks, user):
             # Tasks with VIEW_SOLUTIONS permission
             ids = [x.id for x in another_check]
             # Author already checked.
-            accepted = set(get_object_ids_with_exclusive_permission(user,
-                VIEW_SOLUTIONS, model=Task, filter_ids=ids))
+            accepted = set(
+                get_object_ids_with_exclusive_permission(
+                    user, VIEW_SOLUTIONS, model=Task, filter_ids=ids
+                )
+            )
             for x in another_check:
                 x.cache_prerequisites_met = x.id in accepted
+
 
 def get_task_folder_data(task, user):
     folder_ids = get_task_folder_ids(task)  # unsafe, no permission check!
     folders = list(Folder.objects.filter(id__in=folder_ids))
-    folder_data = prepare_folder_menu(folders, user) # safe
+    folder_data = prepare_folder_menu(folders, user)  # safe
 
     # For now, folder is not considered to be the owner of the tasks, but only
     # a collection. Therefore, if the user has no access to any of the
@@ -129,19 +138,20 @@ def get_task_folder_data(task, user):
     return folder_data
 
 
-
 def task_similarity(first, second):
     a = set(first.tags.values_list('id', 'weight'))
     b = set(second.tags.values_list('id', 'weight'))
     tag_sim = 0
-    for id, weight in (a & b):
+    for id, weight in a & b:
         tag_sim += weight
 
     # difficulty similarity
     if first.difficulty_rating_avg == 0.0 or second.difficulty_rating_avg == 0.0:
         diff_sim = 0.1
     else:
-        diff_sim = 1. / (1 + (first.difficulty_rating_avg - second.difficulty_rating_avg) ** 2)
+        diff_sim = 1.0 / (
+            1 + (first.difficulty_rating_avg - second.difficulty_rating_avg) ** 2
+        )
 
     # total similarity
     return tag_sim * diff_sim
@@ -232,16 +242,22 @@ def create_tasks_from_json(description):
             # --- folder ids ---
             folder_id = desc.get('_folder_id')
             if folder_id is not None:
-                folder_tasks.append(FolderTask(
-                        folder_id=folder_id, task=task,
-                        position=desc.get('_folder_position', 0)))
+                folder_tasks.append(
+                    FolderTask(
+                        folder_id=folder_id,
+                        task=task,
+                        position=desc.get('_folder_position', 0),
+                    )
+                )
 
             # --- group permissions ---
             for perm, group_ids in desc.get('_permissions', {}).iteritems():
                 for group_id in group_ids:
-                    object_permissions.append(ObjectPermission(
-                            content_object=task, group_id=group_id,
-                            permission_type=perm))
+                    object_permissions.append(
+                        ObjectPermission(
+                            content_object=task, group_id=group_id, permission_type=perm
+                        )
+                    )
 
         log_time("Done storing tasks.")
 

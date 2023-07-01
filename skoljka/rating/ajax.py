@@ -4,26 +4,28 @@ from django.shortcuts import get_object_or_404
 from django.utils.formats import number_format
 
 from skoljka.permissions.constants import VIEW
+from skoljka.rating.utils import do_vote
 from skoljka.tags.models import Tag, TaggedItem
 from skoljka.task.models import Task
 from skoljka.utils.decorators import ajax
 
-from skoljka.rating.utils import do_vote
 
 @ajax(post=['value', 'tag', 'task'])
 def tag_vote(request):
     tag = get_object_or_404(Tag, name=request.POST['tag'])
-    
+
     task_ct = ContentType.objects.get_for_model(Task)
     task = Task.objects.get(id=request.POST['task'])
     if not task.user_has_perm(request.user, VIEW):
         return HttpResponseForbidden('Not allowed to view or edit this task.')
-        
-    taggeditem = get_object_or_404(TaggedItem, tag=tag,
-            object_id=request.POST['task'], content_type=task_ct)
-        
+
+    taggeditem = get_object_or_404(
+        TaggedItem, tag=tag, object_id=request.POST['task'], content_type=task_ct
+    )
+
     value = taggeditem.votes.update(request.user, request.POST['value'])
     return HttpResponse(value)
+
 
 @ajax(method='POST')
 def vote(request, object_id, content_type_id, name):
@@ -36,4 +38,3 @@ def vote(request, object_id, content_type_id, name):
     if isinstance(value, (int, float)):
         return HttpResponse(number_format(value, 1))
     return value
-

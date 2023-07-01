@@ -13,7 +13,7 @@ import os
 PROJECT_ROOT = '/app'  # <-- if using docker container
 
 ADMINS = (
-#    ('Pajo Patak', 'pajopatak@gmail.com'),
+    #    ('Pajo Patak', 'pajopatak@gmail.com'),
 )
 
 MANAGERS = ADMINS
@@ -21,11 +21,13 @@ MANAGERS = ADMINS
 # If docker is used, automatically filled by docker/build_internal.sh.
 SECRET_KEY = 'KEY_SHOULD_BE_SOMETHING_COMPLICATED'  # (REQUIRED)
 
+
 def _get_mysql_options():
     # TODO: Investigate which engine to use -- MyISAM or InnoDB
     # Different engines for different tables might cause problems to
     # foreign key relations.
     import subprocess
+
     version = subprocess.check_output(['mysql', '--version'])
     if ' 5.5.' in version:
         return {'init_command': 'SET storage_engine=MyISAM;'}
@@ -33,14 +35,14 @@ def _get_mysql_options():
         return {'init_command': 'SET default_storage_engine=MyISAM;'}
 
 
-INTERNAL_IPS = ('127.0.0.1', )
+INTERNAL_IPS = ('127.0.0.1',)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'OPTIONS': _get_mysql_options(),
-        'NAME': 'skoljka',      # (REQUIRED) enter database name here
-        'USER': 'root',         # (REQUIRED) enter mysql username here
-        'PASSWORD': '',         # (REQUIRED) enter password here
+        'NAME': 'skoljka',  # (REQUIRED) enter database name here
+        'USER': 'root',  # (REQUIRED) enter mysql username here
+        'PASSWORD': '',  # (REQUIRED) enter password here
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -49,10 +51,10 @@ DATABASES = {
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 ENABLE_DEBUG_TOOLBAR = True  # Works only if DEBUG is True.
-MATHCONTENT_DEBUG = False    # Not dependent on DEBUG.
+MATHCONTENT_DEBUG = False  # Not dependent on DEBUG.
 TEST_MODE = False
 TEST_SITE_DOMAIN = 'localhost:8000'  # Used by reset_testdb.
-TEST_SITE_NAME = 'localhost:8000'    # Used by reset_testdb.
+TEST_SITE_NAME = 'localhost:8000'  # Used by reset_testdb.
 
 # Set this if latex is not in PATH
 # LATEX_BIN_DIR = 'C:\\Program Files\\texlive\\2011\\bin\\win32\\'
@@ -110,8 +112,14 @@ USERPROFILE_SCHOOL_CLASS_INFO = [
 ]
 
 # + is replaced with the appropriate tag from school class info
-FOLDER_HOMEPAGE_SHORTCUTS_ONLINE = ['drz,+', 'zup,+', 'opc,+', 'IMO',
-    'shortlist', 'MEMO']
+FOLDER_HOMEPAGE_SHORTCUTS_ONLINE = [
+    'drz,+',
+    'zup,+',
+    'opc,+',
+    'IMO',
+    'shortlist',
+    'MEMO',
+]
 FOLDER_HOMEPAGE_SHORTCUTS_OFFLINE = ['IMO', 'shortlist', 'MEMO']
 FOLDER_INLINE_YEAR_COUNT = 10
 
@@ -135,7 +143,10 @@ EXTRA_HEADER_TOP = "<div style=\"text-align: center; background-color: orange;\"
 
 EXTRA_MENU_TOP = "--EXTRA_MENU_TOP--"
 # OR
-EXTRA_MENU_TOP = {'hr': "--EXTRA_MENU_TOP--", None: "--default language EXTRA_MENU_TOP--"}
+EXTRA_MENU_TOP = {
+    'hr': "--EXTRA_MENU_TOP--",
+    None: "--default language EXTRA_MENU_TOP--",
+}
 
 LECTURES_FOLDER_URL = "/folder/<ID NOT SET>/"
 FEATURED_LECTURES_FOLDER_ID = None

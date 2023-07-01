@@ -2,7 +2,7 @@ VIEW = 1
 EDIT = 2
 DELETE = 3
 EDIT_PERMISSIONS = 4
-ADD_MEMBERS = 5     # For UserGroup.
+ADD_MEMBERS = 5  # For UserGroup.
 VIEW_SOLUTIONS = 6  # For Task (solution_settings).
 
 # Default permissions related to a model.
@@ -22,7 +22,9 @@ PERMISSION_NAMES = {value: key for key, value in PERMISSIONS}
 
 # Dictionary constant name / 'shortcut' -> list of related constants
 PERMISSION_GROUPS = {key: [value] for key, value in PERMISSIONS}
-PERMISSION_GROUPS.update({
-    # 'shortcuts'...
-    'default': MODEL_DEFAULT,
-})
+PERMISSION_GROUPS.update(
+    {
+        # 'shortcuts'...
+        'default': MODEL_DEFAULT,
+    }
+)

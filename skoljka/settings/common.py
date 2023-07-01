@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-import sys
 import os.path
 import subprocess
+import sys
 
-from skoljka.utils import timeout
 from skoljka.settings.local import *
+from skoljka.utils import timeout
 
 ######################################
 # GENERAL
@@ -32,7 +32,7 @@ SECRET_FILE = os.path.normpath(os.path.join(LOCAL_DIR, 'SECRET'))
 # LIB_ROOT = os.path.normpath(os.path.join(PROJECT_ROOT, 'lib'))
 # DEBUG_TOOLBAR_ROOT = os.path.normpath(
 #     os.path.join(LIB_ROOT, 'django_debug_toolbar'))
-# 
+#
 # sys.path.append(LIB_ROOT)
 # sys.path.append(DEBUG_TOOLBAR_ROOT)
 
@@ -48,9 +48,9 @@ TIME_ZONE = 'Europe/Zagreb'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-#LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = 'en-us'
 LANGUAGE_CODE = 'hr'
-LOCALE_PATHS = (os.path.normpath(os.path.join(PROJECT_ROOT, 'skoljka', 'locale')), )
+LOCALE_PATHS = (os.path.normpath(os.path.join(PROJECT_ROOT, 'skoljka', 'locale')),)
 
 SITE_ID = 1
 
@@ -75,9 +75,7 @@ MEDIA_URL = '/media/'
 # anything in this directory yourself; store your static files in apps' static/
 # subdirectories and in STATICFILES_DIRS.
 STATIC_ROOT = os.path.normpath(os.path.join(LOCAL_DIR, 'static'))
-STATICFILES_DIRS = (
-    os.path.join(PROJECT_ROOT, 'build', 'static'),
-)
+STATICFILES_DIRS = (os.path.join(PROJECT_ROOT, 'build', 'static'),)
 
 # URL prefix for static files.
 STATIC_URL = '/static/'
@@ -102,21 +100,17 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
-
-# this searches for files in <app>/templates
+    # this searches for files in <app>/templates
     'django.template.loaders.app_directories.Loader',
-
-#     'django.template.loaders.eggs.Loader',
+    #     'django.template.loaders.eggs.Loader',
 )
 
 ROOT_URLCONF = 'skoljka.urls'
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
-
-# this searches for static files in <appname>/static
+    # this searches for static files in <appname>/static
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-
     #'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
@@ -150,12 +144,12 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-#    'sentry.client.middleware.Sentry404CatchMiddleware',
+    #    'sentry.client.middleware.Sentry404CatchMiddleware',
     'pagination.middleware.PaginationMiddleware',
 )
 
 if DEBUG and ENABLE_DEBUG_TOOLBAR:
-    MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware', )
+    MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 
 ######################################
 # Installed apps
@@ -175,13 +169,11 @@ INSTALLED_APPS = (
     'pagination',
     'pipeline',
     'registration',
-#    'sentry',
-#    'sentry.client',
+    #    'sentry',
+    #    'sentry.client',
     'taggit',
     'template_preprocessor',
-
     # 'skoljka.utils',
-
     'skoljka.activity',
     'skoljka.base',
     'skoljka.competition',
@@ -201,7 +193,7 @@ INSTALLED_APPS = (
 )
 
 if DEBUG and ENABLE_DEBUG_TOOLBAR:
-    INSTALLED_APPS += ('debug_toolbar', )
+    INSTALLED_APPS += ('debug_toolbar',)
 
 ######################################
 # Logging
@@ -222,16 +214,14 @@ LOGGING = {
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
         },
-        'simple': {
-            'format': '%(levelname)s %(message)s'
-        },
+        'simple': {'format': '%(levelname)s %(message)s'},
     },
     'handlers': {
-#        'sentry': {
-#            'level': 'DEBUG',
-#            'class': 'sentry.client.handlers.SentryHandler',
-#            'formatter': 'verbose'
-#        },
+        #        'sentry': {
+        #            'level': 'DEBUG',
+        #            'class': 'sentry.client.handlers.SentryHandler',
+        #            'formatter': 'verbose'
+        #        },
         'null': {
             'level': 'DEBUG',
             'class': 'django.utils.log.NullHandler',
@@ -245,7 +235,7 @@ LOGGING = {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
             'filters': ['require_debug_false'],
-        }
+        },
     },
     'loggers': {
         'django': {
@@ -254,16 +244,16 @@ LOGGING = {
             'propagate': True,
         },
         'django.request': {
-#            'handlers': ['sentry'],
+            #            'handlers': ['sentry'],
             'handlers': ['console', 'mail_admins'],
             'level': 'ERROR',
             'propagate': True,
         },
-#        'sentry.errors': {
-#            'level': 'DEBUG',
-#            'handlers': ['console'],
-#            'propagate': False,
-#        },
+        #        'sentry.errors': {
+        #            'level': 'DEBUG',
+        #            'handlers': ['console'],
+        #            'propagate': False,
+        #        },
     },
 }
 
@@ -283,8 +273,8 @@ gettext_dummy = lambda s: s
 
 # Define languages -> otherwise templates will be compiled in all possible languages
 LANGUAGES = (
-     ('en', gettext_dummy('English')),
-     ('hr', gettext_dummy('Croatian')),
+    ('en', gettext_dummy('English')),
+    ('hr', gettext_dummy('Croatian')),
 )
 
 MEDIA_CACHE_DIR = os.path.normpath(os.path.join(MEDIA_ROOT, 'cache'))
@@ -294,9 +284,7 @@ TEMPLATE_CACHE_DIR = os.path.normpath(os.path.join(LOCAL_DIR, 'templates', 'cach
 # Wrap template loaders
 if not DEBUG:
     TEMPLATE_LOADERS = (
-        ('template_preprocessor.template.loaders.PreprocessedLoader',
-            TEMPLATE_LOADERS
-        ),
+        ('template_preprocessor.template.loaders.PreprocessedLoader', TEMPLATE_LOADERS),
     )
 ## Template preprocessor for now completely disabled in debug mode. If there
 ## will be any need to change this, please make it as an option.
@@ -313,8 +301,7 @@ if not DEBUG:
 TEMPLATE_PREPROCESSOR_OPTIONS = {
     # Defaults settings for all application
     # NOTE: Validation is disabled as HTML5 is not supported
-    '*': ('html', 'whitespace-compression', 'no-validate-html' ),
-
+    '*': ('html', 'whitespace-compression', 'no-validate-html'),
     # Override for specific applications
     ('django.contrib.admin', 'django.contrib.admindocs', 'debug_toolbar'): ('no-html',),
 }

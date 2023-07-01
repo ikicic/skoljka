@@ -5,16 +5,16 @@ from django.conf import settings
 from django.template.base import TemplateSyntaxError
 from django.utils.safestring import mark_safe
 
+from skoljka.userprofile.utils import get_useroption
 from skoljka.utils.decorators import response_update_cookie
 from skoljka.utils.templatetags.utils_tags import generate_get_query_string
 from skoljka.utils.xss import escape
-
-from skoljka.userprofile.utils import get_useroption
 
 register = template.Library()
 
 # TODO: refactor UserOptions!
 # view inc_task_list.html and inc_solution_list.html
+
 
 def _remove_quotations(s):
     """
@@ -24,6 +24,7 @@ def _remove_quotations(s):
     if s[0] == s[-1] and s[0] in ('"', "'"):
         return s[1:-1]
     return s
+
 
 class UserOptionNode(template.Node):
     def __init__(self, value, text, is_default, class_attr):
@@ -41,11 +42,13 @@ class UserOptionNode(template.Node):
         if value == self.value:
             class_attr += ' active'
 
-        return mark_safe(u'<a href="?{}" class="btn btn-mini {}">{}</a>\n'.format(
-            generate_get_query_string(context, **kwargs),
-            class_attr,
-            self.text,
-        ))
+        return mark_safe(
+            u'<a href="?{}" class="btn btn-mini {}">{}</a>\n'.format(
+                generate_get_query_string(context, **kwargs),
+                class_attr,
+                self.text,
+            )
+        )
 
 
 class UserOptionsNode(template.Node):
@@ -70,7 +73,6 @@ class UserOptionsNode(template.Node):
         else:
             save_to = self.save_to.resolve(context)
 
-
         value = context['request'].GET.get(field_name, None)
         if value is not None and value in self.allowed_values:
             if user.is_authenticated():
@@ -80,16 +82,17 @@ class UserOptionsNode(template.Node):
             elif not settings.DISABLE_PREF_COOKIES:
                 response_update_cookie(context['request'], field_name, value)
         else:
-            value = get_useroption(context['request'], field_name,
-                self.default_value)
+            value = get_useroption(context['request'], field_name, self.default_value)
 
         context._useroptions_field_name = field_name
         context._useroptions_value = unicode(value)
         context[save_to] = unicode(value)
 
-        out = '<div style="float:right;padding:8px;" class="btn-group">'    \
-            + self.nodelist.render(context) \
+        out = (
+            '<div style="float:right;padding:8px;" class="btn-group">'
+            + self.nodelist.render(context)
             + '</div>'
+        )
         return out
 
 
@@ -97,7 +100,9 @@ class UserOptionsNode(template.Node):
 def useroption(parser, token):
     bits = token.split_contents()
     if len(bits) not in (3, 4, 5):
-        raise TemplateSyntaxError("Two, three or four parameters expected for 'useroption'.")
+        raise TemplateSyntaxError(
+            "Two, three or four parameters expected for 'useroption'."
+        )
 
     value = _remove_quotations(bits[1])
     is_default = len(bits) >= 4 and bits[3] == 'default'
@@ -133,15 +138,19 @@ def useroptions(parser, token):
         save_to = field_name
 
     if len(default_value) != 1:
-        raise TemplateSyntaxError("Exactly one 'useroption' must have 'default' parameter!")
+        raise TemplateSyntaxError(
+            "Exactly one 'useroption' must have 'default' parameter!"
+        )
 
-    return UserOptionsNode(nodelist, field_name, default_value[0].value, allowed_values, save_to)
+    return UserOptionsNode(
+        nodelist, field_name, default_value[0].value, allowed_values, save_to
+    )
 
 
-@register.inclusion_tag('registration/inc_login_form.html',
-        takes_context=True)
+@register.inclusion_tag('registration/inc_login_form.html', takes_context=True)
 def login_form(context, no_new_account_link=False):
     from skoljka.userprofile.forms import AuthenticationFormEx
+
     return {
         'form': AuthenticationFormEx(),
         'next': context.get('next', context['request'].get_full_path()),
@@ -153,6 +162,7 @@ def login_form(context, no_new_account_link=False):
 @register.inclusion_tag('registration/inc_registration_form.html')
 def registration_form(form=None, final_url=None):
     from skoljka.userprofile.forms import UserCreationForm
+
     if form is None:
         form = UserCreationForm()
     return {'form': form, 'final_url': final_url or '/'}
@@ -170,7 +180,11 @@ def userlink(user, what=None):
     if not name:
         name = user.username
 
-    return mark_safe(u'<a href="/profile/%d/" title="%s">%s</a>' % (user.pk, escape(user.get_full_name()), escape(name)))
+    return mark_safe(
+        u'<a href="/profile/%d/" title="%s">%s</a>'
+        % (user.pk, escape(user.get_full_name()), escape(name))
+    )
+
 
 @register.simple_tag(takes_context=True)
 def update_userprofile_evaluator_time(context):

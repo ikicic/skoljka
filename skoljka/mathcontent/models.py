@@ -2,8 +2,8 @@ import os
 
 from django.conf import settings
 from django.db import models
-from django.utils.safestring import mark_safe
 from django.template.loader import render_to_string
+from django.utils.safestring import mark_safe
 
 from skoljka.utils.decorators import autoconnect
 from skoljka.utils.generators import LowerNumKeyGen
@@ -25,14 +25,13 @@ class LatexElement(models.Model):
     format = models.CharField(max_length=64)
     depth = models.IntegerField()
     date_created = models.DateTimeField(
-            auto_now=True,
-            help_text="If something goes wrong, date might be useful.")
+        auto_now=True, help_text="If something goes wrong, date might be useful."
+    )
 
 
 @autoconnect
 class MathContent(models.Model):
-    text = models.TextField(blank=True, max_length=MAX_LENGTH,
-        verbose_name='Tekst')
+    text = models.TextField(blank=True, max_length=MAX_LENGTH, verbose_name='Tekst')
     html = models.TextField(blank=True, null=True)
     # version = models.IntegerField(default=0)
 
@@ -59,7 +58,7 @@ def attachment_upload_to(instance, filename):
         'attachment',
         str(instance.id // 100),
         '%05d_%s' % (instance.id, LowerNumKeyGen.generate(length=20)),
-        filename
+        filename,
     )
 
 

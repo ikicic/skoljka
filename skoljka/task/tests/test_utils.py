@@ -2,18 +2,19 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 from skoljka.mathcontent.models import MathContent
-from skoljka.permissions.constants import \
-        VIEW, EDIT, EDIT_PERMISSIONS, VIEW_SOLUTIONS
+from skoljka.permissions.constants import EDIT, EDIT_PERMISSIONS, VIEW, VIEW_SOLUTIONS
 from skoljka.permissions.models import ObjectPermission
-from skoljka.solution.models import Solution, SolutionStatus, SOLUTION_CORRECT_SCORE
-
+from skoljka.solution.models import SOLUTION_CORRECT_SCORE, Solution, SolutionStatus
 from skoljka.task.models import Task
-from skoljka.task.utils import check_prerequisites_for_task, \
-        check_prerequisites_for_tasks
+from skoljka.task.utils import (
+    check_prerequisites_for_task,
+    check_prerequisites_for_tasks,
+)
 
 # Shorthands
 CHECK_ONE = check_prerequisites_for_task
 CHECK_MULTIPLE = check_prerequisites_for_tasks
+
 
 class TaskUtilsTestCase(TestCase):
     fixtures = ['skoljka/userprofile/fixtures/test_userprofiles.json']
@@ -24,18 +25,20 @@ class TaskUtilsTestCase(TestCase):
         self.user1 = User.objects.get(id=1)
         self.user2 = User.objects.get(id=2)
         self.task1 = Task.objects.create(
-                name="First example task",
-                author=self.user1,
-                content=content1)
+            name="First example task", author=self.user1, content=content1
+        )
         self.task2 = Task.objects.create(
-                name="Second example task",
-                author=self.user2,
-                content=content2,
-                prerequisites=str(self.task1.id)) # With prerequisites
+            name="Second example task",
+            author=self.user2,
+            content=content2,
+            prerequisites=str(self.task1.id),
+        )  # With prerequisites
 
     def test_author_permissions(self):
-        self.assertEqual(set(self.task1.get_user_permissions(self.user1)),
-                set([VIEW, EDIT, EDIT_PERMISSIONS, VIEW_SOLUTIONS]))
+        self.assertEqual(
+            set(self.task1.get_user_permissions(self.user1)),
+            set([VIEW, EDIT, EDIT_PERMISSIONS, VIEW_SOLUTIONS]),
+        )
 
     def _check_prereqs(self, tasks, user, expected):
         """
@@ -43,8 +46,7 @@ class TaskUtilsTestCase(TestCase):
         """
         check_prerequisites_for_tasks(tasks, user)
         for k, task in enumerate(tasks):
-            msg = "{} is not {} for k = {}".format(
-                    not expected[k], expected[k], k)
+            msg = "{} is not {} for k = {}".format(not expected[k], expected[k], k)
             self.assertEqual(task.cache_prerequisites_met, expected[k], msg=msg)
 
     def test_prerequisites(self):
@@ -61,12 +63,16 @@ class TaskUtilsTestCase(TestCase):
 
     def test_prerequisites_submitted(self):
         content = MathContent.objects.create(text="Test text for the solution")
-        solution = Solution.objects.create(task=self.task1, author=self.user1,
-            content=content, status=SolutionStatus.SUBMITTED,
-            correctness_avg=SOLUTION_CORRECT_SCORE) # Solved
+        solution = Solution.objects.create(
+            task=self.task1,
+            author=self.user1,
+            content=content,
+            status=SolutionStatus.SUBMITTED,
+            correctness_avg=SOLUTION_CORRECT_SCORE,
+        )  # Solved
         self.assertTrue(CHECK_ONE(self.task2, self.user1))
 
-        solution.correctness_avg = SOLUTION_CORRECT_SCORE / 2. # Not solved
+        solution.correctness_avg = SOLUTION_CORRECT_SCORE / 2.0  # Not solved
         solution.save()
         self.assertFalse(CHECK_ONE(self.task2, self.user1))
 
@@ -79,7 +85,9 @@ class TaskUtilsTestCase(TestCase):
         self.assertTrue(CHECK_ONE(self.task2, self.user1, perm=[VIEW_SOLUTIONS]))
 
         # With explicit permission, he/she can access the task.
-        ObjectPermission.objects.create(permission_type=VIEW_SOLUTIONS,
+        ObjectPermission.objects.create(
+            permission_type=VIEW_SOLUTIONS,
             content_object=self.task2,
-            group=self.user1.get_profile().private_group)
+            group=self.user1.get_profile().private_group,
+        )
         self.assertTrue(CHECK_ONE(self.task2, self.user1))

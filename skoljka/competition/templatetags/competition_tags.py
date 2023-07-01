@@ -7,19 +7,20 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import truncatechars
 from django.utils.html import mark_safe
-from django.utils.translation import ugettext as _, ungettext
+from django.utils.translation import ugettext as _
+from django.utils.translation import ungettext
 
 from skoljka.activity import action as _action
 from skoljka.activity.models import Action
+from skoljka.competition.models import Submission, TeamMember
+from skoljka.competition.utils import comp_url as utils__comp_url
+from skoljka.competition.utils import ctask_comment_class as utils__ctask_comment_class
+from skoljka.competition.utils import get_ctask_statistics, parse_chain_comments_cache
 from skoljka.userprofile.templatetags.userprofile_tags import userlink
 from skoljka.utils import xss
 
-from skoljka.competition.models import Submission, TeamMember
-from skoljka.competition.utils import parse_chain_comments_cache, get_ctask_statistics
-from skoljka.competition.utils import comp_url as utils__comp_url
-from skoljka.competition.utils import ctask_comment_class as utils__ctask_comment_class
-
 register = template.Library()
+
 
 @register.simple_tag(takes_context=True)
 def comp_url(context, url_suffix):
@@ -34,20 +35,28 @@ def cdebug(context, var):
 
 @register.simple_tag(takes_context=True)
 def reg_available_users(context):
-    in_teams = TeamMember.objects \
-            .filter(team__competition_id=context['competition'].id, \
-                    invitation_status=TeamMember.INVITATION_ACCEPTED) \
-            .exclude(member_id__isnull=True) \
-            .values_list('member_id', flat=True)
+    in_teams = (
+        TeamMember.objects.filter(
+            team__competition_id=context['competition'].id,
+            invitation_status=TeamMember.INVITATION_ACCEPTED,
+        )
+        .exclude(member_id__isnull=True)
+        .values_list('member_id', flat=True)
+    )
 
     # exclude 'arhiva' account and the current user
     in_teams = list(in_teams) + [1, context['user'].id]
-    available = list(User.objects.filter(is_active=True) \
-            .exclude(id__in=in_teams) \
-            .values_list('username', flat=True))
+    available = list(
+        User.objects.filter(is_active=True)
+        .exclude(id__in=in_teams)
+        .values_list('username', flat=True)
+    )
 
-    return mark_safe(u'<script>reg_available_users=[{}];</script>'.format(
-            u','.join(u'"{}"'.format(username) for username in available)))
+    return mark_safe(
+        u'<script>reg_available_users=[{}];</script>'.format(
+            u','.join(u'"{}"'.format(username) for username in available)
+        )
+    )
 
 
 @register.simple_tag(takes_context=True)
@@ -57,9 +66,11 @@ def reg_add_member_fields(context):
     team = context.get('team', None)
 
     if team:
-        team_members = list(TeamMember.objects.filter(team=team) \
-                .exclude(member_id=user.id) \
-                .values_list('member_name', 'member_id', 'invitation_status'))
+        team_members = list(
+            TeamMember.objects.filter(team=team)
+            .exclude(member_id=user.id)
+            .values_list('member_name', 'member_id', 'invitation_status')
+        )
     else:
         team_members = []
 
@@ -70,9 +81,14 @@ def reg_add_member_fields(context):
     for k in xrange(len(team_members) - 1):
         member_name, member_id, status = team_members[k]
         # If member_id isn't None, member_name is the same as username.
-        output.append(u'reg_add_member_field({},"{}","{}",{});'.format(
-            k + 2, member_name, member_name if member_id else '',
-            int(status == TeamMember.INVITATION_ACCEPTED)))
+        output.append(
+            u'reg_add_member_field({},"{}","{}",{});'.format(
+                k + 2,
+                member_name,
+                member_name if member_id else '',
+                int(status == TeamMember.INVITATION_ACCEPTED),
+            )
+        )
 
     return u"<script>{}</script>".format(u''.join(output))
 
@@ -99,14 +115,14 @@ def ctask_class(ctask):
 
 @register.simple_tag(takes_context=True)
 def chain_ctask_comments_info(context, chain):
-    num_important, num_important_my = parse_chain_comments_cache(
-            chain, context['user'])
+    num_important, num_important_my = parse_chain_comments_cache(chain, context['user'])
     if num_important:
-        first = ungettext("%d important", "%d important", num_important) \
-                % num_important
+        first = ungettext("%d important", "%d important", num_important) % num_important
         if num_important_my:
-            second = ungettext("%d my task", "%d my tasks", num_important_my) \
-                    % num_important_my
+            second = (
+                ungettext("%d my task", "%d my tasks", num_important_my)
+                % num_important_my
+            )
             return mark_safe(u"{} <b>({})</b>".format(first, second))
         return first
     return ""
@@ -121,19 +137,22 @@ def chain_ctask_tr(ctask, counter=None, total_ctasks=None):
 def chain_list_ctask_name_text(ctask, truncate):
     truncated = truncatechars(ctask.task.content.text or '', truncate)
     if ctask.competition.use_custom_ctask_names():
-        return mark_safe(u"<b>{}:</b> {}".format(
-            xss.escape(ctask.task.name), xss.escape(truncated)))
+        return mark_safe(
+            u"<b>{}:</b> {}".format(xss.escape(ctask.task.name), xss.escape(truncated))
+        )
     else:
         return truncated
 
 
 CHAIN_LIST_CTASK_COMMENT_PREVIEW_RE = re.compile(r'\s*\[\s*hide\s*\]')
+
+
 @register.simple_tag(takes_context=False)
 def chain_list_ctask_comment_preview(ctask):
     truncate = 40 if ctask.chain_id else 30
     truncated = truncatechars(ctask.comment.text or '', truncate)
     search = CHAIN_LIST_CTASK_COMMENT_PREVIEW_RE.search(truncated)
-    return truncated[:search.start()] + '...' if search else truncated
+    return truncated[: search.start()] + '...' if search else truncated
 
 
 @register.simple_tag(takes_context=True)
@@ -148,8 +167,7 @@ def chain_class(context, chain):
 
 @register.simple_tag(takes_context=True)
 def admin_chain_class(context, chain):
-    num_important, num_important_my = parse_chain_comments_cache(
-            chain, context['user'])
+    num_important, num_important_my = parse_chain_comments_cache(chain, context['user'])
     if num_important_my > 0:
         return 'cchain-important-my-ctasks'
     elif num_important > 0:
@@ -166,10 +184,14 @@ def ctask_comment_class(context, ctask):
 
 @register.simple_tag()
 def ctask_score_text(ctask):
-    text = ungettext(
+    text = (
+        ungettext(
             "This task is worth %d point.",
             "This task is worth %d points.",
-            ctask.max_score) % ctask.max_score
+            ctask.max_score,
+        )
+        % ctask.max_score
+    )
     return u'<div class="ctask-score-text">{}</div>'.format(text)
 
 
@@ -177,8 +199,7 @@ def ctask_score_text(ctask):
 def chain_badge_class(chain):
     if all(ctask.t_is_solved for ctask in chain.ctasks):
         return "badge-success"
-    if any(ctask.t_submission_count > ctask.max_submissions \
-            for ctask in chain.ctasks):
+    if any(ctask.t_submission_count > ctask.max_submissions for ctask in chain.ctasks):
         return ""
     return "badge-info"
 
@@ -186,32 +207,35 @@ def chain_badge_class(chain):
 @register.simple_tag()
 def legend_ctask(_class, text):
     return mark_safe(
-            u'<tr>' \
-                u'<td width="100%">' \
-                    u'<div class="progress"><div class="{}"></div></div>' \
-                u'</td>' \
-                u'<td>{}</td>' \
-            u'</tr>'.format(_class, text))
+        u'<tr>'
+        u'<td width="100%">'
+        u'<div class="progress"><div class="{}"></div></div>'
+        u'</td>'
+        u'<td>{}</td>'
+        u'</tr>'.format(_class, text)
+    )
 
 
 @register.simple_tag()
 def legend_chain(_class, text):
     return mark_safe(
-            u'<tr>' \
-                u'<td width="100%"><span class="badge {}">+1</span></td>' \
-                u'<td>{}</td>' \
-            u'</tr>'.format(_class, text))
+        u'<tr>'
+        u'<td width="100%"><span class="badge {}">+1</span></td>'
+        u'<td>{}</td>'
+        u'</tr>'.format(_class, text)
+    )
 
 
 @register.simple_tag(takes_context=True)
 def send_notification_link(context, team_id=None, ctask_id=None):
     params = {}
-    if team_id: params['team'] = team_id
-    if ctask_id: params['ctask'] = ctask_id
+    if team_id:
+        params['team'] = team_id
+    if ctask_id:
+        params['ctask'] = ctask_id
     end = '?{}#post'.format(urllib.urlencode(params))
     url = utils__comp_url(context['competition'], 'notifications/admin') + end
-    return mark_safe(
-            u'<a href="{}"><i class="icon-envelope"></i></a>'.format(url))
+    return mark_safe(u'<a href="{}"><i class="icon-envelope"></i></a>'.format(url))
 
 
 @register.simple_tag(takes_context=True)
@@ -237,10 +261,14 @@ def _action_message(action):
     if action.type_pair == _action.COMPETITION_UPDATE_SUBMISSION_SCORE:
         # action_object_id is used in a hacky way to store the score.
         score = action.action_object_id
-        msg = ungettext(
+        msg = (
+            ungettext(
                 "%(actor)s updated the score to %(score)d.",
                 "%(actor)s updated the score to %(score)d.",
-                score) % {'score': score, 'actor': userlink(action.actor)}
+                score,
+            )
+            % {'score': score, 'actor': userlink(action.actor)}
+        )
     else:
         msg = u"Unknown action {}!".format(action)
     return mark_safe(msg)
@@ -248,28 +276,35 @@ def _action_message(action):
 
 def get_submission_actions(submission):
     content_type_id = ContentType.objects.get_for_model(Submission).id
-    actions = list(Action.objects
-            .filter(target_content_type_id=content_type_id,
-                    target_id=submission.id)
-            .exclude(type=_action.POST_SEND[0])
-            .select_related('actor'))
+    actions = list(
+        Action.objects.filter(
+            target_content_type_id=content_type_id, target_id=submission.id
+        )
+        .exclude(type=_action.POST_SEND[0])
+        .select_related('actor')
+    )
     not_graded = all(
-            action.type_pair != _action.COMPETITION_UPDATE_SUBMISSION_SCORE
-            for action in actions)
+        action.type_pair != _action.COMPETITION_UPDATE_SUBMISSION_SCORE
+        for action in actions
+    )
     return actions, not_graded
 
 
 @register.inclusion_tag('inc_competition_submission_posts.html', takes_context=True)
 def show_submission_posts(context, submission, unread_newer_than, actions=None):
-    posts = list(submission.posts
-            .select_related('author', 'content', 'last_edit_by')
-            .order_by('-date_created'))
+    posts = list(
+        submission.posts.select_related('author', 'content', 'last_edit_by').order_by(
+            '-date_created'
+        )
+    )
     user = context['user']
     for x in posts:
         x.cache_can_edit = x.can_edit(user, submission)
-        if unread_newer_than \
-                and x.last_edit_time >= unread_newer_than \
-                and x.last_edit_by_id != context['user'].id:
+        if (
+            unread_newer_than
+            and x.last_edit_time >= unread_newer_than
+            and x.last_edit_by_id != context['user'].id
+        ):
             x.t_unread = True
         x.t_is_post = True
 

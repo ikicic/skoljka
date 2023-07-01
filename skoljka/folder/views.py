@@ -3,30 +3,43 @@
 import re
 
 from django.conf import settings
-from django.contrib.admin.models import LogEntry, CHANGE
+from django.contrib.admin.models import CHANGE, LogEntry
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
-from django.http import Http404, HttpResponse, HttpResponseForbidden, \
-        HttpResponseBadRequest, HttpResponseRedirect, \
-        HttpResponsePermanentRedirect
-from django.shortcuts import render_to_response, get_object_or_404
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseForbidden,
+    HttpResponsePermanentRedirect,
+    HttpResponseRedirect,
+)
+from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.template.defaultfilters import slugify
 
+from skoljka.folder.decorators import folder_view
+from skoljka.folder.forms import FolderAdvancedCreateForm, FolderForm
+from skoljka.folder.models import (
+    FOLDER_NAMESPACE_FORMAT,
+    FOLDER_TASKS_DB_TABLE,
+    Folder,
+    FolderTask,
+)
+from skoljka.folder.utils import (
+    add_or_remove_folder_task,
+    get_folder_descendant_ids,
+    get_visible_folder_tree,
+    prepare_folder_menu,
+    refresh_path_cache,
+)
 from skoljka.permissions.constants import DELETE, EDIT, EDIT_PERMISSIONS, VIEW
 from skoljka.permissions.models import ObjectPermission
-from skoljka.task.models import Task
 from skoljka.tags.utils import set_tags
+from skoljka.task.models import Task
 from skoljka.utils import get_referrer_path, ncache
 from skoljka.utils.decorators import response
 
-from skoljka.folder.decorators import folder_view
-from skoljka.folder.models import Folder, FolderTask, FOLDER_TASKS_DB_TABLE, \
-        FOLDER_NAMESPACE_FORMAT
-from skoljka.folder.forms import FolderForm, FolderAdvancedCreateForm
-from skoljka.folder.utils import add_or_remove_folder_task, \
-        get_folder_descendant_ids, get_visible_folder_tree, \
-        prepare_folder_menu, refresh_path_cache
 
 # TODO: check ancestor VIEW permissions?
 def redirect_by_path(request, path):
@@ -50,6 +63,7 @@ def redirect_by_path(request, path):
         url += '?' + parameters
     return HttpResponsePermanentRedirect(url)
 
+
 @folder_view(permission=DELETE)
 @response('folder_delete.html')
 def delete(request, folder, data):
@@ -57,14 +71,21 @@ def delete(request, folder, data):
         if 'confirm' in request.POST:
             parent = folder.parent
             folder.delete()
-            return (parent.get_absolute_url(), )
+            return (parent.get_absolute_url(),)
 
     return data
 
+
 def _edit_tasks_tasks(folder, user):
-    return folder.tasks.for_user(user, VIEW) \
-        .extra(select={'position': FOLDER_TASKS_DB_TABLE + '.position'},
-            order_by=['position']).distinct()
+    return (
+        folder.tasks.for_user(user, VIEW)
+        .extra(
+            select={'position': FOLDER_TASKS_DB_TABLE + '.position'},
+            order_by=['position'],
+        )
+        .distinct()
+    )
+
 
 @folder_view(permission=EDIT)
 @response('folder_edit_tasks.html')
@@ -94,20 +115,24 @@ def edit_tasks(request, folder, data):
             else:
                 value = int(value)
                 if value != task_info[id]:
-                    FolderTask.objects.filter(folder=folder, task_id=id)    \
-                        .update(position=value)
+                    FolderTask.objects.filter(folder=folder, task_id=id).update(
+                        position=value
+                    )
                     updated.add(id)
 
     tasks = _edit_tasks_tasks(folder, request.user)
 
-    data.update({
-        'tasks': tasks,
-        'invalid': invalid,
-        'unknown': unknown,
-        'updated': updated,
-    })
+    data.update(
+        {
+            'tasks': tasks,
+            'invalid': invalid,
+            'unknown': unknown,
+            'updated': updated,
+        }
+    )
 
     return data
+
 
 # TODO: check ancestor VIEW permissions?
 @login_required
@@ -146,14 +171,15 @@ def select(request, id):
         response = 1
 
     profile.save()
-    #return HttpResponse(FOLDER_EDIT_LINK_CONTENT[response])
+    # return HttpResponse(FOLDER_EDIT_LINK_CONTENT[response])
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
 
 @response('folder_list.html')
 @login_required
 def folder_my(request):
     """
-        List all folders created by the user.
+    List all folders created by the user.
     """
     folders = list(Folder.objects.filter(author_id=request.user.id))
     if not folders:
@@ -170,10 +196,14 @@ def folder_my(request):
     folders_html = []
     for x in sorted_folders:
         if x.id in original_ids:
-            html = x._html_menu_item(True, x._depth, None,
+            html = x._html_menu_item(
+                True,
+                x._depth,
+                None,
                 cls='folder-list-my',
-                extra='<a href="/folder/{}/edit/" class="folder-list-my-edit"' \
-                    ' title="Uredi"> <i class="icon-edit"></i></a>'.format(x.id))
+                extra='<a href="/folder/{}/edit/" class="folder-list-my-edit"'
+                ' title="Uredi"> <i class="icon-edit"></i></a>'.format(x.id),
+            )
             accessible_ids.add(x.id)
         else:
             html = x._html_menu_item(x.id in ancestor_ids, x._depth, None)
@@ -181,16 +211,18 @@ def folder_my(request):
 
     return {
         'folders_html': u''.join(folders_html),
-        'inaccessible_folders': [x for x in folders
-            if x.parent_id and x.id not in accessible_ids],
+        'inaccessible_folders': [
+            x for x in folders if x.parent_id and x.id not in accessible_ids
+        ],
     }
+
 
 @folder_view()
 @response('folder_detail.html')
 def view(request, folder, data, path=u''):
     if path != folder.cache_path:
         # Redirect to the correct URL. E.g. force / at the end etc.
-        return (folder.get_absolute_url(), )
+        return (folder.get_absolute_url(),)
 
     data.update(folder.get_details(request.user))
 
@@ -206,6 +238,7 @@ def view(request, folder, data, path=u''):
             data['this_folder_selected'] = True
 
     return data
+
 
 @login_required
 @response('folder_new.html')
@@ -237,17 +270,21 @@ def new(request, folder_id=None):
             data['can_edit_permissions'] = True
             data['content_type'] = ContentType.objects.get_for_model(Folder)
 
-        data['children'] = children = list(Folder.objects   \
-            .for_user(request.user, VIEW)                   \
-            .filter(parent=folder).order_by('parent_index').distinct())
+        data['children'] = children = list(
+            Folder.objects.for_user(request.user, VIEW)
+            .filter(parent=folder)
+            .order_by('parent_index')
+            .distinct()
+        )
 
-        data['has_subfolders_strict'] = Folder.objects  \
-            .filter(parent_id=folder_id).exists()
+        data['has_subfolders_strict'] = Folder.objects.filter(
+            parent_id=folder_id
+        ).exists()
     else:
         referrer = get_referrer_path(request)
         if referrer and referrer.startswith('/folder/'):
             try:
-                initial_parent_id = int(referrer[8:referrer.find('/', 8)])
+                initial_parent_id = int(referrer[8 : referrer.find('/', 8)])
             except:
                 pass
 
@@ -269,8 +306,7 @@ def new(request, folder_id=None):
                 for x in children:
                     parent_index = request.POST.get('child-{}'.format(x.id))
                     parent_index = int(parent_index)
-                    if parent_index is not None \
-                            and x.parent_index != parent_index:
+                    if parent_index is not None and x.parent_index != parent_index:
                         x.parent_index = parent_index
                         x.save()
 
@@ -296,17 +332,19 @@ def new(request, folder_id=None):
                 descendant_ids.append(folder.id)
                 # refresh_path_cache also requires ancestors. Following code
                 # works, because you can't move a folder into its child folder.
-                descendant_ids.extend([int(x)
-                    for x in folder.parent.cache_ancestor_ids.split(',') if x])
+                descendant_ids.extend(
+                    [int(x) for x in folder.parent.cache_ancestor_ids.split(',') if x]
+                )
                 descendant_ids.append(folder.parent_id)
                 refresh_path_cache(Folder.objects.filter(id__in=descendant_ids))
 
             if not edit:
-                return ('/folder/{}/edit/'.format(folder.id), )
+                return ('/folder/{}/edit/'.format(folder.id),)
             # return HttpResponseRedirect(folder.get_absolute_url())
     else:
-        folder_form = FolderForm(instance=folder, user=request.user,
-            initial_parent_id=initial_parent_id)
+        folder_form = FolderForm(
+            instance=folder, user=request.user, initial_parent_id=initial_parent_id
+        )
 
         # If parent given and acceptable, show menu. (new mode)
         initial_parent = getattr(folder_form, 'initial_parent', None)
@@ -332,6 +370,7 @@ def _dict_to_object(d):
             self.__dict__.update(d)
 
     return Struct(d)
+
 
 def _create_folders(author, parent, structure, p):
     vars = {'p': p}
@@ -388,14 +427,21 @@ def _create_folders(author, parent, structure, p):
 
         try:
             # Check if folder with the same name, short name and parent exists.
-            folder = Folder.objects.get(parent=parent, name=vars['name'],
-                    short_name=vars['short'])
+            folder = Folder.objects.get(
+                parent=parent, name=vars['name'], short_name=vars['short']
+            )
             existing += 1
         except:
             # If not, create new folder.
-            folder = Folder(author=author, parent=parent, parent_index=index,
-                hidden=False, editable=False, name=vars['name'],
-                short_name=vars['short'])
+            folder = Folder(
+                author=author,
+                parent=parent,
+                parent_index=index,
+                hidden=False,
+                editable=False,
+                name=vars['name'],
+                short_name=vars['short'],
+            )
             folder.save()
             created += 1
 
@@ -412,68 +458,70 @@ def _create_folders(author, parent, structure, p):
 
     return created, existing
 
+
 # stored as object_repr in django_admin_log
 ADVANCED_NEW_OBJECT_REPR = u'<advanced new>'
+
 
 @permission_required('folder.advanced_create')
 @response('folder_advanced_new.html')
 def advanced_new(request):
     """
-        Create folders defined by structure and the parent.
-        Existing folder (folders with matching short, full name and parent)
-        will be used instead of creating new ones.
+    Create folders defined by structure and the parent.
+    Existing folder (folders with matching short, full name and parent)
+    will be used instead of creating new ones.
 
-        Structure format:
-            level1 [ | level2 [ | level3 ... ] ]
-        Level format:
-            i) variable names
-            ii) list of child folders - variable values
-            iii) format of additional variables
+    Structure format:
+        level1 [ | level2 [ | level3 ... ] ]
+    Level format:
+        i) variable names
+        ii) list of child folders - variable values
+        iii) format of additional variables
 
-        Or, more detailed:
-            var_name1/var_name2/...var_nameN
+    Or, more detailed:
+        var_name1/var_name2/...var_nameN
 
-            child1_var_value1/child1_var_value2/.../child1_var_valueN
-            ...
-            childM_var_value1/childM_var_value2/.../childM_var_valueN
+        child1_var_value1/child1_var_value2/.../child1_var_valueN
+        ...
+        childM_var_value1/childM_var_value2/.../childM_var_valueN
 
-            some_var={var_nameX} some text, {var_nameX}
-            other_var={var_nameY} {var_nameZ} text text
+        some_var={var_nameX} some text, {var_nameX}
+        other_var={var_nameY} {var_nameZ} text text
 
-        Also, to access variables from previous levels, use 'p.' prefix. E.g:
-            name={p.competition_name} {year}
+    Also, to access variables from previous levels, use 'p.' prefix. E.g:
+        name={p.competition_name} {year}
 
-        There are three variables that has to be set (as i+ii or iii):
-            name = full name of the folder
-            short = shown in menu
-            tags = tag filters for the folder
-        If any of these variables are missing, parser will throw an expection.
+    There are three variables that has to be set (as i+ii or iii):
+        name = full name of the folder
+        short = shown in menu
+        tags = tag filters for the folder
+    If any of these variables are missing, parser will throw an expection.
 
-        Special functions:
-            Instead of listing dozens of years (ii part), you can use this
-            helper function:
-                %RANGE a, b
-            which acts like numbers from a to b, inclusive (works both asc/desc)
+    Special functions:
+        Instead of listing dozens of years (ii part), you can use this
+        helper function:
+            %RANGE a, b
+        which acts like numbers from a to b, inclusive (works both asc/desc)
 
 
 
-        Real example:
-            name/tags
+    Real example:
+        name/tags
 
-            International Mathematical Olympiad/imo
-            International Mathematical Olympiad - Shortlist/shortlist
+        International Mathematical Olympiad/imo
+        International Mathematical Olympiad - Shortlist/shortlist
 
-            short={name}
+        short={name}
 
-            |
+        |
 
-            year
+        year
 
-            %RANGE 2011, 1959
+        %RANGE 2011, 1959
 
-            name={p.name} {year}
-            short={year}
-            tags={p.tags},{year}
+        name={p.name} {year}
+        short={year}
+        tags={p.tags},{year}
     """
 
     content_type = ContentType.objects.get_for_model(Folder)
@@ -487,14 +535,17 @@ def advanced_new(request):
             structure = form.cleaned_data['structure']
 
             # Use admin log to save structure for future changes
-            LogEntry.objects.log_action(user_id=request.user.id,
-                content_type_id=content_type.id, object_id=parent.id,
-                object_repr=ADVANCED_NEW_OBJECT_REPR, action_flag=CHANGE,
-                change_message=structure)
+            LogEntry.objects.log_action(
+                user_id=request.user.id,
+                content_type_id=content_type.id,
+                object_id=parent.id,
+                object_repr=ADVANCED_NEW_OBJECT_REPR,
+                action_flag=CHANGE,
+                change_message=structure,
+            )
 
             print("Creating folders...")
-            created, existing = \
-                _create_folders(request.user, parent, structure, None)
+            created, existing = _create_folders(request.user, parent, structure, None)
 
             # print 'Refreshing folder cache...'
             # refresh_cache_fields(Folder.objects.all())
@@ -502,10 +553,12 @@ def advanced_new(request):
     else:
         form = FolderAdvancedCreateForm(request.user)
 
-    structure_history = LogEntry.objects.filter(content_type=content_type,
-        object_repr=ADVANCED_NEW_OBJECT_REPR)
-    history_array = [{'title': x.action_time, 'content': x.change_message} \
-            for x in structure_history];
+    structure_history = LogEntry.objects.filter(
+        content_type=content_type, object_repr=ADVANCED_NEW_OBJECT_REPR
+    )
+    history_array = [
+        {'title': x.action_time, 'content': x.change_message} for x in structure_history
+    ]
 
     return {
         'form': form,

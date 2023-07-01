@@ -27,6 +27,7 @@ def assert_testdb(func):
         if not _TEST_MODE:
             raise Exception("test API available only in test mode")
         return func(*args, **kwargs)
+
     return functools.wraps(func)(inner)
 
 
@@ -43,11 +44,11 @@ def reset_testdb(request):
         # Reset mechanism used by TransactionTestCase.
         db = 'default'
         call_command('flush', verbosity=0, interactive=False, database=db)
-        call_command('loaddata', *fixtures,
-                     **{'verbosity': 0, 'database': db})
+        call_command('loaddata', *fixtures, **{'verbosity': 0, 'database': db})
         assert Site.objects.count() == 1, list(Site.objects.all())
-        Site.objects.update(domain=settings.TEST_SITE_DOMAIN,
-                            name=settings.TEST_SITE_NAME)
+        Site.objects.update(
+            domain=settings.TEST_SITE_DOMAIN, name=settings.TEST_SITE_NAME
+        )
 
     return HttpResponse("reset_testdb\nrequest.method={}".format(request.method))
 

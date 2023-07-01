@@ -6,13 +6,14 @@ from django.dispatch import receiver
 
 from skoljka.folder.models import FOLDER_NAMESPACE_FORMAT_ID, Folder, FolderTask
 from skoljka.task.models import Task
-from skoljka.utils.decorators import cache_function, \
-        get_cache_function_full_key
 from skoljka.utils import ncache
+from skoljka.utils.decorators import cache_function, get_cache_function_full_key
 
 FEATURED_FOLDER_ID = getattr(settings, 'FEATURED_LECTURES_FOLDER_ID', None)
-FEATURED_LECTURES_FOLDER_NAMESPACE = \
-        FOLDER_NAMESPACE_FORMAT_ID.format(FEATURED_FOLDER_ID)
+FEATURED_LECTURES_FOLDER_NAMESPACE = FOLDER_NAMESPACE_FORMAT_ID.format(
+    FEATURED_FOLDER_ID
+)
+
 
 def can_edit_featured_lectures(user):
     """Check if the given user can edit featured lectures."""
@@ -54,10 +55,15 @@ def get_featured_lectures():
 @receiver(post_save, sender=Task)
 def _invalidate_on_task_update(sender, **kwargs):
     instance = kwargs['instance']
-    if instance.is_lecture and FolderTask.objects.filter(
-            folder_id=FEATURED_FOLDER_ID, task_id=instance.id).exists():
+    if (
+        instance.is_lecture
+        and FolderTask.objects.filter(
+            folder_id=FEATURED_FOLDER_ID, task_id=instance.id
+        ).exists()
+    ):
         # It is fine to make an additional database query to check if
         # invalidation is necessary. (one query vs a lot of queries)
-        full_key = get_cache_function_full_key(_get_featured_lectures_cached,
-                namespace=FEATURED_LECTURES_FOLDER_NAMESPACE)
+        full_key = get_cache_function_full_key(
+            _get_featured_lectures_cached, namespace=FEATURED_LECTURES_FOLDER_NAMESPACE
+        )
         ncache.invalidate_full_key(full_key)

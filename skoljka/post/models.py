@@ -1,10 +1,11 @@
 from django.contrib.auth.models import User
-from django.db import models
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
+from django.db import models
 
-from skoljka.mathcontent.models import MathContent
 from skoljka.mathcontent.forms import MathContentForm
+from skoljka.mathcontent.models import MathContent
+
 
 class Post(models.Model):
     object_id = models.PositiveIntegerField()
@@ -22,7 +23,8 @@ class Post(models.Model):
     # complexity much). To allow for counting, a db index (content_type_id,
     # object_id, extra) should be included in the database.
     extra = models.IntegerField(
-            default=0, help_text="Application-specific additional information.")
+        default=0, help_text="Application-specific additional information."
+    )
 
     def __unicode__(self):
         return u'Post #{}'.format(self.id)
@@ -30,6 +32,9 @@ class Post(models.Model):
     def can_edit(self, user, container=None):
         if container is None:
             container = self.content_object
-        return user.is_superuser            \
-            or self.author_id == user.id    \
-            or hasattr(container, "author_id") and container.author_id == user.id
+        return (
+            user.is_superuser
+            or self.author_id == user.id
+            or hasattr(container, "author_id")
+            and container.author_id == user.id
+        )

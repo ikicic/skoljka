@@ -7,13 +7,12 @@ from django.utils.safestring import mark_safe
 
 from skoljka.mathcontent.utils import convert_to_html_safe
 from skoljka.permissions.constants import PERMISSION_NAMES
-from skoljka.solution.models import Solution, HTML_INFO, SolutionDetailedStatus
+from skoljka.solution.models import HTML_INFO, Solution, SolutionDetailedStatus
 from skoljka.tags.models import TaggedItem
 from skoljka.tags.templatetags.tags_tags import tag_list_preview
+from skoljka.task.utils import check_prerequisites_for_tasks
 from skoljka.usergroup.templatetags.usergroup_tags import grouplink
 from skoljka.userprofile.utils import get_useroption
-
-from skoljka.task.utils import check_prerequisites_for_tasks
 
 register = template.Library()
 
@@ -21,29 +20,33 @@ register = template.Library()
 @register.simple_tag()
 def task_link(task, tooltip=False, url_suffix=''):
     """
-        Simple wrapper.
+    Simple wrapper.
     """
     return task.get_link(tooltip=tooltip, url_suffix=url_suffix)
 
 
 @register.inclusion_tag('inc_task_small_box.html', takes_context=True)
 def task_small_box(context, task, div_class='', url_suffix='', options=''):
-    return {'user': context['user'], 'task': task, 'div_class': div_class,
-        'url_suffix': url_suffix, 'options': options}
+    return {
+        'user': context['user'],
+        'task': task,
+        'div_class': div_class,
+        'url_suffix': url_suffix,
+        'options': options,
+    }
 
 
 @register.simple_tag(takes_context=True)
 def task_options_mode_check(context):
     """
-        Checks if 'options' GET key is set, and available for current user.
+    Checks if 'options' GET key is set, and available for current user.
     """
     if context['user'].is_staff:
         context['options_mode'] = 'options' in context['request'].GET
     return ''
 
 
-@register.inclusion_tag('inc_task_bulk_preview_multiple.html',
-        takes_context=True)
+@register.inclusion_tag('inc_task_bulk_preview_multiple.html', takes_context=True)
 def task_bulk_preview_multiple(context, task_infos):
     """Render multiple task preview, given a list of TaskInfo instances."""
     return {'task_infos': task_infos}
@@ -73,8 +76,8 @@ def task_bulk_preview_single(task_info):
 @register.simple_tag(takes_context=True)
 def task_view_type_check(context):
     """
-        Used for inc_task_list.html. Use select_related('content') if showing
-        the content. Checks the user options and if the 'tasks' is the queryset.
+    Used for inc_task_list.html. Use select_related('content') if showing
+    the content. Checks the user options and if the 'tasks' is the queryset.
     """
     # TODO: This is temporary solution. Refactor UserOptions!
     # Takes the old value if the current request updates it.
@@ -90,8 +93,8 @@ def task_view_type_check(context):
 @register.simple_tag(takes_context=True)
 def cache_task_info_lite(context, tasks):
     """
-        Prepares data for task list in options mode, where whole queryset
-        is selected, and only basic info is visible (such as queryset length...)
+    Prepares data for task list in options mode, where whole queryset
+    is selected, and only basic info is visible (such as queryset length...)
     """
     ids = [x.id for x in tasks]
 
@@ -107,24 +110,28 @@ def cache_task_info_lite(context, tasks):
 @register.simple_tag(takes_context=True)
 def cache_task_info(context, tasks):
     """
-        Prepares data (tags, solution status and similar) for task list.
-        Usually just one page of tasks is considered.
+    Prepares data (tags, solution status and similar) for task list.
+    Usually just one page of tasks is considered.
     """
     # TODO: cache_task_info util method that takes user, not context.
     user = context['user']
-    task_content_type = ContentType.objects.get_by_natural_key(app_label="task", model="task")
+    task_content_type = ContentType.objects.get_by_natural_key(
+        app_label="task", model="task"
+    )
     ids = [x.id for x in tasks]
 
     # ----- tags -----
-    tagovi = TaggedItem.objects.filter(content_type=task_content_type,
-        object_id__in=ids).select_related('tag')
+    tagovi = TaggedItem.objects.filter(
+        content_type=task_content_type, object_id__in=ids
+    ).select_related('tag')
     tagged_items = collections.defaultdict(list)
     for x in tagovi:
         tagged_items[x.object_id].append(x)
 
     for task in tasks:
-        task._cache_tagged_items = sorted(tagged_items[task.id],
-            key=lambda x: (x.tag.name, x.votes_sum))
+        task._cache_tagged_items = sorted(
+            tagged_items[task.id], key=lambda x: (x.tag.name, x.votes_sum)
+        )
 
     # ----- solutions ------
     if user.is_authenticated():
@@ -139,10 +146,11 @@ def cache_task_info(context, tasks):
     if user.is_authenticated():
         folder = user.profile.selected_folder
         if folder is not None:
-            selected_tasks = folder.tasks.filter(id__in=ids).values_list('id', flat=True)
+            selected_tasks = folder.tasks.filter(id__in=ids).values_list(
+                'id', flat=True
+            )
             for task in tasks:
                 task.is_in_folder = task.id in selected_tasks
-
 
     # ------ context variables --------
     context['task_ids'] = ids
@@ -152,6 +160,7 @@ def cache_task_info(context, tasks):
 @register.inclusion_tag('inc_task_lecture_small_box.html', takes_context=True)
 def lecture_small_box(context, task):
     return {'task': task}
+
 
 @register.simple_tag()
 def lecture_img_class(task):

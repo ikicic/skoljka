@@ -2,17 +2,19 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 from skoljka.mathcontent.models import MathContent
+from skoljka.search.utils import search_tasks
 from skoljka.tags.utils import add_tags, remove_tags, set_tags
 from skoljka.task.models import Task
 
-from skoljka.search.utils import search_tasks
 
 def _create_task(author, tags, hidden):
     content = MathContent.objects.create(text="Test text", html="Test text")
-    task = Task.objects.create(name="Test task", content=content,
-            author=author, hidden=hidden)
+    task = Task.objects.create(
+        name="Test task", content=content, author=author, hidden=hidden
+    )
     set_tags(task, tags)
     return task
+
 
 class SearchTest(TestCase):
     fixtures = ['skoljka/userprofile/fixtures/test_userprofiles.json']

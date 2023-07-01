@@ -1,5 +1,6 @@
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls.defaults import include, patterns, url
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     (r'^tags/$', 'skoljka.tags.views.list'),
 )

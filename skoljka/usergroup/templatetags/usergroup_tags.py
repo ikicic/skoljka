@@ -5,10 +5,12 @@ from skoljka.utils import xss
 
 register = template.Library()
 
+
 @register.filter
 def grouplink(group):
-    return mark_safe(u'<a href="/usergroup/{}/">{}</a>'.format(
-            group.id, xss.escape(group.name)))
+    return mark_safe(
+        u'<a href="/usergroup/{}/">{}</a>'.format(group.id, xss.escape(group.name))
+    )
 
 
 @register.simple_tag(takes_context=True)

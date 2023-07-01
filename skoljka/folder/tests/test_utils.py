@@ -6,6 +6,7 @@ from skoljka.folder.utils import get_folder_descendant_ids
 # TODO: Do not use fixtures.
 # TODO: Tests.
 
+
 class TaskUtilsTestCase(TestCase):
     fixtures = ['skoljka/folder/fixtures/test_folders.json']
 

@@ -3,20 +3,24 @@
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
+
 class InvalidSolution(Exception):
     def __init__(self, msg=None):
         if msg is None:
             msg = _("Invalid solution!")
         super(InvalidSolution, self).__init__(msg)
 
+
 class NotThisFormat(Exception):
     pass
+
 
 class InvalidDescriptor(Exception):
     def __init__(self, msg=None):
         if msg is None:
             msg = _("Invalid solution descriptor!")
         super(InvalidDescriptor, self).__init__(msg)
+
 
 class Variable(object):
     def __init__(self, descriptor):

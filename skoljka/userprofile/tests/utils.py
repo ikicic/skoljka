@@ -1,8 +1,10 @@
-from django.contrib.auth.models import User
 import time
+
+from django.contrib.auth.models import User
 
 from skoljka.folder.models import Folder
 from skoljka.utils.testcase import TestCase
+
 
 class TestCaseWithUsers(TestCase):
     fixtures = ['skoljka/userprofile/fixtures/test_userprofiles.json']

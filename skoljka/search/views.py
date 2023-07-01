@@ -1,13 +1,13 @@
 ﻿from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 
+from skoljka.search.forms import AdvancedSearchForm, SearchForm
+from skoljka.search.utils import search_tasks
 from skoljka.tags.models import Tag
 from skoljka.tags.utils import get_available_tags, split_tags
 from skoljka.task.models import Task
 
-from skoljka.search.forms import SearchForm, AdvancedSearchForm
-from skoljka.search.utils import search_tasks
 
 def view(request):
     q = request.GET.get('q')
@@ -22,17 +22,20 @@ def view(request):
             error.append('Navedite barem jednu oznaku!')
         elif len(tags) != len(q):
             diff = set([x.lower() for x in q]) - set([x.lower() for x in tags])
-            error.append(u'Nepostojeć%s: %s!' % (
-                u'a oznaka' if len(diff) == 1 else 'e oznake',
-                u', '.join(diff),
-            ))
+            error.append(
+                u'Nepostojeć%s: %s!'
+                % (
+                    u'a oznaka' if len(diff) == 1 else 'e oznake',
+                    u', '.join(diff),
+                )
+            )
 
     kwargs = dict(
-        show_hidden = 'show_hidden' in request.GET,
-        quality_min = request.GET.get('quality_min'),
-        quality_max = request.GET.get('quality_max'),
-        difficulty_min = request.GET.get('difficulty_min'),
-        difficulty_max = request.GET.get('difficulty_max'),
+        show_hidden='show_hidden' in request.GET,
+        quality_min=request.GET.get('quality_min'),
+        quality_max=request.GET.get('quality_max'),
+        difficulty_min=request.GET.get('difficulty_min'),
+        difficulty_max=request.GET.get('difficulty_max'),
     )
 
     groups_error = False
@@ -55,14 +58,17 @@ def view(request):
     else:
         tasks = Task.objects.none()
 
-
-    return render_to_response('search.html', {
-        'advanced_form': advanced_form,
-        'any': bool(request.GET),
-        'errors': '<br>'.join(error),
-        'form': SearchForm(request.GET),
-        'groups_error': groups_error,
-        'search_solved_count': bool(kwargs.get('groups')),
-        'tasks': tasks,
-        'tags': tags,
-        }, context_instance=RequestContext(request))
+    return render_to_response(
+        'search.html',
+        {
+            'advanced_form': advanced_form,
+            'any': bool(request.GET),
+            'errors': '<br>'.join(error),
+            'form': SearchForm(request.GET),
+            'groups_error': groups_error,
+            'search_solved_count': bool(kwargs.get('groups')),
+            'tasks': tasks,
+            'tags': tags,
+        },
+        context_instance=RequestContext(request),
+    )

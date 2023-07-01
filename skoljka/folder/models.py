@@ -3,25 +3,27 @@
 import itertools
 import time
 
-from django.db import connection, models, transaction
-from django.db.models import Count
 from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.generic import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
+from django.db import connection, models, transaction
+from django.db.models import Count
 from django.utils.html import mark_safe
 
 from skoljka.permissions.constants import VIEW
 from skoljka.permissions.models import BasePermissionsModel
 from skoljka.permissions.utils import get_object_ids_with_exclusive_permission
-from skoljka.tags.managers import TaggableManager
-from skoljka.task.models import Task
 from skoljka.search.models import SearchCache, SearchCacheElement
 from skoljka.search.utils import search, search_tasks
-from skoljka.solution.models import Solution, SolutionDetailedStatus, \
-        SOLUTION_DETAILED_STATUS_MAX
+from skoljka.solution.models import (
+    SOLUTION_DETAILED_STATUS_MAX,
+    Solution,
+    SolutionDetailedStatus,
+)
 from skoljka.tags.managers import TaggableManager
+from skoljka.task.models import Task
 from skoljka.utils import interpolate_three_colors, ncache
 from skoljka.utils.decorators import cache_function, cache_many_function
 from skoljka.utils.models import icon_help_text
@@ -35,6 +37,7 @@ IN_OUT_OFFSET = 12
 # The difference between 'inside' and 'outside' for list-style.
 # Look at folder.css for more info.
 
+
 class Folder(BasePermissionsModel):
     class Meta:
         permissions = (
@@ -43,10 +46,15 @@ class Folder(BasePermissionsModel):
             ("advanced_create", "Advanced folder create"),
         )
 
-    name = models.CharField(max_length=64, verbose_name='Ime')      # full name
-    short_name = models.CharField(max_length=128, verbose_name='Kratko ime',
-        help_text=icon_help_text(u'Ime prikazano u izborniku. Ukoliko se ne '
-            u'razlikuje od punog imena, možete ostaviti prazno.'))   # menu name
+    name = models.CharField(max_length=64, verbose_name='Ime')  # full name
+    short_name = models.CharField(
+        max_length=128,
+        verbose_name='Kratko ime',
+        help_text=icon_help_text(
+            u'Ime prikazano u izborniku. Ukoliko se ne '
+            u'razlikuje od punog imena, možete ostaviti prazno.'
+        ),
+    )  # menu name
 
     # PermissionsModel
     hidden = models.BooleanField(default=True, verbose_name='Skriveno')
@@ -75,8 +83,9 @@ class Folder(BasePermissionsModel):
     cache_path = models.CharField(max_length=1000, blank=True, db_index=True)
 
     # Cache, link to SearchCache instance, in the case of a folder-filter type
-    cache_searchcache = models.ForeignKey(SearchCache, blank=True, null=True,
-        on_delete=models.SET_NULL) # WARNING: Do not remove SET_NULL!!
+    cache_searchcache = models.ForeignKey(
+        SearchCache, blank=True, null=True, on_delete=models.SET_NULL
+    )  # WARNING: Do not remove SET_NULL!!
 
     tasks = models.ManyToManyField(Task, blank=True, through='FolderTask')
     search_cache_elements = GenericRelation(SearchCacheElement)
@@ -85,7 +94,7 @@ class Folder(BasePermissionsModel):
         return self.name
 
     def get_absolute_url(self):
-        #return '/folder/{}/{}'.format(self.id, slugify(self.name))
+        # return '/folder/{}/{}'.format(self.id, slugify(self.name))
         return '/folder/{}/{}'.format(self.id, self.cache_path)
 
     def refresh_cache_tags(self):
@@ -103,26 +112,29 @@ class Folder(BasePermissionsModel):
             self.save()
 
     def _html_breadcrumb_item(self):
-        return u'<li><a href="{}">{}</a></li>'.format(self.get_absolute_url(),
-            self.name)
+        return u'<li><a href="{}">{}</a></li>'.format(
+            self.get_absolute_url(), self.name
+        )
 
     @staticmethod
     def parse_solution_stats(S, total_solvable_count):
         """
-            S = Solution statistics (list of counters, one for each detailed status)
-            total_solvable_count = Number of solvable tasks in the folder
+        S = Solution statistics (list of counters, one for each detailed status)
+        total_solvable_count = Number of solvable tasks in the folder
 
-            Returns tuple:
-                - bool, has any non blank solution
-                - bool, has any non rated solutions
-                - float, percent solved
-                - 3-tuple of floats, color RGB
+        Returns tuple:
+            - bool, has any non blank solution
+            - bool, has any non rated solutions
+            - float, percent solved
+            - 3-tuple of floats, color RGB
         """
         if not S or sum(S) - S[SolutionDetailedStatus.BLANK] <= 0:
             return False, False, 0, (150, 150, 150)
 
-        solved = S[SolutionDetailedStatus.AS_SOLVED] \
-                + S[SolutionDetailedStatus.SUBMITTED_CORRECT]
+        solved = (
+            S[SolutionDetailedStatus.AS_SOLVED]
+            + S[SolutionDetailedStatus.SUBMITTED_CORRECT]
+        )
         todo = S[SolutionDetailedStatus.TODO]
 
         percent = float(solved) / total_solvable_count
@@ -130,26 +142,27 @@ class Folder(BasePermissionsModel):
         if S[SolutionDetailedStatus.SUBMITTED_INCORRECT]:
             r, g, b = 255, 0, 0
         else:
-            r, g, b = interpolate_three_colors(180, 180, 180,
-                100, 220, 100, percent, 230, 180, 92, todo_percent)
+            r, g, b = interpolate_three_colors(
+                180, 180, 180, 100, 220, 100, percent, 230, 180, 92, todo_percent
+            )
 
         non_rated = bool(S[SolutionDetailedStatus.SUBMITTED_NOT_RATED])
         return True, non_rated, percent, (r, g, b)
 
     def _should_show_stats(self):
         """
-            Show solutions statistics only if year-folder (or similar).
+        Show solutions statistics only if year-folder (or similar).
         """
         return self.short_name.isdigit()
 
     def _html_menu_item(self, is_open, depth, stats, cls='', extra=''):
         """
-            Parameters:
-                is_open - is folder open (is in chain?)
-                depth - folder depth
-                stats - stats from many_get_user_stats
-                cls - additional CSS class, optional
-                extra - extra HTML added between <li> and <a>, optional
+        Parameters:
+            is_open - is folder open (is in chain?)
+            depth - folder depth
+            stats - stats from many_get_user_stats
+            cls - additional CSS class, optional
+            extra - extra HTML added between <li> and <a>, optional
         """
 
         cls += ' nav-folder-hidden' if self.hidden else ' nav-folder'
@@ -168,27 +181,44 @@ class Folder(BasePermissionsModel):
             # without subfolders).
             title = "Ukupno zadataka: {}".format(stats[0])
 
-            any, any_non_rated, percent, (r, g, b) =    \
-                Folder.parse_solution_stats(S, total_solvable)
+            any, any_non_rated, percent, (r, g, b) = Folder.parse_solution_stats(
+                S, total_solvable
+            )
 
             if any:
                 # Show extra + sign if there are any non rated solutions.
                 plus_sign = '+' if any_non_rated else ''
 
-                stats_str = '<span style="color:#%02X%02X%02X;">(%s%d%%)</span>' \
-                    % (r, g, b, plus_sign, 100 * percent)
+                stats_str = '<span style="color:#%02X%02X%02X;">(%s%d%%)</span>' % (
+                    r,
+                    g,
+                    b,
+                    plus_sign,
+                    100 * percent,
+                )
 
         title = "" if not title else ' title="{}"'.format(title)
-        return u'<li class="%s" style="margin-left:%dpx;"%s> '   \
-            '%s<a href="%s">%s %s</a></li>\n' % (cls,
-            depth * 10 - 7 + IN_OUT_OFFSET, title, extra,
-            self.get_absolute_url(), self.short_name, stats_str)
+        return (
+            u'<li class="%s" style="margin-left:%dpx;"%s> '
+            '%s<a href="%s">%s %s</a></li>\n'
+            % (
+                cls,
+                depth * 10 - 7 + IN_OUT_OFFSET,
+                title,
+                extra,
+                self.get_absolute_url(),
+                self.short_name,
+                stats_str,
+            )
+        )
 
     def tag_list_html(self):
         if not self.cache_tags:
             return u''
-        links = [u'<a href="/search/?q={}">{}</a>'.format(tag, tag) \
-                for tag in sorted(self.cache_tags.split(','))]
+        links = [
+            u'<a href="/search/?q={}">{}</a>'.format(tag, tag)
+            for tag in sorted(self.cache_tags.split(','))
+        ]
         return mark_safe(u'[ {} ]'.format(u' | '.join(links)))
 
     @staticmethod
@@ -197,8 +227,8 @@ class Folder(BasePermissionsModel):
 
         # Ignore non-filters and those who already have FolderTask prepared.
         folders = filter(
-            lambda x: x.cache_tag_ids and x.cache_searchcache_id is None,
-            folders)
+            lambda x: x.cache_tag_ids and x.cache_searchcache_id is None, folders
+        )
 
         if not folders:
             return
@@ -210,15 +240,15 @@ class Folder(BasePermissionsModel):
             tag_ids = [int(x) for x in folder.cache_tag_ids.split(',')]
 
             folder.cache_searchcache_id = search(tag_ids=tag_ids).id
-            folder.save()   # Yes, send signals.
+            folder.save()  # Yes, send signals.
 
-            query = 'INSERT INTO folder_folder_tasks (folder_id, task_id, position)' \
-                    ' SELECT {}, SCE.object_id, SCE.object_id FROM search_searchcacheelement SCE'\
-                    ' WHERE SCE.content_type_id = {} AND SCE.cache_id = {};'.format(
-                        folder.id,
-                        content_type_id,
-                        folder.cache_searchcache_id
-                    )
+            query = (
+                'INSERT INTO folder_folder_tasks (folder_id, task_id, position)'
+                ' SELECT {}, SCE.object_id, SCE.object_id FROM search_searchcacheelement SCE'
+                ' WHERE SCE.content_type_id = {} AND SCE.cache_id = {};'.format(
+                    folder.id, content_type_id, folder.cache_searchcache_id
+                )
+            )
 
             cursor = connection.cursor()
             cursor.execute(query)
@@ -227,12 +257,12 @@ class Folder(BasePermissionsModel):
 
     def get_queryset(self, user, no_perm_check=False, order=True):
         """
-            Depending on type of folder (tag filter / manual), return
-            queryset of contained Tasks.
+        Depending on type of folder (tag filter / manual), return
+        queryset of contained Tasks.
 
-            Flags (useful for optimization purposes):
-                no_perm_check - do not check permission, return all tasks
-                order - order by default order (if defined)
+        Flags (useful for optimization purposes):
+            no_perm_check - do not check permission, return all tasks
+            order - order by default order (if defined)
         """
 
         # If we know there is no hidden task, don't check permissions.
@@ -252,8 +282,11 @@ class Folder(BasePermissionsModel):
     @cache_function(namespace=FOLDER_NAMESPACE_FORMAT, key='AnyHidden')
     def has_any_hidden_task(self):
         # No danger from infinite recursion here.
-        return self.get_queryset(None, no_perm_check=True, order=False) \
-            .filter(hidden=True).exists()
+        return (
+            self.get_queryset(None, no_perm_check=True, order=False)
+            .filter(hidden=True)
+            .exists()
+        )
 
     @staticmethod
     @cache_many_function(
@@ -263,17 +296,17 @@ class Folder(BasePermissionsModel):
     )
     def many_get_user_stats(folders, user):
         """
-            Get user statistics and other information for multiple folders.
+        Get user statistics and other information for multiple folders.
 
-            If user not authenticated, returns empty dictionary.
-            Otherwise, returns dictionary
-                {folder.id: [visible task count, visible solvable task count,
-                    solution_stats]}   (*)
-            where solution_stats is a list of solution counters,
-            one element for each detailed status. E.g.
-                (50, [0, 3, 0, 1, 2 (...)])
+        If user not authenticated, returns empty dictionary.
+        Otherwise, returns dictionary
+            {folder.id: [visible task count, visible solvable task count,
+                solution_stats]}   (*)
+        where solution_stats is a list of solution counters,
+        one element for each detailed status. E.g.
+            (50, [0, 3, 0, 1, 2 (...)])
 
-            (*) For implementation reasons, it returns lists instead of tuples.
+        (*) For implementation reasons, it returns lists instead of tuples.
         """
         start_time = time.time()
 
@@ -285,15 +318,18 @@ class Folder(BasePermissionsModel):
         folder_task_ids = {}
 
         # {folder_id: [visible task count, solution statistics]}
-        result = {x.id: [0, 0, [0] * (SOLUTION_DETAILED_STATUS_MAX + 1)] for x in folders}
+        result = {
+            x.id: [0, 0, [0] * (SOLUTION_DETAILED_STATUS_MAX + 1)] for x in folders
+        }
 
-        query = 'SELECT FT.folder_id, T.id, T.author_id, T.hidden, T.solvable, S.detailed_status FROM folder_folder_tasks FT'  \
-            ' INNER JOIN task_task T ON (FT.task_id = T.id)'   \
-            ' LEFT OUTER JOIN solution_solution S ON (S.task_id = T.id AND S.author_id = {})' \
+        query = (
+            'SELECT FT.folder_id, T.id, T.author_id, T.hidden, T.solvable, S.detailed_status FROM folder_folder_tasks FT'
+            ' INNER JOIN task_task T ON (FT.task_id = T.id)'
+            ' LEFT OUTER JOIN solution_solution S ON (S.task_id = T.id AND S.author_id = {})'
             ' WHERE FT.folder_id IN ({});'.format(
-                user.id,
-                ','.join(str(x.id) for x in folders)
+                user.id, ','.join(str(x.id) for x in folders)
             )
+        )
 
         cursor = connection.cursor()
         cursor.execute(query)
@@ -301,37 +337,59 @@ class Folder(BasePermissionsModel):
         # Task whose permissions have to be checked explicitly.
         to_check = []
         db_result = list(cursor.fetchall())
-        for folder_id, task_id, author_id, hidden, solvable, detailed_status in db_result:
+        for (
+            folder_id,
+            task_id,
+            author_id,
+            hidden,
+            solvable,
+            detailed_status,
+        ) in db_result:
             if hidden and author_id != user.id:
                 to_check.append(task_id)
 
         # Filter only visible Tasks
-        visible_tasks = set(get_object_ids_with_exclusive_permission(
-            user, VIEW, model=Task, filter_ids=to_check))   \
-            if to_check else set()
+        visible_tasks = (
+            set(
+                get_object_ids_with_exclusive_permission(
+                    user, VIEW, model=Task, filter_ids=to_check
+                )
+            )
+            if to_check
+            else set()
+        )
 
         # Fill statistics
-        for folder_id, task_id, author_id, hidden, solvable, detailed_status in db_result:
+        for (
+            folder_id,
+            task_id,
+            author_id,
+            hidden,
+            solvable,
+            detailed_status,
+        ) in db_result:
             # Is Task visible?
             if not hidden or author_id == user.id or task_id in visible_tasks:
                 ref = result[folder_id]
-                ref[0] += 1                         # Total Task count
+                ref[0] += 1  # Total Task count
                 if solvable:
-                    ref[1] += 1                     # Total solvable Task count
+                    ref[1] += 1  # Total solvable Task count
                 if detailed_status is not None:
-                    ref[2][detailed_status] += 1    # Solution statistics
+                    ref[2][detailed_status] += 1  # Solution statistics
 
-        print("user solution stats for %d folders found in %lfs" % (len(folders), time.time() - start_time))
+        print(
+            "user solution stats for %d folders found in %lfs"
+            % (len(folders), time.time() - start_time)
+        )
         return result
-
 
     def get_details(self, user):
         """
-            Returns a dictionary of following folder information:
-                folder - self
-                tag_list - list of tags
-                tag_list_html - HTML version
-                tasks - queryset to folder's tasks
+        Returns a dictionary of following folder information:
+            folder - self
+            tag_list - list of tags
+            tag_list_html - HTML version
+            tasks - queryset to folder's tasks
         """
 
         return {

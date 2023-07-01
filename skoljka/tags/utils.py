@@ -3,13 +3,16 @@ from django.utils.html import mark_safe
 from taggit.utils import parse_tags
 
 from skoljka.tags.models import Tag, TaggedItem
-from skoljka.tags.signals import object_tag_ids_changed_high_priority, \
-        object_tag_ids_changed
+from skoljka.tags.signals import (
+    object_tag_ids_changed,
+    object_tag_ids_changed_high_priority,
+)
 
 # TODO: Taggit is case sensitive, and makes different slugs for tags that
 # differ in case only. We want tags to be case-insensitive, so we use a wrapper.
 # Therefore, we can stop to use Taggit and use our own model that has no slug
 # field. Before making any changes, find a way to make tags multilingual.
+
 
 def _set_tag_ids(instance, content_type, old_tag_ids, new_tag_ids):
     """
@@ -28,24 +31,32 @@ def _set_tag_ids(instance, content_type, old_tag_ids, new_tag_ids):
     removed = 0
     for tag_id in old_tag_ids - new_tag_ids:
         tagged_item = TaggedItem.objects.get(
-                object_id=instance.id, content_type=content_type, tag_id=tag_id)
+            object_id=instance.id, content_type=content_type, tag_id=tag_id
+        )
         tagged_item.delete()
         removed += 1
 
     for tag_id in new_tag_ids - old_tag_ids:
         TaggedItem.objects.create(
-                object_id=instance.id, content_type=content_type, tag_id=tag_id)
+            object_id=instance.id, content_type=content_type, tag_id=tag_id
+        )
         added += 1
 
     if added + removed > 0:
         if hasattr(instance, '_cache_tagged_items'):
             delattr(instance, '_cache_tagged_items')
         object_tag_ids_changed_high_priority.send(
-                sender=content_type.model_class(), instance=instance,
-                old_tag_ids=old_tag_ids, new_tag_ids=new_tag_ids)
+            sender=content_type.model_class(),
+            instance=instance,
+            old_tag_ids=old_tag_ids,
+            new_tag_ids=new_tag_ids,
+        )
         object_tag_ids_changed.send(
-                sender=content_type.model_class(), instance=instance,
-                old_tag_ids=old_tag_ids, new_tag_ids=new_tag_ids)
+            sender=content_type.model_class(),
+            instance=instance,
+            old_tag_ids=old_tag_ids,
+            new_tag_ids=new_tag_ids,
+        )
 
     return added - removed
 
@@ -55,10 +66,12 @@ def set_tags(instance, tags, content_type=None):
     new_tag_ids = tag_names_to_ids(tags, add=True)
     return _set_tag_ids(instance, content_type, old_tag_ids, new_tag_ids)
 
+
 def add_tags(instance, tags, content_type=None):
     old_tag_ids = list(instance.tags.values_list('id', flat=True))
     new_tag_ids = old_tag_ids + tag_names_to_ids(tags, add=True)
     return _set_tag_ids(instance, content_type, old_tag_ids, new_tag_ids)
+
 
 def remove_tags(instance, tags_to_remove, content_type=None):
     old_tag_ids = set(instance.tags.values_list('id', flat=True))
@@ -134,8 +147,7 @@ def tag_names_to_ids(tag_names, add=False):
     """
     if add:
         tag_names = split_tags(tag_names)
-        available = Tag.objects.filter(name__in=tag_names) \
-                               .values_list('id', 'name')
+        available = Tag.objects.filter(name__in=tag_names).values_list('id', 'name')
         lowercase = {name.lower(): tag_id for tag_id, name in available}
         result = []
         for name in tag_names:
@@ -147,8 +159,9 @@ def tag_names_to_ids(tag_names, add=False):
                 result.append(tag.id)
         return result
     else:
-        return Tag.objects.filter(name__in=split_tags(tag_names)) \
-                          .values_list('id', flat=True)
+        return Tag.objects.filter(name__in=split_tags(tag_names)).values_list(
+            'id', flat=True
+        )
 
 
 def get_object_tagged_items(instance):
@@ -157,12 +170,11 @@ def get_object_tagged_items(instance):
         content_type = ContentType.objects.get_for_model(instance)
 
         # Get all tags (TaggedItem)
-        queryset = TaggedItem.objects   \
-            .filter(content_type=content_type, object_id=instance.id)   \
-            .select_related('tag')
+        queryset = TaggedItem.objects.filter(
+            content_type=content_type, object_id=instance.id
+        ).select_related('tag')
 
         # Evaluate and sort by tag.name
-        instance._cache_tagged_items = \
-            sorted(queryset, key=lambda x: x.tag.name)
+        instance._cache_tagged_items = sorted(queryset, key=lambda x: x.tag.name)
 
     return instance._cache_tagged_items

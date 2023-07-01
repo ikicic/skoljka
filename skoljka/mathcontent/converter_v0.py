@@ -1,10 +1,13 @@
 # coding=utf-8
 
-from skoljka.utils import xss
-
-from skoljka.mathcontent.models import ERROR_DEPTH_VALUE, IMG_URL_PATH, \
-        TYPE_HTML, TYPE_LATEX
 from skoljka.mathcontent.latex import get_or_generate_png
+from skoljka.mathcontent.models import (
+    ERROR_DEPTH_VALUE,
+    IMG_URL_PATH,
+    TYPE_HTML,
+    TYPE_LATEX,
+)
+from skoljka.utils import xss
 
 # Prepend this to the text to use this converter.
 VERSION_MARKER = '%V0'
@@ -26,7 +29,7 @@ latex_escape_table = {
 }
 
 html_escape_table = {
-    '&': '&amp;',   # this one must be the first
+    '&': '&amp;',  # this one must be the first
     '"': '&quot;',
     "'": '&apos;',
     '>': '&gt;',
@@ -40,10 +43,9 @@ tag_open = {
     's': ('<s>', '\\sout{'),
     'u': ('<u>', '\\uline{'),
     'quote': ('<div class="quote">', ''),
-
-# img accepts attachment attribute, index of attachment to use as a src (1-based)
+    # img accepts attachment attribute, index of attachment to use as a src (1-based)
     'img': ('<img alt="Attachment image"%(extra)s>', '\\includegraphics%(extra)s'),
-    'url': ('<a href="%(url)s" rel="nofollow">', '%(url)s'),   # TODO: LaTeX links
+    'url': ('<a href="%(url)s" rel="nofollow">', '%(url)s'),  # TODO: LaTeX links
 }
 
 # automatically converted attributes as %(extra)s
@@ -67,17 +69,17 @@ tag_close = {
 
 def parse_bb_code(S):
     """
-        Split tag name and attributes.
-        Returns tuple (name, attrs), where attrs is a dictionary.
+    Split tag name and attributes.
+    Returns tuple (name, attrs), where attrs is a dictionary.
 
-        Note:
-            Doesn't support spaces in attribute values!
+    Note:
+        Doesn't support spaces in attribute values!
 
-        Example:
-            S = 'img attachment=2 width=100px'
+    Example:
+        S = 'img attachment=2 width=100px'
 
-            name = u'img'
-            attrs = {u'attachment': u'2', u'width': u'100px'}
+        name = u'img'
+        attrs = {u'attachment': u'2', u'width': u'100px'}
     """
 
     # is there any shortcut for this in Python 2.7?
@@ -95,13 +97,14 @@ def parse_bb_code(S):
     return name, attrs
 
 
-def _convert(type, T, handle_latex_func, escape_table, attachments=None,
-        attachments_path=None): # XSS danger!!! Be careful
+def _convert(
+    type, T, handle_latex_func, escape_table, attachments=None, attachments_path=None
+):  # XSS danger!!! Be careful
     """
-        Converts MathContent format to HTML (type 0) or LaTeX (type 1)
+    Converts MathContent format to HTML (type 0) or LaTeX (type 1)
 
-        To support features like [img], it must be called with a
-        list of Attachment instances.
+    To support features like [img], it must be called with a
+    list of Attachment instances.
     """
 
     # force strip
@@ -122,41 +125,43 @@ def _convert(type, T, handle_latex_func, escape_table, attachments=None,
             if i + 1 < n:
                 out.append(escape_table.get(T[i + 1], T[i + 1]))
             i += 2
-        elif T[i:i+2] == '\r\n':
+        elif T[i : i + 2] == '\r\n':
             out.append(newline)
             i += 2
         elif T[i] == '\r' or T[i] == '\n':
             out.append(newline)
             i += 1
-        elif T[i] == '[':   # BBCode
+        elif T[i] == '[':  # BBCode
             # TODO: [url] can't contain ]
             end = T.find(']', i)
             if end == -1:
-                out.append('[')     # no error messages for now
+                out.append('[')  # no error messages for now
                 i += 1
             elif end == i + 1:
                 out.append('[]')
                 i += 2
-            elif end == i + 2 and T[i+1] == '/':
+            elif end == i + 2 and T[i + 1] == '/':
                 out.append('[/]')
                 i += 3
-            else: # non empty tag
+            else:  # non empty tag
                 # here we make difference between TYPE_HTML and TYPE_LATEX
                 # TYPE_HTML = first element of tag tuple
                 # TYPE_LATEX = second element of tag tuple
 
                 try:
-                    tag, attrs = parse_bb_code(T[i+1:end])
+                    tag, attrs = parse_bb_code(T[i + 1 : end])
                 except:
                     # if bb code not valid (or if not bb code at all), output original text
-                    out.append('[%s]' % T[i+1:end])
+                    out.append('[%s]' % T[i + 1 : end])
                     i = end + 1
                     continue
 
                 if tag[0] == '/':
                     tag = tag[1:]
                     if not tag_stack or tag_stack[-1] != tag:
-                        out.append('{{ Poredak otvorenih i zatvorenih tagova nije valjan. }}')
+                        out.append(
+                            '{{ Poredak otvorenih i zatvorenih tagova nije valjan. }}'
+                        )
                     else:
                         out.append(tag_close[tag_stack.pop()][type])
                 elif tag not in tag_open:
@@ -190,10 +195,11 @@ def _convert(type, T, handle_latex_func, escape_table, attachments=None,
                                 file = attachments[k]
                                 if type == TYPE_HTML:
                                     extra += ' src="%s"' % xss.escape(file.get_url())
-                                else: # type == TYPE_LATEX
+                                else:  # type == TYPE_LATEX
                                     if attachments_path:
                                         filename = '{}/{}/{}'.format(
-                                            attachments_path, k, file.get_filename())
+                                            attachments_path, k, file.get_filename()
+                                        )
                                     else:
                                         filename = file.get_full_path_and_filename()
                                     extra = '[%s]{%s}' % (extra[1:], filename)
@@ -207,7 +213,7 @@ def _convert(type, T, handle_latex_func, escape_table, attachments=None,
                             if url_end == -1:
                                 open = u'{{ Nedostaje [/url] }}'
                             else:
-                                attrs['url'] = T[i + 5:url_end]
+                                attrs['url'] = T[i + 5 : url_end]
                         attrs['url'] = xss.escape(attrs.get('url', ''))
 
                     attrs.update({'extra': extra})
@@ -226,14 +232,14 @@ def _convert(type, T, handle_latex_func, escape_table, attachments=None,
             # this should cover all weird cases with \\ and \$
             latex = []
             while i < n:
-                if T[i:i+2] == '\\$' or T[i:i+2] == '\\\\':
-                    latex.append(T[i:i+2])
+                if T[i : i + 2] == '\\$' or T[i : i + 2] == '\\\\':
+                    latex.append(T[i : i + 2])
                     i += 2
-                elif cnt <= 2 and T[i] == '$' or cnt == 3 and T[i:i+2] == '$$':
-                # It is possible to use $ ... $ inside inside of $$$ ... $$$.
-                # This could be also written more strictly as
-                # elif T[i:i+cnt] == '$' * cnt:
-                    break;
+                elif cnt <= 2 and T[i] == '$' or cnt == 3 and T[i : i + 2] == '$$':
+                    # It is possible to use $ ... $ inside inside of $$$ ... $$$.
+                    # This could be also written more strictly as
+                    # elif T[i:i+cnt] == '$' * cnt:
+                    break
                 else:
                     latex.append(T[i])
                     i += 1
@@ -276,7 +282,10 @@ def _handle_latex_html(cnt, latex):
         hash = latex_element.hash
         url = '%s%s/%s/%s/%s.png' % (IMG_URL_PATH, hash[0], hash[1], hash[2], hash)
         if inline:
-            img = '<img src="%s" alt="%s" class="latex" style="vertical-align:%dpx">' % (url, latex_escaped, -latex_element.depth)
+            img = (
+                '<img src="%s" alt="%s" class="latex" style="vertical-align:%dpx">'
+                % (url, latex_escaped, -latex_element.depth)
+            )
         else:
             img = '<img src="%s" alt="%s" class="latex-center">' % (url, latex_escaped)
 
@@ -311,8 +320,9 @@ def convert_to_html(T, attachments=None):
     """Convert MathContent format to HTML.
 
     Handles BBCode tags, converts LaTeX to images and escapes special chars."""
-    return _convert(TYPE_HTML, T, _handle_latex_html, html_escape_table,
-            attachments=attachments)
+    return _convert(
+        TYPE_HTML, T, _handle_latex_html, html_escape_table, attachments=attachments
+    )
 
 
 def convert_to_latex(T, attachments=None, attachments_path=None):
@@ -324,8 +334,15 @@ def convert_to_latex(T, attachments=None, attachments_path=None):
 
     Handles BBCode [i], [b] etc.
     """
-    return _convert(TYPE_LATEX, T, _handle_latex_latex, latex_escape_table,
-        attachments=attachments, attachments_path=attachments_path)
+    return _convert(
+        TYPE_LATEX,
+        T,
+        _handle_latex_latex,
+        latex_escape_table,
+        attachments=attachments,
+        attachments_path=attachments_path,
+    )
+
 
 def convert(type, text, attachments=None, attachments_path=None):
     """Convert given text to the given type in the context of the given
@@ -333,5 +350,6 @@ def convert(type, text, attachments=None, attachments_path=None):
     if type == TYPE_HTML:
         return convert_to_html(text, attachments=attachments)
     if type == TYPE_LATEX:
-        return convert_to_latex(text, attachments=attachments,
-                attachments_path=attachments_path)
+        return convert_to_latex(
+            text, attachments=attachments, attachments_path=attachments_path
+        )

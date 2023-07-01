@@ -1,14 +1,16 @@
-from datetime import datetime
 import json
 import re
+from datetime import datetime
 
 from django.conf import settings
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, User
 from django.db import models
 from django.db.models import F
-from django.utils.translation import ugettext as _, ugettext_lazy
 from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy
 
+from skoljka.competition.evaluator import EVALUATOR_V1
 from skoljka.mathcontent.models import MathContent
 from skoljka.permissions.constants import EDIT
 from skoljka.permissions.models import BasePermissionsModel
@@ -18,7 +20,6 @@ from skoljka.utils import xss
 from skoljka.utils.models import gray_help_text
 from skoljka.utils.string_operations import join_urls
 
-from skoljka.competition.evaluator import EVALUATOR_V1
 
 class Competition(BasePermissionsModel):
     """
@@ -29,12 +30,12 @@ class Competition(BasePermissionsModel):
         admin_group must have VIEW and EDIT permissions for the competition
         object.
     """
+
     KIND_COMPETITION = 1
     KIND_COURSE = 2
 
     name = models.CharField(max_length=64)
-    kind = models.SmallIntegerField(
-            default=1, help_text="1=competition, 2=course")
+    kind = models.SmallIntegerField(default=1, help_text="1=competition, 2=course")
     hidden = models.BooleanField(default=True)
     registration_open_date = models.DateTimeField()
     start_date = models.DateTimeField()
@@ -48,29 +49,36 @@ class Competition(BasePermissionsModel):
     url_path_prefix = models.CharField(blank=True, max_length=64)
     scoreboard_freeze_date = models.DateTimeField()
     evaluator_version = models.IntegerField(default=EVALUATOR_V1)
-    fixed_task_score = models.IntegerField(default=0,
-            help_text="Use 0 to disable.")
-    min_admin_solved_count = models.IntegerField(default=1,
-            help_text="Min. required number of admins that solved a task "
-                      "for it to be published.")
+    fixed_task_score = models.IntegerField(default=0, help_text="Use 0 to disable.")
+    min_admin_solved_count = models.IntegerField(
+        default=1,
+        help_text="Min. required number of admins that solved a task "
+        "for it to be published.",
+    )
     team_categories = models.CharField(
-            blank=True, max_length=255,
-            help_text="Format is {\"lang\": {\"ID1\": \"name1\", ...}, ...}, "
-                      "old format is \"ID1:name1 | ID2:name2 | ... \", " \
-                      "where ID is a number. " \
-                      "Last category is considered the default.")
+        blank=True,
+        max_length=255,
+        help_text="Format is {\"lang\": {\"ID1\": \"name1\", ...}, ...}, "
+        "old format is \"ID1:name1 | ID2:name2 | ... \", "
+        "where ID is a number. "
+        "Last category is considered the default.",
+    )
     task_categories_trans = models.CharField(
-            blank=False, default='', max_length=255,
-            help_text="Deprecated! Translations of task category names. " \
-                      "E.g. {\"en\": {\"Geometrija\": \"Geometry\"}}. " \
-                      "If a translation is not available, the original name is used.")
+        blank=False,
+        default='',
+        max_length=255,
+        help_text="Deprecated! Translations of task category names. "
+        "E.g. {\"en\": {\"Geometrija\": \"Geometry\"}}. "
+        "If a translation is not available, the original name is used.",
+    )
     show_solutions = models.BooleanField(
-            default=False,
-            help_text="Show solutions after the competition ends.")
+        default=False, help_text="Show solutions after the competition ends."
+    )
     public_scoreboard = models.BooleanField(
-            default=True,
-            help_text="Show scoreboard (for competitions) or the "
-                      "participants list (for courses) publicly?")
+        default=True,
+        help_text="Show scoreboard (for competitions) or the "
+        "participants list (for courses) publicly?",
+    )
 
     posts = PostGenericRelation(placeholder=ugettext_lazy("Message"))
 
@@ -93,8 +101,9 @@ class Competition(BasePermissionsModel):
         competitions) or the participants list (for courses), with proper
         translation and URL."""
         title = _("Participants") if self.is_course else _("Scoreboard")
-        return mark_safe(u'<a href="{}/">{}</a>'.format(
-                self.get_scoreboard_url(), xss.escape(title)))
+        return mark_safe(
+            u'<a href="{}/">{}</a>'.format(self.get_scoreboard_url(), xss.escape(title))
+        )
 
     def get_scoreboard_url(self):
         """Return the URL for either the scoreboard (for competitions) or the
@@ -192,16 +201,19 @@ class Team(models.Model):
         return ''
 
     def get_link(self):
-        return mark_safe(u'<a href="{}" class="{}">{}</a>'.format(
-                self.get_absolute_url(), self.get_type_css_class(),
-                xss.escape(self.name)))
+        return mark_safe(
+            u'<a href="{}" class="{}">{}</a>'.format(
+                self.get_absolute_url(),
+                self.get_type_css_class(),
+                xss.escape(self.name),
+            )
+        )
 
     def get_send_notification_link(self):
         url = '{}notifications/admin/?team={}#post'.format(
-                self.competition.get_absolute_url(), self.id)
-        return mark_safe(
-                u'<a href="{}"><i class="icon-envelope"></i></a>'.format(url))
-
+            self.competition.get_absolute_url(), self.id
+        )
+        return mark_safe(u'<a href="{}"><i class="icon-envelope"></i></a>'.format(url))
 
 
 class TeamMember(models.Model):
@@ -217,7 +229,6 @@ class TeamMember(models.Model):
 
     def __unicode__(self):
         return self.team.name + '::' + self.member_name
-
 
 
 class Chain(models.Model):
@@ -238,10 +249,10 @@ class Chain(models.Model):
     # consider adding a new model Category. So far this suffices.
     category = models.CharField(blank=True, db_index=True, max_length=200)
     bonus_score = models.IntegerField(default=1)
-    position = models.IntegerField(default=0,
-            help_text=gray_help_text(ugettext_lazy("Position in the category.")))
-    unlock_mode = models.SmallIntegerField(
-            choices=UNLOCK_MODES, default=UNLOCK_GRADUAL)
+    position = models.IntegerField(
+        default=0, help_text=gray_help_text(ugettext_lazy("Position in the category."))
+    )
+    unlock_mode = models.SmallIntegerField(choices=UNLOCK_MODES, default=UNLOCK_GRADUAL)
     cache_ctask_comments_info = models.CharField(blank=True, max_length=255)
     cache_is_verified = models.BooleanField(default=False)
 
@@ -253,13 +264,13 @@ class Chain(models.Model):
 
     @property
     def unlock_days(self):
-        return self.unlock_minutes / (24 * 60.)
-
+        return self.unlock_minutes / (24 * 60.0)
 
 
 class CompetitionTask(models.Model):
     class Meta:
-        unique_together = (('competition', 'task'), )
+        unique_together = (('competition', 'task'),)
+
     competition = models.ForeignKey(Competition)
     task = models.ForeignKey(Task)
     descriptor = models.CharField(max_length=255)
@@ -271,12 +282,13 @@ class CompetitionTask(models.Model):
     cache_admin_solved_count = models.IntegerField(default=0)
 
     cache_new_activities_count = models.IntegerField(
-            default=0,
-            help_text="Number of solutions with an ungraded or unread update.")
+        default=0, help_text="Number of solutions with an ungraded or unread update."
+    )
 
     def __unicode__(self):
         return u"CompetitionTask {} comp={} task={}".format(
-                self.get_name(), self.competition_id, self.task_id)
+            self.get_name(), self.competition_id, self.task_id
+        )
 
     def get_name(self):
         if self.competition.use_custom_ctask_names():
@@ -284,7 +296,7 @@ class CompetitionTask(models.Model):
         elif self.chain_id:
             return u"{} #{}".format(self.chain.name, self.chain_position)
         else:
-            return u"(No chain) id={}".format(self.id);
+            return u"(No chain) id={}".format(self.id)
 
     def get_absolute_url(self):
         return self.competition.get_absolute_url() + 'task/{}/'.format(self.id)
@@ -293,12 +305,16 @@ class CompetitionTask(models.Model):
         return self.get_absolute_url() + 'edit/'
 
     def get_send_clarification_request_url(self):
-        return self.competition.get_absolute_url() + \
-                'notifications/{}/#post'.format(self.id)
+        return self.competition.get_absolute_url() + 'notifications/{}/#post'.format(
+            self.id
+        )
 
     def get_link(self):
-        return mark_safe(u'<a href="{}">{}</a>'.format(
-                self.get_absolute_url(), xss.escape(self.get_name())))
+        return mark_safe(
+            u'<a href="{}">{}</a>'.format(
+                self.get_absolute_url(), xss.escape(self.get_name())
+            )
+        )
 
     def is_automatically_graded(self):
         return self.descriptor != settings.COMPETITION_MANUAL_GRADING_TAG
@@ -312,9 +328,9 @@ class CompetitionTask(models.Model):
 
         The local value of `self.cache_new_activities_count` is updated as well,
         but non-atomically and may mismatch the final database value."""
-        CompetitionTask.objects.filter(id=self.id) \
-                .update(cache_new_activities_count=
-                        F('cache_new_activities_count') + delta)
+        CompetitionTask.objects.filter(id=self.id).update(
+            cache_new_activities_count=F('cache_new_activities_count') + delta
+        )
         self.cache_new_activities_count += delta
 
 
@@ -335,9 +351,11 @@ class Submission(models.Model):
     # "Mark as read" or by grading the solution. The admin activity is reset
     # immediately when viewed.
     oldest_unseen_admin_activity = models.DateTimeField(
-            default=NO_UNSEEN_ACTIVITIES_DATETIME)
+        default=NO_UNSEEN_ACTIVITIES_DATETIME
+    )
     oldest_unseen_team_activity = models.DateTimeField(
-            default=NO_UNSEEN_ACTIVITIES_DATETIME)
+        default=NO_UNSEEN_ACTIVITIES_DATETIME
+    )
 
     posts = PostGenericRelation(placeholder=ugettext_lazy("Message"))
 
@@ -352,7 +370,8 @@ class Submission(models.Model):
 
     def get_admin_url(self):
         return '{}submission/{}/'.format(
-                self.ctask.competition.get_absolute_url(), self.id)
+            self.ctask.competition.get_absolute_url(), self.id
+        )
 
     def get_tr_class(self):
         """Get <tr>...</tr> class in admin submissions list."""
@@ -371,14 +390,15 @@ class Submission(models.Model):
     def has_new_team_activities(self):
         # Note: update refresh_ctask_cache_new_activities_count if this logic
         # is being updated.
-        return self.oldest_unseen_team_activity \
-                != self.NO_UNSEEN_ACTIVITIES_DATETIME
+        return self.oldest_unseen_team_activity != self.NO_UNSEEN_ACTIVITIES_DATETIME
 
     def mark_unseen_admin_activity(self):
         """Update oldest_unseen_admin_activity if is not already set. Return
         whether the field was updated. Does not save."""
-        if self.oldest_unseen_admin_activity \
-                == Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
+        if (
+            self.oldest_unseen_admin_activity
+            == Submission.NO_UNSEEN_ACTIVITIES_DATETIME
+        ):
             self.oldest_unseen_admin_activity = datetime.now()
             return True
         else:
@@ -389,8 +409,7 @@ class Submission(models.Model):
         Update the competition task's activity counter accordingly.
         Return whether the field was updated. Does not save the submission,
         does update the competition task."""
-        if self.oldest_unseen_team_activity \
-                == Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
+        if self.oldest_unseen_team_activity == Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
             self.oldest_unseen_team_activity = datetime.now()
             self.ctask.update_cache_new_activities_count(+1)
             return True
@@ -403,9 +422,7 @@ class Submission(models.Model):
         Does not save the submission, does update the competition task."""
         if self.has_new_team_activities():
             self.ctask.update_cache_new_activities_count(-1)
-            self.oldest_unseen_team_activity = \
-                    Submission.NO_UNSEEN_ACTIVITIES_DATETIME
+            self.oldest_unseen_team_activity = Submission.NO_UNSEEN_ACTIVITIES_DATETIME
 
     def __unicode__(self):
-        return "ctask={} team={} {}".format(
-                self.ctask_id, self.team_id, self.date)
+        return "ctask={} team={} {}".format(self.ctask_id, self.team_id, self.date)

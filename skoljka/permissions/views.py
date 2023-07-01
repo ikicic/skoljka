@@ -1,21 +1,23 @@
 from django import forms
-from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError
 from django.db.models import Q
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 
 from skoljka.folder.decorators import folder_view  # Model-specific.
+from skoljka.permissions.constants import EDIT_PERMISSIONS, PERMISSIONS, VIEW
+from skoljka.permissions.models import (
+    ObjectPermission,
+    convert_permission_names_to_values,
+    has_group_perm,
+)
+from skoljka.permissions.signals import objectpermissions_changed
 from skoljka.usergroup.forms import GroupEntryForm
 from skoljka.utils.decorators import response
-
-from skoljka.permissions.constants import VIEW, EDIT_PERMISSIONS, PERMISSIONS
-from skoljka.permissions.models import ObjectPermission, has_group_perm, \
-    convert_permission_names_to_values
-from skoljka.permissions.signals import objectpermissions_changed
 
 
 @login_required
@@ -62,8 +64,9 @@ def _edit(request, data, id, object, type_id, content_type):
     permission_types = convert_permission_names_to_values(object_permissions)
 
     # Get the (name, value) pairs in the specific order.
-    applicable_permissions = [(name, value)
-        for name, value in PERMISSIONS if value in permission_types]
+    applicable_permissions = [
+        (name, value) for name, value in PERMISSIONS if value in permission_types
+    ]
 
     selected_types = [VIEW]
     form = None
@@ -79,41 +82,55 @@ def _edit(request, data, id, object, type_id, content_type):
                 except Group.DoesNotExist:
                     return 403
 
-                to_delete = ObjectPermission.objects.filter(object_id=id,
-                    content_type_id=type_id, group_id=group_id)
-                if content_type.app_label == 'auth' \
-                        and content_type.model == 'group' \
-                        and id == group_id:
+                to_delete = ObjectPermission.objects.filter(
+                    object_id=id, content_type_id=type_id, group_id=group_id
+                )
+                if (
+                    content_type.app_label == 'auth'
+                    and content_type.model == 'group'
+                    and id == group_id
+                ):
                     # Don't delete group's permission to view itself.
                     to_delete = to_delete.exclude(permission_type=VIEW)
                 to_delete.delete()
 
-                objectpermissions_changed.send(sender=model, instance=object,
-                    content_type=content_type)
+                objectpermissions_changed.send(
+                    sender=model, instance=object, content_type=content_type
+                )
         else:
             form = GroupEntryForm(request.POST, user=request.user)
             if form.is_valid():
                 groups = form.cleaned_data['list']
-                selected_types = [x[1] for x in applicable_permissions
-                    if ('perm-%d' % x[1]) in request.POST]
+                selected_types = [
+                    x[1]
+                    for x in applicable_permissions
+                    if ('perm-%d' % x[1]) in request.POST
+                ]
 
                 # delete all old selected permission for given groups
                 # (make sure there will be no duplicates...)
                 ObjectPermission.objects.filter(
-                    content_type_id=type_id, object_id=id,
-                    permission_type__in=selected_types, group__in=groups).delete()
+                    content_type_id=type_id,
+                    object_id=id,
+                    permission_type__in=selected_types,
+                    group__in=groups,
+                ).delete()
 
                 # add them back
                 perm = []
                 for x in selected_types:
                     for y in groups:
-                        perm.append(ObjectPermission(content_object=object,
-                            permission_type=x, group=y))
+                        perm.append(
+                            ObjectPermission(
+                                content_object=object, permission_type=x, group=y
+                            )
+                        )
 
                 ObjectPermission.objects.bulk_create(perm)
 
-                objectpermissions_changed.send(sender=model, instance=object,
-                    content_type=content_type)
+                objectpermissions_changed.send(
+                    sender=model, instance=object, content_type=content_type
+                )
 
                 message = _("Changes saved.")
 
@@ -132,13 +149,15 @@ def _edit(request, data, id, object, type_id, content_type):
             groups[group.id] = group
             groups[group.id]._cache_permissions = [perm.permission_type]
 
-    data.update({
-        'object': object,
-        'form': form,
-        'message': message,
-        'groups': groups.itervalues(),
-        'applicable_permissions': applicable_permissions,
-        'selected_types': selected_types,
-    })
+    data.update(
+        {
+            'object': object,
+            'form': form,
+            'message': message,
+            'groups': groups.itervalues(),
+            'applicable_permissions': applicable_permissions,
+            'selected_types': selected_types,
+        }
+    )
 
     return data

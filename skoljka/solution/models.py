@@ -1,6 +1,6 @@
-﻿from django.db import models
+﻿from django.contrib.auth.models import User
+from django.db import models
 from django.db.models import Q
-from django.contrib.auth.models import User
 from django.utils.html import mark_safe
 
 from skoljka.activity.constants import SOLUTION_RATE
@@ -12,10 +12,10 @@ from skoljka.task.models import Task
 from skoljka.utils.decorators import autoconnect
 from skoljka.utils.models import ModelEx
 
-
 # TODO: nekako drugacije ovo nazvati
 # 0 = unrated, 1 = incorrect, 2 = correct... tehnical details...
-SOLUTION_CORRECT_SCORE = 1.6 # 'incorrect' has preference over 'correct'
+SOLUTION_CORRECT_SCORE = 1.6  # 'incorrect' has preference over 'correct'
+
 
 class SolutionStatus:
     BLANK = 0
@@ -42,30 +42,46 @@ class SolutionDetailedStatus:
     SUBMITTED_INCORRECT = 4
     SUBMITTED_CORRECT = 5
 
-SOLUTION_DETAILED_STATUS_MAX = 5    # Max value
+
+SOLUTION_DETAILED_STATUS_MAX = 5  # Max value
 
 # Each element of HTML_INFO is dict with keys from _HTML_INFO_KEYS and values
 # from _HTML_INFO
 #                                               task label, solution tr
 _HTML_INFO_KEYS = ('label_class', 'label_text', 'tr_class', 'sol_rgb')
 _HTML_INFO = {
-    SolutionDetailedStatus.BLANK:
-        ('', '', '', None),
-    SolutionDetailedStatus.AS_SOLVED:
-        ('label-success', u'Riješeno', 'task-as-solved', (170, 255, 170)),
-    SolutionDetailedStatus.TODO:
-        ('label-warning', u'To Do', 'task-todo', None),
-    SolutionDetailedStatus.SUBMITTED_NOT_RATED:
-        ('label-info', u'Poslano', 'task-submitted-not-rated', (255, 219, 76)),
-    SolutionDetailedStatus.SUBMITTED_INCORRECT:
-        ('label-important', u'Netočno', 'task-wrong', (255, 150, 150)),
-    SolutionDetailedStatus.SUBMITTED_CORRECT:
-        ('label-success', u'Točno', 'task-correct', (112, 255, 112)),
+    SolutionDetailedStatus.BLANK: ('', '', '', None),
+    SolutionDetailedStatus.AS_SOLVED: (
+        'label-success',
+        u'Riješeno',
+        'task-as-solved',
+        (170, 255, 170),
+    ),
+    SolutionDetailedStatus.TODO: ('label-warning', u'To Do', 'task-todo', None),
+    SolutionDetailedStatus.SUBMITTED_NOT_RATED: (
+        'label-info',
+        u'Poslano',
+        'task-submitted-not-rated',
+        (255, 219, 76),
+    ),
+    SolutionDetailedStatus.SUBMITTED_INCORRECT: (
+        'label-important',
+        u'Netočno',
+        'task-wrong',
+        (255, 150, 150),
+    ),
+    SolutionDetailedStatus.SUBMITTED_CORRECT: (
+        'label-success',
+        u'Točno',
+        'task-correct',
+        (112, 255, 112),
+    ),
 }
 
 # status number -> dict(info_key -> value)
-HTML_INFO = {key: dict(zip(_HTML_INFO_KEYS, value))
-    for key, value in _HTML_INFO.iteritems()}
+HTML_INFO = {
+    key: dict(zip(_HTML_INFO_KEYS, value)) for key, value in _HTML_INFO.iteritems()
+}
 
 
 def _update_solved_count(delta, task, profile, save_task=True, save_profile=True):
@@ -86,20 +102,20 @@ def _update_solved_count(delta, task, profile, save_task=True, save_profile=True
     if save_profile:
         profile.save()
 
+
 def _solution_on_update(solution, field_name, old_value, new_value):
     """
     Updates statistics (number of correct solution for Task and UserProfile)
     in the case solution correctness is changed.
     """
     if solution.status != SolutionStatus.SUBMITTED:
-        return # not interesting
+        return  # not interesting
 
     old = old_value >= SOLUTION_CORRECT_SCORE
     new = new_value >= SOLUTION_CORRECT_SCORE
 
     if old != new:
-        _update_solved_count(new - old, solution.task,
-            solution.author.get_profile())
+        _update_solved_count(new - old, solution.task, solution.author.get_profile())
 
 
 SOLUTION_RATING_ATTRS = {
@@ -108,6 +124,7 @@ SOLUTION_RATING_ATTRS = {
     'action_type': SOLUTION_RATE,
     'on_update': _solution_on_update,
 }
+
 
 class SolutionManager(models.Manager):
     def filter_visible_tasks_for_user(self, user):
@@ -118,12 +135,16 @@ class SolutionManager(models.Manager):
         if user is not None and user.is_authenticated():
             user_group_ids = user.get_profile().get_group_ids()
             return self.filter(
-                Q(task__objpermissions__group_id__in=user_group_ids,
-                    task__objpermissions__permission_type=VIEW)    \
-                | Q(task__author_id=user.id)    \
-                | Q(task__hidden=False)).distinct()
+                Q(
+                    task__objpermissions__group_id__in=user_group_ids,
+                    task__objpermissions__permission_type=VIEW,
+                )
+                | Q(task__author_id=user.id)
+                | Q(task__hidden=False)
+            ).distinct()
         else:
             return self.filter(task__hidden=False)
+
 
 @autoconnect
 class Solution(ModelEx):
@@ -138,8 +159,9 @@ class Solution(ModelEx):
 
     # More like a cached value. Note that this value is automatically refreshed
     # in pre_save, not before that.
-    detailed_status = models.IntegerField(default=SolutionDetailedStatus.BLANK,
-        db_index=True)
+    detailed_status = models.IntegerField(
+        default=SolutionDetailedStatus.BLANK, db_index=True
+    )
 
     is_official = models.BooleanField()
     correctness = RatingField(**SOLUTION_RATING_ATTRS)
@@ -148,7 +170,7 @@ class Solution(ModelEx):
     objects = SolutionManager()
 
     class Meta:
-        unique_together=(('task', 'author'),)
+        unique_together = (('task', 'author'),)
         # TODO: Django 1.5. In the meantime list here all multi-indices.
         # index_together = (('detailed_status', 'date_created'), )
 
@@ -207,8 +229,7 @@ class Solution(ModelEx):
         # if user's solution not given, search for it
         if users_solution is 0:
             try:
-                users_solution = Solution.objects.get(author=user,
-                    task_id=self.task_id)
+                users_solution = Solution.objects.get(author=user, task_id=self.task_id)
             except Solution.DoesNotExist:
                 return None
         return users_solution
@@ -251,7 +272,7 @@ class Solution(ModelEx):
             return task_settings == Task.SOLUTIONS_VISIBLE, True
 
         if self.author_id == user.id:
-            return True, False # always show my own solutions
+            return True, False  # always show my own solutions
 
         # This value must be already determined! Throw except if not.
         if not self.task.cache_prerequisites_met:
@@ -269,11 +290,11 @@ class Solution(ModelEx):
             # preloaded anyway.
             if not can_view:
                 if task_settings == Task.SOLUTIONS_NOT_VISIBLE:
-                    return False, True      # bye
+                    return False, True  # bye
                 elif task_settings == Task.SOLUTIONS_VISIBLE_IF_ACCEPTED:
                     users_solution = self._get_user_solution(user, users_solution)
                     if not users_solution or not users_solution.is_correct():
-                        return False, True     # can't view solution, bye
+                        return False, True  # can't view solution, bye
                     # Otherwise, fine, can_view is actually True
 
         # Ok, now the user definitely has the right to view the solution.
@@ -281,7 +302,8 @@ class Solution(ModelEx):
 
         profile = user.get_profile()
         if not profile.check_solution_obfuscation_preference(
-                self.task.difficulty_rating_avg):
+            self.task.difficulty_rating_avg
+        ):
             # User is fine with seeing the solution.
             return True, False
 
@@ -295,6 +317,7 @@ class Solution(ModelEx):
 
 # nuzno(?) da bi queryji koristili JOIN, a ne subqueryje
 # TODO: neki prikladniji naziv za related_name
-User.add_to_class('solutions',
-        models.ManyToManyField(Task, through=Solution,
-            related_name='solutions_by'))
+User.add_to_class(
+    'solutions',
+    models.ManyToManyField(Task, through=Solution, related_name='solutions_by'),
+)

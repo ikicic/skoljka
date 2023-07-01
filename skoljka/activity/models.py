@@ -1,13 +1,12 @@
-﻿from django.db import models
-from django.contrib.auth.models import User, Group
+﻿from django.contrib.auth.models import Group, User
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
+from django.db import models
 from django.utils.safestring import mark_safe
 
+from skoljka.activity.constants import *
 from skoljka.rating.templatetags.rating_tags import rating_display_bool
 from skoljka.userprofile.templatetags.userprofile_tags import userlink
-
-from skoljka.activity.constants import *
 
 # TODO: napraviti neki shortcut za ttype = (A.type, A.subtype)
 
@@ -25,17 +24,29 @@ class Action(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, db_index=True)
 
     # Group can also act like user.
-    group = models.ForeignKey(Group, db_index=True, blank=True, null=True,
-        related_name='activities', help_text='To whom it may concern.')
+    group = models.ForeignKey(
+        Group,
+        db_index=True,
+        blank=True,
+        null=True,
+        related_name='activities',
+        help_text='To whom it may concern.',
+    )
 
-    target_content_type = models.ForeignKey(ContentType, blank=True, related_name='target')
+    target_content_type = models.ForeignKey(
+        ContentType, blank=True, related_name='target'
+    )
     target_id = models.IntegerField(blank=True)
     target = generic.GenericForeignKey('target_content_type', 'target_id')
     target_cache = models.CharField(max_length=250, blank=True)
 
-    action_object_content_type = models.ForeignKey(ContentType, blank=True, related_name='action_object')
+    action_object_content_type = models.ForeignKey(
+        ContentType, blank=True, related_name='action_object'
+    )
     action_object_id = models.IntegerField(blank=True)
-    action_object = generic.GenericForeignKey('action_object_content_type', 'action_object_id')
+    action_object = generic.GenericForeignKey(
+        'action_object_content_type', 'action_object_id'
+    )
     action_object_cache = models.CharField(max_length=250, blank=True)
 
     @property
@@ -52,19 +63,36 @@ class Action(models.Model):
             model = self.target_content_type.model
         if text is None:
             text = self.target_cache
-        return u'<a href="/%s/%d/%s">%s</a>' % (model, self.target_id, unicode(url_extra), text)
+        return u'<a href="/%s/%d/%s">%s</a>' % (
+            model,
+            self.target_id,
+            unicode(url_extra),
+            text,
+        )
 
     def U(self):
-        return u'<a href="/userprofile/%d/">%s</a>' % (self.actor_id, self.actor.get_full_name())
+        return u'<a href="/userprofile/%d/">%s</a>' % (
+            self.actor_id,
+            self.actor.get_full_name(),
+        )
 
     def get_content(self):
         S = ''
         ttype = (self.type, self.subtype)
-        if ttype in [TASK_ADD, FILE_ADD, SOLUTION_SUBMIT, SOLUTION_AS_SOLVED,
-                SOLUTION_TODO, SOLUTION_AS_OFFICIAL]:
+        if ttype in [
+            TASK_ADD,
+            FILE_ADD,
+            SOLUTION_SUBMIT,
+            SOLUTION_AS_SOLVED,
+            SOLUTION_TODO,
+            SOLUTION_AS_OFFICIAL,
+        ]:
             S = self.T('task')
         if ttype == POST_SEND:
-            S = self.T(url_extra='#post%d' % self.action_object_id, text=self.action_object_cache)
+            S = self.T(
+                url_extra='#post%d' % self.action_object_id,
+                text=self.action_object_cache,
+            )
         return mark_safe(S)
 
     def get_label(self):
@@ -74,7 +102,8 @@ class Action(models.Model):
 
     def t_right_div_html(self):
         if (self.type, self.subtype) == SOLUTION_RATE:
-            from skoljka.solution.models import Solution, SOLUTION_CORRECT_SCORE
+            from skoljka.solution.models import SOLUTION_CORRECT_SCORE, Solution
+
             if int(self.action_object_cache) == 1:
                 S = '<br><img src="/static/images/cross_circle.png">'
             else:
@@ -89,8 +118,7 @@ class Action(models.Model):
                 return ''
             S = '<span class="label %s">%s</span>' % label
 
-        return  mark_safe('<div style="float:right;">%s</div>' % S)
-
+        return mark_safe('<div style="float:right;">%s</div>' % S)
 
     def get_message(self):
         return getattr(self, '_message', u'')

@@ -2,10 +2,10 @@
 
 from django import forms
 
-from skoljka.utils.decorators import ajax, response
-
 from skoljka.task.bulk_format import BulkFormatError, parse_bulk
 from skoljka.task.forms import check_prerequisites
+from skoljka.utils.decorators import ajax, response
+
 
 @ajax(post=['text'])
 @response('inc_task_bulk_preview_multiple.html')
@@ -25,8 +25,7 @@ def prerequisites(request):
     if task_id:
         task_id = int(task_id)
     try:
-        ids, accessible = check_prerequisites(request.GET['ids'],
-            request.user, task_id)
+        ids, accessible = check_prerequisites(request.GET['ids'], request.user, task_id)
     except forms.ValidationError as e:
         return json.dumps(e.messages[0])
 

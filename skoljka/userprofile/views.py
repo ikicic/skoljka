@@ -4,11 +4,11 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, User
 from django.core.cache import cache
 from django.db.models import Max, Q
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render_to_response
 from django.template import RequestContext
 from django.views.decorators.debug import sensitive_post_parameters
 from registration.views import register as _register
@@ -17,15 +17,17 @@ from skoljka.permissions.constants import VIEW
 from skoljka.recommend.models import UserTagScore
 from skoljka.solution.models import Solution, SolutionStatus
 from skoljka.solution.templatetags.solution_tags import cache_solution_info
-from skoljka.task.models import Task, DIFFICULTY_RATING_ATTRS
+from skoljka.task.models import DIFFICULTY_RATING_ATTRS, Task
 from skoljka.task.utils import check_prerequisites_for_tasks
-from skoljka.utils.decorators import response
-from skoljka.utils.templatetags.utils_tags import email_link
-
-from skoljka.userprofile.forms import UserCreationForm, UserEditForm, UserProfileEditForm
+from skoljka.userprofile.forms import (
+    UserCreationForm,
+    UserEditForm,
+    UserProfileEditForm,
+)
 from skoljka.userprofile.models import UserProfile
 from skoljka.userprofile.registration_backend import Backend
-
+from skoljka.utils.decorators import response
+from skoljka.utils.templatetags.utils_tags import email_link
 
 # Note: In registration, we handle final_url separately from the
 # UserCreationForm.
@@ -48,17 +50,20 @@ def new_register(request):
         success_url = '/accounts/register/complete/?email=' + email
     else:
         success_url = None
-    return _register(request,
-            'skoljka.userprofile.registration_backend.Backend',
-            form_class=UserCreationForm, success_url=success_url,
-            extra_context={'final_url': request.POST.get('final_url', '/')})
+    return _register(
+        request,
+        'skoljka.userprofile.registration_backend.Backend',
+        form_class=UserCreationForm,
+        success_url=success_url,
+        extra_context={'final_url': request.POST.get('final_url', '/')},
+    )
 
 
 @sensitive_post_parameters()
 @response('registration/registration_complete.html')
 def registration_complete(request):
     if request.user.is_authenticated():
-        return ('/', )
+        return ('/',)
     return {
         'contact_link': email_link(settings.REGISTRATION_CONTACT_EMAIL),
         'email': request.GET.get('email', ''),
@@ -77,8 +82,9 @@ def member_list(request):
     Show the list of all members. Hide inactive users, as well as the
     main admin.
     """
-    user_list = User.objects.filter(is_active=1)    \
-                .select_related('profile').order_by('id')
+    user_list = (
+        User.objects.filter(is_active=1).select_related('profile').order_by('id')
+    )
 
     # TODO: do not hardcode the username
     user_list = [user for user in user_list if user.username != 'arhiva']
@@ -102,10 +108,14 @@ def edit(request):
         form1 = UserEditForm(instance=request.user)
         form2 = UserProfileEditForm(instance=profile)
 
-    return render_to_response('profile_edit.html', {
-        'forms': [form1, form2],
-        'success': success,
-    }, context_instance=RequestContext(request))
+    return render_to_response(
+        'profile_edit.html',
+        {
+            'forms': [form1, form2],
+            'success': success,
+        },
+        context_instance=RequestContext(request),
+    )
 
 
 @login_required
@@ -134,24 +144,29 @@ def profile(request, pk):
     if request.user.id == pk:
         visible_groups = user.groups.select_related('data')
     else:
-        where = '((SELECT id FROM auth_user_groups AG2 '            \
-                    'WHERE AG2.group_id = auth_group.id AND AG2.user_id = {} ' \
-                    'LIMIT 1)'                                      \
-                ' IS NOT NULL OR usergroup_usergroup.hidden != 0)'  \
-                .format(user.id)
+        where = (
+            '((SELECT id FROM auth_user_groups AG2 '
+            'WHERE AG2.group_id = auth_group.id AND AG2.user_id = {} '
+            'LIMIT 1)'
+            ' IS NOT NULL OR usergroup_usergroup.hidden != 0)'.format(user.id)
+        )
         visible_groups = user.groups.select_related('data').extra(where=[where])
 
     visible_groups = visible_groups.exclude(id=user.get_profile().private_group_id)
 
-    tags = UserTagScore.objects.filter(user=user).select_related('tag').order_by('-cache_score')[:10]
+    tags = (
+        UserTagScore.objects.filter(user=user)
+        .select_related('tag')
+        .order_by('-cache_score')[:10]
+    )
 
-
-    solutions = solutions.filter(author_id=pk)  \
-        .select_related('task')                 \
-        .order_by('-date_created')
+    solutions = (
+        solutions.filter(author_id=pk).select_related('task').order_by('-date_created')
+    )
     todo = solutions.filter(status=SolutionStatus.TODO)[:10]
     solved = solutions.filter(
-        status__in=[SolutionStatus.AS_SOLVED, SolutionStatus.SUBMITTED])[:10]
+        status__in=[SolutionStatus.AS_SOLVED, SolutionStatus.SUBMITTED]
+    )[:10]
 
     if pk != request.user.pk:
         # TODO: optimize, do not load unnecessary my_solution
@@ -159,22 +174,25 @@ def profile(request, pk):
         cache_solution_info(request.user, solved)
         for x in solved:
             x.t_can_view, dummy = x.check_accessibility(
-                request.user, x._cache_my_solution)
+                request.user, x._cache_my_solution
+            )
 
     task_added = tasks.filter(author_id=pk).order_by('-id')[:10]
 
-    all_tasks = [x.task for x in solved]    \
-        + [x.task for x in todo]            \
-        + list(task_added)
+    all_tasks = [x.task for x in solved] + [x.task for x in todo] + list(task_added)
 
     check_prerequisites_for_tasks(all_tasks, request.user)
 
-    return render_to_response('profile_detail.html', {
-        'profile': user,
-        'distribution': distribution,
-        'visible_groups': visible_groups,
-        'tags': tags,
-        'todo': todo,
-        'task_added': task_added,
-        'solved': solved,
-    }, context_instance=RequestContext(request))
+    return render_to_response(
+        'profile_detail.html',
+        {
+            'profile': user,
+            'distribution': distribution,
+            'visible_groups': visible_groups,
+            'tags': tags,
+            'todo': todo,
+            'task_added': task_added,
+            'solved': solved,
+        },
+        context_instance=RequestContext(request),
+    )

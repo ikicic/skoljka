@@ -1,7 +1,8 @@
 from django.conf import settings
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls.defaults import include, patterns, url
 
 from skoljka.utils.string_operations import join_urls
+
 
 def _make_patterns(*patterns):
     result = []
@@ -17,6 +18,7 @@ def _make_patterns(*patterns):
         result.append(url(regex, view))
 
     return result
+
 
 # Competition-related URLs, prefixed with competition/<id>/
 _patterns = _make_patterns(

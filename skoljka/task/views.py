@@ -11,9 +11,13 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import Min
-from django.http import Http404, HttpResponse, HttpResponseRedirect, \
-        HttpResponseServerError
-from django.shortcuts import render_to_response, get_object_or_404
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponseRedirect,
+    HttpResponseServerError,
+)
+from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from pagination.paginator import InfinitePaginator
@@ -21,41 +25,62 @@ from pagination.paginator import InfinitePaginator
 from skoljka.activity import action as _action
 from skoljka.base.utils import can_edit_featured_lectures
 from skoljka.folder.models import Folder, FolderTask
-from skoljka.folder.utils import invalidate_cache_for_folders, \
-        invalidate_folder_cache_for_task
+from skoljka.folder.utils import (
+    invalidate_cache_for_folders,
+    invalidate_folder_cache_for_task,
+)
 from skoljka.mathcontent.forms import AttachmentForm, MathContentForm
 from skoljka.mathcontent.latex import latex_escape
-from skoljka.mathcontent.models import MathContent, Attachment
-from skoljka.mathcontent.utils import check_and_save_attachment, convert_to_latex, \
-        create_file_thumbnail, ThumbnailRenderingException
-from skoljka.permissions.constants import EDIT, VIEW, EDIT_PERMISSIONS, VIEW_SOLUTIONS
+from skoljka.mathcontent.models import Attachment, MathContent
+from skoljka.mathcontent.utils import (
+    ThumbnailRenderingException,
+    check_and_save_attachment,
+    convert_to_latex,
+    create_file_thumbnail,
+)
+from skoljka.permissions.constants import EDIT, EDIT_PERMISSIONS, VIEW, VIEW_SOLUTIONS
 from skoljka.permissions.models import ObjectPermission
 from skoljka.solution.models import Solution, SolutionStatus
 from skoljka.tags.utils import set_tags, split_tags
+from skoljka.task.forms import (
+    EXPORT_FORMAT_CHOICES,
+    TaskAdvancedForm,
+    TaskBulkTemplateForm,
+    TaskExportForm,
+    TaskFileForm,
+    TaskForm,
+    TaskJSONForm,
+    TaskLectureForm,
+)
+from skoljka.task.models import SimilarTask, Task, TaskBulkTemplate
+from skoljka.task.utils import (
+    check_prerequisites_for_task,
+    check_prerequisites_for_tasks,
+    create_tasks_from_json,
+    get_task_folder_data,
+)
 from skoljka.usergroup.forms import GroupEntryForm
 from skoljka.utils.decorators import response
 from skoljka.utils.string_operations import media_path_to_url
 from skoljka.utils.timeout import run_command
 
-from skoljka.task.models import SimilarTask, Task, TaskBulkTemplate
-from skoljka.task.forms import TaskAdvancedForm, TaskBulkTemplateForm, TaskExportForm, \
-        TaskFileForm, TaskForm, TaskJSONForm, TaskLectureForm, \
-        EXPORT_FORMAT_CHOICES
-from skoljka.task.utils import check_prerequisites_for_task, \
-        check_prerequisites_for_tasks, create_tasks_from_json, \
-        get_task_folder_data
-
 # TODO: promijeniti nacin na koji se Task i MathContent generiraju.
 # vrijednosti koje ne ovise o samom formatu se direktno trebaju
 # postaviti na vrijednosti iz forme.
+
 
 def _sort_tasks(request, tasks):
     """Hacky way to sort tasks before rendering the template, i.e. without the
     autosort tag."""
     sort = request.GET.get('sort', 'id')
     # The list here depends on inc_task_list.html and inc_task_list_table.html.
-    if sort not in ('id', 'name', 'solved_count',
-                    'quality_rating_avg', 'difficulty_rating_avg'):
+    if sort not in (
+        'id',
+        'name',
+        'solved_count',
+        'quality_rating_avg',
+        'difficulty_rating_avg',
+    ):
         sort = 'id'
     if request.GET.get('direction', 'asc') == 'desc':
         sort = '-' + sort
@@ -100,8 +125,7 @@ def bulk_new(request, template_id=None):
     if request.method == 'POST':
         if 'step' not in request.POST:
             return 400
-        form = TaskBulkTemplateForm(request.POST, instance=template,
-                user=request.user)
+        form = TaskBulkTemplateForm(request.POST, instance=template, user=request.user)
         if form.is_valid():
             step = request.POST['step']
             jsons = [x.json for x in form.task_infos]
@@ -119,20 +143,27 @@ def bulk_new(request, template_id=None):
                     # return ('/task/new/bulk/success/?total=' + str(total), )
             if step == 'second' and jsons:
                 json_dump = json.dumps(jsons, indent=2, sort_keys=True)
-                return ('task_bulk_new_2nd.html', {
-                    'form': form,
-                    'task_infos': form.task_infos,
-                    'json_dump': json_dump,
-                })
+                return (
+                    'task_bulk_new_2nd.html',
+                    {
+                        'form': form,
+                        'task_infos': form.task_infos,
+                        'json_dump': json_dump,
+                    },
+                )
     else:
         form = TaskBulkTemplateForm(instance=template, user=request.user)
 
-    history = list(TaskBulkTemplate.objects.for_user(request.user, VIEW) \
-            .order_by('id').distinct())
-    history = [{
+    history = list(
+        TaskBulkTemplate.objects.for_user(request.user, VIEW).order_by('id').distinct()
+    )
+    history = [
+        {
             'title': u"{} ({})".format(x.name, x.last_edit_date),
             'content': x.source_code,
-        } for x in history]
+        }
+        for x in history
+    ]
 
     return {
         'error': error,
@@ -154,8 +185,8 @@ def new_lecture(request):
 @response('task_new.html')
 def new(request, task_id=None, is_file=None, is_lecture=None):
     """
-        New Task and Edit Task
-        + New TaskFile and Edit TaskFile
+    New Task and Edit Task
+    + New TaskFile and Edit TaskFile
     """
     content_type = ContentType.objects.get_for_model(Task)
 
@@ -176,9 +207,10 @@ def new(request, task_id=None, is_file=None, is_lecture=None):
     # Make sure each lecture is a file.
     assert is_lecture and is_file or not is_lecture
 
-    form_class = TaskLectureForm if is_lecture \
-            else (TaskFileForm if is_file else TaskForm)
-    math_content_label = 'Opis' if is_file else None    # else default
+    form_class = (
+        TaskLectureForm if is_lecture else (TaskFileForm if is_file else TaskForm)
+    )
+    math_content_label = 'Opis' if is_file else None  # else default
 
     if request.method == 'POST':
         old_hidden = getattr(task, 'hidden', -1)
@@ -186,13 +218,22 @@ def new(request, task_id=None, is_file=None, is_lecture=None):
 
         # Files can have blank description (i.e. math content)
         task_form = form_class(request.POST, instance=task, user=request.user)
-        math_content_form = MathContentForm(request.POST, instance=math_content,
-            blank=is_file, label=math_content_label, auto_preview=False)
-        attachment_form = is_file and not edit \
-            and AttachmentForm(request.POST, request.FILES)
+        math_content_form = MathContentForm(
+            request.POST,
+            instance=math_content,
+            blank=is_file,
+            label=math_content_label,
+            auto_preview=False,
+        )
+        attachment_form = (
+            is_file and not edit and AttachmentForm(request.POST, request.FILES)
+        )
 
-        if task_form.is_valid() and math_content_form.is_valid()    \
-                and (not attachment_form or attachment_form.is_valid()):
+        if (
+            task_form.is_valid()
+            and math_content_form.is_valid()
+            and (not attachment_form or attachment_form.is_valid())
+        ):
 
             task = task_form.save(commit=False)
             math_content = math_content_form.save()
@@ -200,13 +241,15 @@ def new(request, task_id=None, is_file=None, is_lecture=None):
             if not edit:
                 if attachment_form:
                     attachment, attachment_form = check_and_save_attachment(
-                        request, math_content)
-                    task.file_attachment = attachment   # This is a file.
+                        request, math_content
+                    )
+                    task.file_attachment = attachment  # This is a file.
                     path = attachment.get_full_path_and_filename()
                     try:
                         thumbnail_path = create_file_thumbnail(path)
-                        task.cache_file_attachment_thumbnail_url = \
-                                media_path_to_url(thumbnail_path)
+                        task.cache_file_attachment_thumbnail_url = media_path_to_url(
+                            thumbnail_path
+                        )
                     except ThumbnailRenderingException:
                         pass
 
@@ -214,7 +257,7 @@ def new(request, task_id=None, is_file=None, is_lecture=None):
                     # access Attachment table to show the link.
                     task.cache_file_attachment_url = attachment.get_url()
                 else:
-                    task.file_attachment = None         # This is a task.
+                    task.file_attachment = None  # This is a task.
 
             if is_file:
                 task.cache_file_attachment_url = task.file_attachment.get_url()
@@ -227,26 +270,31 @@ def new(request, task_id=None, is_file=None, is_lecture=None):
             set_tags(task, task_form.cleaned_data['tags'])
 
             # TODO: signals!
-            if not edit or old_hidden != task.hidden    \
-                    or old_solvable != task.solvable:   \
+            if not edit or old_hidden != task.hidden or old_solvable != task.solvable:
                 invalidate_folder_cache_for_task(task)
 
             # send action if creating a new nonhidden task
             if not edit:
                 # TODO: signals!
-                type = _action.LECTURE_ADD if is_lecture \
-                        else (_action.FILE_ADD if is_file else _action.TASK_ADD)
+                type = (
+                    _action.LECTURE_ADD
+                    if is_lecture
+                    else (_action.FILE_ADD if is_file else _action.TASK_ADD)
+                )
 
-                _action.add(request.user, type,
-                    action_object=task, target=task)
+                _action.add(request.user, type, action_object=task, target=task)
 
             # TODO: izbrisati task_new_finish.html i url
-            #return HttpResponseRedirect('/task/%d/' % task.id if edit else '/task/new/finish/')
+            # return HttpResponseRedirect('/task/%d/' % task.id if edit else '/task/new/finish/')
             return HttpResponseRedirect(task.get_absolute_url())
     else:
         task_form = form_class(instance=task)
-        math_content_form = MathContentForm(instance=math_content,
-            blank=is_file, label=math_content_label, auto_preview=False)
+        math_content_form = MathContentForm(
+            instance=math_content,
+            blank=is_file,
+            label=math_content_label,
+            auto_preview=False,
+        )
         attachment_form = is_file and not edit and AttachmentForm()
 
     forms = [task_form, math_content_form]
@@ -255,27 +303,30 @@ def new(request, task_id=None, is_file=None, is_lecture=None):
 
     data = get_task_folder_data(task, request.user) if task else {}
 
-    data.update({
-        'action_url': request.path,
-        'bulk_add_url': '/task/new/bulk/',
-        'can_edit_permissions': EDIT_PERMISSIONS in perm,
-        'content_type': content_type,
-        'edit': edit,
-        'forms': forms,
-        'is_file': is_file,
-        'is_lecture': is_lecture,
-        'lectures_folder_url': settings.LECTURES_FOLDER_URL,
-        'task_name': task.name if task else None,  # Convenience.
-        'task': task,
-    })
+    data.update(
+        {
+            'action_url': request.path,
+            'bulk_add_url': '/task/new/bulk/',
+            'can_edit_permissions': EDIT_PERMISSIONS in perm,
+            'content_type': content_type,
+            'edit': edit,
+            'forms': forms,
+            'is_file': is_file,
+            'is_lecture': is_lecture,
+            'lectures_folder_url': settings.LECTURES_FOLDER_URL,
+            'task_name': task.name if task else None,  # Convenience.
+            'task': task,
+        }
+    )
 
     return data
 
 
 @response('task_lectures_list.html')
 def lectures_list(request):
-    lectures = Task.objects.for_user(request.user, VIEW) \
-            .filter(is_lecture=True).distinct()
+    lectures = (
+        Task.objects.for_user(request.user, VIEW).filter(is_lecture=True).distinct()
+    )
     return {'lectures': lectures}
 
 
@@ -315,8 +366,7 @@ def detail(request, id):
 
     # Remember my solution.
     try:
-        solution = Solution.objects.get(
-                author_id=request.user.id, task_id=task.id)
+        solution = Solution.objects.get(author_id=request.user.id, task_id=task.id)
     except:
         solution = None
     task.cache_solution = solution
@@ -328,12 +378,16 @@ def detail(request, id):
     }
 
     featured_folder_id = getattr(settings, 'FEATURED_LECTURES_FOLDER_ID', None)
-    if task.is_lecture and featured_folder_id and \
-            can_edit_featured_lectures(request.user):
+    if (
+        task.is_lecture
+        and featured_folder_id
+        and can_edit_featured_lectures(request.user)
+    ):
         # The case where task is hidden is handled in the template.
         data['can_select_as_featured'] = True
-        data['is_featured'] = FolderTask.objects \
-                .filter(folder_id=featured_folder_id, task_id=id).exists()
+        data['is_featured'] = FolderTask.objects.filter(
+            folder_id=featured_folder_id, task_id=id
+        ).exists()
 
     folder_data = get_task_folder_data(task, request.user)
     if folder_data:
@@ -341,32 +395,42 @@ def detail(request, id):
 
     return data
 
+
 @response('task_similar.html')
 def similar(request, task_id):
     # SPEED: read main task together with the rest
     task = get_object_or_404(Task, pk=task_id)
 
-    sorted_tasks = dict(SimilarTask.objects \
-            .filter(task_id=task_id)[:50].values_list('similar_id', 'score'))
+    sorted_tasks = dict(
+        SimilarTask.objects.filter(task_id=task_id)[:50].values_list(
+            'similar_id', 'score'
+        )
+    )
 
     if request.user.is_authenticated():
-        solutions = Solution.objects \
-                .filter(task__similar_backward=task, author=request.user) \
-                .exclude(status=SolutionStatus.BLANK) \
-                .only('status', 'correctness_avg', 'task')
+        solutions = (
+            Solution.objects.filter(task__similar_backward=task, author=request.user)
+            .exclude(status=SolutionStatus.BLANK)
+            .only('status', 'correctness_avg', 'task')
+        )
         for s in solutions:
             p = 1.0
-            if s.is_todo(): p = 0.5
-            elif s.is_as_solved(): p = 0.3
-            elif s.is_submitted() and s.is_correct(): p = 0.2
+            if s.is_todo():
+                p = 0.5
+            elif s.is_as_solved():
+                p = 0.3
+            elif s.is_submitted() and s.is_correct():
+                p = 0.2
 
             sorted_tasks[s.task_id] *= p
 
-    sorted_tasks = sorted(
-            [(p, id) for id, p in sorted_tasks.iteritems()], reverse=True)
+    sorted_tasks = sorted([(p, id) for id, p in sorted_tasks.iteritems()], reverse=True)
     similar_ids = [id for p, id in sorted_tasks[:6]]
-    similar = Task.objects.for_user(request.user, VIEW) \
-            .filter(id__in=similar_ids).select_related('content')
+    similar = (
+        Task.objects.for_user(request.user, VIEW)
+        .filter(id__in=similar_ids)
+        .select_related('content')
+    )
     similar = _sort_tasks(request, similar)
     similar = list(similar)
 
@@ -378,14 +442,15 @@ def similar(request, task_id):
         'view_type': 'similar_task_view_type',
     }
 
+
 # final filename is 'attachments/task_id/attachment index/filename.ext'
 ZIP_ATTACHMENT_DIR = 'attachments'
+
 
 class _ConvertException(Exception):
     def __init__(self, invalid_tasks, *args, **kwargs):
         super(_ConvertException, self).__init__(*args, **kwargs)
         self.invalid_tasks = invalid_tasks
-
 
 
 def _convert_to_latex(sorted_tasks, ignore_exceptions, **kwargs):
@@ -400,15 +465,18 @@ def _convert_to_latex(sorted_tasks, ignore_exceptions, **kwargs):
         # no / at the end
         attachments_path = is_latex and '{}/{}'.format(ZIP_ATTACHMENT_DIR, x.id)
         try:
-            content = convert_to_latex(x.content.text,
-                    content=x.content, attachments_path=attachments_path)
+            content = convert_to_latex(
+                x.content.text, content=x.content, attachments_path=attachments_path
+            )
         except:
             if not ignore_exceptions:
                 invalid_tasks.append(x)
                 continue
             escaped = latex_escape(x.content.text)
-            content = "CONVERSION ERROR! Original text:\n" \
-                    "\\begin{verbatim}\n%s\n\\end{verbatim}\n" % escaped
+            content = (
+                "CONVERSION ERROR! Original text:\n"
+                "\\begin{verbatim}\n%s\n\\end{verbatim}\n" % escaped
+            )
         data = {
             'title': x.name,
             'url': x.get_absolute_url(),
@@ -423,16 +491,14 @@ def _convert_to_latex(sorted_tasks, ignore_exceptions, **kwargs):
     if invalid_tasks:
         raise _ConvertException(invalid_tasks)
 
-    return render_to_string(
-        'latex_task_export.tex',
-        dict(tasks=tasks, **kwargs)
-    )
+    return render_to_string('latex_task_export.tex', dict(tasks=tasks, **kwargs))
+
 
 def _export(ids, sorted_tasks, tasks, form, ignore_exceptions):
     """
-        Output LaTeX or PDF, permission already checked.
-        It is assumed that Attachments are already saved in tasks[...] as
-        .cache_file_list
+    Output LaTeX or PDF, permission already checked.
+    It is assumed that Attachments are already saved in tasks[...] as
+    .cache_file_list
     """
     format = form.cleaned_data['format']
 
@@ -445,28 +511,26 @@ def _export(ids, sorted_tasks, tasks, form, ignore_exceptions):
     hash = hashlib.md5(repr((ids, form.cleaned_data))).hexdigest()
 
     create_archive = form.cleaned_data['create_archive']
-    filename = os.path.normpath(os.path.join(settings.LOCAL_DIR,
-        'media/export/task' + hash))    # no extension
+    filename = os.path.normpath(
+        os.path.join(settings.LOCAL_DIR, 'media/export/task' + hash)
+    )  # no extension
 
     # check if output already exists
     ext = '.pdf' if format == 'pdf' else '.tex'
-    fext = '.zip' if create_archive else ext         # final ext
+    fext = '.zip' if create_archive else ext  # final ext
 
     # TODO: check if archive exists (currently, it is not trivially possible
     # to check if there were some changes to attachments)
-    if not settings.DEBUG \
-            and not create_archive \
-            and os.path.exists(filename + fext):
-        oldest_file_mtime = \
-                tasks.aggregate(Min('last_edit_date'))['last_edit_date__min']
+    if not settings.DEBUG and not create_archive and os.path.exists(filename + fext):
+        oldest_file_mtime = tasks.aggregate(Min('last_edit_date'))[
+            'last_edit_date__min'
+        ]
         full_path = os.path.getmtime(filename + fext)
         if datetime.datetime.fromtimestamp(full_path) > oldest_file_mtime:
             # already up-to-date
-            return HttpResponseRedirect(
-                    '/media/export/task{}{}'.format(hash, fext))
+            return HttpResponseRedirect('/media/export/task{}{}'.format(hash, fext))
 
-    latex = _convert_to_latex(sorted_tasks, ignore_exceptions,
-            **form.cleaned_data)
+    latex = _convert_to_latex(sorted_tasks, ignore_exceptions, **form.cleaned_data)
 
     # if latex without archive, do not create file, but directly output it
     if format == 'latex' and not create_archive:
@@ -480,29 +544,39 @@ def _export(ids, sorted_tasks, tasks, form, ignore_exceptions):
     f.close()
 
     if format == 'pdf':
-        error = run_command('pdflatex -output-directory=%s -interaction=batchmode %s.tex' \
-            % (os.path.dirname(filename), filename), timeout=10)
+        error = run_command(
+            'pdflatex -output-directory=%s -interaction=batchmode %s.tex'
+            % (os.path.dirname(filename), filename),
+            timeout=10,
+        )
         if error:
-            return HttpResponseServerError('LaTeX generation error! Error code: %d' % error)
+            return HttpResponseServerError(
+                'LaTeX generation error! Error code: %d' % error
+            )
 
         # error = run_command('dvipdfm -o %s %s' % (filename + '.pdf', filename), timeout=10)
         # if error:
-            # return HttpResponseServerError('dvipdfm Error %d!' % error)
+        # return HttpResponseServerError('dvipdfm Error %d!' % error)
         # os.remove(filename + '.tex')
         # os.remove(filename + '.log')
         # os.remove(filename + '.aux')
         # os.remove(filename + '.dvi')
 
     if create_archive:
-        f = zipfile.ZipFile(filename + '.zip', mode='w',
-            compression=zipfile.ZIP_DEFLATED)
+        f = zipfile.ZipFile(
+            filename + '.zip', mode='w', compression=zipfile.ZIP_DEFLATED
+        )
 
         f.write(filename + ext, 'task{}{}'.format(hash, ext))
         for task in tasks:
             for k in range(len(task.cache_file_list)):
                 attachment = task.cache_file_list[k]
-                f.write(attachment.file.name, '{}/{}/{}/{}'.format(
-                    ZIP_ATTACHMENT_DIR, task.id, k, attachment.get_filename()))
+                f.write(
+                    attachment.file.name,
+                    '{}/{}/{}/{}'.format(
+                        ZIP_ATTACHMENT_DIR, task.id, k, attachment.get_filename()
+                    ),
+                )
 
         f.close()
 
@@ -512,8 +586,8 @@ def _export(ids, sorted_tasks, tasks, form, ignore_exceptions):
 @response('task_export.html')
 def export(request, format=None, ids=None):
     """
-        Exports tasks with given ids to given format.
-        Format and ids can be given as GET or POST information.
+    Exports tasks with given ids to given format.
+    Format and ids can be given as GET or POST information.
     """
 
     # Please note that both TaskExportForm and unnamed form (format, ids)
@@ -528,8 +602,7 @@ def export(request, format=None, ids=None):
         POST['ids'] = ids
     else:
         format = POST.get('format')
-        ids  = POST.get('ids')
-
+        ids = POST.get('ids')
 
     available_formats = dict(EXPORT_FORMAT_CHOICES)
     if not ids or format not in available_formats:
@@ -572,9 +645,11 @@ def export(request, format=None, ids=None):
         content_to_task[task.content_id] = task
 
     # attachments
-    query = "SELECT A.* FROM mathcontent_attachment A"                  \
-            " INNER JOIN task_task B ON A.content_id = B.content_id"    \
-            " WHERE B.id IN ({})".format(ids)
+    query = (
+        "SELECT A.* FROM mathcontent_attachment A"
+        " INNER JOIN task_task B ON A.content_id = B.content_id"
+        " WHERE B.id IN ({})".format(ids)
+    )
     attachments = list(Attachment.objects.raw(query))
     for attachment in attachments:
         content_to_task[attachment.content_id].cache_file_list.append(attachment)
@@ -586,8 +661,7 @@ def export(request, format=None, ids=None):
             # note that attachments are imported into each task as .cache_file_list
             ignore_exceptions = request.POST.get('ignore-exceptions')
             try:
-                return _export(ids, sorted_tasks, tasks, form,
-                        ignore_exceptions)
+                return _export(ids, sorted_tasks, tasks, form, ignore_exceptions)
             except _ConvertException as e:
                 invalid_tasks = e.invalid_tasks
 
@@ -599,13 +673,27 @@ def export(request, format=None, ids=None):
     else:
         data = (format, ids, False, False, False, False, True, create_archive)
 
-    data = dict(zip(('format', 'ids', 'has_title', 'has_url', 'has_source',
-        'has_index', 'has_id', 'create_archive'), data))
+    data = dict(
+        zip(
+            (
+                'format',
+                'ids',
+                'has_title',
+                'has_url',
+                'has_source',
+                'has_index',
+                'has_id',
+                'create_archive',
+            ),
+            data,
+        )
+    )
     form = TaskExportForm(data)
 
     if len(attachments):
-        form.fields['create_archive'].label = \
-            'Zip arhiva (ukupno datoteka: {}+1)'.format(len(attachments))
+        form.fields[
+            'create_archive'
+        ].label = 'Zip arhiva (ukupno datoteka: {}+1)'.format(len(attachments))
     else:
         form.fields['create_archive'].widget = forms.HiddenInput()
 

@@ -4,15 +4,24 @@ from django.core.exceptions import ValidationError
 from django.forms.models import BaseModelFormSet, ModelForm
 from django.utils.encoding import force_unicode
 from django.utils.html import mark_safe
-from django.utils.translation import get_language, ugettext as _, ugettext_lazy
+from django.utils.translation import get_language
+from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy
 
-from skoljka.utils import xss
-
+from skoljka.competition.evaluator import (
+    InvalidDescriptor,
+    InvalidSolution,
+    get_evaluator,
+    get_solution_help_text,
+    safe_parse_descriptor,
+)
 from skoljka.competition.models import Chain, CompetitionTask, Team, TeamMember
-from skoljka.competition.evaluator import InvalidDescriptor, InvalidSolution, \
-        get_evaluator, get_solution_help_text, safe_parse_descriptor
-from skoljka.competition.utils import comp_url, ctask_comment_class, \
-        parse_team_categories
+from skoljka.competition.utils import (
+    comp_url,
+    ctask_comment_class,
+    parse_team_categories,
+)
+from skoljka.utils import xss
 
 
 class CompetitionSolutionForm(forms.Form):
@@ -30,16 +39,12 @@ class CompetitionSolutionForm(forms.Form):
         except InvalidSolution as e:
             # TODO: Make a base form that automatically does this (depending on
             # a parameter).
-            self.fields['result'].widget.attrs.update({
-                            'class': 'ctask-submit-error'})
+            self.fields['result'].widget.attrs.update({'class': 'ctask-submit-error'})
             raise forms.ValidationError(unicode(e))
         except InvalidDescriptor as e:
-            self.fields['result'].widget.attrs.update({
-                            'class': 'ctask-submit-error'})
-            raise forms.ValidationError(
-                    _("Descriptor error. Please notify admins!"))
+            self.fields['result'].widget.attrs.update({'class': 'ctask-submit-error'})
+            raise forms.ValidationError(_("Descriptor error. Please notify admins!"))
         return data
-
 
 
 class BaseCompetitionTaskFormSet(BaseModelFormSet):
@@ -48,7 +53,6 @@ class BaseCompetitionTaskFormSet(BaseModelFormSet):
         # initial_text = form.instance.pk and form.instance.task.content.text
         # form.fields["text"] = forms.CharField(widget=forms.Textarea,
         #         initial=initial_text)
-
 
 
 class CompetitionTaskForm(ModelForm):
@@ -68,28 +72,33 @@ class CompetitionTaskForm(ModelForm):
             self.fields['name'].initial = self.instance.task.name
             self.fields['text'].initial = self.instance.task.content.text
             self.fields['comment'].initial = self.instance.comment.text
-            self.t_comment_extra_class += \
-                    " " + ctask_comment_class(self.instance, user)
+            self.t_comment_extra_class += " " + ctask_comment_class(self.instance, user)
 
         descriptor = self.initial.get('descriptor')
         if descriptor:
             variables = safe_parse_descriptor(self.evaluator, descriptor)
             self.fields['descriptor'].help_text = get_solution_help_text(
-                    variables, error_message=_("Invalid!"), show_types=True)
+                variables, error_message=_("Invalid!"), show_types=True
+            )
         self.fields['descriptor'].label = mark_safe(
-                xss.escape(_("Solution")) + \
-                ' <a href="' + comp_url(self.competition, 'rules') +
-                '" target="_blank"><i class="icon-question-sign" title="' +
-                xss.escape(_("Help")) + '"></i></a>')
+            xss.escape(_("Solution"))
+            + ' <a href="'
+            + comp_url(self.competition, 'rules')
+            + '" target="_blank"><i class="icon-question-sign" title="'
+            + xss.escape(_("Help"))
+            + '"></i></a>'
+        )
         if not self.competition.use_custom_ctask_names():
             del self.fields['name']
         if self.fixed_score:
             del self.fields['max_score']
 
         self.fields['text'].widget.attrs.update(
-                {'class': 'comp-mathcontent-text', 'rows': 15})
+            {'class': 'comp-mathcontent-text', 'rows': 15}
+        )
         self.fields['comment'].widget.attrs.update(
-                {'class': 'comp-mathcontent-text ctask-comment', 'rows': 3})
+            {'class': 'comp-mathcontent-text ctask-comment', 'rows': 3}
+        )
 
     def clean(self):
         super(CompetitionTaskForm, self).clean()
@@ -114,36 +123,42 @@ class CompetitionTaskForm(ModelForm):
         fields = ('descriptor', 'max_score')
 
 
-
 class ChainForm(forms.ModelForm):
     """Form for creating or editing chains.
 
     For course-like competitions, the `unlock_minutes` field is replaced with
     an `unlock_days` field.
     """
+
     class Meta:
         model = Chain
-        fields = ['name', 'category', 'unlock_minutes', 'bonus_score',
-                  'position', 'unlock_mode']
+        fields = [
+            'name',
+            'category',
+            'unlock_minutes',
+            'bonus_score',
+            'position',
+            'unlock_mode',
+        ]
 
     def __init__(self, *args, **kwargs):
         self.competition = kwargs.pop('competition')
         super(ChainForm, self).__init__(*args, **kwargs)
         if self.competition.is_course:
             del self.fields['unlock_minutes']
-            days = self.instance.unlock_minutes / (24 * 60.) \
-                    if self.instance else 0
+            days = self.instance.unlock_minutes / (24 * 60.0) if self.instance else 0
             self.fields['unlock_days'] = forms.FloatField(
-                    label=_("Unlock days"), min_value=0, initial=days)
+                label=_("Unlock days"), min_value=0, initial=days
+            )
 
     def clean(self):
         data = self.cleaned_data
         if self.competition.is_course:
-            self.cleaned_data['unlock_minutes'] = \
-                    int((data['unlock_days'] or 0) * 24 * 60)
+            self.cleaned_data['unlock_minutes'] = int(
+                (data['unlock_days'] or 0) * 24 * 60
+            )
             del data['unlock_days']
         return data
-
 
 
 def clean_unused_ctask_ids(competition, ctask_ids):
@@ -153,8 +168,9 @@ def clean_unused_ctask_ids(competition, ctask_ids):
         ctask_ids = [int(x) for x in ctask_ids.split(',')]
     except ValueError:
         raise ValidationError("Invalid input.")
-    ctasks_dict = CompetitionTask.objects \
-            .filter(competition=competition).in_bulk(ctask_ids)
+    ctasks_dict = CompetitionTask.objects.filter(competition=competition).in_bulk(
+        ctask_ids
+    )
     if len(ctask_ids) != len(ctasks_dict):
         raise ValidationError("Unknown competition task ID.")
     for ctask in ctasks_dict.itervalues():
@@ -162,7 +178,6 @@ def clean_unused_ctask_ids(competition, ctask_ids):
             raise ValidationError("Some tasks were already used.")
     ctasks = [ctasks_dict[id] for id in ctask_ids]
     return ctask_ids, ctasks
-
 
 
 class ChainTasksForm(ChainForm):
@@ -179,22 +194,20 @@ class ChainTasksForm(ChainForm):
             self.fields['unlock_days'].widget.attrs.update({'class': 'span1'})
         self.fields['bonus_score'].widget.attrs.update({'class': 'span1'})
         self.fields['position'].widget.attrs.update({'class': 'span1'})
-        self.fields['ctask_ids'].widget.attrs.update(
-                {'id': 'cchain-unused-ctasks-ids'})
+        self.fields['ctask_ids'].widget.attrs.update({'id': 'cchain-unused-ctasks-ids'})
 
     def clean_ctask_ids(self):
         ctask_ids, ctasks = clean_unused_ctask_ids(
-                self.competition, self.cleaned_data['ctask_ids'])
+            self.competition, self.cleaned_data['ctask_ids']
+        )
         self.cleaned_data['ctasks'] = ctasks
         return ctask_ids
-
 
 
 class TeamCategoryRadioSelectRenderer(forms.widgets.RadioFieldRenderer):
     def render(self):
         """Customize radio select render, not to use <ul>."""
         return mark_safe(u'\n'.join([force_unicode(w) for w in self]))
-
 
 
 class TeamForm(forms.ModelForm):
@@ -211,9 +224,10 @@ class TeamForm(forms.ModelForm):
         if instance:
             # Author cannot be removed from the team.
             team_members = list(
-                    TeamMember.objects.filter(team=instance) \
-                    .exclude(member_id=instance.author_id) \
-                    .values_list('member_name', 'member_id'))
+                TeamMember.objects.filter(team=instance)
+                .exclude(member_id=instance.author_id)
+                .values_list('member_name', 'member_id')
+            )
         else:
             team_members = []
 
@@ -229,10 +243,17 @@ class TeamForm(forms.ModelForm):
             initial[field_username] = member_name
 
             # Label empty because HTML generated via JavaScript anyway.
-            extra_fields.append((field_manual, forms.CharField(required=False,
-                label="", max_length=64)))
-            extra_fields.append((field_username, forms.CharField(required=False,
-                    max_length=32, widget=forms.HiddenInput())))
+            extra_fields.append(
+                (field_manual, forms.CharField(required=False, label="", max_length=64))
+            )
+            extra_fields.append(
+                (
+                    field_username,
+                    forms.CharField(
+                        required=False, max_length=32, widget=forms.HiddenInput()
+                    ),
+                )
+            )
 
         # Parse team category string.
         try:
@@ -250,13 +271,12 @@ class TeamForm(forms.ModelForm):
             self.fields[key] = value
 
         self.fields['name'].widget.attrs['class'] = 'input-large'
-        self.fields['name'].error_messages['required'] = \
-                _("Team name cannot be empty.")
+        self.fields['name'].error_messages['required'] = _("Team name cannot be empty.")
 
         if categories:
             self.fields['category'].widget = forms.RadioSelect(
-                    choices=categories,
-                    renderer=TeamCategoryRadioSelectRenderer)
+                choices=categories, renderer=TeamCategoryRadioSelectRenderer
+            )
         else:
             del self.fields['category']
 
@@ -271,14 +291,16 @@ class TeamForm(forms.ModelForm):
             except User.DoesNotExist:
                 raise ValidationError(_("Unknown username \"%s\".") % username)
             if user.id == self.user.id:
-                raise ValidationError(
-                        _("You are automatically added to the team."))
-            if TeamMember.objects.filter(
-                        team__competition_id=self.competition_id,
-                        member_id=user.id,
-                        invitation_status=TeamMember.INVITATION_ACCEPTED) \
-                    .exclude(team_id=self.instance.id) \
-                    .exists():
+                raise ValidationError(_("You are automatically added to the team."))
+            if (
+                TeamMember.objects.filter(
+                    team__competition_id=self.competition_id,
+                    member_id=user.id,
+                    invitation_status=TeamMember.INVITATION_ACCEPTED,
+                )
+                .exclude(team_id=self.instance.id)
+                .exists()
+            ):
                 msg = _("User \"%s\" is already a member of a team.") % username
                 raise ValidationError(msg)
             return (user.username, user)
@@ -288,9 +310,11 @@ class TeamForm(forms.ModelForm):
 
     def clean_name(self):
         name = self.cleaned_data['name'].strip()
-        if Team.objects \
-                .filter(competition_id=self.competition_id, name__iexact=name) \
-                .exclude(id=self.instance.id).exists():
+        if (
+            Team.objects.filter(competition_id=self.competition_id, name__iexact=name)
+            .exclude(id=self.instance.id)
+            .exists()
+        ):
             raise ValidationError(_("Team name already used!"))
         return name
 
@@ -317,8 +341,7 @@ class TeamForm(forms.ModelForm):
                 self.cleaned_data['category'] = self.team_categories[-1][0]
             else:
                 if not any(category == k for k, v in self.team_categories):
-                    raise ValidationError(
-                            _("Unknown team category '%s'!") % category)
+                    raise ValidationError(_("Unknown team category '%s'!") % category)
 
         return self.cleaned_data
 
@@ -327,12 +350,14 @@ class TeamForm(forms.ModelForm):
         fields = ['name', 'category']
 
 
-
 class TaskListAdminPanelForm(forms.Form):
-    filter_by_team_type = forms.ChoiceField([
-        (Team.TYPE_NORMAL, ugettext_lazy("Competitors")),
-        (Team.TYPE_UNOFFICIAL, ugettext_lazy("Unofficial")),
-        (Team.TYPE_ADMIN_PRIVATE, ugettext_lazy("Administrators")),
-    ])
-    filter_by_status = forms.ChoiceField([
-        ('S', "Solved"), ('F', "Failed"), ('T', "Tried")])
+    filter_by_team_type = forms.ChoiceField(
+        [
+            (Team.TYPE_NORMAL, ugettext_lazy("Competitors")),
+            (Team.TYPE_UNOFFICIAL, ugettext_lazy("Unofficial")),
+            (Team.TYPE_ADMIN_PRIVATE, ugettext_lazy("Administrators")),
+        ]
+    )
+    filter_by_status = forms.ChoiceField(
+        [('S', "Solved"), ('F', "Failed"), ('T', "Tried")]
+    )

@@ -6,6 +6,7 @@ from skoljka.mathcontent.utils import convert_to_html
 
 register = template.Library()
 
+
 @register.inclusion_tag('inc_mathcontent_render.html')
 def mathcontent_render(content, quote=False):
     if content.html is None:
@@ -42,11 +43,11 @@ def mathcontent_attachments(content):
 @register.inclusion_tag('inc_mathcontent_attachments_small.html')
 def mathcontent_attachments_small(content=None, attachments=None):
     """
-        List all attachments for given math content, or manually given
-        attachments. The later case is useful when listing attachments
-        of multiple tasks.
+    List all attachments for given math content, or manually given
+    attachments. The later case is useful when listing attachments
+    of multiple tasks.
 
-        Outputs the inline list of short links to those files.
+    Outputs the inline list of short links to those files.
     """
     if attachments is None:
         attachments = content.attachments.all()
@@ -57,7 +58,9 @@ def mathcontent_attachments_small(content=None, attachments=None):
 def mathcontent_bootstrap_preview(content, source_id, target_id, extra_class):
     """Generates a preview button and a preview div for given MathContent."""
     # TODO: Implement attachment attribute.
-    return {'content': content,
-            'source_id': source_id,
-            'target_id': target_id,
-            'extra_class': extra_class}
+    return {
+        'content': content,
+        'source_id': source_id,
+        'target_id': target_id,
+        'extra_class': extra_class,
+    }

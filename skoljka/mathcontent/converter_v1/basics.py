@@ -16,10 +16,8 @@ class State(object):
         self.tokens.append(tokens)  # Flatten later.
 
 
-
 class ParseError(Exception):
     pass
-
 
 
 def float_to_str_pretty(val):
@@ -57,18 +55,23 @@ def img_params_to_html(params):
             height = float_to_str_pretty(100 * scale) + "%"
         elif name != 'attachment' and name != 'img':
             raise ParseError(_("Unexpected attribute:") + " " + name)
-    return (' width="{}"'.format(width) if width else '') + \
-           (' height="{}"'.format(height) if height else '')
+    return (' width="{}"'.format(width) if width else '') + (
+        ' height="{}"'.format(height) if height else ''
+    )
+
 
 ########################################################
 # Test utils
 ########################################################
 # Use in unit tests to skip a comparison of a certain field.
-class _SkipComparison():
+class _SkipComparison:
     def __repr__(self):
         return '<<SKIP>>'
 
+
 SKIP_COMPARISON = _SkipComparison()
+
+
 def test_eq(A, B):
     """Compare two objects. Skip comparison of keys with a value
     SKIP_COMPARISON (it is still required that both objects have the same keys).
@@ -82,8 +85,7 @@ def test_eq(A, B):
     for key, value in x.iteritems():
         if key not in y:
             return False
-        if value != y[key] and value != SKIP_COMPARISON and \
-                y[key] != SKIP_COMPARISON:
+        if value != y[key] and value != SKIP_COMPARISON and y[key] != SKIP_COMPARISON:
             return False
     # It suffices to compare only if they have the same keys.
     return x.keys() == y.keys()

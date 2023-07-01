@@ -4,19 +4,19 @@ import tempfile
 
 from django.conf import settings
 
+from skoljka.mathcontent.models import Attachment, LatexElement, MathContent
 from skoljka.task.tests.utils import create_task
 from skoljka.userprofile.tests.utils import TestCaseWithUsersAndFolders
 from skoljka.utils.testcase import TemporaryMediaRootMixin
 
-from skoljka.mathcontent.models import Attachment, LatexElement, MathContent
 
-class MathContentViewsTest(TemporaryMediaRootMixin,
-                           TestCaseWithUsersAndFolders):
+class MathContentViewsTest(TemporaryMediaRootMixin, TestCaseWithUsersAndFolders):
     def get_preview(self, text):
         response = self.client.get(
-                '/ajax/mathcontent/preview/',
-                {'text': text},
-                HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+            '/ajax/mathcontent/preview/',
+            {'text': text},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
         return response
 
     def test_ajax_preview(self):
@@ -25,8 +25,9 @@ class MathContentViewsTest(TemporaryMediaRootMixin,
 
         # Check preview with no LaTeX.
         self.login(self.user1)
-        self.assertResponse(self.get_preview("Hello!"),
-                            200, '<p class="mc-noindent">Hello!')
+        self.assertResponse(
+            self.get_preview("Hello!"), 200, '<p class="mc-noindent">Hello!'
+        )
 
         # Check preview with LaTeX.
         response = self.get_preview("$x + y$")
@@ -36,9 +37,12 @@ class MathContentViewsTest(TemporaryMediaRootMixin,
         self.assertEqual(elements[0].format, '$%s$')
 
         h = elements[0].hash
-        img = '<img src="/media/m/{}/{}/{}/{}.png" alt="x + y" '\
-              'class="latex" style="vertical-align:{}px">'.format(
-                      h[0], h[1], h[2], h, -elements[0].depth)
+        img = (
+            '<img src="/media/m/{}/{}/{}/{}.png" alt="x + y" '
+            'class="latex" style="vertical-align:{}px">'.format(
+                h[0], h[1], h[2], h, -elements[0].depth
+            )
+        )
         self.assertResponse(response, 200, '<p class="mc-noindent">' + img)
 
         # Clean-up.
@@ -61,8 +65,8 @@ class MathContentViewsTest(TemporaryMediaRootMixin,
             f.seek(0)
             self.login(self.user1)
             response = self.client.post(
-                    task2.content.get_edit_attachments_url(),
-                    {'file': f})
+                task2.content.get_edit_attachments_url(), {'file': f}
+            )
             self.assertResponse(response, 404)
 
             # The server should not crash on bad requests (of user1).
@@ -74,8 +78,8 @@ class MathContentViewsTest(TemporaryMediaRootMixin,
             f.seek(0)
             self.login(self.user1)
             response = self.client.post(
-                    task1.content.get_edit_attachments_url(),
-                    {'file': f})
+                task1.content.get_edit_attachments_url(), {'file': f}
+            )
             self.assertRedirects(response, task1.content.get_edit_attachments_url())
             attachments = list(Attachment.objects.all())
             self.assertEqual(len(attachments), 1)
@@ -90,28 +94,31 @@ class MathContentViewsTest(TemporaryMediaRootMixin,
 
         # The file should actually be accessible.
         self.assertResponse(
-                self.client.get(attachment.get_url()),
-                200, "some file content")
+            self.client.get(attachment.get_url()), 200, "some file content"
+        )
 
         # user2 should not be able to delete user1's attachment.
         self.login(self.user2)
         response = self.client.post(
-                attachment.content.get_edit_attachments_url(),
-                {'delete_attachment_id': attachment.id})
+            attachment.content.get_edit_attachments_url(),
+            {'delete_attachment_id': attachment.id},
+        )
         self.assertResponse(response, 404)
 
         # user2 should not be able to delete user1's attachment by manipulating URL and POST.
         response = self.client.post(
-                task2.content.get_edit_attachments_url(),
-                {'delete_attachment_id': attachment.id})
+            task2.content.get_edit_attachments_url(),
+            {'delete_attachment_id': attachment.id},
+        )
         self.assertResponse(response, 403)
         self.assertEqual(Attachment.objects.count(), 1)
 
         # user1 should not be able to delete their own attachment by manipulating URL and POST.
         self.login(self.user1)
         response = self.client.post(
-                task1b.content.get_edit_attachments_url(),
-                {'delete_attachment_id': attachment.id})
+            task1b.content.get_edit_attachments_url(),
+            {'delete_attachment_id': attachment.id},
+        )
         self.assertResponse(response, 403)
 
         # user1 should be able to delete their attachment.
@@ -119,8 +126,9 @@ class MathContentViewsTest(TemporaryMediaRootMixin,
         path = attachment.file.name
         url = attachment.get_url()
         response = self.client.post(
-                attachment.content.get_edit_attachments_url(),
-                {'delete_attachment_id': attachment.id})
+            attachment.content.get_edit_attachments_url(),
+            {'delete_attachment_id': attachment.id},
+        )
         self.assertRedirects(response, content.get_edit_attachments_url())
 
         # The attachment should not exist anymore.

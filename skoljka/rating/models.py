@@ -3,6 +3,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
+
 class Vote(models.Model):
     object_id = models.PositiveIntegerField()
     content_type = models.ForeignKey(ContentType)
@@ -15,20 +16,20 @@ class Vote(models.Model):
     date = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together=(('content_type', 'object_id', 'key', 'user'),)
-    
+        unique_together = (('content_type', 'object_id', 'key', 'user'),)
+
+
 # strpati object_id, content_type i key u jedan key?
 class Score(models.Model):
     object_id = models.PositiveIntegerField()
     content_type = models.ForeignKey(ContentType)
     content_object = generic.GenericForeignKey()
-    
+
     # single object can have different scores (types)
     key = models.CharField(max_length=32)
-    
+
     sum = models.IntegerField(default=0)
     count = models.IntegerField(default=0)
-    
+
     class Meta:
         unique_together = (('object_id', 'content_type', 'key'),)
-    

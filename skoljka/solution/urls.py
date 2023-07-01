@@ -1,10 +1,11 @@
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls.defaults import include, patterns, url
 from django.views.generic import DetailView, ListView, TemplateView
 
-from skoljka.solution.models import Solution
 import skoljka.solution.views as views
+from skoljka.solution.models import Solution
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     (r'^ajax/task/(?P<task_id>\d+)/$', views.task_ajax),
     (r'^task/(?P<task_id>\d+)/submit/$', views.submit),
     (r'^task/(?P<task_id>\d+)/mark/$', views.mark),

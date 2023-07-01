@@ -8,6 +8,7 @@ from django.conf import settings
 from django.test.simple import DjangoTestSuiteRunner
 from django.test.utils import override_settings
 
+
 def assert_empty_tmp_media_root():
     """Assert that the `settings.MEDIA_ROOT` folder is empty.
 
@@ -31,6 +32,7 @@ class TemporaryMediaRootRunner(DjangoTestSuiteRunner):
 
     The folder is destroyed at the end of the run.
     """
+
     def setup_test_environment(self):
         super(TemporaryMediaRootRunner, self).setup_test_environment()
         self.tmp_media_root = tempfile.mkdtemp(suffix='skoljka_test_media')

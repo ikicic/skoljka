@@ -1,17 +1,27 @@
 from django.contrib import admin
 
-from skoljka.competition.models import Chain, Competition, CompetitionTask, \
-        Team, TeamMember, Submission
-from skoljka.competition.utils import refresh_teams_cache_score, \
-        refresh_submissions_score
+from skoljka.competition.models import (
+    Chain,
+    Competition,
+    CompetitionTask,
+    Submission,
+    Team,
+    TeamMember,
+)
+from skoljka.competition.utils import (
+    refresh_submissions_score,
+    refresh_teams_cache_score,
+)
+
 
 class CompetitionAdmin(admin.ModelAdmin):
     actions = ['refresh_submissions_score']
 
     def save_model(self, request, obj, form, change):
         if obj.fixed_task_score:
-            CompetitionTask.objects.filter(competition=obj) \
-                                   .update(max_score=obj.fixed_task_score)
+            CompetitionTask.objects.filter(competition=obj).update(
+                max_score=obj.fixed_task_score
+            )
         obj.save()
 
     def refresh_submissions_score(self, request, queryset):

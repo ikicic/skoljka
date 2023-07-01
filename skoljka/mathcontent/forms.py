@@ -6,7 +6,8 @@ from skoljka.mathcontent.models import Attachment, MathContent
 class AttachmentForm(ModelForm):
     class Meta:
         model = Attachment
-        fields = ('file', )
+        fields = ('file',)
+
 
 class MathContentForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -22,14 +23,17 @@ class MathContentForm(ModelForm):
         attr_class = 'mc-text'
         if auto_preview:
             attr_class += ' mc-auto-preview-button'
-        self.fields['text'].widget.attrs.update({
-            'rows': 10,
-            'class': attr_class,
-        })
+        self.fields['text'].widget.attrs.update(
+            {
+                'rows': 10,
+                'class': attr_class,
+            }
+        )
 
     class Meta:
         model = MathContent
-        fields = ('text', )
+        fields = ('text',)
+
 
 class MathContentSmallForm(MathContentForm):
     def __init__(self, *args, **kwargs):

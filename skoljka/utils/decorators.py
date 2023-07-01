@@ -1,16 +1,22 @@
-from hashlib import sha1
 from functools import wraps
+from hashlib import sha1
 
 from django.contrib.auth.decorators import login_required
+
 # Don't forget to use same cache as in ncache...
 from django.core.cache import cache
 from django.db import models
-from django.db.models.signals import pre_save
-from django.db.models.signals import post_save
-from django.http import Http404, HttpResponse, HttpResponseBadRequest,      \
-    HttpResponseForbidden, HttpResponseRedirect, HttpResponseNotAllowed,    \
-    HttpResponsePermanentRedirect
-from django.template import loader, RequestContext
+from django.db.models.signals import post_save, pre_save
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseForbidden,
+    HttpResponseNotAllowed,
+    HttpResponsePermanentRedirect,
+    HttpResponseRedirect,
+)
+from django.template import RequestContext, loader
 
 from skoljka.utils import ncache
 
@@ -22,12 +28,13 @@ def _key_list(input):
 
 def _key_dict(input):
     """Helper function. Replace models with their primary keys."""
-    return {key: str(value.pk if isinstance(value, models.Model) else value)
-        for key, value in input.iteritems()}
+    return {
+        key: str(value.pk if isinstance(value, models.Model) else value)
+        for key, value in input.iteritems()
+    }
 
 
-def get_cache_function_full_key(
-        func, key=None, namespace=None, args=(), kwargs={}):
+def get_cache_function_full_key(func, key=None, namespace=None, args=(), kwargs={}):
     """Generate the key for given function, key, namespace and arguments.
 
     To avoid conflicts between this function's arguments and given function's
@@ -41,12 +48,12 @@ def get_cache_function_full_key(
         if namespace:
             # Don't unnecesarry put module name here.
             # If you need it for any reason, feel free to put it.
-            _key = '{}{}{}'.format(func.__name__, _key_list(args),
-                _key_dict(kwargs))
+            _key = '{}{}{}'.format(func.__name__, _key_list(args), _key_dict(kwargs))
         else:
             # If no namespace given, distinguish different modules.
-            _key = '{}{}{}{}'.format(func.__module__, func.__name__,
-                _key_list(args), _key_dict(kwargs))
+            _key = '{}{}{}{}'.format(
+                func.__module__, func.__name__, _key_list(args), _key_dict(kwargs)
+            )
 
         # Memcached doesn't like ascii <= 32 and ascii == 127. Just hash it.
         _key = sha1(_key).hexdigest()
@@ -57,7 +64,8 @@ def get_cache_function_full_key(
 
     return _key
 
-def cache_function(key=None, namespace=None, seconds=86400*7):
+
+def cache_function(key=None, namespace=None, seconds=86400 * 7):
     """Cache the result of a function call.
 
     Parameters:
@@ -77,11 +85,11 @@ def cache_function(key=None, namespace=None, seconds=86400*7):
     of function arguments. Just use key and namespace without any
     curly brackets instead.
     """
+
     def decorator(func):
         def inner(*args, **kwargs):
             # Send as args, kwargs, not *args, **kwargs.
-            full_key = get_cache_function_full_key(
-                    func, key, namespace, args, kwargs)
+            full_key = get_cache_function_full_key(func, key, namespace, args, kwargs)
 
             # Check if value cached. If not, retrieve and save it.
             result = cache.get(full_key)
@@ -89,8 +97,11 @@ def cache_function(key=None, namespace=None, seconds=86400*7):
                 result = func(*args, **kwargs)
                 cache.set(full_key, result, seconds)
             return result
+
         return wraps(func)(inner)
+
     return decorator
+
 
 def cache_many_function(namespace_format=None, key_format=None, pre_test=None):
     """Handles a special case of multiple-get functions.
@@ -135,8 +146,9 @@ def cache_many_function(namespace_format=None, key_format=None, pre_test=None):
 
             # Most common case, handle immediately.
             if len(keys) == len(cached):
-                return {x.id: cached[full_key]
-                    for x, full_key in zip(objects, full_keys)}
+                return {
+                    x.id: cached[full_key] for x, full_key in zip(objects, full_keys)
+                }
 
             result = {}
             eval = []
@@ -156,8 +168,7 @@ def cache_many_function(namespace_format=None, key_format=None, pre_test=None):
             # Update cache. Here result[id] is the full_key. There is no any
             # special reason why we use the same dict `result` for full keys
             # (performance?).
-            cache.set_many({result[id]: value
-                for id, value in values.iteritems()})
+            cache.set_many({result[id]: value for id, value in values.iteritems()})
 
             # Finally, update result (replace those full_keys with results).
             result.update(values)
@@ -165,25 +176,27 @@ def cache_many_function(namespace_format=None, key_format=None, pre_test=None):
             return result
 
         return wraps(func)(inner)
+
     return decorator
+
 
 # TODO: add login check
 def require(method=[], ajax=None, post=[], get=[], force_login=True):
     """
-        Add some restrictions to the query.
+    Add some restrictions to the query.
 
-        Options / parameters:
-            method (*): accept only given methods
-                e.g. method == 'GET' accepts only GET method
-            ajax (boolean): if set, accept only AJAX requests
-            post (*): list of necessary POST fields (**)
-            get (*): list of necessary GET fields (**)
-            force_login (boolean): if set, require will return ResponseForbidden
-                if user not logged in.
+    Options / parameters:
+        method (*): accept only given methods
+            e.g. method == 'GET' accepts only GET method
+        ajax (boolean): if set, accept only AJAX requests
+        post (*): list of necessary POST fields (**)
+        get (*): list of necessary GET fields (**)
+        force_login (boolean): if set, require will return ResponseForbidden
+            if user not logged in.
 
-            (*) a string or a list of strings
-            (**) always necessary, independent of actual method
-                (feel free to change this...)
+        (*) a string or a list of strings
+        (**) always necessary, independent of actual method
+            (feel free to change this...)
     """
 
     if isinstance(method, basestring):
@@ -225,30 +238,33 @@ def require(method=[], ajax=None, post=[], get=[], force_login=True):
                     if x not in request.POST:
                         return HttpResponseBadRequest('Missing POST "%s" field!' % x)
 
-
             output = func(request, *args, **kwargs)
             if isinstance(output, basestring):
                 return HttpResponse(output)
             return output
+
         return wraps(func)(inner)
+
     return decorator
 
 
 def ajax(*args, **kwargs):
     """
-        Shortcut for @require, with default parameters:
-            ajax=True
-            force_login=True
+    Shortcut for @require, with default parameters:
+        ajax=True
+        force_login=True
     """
 
-    return require(ajax=True, force_login=kwargs.get('force_login', True), *args, **kwargs)
+    return require(
+        ajax=True, force_login=kwargs.get('force_login', True), *args, **kwargs
+    )
 
 
 def response_update_cookie(request, name, value):
     """
-        Push cookie update to request.
-        MUST be used together with @response, as it will
-        do the update before the respond.
+    Push cookie update to request.
+    MUST be used together with @response, as it will
+    do the update before the respond.
     """
     if not hasattr(request, '_response_update_cookies'):
         request._response_update_cookies = {}
@@ -262,81 +278,82 @@ def _flush_cookie_update(request, response):
         response.set_cookie(str(key), str(value))
     return response
 
+
 # this is a decorator
 class response:
     # TODO: implement as function with self.(constants) ?
     """
-        Views helper and shortcut decorator.
+    Views helper and shortcut decorator.
 
-        Flushes cookie update, pushed by response_update_cookie!
-        (only on status OK and redirects)
+    Flushes cookie update, pushed by response_update_cookie!
+    (only on status OK and redirects)
 
-        Primary shortcut for
-            return render_to_response(template, {
-                dictionary
-            }, context_instance=RequestContext(request))
-
-
-        Parameter:
-            Takes an optional parameter template, path and filename to template.
-            Response decorator must be initialized!
-            NOT VALID:
-                @response
-                def detail(request):
-                    return 'This is response'
-
-            VALID:
-                @response()
-                def detail(request):
-                    return 'This is response'
+    Primary shortcut for
+        return render_to_response(template, {
+            dictionary
+        }, context_instance=RequestContext(request))
 
 
-        Possible return values:
-        - dict:
-            Dictionary given to template renderer. Template parameter
-            must be given!
-        - string:
-            Return string as is, with status code 200 OK.
-        - int:
-            TODO: Return *default* response (...) (i.e. some message)
-            Return empty response with given status code.
-            If given value is 404, it will raise Http404.
-        - tuple:
-            There are four different formats:
-            - (string, ) - Redirects to given url.
-            - (int, content) - Returns content with given status code.
-            - (string, content) - Returns content with given template.
-            - (int, string, content) - Returns content with given
-                template and status code.
+    Parameter:
+        Takes an optional parameter template, path and filename to template.
+        Response decorator must be initialized!
+        NOT VALID:
+            @response
+            def detail(request):
+                return 'This is response'
 
-            Here `content` denotes string or dict.
-                If a string is given, just return it as is.
-                In case of a dict, it is passed to a template renderer.
-
-        Additional, template filename can be passed via dict as a 'TEMPLATE' element.
+        VALID:
+            @response()
+            def detail(request):
+                return 'This is response'
 
 
-        Examples:
-        @response('template_name.html')
-        def view(request, some_parameter, another_parameter=None):
-            return {'a': 1, 'b': 2}
+    Possible return values:
+    - dict:
+        Dictionary given to template renderer. Template parameter
+        must be given!
+    - string:
+        Return string as is, with status code 200 OK.
+    - int:
+        TODO: Return *default* response (...) (i.e. some message)
+        Return empty response with given status code.
+        If given value is 404, it will raise Http404.
+    - tuple:
+        There are four different formats:
+        - (string, ) - Redirects to given url.
+        - (int, content) - Returns content with given status code.
+        - (string, content) - Returns content with given template.
+        - (int, string, content) - Returns content with given
+            template and status code.
 
-        @response('default_template.html')
-        def view(request, id):
-            obj = get_object_or_404(Object, id=id)
-            if obj.hidden and obj.author != request.user:
-                # returns 403 Forbidden
-                return (403, 'Object %d is hidden' % id)
+        Here `content` denotes string or dict.
+            If a string is given, just return it as is.
+            In case of a dict, it is passed to a template renderer.
 
-            if (...something...):
-                # redirects to Edit page
-                return ('/obj/%d/edit/' % id, )
+    Additional, template filename can be passed via dict as a 'TEMPLATE' element.
 
-            if (...something else...):
-                # everything OK, but use another template
-                return ('specific_template.html', {'obj': obj})
 
-            return {'obj': obj}
+    Examples:
+    @response('template_name.html')
+    def view(request, some_parameter, another_parameter=None):
+        return {'a': 1, 'b': 2}
+
+    @response('default_template.html')
+    def view(request, id):
+        obj = get_object_or_404(Object, id=id)
+        if obj.hidden and obj.author != request.user:
+            # returns 403 Forbidden
+            return (403, 'Object %d is hidden' % id)
+
+        if (...something...):
+            # redirects to Edit page
+            return ('/obj/%d/edit/' % id, )
+
+        if (...something else...):
+            # everything OK, but use another template
+            return ('specific_template.html', {'obj': obj})
+
+        return {'obj': obj}
     """
 
     OK = 200
@@ -362,7 +379,7 @@ class response:
 
             template = self.template
             # is any of special types
-            if isinstance(x, dict):         # use default template
+            if isinstance(x, dict):  # use default template
                 status = 200
                 content = x
             elif isinstance(x, (int, long)):  # empty content, status code defined
@@ -370,13 +387,12 @@ class response:
                     raise Http404
                 status = x
                 content = ''
-            elif isinstance(x, tuple):        # given a tuple
+            elif isinstance(x, tuple):  # given a tuple
                 # len == 1 -> redirect
                 # len == 2 -> status (int), content (string / dict)
                 # len == 3 -> status (int), template (string), content (string / dict)
                 if len(x) == 1:
-                    return _flush_cookie_update(
-                            request, HttpResponseRedirect(x[0]))
+                    return _flush_cookie_update(request, HttpResponseRedirect(x[0]))
                 elif len(x) == 2:
                     dummy, content = x
                     if isinstance(dummy, basestring):
@@ -389,8 +405,9 @@ class response:
             # render to string if given a dict
             if isinstance(content, dict):
                 template = template or content.pop('TEMPLATE', None)
-                content = loader.render_to_string(template, content,
-                    context_instance=RequestContext(request))
+                content = loader.render_to_string(
+                    template, content, context_instance=RequestContext(request)
+                )
 
             if content is not None:
                 if status == response.REDIRECT:
@@ -403,11 +420,14 @@ class response:
                 # can't recognize data, return original
                 rsp = x
 
-
-            if isinstance(rsp, HttpResponse) and status in (response.OK,
-                    response.MOVED, response.REDIRECT):
+            if isinstance(rsp, HttpResponse) and status in (
+                response.OK,
+                response.MOVED,
+                response.REDIRECT,
+            ):
                 return _flush_cookie_update(request, rsp)
             return rsp
+
         return wraps(func)(inner)
 
 
@@ -427,11 +447,14 @@ def autoconnect(cls):
             if self.foo is not None:
                 self.bar = True
     """
+
     def connect(signal, func):
         cls.func = staticmethod(func)
+
         @wraps(func)
         def wrapper(sender, **kwargs):
             return func(kwargs.get('instance'))
+
         signal.connect(wrapper, sender=cls)
         return wrapper
 
@@ -442,4 +465,3 @@ def autoconnect(cls):
         cls.post_save = connect(post_save, cls.post_save)
 
     return cls
-

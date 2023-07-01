@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from skoljka.mathcontent.models import Attachment
 
+
 class AttachmentAdmin(admin.ModelAdmin):
     actions = ['refresh_file_size']
 
@@ -12,5 +13,6 @@ class AttachmentAdmin(admin.ModelAdmin):
             except:
                 attachment.cache_file_size = -1
             attachment.save()
+
 
 admin.site.register(Attachment, AttachmentAdmin)

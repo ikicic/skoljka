@@ -1,6 +1,6 @@
+import re
 from collections import defaultdict
 from datetime import datetime
-import re
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -13,49 +13,74 @@ from django.forms.models import modelformset_factory
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext as _, ungettext
+from django.utils.translation import ugettext as _
+from django.utils.translation import ungettext
 
 from skoljka.activity import action as _action
+from skoljka.competition.decorators import competition_view
+from skoljka.competition.evaluator import (
+    get_evaluator,
+    get_sample_solution,
+    get_solution_help_text,
+    safe_parse_descriptor,
+)
+from skoljka.competition.forms import (
+    BaseCompetitionTaskFormSet,
+    ChainForm,
+    ChainTasksForm,
+    CompetitionSolutionForm,
+    CompetitionTaskForm,
+    TaskListAdminPanelForm,
+    TeamForm,
+    clean_unused_ctask_ids,
+)
+from skoljka.competition.models import (
+    Chain,
+    Competition,
+    CompetitionTask,
+    Submission,
+    Team,
+    TeamMember,
+)
+from skoljka.competition.templatetags.competition_tags import get_submission_actions
+from skoljka.competition.utils import (
+    comp_url,
+    ctask_comment_verified_class,
+    delete_chain,
+    detach_ctask_from_chain,
+    get_teams_for_user_ids,
+    is_ctask_comment_important,
+    load_and_preprocess_chain,
+    lock_ctasks_in_chain,
+    parse_team_categories,
+    preprocess_chain,
+    refresh_chain_cache_is_verified,
+    refresh_ctask_cache_admin_solved_count,
+    refresh_ctask_cache_new_activities_count,
+    refresh_submissions_score,
+    refresh_teams_cache_score,
+    update_chain_cache_is_verified,
+    update_chain_comments_cache,
+    update_chain_ctasks,
+    update_ctask_cache_admin_solved_count,
+    update_ctask_task,
+    update_score_on_ctask_action,
+)
 from skoljka.mathcontent.forms import MathContentForm
 from skoljka.mathcontent.latex import latex_escape
 from skoljka.mathcontent.models import MathContent
-from skoljka.permissions.constants import VIEW, EDIT
+from skoljka.permissions.constants import EDIT, VIEW
 from skoljka.permissions.models import ObjectPermission
 from skoljka.post.forms import PostsForm
 from skoljka.post.models import Post
-from skoljka.utils.decorators import response
 from skoljka.tags.utils import add_tags
 from skoljka.task.models import Task
 from skoljka.userprofile.forms import AuthenticationFormEx
-from skoljka.utils.decorators import require
-
-from skoljka.competition.decorators import competition_view
-from skoljka.competition.evaluator import get_evaluator, \
-        get_solution_help_text, get_sample_solution, safe_parse_descriptor
-from skoljka.competition.forms import ChainForm, \
-        ChainTasksForm, clean_unused_ctask_ids, \
-        CompetitionSolutionForm, CompetitionTaskForm, \
-        BaseCompetitionTaskFormSet, TeamForm, TaskListAdminPanelForm
-from skoljka.competition.models import Chain, Competition, CompetitionTask, \
-        Team, TeamMember, Submission
-from skoljka.competition.templatetags.competition_tags import get_submission_actions
-from skoljka.competition.utils import update_chain_comments_cache, \
-        comp_url, update_score_on_ctask_action, load_and_preprocess_chain, \
-        preprocess_chain, get_teams_for_user_ids, lock_ctasks_in_chain, \
-        refresh_teams_cache_score, update_ctask_task, \
-        is_ctask_comment_important, ctask_comment_verified_class, \
-        detach_ctask_from_chain, delete_chain, \
-        refresh_chain_cache_is_verified, \
-        update_chain_cache_is_verified, \
-        refresh_ctask_cache_admin_solved_count, \
-        update_ctask_cache_admin_solved_count, \
-        refresh_ctask_cache_new_activities_count, \
-        update_chain_ctasks, parse_team_categories, \
-        refresh_submissions_score
-
+from skoljka.utils.decorators import require, response
 
 # [order=-10] asdf --> ('-10', ' asdf')
 _CATEGORY_RE = re.compile(r'\[order=([-+]?\d+)\](.+)')
+
 
 class _Category(object):
     """
@@ -70,6 +95,7 @@ class _Category(object):
 
     The order number may be negative.
     """
+
     def __init__(self, name, competition, lang, category_translations):
         translated_name = pick_name_translation(name, competition, lang)
         order, translated_name = self.split_order_name(translated_name)
@@ -83,7 +109,8 @@ class _Category(object):
         translated_name = translated_name.strip()
         if category_translations:  # Legacy, deprecated.
             translated_name = category_translations.get(
-                    translated_name, translated_name)
+                translated_name, translated_name
+            )
 
         self.name = name
         self.order = order
@@ -114,8 +141,8 @@ class _Category(object):
 
 
 def _init_categories_and_sort_chains(
-        competition, chains, language_code,
-        sort_by='category', sort_descending=False):
+    competition, chains, language_code, sort_by='category', sort_descending=False
+):
     """Find unique categories, fill chain.t_category and sort chains.
 
     Attributes:
@@ -136,16 +163,15 @@ def _init_categories_and_sort_chains(
     chains.sort(key=lambda chain: (chain.position, chain.name))
 
     # Deprecated.
-    category_translations = competition.get_task_categories_translations(
-            language_code)
+    category_translations = competition.get_task_categories_translations(language_code)
 
     categories = {}
     for chain in chains:
         category = categories.get(chain.category)
         if not category:
             category = categories[chain.category] = _Category(
-                    chain.category, competition, language_code,
-                    category_translations)
+                chain.category, competition, language_code, category_translations
+            )
         chain.t_category = category
         category.chains.append(chain)
 
@@ -166,21 +192,29 @@ def _init_categories_and_sort_chains(
     return categories, chains
 
 
-#TODO: Option for admins to create a team even if they have a private group.
-#TODO: When updating chain_position, update task name.
-#TODO: Formalize when update_ does .save() or not.
+# TODO: Option for admins to create a team even if they have a private group.
+# TODO: When updating chain_position, update task name.
+# TODO: Formalize when update_ does .save() or not.
+
 
 @response('competition_list.html')
 def competition_list(request):
-    competitions = Competition.objects \
-            .for_user(request.user, VIEW).distinct().order_by('-start_date')
-    member_of = list(TeamMember.objects \
-        .filter(member_id=request.user.id,
-            invitation_status=TeamMember.INVITATION_ACCEPTED) \
-        .values_list('team__competition_id', flat=True))
+    competitions = (
+        Competition.objects.for_user(request.user, VIEW)
+        .distinct()
+        .order_by('-start_date')
+    )
+    member_of = list(
+        TeamMember.objects.filter(
+            member_id=request.user.id, invitation_status=TeamMember.INVITATION_ACCEPTED
+        ).values_list('team__competition_id', flat=True)
+    )
 
-    return {'competitions': competitions, 'current_time': datetime.now(),
-            'member_of': member_of}
+    return {
+        'competitions': competitions,
+        'current_time': datetime.now(),
+        'member_of': member_of,
+    }
 
 
 @competition_view()
@@ -191,43 +225,49 @@ def homepage(request, competition, data):
 
 def _update_team_invitations(team, team_form):
     old_invitations = list(TeamMember.objects.filter(team=team))
-    old_invitations_dict = \
-            {x.member_id: x for x in old_invitations if x.member_id}
+    old_invitations_dict = {x.member_id: x for x in old_invitations if x.member_id}
 
     author = team.author
     members = team_form._members
-    members.append((author.username, author)) # Author is also a member
+    members.append((author.username, author))  # Author is also a member
     new_invited_users_ids = set(user.id for name, user in members if user)
 
     # Delete old invitations (keep old TeamMember instances if necessary).
     for invitation in old_invitations:
-        if invitation.member_id is None \
-                or invitation.member_id not in new_invited_users_ids:
+        if (
+            invitation.member_id is None
+            or invitation.member_id not in new_invited_users_ids
+        ):
             invitation.delete()
 
     # Insert new invitations (don't duplicate TeamMember).
     for name, user in members:
         if not user or user.id not in old_invitations_dict:
-            status = TeamMember.INVITATION_ACCEPTED \
-                    if not user or user.id == author.id \
-                    else TeamMember.INVITATION_UNANSWERED
-            TeamMember.objects.create(team=team, member=user, member_name=name,
-                    invitation_status=status)
+            status = (
+                TeamMember.INVITATION_ACCEPTED
+                if not user or user.id == author.id
+                else TeamMember.INVITATION_UNANSWERED
+            )
+            TeamMember.objects.create(
+                team=team, member=user, member_name=name, invitation_status=status
+            )
 
 
 @competition_view()
 @response('competition_team_detail.html')
 def team_detail(request, competition, data, team_id):
-    data['preview_team'] = \
-            get_object_or_404(Team, id=team_id, competition_id=competition.id)
-    data['preview_team_members'] = TeamMember.objects.filter(team_id=team_id,
-            invitation_status=TeamMember.INVITATION_ACCEPTED) \
-                    .select_related('member')
+    data['preview_team'] = get_object_or_404(
+        Team, id=team_id, competition_id=competition.id
+    )
+    data['preview_team_members'] = TeamMember.objects.filter(
+        team_id=team_id, invitation_status=TeamMember.INVITATION_ACCEPTED
+    ).select_related('member')
     if data['is_admin']:
-        data['submissions'] = list(Submission.objects \
-                .filter(team_id=team_id) \
-                .select_related('ctask', 'ctask__chain__name') \
-                .order_by('id'))
+        data['submissions'] = list(
+            Submission.objects.filter(team_id=team_id)
+            .select_related('ctask', 'ctask__chain__name')
+            .order_by('id')
+        )
         for submission in data['submissions']:
             if submission.ctask.chain_id:
                 submission.ctask.chain.competition = competition
@@ -239,10 +279,12 @@ def team_detail(request, competition, data, team_id):
 @response('competition_registration.html')
 def registration(request, competition, data):
     if data['has_finished']:
-        return (competition.get_absolute_url(), )
-    if competition.registration_open_date > data['current_time'] and \
-            not data['is_admin']:
-        return (competition.get_absolute_url(), )
+        return (competition.get_absolute_url(),)
+    if (
+        competition.registration_open_date > data['current_time']
+        and not data['is_admin']
+    ):
+        return (competition.get_absolute_url(),)
     if not request.user.is_authenticated():
         data['form'] = AuthenticationFormEx()
         return 'competition_registration_login.html', data
@@ -253,34 +295,37 @@ def registration(request, competition, data):
     is_course = competition.is_course
 
     if team and is_course:
-        return (competition.get_absolute_url(), )
+        return (competition.get_absolute_url(),)
 
-    if not team and request.method == 'POST' \
-            and not is_course \
-            and 'invitation-accept' in request.POST:
+    if (
+        not team
+        and request.method == 'POST'
+        and not is_course
+        and 'invitation-accept' in request.POST
+    ):
         team = get_object_or_404(Team, id=request.POST['invitation-accept'])
-        team_member = get_object_or_404(TeamMember, team=team,
-                member=request.user)
+        team_member = get_object_or_404(TeamMember, team=team, member=request.user)
         team_member.invitation_status = TeamMember.INVITATION_ACCEPTED
         team_member.is_selected = True
         team_member.save()
-        TeamMember.objects \
-                .filter(team__competition=competition, member=request.user) \
-                .exclude(id=team_member.id) \
-                .exclude(invitation_status=TeamMember.INVITATION_ACCEPTED) \
-                .delete()
-        TeamMember.objects \
-                .filter(team__competition=competition, member=request.user) \
-                .exclude(id=team_member.id) \
-                .update(is_selected=False)
+        TeamMember.objects.filter(
+            team__competition=competition, member=request.user
+        ).exclude(id=team_member.id).exclude(
+            invitation_status=TeamMember.INVITATION_ACCEPTED
+        ).delete()
+        TeamMember.objects.filter(
+            team__competition=competition, member=request.user
+        ).exclude(id=team_member.id).update(is_selected=False)
         data['team'] = team
         data['team_invitations'] = []
-    elif request.method == 'POST' \
-            and 'name' in request.POST \
-            and not is_course:
-        team_form = TeamForm(request.POST, competition=competition,
-                max_team_size=competition.max_team_size, instance=team,
-                user=request.user)
+    elif request.method == 'POST' and 'name' in request.POST and not is_course:
+        team_form = TeamForm(
+            request.POST,
+            competition=competition,
+            max_team_size=competition.max_team_size,
+            instance=team,
+            user=request.user,
+        )
         if team_form.is_valid():
             old_team = team
             team = team_form.save(commit=False)
@@ -296,55 +341,77 @@ def registration(request, competition, data):
             _update_team_invitations(team, team_form)
 
             if not old_team:
-                TeamMember.objects \
-                        .filter(team__competition=competition,
-                                member=request.user) \
-                        .exclude(team=team).delete()
+                TeamMember.objects.filter(
+                    team__competition=competition, member=request.user
+                ).exclude(team=team).delete()
                 data['team'] = team
                 return ('competition_registration_complete.html', data)
             # Need to refresh data from the decorator...
             url = request.get_full_path()
             if '?changes=1' not in url:
                 url += '?changes=1'
-            return (url, )
-    elif request.method == 'POST' and data['is_admin'] \
-            and 'create-admin-private-team' in request.POST \
-            and not data['has_private_team']:
+            return (url,)
+    elif (
+        request.method == 'POST'
+        and data['is_admin']
+        and 'create-admin-private-team' in request.POST
+        and not data['has_private_team']
+    ):
         name = request.user.username
-        team = Team(name=name + " (private)",
-                author=request.user, competition=competition,
-                team_type=Team.TYPE_ADMIN_PRIVATE)
+        team = Team(
+            name=name + " (private)",
+            author=request.user,
+            competition=competition,
+            team_type=Team.TYPE_ADMIN_PRIVATE,
+        )
         team.save()
-        TeamMember.objects.filter(member=request.user,
-                team__competition=competition).update(is_selected=False)
-        TeamMember.objects.create(team=team, member=request.user,
-                member_name=name, is_selected=True,
-                invitation_status=TeamMember.INVITATION_ACCEPTED)
-        return (request.get_full_path() + '?created=1', )
+        TeamMember.objects.filter(
+            member=request.user, team__competition=competition
+        ).update(is_selected=False)
+        TeamMember.objects.create(
+            team=team,
+            member=request.user,
+            member_name=name,
+            is_selected=True,
+            invitation_status=TeamMember.INVITATION_ACCEPTED,
+        )
+        return (request.get_full_path() + '?created=1',)
     elif request.method == 'POST' and is_course:
         assert not team
         name = request.user.username
-        team = Team(name=name, author=request.user, competition=competition,
-                    team_type=Team.TYPE_NORMAL)
+        team = Team(
+            name=name,
+            author=request.user,
+            competition=competition,
+            team_type=Team.TYPE_NORMAL,
+        )
         team.save()
         TeamMember.objects.create(
-                team=team, member=request.user, member_name=name,
-                is_selected=True,
-                invitation_status=TeamMember.INVITATION_ACCEPTED)
+            team=team,
+            member=request.user,
+            member_name=name,
+            is_selected=True,
+            invitation_status=TeamMember.INVITATION_ACCEPTED,
+        )
         data['team'] = team
         return ('competition_registration_complete_course.html', data)
 
-
-    if team_form is None \
-            and not (team and team.author_id != request.user.id) \
-            and not (team and team.team_type == Team.TYPE_ADMIN_PRIVATE):
-        team_form = TeamForm(instance=team, competition=competition,
-                max_team_size=competition.max_team_size, user=request.user)
+    if (
+        team_form is None
+        and not (team and team.author_id != request.user.id)
+        and not (team and team.team_type == Team.TYPE_ADMIN_PRIVATE)
+    ):
+        team_form = TeamForm(
+            instance=team,
+            competition=competition,
+            max_team_size=competition.max_team_size,
+            user=request.user,
+        )
 
     data['team_form'] = team_form
     data['preview_team_members'] = TeamMember.objects.filter(
-                team=team, invitation_status=TeamMember.INVITATION_ACCEPTED) \
-            .select_related('member')
+        team=team, invitation_status=TeamMember.INVITATION_ACCEPTED
+    ).select_related('member')
     return data
 
 
@@ -398,14 +465,24 @@ def scoreboard(request, competition, data, as_participants=False):
     else:
         order_by = '-cache_score_before_freeze'
 
-    teams = list(Team.objects.filter(competition=competition, **extra) \
-            .order_by(order_by, 'id') \
-            .only('id', 'name', 'cache_score', 'cache_score_before_freeze',
-                  'cache_max_score_after_freeze', 'team_type', 'category'))
+    teams = list(
+        Team.objects.filter(competition=competition, **extra)
+        .order_by(order_by, 'id')
+        .only(
+            'id',
+            'name',
+            'cache_score',
+            'cache_score_before_freeze',
+            'cache_max_score_after_freeze',
+            'team_type',
+            'category',
+        )
+    )
 
     try:
         team_categories = parse_team_categories(
-                competition.team_categories, request.LANGUAGE_CODE)
+            competition.team_categories, request.LANGUAGE_CODE
+        )
     except ValueError:
         team_categories = []
     team_categories_dict = dict(team_categories)
@@ -420,8 +497,9 @@ def scoreboard(request, competition, data, as_participants=False):
             last_position = position
         team.t_position = i + 1 if order_by == 'name' else last_position
         if team_categories:
-            team.t_category = team_categories_dict.get(team.category,
-                                                       team_categories[-1][1])
+            team.t_category = team_categories_dict.get(
+                team.category, team_categories[-1][1]
+            )
         if team.is_normal():
             last_score = team.cache_score_before_freeze
             position += 1
@@ -459,11 +537,15 @@ def pick_name_translation(name, competition, lang):
 def task_list(request, competition, data):
     all_ctasks = list(CompetitionTask.objects.filter(competition=competition))
     all_ctasks_dict = {ctask.id: ctask for ctask in all_ctasks}
-    all_chains = list(Chain.objects \
-            .filter(competition=competition, cache_is_verified=True))
+    all_chains = list(
+        Chain.objects.filter(competition=competition, cache_is_verified=True)
+    )
     all_chains_dict = {chain.id: chain for chain in all_chains}
-    all_my_submissions = list(Submission.objects.filter(team=data['team']) \
-            .only('id', 'ctask', 'score', 'oldest_unseen_admin_activity'))
+    all_my_submissions = list(
+        Submission.objects.filter(team=data['team']).only(
+            'id', 'ctask', 'score', 'oldest_unseen_admin_activity'
+        )
+    )
 
     unverified_chains = set()
     for chain in all_chains:
@@ -483,22 +565,30 @@ def task_list(request, competition, data):
         if ctask.max_score > 1 or competition.is_course:
             if ctask.is_manually_graded() and submission:
                 ctask.t_link_text = "{}/{}".format(
-                        submission.score if submission else 0,
-                        ctask.max_score)
+                    submission.score if submission else 0, ctask.max_score
+                )
             else:
                 ctask.t_link_text = str(ctask.max_score)
-            ctask.t_title = ungettext(
+            ctask.t_title = (
+                ungettext(
                     "This task is worth %d point.",
                     "This task is worth %d points.",
-                    ctask.max_score) % ctask.max_score
+                    ctask.max_score,
+                )
+                % ctask.max_score
+            )
         else:
             ctask.t_link_text = ""
             ctask.t_title = ""
 
-        if submission and submission.oldest_unseen_admin_activity \
-                != Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
+        if (
+            submission
+            and submission.oldest_unseen_admin_activity
+            != Submission.NO_UNSEEN_ACTIVITIES_DATETIME
+        ):
             ctask.t_link_text = mark_safe(
-                    ctask.t_link_text + ' <i class="icon-comment"></i>')
+                ctask.t_link_text + ' <i class="icon-comment"></i>'
+            )
             ctask.t_title += " " + _("There are new messages.")
 
         if ctask.chain_id in all_chains_dict:
@@ -515,7 +605,8 @@ def task_list(request, competition, data):
     for chain in all_chains:
         chain.t_is_locked = data['minutes_passed'] < chain.unlock_minutes
         chain.t_translated_name = pick_name_translation(
-                chain.name, competition, request.LANGUAGE_CODE)
+            chain.name, competition, request.LANGUAGE_CODE
+        )
 
         chain.ctasks.sort(key=lambda ctask: (ctask.chain_position, ctask.id))
         if not data['has_finished']:
@@ -526,8 +617,11 @@ def task_list(request, competition, data):
 
         chain.t_next_task = None
         for ctask in chain.ctasks:
-            if not ctask.t_is_locked and not ctask.t_is_solved and \
-                    ctask.t_submission_count < ctask.max_submissions:
+            if (
+                not ctask.t_is_locked
+                and not ctask.t_is_solved
+                and ctask.t_submission_count < ctask.max_submissions
+            ):
                 chain.t_next_task = ctask
                 break
 
@@ -535,19 +629,23 @@ def task_list(request, competition, data):
         all_chains = [chain for chain in all_chains if not chain.t_is_locked]
 
     categories, all_chains = _init_categories_and_sort_chains(
-            competition, all_chains, request.LANGUAGE_CODE,
-            sort_by='category', sort_descending=False)
+        competition,
+        all_chains,
+        request.LANGUAGE_CODE,
+        sort_by='category',
+        sort_descending=False,
+    )
 
     if data['is_admin']:
         data['admin_panel_form'] = TaskListAdminPanelForm()
         for category in categories:
-            category.t_is_locked = \
-                    all(chain.t_is_locked for chain in category.chains)
+            category.t_is_locked = all(chain.t_is_locked for chain in category.chains)
 
     data['unverified_chains_count'] = len(unverified_chains)
     data['categories'] = categories
-    data['max_chain_length'] = 0 if not all_chains \
-            else max(len(chain.ctasks) for chain in all_chains)
+    data['max_chain_length'] = (
+        0 if not all_chains else max(len(chain.ctasks) for chain in all_chains)
+    )
     return data
 
 
@@ -557,15 +655,21 @@ def task_detail(request, competition, data, ctask_id):
     is_admin = data['is_admin']
     extra = ['task__author'] if is_admin else []
     ctask = get_object_or_404(
-            CompetitionTask.objects.select_related('chain', 'task',
-                'task__content', *extra),
-            competition=competition, id=ctask_id)
+        CompetitionTask.objects.select_related(
+            'chain', 'task', 'task__content', *extra
+        ),
+        competition=competition,
+        id=ctask_id,
+    )
     ctask.competition = competition
     ctask_id = int(ctask_id)
     team = data['team']
     if not is_admin:
-        if (not team and not data['has_finished']) or not data['has_started'] \
-                or ctask.chain.unlock_minutes > data['minutes_passed']:
+        if (
+            (not team and not data['has_finished'])
+            or not data['has_started']
+            or ctask.chain.unlock_minutes > data['minutes_passed']
+        ):
             raise Http404
 
     evaluator = get_evaluator(competition.evaluator_version)
@@ -573,7 +677,8 @@ def task_detail(request, competition, data, ctask_id):
 
     if team:
         ctasks, chain_submissions = load_and_preprocess_chain(
-                competition, ctask.chain, team, preloaded_ctask=ctask)
+            competition, ctask.chain, team, preloaded_ctask=ctask
+        )
         submissions = [x for x in chain_submissions if x.ctask_id == ctask_id]
         submissions.sort(key=lambda x: x.date)
 
@@ -585,15 +690,18 @@ def task_detail(request, competition, data, ctask_id):
 
     if team and ctask.is_automatically_graded():
         if request.method == 'POST' and (not data['has_finished'] or is_admin):
-            solution_form = CompetitionSolutionForm(request.POST,
-                    descriptor=ctask.descriptor, evaluator=evaluator)
+            solution_form = CompetitionSolutionForm(
+                request.POST, descriptor=ctask.descriptor, evaluator=evaluator
+            )
             new_chain_submissions = None
             if is_admin and 'delete-submission' in request.POST:
                 try:
                     submission = Submission.objects.get(
-                            id=request.POST['delete-submission'])
-                    new_chain_submissions = \
-                            [x for x in chain_submissions if x != submission]
+                        id=request.POST['delete-submission']
+                    )
+                    new_chain_submissions = [
+                        x for x in chain_submissions if x != submission
+                    ]
                     submissions = [x for x in submissions if x != submission]
                     submission.delete()
                 except Submission.DoesNotExist:
@@ -602,10 +710,13 @@ def task_detail(request, competition, data, ctask_id):
                 # TODO: Ignore submission if already correctly solved.
                 if len(submissions) < ctask.max_submissions:
                     result = solution_form.cleaned_data['result']
-                    is_correct = evaluator.check_result(
-                            ctask.descriptor, result)
-                    submission = Submission(ctask=ctask, team=team,
-                            result=result, score=is_correct * ctask.max_score)
+                    is_correct = evaluator.check_result(ctask.descriptor, result)
+                    submission = Submission(
+                        ctask=ctask,
+                        team=team,
+                        result=result,
+                        score=is_correct * ctask.max_score,
+                    )
                     submission.save()
                     new_chain_submissions = chain_submissions + [submission]
                     submissions.append(submission)
@@ -613,18 +724,24 @@ def task_detail(request, competition, data, ctask_id):
             if new_chain_submissions is not None:
                 if is_admin and team.is_admin_private():
                     update_ctask_cache_admin_solved_count(
-                            competition, ctask, ctask.chain)
+                        competition, ctask, ctask.chain
+                    )
                 update_score_on_ctask_action(
-                        competition, team, ctask.chain, chain_ctasks=ctasks,
-                        old_chain_submissions=chain_submissions,
-                        new_chain_submissions=new_chain_submissions)
+                    competition,
+                    team,
+                    ctask.chain,
+                    chain_ctasks=ctasks,
+                    old_chain_submissions=chain_submissions,
+                    new_chain_submissions=new_chain_submissions,
+                )
 
                 # Prevent form resubmission.
-                return (ctask.get_absolute_url(), )
+                return (ctask.get_absolute_url(),)
 
         else:
             solution_form = CompetitionSolutionForm(
-                    descriptor=ctask.descriptor, evaluator=evaluator)
+                descriptor=ctask.descriptor, evaluator=evaluator
+            )
 
         data['is_solved'] = any(x.score for x in submissions)
         data['solution_form'] = solution_form
@@ -641,38 +758,49 @@ def task_detail(request, competition, data, ctask_id):
             submission = content = None
 
         content_form = MathContentForm(request.POST or None, instance=content)
-        if request.method == 'POST' \
-                and (not data['has_finished'] or is_admin) \
-                and content_form.is_valid():
+        if (
+            request.method == 'POST'
+            and (not data['has_finished'] or is_admin)
+            and content_form.is_valid()
+        ):
             content_form = MathContentForm(request.POST, instance=content)
             content = content_form.save()
             if not submission:
                 submission = Submission(
-                        ctask=ctask, team=team, content=content,
-                        result=settings.COMPETITION_MANUAL_GRADING_TAG)
+                    ctask=ctask,
+                    team=team,
+                    content=content,
+                    result=settings.COMPETITION_MANUAL_GRADING_TAG,
+                )
             submission.mark_unseen_team_activity()
             submission.save()
 
             # Prevent form resubmission.
-            return (ctask.get_absolute_url(), )
-        elif submission and submission.oldest_unseen_admin_activity \
-                    != Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
+            return (ctask.get_absolute_url(),)
+        elif (
+            submission
+            and submission.oldest_unseen_admin_activity
+            != Submission.NO_UNSEEN_ACTIVITIES_DATETIME
+        ):
             data['unread_newer_than'] = submission.oldest_unseen_admin_activity
-            submission.oldest_unseen_admin_activity = \
-                    Submission.NO_UNSEEN_ACTIVITIES_DATETIME
+            submission.oldest_unseen_admin_activity = (
+                Submission.NO_UNSEEN_ACTIVITIES_DATETIME
+            )
             submission.save()
 
         data['content_form'] = content_form
         data['submission'] = submission
         if submission:
-            data['submission_actions'], data['not_graded'] = \
-                    get_submission_actions(submission)
+            data['submission_actions'], data['not_graded'] = get_submission_actions(
+                submission
+            )
 
     if is_admin:
-        data['all_ctask_submissions'] = list(Submission.objects \
-                .filter(ctask_id=ctask_id) \
-                .select_related('team') \
-                .order_by('id'))
+        data['all_ctask_submissions'] = list(
+            Submission.objects.filter(ctask_id=ctask_id)
+            .select_related('team')
+            .order_by('id')
+        )
         for submission in data['all_ctask_submissions']:
             submission.team.competition = competition
             submission.ctask = ctask
@@ -681,8 +809,11 @@ def task_detail(request, competition, data, ctask_id):
     data['chain'] = ctask.chain
     data['ctask'] = ctask
 
-    if competition.show_solutions and data['has_finished'] \
-            and not data.get('is_solved', False):
+    if (
+        competition.show_solutions
+        and data['has_finished']
+        and not data.get('is_solved', False)
+    ):
         data['sample_solution'] = get_sample_solution(variables)
 
     return data
@@ -693,13 +824,15 @@ def task_detail(request, competition, data, ctask_id):
 def submission_detail(request, competition, data, submission_id=None):
     """Competition admin view of a submission for grading purposes."""
     submission = get_object_or_404(
-            Submission.objects.select_related('content', 'ctask', 'team'),
-            id=submission_id)
+        Submission.objects.select_related('content', 'ctask', 'team'), id=submission_id
+    )
     ctask = submission.ctask
     team = submission.team
-    if ctask.competition_id != competition.id \
-            or not ctask.is_manually_graded() \
-            or submission.content is None:
+    if (
+        ctask.competition_id != competition.id
+        or not ctask.is_manually_graded()
+        or submission.content is None
+    ):
         raise Http404
 
     data['submission_actions'], not_graded = get_submission_actions(submission)
@@ -725,12 +858,16 @@ def submission_detail(request, competition, data, submission_id=None):
 
             # We need to store a single number, so we hack it into
             # action_object_id and use a fake action_object_content_type_id.
-            _action.add(request.user, _action.COMPETITION_UPDATE_SUBMISSION_SCORE,
-                        action_object_content_type_id=-1,
-                        action_object_id=score, target=submission,
-                        fake_action_object=True)
+            _action.add(
+                request.user,
+                _action.COMPETITION_UPDATE_SUBMISSION_SCORE,
+                action_object_content_type_id=-1,
+                action_object_id=score,
+                target=submission,
+                fake_action_object=True,
+            )
 
-            return (request.get_full_path(), )  # Prevent form resubmission.
+            return (request.get_full_path(),)  # Prevent form resubmission.
 
     if request.method == 'POST' and 'mark_new' in request.POST:
         as_unread = request.POST['mark_new'] == '1'
@@ -739,10 +876,12 @@ def submission_detail(request, competition, data, submission_id=None):
         else:
             submission.reset_unseen_team_activities()
         submission.save()
-        return (request.get_full_path(), )  # Prevent form resubmission.
+        return (request.get_full_path(),)  # Prevent form resubmission.
 
-    if submission.oldest_unseen_team_activity != \
-            Submission.NO_UNSEEN_ACTIVITIES_DATETIME:
+    if (
+        submission.oldest_unseen_team_activity
+        != Submission.NO_UNSEEN_ACTIVITIES_DATETIME
+    ):
         data['unread_newer_than'] = submission.oldest_unseen_team_activity
 
     data['submission'] = submission
@@ -756,16 +895,19 @@ def submission_detail(request, competition, data, submission_id=None):
 def task_new(request, competition, data, ctask_id=None):
     if ctask_id:
         ctask = get_object_or_404(
-                CompetitionTask.objects.select_related('task'),
-                id=ctask_id, competition_id=competition.id)
+            CompetitionTask.objects.select_related('task'),
+            id=ctask_id,
+            competition_id=competition.id,
+        )
         edit = True
     else:
         ctask = None
         edit = False
 
     POST = request.POST if request.method == 'POST' else None
-    form = CompetitionTaskForm(POST, instance=ctask, competition=competition,
-            user=request.user)
+    form = CompetitionTaskForm(
+        POST, instance=ctask, competition=competition, user=request.user
+    )
 
     if request.method == 'POST' and form.is_valid():
         ctask = form.save(commit=False)
@@ -775,32 +917,40 @@ def task_new(request, competition, data, ctask_id=None):
             ctask.chain_position = -1
             ctask.max_submissions = competition.default_max_submissions
 
-        _create_or_update_task(ctask, request.user, competition,
-                ctask.chain, ctask.chain_position, ctask._text,
-                ctask._comment, form.cleaned_data.get('name'))
+        _create_or_update_task(
+            ctask,
+            request.user,
+            competition,
+            ctask.chain,
+            ctask.chain_position,
+            ctask._text,
+            ctask._comment,
+            form.cleaned_data.get('name'),
+        )
 
         ctask.save()
 
         if ctask.chain:
-            chain_ctasks = CompetitionTask.objects.filter(chain=ctask.chain) \
-                    .select_related('comment').only('id', 'comment')
+            chain_ctasks = (
+                CompetitionTask.objects.filter(chain=ctask.chain)
+                .select_related('comment')
+                .only('id', 'comment')
+            )
             update_chain_comments_cache(ctask.chain, chain_ctasks)
             update_chain_cache_is_verified(competition, ctask.chain)
             ctask.chain.save()
 
         target = request.POST.get('next', 'stay')
         if target == 'next':
-            return (comp_url(competition, 'task/new'), )
+            return (comp_url(competition, 'task/new'),)
         if target == 'tasks':
-            return (comp_url(competition, 'chain/tasks'), )
-        return (ctask.get_edit_url(), )  # stay
+            return (comp_url(competition, 'chain/tasks'),)
+        return (ctask.get_edit_url(),)  # stay
 
-    data['is_solution_hidden'] = \
-            ctask and ctask.task.author_id != request.user.id
+    data['is_solution_hidden'] = ctask and ctask.task.author_id != request.user.id
     data['form'] = form
     data['ctask'] = ctask
     return data
-
 
 
 @competition_view(permission=EDIT)
@@ -816,14 +966,15 @@ def chain_tasks_list(request, competition, data):
     if request.POST.get('action') == 'refresh-chain-cache-is-verified':
         updated_chains_count = len(refresh_chain_cache_is_verified(competition))
     elif request.POST.get('action') == 'refresh-ctask-cache-admin-solved-count':
-        updated_ctasks_count = len(
-                refresh_ctask_cache_admin_solved_count(competition))
+        updated_ctasks_count = len(refresh_ctask_cache_admin_solved_count(competition))
     elif request.POST.get('action') == 'refresh-ctask-cache-new-activities-count':
         updated_ctasks_count = len(
-                refresh_ctask_cache_new_activities_count(competition))
+            refresh_ctask_cache_new_activities_count(competition)
+        )
     elif request.POST.get('action') == 'refresh-submission-is-correct':
-        updated_submissions_score_count = \
-                refresh_submissions_score(competitions=[competition])
+        updated_submissions_score_count = refresh_submissions_score(
+            competitions=[competition]
+        )
     elif request.method == 'POST':
         form = ChainTasksForm(request.POST, competition=competition)
         if form.is_valid():
@@ -831,8 +982,9 @@ def chain_tasks_list(request, competition, data):
             chain.competition = competition
             chain.save()
 
-            old_ids = CompetitionTask.objects \
-                    .filter(chain=chain).values_list('id', flat=True)
+            old_ids = CompetitionTask.objects.filter(chain=chain).values_list(
+                'id', flat=True
+            )
             new_ids = [x.id for x in form.cleaned_data['ctasks']]
             update_chain_ctasks(competition, chain, old_ids, new_ids)
             created = True
@@ -840,14 +992,19 @@ def chain_tasks_list(request, competition, data):
 
     chains = Chain.objects.filter(competition=competition)
     categories, chains = _init_categories_and_sort_chains(
-            competition, chains, request.LANGUAGE_CODE,
-            sort_by=request.GET.get('sort', 'category'),
-            sort_descending=request.GET.get('direction', 'asc') == 'desc')
+        competition,
+        chains,
+        request.LANGUAGE_CODE,
+        sort_by=request.GET.get('sort', 'category'),
+        sort_descending=request.GET.get('direction', 'asc') == 'desc',
+    )
 
     chain_dict = {chain.id: chain for chain in chains}
-    ctasks = list(CompetitionTask.objects.filter(competition=competition) \
-            .select_related('task__author', 'task__content__text',
-                'comment__text'))
+    ctasks = list(
+        CompetitionTask.objects.filter(competition=competition).select_related(
+            'task__author', 'task__content__text', 'comment__text'
+        )
+    )
     ctask_dict = {ctask.id: ctask for ctask in ctasks}
 
     for chain in chains:
@@ -863,15 +1020,16 @@ def chain_tasks_list(request, competition, data):
             chain_dict[ctask.chain_id].t_ctasks.append(ctask)
 
     for ctask in ctasks:
-        is_important = ctask.comment.text.strip() and \
-                is_ctask_comment_important(ctask.comment.text)
+        is_important = ctask.comment.text.strip() and is_ctask_comment_important(
+            ctask.comment.text
+        )
         ctask.t_class = ctask_comment_verified_class(
-                competition, ctask, request.user, is_important=is_important)
+            competition, ctask, request.user, is_important=is_important
+        )
 
     for chain in chains:
         chain.t_ctasks.sort(key=lambda x: x.chain_position)
-        chain.t_class = \
-                'cchain-verified-list' if chain.cache_is_verified else ''
+        chain.t_class = 'cchain-verified-list' if chain.cache_is_verified else ''
 
     data['created'] = created
     data['form'] = form
@@ -880,8 +1038,7 @@ def chain_tasks_list(request, competition, data):
     data['trans_checked_title'] = _("Number of admins that solved this task.")
     data['updated_chains_count'] = updated_chains_count
     data['updated_ctasks_count'] = updated_ctasks_count
-    data['updated_submissions_score_count'] = \
-            updated_submissions_score_count
+    data['updated_submissions_score_count'] = updated_submissions_score_count
     return data
 
 
@@ -893,14 +1050,13 @@ def chain_tasks_action(request, competition, data):
     url_suffix = ""
     if re.match('delete-chain-(\d+)', action):
         # Delete whole chain. Does not delete ctasks, of course.
-        id = int(action[len('delete-chain-'):])
+        id = int(action[len('delete-chain-') :])
         chain = get_object_or_404(Chain, id=id, competition=competition)
         delete_chain(chain)
     elif re.match('detach-(\d+)', action):
         # Detach ctask from a chain.
-        id = int(action[len('detach-'):])
-        ctask = get_object_or_404(CompetitionTask,
-            id=id, competition=competition)
+        id = int(action[len('detach-') :])
+        ctask = get_object_or_404(CompetitionTask, id=id, competition=competition)
         url_suffix = '#chain-{}'.format(ctask.chain_id)
         detach_ctask_from_chain(ctask)
     elif action == 'add-after':
@@ -912,22 +1068,27 @@ def chain_tasks_action(request, competition, data):
         except KeyError as e:
             return (400, "POST arguments missing " + e.message)
         if after_what == 'chain':
-            chain = get_object_or_404(
-                    Chain, id=after_id, competition=competition)
+            chain = get_object_or_404(Chain, id=after_id, competition=competition)
             position = 0
         elif after_what == 'ctask':
             ctask = get_object_or_404(
-                    CompetitionTask.objects.select_related('chain'),
-                    id=after_id, competition=competition)
+                CompetitionTask.objects.select_related('chain'),
+                id=after_id,
+                competition=competition,
+            )
             chain = ctask.chain
             position = ctask.chain_position - 1
         else:
             return (400, "after_what={}?".format(after_what))
-        old_ids = list(CompetitionTask.objects.filter(chain=chain) \
-                .order_by('chain_position').values_list('id', flat=True))
+        old_ids = list(
+            CompetitionTask.objects.filter(chain=chain)
+            .order_by('chain_position')
+            .values_list('id', flat=True)
+        )
         try:
             selected_ids, selected_ctasks = clean_unused_ctask_ids(
-                    competition, ctask_ids)
+                competition, ctask_ids
+            )
         except ValidationError:
             return (400, "invalid ctask_ids: {}".format(ctask_ids))
 
@@ -935,12 +1096,17 @@ def chain_tasks_action(request, competition, data):
         update_chain_ctasks(competition, chain, old_ids, new_ids)
         url_suffix = '#chain-{}'.format(chain.id)
     elif re.match('move-(lo|hi)-(\d+)', action):
-        id = int(action[len('move-lo-'):])
+        id = int(action[len('move-lo-') :])
         ctask = get_object_or_404(
-                CompetitionTask.objects.select_related('chain'),
-                id=id, competition=competition)
-        old_ids = list(CompetitionTask.objects.filter(chain=ctask.chain) \
-                .order_by('chain_position').values_list('id', flat=True))
+            CompetitionTask.objects.select_related('chain'),
+            id=id,
+            competition=competition,
+        )
+        old_ids = list(
+            CompetitionTask.objects.filter(chain=ctask.chain)
+            .order_by('chain_position')
+            .values_list('id', flat=True)
+        )
         pos = ctask.chain_position - 1
         new_ids = old_ids[:]
         if action[5] == 'l' and pos > 0:
@@ -952,8 +1118,7 @@ def chain_tasks_action(request, competition, data):
         update_chain_ctasks(competition, ctask.chain, old_ids, new_ids)
     else:
         return (400, "Unrecognized action " + action)
-    return (comp_url(competition, "chain/tasks") + url_suffix, )
-
+    return (comp_url(competition, "chain/tasks") + url_suffix,)
 
 
 @competition_view(permission=EDIT)
@@ -961,21 +1126,30 @@ def chain_tasks_action(request, competition, data):
 def chain_list(request, competition, data):
     chains = Chain.objects.filter(competition=competition)
     categories, chains = _init_categories_and_sort_chains(
-            competition, chains, language_code=None,
-            sort_by=request.GET.get('sort', 'category'),
-            sort_descending=request.GET.get('direction', 'asc') == 'desc')
+        competition,
+        chains,
+        language_code=None,
+        sort_by=request.GET.get('sort', 'category'),
+        sort_descending=request.GET.get('direction', 'asc') == 'desc',
+    )
     chain_dict = {chain.id: chain for chain in chains}
-    ctasks = list(CompetitionTask.objects.filter(competition=competition) \
-            .values_list('id', 'chain_id', 'task__author_id'))
+    ctasks = list(
+        CompetitionTask.objects.filter(competition=competition).values_list(
+            'id', 'chain_id', 'task__author_id'
+        )
+    )
     author_ids = [author_id for ctask_id, chain_id, author_id in ctasks]
-    authors = User.objects.only('id', 'username', 'first_name', 'last_name') \
-            .in_bulk(set(author_ids))
+    authors = User.objects.only('id', 'username', 'first_name', 'last_name').in_bulk(
+        set(author_ids)
+    )
 
-    verified_ctask_ids = set(Submission.objects \
-            .filter(team__competition_id=competition.id,
-                    team__team_type=Team.TYPE_ADMIN_PRIVATE,
-                    score=F('ctask__max_score')) \
-            .values_list('ctask_id', flat=True))
+    verified_ctask_ids = set(
+        Submission.objects.filter(
+            team__competition_id=competition.id,
+            team__team_type=Team.TYPE_ADMIN_PRIVATE,
+            score=F('ctask__max_score'),
+        ).values_list('ctask_id', flat=True)
+    )
 
     for chain in chains:
         chain.competition = competition
@@ -994,16 +1168,17 @@ def chain_list(request, competition, data):
             chain.t_is_verified = False
 
     from skoljka.userprofile.templatetags.userprofile_tags import userlink
+
     for chain in chains:
-        chain.t_authors = mark_safe(u", ".join(userlink(authors[author_id])
-                for author_id in chain._author_ids))
+        chain.t_authors = mark_safe(
+            u", ".join(userlink(authors[author_id]) for author_id in chain._author_ids)
+        )
 
     data['chains'] = chains
     return data
 
 
-def _create_or_update_task(
-        ctask, user, competition, chain, index, text, comment, name):
+def _create_or_update_task(ctask, user, competition, chain, index, text, comment, name):
     edit = bool(ctask.task_id)
     if not edit:
         content = MathContent(text=text)
@@ -1025,10 +1200,12 @@ def _create_or_update_task(
         if competition.automatic_task_tags:
             add_tags(task, competition.automatic_task_tags)
         if competition.admin_group:
-            ObjectPermission.objects.create(content_object=task,
-                    group=competition.admin_group, permission_type=VIEW)
-            ObjectPermission.objects.create(content_object=task,
-                    group=competition.admin_group, permission_type=EDIT)
+            ObjectPermission.objects.create(
+                content_object=task, group=competition.admin_group, permission_type=VIEW
+            )
+            ObjectPermission.objects.create(
+                content_object=task, group=competition.admin_group, permission_type=EDIT
+            )
         ctask.task = task
 
 
@@ -1037,9 +1214,11 @@ def _create_or_update_task(
 def chain_overview(request, competition, data, chain_id):
     chain = get_object_or_404(Chain, id=chain_id, competition_id=competition.id)
     chain.competition = competition
-    ctasks = CompetitionTask.objects.filter(chain=chain) \
-            .select_related('task__content', 'task__author', 'comment') \
-            .order_by('chain_position')
+    ctasks = (
+        CompetitionTask.objects.filter(chain=chain)
+        .select_related('task__content', 'task__author', 'comment')
+        .order_by('chain_position')
+    )
     for ctask in ctasks:
         ctask.competition = competition
 
@@ -1052,8 +1231,7 @@ def chain_overview(request, competition, data, chain_id):
 @response('competition_chain_new.html')
 def chain_new(request, competition, data, chain_id=None):
     if chain_id:
-        chain = get_object_or_404(
-                Chain, id=chain_id, competition_id=competition.id)
+        chain = get_object_or_404(Chain, id=chain_id, competition_id=competition.id)
         edit = True
     else:
         chain = None
@@ -1069,7 +1247,7 @@ def chain_new(request, competition, data, chain_id=None):
                 chain.competition = competition
             chain.save()
 
-            return (chain.get_absolute_url(), )
+            return (chain.get_absolute_url(),)
 
     data['chain_form'] = chain_form
     return data
@@ -1081,8 +1259,8 @@ def chain_edit(request, competition_id, chain_id):
 
 def _notification_ctask_prefix(ctask, is_admin):
     task_link = u'[b]{} [url={}]{}[/url][/b]\n\n'.format(
-            _("Task:"), ctask.get_absolute_url(),
-            latex_escape(ctask.get_name()))
+        _("Task:"), ctask.get_absolute_url(), latex_escape(ctask.get_name())
+    )
     if is_admin:
         return task_link
     return task_link + '<' + _("Write the question / message here.") + '>'
@@ -1094,8 +1272,9 @@ def notifications(request, competition, data, ctask_id=None):
     team = data['team']
 
     # This could return None as a member, but that's not a problem.
-    member_ids = set(TeamMember.objects.filter(team=team) \
-            .values_list('member_id', flat=True))
+    member_ids = set(
+        TeamMember.objects.filter(team=team).values_list('member_id', flat=True)
+    )
 
     posts = list(competition.posts.select_related('author', 'content'))
     if team:
@@ -1106,11 +1285,12 @@ def notifications(request, competition, data, ctask_id=None):
         post_form = team.posts.get_post_form()
         if ctask_id is not None:
             ctask = get_object_or_404(
-                    CompetitionTask.objects.select_related('chain'),
-                    id=ctask_id)
+                CompetitionTask.objects.select_related('chain'), id=ctask_id
+            )
             ctask.competition = competition
-            post_form.fields['text'].initial = \
-                    _notification_ctask_prefix(ctask, data['is_admin'])
+            post_form.fields['text'].initial = _notification_ctask_prefix(
+                ctask, data['is_admin']
+            )
         data['post_form'] = post_form
 
     posts.sort(key=lambda post: post.date_created, reverse=True)
@@ -1142,23 +1322,24 @@ def notifications_admin(request, competition, data):
 
             # Update if team-related post. As noted below, using
             # `team__competition_id` makes one JOIN too much.
-            Post.objects \
-                .filter(id=post_id, content_type=team_ct,
-                        object_id__in=team_ids_query) \
-                .update(extra=extra)
+            Post.objects.filter(
+                id=post_id, content_type=team_ct, object_id__in=team_ids_query
+            ).update(extra=extra)
 
     show_answered = request.GET.get('answered') == '1'
     extra_filter = {} if show_answered else {'extra': 0}
 
-    posts = list(competition.posts.filter(**extra_filter) \
-                            .select_related('author', 'content'))
+    posts = list(
+        competition.posts.filter(**extra_filter).select_related('author', 'content')
+    )
     teams = list(teams)
     teams_dict = {x.id: x for x in teams}
     # Post.objects.filter(team__competition_id=id, ct=...) makes an extra JOIN.
-    team_posts = list(Post.objects \
-            .filter(content_type=team_ct, object_id__in=team_ids_query,
-                    **extra_filter) \
-            .select_related('author', 'content'))
+    team_posts = list(
+        Post.objects.filter(
+            content_type=team_ct, object_id__in=team_ids_query, **extra_filter
+        ).select_related('author', 'content')
+    )
     user_ids = [post.author_id for post in team_posts]
     user_id_to_team = get_teams_for_user_ids(competition, user_ids)
     for post in team_posts:
@@ -1173,12 +1354,14 @@ def notifications_admin(request, competition, data):
     if 'ctask' in request.GET:
         try:
             ctask = CompetitionTask.objects.get(
-                    competition=competition, id=request.GET['ctask'])
+                competition=competition, id=request.GET['ctask']
+            )
         except CompetitionTask.DoesNotExist:
             pass
         else:
-            post_form.fields['text'].initial = \
-                    _notification_ctask_prefix(ctask, data['is_admin'])
+            post_form.fields['text'].initial = _notification_ctask_prefix(
+                ctask, data['is_admin']
+            )
     if 'team' in request.GET:
         try:
             selected_team_id = int(request.GET['team'])
@@ -1196,12 +1379,14 @@ def notifications_admin(request, competition, data):
     posts += team_posts
     posts.sort(key=lambda post: post.date_created, reverse=True)
 
-    data.update({
-        'competition_ct': ContentType.objects.get_for_model(Competition),
-        'post_form': post_form,
-        'posts': posts,
-        'show_answered': show_answered,
-        'team_ct': team_ct,
-        'teams': teams,
-    })
+    data.update(
+        {
+            'competition_ct': ContentType.objects.get_for_model(Competition),
+            'post_form': post_form,
+            'posts': posts,
+            'show_answered': show_answered,
+            'team_ct': team_ct,
+            'teams': teams,
+        }
+    )
     return data

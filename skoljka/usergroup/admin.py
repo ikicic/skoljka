@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from skoljka.usergroup.models import UserGroup
 
+
 class UserGroupAdmin(admin.ModelAdmin):
     actions = ['refresh_member_count']
 
@@ -13,5 +14,5 @@ class UserGroupAdmin(admin.ModelAdmin):
             group_data.cache_member_count = group_data.get_members().count()
             group_data.save()
 
-admin.site.register(UserGroup, UserGroupAdmin)
 
+admin.site.register(UserGroup, UserGroupAdmin)

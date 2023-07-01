@@ -3,6 +3,7 @@ import threading
 
 # TODO: Replace -1 and -2 with exceptions.
 
+
 class Command(object):
     '''
     Modified version of https://gist.github.com/1306188
@@ -22,6 +23,7 @@ class Command(object):
     Based on jcollado's solution:
     http://stackoverflow.com/questions/1191374/subprocess-with-timeout/4825933#4825933
     '''
+
     def __init__(self, cmd):
         self.cmd = cmd
         self.process = None
@@ -43,7 +45,6 @@ class Command(object):
         if not self.process:
             return -1
         return self.process.returncode
-
 
 
 def run_command(cmd, timeout=5, shell=True, **kwargs):

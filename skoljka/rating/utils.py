@@ -1,6 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseForbidden, HttpResponseServerError
 
+
 def do_vote(user, object_id, content_type_id, name, value):
     # value == 0 for delete
 
@@ -10,7 +11,7 @@ def do_vote(user, object_id, content_type_id, name, value):
     except:
         return HttpResponseServerError("Something's wrong")
 
-    specific = ["solution"] # task also?
+    specific = ["solution"]  # task also?
     if content_type.app_label in specific and content_type.model in specific:
         if name == "quality_rating" and instance.author == user:
             return HttpResponseForbidden("Not allowed")
@@ -19,14 +20,19 @@ def do_vote(user, object_id, content_type_id, name, value):
     value = manager.update(user, value)
     return value
 
+
 def rating_check_request(request):
     """
     Check if POST contains the voting data, applies the vote if so.
     """
     if request.method != 'POST':
         return
-    args = ['rating-instance-id', 'rating-content-type-id', 'rating-field-name',
-            'rating-vote']
+    args = [
+        'rating-instance-id',
+        'rating-content-type-id',
+        'rating-field-name',
+        'rating-vote',
+    ]
     try:
         args = [request.POST[x] for x in args]
     except:

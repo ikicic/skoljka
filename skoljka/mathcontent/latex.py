@@ -1,18 +1,17 @@
 ﻿from __future__ import print_function
 
-from collections import defaultdict
 import codecs
 import hashlib
 import os
 import re
 import sys
+from collections import defaultdict
 
 from django.conf import settings
 from django.template.loader import render_to_string
 
-from skoljka.utils.timeout import run_command
-
 from skoljka.mathcontent.models import ERROR_DEPTH_VALUE, LatexElement
+from skoljka.utils.timeout import run_command
 
 latex_escape_table = {
     '#': '\\#',
@@ -26,13 +25,16 @@ latex_escape_table = {
     '\\': '\\textbackslash{}',
 }
 
+
 def latex_escape(val):
     return u"".join(latex_escape_table.get(x, x) for x in val)
 
 
 # Obican .getstatusoutput ne radi na Windowimsa, ovo je zamjena
 # Preuzeto s http://mail.python.org/pipermail/python-win32/2008-January/006606.html
-mswindows = (sys.platform == "win32")
+mswindows = sys.platform == "win32"
+
+
 def getstatusoutput(cmd):
     """Return (status, output) of executing cmd in a shell."""
     if not mswindows:
@@ -64,8 +66,7 @@ def get_available_latex_elements(formulas):
         groups[format].append(hash)
     result = []
     for format, hashes in groups.iteritems():
-        result.extend(LatexElement.objects.filter(
-            format=format, hash__in=hashes))
+        result.extend(LatexElement.objects.filter(format=format, hash__in=hashes))
     return result
 
 
@@ -87,8 +88,9 @@ def get_or_generate_png(format, content):
 # TODO: enable client-side caching
 def generate_png(hash, format, latex):
     latex = latex.strip()
-    path = os.path.normpath(os.path.join(
-        settings.MEDIA_ROOT, 'm', hash[0], hash[1], hash[2]))
+    path = os.path.normpath(
+        os.path.join(settings.MEDIA_ROOT, 'm', hash[0], hash[1], hash[2])
+    )
     if not os.path.exists(path):
         os.makedirs(path)
     filename = os.path.normpath(os.path.join(path, hash))
@@ -100,13 +102,19 @@ def generate_png(hash, format, latex):
 
     # TODO: handle errors
     # TODO: disable logs
-    cmd = '%s -output-directory=%s -interaction=batchmode %s.tex' % \
-            (latex_full_filename('latex'), os.path.dirname(filename), filename)
+    cmd = '%s -output-directory=%s -interaction=batchmode %s.tex' % (
+        latex_full_filename('latex'),
+        os.path.dirname(filename),
+        filename,
+    )
     error = run_command(cmd, timeout=5)
 
     if not error:
         # TODO: handle errors and test quality
-        cmd = "%s -bg Transparent --gamma 1.5 -D 120 --depth* -T tight --strict -o %s.png %s" % (latex_full_filename('dvipng'), filename, filename)
+        cmd = (
+            "%s -bg Transparent --gamma 1.5 -D 120 --depth* -T tight --strict -o %s.png %s"
+            % (latex_full_filename('dvipng'), filename, filename)
+        )
         status, stdout = getstatusoutput(cmd)
 
     # Fixing $\newline$ bug. dvipng would return depth=2^31-1.
@@ -133,7 +141,6 @@ def generate_png(hash, format, latex):
         os.remove(filename + '.aux')
         os.remove(filename + '.dvi')
 
-    latex_element = LatexElement(
-            hash=hash, text=latex, format=format, depth=depth)
+    latex_element = LatexElement(hash=hash, text=latex, format=format, depth=depth)
     latex_element.save(force_insert=True)
     return latex_element

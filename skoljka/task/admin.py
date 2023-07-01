@@ -1,10 +1,9 @@
 from django.contrib import admin
 
-from skoljka.mathcontent.utils import \
-        create_file_thumbnail, ThumbnailRenderingException
+from skoljka.mathcontent.utils import ThumbnailRenderingException, create_file_thumbnail
+from skoljka.task.models import Task, TaskBulkTemplate
 from skoljka.utils.string_operations import media_path_to_url
 
-from skoljka.task.models import Task, TaskBulkTemplate
 
 class TaskAdmin(admin.ModelAdmin):
     actions = ['refresh_thumbnails']
@@ -21,13 +20,14 @@ class TaskAdmin(admin.ModelAdmin):
                     errors += 1
                     continue
                 generated += 1
-                task.cache_file_attachment_thumbnail_url = \
-                        media_path_to_url(thumbnail_filename)
+                task.cache_file_attachment_thumbnail_url = media_path_to_url(
+                    thumbnail_filename
+                )
                 task.save()
 
-        self.message_user(request,
-                "Generated {} thumbnail(s). {} error(s).".format(
-                    generated, errors))
+        self.message_user(
+            request, "Generated {} thumbnail(s). {} error(s).".format(generated, errors)
+        )
 
 
 admin.site.register(Task, TaskAdmin)

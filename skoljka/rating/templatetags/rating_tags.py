@@ -1,6 +1,6 @@
 ﻿from django import template
-from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -16,23 +16,27 @@ def rating_box(context, text, manager, use_bool_design=False):
         user_vote = None
 
     _template = template.loader.get_template(
-            'inc_rating_box_bool.html' if use_bool_design else
-            'inc_rating_box.html')
+        'inc_rating_box_bool.html' if use_bool_design else 'inc_rating_box.html'
+    )
 
     context.push()
-    context.update({
-        'read_only': read_only,
-        'text': text,
-        'm': manager,
-        'user_vote': None if user_vote is None else user_vote.value
-    })
+    context.update(
+        {
+            'read_only': read_only,
+            'text': text,
+            'm': manager,
+            'user_vote': None if user_vote is None else user_vote.value,
+        }
+    )
     result = _template.render(context)
     context.pop()
     return result
 
+
 @register.simple_tag
-def rating_display_bool(manager=None, field=None, red_if_lt=1.5, value=None,
-        empty_if_no_votes=False):
+def rating_display_bool(
+    manager=None, field=None, red_if_lt=1.5, value=None, empty_if_no_votes=False
+):
     if not field:
         field = manager.field
     if value is None:
@@ -54,8 +58,8 @@ def rating_display_bool(manager=None, field=None, red_if_lt=1.5, value=None,
         return u'<span class="label {}">{}</span>'.format(label, title)
 
     return u'<span class="label {}" title="{}">{}%</span>'.format(
-            label, title, int((value - 1) * 100))
-
+        label, title, int((value - 1) * 100)
+    )
 
 
 @register.simple_tag
@@ -64,7 +68,6 @@ def rating_stars(manager=None, field=None, red_if_lt=0.0, value=None):
         field = manager.field
     if value is None:
         value = getattr(manager.instance, '%s_avg' % field.name)
-
 
     # TODO: if min or max value, output only one div.
     left = int(80 * value / float(field.range - 1))
@@ -77,4 +80,5 @@ def rating_stars(manager=None, field=None, red_if_lt=0.0, value=None):
         u'<div class="readonly-star" style="background-position:'
         u'-{}px 0px;width:{}px;" title="{}"></div>'.format(
             shift, left, title, left, right, title
-            ))
+        )
+    )

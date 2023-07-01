@@ -4,9 +4,9 @@ from functools import wraps
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 
-from skoljka.permissions.constants import VIEW, EDIT
-
 from skoljka.competition.models import Competition, TeamMember
+from skoljka.permissions.constants import EDIT, VIEW
+
 
 def competition_view(permission=VIEW):
     """
@@ -32,7 +32,8 @@ def competition_view(permission=VIEW):
             perm = competition.get_user_permissions(request.user)
             if permission not in perm:
                 return HttpResponseForbidden(
-                    'No permission to view this competition or do this action!')
+                    'No permission to view this competition or do this action!'
+                )
 
             is_admin = EDIT in perm
             current_time = datetime.now()
@@ -43,10 +44,11 @@ def competition_view(permission=VIEW):
             team_invitations = []
             team = None
             if request.user.is_authenticated():
-                team_member_entries = list(TeamMember.objects   \
-                        .select_related('team', 'team__author') \
-                        .filter(team__competition_id=competition.id,
-                            member_id=request.user.id))
+                team_member_entries = list(
+                    TeamMember.objects.select_related('team', 'team__author').filter(
+                        team__competition_id=competition.id, member_id=request.user.id
+                    )
+                )
 
                 for entry in team_member_entries:
                     status = entry.invitation_status
@@ -57,28 +59,32 @@ def competition_view(permission=VIEW):
                     elif status == TeamMember.INVITATION_UNANSWERED:
                         team_invitations.append(entry.team)
 
-            minutes_passed = \
-                    (current_time - competition.start_date).total_seconds() / 60
-            nearly_finished = not has_finished and \
-                    (competition.end_date - current_time).total_seconds() < 1800
+            minutes_passed = (
+                current_time - competition.start_date
+            ).total_seconds() / 60
+            nearly_finished = (
+                not has_finished
+                and (competition.end_date - current_time).total_seconds() < 1800
+            )
             data = {
                 'competition': competition,
                 'team': team,
                 'teams': teams,
                 'team_invitations': team_invitations,
                 'is_admin': is_admin,
-                'has_private_team': any(x for x in teams
-                        if x.team_type == team.TYPE_ADMIN_PRIVATE),
+                'has_private_team': any(
+                    x for x in teams if x.team_type == team.TYPE_ADMIN_PRIVATE
+                ),
                 'has_started': has_started,
                 'has_finished': has_finished,
                 'nearly_finished': nearly_finished,
                 'current_time': current_time,
                 'minutes_passed': minutes_passed,
-                'is_scoreboard_frozen':
-                        current_time > competition.scoreboard_freeze_date,
+                'is_scoreboard_frozen': current_time
+                > competition.scoreboard_freeze_date,
             }
             return func(request, competition, data, *args, **kwargs)
 
         return wraps(func)(inner)
-    return decorator
 
+    return decorator
