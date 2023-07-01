@@ -148,9 +148,9 @@ def check_solution_for_accessibility(context, solution, text):
         if solution.task.solution_settings == Task.SOLUTIONS_NOT_VISIBLE:
             context['no_access_explanation'] = u'Rješenje nedostupno'
         else:  # Task.SOLUTIONS_VISIBLE_IF_ACCEPTED
-            context['no_access_explanation'] = (
-                u'Rješenje dostupno samo ' u'korisnicima s točnim vlastitim rješenjem'
-            )
+            context[
+                'no_access_explanation'
+            ] = u'Rješenje dostupno samo korisnicima s točnim vlastitim rješenjem'
 
     context['can_view_solution'] = can_view
     context['obfuscation_text'] = text

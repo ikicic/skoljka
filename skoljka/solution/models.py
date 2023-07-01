@@ -53,26 +53,26 @@ _HTML_INFO = {
     SolutionDetailedStatus.BLANK: ('', '', '', None),
     SolutionDetailedStatus.AS_SOLVED: (
         'label-success',
-        u'Riješeno',
+        u"Riješeno",
         'task-as-solved',
         (170, 255, 170),
     ),
     SolutionDetailedStatus.TODO: ('label-warning', u'To Do', 'task-todo', None),
     SolutionDetailedStatus.SUBMITTED_NOT_RATED: (
         'label-info',
-        u'Poslano',
+        u"Poslano",
         'task-submitted-not-rated',
         (255, 219, 76),
     ),
     SolutionDetailedStatus.SUBMITTED_INCORRECT: (
         'label-important',
-        u'Netočno',
+        u"Netočno",
         'task-wrong',
         (255, 150, 150),
     ),
     SolutionDetailedStatus.SUBMITTED_CORRECT: (
         'label-success',
-        u'Točno',
+        u"Točno",
         'task-correct',
         (112, 255, 112),
     ),
@@ -120,7 +120,7 @@ def _solution_on_update(solution, field_name, old_value, new_value):
 
 SOLUTION_RATING_ATTRS = {
     'range': 3,
-    'titles': [u'Neocijenjeno', u'Netočno', u'Točno'],
+    'titles': [u"Neocijenjeno", u"Netočno", u"Točno"],
     'action_type': SOLUTION_RATE,
     'on_update': _solution_on_update,
 }

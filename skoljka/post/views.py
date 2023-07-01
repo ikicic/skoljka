@@ -33,7 +33,7 @@ def add_post(request):
         try:
             object = content_type.get_object_for_this_type(pk=request.POST['object_id'])
         except:
-            raise Http404('Object does not exist.')
+            raise Http404("Object does not exist.")
 
         if hasattr(object, 'can_send_post'):
             if not object.can_send_post(request.user):
@@ -84,7 +84,7 @@ def add_post(request):
 def edit_post(request, post_id=None):
     post = get_object_or_404(Post, pk=post_id)
     if not post.can_edit(request.user):
-        return HttpResponseForbidden('Not allowed to edit this post.')
+        return HttpResponseForbidden("Not allowed to edit this post.")
 
     if request.method == 'POST':
         math_content_form = MathContentForm(request.POST, instance=post.content)

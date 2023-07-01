@@ -160,7 +160,7 @@ def select_task(request, task_id):
 def select(request, id):
     folder = get_object_or_404(Folder, id=id)
     if not folder.user_has_perm(request.user, EDIT):
-        return HttpResponseForbidden('Not allowed to edit this folder.')
+        return HttpResponseForbidden("Not allowed to edit this folder.")
 
     profile = request.user.profile
     if profile.selected_folder == folder:
@@ -408,7 +408,7 @@ def _create_folders(author, parent, structure, p):
                 r = range(a, b + 1) if a <= b else range(a, b - 1, -1)
                 children.extend([str(x) for x in r])
             else:
-                raise Exception('Nepoznata naredba: ' + left)
+                raise Exception("Nepoznata naredba: " + left)
         else:
             # Child definition: var_value1/var_value2/.../var_valueN
             children.append(left)

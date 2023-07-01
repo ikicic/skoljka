@@ -9,26 +9,25 @@ class SearchForm(forms.Form):
     q = forms.CharField(required=False, max_length=100, label='Tags')
     show_hidden = forms.BooleanField(required=False, initial=False, label='Skriveni')
 
-    # TODO: DRY!
     quality_min = forms.FloatField(
         required=False,
         widget=RatingWidget(attrs=QUALITY_RATING_ATTRS),
-        label='Kvaliteta min.',
+        label="Kvaliteta min.",
     )
     quality_max = forms.FloatField(
         required=False,
         widget=RatingWidget(attrs=QUALITY_RATING_ATTRS),
-        label='Kvaliteta max.',
+        label="Kvaliteta max.",
     )
     difficulty_min = forms.FloatField(
         required=False,
         widget=RatingWidget(attrs=DIFFICULTY_RATING_ATTRS),
-        label=u'Težina min.',
+        label=u"Težina min.",
     )
     difficulty_max = forms.FloatField(
         required=False,
         widget=RatingWidget(attrs=DIFFICULTY_RATING_ATTRS),
-        label=u'Težina max.',
+        label=u"Težina max.",
     )
 
     def __init__(self, *args, **kwargs):

@@ -30,7 +30,7 @@ def list(request):
             try:
                 id = int(k[1:])
             except ValueError:
-                return (response.BAD_REQUEST, 'Invalid input id %s' % k)
+                return (response.BAD_REQUEST, "Invalid input id %s" % k)
 
             try:
                 weight = float(v)
@@ -43,10 +43,10 @@ def list(request):
 
         if invalid:
             alert_class = 'alert-error'
-            message = 'Neke vrijednosti su nevaljanje (%d).' % len(invalid)
+            message = "Neke vrijednosti su nevaljanje (%d)." % len(invalid)
         else:
             alert_class = 'alert-success'
-            message = 'Promjene spremljene.'
+            message = "Promjene spremljene."
 
     task_content_type = ContentType.objects.get_for_model(Task)
     tags = Tag.objects.filter(

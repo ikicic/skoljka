@@ -32,7 +32,7 @@ def competition_view(permission=VIEW):
             perm = competition.get_user_permissions(request.user)
             if permission not in perm:
                 return HttpResponseForbidden(
-                    'No permission to view this competition or do this action!'
+                    "No permission to view this competition or do this action!"
                 )
 
             is_admin = EDIT in perm

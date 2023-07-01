@@ -146,7 +146,7 @@ def help_format(request):
         ),
         (
             "\\begin{verbatim*}...\\end{verbatim*}",
-            _("Similar to <code>verbatim</code>, where spaces are shown " "as &blank;.")
+            _("Similar to <code>verbatim</code>, where spaces are shown as &blank;.")
             + VISUALLY_DIFFERENT,
             "\\begin{verbatim*}a = b + c\n  = c + b\\end{verbatim*}",
         ),

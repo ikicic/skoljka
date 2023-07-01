@@ -24,7 +24,7 @@ urlpatterns = patterns(
     (r'^folder/', include('skoljka.folder.urls')),
     (r'^lectures/$', 'skoljka.task.views.lectures_list'),
     (r'^lectures/list/$', 'skoljka.task.views.lectures_as_list'),
-    (r'^', include('skoljka.mathcontent.urls')),  # namjerno nije r'^mathcontent/'
+    (r'^', include('skoljka.mathcontent.urls')),  # Intentionally not r'^mathcontent/'
     (r'^permissions/', include('skoljka.permissions.urls')),
     (r'^pm/', include('skoljka.pm.urls')),
     (r'^', include('skoljka.rating.urls')),
@@ -32,8 +32,8 @@ urlpatterns = patterns(
     (r'^', include('skoljka.tags.urls')),
     (r'^task/', include('skoljka.task.urls')),
     (r'^usergroup/', include('skoljka.usergroup.urls')),
-    (r'^', include('skoljka.post.urls')),  # namjerno nije r'^post/'
-    (r'^', include('skoljka.userprofile.urls')),  # namjerno nije r'^profile/'
-    (r'^', include('skoljka.solution.urls')),  # namjerno nije r'^solution/'
+    (r'^', include('skoljka.post.urls')),  # Intentionally not r'^post/'
+    (r'^', include('skoljka.userprofile.urls')),  # Intentionally not r'^profile/'
+    (r'^', include('skoljka.solution.urls')),  # Intentionally not r'^solution/'
     # (r'^sentry/', include('sentry.web.urls')),
 )

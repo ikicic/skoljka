@@ -53,7 +53,7 @@ class UserCreationForm(forms.Form):
         label=mark_safe(_(u'I accept the <a href="/tou/">Terms of Use</a>')),
         error_messages={
             'required': _(
-                u"You may not use Školjka if you do not accept " u"the Terms of Use."
+                u"You may not use Školjka if you do not accept the Terms of Use."
             )
         },
     )

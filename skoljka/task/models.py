@@ -30,29 +30,29 @@ MAX_SIMILAR_TASKS = 20
 QUALITY_RATING_ATTRS = {
     'range': 6,
     'titles': [
-        u'Nepoznato',
-        u'Loš. Dosadan.',
-        u'Ima i boljih.',
-        u'Dobar zadatak.',
-        u'Jako dobar. Zanimljiv.',
-        u'Izvrstan. Vrlo zanimljiv.',
+        u"Nepoznato",
+        u"Loš. Dosadan.",
+        u"Ima i boljih.",
+        u"Dobar zadatak.",
+        u"Jako dobar. Zanimljiv.",
+        u"Izvrstan. Vrlo zanimljiv.",
     ],
 }
 
 DIFFICULTY_RATING_ATTRS = {
     'range': 11,
     'titles': [
-        u'Neodređeno',
-        u'OŠ lakši',
-        u'OŠ teži',
-        u'SŠ lakši',
-        u'SŠ teži',
-        u'Srednje težine',
-        u'Shortlist 1/2',
-        u'Shortlist 3/4',
-        u'Shortlist 5/6',
-        u'Shortlist 7/8',
-        u'Nerješiv',
+        u"Neodređeno",
+        u"OŠ lakši",
+        u"OŠ teži",
+        u"SŠ lakši",
+        u"SŠ teži",
+        u"Srednje težine",
+        u"Shortlist 1/2",
+        u"Shortlist 3/4",
+        u"Shortlist 5/6",
+        u"Shortlist 7/8",
+        u"Nerješiv",
     ],
     'on_update': 'skoljka.userprofile.models.task_difficulty_on_update',
 }
@@ -82,13 +82,13 @@ class Task(BasePermissionsModel):
     object_permissions = ['view', 'edit', 'edit_permissions', 'view_solutions']
 
     # napomena: cache za Solution POST_SEND activity ovisi o ovom max_length, nemojte previse povecavati
-    name = models.CharField(max_length=120, verbose_name='Naslov')
+    name = models.CharField(max_length=120, verbose_name=_("Title"))
     content = models.OneToOneField(MathContent)
     author = models.ForeignKey(User)
     date_created = models.DateTimeField(auto_now_add=True)
     last_edit_date = models.DateTimeField(auto_now=True)
-    hidden = models.BooleanField(default=False, verbose_name='Skriven')
-    source = models.CharField(max_length=200, blank=True, verbose_name='Izvor')
+    hidden = models.BooleanField(default=False, verbose_name=_("Hidden"))
+    source = models.CharField(max_length=200, blank=True, verbose_name=_("Source"))
 
     search_cache_elements = GenericRelation(SearchCacheElement)
     posts = PostGenericRelation(placeholder="Komentar")
@@ -103,25 +103,25 @@ class Task(BasePermissionsModel):
 
     solvable = models.BooleanField(
         default=True,
-        verbose_name=u'Zadatak',
-        help_text=icon_help_text(u'Rješivo ili ne, to jest mogu li se slati rješenja?'),
+        verbose_name=_("Solvable"),
+        help_text=icon_help_text(_("Can solutions be submitted?")),
     )
 
     SOLUTIONS_VISIBLE = 0
     SOLUTIONS_VISIBLE_IF_ACCEPTED = 10
     SOLUTIONS_NOT_VISIBLE = 20
     SOLUTION_SETTINGS_CHOICES = [
-        (0, 'Uvijek vidljiva'),
-        (10, 'Vidljiva samo korisnicima s prihvaćenim rješenjem'),
-        (20, 'Vidljiva samo ovlaštenim korisnicima'),
+        (0, u"Uvijek vidljiva"),
+        (10, u"Vidljiva samo korisnicima s prihvaćenim rješenjem"),
+        (20, u"Vidljiva samo ovlaštenim korisnicima"),
     ]
     solution_settings = models.SmallIntegerField(
         default=0,
-        verbose_name=u'Postavke rješenja',
+        verbose_name=u"Postavke rješenja",
         choices=SOLUTION_SETTINGS_CHOICES,
         help_text=icon_help_text(
-            u'Postavi li se ograničenje, rješenja će biti '
-            u'prikazana na popisu, ali im tekst neće biti vidljiv.'
+            u"Postavi li se ograničenje, rješenja će biti "
+            u"prikazana na popisu, ali im tekst neće biti vidljiv."
         ),
     )
 
@@ -137,13 +137,13 @@ class Task(BasePermissionsModel):
     # Thus, just make sure not to show the task content in task view, list etc.
     prerequisites = models.CharField(
         max_length=100,
-        verbose_name='Preduvjeti',
+        verbose_name="Preduvjeti",
         blank=True,
         default='',
         help_text=icon_help_text(
-            u'Popis ID-eva zadataka, odvojenih zarezom, '
-            u'koji su preduvjet ovom zadatku. Korisnik će moći pristupiti '
-            u'zadatku samo uz poslana i točna rješenja navedenih zadataka.'
+            u"Popis ID-eva zadataka, odvojenih zarezom, "
+            u"koji su preduvjet ovom zadatku. Korisnik će moći pristupiti "
+            u"zadatku samo uz poslana i točna rješenja navedenih zadataka."
         ),
     )
 

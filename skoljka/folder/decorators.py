@@ -42,7 +42,7 @@ def folder_view(permission=VIEW):
                 explicit = folder.user_has_perm(request.user, permission)
                 if not explicit:
                     # Reject immediately, do not waste time
-                    return HttpResponseForbidden('No permission for this action!')
+                    return HttpResponseForbidden("No permission for this action!")
             else:
                 explicit = None
 
@@ -60,7 +60,7 @@ def folder_view(permission=VIEW):
                     # give me this same information?)
                     explicit = folder.user_has_perm(request.user, permission)
                 if not explicit:
-                    return HttpResponseForbidden('No permission for this action!')
+                    return HttpResponseForbidden("No permission for this action!")
 
             data['folder'] = folder
             try:

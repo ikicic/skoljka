@@ -232,7 +232,7 @@ class Fraction(Variable):
         return fraction.num * self.den == fraction.den * self.num
 
     def help_text(self):
-        return _("Write the solution in the form a/b, where a and b are " "integers.")
+        return _("Write the solution in the form a/b, where a and b are integers.")
 
     def get_sample_solution(self):
         return "{}/{}".format(self.num, self.den)
@@ -341,9 +341,7 @@ class List(BaseList):
 
     def help_text(self):
         if self.element_type == Integer:
-            msg = _(
-                "Write the results in the correct order, separated with " "a comma."
-            )
+            msg = _("Write the results in the correct order, separated with a comma.")
         if self.element_type == Float:
             decimal_count = self.items[0].decimal_count
             msg = (
@@ -363,9 +361,7 @@ class List(BaseList):
                 "them in the correct order."
             )
         if self.element_type == String:
-            msg = _(
-                "Write the results in the correct order, separated with a " "comma."
-            )
+            msg = _("Write the results in the correct order, separated with a comma.")
         if self.length_specified:
             msg += " " + _("Number of elements:") + " " + str(len(self.items))
         return msg

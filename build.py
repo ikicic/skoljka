@@ -23,14 +23,14 @@ def main(argv):
         sys.stdout.flush()
         time.sleep(1)
 
-    run_command("./node_modules/grunt-cli/bin/grunt")
-    run_command("python manage.py collectstatic --noinput")
+    run_command('./node_modules/grunt-cli/bin/grunt')
+    run_command('python manage.py collectstatic --noinput')
 
     # For some reason, the cmdline argument --settings=skoljka.settings does not work.
-    run_command("(cd skoljka && python ../manage.py compilemessages)")
+    run_command('(cd skoljka && python ../manage.py compilemessages)')
 
     # TODO: no "--all" if --force
-    run_command("python manage.py compile_templates -v 0 --all --noinput")
+    run_command('python manage.py compile_templates -v 0 --all --noinput')
 
 
 if __name__ == "__main__":

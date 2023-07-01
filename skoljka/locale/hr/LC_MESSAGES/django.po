@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-12 22:02+0200\n"
+"POT-Creation-Date: 2023-07-02 00:55+0200\n"
 "PO-Revision-Date: 2017-10-03 01:49+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
@@ -19,43 +19,43 @@ msgstr ""
 msgid "No recent activities"
 msgstr "Nema nedavnih aktivnosti"
 
-#: base/help.py:21
+#: base/help.py:23
 msgid "Partially supported."
 msgstr "Djelomično podržano."
 
-#: base/help.py:22
+#: base/help.py:24
 msgid "Possibly incompatible behavior."
 msgstr "Moguće nekompatilno ponašanje."
 
-#: base/help.py:24
+#: base/help.py:26
 msgid "Visually different when exported to PDF."
 msgstr "Vizualno drugačije kad se pretvori u PDF."
 
-#: base/help.py:27
+#: base/help.py:30
 msgid "Basic Commands"
 msgstr "Osnovne naredbe"
 
-#: base/help.py:28
+#: base/help.py:31
 msgid "Emphasized text (usually italic)."
 msgstr "Naglašeni tekst (obično italic)."
 
-#: base/help.py:29 base/help.py:112
+#: base/help.py:32 base/help.py:156
 msgid "Bold."
 msgstr "Bold."
 
-#: base/help.py:30 base/help.py:113
+#: base/help.py:33 base/help.py:157
 msgid "Italic."
 msgstr "Italic."
 
-#: base/help.py:31 base/help.py:114
+#: base/help.py:34 base/help.py:158
 msgid "Strikethrough."
 msgstr "Precrtano."
 
-#: base/help.py:32 base/help.py:115
+#: base/help.py:35 base/help.py:159
 msgid "Underline."
 msgstr "Podcrtano."
 
-#: base/help.py:34
+#: base/help.py:39
 msgid ""
 "Underline and disable word-wrap. It's recommended to use <code>\\uline</"
 "code> instead."
@@ -63,43 +63,43 @@ msgstr ""
 "Podcrtano s isključenim prijelomom teksta. Preporučeno je koristiti umjesto "
 "toga <code>\\uline</code>."
 
-#: base/help.py:37
+#: base/help.py:44
 msgid "Monospace font."
 msgstr "Monospace font."
 
-#: base/help.py:39
+#: base/help.py:45
 msgid "Newline."
 msgstr "Novi red."
 
-#: base/help.py:41
+#: base/help.py:46
 msgid "Advanced Commands"
 msgstr "Napredne naredbe"
 
-#: base/help.py:43
+#: base/help.py:49
 msgid "Show the given image."
 msgstr "Prikaži zadanu sliku."
 
-#: base/help.py:44
+#: base/help.py:52
 msgid "Figure caption."
 msgstr "Opis slike"
 
-#: base/help.py:45
+#: base/help.py:53
 msgid "Figure centering."
 msgstr "Centriranje slike"
 
-#: base/help.py:47
+#: base/help.py:56
 msgid "Set figure or equation label."
 msgstr "Postavi oznaku slike ili jednadžbe."
 
-#: base/help.py:48
+#: base/help.py:61
 msgid "Given a label, show a link to the related content."
 msgstr "Link na sadržaj označen zadanom oznakom."
 
-#: base/help.py:50 base/help.py:51
+#: base/help.py:66 base/help.py:67
 msgid "Link"
 msgstr "Link"
 
-#: base/help.py:53
+#: base/help.py:71
 msgid ""
 "Set value of the given length command. Currently, only <code>\\parindent</"
 "code> and <code>\\parskip</code> are supported, representing indentation "
@@ -109,11 +109,11 @@ msgstr ""
 "<code>\\parindent</code> i <code>\\parskip</code>, koji predstavljaju "
 "uvlačenje i gornju marginu paragrafa (razmak između paragrafa)."
 
-#: base/help.py:57
+#: base/help.py:77
 msgid "Note that the first paragraph is not indented."
 msgstr "Primijetite da prvi paragraf nije uvučen."
 
-#: base/help.py:58
+#: base/help.py:80
 #, python-format
 msgid ""
 "The default values are <code>%(parskip)s</code> for <code>\\parskip</code> "
@@ -122,63 +122,63 @@ msgstr ""
 "Početne vrijednosti su <code>%(parskip)s</code> za <code>\\parskip</code> i "
 "<code>%(parindent)s</code> za <code>\\parindent</code>."
 
-#: base/help.py:69
+#: base/help.py:93
 msgid "Other Commands"
 msgstr "Ostale naredbe"
 
-#: base/help.py:71
+#: base/help.py:96
 msgid "Framed box with disabled word-wrap."
 msgstr "Uokviren tekst s isključenim prijelomom teksta."
 
-#: base/help.py:72 base/help.py:76 base/help.py:135
+#: base/help.py:96 base/help.py:101 base/help.py:197
 msgid "Please don't misuse."
 msgstr "Molimo nemojte zloupotrebljavati."
 
-#: base/help.py:75
+#: base/help.py:101
 msgid "Disabled word-wrap."
 msgstr "Isključen prijelom teksta."
 
-#: base/help.py:80 base/help.py:81 base/help.py:82 base/help.py:85
-#: base/help.py:86 base/help.py:87 base/help.py:88 base/help.py:89
-#: base/help.py:90 base/help.py:91
+#: base/help.py:106 base/help.py:107 base/help.py:108 base/help.py:114
+#: base/help.py:115 base/help.py:116 base/help.py:117 base/help.py:118
+#: base/help.py:119 base/help.py:120
 #, python-format
 msgid "Symbol %s."
 msgstr "Simbol %s."
 
-#: base/help.py:83
+#: base/help.py:111
 msgid "Soft hyphen, shown in HTML as <pre>&amp;shy;</pre>."
 msgstr "Tzv. <i>soft hyphen</i>, prikazan u HTML-u kao <pre>&amp;shy;</pre>."
 
-#: base/help.py:93
+#: base/help.py:121
 msgid "LaTeX Environments"
 msgstr "LaTeX Environments"
 
-#: base/help.py:94
+#: base/help.py:124
 msgid "Centering."
 msgstr "Centriranje."
 
-#: base/help.py:97
+#: base/help.py:129
 msgid "Figure, used for inserting images."
 msgstr "Za ubacivanje slika."
 
-#: base/help.py:103
+#: base/help.py:144
 msgid "Pre-formatted text."
 msgstr "Unaprijed formatiran tekst."
 
-#: base/help.py:106
+#: base/help.py:149
 msgid "Similar to <code>verbatim</code>, where spaces are shown as &blank;."
 msgstr ""
 "Slično <code>verbatim</code>, samo što se razmaci prikazuju kao &blank;."
 
-#: base/help.py:116
+#: base/help.py:160
 msgid "Code."
 msgstr "Kod."
 
-#: base/help.py:118 base/help.py:120
+#: base/help.py:163 base/help.py:168
 msgid "Hidden text."
 msgstr "Skriven tekst."
 
-#: base/help.py:123
+#: base/help.py:174
 msgid ""
 "Shorthand for <code>\\setlength{\\parskip}{SKIP} \\setlength{\\parindent}"
 "{INDENT}</code>. Value <code>0</code> is treated as <code>0pt</code>."
@@ -186,16 +186,16 @@ msgstr ""
 "Kratica za <code>\\setlength{\\parskip}{SKIP} \\setlength{\\parindent}"
 "{INDENT}</code>. Vrijednost <code>0</code> se tretira kao <code>0pt</code>."
 
-#: base/help.py:128
+#: base/help.py:183
 msgid "Preformatted text. Simulates LaTeX environment <code>verbatim</code>."
 msgstr ""
 "Unaprijed formatiran tekst. Simulira <code>verbatim</code> LaTeX environment."
 
-#: base/help.py:131
+#: base/help.py:188
 msgid "Quotation."
 msgstr "Citat."
 
-#: base/help.py:134
+#: base/help.py:193
 msgid ""
 "Show the attachment #x, counting from 1. Optionally, specify the width and "
 "height."
@@ -203,15 +203,15 @@ msgstr ""
 "Prikaži priloženu sliku #x, brojeći od 1. Po želji se mogu specificirati "
 "duljina i visina slike."
 
-#: base/help.py:138 base/help.py:139
+#: base/help.py:201 base/help.py:204
 msgid "Link."
 msgstr "Link."
 
-#: base/help.py:146
+#: base/help.py:212
 msgid "Some text here."
 msgstr "Neki tekst."
 
-#: base/help.py:154 base/help.py:174
+#: base/help.py:220 base/help.py:239
 msgid "Incomplete."
 msgstr "Nedovršeno."
 
@@ -263,11 +263,11 @@ msgstr ""
 msgid "Map editing"
 msgstr "Uređivanje mape"
 
-#: base/templates/base.html:54 userprofile/forms.py:21 userprofile/forms.py:35
+#: base/templates/base.html:54 userprofile/forms.py:21 userprofile/forms.py:38
 msgid "Username"
 msgstr "Korisničko ime"
 
-#: base/templates/base.html:57 userprofile/forms.py:22 userprofile/forms.py:41
+#: base/templates/base.html:57 userprofile/forms.py:22 userprofile/forms.py:45
 msgid "Password"
 msgstr "Lozinka"
 
@@ -340,7 +340,7 @@ msgstr "Pretraživanje"
 msgid "Sign out"
 msgstr "Odjava"
 
-#: base/templates/base.html:111 competition/forms.py:83
+#: base/templates/base.html:111 competition/forms.py:88
 #: task/templates/task_new.html:91
 msgid "Help"
 msgstr "Pomoć"
@@ -451,15 +451,15 @@ msgstr "ILI"
 msgid "Error!"
 msgstr "Greška!"
 
-#: competition/evaluator_base.py:9
+#: competition/evaluator_base.py:10
 msgid "Invalid solution!"
 msgstr "Nevaljano rješenje!"
 
-#: competition/evaluator_base.py:18
+#: competition/evaluator_base.py:21
 msgid "Invalid solution descriptor!"
 msgstr "Nevaljan opis rješenja!"
 
-#: competition/evaluator_v0.py:36
+#: competition/evaluator_v0.py:39
 msgid ""
 "Follow the instructions in the problem description. In the case the result "
 "is a number, please make sure to use the exact number of decimals as "
@@ -468,7 +468,7 @@ msgstr ""
 "Pratite instrukcije u tekstu zadatka. U slučaju da je rješenje broj, molimo "
 "pripazite da ste unijeli točan broj decimala."
 
-#: competition/evaluator_v0.py:59
+#: competition/evaluator_v0.py:64
 msgid ""
 "Split different correct results with a '|' character. Character '|' cannot "
 "be a part of the result. Trailing and leading spaces are always ignored."
@@ -476,51 +476,51 @@ msgstr ""
 "Razdvojite različita točna rješenja sa znakom '|'. Znak '|' ne može biti dio "
 "rješenja. Vodeći i prateći razmaci se uvijek ignoriraju."
 
-#: competition/evaluator_v1.py:24
+#: competition/evaluator_v1.py:29
 msgid "Invalid number of elements!"
 msgstr "Nevaljan broj članova!"
 
-#: competition/evaluator_v1.py:30
+#: competition/evaluator_v1.py:36
 msgid "Too few decimals!"
 msgstr "Premalen broj decimala!"
 
-#: competition/evaluator_v1.py:37
+#: competition/evaluator_v1.py:44
 msgid "Mixed types of elements not allowed!"
 msgstr "Miješani tipovi članova nisu dozvoljeni!"
 
-#: competition/evaluator_v1.py:43
+#: competition/evaluator_v1.py:51
 msgid "Mixed precisions not allowed!"
 msgstr "Miješane preciznosti brojeva nisu dozvoljene!"
 
-#: competition/evaluator_v1.py:49
+#: competition/evaluator_v1.py:58
 msgid "Unallowed characters!"
 msgstr "Nedozvoljeni znakovi!"
 
-#: competition/evaluator_v1.py:55
+#: competition/evaluator_v1.py:65
 msgid "Invalid modifiers!"
 msgstr "Nevaljani modifikatori!"
 
-#: competition/evaluator_v1.py:61
+#: competition/evaluator_v1.py:72
 msgid "Ambiguous, is it a number or a string?"
 msgstr "Dvoznačno, je li broj ili string?"
 
-#: competition/evaluator_v1.py:67
+#: competition/evaluator_v1.py:79
 msgid "Ambiguous, is it a float or a list?"
 msgstr "Dvoznačno, je li decimalni broj ili lista?"
 
-#: competition/evaluator_v1.py:73
+#: competition/evaluator_v1.py:86
 msgid "Elements must be separated by a comma!"
 msgstr "Članovi moraju biti razdvojeni zarezom!"
 
-#: competition/evaluator_v1.py:79
+#: competition/evaluator_v1.py:93
 msgid "Denominator cannot be 0!"
 msgstr "Nazivnik ne može biti 0!"
 
-#: competition/evaluator_v1.py:106
+#: competition/evaluator_v1.py:120
 msgid "Integer"
 msgstr "Cijeli broj"
 
-#: competition/evaluator_v1.py:114
+#: competition/evaluator_v1.py:129
 msgid ""
 "A simple number, positive or negative. In general, all numbers mentioned "
 "below can be positive or negative."
@@ -528,7 +528,7 @@ msgstr ""
 "Običan broj, pozitivan ili negativan. Općenito, svi dolje spomenuti brojevi "
 "mogu biti pozitivni ili negativni."
 
-#: competition/evaluator_v1.py:154
+#: competition/evaluator_v1.py:172
 #, python-format
 msgid "Write the result rounded to %(count)d decimal."
 msgid_plural "Write the result rounded to %(count)d decimals."
@@ -536,11 +536,11 @@ msgstr[0] "Napišite rezultat zaokružen na %(count)d decimalu."
 msgstr[1] "Napišite rezultat zaokružen na %(count)d decimale."
 msgstr[2] "Napišite rezultat zaokružen na %(count)d decimala."
 
-#: competition/evaluator_v1.py:164
+#: competition/evaluator_v1.py:186
 msgid "Decimal number"
 msgstr "Decimalni broj"
 
-#: competition/evaluator_v1.py:168
+#: competition/evaluator_v1.py:191
 msgid ""
 "The solution is required to have at least as many decimals as entered by the "
 "author, otherwise it will be rejected. The solution is accepted if and only "
@@ -555,7 +555,7 @@ msgstr ""
 "točno zaokružiti broj, molimo provjerite ručno prihvaća li se rješenje s "
 "više decimala. Preferirajte decimalne točke umjesto zareza."
 
-#: competition/evaluator_v1.py:179
+#: competition/evaluator_v1.py:204
 msgid ""
 "The solution must have as least as many decimals as written in the "
 "description, and has to exactly match the official solution when rounded to "
@@ -564,15 +564,15 @@ msgstr ""
 "Rješenje mora imati barem toliko decimala koliko piše u opisu, i mora biti "
 "točno jednako službenom rješenju kada se zaokruži na taj broj decimala."
 
-#: competition/evaluator_v1.py:209
+#: competition/evaluator_v1.py:235
 msgid "Write the solution in the form a/b, where a and b are integers."
 msgstr "Rješenje napišite u obliku a/b, gdje su a i b cijeli brojevi."
 
-#: competition/evaluator_v1.py:217
+#: competition/evaluator_v1.py:242
 msgid "Fraction"
 msgstr "Razlomak"
 
-#: competition/evaluator_v1.py:221
+#: competition/evaluator_v1.py:247
 msgid ""
 "Fraction is written in the format a/b, where a and b are integers. The "
 "competitors solution will be accepted if it is an integer or a fraction "
@@ -582,7 +582,7 @@ msgstr ""
 "rješenje će  biti prihvaćeno ako se radi o cijelom broju ili razlomku "
 "jednakom traženoj vrijednosti. Neskraćeni razlomci su također prihvaćaju."
 
-#: competition/evaluator_v1.py:228
+#: competition/evaluator_v1.py:256
 msgid ""
 "Fractions are written in the format a/b, where a and b are integers. "
 "Reducible fractions are accepted. You can also write a single integer if you "
@@ -592,11 +592,11 @@ msgstr ""
 "razlomci se također prihvaćaju. Možete napisati i sami cijeli broj ako ste "
 "sigurni da rješenje jest cijeli broj. Decimalni brojevi se ne prihvaćaju."
 
-#: competition/evaluator_v1.py:317 competition/evaluator_v1.py:332
+#: competition/evaluator_v1.py:344 competition/evaluator_v1.py:364
 msgid "Write the results in the correct order, separated with a comma."
 msgstr "Rezultate napišite u točnom poretku, razdvojene zarezom."
 
-#: competition/evaluator_v1.py:322
+#: competition/evaluator_v1.py:349
 #, python-format
 msgid ""
 "Write the results in the correct order, round to %(decimals)d decimal and "
@@ -614,7 +614,7 @@ msgstr[2] ""
 "Rezultate napišite u točnom poretku, zaokružene na %(decimals)d decimala i "
 "razdvojene zarezom."
 
-#: competition/evaluator_v1.py:328
+#: competition/evaluator_v1.py:359
 msgid ""
 "Write the results in in the form a/b, where a and b are integers. Separate "
 "the results with a comma, and write them in the correct order."
@@ -622,15 +622,15 @@ msgstr ""
 "Rezultate napišite u obliku a/b, gdje su a i b cijeli brojevi. Rezultate "
 "razdvojite zarezom te ih napišite u točnom poretku."
 
-#: competition/evaluator_v1.py:335 competition/evaluator_v1.py:420
+#: competition/evaluator_v1.py:366 competition/evaluator_v1.py:460
 msgid "Number of elements:"
 msgstr "Broj članova:"
 
-#: competition/evaluator_v1.py:340
+#: competition/evaluator_v1.py:371
 msgid "List"
 msgstr "Niz"
 
-#: competition/evaluator_v1.py:344
+#: competition/evaluator_v1.py:376
 msgid ""
 "A list can contain integers, decimal numbers, fractions or strings (anything "
 "else). All elements must have the same type. Elements are separated with a "
@@ -644,7 +644,7 @@ msgstr ""
 "članova niz ima, stavit prefix '#:'. Da bi napravili jednočlanu listu, "
 "stavite član unutar [ ] zagrada."
 
-#: competition/evaluator_v1.py:353
+#: competition/evaluator_v1.py:387
 msgid ""
 "A list can contain integers, decimal numbers, fractions or strings (anything "
 "else). If not obvious, the type of elements will be specified, together with "
@@ -658,11 +658,11 @@ msgstr ""
 "traženi broj članova će biti specificiran ili ne. Niz također može "
 "sadržavati jedan član! Razdvajajte članove zarezom."
 
-#: competition/evaluator_v1.py:404 competition/evaluator_v1.py:418
+#: competition/evaluator_v1.py:438 competition/evaluator_v1.py:458
 msgid "Write the results in any order, separated with a comma."
 msgstr "Napišite rezultate u bilo kojem poretku, razdvojene zarezom."
 
-#: competition/evaluator_v1.py:408
+#: competition/evaluator_v1.py:443
 #, python-format
 msgid ""
 "Write the results in any order, round to %(decimals)d decimal and separated "
@@ -680,7 +680,7 @@ msgstr[2] ""
 "Napišite rezultate u bilo kojem poretku, zaokružene na %(decimals)d decimala "
 "i razdvojene zarezom."
 
-#: competition/evaluator_v1.py:414
+#: competition/evaluator_v1.py:453
 msgid ""
 "Write the results in the form a/b, where a and b are integers. Separate the "
 "results with a comma. List them in any order."
@@ -688,11 +688,11 @@ msgstr ""
 "Rezultate napišite u obliku a/b, gdje su a i b cijeli brojevi. Rezultate "
 "razdvojite zarezom i navedite ih u bilo kojem poretku."
 
-#: competition/evaluator_v1.py:425
+#: competition/evaluator_v1.py:465
 msgid "Set"
 msgstr "Skup"
 
-#: competition/evaluator_v1.py:429
+#: competition/evaluator_v1.py:470
 msgid ""
 "Acts similarly to lists, only the elements are treated as unordered. Put the "
 "comma separated values inside the { } brackets. Same as for lists, use #: "
@@ -706,15 +706,15 @@ msgstr ""
 "ponašaju kao multiskupovi, molimo navedite u tekstu zadatka direktno ako se "
 "očekuje više jednakih vrijednosti."
 
-#: competition/evaluator_v1.py:438
+#: competition/evaluator_v1.py:480
 msgid "Same as for lists, just the order does not matter."
 msgstr "Isto kao i za nizove, samo što poredak nije bitan."
 
-#: competition/evaluator_v1.py:457
+#: competition/evaluator_v1.py:498
 msgid "String"
 msgstr "String"
 
-#: competition/evaluator_v1.py:461
+#: competition/evaluator_v1.py:503
 msgid ""
 "Anything that does not match any other type. To force the type to be a "
 "string, use = prefix."
@@ -722,7 +722,7 @@ msgstr ""
 "Bilo što što ne odgovara drugim tipovima. Ukoliko želite forsirati tip da "
 "bude string, stavite = prefiks."
 
-#: competition/evaluator_v1.py:466
+#: competition/evaluator_v1.py:510
 msgid ""
 "Anything that does not match any other type. That can include words, special "
 "formats, or even numbers of special forms."
@@ -730,21 +730,21 @@ msgstr ""
 "Bilo što što ne odgovara drugim tipovima. To može uključivati riječi, "
 "specijalne formate, ili čak brojeve u specijalnim oblicima."
 
-#: competition/evaluator_v1.py:484
+#: competition/evaluator_v1.py:528
 msgid "Textual"
 msgstr "Tekstualno"
 
-#: competition/evaluator_v1.py:488
+#: competition/evaluator_v1.py:533
 #, python-format
 msgid "To enable textual (manually graded) answer, set task solution to %s."
 msgstr ""
 "Za tekstualna (ručno ocijenjena) rješenja, unesite %s kao traženo rješenje."
 
-#: competition/evaluator_v1.py:493
+#: competition/evaluator_v1.py:539
 msgid "Textual answer, manually graded by the organizers."
 msgstr "Tekstualna, ručno ocijenjena, rješenja."
 
-#: competition/evaluator_v1.py:598
+#: competition/evaluator_v1.py:647
 msgid ""
 "Split different accepted solutions by a '|' character. To use the '|' "
 "character, write '\\|'. To use '\\', write '\\\\'. Trailing and leading "
@@ -754,104 +754,105 @@ msgstr ""
 "kao dio rješenja, napišite '\\|'. Da bi dobili '\\', napišite '\\\\'.  "
 "Vodeći i prateći razmaci se uvijek ignoriraju."
 
-#: competition/forms.py:40
+#: competition/forms.py:46
 msgid "Descriptor error. Please notify admins!"
 msgstr "Nevaljan deskriptor. Molimo obavijestite administratore!"
 
-#: competition/forms.py:78
+#: competition/forms.py:81
 msgid "Invalid!"
 msgstr "Nevaljano rješenje!"
 
-#: competition/forms.py:80 solution/templates/inc_solution_list.html:35
+#: competition/forms.py:84 solution/templates/inc_solution_list.html:35
 msgid "Solution"
 msgstr "Rješenje"
 
-#: competition/forms.py:137
+#: competition/forms.py:151
 msgid "Unlock days"
 msgstr "Vrijeme otključavanja u danima"
 
-#: competition/forms.py:254
+#: competition/forms.py:274
 msgid "Team name cannot be empty."
 msgstr "Naziv tima ne može biti prazan."
 
-#: competition/forms.py:272
+#: competition/forms.py:292
 #, python-format
 msgid "Unknown username \"%s\"."
 msgstr "Nepoznato korisničko ime \"%s\"."
 
-#: competition/forms.py:275
+#: competition/forms.py:294
 msgid "You are automatically added to the team."
 msgstr "Vi ste automatski dodani u tim."
 
-#: competition/forms.py:282
+#: competition/forms.py:304
 #, python-format
 msgid "User \"%s\" is already a member of a team."
 msgstr "Korisnik \"%s\" je već član nekog tima."
 
-#: competition/forms.py:294
+#: competition/forms.py:318
 msgid "Team name already used!"
 msgstr "Ime tima se već koristi."
 
-#: competition/forms.py:321
+#: competition/forms.py:344
 #, python-format
 msgid "Unknown team category '%s'!"
 msgstr "Nepoznata timska kategorija '%s'."
 
-#: competition/forms.py:333
+#: competition/forms.py:356
 msgid "Competitors"
 msgstr "Natjecatelji"
 
-#: competition/forms.py:334
+#: competition/forms.py:357
 msgid "Unofficial"
 msgstr "Neslužbeni"
 
-#: competition/forms.py:335
+#: competition/forms.py:358
 msgid "Administrators"
 msgstr "Administratori"
 
-#: competition/models.py:75 competition/models.py:166 competition/models.py:342
-#: competition/views.py:1172
+#: competition/models.py:83 competition/models.py:175 competition/models.py:360
+#: competition/views.py:1353
 msgid "Message"
 msgstr "Poruka"
 
-#: competition/models.py:95 competition/templates/competition_scoreboard.html:9
+#: competition/models.py:103
+#: competition/templates/competition_scoreboard.html:9
 msgid "Participants"
 msgstr "Polaznici"
 
-#: competition/models.py:95
+#: competition/models.py:103
 #: competition/templates/competition_scoreboard.html:11
 msgid "Scoreboard"
 msgstr "Bodovna lista"
 
-#: competition/models.py:136
+#: competition/models.py:145
 msgid "Course has finished."
 msgstr "Tečaj je završio!"
 
-#: competition/models.py:138
+#: competition/models.py:147
 msgid "Competition has finished."
 msgstr "Natjecanje je završilo!"
 
-#: competition/models.py:142
+#: competition/models.py:151
 msgid "Course has not started yet."
 msgstr "Tečaj još nije počeo!"
 
-#: competition/models.py:144
+#: competition/models.py:153
 msgid "Competition has not started yet."
 msgstr "Natjecanje još nije počelo!"
 
-#: competition/models.py:227
+#: competition/models.py:238
 msgid "Gradual unlocking"
 msgstr "Postepeno otključavanje"
 
-#: competition/models.py:228
+#: competition/models.py:239
 msgid "All tasks unlocked"
 msgstr "Svi zadaci otključani"
 
-#: competition/models.py:242
+#: competition/models.py:253
 msgid "Position in the category."
 msgstr "Pozicija u kategoriji."
 
-#: competition/views.py:491 competition/templatetags/competition_tags.py:170
+#: competition/views.py:574 competition/templatetags/competition_tags.py:189
 #, python-format
 msgid "This task is worth %d point."
 msgid_plural "This task is worth %d points."
@@ -859,19 +860,19 @@ msgstr[0] "Ovaj zadatak vrijedi %d bod."
 msgstr[1] "Ovaj zadatak vrijedi %d boda."
 msgstr[2] "Ovaj zadatak vrijedi %d bodova."
 
-#: competition/views.py:502
+#: competition/views.py:592
 msgid "There are new messages."
 msgstr "Nove poruke."
 
-#: competition/views.py:880
+#: competition/views.py:1038
 msgid "Number of admins that solved this task."
 msgstr "Broj administratora koji su riješili ovaj zadatak."
 
-#: competition/views.py:1084
+#: competition/views.py:1262
 msgid "Task:"
 msgstr "Zadatak:"
 
-#: competition/views.py:1088
+#: competition/views.py:1266
 msgid "Write the question / message here."
 msgstr "Napišite pitanje / poruku ovdje."
 
@@ -1087,7 +1088,7 @@ msgstr "Autor"
 msgid "Text"
 msgstr "Tekst"
 
-#: competition/templates/competition_chain_list_tasks.html:96 post/forms.py:7
+#: competition/templates/competition_chain_list_tasks.html:96 post/forms.py:8
 msgid "Comment"
 msgstr "Komentar"
 
@@ -1104,8 +1105,8 @@ msgstr "Lanci (iskorišteni zadaci)"
 msgid "Category"
 msgstr "Kategorija"
 
-#: competition/templates/competition_chain_list_tasks.html:133
-#: task/templates/inc_task_list_table.html:14
+#: competition/templates/competition_chain_list_tasks.html:133 task/forms.py:48
+#: task/models.py:85 task/templates/inc_task_list_table.html:14
 msgid "Title"
 msgstr "Naslov"
 
@@ -1718,7 +1719,7 @@ msgstr "Nove aktivnosti"
 msgid "Members:"
 msgstr "Članovi:"
 
-#: competition/templatetags/competition_tags.py:105
+#: competition/templatetags/competition_tags.py:120
 #, python-format
 msgid "%d important"
 msgid_plural "%d important"
@@ -1726,7 +1727,7 @@ msgstr[0] "%d važan"
 msgstr[1] "%d važna"
 msgstr[2] "%d važnih"
 
-#: competition/templatetags/competition_tags.py:108
+#: competition/templatetags/competition_tags.py:123
 #, python-format
 msgid "%d my task"
 msgid_plural "%d my tasks"
@@ -1734,7 +1735,7 @@ msgstr[0] "%d moj zadatak"
 msgstr[1] "%d moja zadatka"
 msgstr[2] "%d mojih zadataka"
 
-#: competition/templatetags/competition_tags.py:241
+#: competition/templatetags/competition_tags.py:266
 #, python-format
 msgid "%(actor)s updated the score to %(score)d."
 msgid_plural "%(actor)s updated the score to %(score)d."
@@ -1762,58 +1763,58 @@ msgstr "Napravi kolekciju"
 msgid "My collections"
 msgstr "Moje kolekcije"
 
-#: mathcontent/utils.py:34 mathcontent/templates/inc_mathcontent_render.html:9
+#: mathcontent/utils.py:35 mathcontent/templates/inc_mathcontent_render.html:9
 msgid "Internal parser error. Please contact administrators."
 msgstr "Greška parsiranja. Molimo obavijestite administratore!"
 
-#: mathcontent/converter_v1/__init__.py:262
-#: mathcontent/converter_v1/__init__.py:274
+#: mathcontent/converter_v1/__init__.py:289
+#: mathcontent/converter_v1/__init__.py:301
 msgid "Ending not found:"
 msgstr "Kraj nije pronađen:"
 
-#: mathcontent/converter_v1/__init__.py:291
+#: mathcontent/converter_v1/__init__.py:317
 msgid "None of the endings found:"
 msgstr "Niti jedan od krajeva nije pronađen:"
 
-#: mathcontent/converter_v1/__init__.py:353
+#: mathcontent/converter_v1/__init__.py:378
 msgid "Unknown LaTeX command."
 msgstr "Nepoznata LaTeX naredba."
 
-#: mathcontent/converter_v1/__init__.py:392
+#: mathcontent/converter_v1/__init__.py:418
 msgid "Expected a '{' bracket."
 msgstr "Očekuje se '{' zagrada."
 
-#: mathcontent/converter_v1/__init__.py:411
+#: mathcontent/converter_v1/__init__.py:439
 #, python-format
 msgid "Expected a '%s' bracket."
 msgstr "Očekuje se '%s' zagrada."
 
-#: mathcontent/converter_v1/__init__.py:502
+#: mathcontent/converter_v1/__init__.py:535
 msgid "Unexpected '}'."
 msgstr "Neočekivana zagrada '}'."
 
-#: mathcontent/converter_v1/__init__.py:528
+#: mathcontent/converter_v1/__init__.py:557
 msgid "Expected a '}' bracket."
 msgstr "Očekuje se '}' zagrada."
 
-#: mathcontent/converter_v1/__init__.py:530
+#: mathcontent/converter_v1/__init__.py:559
 msgid "End delimiter missing."
 msgstr "Nedostaje krajnja oznaka."
 
-#: mathcontent/converter_v1/__init__.py:558
+#: mathcontent/converter_v1/__init__.py:586
 msgid "Invalid LaTeX."
 msgstr "Nevaljan LaTeX."
 
-#: mathcontent/converter_v1/__init__.py:810
+#: mathcontent/converter_v1/__init__.py:858
 msgid "Unexpected '}'"
 msgstr "Neočekivana zagrada '}'."
 
-#: mathcontent/converter_v1/basics.py:39 mathcontent/converter_v1/basics.py:55
-#: mathcontent/converter_v1/latex.py:44
+#: mathcontent/converter_v1/basics.py:37 mathcontent/converter_v1/basics.py:53
+#: mathcontent/converter_v1/latex.py:55
 msgid "Unexpected value:"
 msgstr "Neočekivana vrijednost:"
 
-#: mathcontent/converter_v1/basics.py:59 mathcontent/converter_v1/bbcode.py:60
+#: mathcontent/converter_v1/basics.py:57 mathcontent/converter_v1/bbcode.py:61
 msgid "Unexpected attribute:"
 msgstr "Neočekivani atribut"
 
@@ -1825,15 +1826,15 @@ msgstr "Neočekivani parametar/ri."
 msgid "Unexpected parameter:"
 msgstr "Neočekivani parametar:"
 
-#: mathcontent/converter_v1/bbcode.py:51 mathcontent/converter_v1/bbcode.py:58
+#: mathcontent/converter_v1/bbcode.py:52 mathcontent/converter_v1/bbcode.py:59
 msgid "Expected a number."
 msgstr "Traži se broj."
 
-#: mathcontent/converter_v1/bbcode.py:62
+#: mathcontent/converter_v1/bbcode.py:63
 msgid "Incompatible scaling."
 msgstr "Nekompatibilno skaliranje"
 
-#: mathcontent/converter_v1/bbcode.py:252 mathcontent/converter_v1/latex.py:406
+#: mathcontent/converter_v1/bbcode.py:252 mathcontent/converter_v1/latex.py:416
 msgid "Attachments not shown in a preview."
 msgstr "U pregledu slike nisu prikazane."
 
@@ -1850,66 +1851,66 @@ msgstr "Nevaljana vrijednost \"%(val)s\" za atribut \"%(attr)s\"."
 msgid "Unavailable attachment:"
 msgstr "Nedostupna slika:"
 
-#: mathcontent/converter_v1/bbcode.py:317
+#: mathcontent/converter_v1/bbcode.py:322
 msgid "Expected two attributes."
 msgstr "Traže se dva atributa."
 
-#: mathcontent/converter_v1/bbcode.py:320
+#: mathcontent/converter_v1/bbcode.py:326
 msgid "Unexpected attribute value:"
 msgstr "Neočekivana vrijednost atributa:"
 
-#: mathcontent/converter_v1/bbcode.py:330
+#: mathcontent/converter_v1/bbcode.py:338
 msgid "Unexpected attribute value."
 msgstr "Neočekivana vrijednost atributa."
 
-#: mathcontent/converter_v1/latex.py:67
+#: mathcontent/converter_v1/latex.py:78
 msgid "Closing '}' bracket not found."
 msgstr "Nedostaje zagrada '}'."
 
-#: mathcontent/converter_v1/latex.py:81
+#: mathcontent/converter_v1/latex.py:92
 msgid "Invalid format:"
 msgstr "Nevaljani format:"
 
-#: mathcontent/converter_v1/latex.py:217
+#: mathcontent/converter_v1/latex.py:226
 #, python-format
 msgid "Ignored the rest of the line after %s!"
 msgstr "Ostatak reda nakon %s je ignoriran!"
 
-#: mathcontent/converter_v1/latex.py:256
+#: mathcontent/converter_v1/latex.py:268
 msgid "Unexpected \\end."
 msgstr "Neočekivani \\end."
 
-#: mathcontent/converter_v1/latex.py:260
+#: mathcontent/converter_v1/latex.py:272
 #, python-format
 msgid "Expected '%(expected)s', received '%(received)s'."
 msgstr "Očekivano '%(expected)s', dobiveno '%(received)s'."
 
-#: mathcontent/converter_v1/latex.py:284
+#: mathcontent/converter_v1/latex.py:295
 msgid "Unexpected \\caption."
 msgstr "Neočekivani \\caption."
 
-#: mathcontent/converter_v1/latex.py:330
+#: mathcontent/converter_v1/latex.py:344
 msgid "Unexpected \\centering."
 msgstr "Neočekivani \\centering."
 
-#: mathcontent/converter_v1/latex.py:411
+#: mathcontent/converter_v1/latex.py:421
 msgid "Attachment not found:"
 msgstr "Slika nije pronađena:"
 
-#: mathcontent/converter_v1/latex.py:447
+#: mathcontent/converter_v1/latex.py:457
 msgid "Unexpected '\\label'."
 msgstr "Neočekivani \\label."
 
-#: mathcontent/converter_v1/latex.py:450
+#: mathcontent/converter_v1/latex.py:460
 msgid "Tag missing, did you put \\label before \\caption?"
 msgstr "Nedostaje tag, jeste li stavili \\label prije \\caption?"
 
-#: mathcontent/converter_v1/latex.py:505
+#: mathcontent/converter_v1/latex.py:516
 #, python-format
 msgid "Unsupported value \"%(value)s\" for the command \"%(cmd)s\"."
 msgstr "Nepodržana vrijednost \"%(value)s\" za naredbu \"%(cmd)s\"."
 
-#: mathcontent/converter_v1/tokens.py:63
+#: mathcontent/converter_v1/tokens.py:78
 msgid "Warning:"
 msgstr "Upozorenje:"
 
@@ -1946,7 +1947,7 @@ msgstr "Nema datoteka."
 msgid "Upload an attachment"
 msgstr "Dodaj datoteku"
 
-#: permissions/views.py:118
+#: permissions/views.py:135
 msgid "Changes saved."
 msgstr "Promjene spremljene."
 
@@ -2093,20 +2094,20 @@ msgctxt "title"
 msgid "Submit a solution"
 msgstr "Pošalji rješenje"
 
-#: tags/managers.py:23 tags/models.py:16
+#: tags/managers.py:25 tags/models.py:17
 #: task/templates/inc_task_list_table.html:15
 msgid "Tags"
 msgstr "Oznake"
 
-#: tags/models.py:15 tags/templates/tags_list.html:30
+#: tags/models.py:16 tags/templates/tags_list.html:30
 msgid "Tag"
 msgstr "Oznaka"
 
-#: tags/models.py:33
+#: tags/models.py:36
 msgid "Tagged Item"
 msgstr "Označeni predmet"
 
-#: tags/models.py:34
+#: tags/models.py:37
 msgid "Tagged Items"
 msgstr "Označeni predmeti"
 
@@ -2126,113 +2127,146 @@ msgstr "Težina"
 msgid "New difficulty"
 msgstr "Nova težina"
 
-#: task/bulk_format.py:126
+#: task/bulk_format.py:135
 #, python-format
 msgid "User \"%s\" not found."
 msgstr "Korisnik \"%s\" nije pronađen."
 
-#: task/bulk_format.py:133
+#: task/bulk_format.py:142
 #, python-format
 msgid "Folder #%d does not exist or no edit permission."
 msgstr "Direktorij #%d ne postoji ili nemate prava za uređivanje."
 
-#: task/bulk_format.py:149
+#: task/bulk_format.py:157
 #, python-format
 msgid "User or group \"%s\" not found."
 msgstr "Nije pronađen korisnik ili grupa \"%s\"."
 
-#: task/bulk_format.py:175
+#: task/bulk_format.py:181
 msgid "Expected a non-empty string."
 msgstr "Traži se neprazan string."
 
-#: task/bulk_format.py:179
+#: task/bulk_format.py:185
 #, python-format
 msgid "Expected an integer between 0 and %d, inclusive."
 msgstr "Traži se cijeli broj između 0 i %d, uključujući."
 
-#: task/bulk_format.py:184
+#: task/bulk_format.py:189
 msgid "Expected a nonnegative integer or an empty string."
 msgstr "Traži se nenegativan cijeli broj ili prazan string."
 
-#: task/bulk_format.py:188
+#: task/bulk_format.py:193
 msgid "Expected an integer or an empty string."
 msgstr "Traži se cijeli broj ili prazan string."
 
-#: task/bulk_format.py:191
+#: task/bulk_format.py:196
 msgid "Expected 0 or 1."
 msgstr "Traži se 0 ili 1."
 
-#: task/bulk_format.py:225
+#: task/bulk_format.py:230
 msgid "Missing a '}' brace."
 msgstr "Nedostaje zagrada '}'."
 
-#: task/bulk_format.py:256
+#: task/bulk_format.py:261
 msgid "Expected @{factor*variable-name}."
 msgstr "Traži se @{facotr*variable-name}."
 
-#: task/bulk_format.py:262
+#: task/bulk_format.py:267
 #, python-format
 msgid "Cyclic dependency detected for the variable \"%s\"."
 msgstr "Pronađena ciklična ovisnost za varijablu \"%s\"."
 
-#: task/bulk_format.py:271
+#: task/bulk_format.py:276
 msgid "Unknown variable name:"
 msgstr "Nepoznata varijabla:"
 
-#: task/bulk_format.py:279
+#: task/bulk_format.py:284
 #, python-format
 msgid "Value of the variable \"%s\" too long."
 msgstr "Vrijednost varijable \"%s\" predugačka."
 
-#: task/bulk_format.py:299
+#: task/bulk_format.py:303
 msgid "Invalid parameter count."
 msgstr "Nevaljan broj parametara."
 
-#: task/bulk_format.py:309
+#: task/bulk_format.py:313
 msgid "Unrecognized permission name."
 msgstr "Nepoznat naziv privilegije."
 
-#: task/bulk_format.py:363
+#: task/bulk_format.py:365
 msgid "Invalid variable:"
 msgstr "Nevaljana varijabla:"
 
-#: task/bulk_format.py:376
+#: task/bulk_format.py:378
 #, python-format
 msgid "Error at line number %d:"
 msgstr "Greška u liniji %d:"
 
-#: task/bulk_format.py:397
+#: task/bulk_format.py:400
 #, python-format
 msgid "Parsing error for the task #%d:"
 msgstr "Greška parsiranja za zadatak #%d:"
 
-#: task/bulk_format.py:425
+#: task/bulk_format.py:429
 msgid "Unknown command."
 msgstr "Nepoznata naredba."
 
-#: task/bulk_format.py:438
+#: task/bulk_format.py:442
 #, python-format
 msgid "Invalid value(s) for the task #%d:"
 msgstr "Nevaljana/e vrijednost/i za zadatak #%d:"
 
-#: task/forms.py:35
+#: task/forms.py:37
 msgid "At least one task expected."
 msgstr "Traži se barem jedan zadatak."
 
-#: task/forms.py:169
+#: task/forms.py:49
+msgid "URL"
+msgstr "URL"
+
+#: task/forms.py:50 task/models.py:91 task/templates/task_detail.html:99
+msgid "Source"
+msgstr "Izvor"
+
+#: task/forms.py:51
+msgid "Index"
+msgstr "Indeks"
+
+#: task/forms.py:52
+msgid "ID"
+msgstr "ID"
+
+#: task/forms.py:98
+msgid "Invalid format."
+msgstr "Nevaljani format."
+
+#: task/forms.py:153
+msgid "The tag 'news' is not allowed."
+msgstr "Oznaka 'news' nije dozvoljena."
+
+#: task/forms.py:194
 msgid ""
 "ID of the folder containing the problems and files related to this lecture."
 msgstr "ID kolekcije koja sadrži probleme i datoteke vezane uz ovo predavanje."
 
-#: task/models.py:46 task/templates/inc_task_bulk_preview_single.html:30
+#: task/models.py:63 task/models.py:90
+#: task/templates/inc_task_bulk_preview_single.html:30 usergroup/models.py:63
 msgid "Hidden"
 msgstr "Skriven"
 
-#: task/models.py:49 usergroup/templates/usergroup_list.html:13
+#: task/models.py:66 usergroup/templates/usergroup_list.html:13
 msgid "Name"
 msgstr "Naziv"
 
-#: task/models.py:133
+#: task/models.py:106
+msgid "Solvable"
+msgstr "Riješivo"
+
+#: task/models.py:107
+msgid "Can solutions be submitted?"
+msgstr "Mogu li se slati rješenja?"
+
+#: task/models.py:164
 msgid "Lecture video URL"
 msgstr "URL videa predavanja"
 
@@ -2468,10 +2502,6 @@ msgstr "Makni s naslovne"
 msgid "Click here to open the file."
 msgstr "Kliknite ovdje kako biste otvorili datoteku."
 
-#: task/templates/task_detail.html:99
-msgid "Source"
-msgstr "Izvor"
-
 #: task/templates/task_export.html:6 task/templates/task_export.html.py:10
 #, python-format
 msgid "Export to %(format)s"
@@ -2582,31 +2612,31 @@ msgstr "Dodaj"
 msgid "Cancel"
 msgstr "Odustani"
 
-#: userprofile/forms.py:38
+#: userprofile/forms.py:41
 msgid "Email"
 msgstr "Email"
 
-#: userprofile/forms.py:44
+#: userprofile/forms.py:49
 msgid "Confirm password"
 msgstr "Potvrda lozinke"
 
-#: userprofile/forms.py:47
+#: userprofile/forms.py:53
 msgid "I accept the <a href=\"/tou/\">Terms of Use</a>"
 msgstr "Prihvaćam <a href=\"/tou/\">Uvjete korištenja</a>"
 
-#: userprofile/forms.py:49
+#: userprofile/forms.py:56
 msgid "You may not use Školjka if you do not accept the Terms of Use."
 msgstr "Ne možete koristiti Školjku ako ne prihvaćate Uvjete korištenja."
 
-#: userprofile/forms.py:70
+#: userprofile/forms.py:81
 msgid "This name is already reserved. Please choose another."
 msgstr "Navedeno ime je već iskorišteno. Molimo izaberite drugo."
 
-#: userprofile/forms.py:76
+#: userprofile/forms.py:88
 msgid "E-mail address already in use."
 msgstr "Email adresa se već koristi."
 
-#: userprofile/forms.py:83
+#: userprofile/forms.py:94
 msgid "Passwords do not match!"
 msgstr "Lozinke se ne slažu!"
 

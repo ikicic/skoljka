@@ -76,9 +76,9 @@ class FolderForm(forms.ModelForm):
                 if 'parent' not in self.errors:
                     self.errors.update(parent=[])
                 self.errors['parent'].append(
-                    'Trenutačna roditeljska kolekcija '
-                    'nije dostupna! Kako bi ova kolekcija bila dostupna iz '
-                    'izbornika, premjestite je u neku dostupnu kolekciju.'
+                    "Trenutačna roditeljska kolekcija "
+                    "nije dostupna! Kako bi ova kolekcija bila dostupna iz "
+                    "izbornika, premjestite je u neku dostupnu kolekciju."
                 )
 
         self.fields['parent'] = forms.ChoiceField(
@@ -90,7 +90,7 @@ class FolderForm(forms.ModelForm):
         folder = next((x for x in self._parent_choices if data == unicode(x.id)), None)
 
         if not folder:
-            raise forms.ValidationError('Nevaljana kolekcija.')
+            raise forms.ValidationError("Nevaljana kolekcija.")
 
         return folder
 
@@ -108,7 +108,7 @@ class FolderForm(forms.ModelForm):
 
 
 class FolderAdvancedCreateForm(forms.Form):
-    structure = forms.CharField(widget=forms.Textarea(), label='Struktura')
+    structure = forms.CharField(widget=forms.Textarea(), label="Struktura")
     # parent = added in init...
 
     def __init__(self, user, *args, **kwargs):
@@ -128,5 +128,5 @@ class FolderAdvancedCreateForm(forms.Form):
             queryset=Folder.objects.for_user(user, VIEW)
             .filter(editable=True)
             .distinct(),
-            label='Roditelj',
+            label="Roditelj",
         )

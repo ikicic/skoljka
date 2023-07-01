@@ -216,15 +216,15 @@ def require(method=[], ajax=None, post=[], get=[], force_login=True):
         def inner(request, *args, **kwargs):
             if ajax is not None:
                 if ajax and not request.is_ajax():
-                    return HttpResponseBadRequest('Ajax only!')
+                    return HttpResponseBadRequest("Ajax only!")
                 elif not ajax and request.is_ajax():
-                    return HttpResponseBadRequest('Ajax not allowed!')
+                    return HttpResponseBadRequest("Ajax not allowed!")
 
             if force_login is not None:
                 if force_login and not request.user.is_authenticated():
-                    return HttpResponseForbidden('Login first!')
+                    return HttpResponseForbidden("Login first!")
                 elif not force_login and request.user.is_authenticated():
-                    return HttpResponseForbidden('No registered users allowed!')
+                    return HttpResponseForbidden("No registered users allowed!")
 
             if request.method not in method:
                 return HttpResponseNotAllowed(method)
@@ -232,11 +232,11 @@ def require(method=[], ajax=None, post=[], get=[], force_login=True):
             if get:
                 for x in get:
                     if x not in request.GET:
-                        return HttpResponseBadRequest('Missing GET "%s" field!' % x)
+                        return HttpResponseBadRequest("Missing GET '%s' field!" % x)
             if post:
                 for x in post:
                     if x not in request.POST:
-                        return HttpResponseBadRequest('Missing POST "%s" field!' % x)
+                        return HttpResponseBadRequest("Missing POST '%s' field!" % x)
 
             output = func(request, *args, **kwargs)
             if isinstance(output, basestring):

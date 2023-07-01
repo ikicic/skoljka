@@ -24,11 +24,11 @@ GROUP_LEAVE = (GROUP_CHANGE, 2)  # group
 COMPETITION_UPDATE_SUBMISSION_SCORE = (500, 1)
 
 action_label = {
-    TASK_ADD: ('label-success', 'Novi zadatak'),
-    FILE_ADD: ('label-success', 'Nova datoteka'),
-    LECTURE_ADD: ('label-success', 'Novo predavanje'),
-    SOLUTION_SUBMIT: ('label-info', 'Rješenje'),
-    SOLUTION_AS_OFFICIAL: ('label-info', u'Službeno rješenje'),
+    TASK_ADD: ('label-success', "Novi zadatak"),
+    FILE_ADD: ('label-success', "Nova datoteka"),
+    LECTURE_ADD: ('label-success', "Novo predavanje"),
+    SOLUTION_SUBMIT: ('label-info', u"Rješenje"),
+    SOLUTION_AS_OFFICIAL: ('label-info', u"Službeno rješenje"),
 }
 
 

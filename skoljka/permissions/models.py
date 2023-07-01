@@ -16,7 +16,7 @@ class ObjectPermission(models.Model):
     permission_type = models.IntegerField()
 
     def __unicode__(self):
-        return u'Permission %d for group %d for object %d::%d' % (
+        return u"Permission %d for group %d for object %d::%d" % (
             self.permission_type,
             self.group_id,
             self.content_type_id,

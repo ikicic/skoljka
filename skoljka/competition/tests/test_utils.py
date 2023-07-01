@@ -244,7 +244,7 @@ class TestCompetitionTaskComments(TestCase):
                 self.chain,
                 "42",
                 1,
-                "first nothing important\n" "IMPORTANT: but then something important",
+                "first nothing important\nIMPORTANT: but then something important",
             )
         )
         ctasks.append(
@@ -254,7 +254,7 @@ class TestCompetitionTaskComments(TestCase):
                 self.chain,
                 "42",
                 1,
-                "again first nothing important\n" "IMPORTANT: bla bla\n" "bla bla",
+                "again first nothing important\nIMPORTANT: bla bla\nbla bla",
             )
         )
         ctasks.append(
@@ -269,7 +269,7 @@ class TestCompetitionTaskComments(TestCase):
                 self.chain,
                 "42",
                 1,
-                "nothing important\n" "IMPORTANT: bla bla\n" "bla bla",
+                "nothing important\nIMPORTANT: bla bla\nbla bla",
             )
         )
         update_chain_comments_cache(self.chain, ctasks)

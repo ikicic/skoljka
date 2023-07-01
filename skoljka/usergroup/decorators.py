@@ -38,12 +38,9 @@ def group_view(permission=VIEW):
 
             perm = group.get_user_permissions(request.user)
             if VIEW not in perm:
-                return HttpResponseForbidden(
-                    "You are not a member of this "
-                    "group, and you cannot view it's details."
-                )
+                return HttpResponseForbidden("You are not a member of this group.")
             if permission not in perm:
-                return HttpResponseForbidden("Not allowed for this action.")
+                return HttpResponseForbidden("Action not allowed.")
 
             context_dict = {}
             context_dict['group'] = group

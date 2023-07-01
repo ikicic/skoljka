@@ -51,13 +51,13 @@ class Folder(BasePermissionsModel):
         max_length=128,
         verbose_name='Kratko ime',
         help_text=icon_help_text(
-            u'Ime prikazano u izborniku. Ukoliko se ne '
-            u'razlikuje od punog imena, možete ostaviti prazno.'
+            u"Ime prikazano u izborniku. Ukoliko se ne "
+            u"razlikuje od punog imena, možete ostaviti prazno."
         ),
     )  # menu name
 
     # PermissionsModel
-    hidden = models.BooleanField(default=True, verbose_name='Skriveno')
+    hidden = models.BooleanField(default=True, verbose_name="Skriveno")
     author = models.ForeignKey(User)
 
     # Sometimes there is no particular reason to edit a folder. (e.g. year

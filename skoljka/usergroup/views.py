@@ -20,10 +20,10 @@ from skoljka.utils.decorators import response
 @response('usergroup_leave.html')
 def leave(request, group, context_dict):
     if group.data is None:
-        return (403, 'Can\'t leave your private user-group.')
+        return (403, "Can't leave your private user-group.")
 
     if not context_dict['is_member']:
-        return (403, 'You are not a member of this group.')
+        return (403, "You are not a member of this group.")
 
     if request.method == 'POST':
         if request.POST.get('confirm') == u'1':
@@ -66,7 +66,7 @@ def new(request, group_id=None):
         if not group.data:
             return (
                 400,
-                'You can\'t edit your own private user-group (or there is some data error).',
+                "You can't edit your own private user-group (or there is some data error).",
             )
 
         usergroup = group.data
@@ -78,7 +78,7 @@ def new(request, group_id=None):
         perm = group.get_user_permissions(request.user)
         is_member = is_group_member(group.id, request.user.id)
         if EDIT not in perm:
-            return (403, 'You do not have permission to edit this group\'s details.')
+            return (403, "You do not have permission to edit this group's details.")
 
         description = usergroup.description
         edit = True

@@ -60,11 +60,11 @@ def task_difficulty_on_update(task, field_name, old_value, new_value):
     # information.
 
     base = (
-        "UPDATE userprofile_difficultydistribution D"
-        " INNER JOIN solution_solution S ON D.user_id = S.author_id"
-        " SET D.solved_count = D.solved_count + ({{0}})"
-        " WHERE S.task_id = {0} AND D.difficulty = {{1}} AND"
-        " (S.status = {1} OR S.status = {2} AND S.correctness_avg >= {3});".format(
+        'UPDATE userprofile_difficultydistribution D'
+        ' INNER JOIN solution_solution S ON D.user_id = S.author_id'
+        ' SET D.solved_count = D.solved_count + ({{0}})'
+        ' WHERE S.task_id = {0} AND D.difficulty = {{1}} AND'
+        ' (S.status = {1} OR S.status = {2} AND S.correctness_avg >= {3});'.format(
             task.id,
             SolutionStatus.AS_SOLVED,
             SolutionStatus.SUBMITTED,
@@ -113,57 +113,57 @@ class UserProfile(models.Model):
     # data
     # Don't ask for useless private(!) information!
     GENDER_CHOICES = (
-        ('', 'Neizjašnjeno'),
-        ('M', 'Momak'),
-        ('F', 'Djevojka'),
+        ('', "Neizjašnjeno"),
+        ('M', "Momak"),
+        ('F', "Djevojka"),
     )
     gender = models.CharField(
         blank=True,
         max_length=1,
         choices=GENDER_CHOICES,
         default='',
-        verbose_name='Spol',
-        help_text=icon_help_text(u'Za gramatičke i pravopisne potrebe.'),
+        verbose_name="Spol",
+        help_text=icon_help_text(u"Za gramatičke i pravopisne potrebe."),
     )
 
     # constants
     HIDDEN_TAGS_HIDE = 0
     HIDDEN_TAGS_SHOW_IF_SOLVED = 1
     HIDDEN_TAGS_SHOW_ALWAYS = 2
-    HIDDEN_TAGS_CHOICES = [(0, 'Ne'), (1, 'Samo za riješene zadatke'), (2, 'Uvijek')]
+    HIDDEN_TAGS_CHOICES = [(0, "Ne"), (1, "Samo za riješene zadatke"), (2, "Uvijek")]
 
     # options
     show_hidden_tags = models.SmallIntegerField(
         default=False,
         choices=HIDDEN_TAGS_CHOICES,
-        verbose_name='Prikazuj skrivene oznake',
+        verbose_name="Prikazuj skrivene oznake",
     )
     show_unsolved_task_solutions = models.BooleanField(
-        default=False, verbose_name=u'Prikazuj rješenja neriješenih zadataka'
+        default=False, verbose_name=u"Prikazuj rješenja neriješenih zadataka"
     )
     hide_solution_min_diff = models.FloatField(
         default=0,
-        verbose_name=u'Ili ako je je težina manja od',
+        verbose_name=u"Ili ako je je težina manja od",
         help_text=icon_help_text(
-            u'Na ovaj način možete odabrati da vam se uvijek prikazuju rješenja '
-            u'dovoljno laganih zadataka, što je pogotovo korisno ako ste '
-            u'ispravljač.'
+            u"Na ovaj način možete odabrati da vam se uvijek prikazuju rješenja "
+            u"dovoljno laganih zadataka, što je pogotovo korisno ako ste "
+            u"ispravljač."
         ),
     )
     school_class = models.IntegerField(
         default=0,
         choices=USERPROFILE_SCHOOL_CLASS_CHOICES,
-        verbose_name='Razred',
-        help_text=icon_help_text('Za odabrane zadatke na naslovnoj stranici'),
+        verbose_name="Razred",
+        help_text=icon_help_text("Za odabrane zadatke na naslovnoj stranici"),
     )
 
     # (any better name?)
     evaluator = models.BooleanField(
         default=False,
-        verbose_name=u'Ispravljač',
+        verbose_name=u"Ispravljač",
         help_text=icon_help_text(
-            u'Kao ispravljač bit ćete obavještavani o '
-            u'poslanim rješenjima drugih korisnika.'
+            u"Kao ispravljač bit ćete obavještavani o "
+            u"poslanim rješenjima drugih korisnika."
         ),
     )
     eval_sol_last_view = models.DateTimeField(auto_now_add=True)
@@ -185,7 +185,7 @@ class UserProfile(models.Model):
     cache_group_ids = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
-        return u'UserProfile for ' + self.user.username
+        return u"UserProfile for " + self.user.username
 
     def get_absolute_url(self):
         return '/profile/%d/' % self.id

@@ -20,7 +20,7 @@ class UserEntryField(forms.CharField):
         not_found = set(usernames) - set(x.username.lower() for x in found)
         if not_found:
             raise forms.ValidationError(
-                u'Nepostojeći korisnici: %s' % ', '.join(not_found)
+                u"Nepostojeći korisnici: %s" % ", ".join(not_found)
             )
 
         return found
@@ -64,7 +64,7 @@ class GroupEntryField(forms.CharField):
 
         if error:
             raise forms.ValidationError(
-                u'Nepostojeće ili nedostupne grupe ili korisnici: %s' % ', '.join(error)
+                u"Nepostojeće ili nedostupne grupe ili korisnici: %s" % ", ".join(error)
             )
 
         return groups

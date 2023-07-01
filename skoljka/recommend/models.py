@@ -17,7 +17,7 @@ class UserTagScore(models.Model):
     cache_score = models.FloatField(
         default=0,
         db_index=True,
-        help_text='Equals to interest * tag.weight, used for prefered tags for UserProfile',
+        help_text="Equals to interest * tag.weight, used for prefered tags for UserProfile",
     )
 
     class Meta:

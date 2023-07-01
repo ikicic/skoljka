@@ -45,11 +45,11 @@ class TaskBulkTemplateForm(forms.ModelForm):
 class TaskExportForm(forms.Form):
     format = forms.ChoiceField(choices=EXPORT_FORMAT_CHOICES)
     ids = forms.CharField(widget=forms.HiddenInput())
-    has_title = forms.BooleanField(label='Naslov', required=False)
-    has_url = forms.BooleanField(label='URL', required=False)
-    has_source = forms.BooleanField(label='Izvor', required=False)
-    has_index = forms.BooleanField(label='Broj', required=False)
-    has_id = forms.BooleanField(label='ID', required=False)
+    has_title = forms.BooleanField(label=_("Title"), required=False)
+    has_url = forms.BooleanField(label=_("URL"), required=False)
+    has_source = forms.BooleanField(label=_("Source"), required=False)
+    has_index = forms.BooleanField(label=_("Index"), required=False)
+    has_id = forms.BooleanField(label=_("ID"), required=False)
 
     # label will be manually set later
     create_archive = forms.BooleanField(required=False)
@@ -95,10 +95,10 @@ def check_prerequisites(prerequisites, user, task_id):
         # Remove duplicates
         ids = set([int(x) for x in prerequisites.split(',')])
     except ValueError:
-        raise forms.ValidationError('Nevaljan format!')
+        raise forms.ValidationError(_("Invalid format."))
 
     if task_id and task_id in ids:
-        raise forms.ValidationError(u'Zadatak ne može biti sam sebi preduvjet!')
+        raise forms.ValidationError(u"Zadatak ne može biti sam sebi preduvjet!")
 
     tasks = Task.objects.filter(id__in=ids)
     accessible = filter_objects_with_permission(tasks, user, VIEW, model=Task)
@@ -106,7 +106,7 @@ def check_prerequisites(prerequisites, user, task_id):
     if len(ids) != len(accessible):
         diff = ids - set(x.id for x in accessible)
         raise forms.ValidationError(
-            'Nepoznati ili nedostupni zadaci: {}'.format(
+            "Nepoznati ili nedostupni zadaci: {}".format(
                 ', '.join(str(x) for x in diff)
             )
         )
@@ -114,7 +114,7 @@ def check_prerequisites(prerequisites, user, task_id):
     for x in accessible:
         if not x.solvable:
             raise forms.ValidationError(
-                u'Nije moguće slati rješenja za zadatak #{}!'.format(x.id)
+                u"Nije moguće slati rješenja za zadatak #{}!".format(x.id)
             )
 
     return ids, accessible
@@ -140,8 +140,8 @@ class TaskForm(forms.ModelForm):
             'solution_settings'
         ] == Task.SOLUTIONS_VISIBLE and self.cleaned_data.get('prerequisites'):
             raise forms.ValidationError(
-                u'Ukoliko su postavljeni preduvjeti, '
-                u'rješenja ne mogu biti \'uvijek vidljiva\'!'
+                u"Ukoliko su postavljeni preduvjeti, "
+                u"rješenja ne mogu biti 'uvijek vidljiva'!"
             )
         return self.cleaned_data
 
@@ -150,7 +150,7 @@ class TaskForm(forms.ModelForm):
         # temporary solution
         if self.user and not self.user.is_staff:
             if any(('news' == x.strip().lower() for x in tags)):
-                raise forms.ValidationError("Oznaka 'news' nije dozvoljena!")
+                raise forms.ValidationError(_("The tag 'news' is not allowed."))
         return tags
 
     def clean_prerequisites(self):

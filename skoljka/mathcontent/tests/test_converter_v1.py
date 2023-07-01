@@ -812,22 +812,22 @@ class ConverterV1TestCase(SimpleTestCase):
 
         # Test \parindent and \parskip.
         self.assertHTMLAutoLatex(
-            "\\setlength{\\parindent}{2em}" "First\n\n" "Second",
+            "\\setlength{\\parindent}{2em}First\n\nSecond",
             '<p class="mc-noindent">First' '<p style="text-indent:2em;">Second',
         )
         self.assertHTMLAutoLatex(
-            "\\setlength{\\parskip}{1.5in}" "First\n\n" "Second",
+            "\\setlength{\\parskip}{1.5in}First\n\nSecond",
             '<p class="mc-noindent" style="margin-top:1.5in;">First'
             '<p class="mc-indent" style="margin-top:1.5in;">Second',
         )
         self.assertHTMLAutoLatex(  # Test {...} scope.
-            "{" "\\setlength{\\parindent}{2em}" "First\n\n" "Second" "}\n\n" "Third",
+            "{\\setlength{\\parindent}{2em}First\n\nSecond}\n\nThird",
             '<p class="mc-noindent">First'
             '<p style="text-indent:2em;">Second'
             '<p class="mc-indent">Third',
         )
         self.assertHTMLLatex(  # Test {...} scope.
-            "{" "[par 1.5in 2em]" "First\n\n" "Second" "}\n\n" "Third",
+            "{[par 1.5in 2em]First\n\nSecond}\n\nThird",
             '<p class="mc-noindent" style="margin-top:1.5in;">First'
             '<p style="margin-top:1.5in;text-indent:2em;">Second'
             '<p class="mc-indent">Third',
@@ -841,12 +841,12 @@ class ConverterV1TestCase(SimpleTestCase):
         )
         self.assertLatex(
             "[par 12pt 13pt]",
-            "\\setlength{\\parskip}{12pt}\n" "\\setlength{\\parindent}{13pt}\n",
+            "\\setlength{\\parskip}{12pt}\n\\setlength{\\parindent}{13pt}\n",
         )
         self.assertLatex("[par 12adfs 13pt]", "[par 12adfs 13pt]")
         self.assertLatex(
             "[par 0 1em]",
-            "\\setlength{\\parskip}{0pt}\n" "\\setlength{\\parindent}{1em}\n",
+            "\\setlength{\\parskip}{0pt}\n\\setlength{\\parindent}{1em}\n",
         )
         self.assertHTMLAutoLatex(
             "\setlength{\parindent}{2em}\n"

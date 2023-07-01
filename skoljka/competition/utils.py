@@ -227,9 +227,9 @@ def refresh_teams_cache_score(teams):
         queries_args.append((S0, S1, S2, int(team_id)))
     cursor = connection.cursor()
     cursor.executemany(
-        "UPDATE `competition_team` SET `cache_score`=%s, "
-        "`cache_score_before_freeze`=%s, `cache_max_score_after_freeze`=%s "
-        "WHERE `id`=%s;",
+        'UPDATE `competition_team` SET `cache_score`=%s, '
+        '`cache_score_before_freeze`=%s, `cache_max_score_after_freeze`=%s '
+        'WHERE `id`=%s;',
         queries_args,
     )
     transaction.commit_unless_managed()
@@ -424,14 +424,12 @@ def update_chain_ctasks(competition, chain, old_ids, new_ids):
     for k, ctask_id in enumerate(new_ids, 1):
         queries_args.append((chain.id, k, ctask_id))
 
-    print("OLD NEW_IDS", old_ids, new_ids)
-    print("QUERIES", queries_args)
     if queries_args:
         cursor = connection.cursor()
         cursor.executemany(
-            "UPDATE `competition_competitiontask` "
-            "SET `chain_id`=%s, `chain_position`=%s "
-            "WHERE `id`=%s;",
+            'UPDATE `competition_competitiontask` '
+            'SET `chain_id`=%s, `chain_position`=%s '
+            'WHERE `id`=%s;',
             queries_args,
         )
         transaction.commit_unless_managed()
@@ -472,7 +470,7 @@ def refresh_chain_cache_is_verified(competition):
     if queries_args:
         cursor = connection.cursor()
         cursor.executemany(
-            "UPDATE `competition_chain` SET `cache_is_verified`=%s " "WHERE `id`=%s;",
+            'UPDATE `competition_chain` SET `cache_is_verified`=%s WHERE `id`=%s;',
             queries_args,
         )
         transaction.commit_unless_managed()
@@ -526,8 +524,8 @@ def refresh_ctask_cache_admin_solved_count(competition):
     if queries_args:
         cursor = connection.cursor()
         cursor.executemany(
-            "UPDATE `competition_competitiontask` SET "
-            "`cache_admin_solved_count`=%s WHERE `id`=%s;",
+            'UPDATE `competition_competitiontask` SET '
+            '`cache_admin_solved_count`=%s WHERE `id`=%s;',
             queries_args,
         )
         transaction.commit_unless_managed()
@@ -585,9 +583,9 @@ def refresh_ctask_cache_new_activities_count(competition):
             args.append((new_cnt, id))
     if args:
         connection.cursor().executemany(
-            "UPDATE `competition_competitiontask` "
-            "SET `cache_new_activities_count`=%s "
-            "WHERE `id`=%s;",
+            'UPDATE `competition_competitiontask` '
+            'SET `cache_new_activities_count`=%s '
+            'WHERE `id`=%s;',
             args,
         )
 

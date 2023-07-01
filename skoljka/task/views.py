@@ -551,7 +551,7 @@ def _export(ids, sorted_tasks, tasks, form, ignore_exceptions):
         )
         if error:
             return HttpResponseServerError(
-                'LaTeX generation error! Error code: %d' % error
+                "LaTeX generation error! Error code: %d" % error
             )
 
         # error = run_command('dvipdfm -o %s %s' % (filename + '.pdf', filename), timeout=10)
@@ -646,9 +646,9 @@ def export(request, format=None, ids=None):
 
     # attachments
     query = (
-        "SELECT A.* FROM mathcontent_attachment A"
-        " INNER JOIN task_task B ON A.content_id = B.content_id"
-        " WHERE B.id IN ({})".format(ids)
+        'SELECT A.* FROM mathcontent_attachment A'
+        ' INNER JOIN task_task B ON A.content_id = B.content_id'
+        ' WHERE B.id IN ({})'.format(ids)
     )
     attachments = list(Attachment.objects.raw(query))
     for attachment in attachments:
@@ -691,9 +691,8 @@ def export(request, format=None, ids=None):
     form = TaskExportForm(data)
 
     if len(attachments):
-        form.fields[
-            'create_archive'
-        ].label = 'Zip arhiva (ukupno datoteka: {}+1)'.format(len(attachments))
+        label = "Zip arhiva (ukupno datoteka: {}+1)".format(len(attachments))
+        form.fields['create_archive'].label = label
     else:
         form.fields['create_archive'].widget = forms.HiddenInput()
 

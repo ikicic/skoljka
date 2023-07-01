@@ -71,9 +71,9 @@ class Attachment(models.Model):
 
     def __unicode__(self):
         if self.cache_file_size >= 0:
-            return 'Attachment #{}'.format(self.id)
+            return "Attachment #{}".format(self.id)
         else:
-            return 'Attachment #{} <MISSING>'.format(self.id)
+            return "Attachment #{} <MISSING>".format(self.id)
 
     def get_url(self):
         return media_path_to_url(self.file.name)

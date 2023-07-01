@@ -30,7 +30,7 @@ class Action(models.Model):
         blank=True,
         null=True,
         related_name='activities',
-        help_text='To whom it may concern.',
+        help_text="To whom it may concern.",
     )
 
     target_content_type = models.ForeignKey(

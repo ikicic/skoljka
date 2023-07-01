@@ -91,12 +91,12 @@ def localdate(value):
 
 @register.filter(expects_localtime=True, is_safe=False)
 def localtime(value):
-    return date_format(value, "TIME_FORMAT")
+    return date_format(value, 'TIME_FORMAT')
 
 
 @register.filter(expects_localtime=True, is_safe=False)
 def localdatetime(value):
-    return date_format(value, "DATETIME_FORMAT")
+    return date_format(value, 'DATETIME_FORMAT')
 
 
 #############################################
@@ -107,7 +107,7 @@ def get_fieldset(parser, token):
         name, fields, as_, variable_name, from_, form = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError(
-            'bad arguments for %r' % token.split_contents()[0]
+            "bad arguments for %r" % token.split_contents()[0]
         )
 
     return FieldSetNode(fields.split(','), variable_name, form)

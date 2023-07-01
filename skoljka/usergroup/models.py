@@ -3,6 +3,7 @@ from django.contrib.contenttypes import generic
 from django.db import models
 from django.db.models import Q
 from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext_lazy as _
 
 from skoljka.mathcontent.models import MathContent
 from skoljka.permissions.constants import *
@@ -59,7 +60,7 @@ class UserGroup(models.Model):
     description = models.OneToOneField(MathContent)
     author = models.ForeignKey(User)
     date_created = models.DateTimeField(auto_now_add=True)
-    hidden = models.BooleanField(default=False, verbose_name='Skriveno')
+    hidden = models.BooleanField(default=False, verbose_name=_("Hidden"))
 
     cache_member_count = models.IntegerField(default=0)
 

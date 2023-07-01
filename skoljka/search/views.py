@@ -19,14 +19,14 @@ def view(request):
     tags = list(get_available_tags(q or []).values_list('name', flat=True))
     if q is not None:
         if not q:
-            error.append('Navedite barem jednu oznaku!')
+            error.append("Navedite barem jednu oznaku!")
         elif len(tags) != len(q):
             diff = set([x.lower() for x in q]) - set([x.lower() for x in tags])
             error.append(
-                u'Nepostojeć%s: %s!'
+                u"Nepostojeć%s: %s!"
                 % (
-                    u'a oznaka' if len(diff) == 1 else 'e oznake',
-                    u', '.join(diff),
+                    u"a oznaka" if len(diff) == 1 else "e oznake",
+                    u", ".join(diff),
                 )
             )
 
