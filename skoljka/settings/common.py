@@ -11,8 +11,8 @@ from skoljka.settings.local import *
 # GENERAL
 ######################################
 
-VERSION = 'v0.10.0'
-VERSION_FOOTER = "v0.10.0"
+VERSION = 'v0.10.1'
+VERSION_FOOTER = "v0.10.1"
 
 try:
     # TODO (Python 3): http://stackoverflow.com/a/12698328/2203044
