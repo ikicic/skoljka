@@ -1,6 +1,4 @@
 from django.conf.urls.defaults import include, patterns, url
-from django.contrib.auth.models import User
-from django.views.generic import DetailView, ListView, TemplateView
 
 import skoljka.userprofile.views as views
 from skoljka.userprofile.forms import AuthenticationFormEx

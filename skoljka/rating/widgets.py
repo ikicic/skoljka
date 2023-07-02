@@ -1,4 +1,4 @@
-from django.forms.widgets import RadioSelect, Widget
+from django.forms.widgets import RadioSelect
 from django.utils.safestring import mark_safe
 
 

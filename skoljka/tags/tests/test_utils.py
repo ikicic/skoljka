@@ -15,7 +15,9 @@ from skoljka.tags.utils import (
 
 class TagsUtilsTestCase(TagsTestCaseBase):
     def test_split_tags(self):
-        CHECK = lambda x, y, z="": self.assertEqual(sorted(split_tags(x)), sorted(y), z)
+        def CHECK(x, y, z=None):
+            self.assertEqual(sorted(split_tags(x)), sorted(y), z)
+
         CHECK("first, second, third", ["first", "second", "third"])
         CHECK("First, seCOND, THIRD", ["First", "seCOND", "THIRD"], "should keep cases")
         CHECK("two words", ["two words"], "should support multiple word tags")
@@ -31,7 +33,9 @@ class TagsUtilsTestCase(TagsTestCaseBase):
             split_tags(12312313)
 
     def test_split_tag_ids(self):
-        CHECK = lambda x, y, z=None: self.assertEqual(split_tag_ids(x), y, z)
+        def CHECK(x, y, z=None):
+            self.assertEqual(split_tag_ids(x), y, z)
+
         CHECK("123", [123])
         CHECK("10,20,30,40,50,15", [10, 20, 30, 40, 50, 15])
         CHECK("50, 40, 30, 25", [50, 40, 30, 25])
@@ -52,18 +56,20 @@ class TagsUtilsTestCase(TagsTestCaseBase):
         CHECK("imo, mEMo", ["IMO", "MEMO"], "should be case insensitive")
 
     def test_replace_with_original_tags(self):
-        CHECK = lambda x, y, z=None: self.assertEqual(
-            sorted(replace_with_original_tags(x)), sorted(y), z
-        )
+        def CHECK(x, y, z=None):
+            self.assertEqual(sorted(replace_with_original_tags(x)), sorted(y), z)
+
         CHECK("imo,memo", ["IMO", "MEMO"], "should fix cases")
         CHECK("wEiRD", ["wEiRD"], "should keep cases for unknown tags")
         CHECK("geo,imo,2007,NEWTAG", ["geo", "IMO", "2007", "NEWTAG"])
         CHECK(["Imo", "asdf"], ["IMO", "asdf"], "should work with lists")
 
     def test_add_tags(self):
-        CHECK = lambda x, y, z=None: self.assertEqual(
-            sorted(x.tags.values_list('name', flat=True)), sorted(y), z
-        )
+        def CHECK(x, y, z=None):
+            self.assertEqual(
+                sorted(x.tags.values_list('name', flat=True)), sorted(y), z
+            )
+
         self._set_up_tasks()
 
         CHECK(self.alice_task, ["MEMO", "alg"])

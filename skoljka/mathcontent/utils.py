@@ -6,7 +6,6 @@ from django.utils.translation import ugettext as _
 from skoljka.mathcontent import converter_v0, converter_v1
 from skoljka.mathcontent.forms import AttachmentForm
 from skoljka.mathcontent.models import TYPE_HTML, TYPE_LATEX, Attachment
-from skoljka.utils import xss
 from skoljka.utils.timeout import run_command
 
 
@@ -29,7 +28,7 @@ def convert(type, text, content=None, attachments_path=None):
 def convert_safe(type, *args, **kwargs):
     try:
         return convert(type, *args, **kwargs)
-    except:
+    except:  # noqa: E722
         if getattr(settings, 'MATHCONTENT_DEBUG', False):
             raise
         msg = _("Internal parser error. Please contact administrators.")
@@ -113,11 +112,11 @@ def check_and_save_attachment(request, content):
             try:
                 content.html = None
                 content.save()
-            except:
+            except:  # noqa: E722
                 # The file is not saved until .save(commit=True).
                 attachment.delete_file()
                 raise
-        except:
+        except:  # noqa: E722
             attachment.delete()
             raise
     else:

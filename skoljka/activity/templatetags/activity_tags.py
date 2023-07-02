@@ -1,9 +1,21 @@
 ﻿from django import template
 from django.utils.safestring import mark_safe
 
-from skoljka.activity.constants import *
+from skoljka.activity.constants import (
+    FILE_ADD,
+    GROUP_ADD,
+    GROUP_LEAVE,
+    LECTURE_ADD,
+    POST_SEND,
+    POST_SEND_CACHE_SEPARATOR,
+    SOLUTION_AS_OFFICIAL,
+    SOLUTION_AS_SOLVED,
+    SOLUTION_RATE,
+    SOLUTION_SUBMIT,
+    SOLUTION_TODO,
+    TASK_ADD,
+)
 from skoljka.activity.utils import get_recent_activities
-from skoljka.userprofile.templatetags.userprofile_tags import userlink
 from skoljka.utils.string_operations import G
 
 register = template.Library()

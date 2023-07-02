@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils.html import mark_safe

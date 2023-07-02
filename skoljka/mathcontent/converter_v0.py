@@ -150,7 +150,7 @@ def _convert(
 
                 try:
                     tag, attrs = parse_bb_code(T[i + 1 : end])
-                except:
+                except:  # noqa: E722
                     # if bb code not valid (or if not bb code at all), output original text
                     out.append('[%s]' % T[i + 1 : end])
                     i = end + 1
@@ -326,10 +326,10 @@ def convert_to_html(T, attachments=None):
 
 
 def convert_to_latex(T, attachments=None, attachments_path=None):
-    """Convert MathContent Format to LaTeX.
+    r"""Convert MathContent Format to LaTeX.
 
     Replaces # % ^ & _ { } ~ \\
-    with \# \% \\textasciicircum{} \& \_ \{ \} \~{} \\textbackslash{},
+    with \# \% \textasciicircum{} \& \_ \{ \} \~{} \textbackslash{},
     but keeps \$ as \$, because $ is a special char anyway.
 
     Handles BBCode [i], [b] etc.

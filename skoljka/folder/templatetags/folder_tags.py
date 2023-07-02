@@ -2,7 +2,6 @@ from collections import defaultdict
 
 from django import template
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 from django.utils.safestring import mark_safe
 
 from skoljka.folder.models import Folder

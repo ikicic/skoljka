@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
 

@@ -55,7 +55,7 @@ class TaskBulkFormatTestCase(TestCase):
         self.assertEqual(split_expression(5), [(False, "5")])
         self.assertEqual(split_expression("bla bla"), [(False, "bla bla")])
         self.assertEqual(split_expression("@{foo}"), [(True, "foo")])
-        self.assertEqual(split_expression("\@{foo}"), [(False, "@{foo}")])
+        self.assertEqual(split_expression("\\@{foo}"), [(False, "@{foo}")])
         self.assertEqual(
             split_expression("abc @{foo} def @{bar} ghi jkl"),
             [
@@ -263,7 +263,7 @@ class TaskBulkFormatTestCase(TestCase):
             @SOURCE = bla@{third}bla
 
             @second = @{third}
-            @first = \ \ one@{  }
+            @first = \\ \\ one@{  }
             @third = \u0161 \u010e \u017e
             Task first \u0161...
 

@@ -1,13 +1,10 @@
 from urllib import quote_plus
 
 from django.conf import settings
-from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout as auth_logout
-from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth.models import Group, User
-from django.core.cache import cache
-from django.db.models import Max, Q
-from django.http import Http404, HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render_to_response
 from django.template import RequestContext
 from django.views.decorators.debug import sensitive_post_parameters
@@ -24,7 +21,6 @@ from skoljka.userprofile.forms import (
     UserEditForm,
     UserProfileEditForm,
 )
-from skoljka.userprofile.models import UserProfile
 from skoljka.userprofile.registration_backend import Backend
 from skoljka.utils.decorators import response
 from skoljka.utils.templatetags.utils_tags import email_link

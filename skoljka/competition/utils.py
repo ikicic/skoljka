@@ -3,7 +3,6 @@ from __future__ import print_function
 import json
 import re
 from collections import Counter, defaultdict
-from datetime import datetime, timedelta
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import connection, transaction
@@ -11,11 +10,8 @@ from django.db.models import Count, F
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from skoljka.competition.evaluator import (
-    InvalidDescriptor,
-    InvalidSolution,
-    get_evaluator,
-)
+from skoljka.competition.evaluator import get_evaluator
+from skoljka.competition.evaluator_base import InvalidDescriptor, InvalidSolution
 from skoljka.competition.models import (
     Chain,
     Competition,
@@ -589,7 +585,7 @@ def refresh_ctask_cache_new_activities_count(competition):
             args,
         )
 
-    ids = [id for new_cnt, id in args]
+    ids = [id for new_cnt, id in args]  # noqa: F812
     return ids
 
 

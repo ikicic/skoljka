@@ -1,8 +1,6 @@
 # coding=utf-8
 # local.py is ignored by git!
 
-import os
-
 ######################################
 # General
 ######################################

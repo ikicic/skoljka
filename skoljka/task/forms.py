@@ -135,7 +135,7 @@ class TaskForm(forms.ModelForm):
             self.fields[x].widget.attrs.update({'class': 'span6'})
 
     def clean(self):
-        cleaned_data = super(TaskForm, self).clean()
+        super(TaskForm, self).clean()
         if self.cleaned_data[
             'solution_settings'
         ] == Task.SOLUTIONS_VISIBLE and self.cleaned_data.get('prerequisites'):

@@ -1,5 +1,3 @@
-import time
-
 from django.contrib.auth.models import User
 
 from skoljka.folder.models import Folder

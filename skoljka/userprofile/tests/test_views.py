@@ -119,7 +119,8 @@ class UserViewsTestCase(TestCase):
         # Continue testing the registered user.
         user = User.objects.get(username='testaccount')
         self.assertEqual(UserProfile.objects.all().count(), 1)
-        profile = user.get_profile()  # Test profile created.
+        profile = user.get_profile()  # Test that profile was created.
+        self.assertIsNotNone(profile)
         self.assertEqual(Group.objects.all().count(), 1)
         group = Group.objects.get(name='testaccount')
         self.assertEqual(

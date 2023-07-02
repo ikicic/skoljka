@@ -1,11 +1,8 @@
 from collections import defaultdict
 
-from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.db import connection, transaction
-from django.db.models import Count
 from django.dispatch import receiver
-from django.template.defaultfilters import slugify
 
 from skoljka.permissions.constants import VIEW
 from skoljka.search.models import (
@@ -15,14 +12,9 @@ from skoljka.search.models import (
     _reverse_search_key,
 )
 from skoljka.solution.models import SolutionStatus
-from skoljka.tags.models import Tag, TaggedItem
+from skoljka.tags.models import Tag
 from skoljka.tags.signals import object_tag_ids_changed_high_priority
-from skoljka.tags.utils import (
-    get_available_tags,
-    replace_with_original_tags,
-    split_tag_ids,
-    split_tags,
-)
+from skoljka.tags.utils import get_available_tags, split_tag_ids, split_tags
 from skoljka.task.models import Task
 
 
@@ -47,7 +39,7 @@ def _search_and_cache(tag_ids):
     key = _normal_search_key(tag_ids)
     try:
         return SearchCache.objects.get(key=key)
-    except:
+    except SearchCache.DoesNotExist:
         cache = SearchCache(key=key)
         cache.save()
         tags = Tag.objects.filter(id__in=tag_ids)

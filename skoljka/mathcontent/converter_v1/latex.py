@@ -1,12 +1,16 @@
 from django.utils.translation import ugettext as _
 
 from skoljka.mathcontent.converter_v1.basics import (
-    COUNTER_EQUATION,
     COUNTER_FIGURE,
     ParseError,
     State,
     img_params_to_html,
     test_eq,
+)
+from skoljka.mathcontent.converter_v1.exceptions import (
+    BBCodeException,
+    LatexValueError,
+    ParserInternalError,
 )
 from skoljka.mathcontent.converter_v1.tokens import (
     TOKEN_CLOSED_CURLY,
@@ -16,11 +20,6 @@ from skoljka.mathcontent.converter_v1.tokens import (
     TokenWarning,
 )
 from skoljka.utils import xss
-
-
-class LatexValueError(Exception):
-    pass
-
 
 ########################################################
 # LaTeX Commands
@@ -217,7 +216,7 @@ class LatexBegin(Command):
                 try:
                     ignored = tokenizer.read_until_exact_any(['\r', '\n'])
                     tokenizer.K -= 1  # Do not skip the newline.
-                except ParseError as e:
+                except ParseError:
                     ignored = tokenizer.T[tokenizer.K :]
                     tokenizer.K = len(tokenizer.T)
                 if ignored.strip():

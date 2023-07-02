@@ -1,10 +1,8 @@
-﻿from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render_to_response
+﻿from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from skoljka.search.forms import AdvancedSearchForm, SearchForm
 from skoljka.search.utils import search_tasks
-from skoljka.tags.models import Tag
 from skoljka.tags.utils import get_available_tags, split_tags
 from skoljka.task.models import Task
 

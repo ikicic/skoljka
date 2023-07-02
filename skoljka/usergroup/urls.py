@@ -1,9 +1,6 @@
-from django.conf.urls.defaults import include, patterns, url
-from django.contrib.auth.models import Group
-from django.views.generic import DetailView
+from django.conf.urls.defaults import patterns
 
 import skoljka.usergroup.views as views
-from skoljka.usergroup.models import UserGroup
 
 urlpatterns = patterns(
     '',

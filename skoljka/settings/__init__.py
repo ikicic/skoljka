@@ -4,7 +4,7 @@
 # import skoljka.settings.common as common
 
 import common
-from common import *
+from common import *  # noqa: F401,F403
 
 
 def _check_mandatory_values(values):
@@ -16,8 +16,4 @@ def _check_mandatory_values(values):
             )
 
 
-_check_mandatory_values(
-    [
-        'REGISTRATION_CONTACT_EMAIL',
-    ]
-)
+_check_mandatory_values(['REGISTRATION_CONTACT_EMAIL'])

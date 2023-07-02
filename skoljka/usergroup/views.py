@@ -1,16 +1,14 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
-from django.contrib.contenttypes.models import ContentType
-from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext
+from django.shortcuts import get_object_or_404
 
 from skoljka.activity import action as _action
 from skoljka.mathcontent.forms import MathContentForm
-from skoljka.permissions.constants import ADD_MEMBERS, EDIT, EDIT_PERMISSIONS, VIEW
+from skoljka.permissions.constants import EDIT, VIEW
 from skoljka.permissions.models import ObjectPermission
 from skoljka.usergroup.decorators import group_view
 from skoljka.usergroup.forms import GroupForm, UserEntryForm, UserGroupForm
-from skoljka.usergroup.models import GroupExtended, UserGroup, is_group_member
+from skoljka.usergroup.models import GroupExtended, is_group_member
 from skoljka.userprofile.models import user_refresh_group_cache
 from skoljka.utils.decorators import response
 

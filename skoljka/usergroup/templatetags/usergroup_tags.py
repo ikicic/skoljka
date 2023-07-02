@@ -15,8 +15,6 @@ def grouplink(group):
 
 @register.simple_tag(takes_context=True)
 def group_class_attr(context, group):
-    user = context['user']
-
     if group.data.hidden:
         cls = 'group-hidden'
     elif group.id in context['user_group_ids']:

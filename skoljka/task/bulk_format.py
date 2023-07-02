@@ -173,7 +173,7 @@ def _precheck_task_var_value(var, value, prefetch):
     try:
         int(value)
         is_int = True
-    except:
+    except (ValueError, TypeError):
         is_int = False
 
     if var in ['AUTHOR', 'NAME']:

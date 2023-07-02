@@ -4,7 +4,7 @@ import tempfile
 
 from django.conf import settings
 
-from skoljka.mathcontent.models import Attachment, LatexElement, MathContent
+from skoljka.mathcontent.models import Attachment, LatexElement
 from skoljka.task.tests.utils import create_task
 from skoljka.userprofile.tests.utils import TestCaseWithUsersAndFolders
 from skoljka.utils.testcase import TemporaryMediaRootMixin

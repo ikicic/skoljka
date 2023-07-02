@@ -1,7 +1,6 @@
 ﻿from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
-from django.utils.html import mark_safe
 
 from skoljka.activity.constants import SOLUTION_RATE
 from skoljka.mathcontent.models import MathContent
@@ -30,6 +29,8 @@ SOLUTION_STATUS_BY_NAME = {
     'todo': SolutionStatus.TODO,
     'submitted': SolutionStatus.SUBMITTED,
 }
+
+_USERS_SOLUTION_NOT_PROVIDED = object()
 
 # Key names of detailed states.
 # For more info, look at Solution._calc_detailed_status()
@@ -227,7 +228,7 @@ class Solution(ModelEx):
 
     def _get_user_solution(self, user, users_solution):
         # if user's solution not given, search for it
-        if users_solution is 0:
+        if users_solution is _USERS_SOLUTION_NOT_PROVIDED:
             try:
                 users_solution = Solution.objects.get(author=user, task_id=self.task_id)
             except Solution.DoesNotExist:
@@ -243,7 +244,7 @@ class Solution(ModelEx):
         """
         return self.author_id == user.id or user.is_staff
 
-    def check_accessibility(self, user, users_solution=0):
+    def check_accessibility(self, user, users_solution=_USERS_SOLUTION_NOT_PROVIDED):
         """
         Checks if the user can view the solution, and if it should be
         obfuscated.

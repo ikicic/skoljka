@@ -328,7 +328,6 @@ class List(BaseList):
         for k in xrange(len(items)):
             # Only one type and one Float precision currently supported.
             # If the number of items not matching, call to check format.
-            index = k if k < len(self.items) else 0
             if k < len(self.items):
                 if not self.items[k].evaluate_solution(items[k]):
                     is_correct = False

@@ -16,8 +16,8 @@ from skoljka.mathcontent.converter_v1.bbcode import (
 from skoljka.mathcontent.converter_v1.latex import (
     LatexInlineMathCommand,
     LatexValueError,
+    ParserInternalError,
     latex_commands,
-    latex_environments,
     latex_escape_chars,
 )
 from skoljka.mathcontent.converter_v1.tokens import (
@@ -95,10 +95,6 @@ RE_ASCII_ALPHA_SINGLE_CHAR = re.compile('[a-zA-Z]')
 _NT__READ_TEXT__END_CHAR = set('{}[]$\n\r\\%')
 
 
-class ParserInternalError(Exception):
-    pass
-
-
 ########################################################
 # Tokenizer
 ########################################################
@@ -131,10 +127,6 @@ class Tokenizer(object):
 
     def get_full_url(self, url):
         return urljoin(self.url_prefix, url)
-
-    def get_latex_picture(self, *args, **kwargs):
-        # To be able to mock it.
-        return get_latex_picture(*args, **kwargs)
 
     def _nt__read_text(self):
         """(next_token helper function) Read everything until any of the
@@ -319,7 +311,7 @@ class Tokenizer(object):
         return self.T[start:K]
 
     def handle_math_mode(self):
-        """Handle $...$, $$...$$, \(...\), \[...\] and $$$ ... $$$."""
+        r"""Handle $...$, $$...$$, \(...\), \[...\] and $$$ ... $$$."""
         T = self.T
         K = self.K
         dollars = 0
@@ -471,7 +463,7 @@ class Tokenizer(object):
 
         try:
             name, attrs, K = parse_bbcode(T, start)
-        except BBCodeException as e:
+        except BBCodeException:
             return TokenText(u"[")  # Just print it as a normal string.
         if name not in bb_commands:
             return TokenText(u"[")
@@ -576,7 +568,7 @@ class Tokenizer(object):
 
 def get_latex_html(latex_element, force_inline):
     """Given LatexElement instance generate <img> HTML."""
-    inline = force_inline or latex_element.format in ['$%s$', '\(%s\)']
+    inline = force_inline or latex_element.format in ['$%s$', r'\(%s\)']
     latex_escaped = xss.escape(latex_element.text)
     depth = latex_element.depth
 
@@ -608,7 +600,6 @@ def get_latex_html(latex_element, force_inline):
     #         obj = '<object data="%s" type="image/svg+xml" alt="%s" class="latex" style="vertical-align:%fpt"></object>' % (url, latex_escaped, -depth)
     #     else:
     #         obj = '<object data="%s" type="image/svg+xml" alt="%s" class="latex-center"></object>' % (url, latex_escaped)
-    return img
 
 
 ########################################################
@@ -770,7 +761,7 @@ class Converter(object):
                     return bb.to_html(token, self)
                 else:
                     return bb.to_latex(token, self)
-        except BBCodeException as e:
+        except BBCodeException:
             return self.tokenizer.T[token.T_start : token.T_end]
             # Show no errors at all for now.
             # return TokenError(
@@ -797,15 +788,15 @@ class Converter(object):
         tokens = self._pre_convert_to_html()
         if self.errors_mode == Converter.ERRORS_ENABLED:
             error_func = (
-                lambda token: u'<span class="mc-error">'
+                lambda token: u'<span class="mc-error">'  # noqa: E731
                 u'<span class="mc-error-source">{}</span> {}</span>'.format(
                     token.content, token.error_message
                 )
             )
         elif self.errors_mode == Converter.ERRORS_TESTING:
-            error_func = lambda token: u"<<ERROR>>"
+            error_func = lambda token: u"<<ERROR>>"  # noqa: E731
         else:
-            error_func = lambda token: u""
+            error_func = lambda token: u""  # noqa: E731
 
         self._state_stack = [_HTMLConverterState()]
         self.state = self._state_stack[-1]
@@ -893,14 +884,14 @@ class Converter(object):
     def convert_to_latex(self):
         output = []
         if self.errors_mode == Converter.ERRORS_ENABLED:
-            error_func = lambda token: "\\textbf{%s} %s" % (
+            error_func = lambda token: "\\textbf{%s} %s" % (  # noqa: E731
                 token.error_message,
                 token.content,
             )
         elif self.errors_mode == Converter.ERRORS_TESTING:
-            error_func = lambda token: u"<<ERROR>>"
+            error_func = lambda token: u"<<ERROR>>"  # noqa: E731
         else:
-            error_func = lambda token: u""
+            error_func = lambda token: u""  # noqa: E731
         for token in self.tokens:
             if isinstance(
                 token, (TokenText, TokenSimpleWhitespace, TokenMultilineWhitespace)

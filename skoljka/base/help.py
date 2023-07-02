@@ -109,7 +109,7 @@ def help_format(request):
         (
             "\\-",
             _("Soft hyphen, shown in HTML as <pre>&amp;shy;</pre>."),
-            "a\-very\-long\-word",
+            r"a\-very\-long\-word",
         ),
         ("\\{", _("Symbol %s.") % '{', None),
         ("\\}", _("Symbol %s.") % '}', None),

@@ -9,7 +9,6 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
 from django.db.models import Min
 from django.http import (
     Http404,
@@ -17,34 +16,27 @@ from django.http import (
     HttpResponseRedirect,
     HttpResponseServerError,
 )
-from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext
+from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
-from pagination.paginator import InfinitePaginator
 
 from skoljka.activity import action as _action
 from skoljka.base.utils import can_edit_featured_lectures
-from skoljka.folder.models import Folder, FolderTask
-from skoljka.folder.utils import (
-    invalidate_cache_for_folders,
-    invalidate_folder_cache_for_task,
-)
+from skoljka.folder.models import FolderTask
+from skoljka.folder.utils import invalidate_folder_cache_for_task
 from skoljka.mathcontent.forms import AttachmentForm, MathContentForm
 from skoljka.mathcontent.latex import latex_escape
-from skoljka.mathcontent.models import Attachment, MathContent
+from skoljka.mathcontent.models import Attachment
 from skoljka.mathcontent.utils import (
     ThumbnailRenderingException,
     check_and_save_attachment,
     convert_to_latex,
     create_file_thumbnail,
 )
-from skoljka.permissions.constants import EDIT, EDIT_PERMISSIONS, VIEW, VIEW_SOLUTIONS
-from skoljka.permissions.models import ObjectPermission
+from skoljka.permissions.constants import EDIT, EDIT_PERMISSIONS, VIEW
 from skoljka.solution.models import Solution, SolutionStatus
-from skoljka.tags.utils import set_tags, split_tags
+from skoljka.tags.utils import set_tags
 from skoljka.task.forms import (
     EXPORT_FORMAT_CHOICES,
-    TaskAdvancedForm,
     TaskBulkTemplateForm,
     TaskExportForm,
     TaskFileForm,
@@ -59,7 +51,6 @@ from skoljka.task.utils import (
     create_tasks_from_json,
     get_task_folder_data,
 )
-from skoljka.usergroup.forms import GroupEntryForm
 from skoljka.utils.decorators import response
 from skoljka.utils.string_operations import media_path_to_url
 from skoljka.utils.timeout import run_command
@@ -67,6 +58,8 @@ from skoljka.utils.timeout import run_command
 # TODO: promijeniti nacin na koji se Task i MathContent generiraju.
 # vrijednosti koje ne ovise o samom formatu se direktno trebaju
 # postaviti na vrijednosti iz forme.
+
+# TODO: Python 3: remove noqa F812 "list comprehension redefines '...'"
 
 
 def _sort_tasks(request, tasks):
@@ -119,7 +112,6 @@ def bulk_new(request, template_id=None):
     template = None
     if template_id:
         template = get_object_or_404(TaskBulkTemplate, id=template_id)
-    edit = template is not None
     error = None
 
     if request.method == 'POST':
@@ -131,7 +123,7 @@ def bulk_new(request, template_id=None):
             jsons = [x.json for x in form.task_infos]
             if step == 'final' and request.POST.get('action') == 'create':
                 try:
-                    tasks = create_tasks_from_json(jsons)
+                    tasks = create_tasks_from_json(jsons)  # noqa: F841 unused
                 except Exception as e:
                     error = e.message
 
@@ -139,7 +131,7 @@ def bulk_new(request, template_id=None):
                     template = form.save(commit=False)
                     template.author = request.user
                     template.save()
-                    total = len(tasks)
+                    # total = len(tasks)
                     # return ('/task/new/bulk/success/?total=' + str(total), )
             if step == 'second' and jsons:
                 json_dump = json.dumps(jsons, indent=2, sort_keys=True)
@@ -367,7 +359,7 @@ def detail(request, id):
     # Remember my solution.
     try:
         solution = Solution.objects.get(author_id=request.user.id, task_id=task.id)
-    except:
+    except Solution.DoesNotExist:
         solution = None
     task.cache_solution = solution
 
@@ -424,7 +416,9 @@ def similar(request, task_id):
 
             sorted_tasks[s.task_id] *= p
 
-    sorted_tasks = sorted([(p, id) for id, p in sorted_tasks.iteritems()], reverse=True)
+    sorted_tasks = sorted(
+        [(p, id) for id, p in sorted_tasks.iteritems()], reverse=True  # noqa: F812
+    )
     similar_ids = [id for p, id in sorted_tasks[:6]]
     similar = (
         Task.objects.for_user(request.user, VIEW)
@@ -468,7 +462,7 @@ def _convert_to_latex(sorted_tasks, ignore_exceptions, **kwargs):
             content = convert_to_latex(
                 x.content.text, content=x.content, attachments_path=attachments_path
             )
-        except:
+        except:  # noqa: E722 do not use bare 'except'
             if not ignore_exceptions:
                 invalid_tasks.append(x)
                 continue

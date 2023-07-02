@@ -145,7 +145,7 @@ class TeamScoreTest(TestCase):
                     team.cache_max_score_after_freeze,
                 )
                 self.assertEqual(score_triple, expected_score_triple)
-            except:
+            except:  # noqa: E722 do not use bare 'except'
                 print("Test case #{}: {}".format(index, test_case))
                 raise
 

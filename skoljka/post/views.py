@@ -1,7 +1,4 @@
-﻿import sys
-
-from django import forms
-from django.contrib.auth.decorators import login_required
+﻿from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404, HttpResponseForbidden, HttpResponseRedirect
@@ -32,7 +29,7 @@ def add_post(request):
         )
         try:
             object = content_type.get_object_for_this_type(pk=request.POST['object_id'])
-        except:
+        except:  # noqa: E722
             raise Http404("Object does not exist.")
 
         if hasattr(object, 'can_send_post'):
@@ -41,16 +38,17 @@ def add_post(request):
                     "You are not allowed to send messages to this object!"
                 )
 
-        object_author = getattr(object, 'author', None)
-        object_author_id = None
-        object_author_group = None
-        if object_author:
-            object_author_id = object_author.id
-            try:
-                object_author_group = Group.objects.get(name=object_author.username)
-            except Group.DoesNotExist:
-                pass
-                # TODO: report error
+        # TODO: What was this? Finish it.
+        # object_author = getattr(object, 'author', None)
+        # object_author_id = None
+        # object_author_group = None
+        # if object_author:
+        #     object_author_id = object_author.id
+        #     try:
+        #         object_author_group = Group.objects.get(name=object_author.username)
+        #     except Group.DoesNotExist:
+        #         pass
+        #         # TODO: report error
 
         content = math_content_form.save()
         post = Post.objects.create(
@@ -89,7 +87,7 @@ def edit_post(request, post_id=None):
     if request.method == 'POST':
         math_content_form = MathContentForm(request.POST, instance=post.content)
         if math_content_form.is_valid():
-            content = math_content_form.save()
+            math_content_form.save()
             post.last_edit_by = request.user
             post.save()
             return HttpResponseRedirect(request.POST.get('next', '/'))

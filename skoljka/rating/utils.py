@@ -8,7 +8,7 @@ def do_vote(user, object_id, content_type_id, name, value):
     try:
         content_type = ContentType.objects.get_for_id(content_type_id)
         instance = content_type.get_object_for_this_type(id=object_id)
-    except:
+    except:  # noqa: E722
         return HttpResponseServerError("Something's wrong")
 
     specific = ["solution"]  # task also?
@@ -35,7 +35,7 @@ def rating_check_request(request):
     ]
     try:
         args = [request.POST[x] for x in args]
-    except:
+    except KeyError:
         return
 
     return do_vote(request.user, *args)

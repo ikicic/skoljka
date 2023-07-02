@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import time
+import traceback
 
 from skoljka.folder.models import Folder, FolderTask
 from skoljka.folder.utils import (
@@ -13,7 +14,6 @@ from skoljka.permissions.constants import VIEW_SOLUTIONS
 from skoljka.permissions.models import ObjectPermission
 from skoljka.permissions.utils import get_object_ids_with_exclusive_permission
 from skoljka.solution.models import Solution, SolutionDetailedStatus
-from skoljka.tags.models import Tag, TaggedItem
 from skoljka.tags.utils import set_tags
 from skoljka.task.models import Task
 
@@ -203,7 +203,7 @@ def create_tasks_from_json(description):
 
     try:
         for k, desc in enumerate(description):
-            message_list.append("Creating task #0.".format(k + 1))
+            message_list.append("Creating task #{}.".format(k + 1))
             log_time("Creating task #{}.".format(k + 1))
 
             # First, prepare data to be able to create Task.

@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import include, patterns
 from django.views.generic import TemplateView
 
 from skoljka.base.views_test import IS_TESTDB

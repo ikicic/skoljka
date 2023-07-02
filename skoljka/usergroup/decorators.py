@@ -2,11 +2,11 @@ from functools import wraps
 
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
-from django.http import Http404, HttpResponseForbidden
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 
 from skoljka.permissions.constants import ADD_MEMBERS, EDIT, EDIT_PERMISSIONS, VIEW
-from skoljka.usergroup.models import UserGroup, is_group_member
+from skoljka.usergroup.models import is_group_member
 
 
 def group_view(permission=VIEW):

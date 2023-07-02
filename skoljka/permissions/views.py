@@ -1,19 +1,15 @@
-from django import forms
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
-from django.db import IntegrityError
-from django.db.models import Q
-from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext
+from django.http import Http404
+from django.shortcuts import get_object_or_404
+from django.utils.translation import ugettext as _
 
 from skoljka.folder.decorators import folder_view  # Model-specific.
 from skoljka.permissions.constants import EDIT_PERMISSIONS, PERMISSIONS, VIEW
 from skoljka.permissions.models import (
     ObjectPermission,
     convert_permission_names_to_values,
-    has_group_perm,
 )
 from skoljka.permissions.signals import objectpermissions_changed
 from skoljka.usergroup.forms import GroupEntryForm
@@ -36,7 +32,7 @@ def edit(request, id, type_id):
 
     try:
         object = content_type.get_object_for_this_type(id=id)
-    except:
+    except:  # noqa: E722
         raise Http404
 
     # Check if the user has the permission to *edit permissions* (not just

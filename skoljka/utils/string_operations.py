@@ -1,6 +1,5 @@
 ﻿"""Useful string operations"""
 
-import os
 import re
 
 from django.conf import settings

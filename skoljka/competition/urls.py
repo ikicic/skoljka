@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls.defaults import include, patterns, url
+from django.conf.urls.defaults import patterns, url
 
 from skoljka.utils.string_operations import join_urls
 

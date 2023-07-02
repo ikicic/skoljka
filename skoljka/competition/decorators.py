@@ -1,7 +1,7 @@
 from datetime import datetime
 from functools import wraps
 
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 
 from skoljka.competition.models import Competition, TeamMember

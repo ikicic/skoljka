@@ -2,7 +2,7 @@ import re
 
 from django.utils.translation import ugettext as _
 
-from skoljka.competition.evaluator_base import *
+from skoljka.competition.evaluator_base import Variable
 
 
 # Here Variable takes care of different solutions, and not the evaluator.
@@ -17,7 +17,7 @@ class VariableV0(Variable):
 
     def evaluate_solution(self, value):
         value = re.sub(r'\s+', '', value).lower()
-        return result in self.descriptor
+        return value in self.descriptor
 
     def help_text(self):
         return ""

@@ -1,8 +1,6 @@
 from functools import wraps
 from hashlib import sha1
 
-from django.contrib.auth.decorators import login_required
-
 # Don't forget to use same cache as in ncache...
 from django.core.cache import cache
 from django.db import models

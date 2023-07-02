@@ -2,10 +2,9 @@
 
 import os.path
 import subprocess
-import sys
 
-from skoljka.settings.local import *
-from skoljka.utils import timeout
+from skoljka.settings.local import *  # noqa: F401,F403
+from skoljka.settings.local import DEBUG, ENABLE_DEBUG_TOOLBAR, PROJECT_ROOT
 
 ######################################
 # GENERAL
@@ -21,7 +20,7 @@ try:
     _branch = _process.stdout.read()
     if _branch.strip() == 'dev_branch':
         VERSION_FOOTER += " (dev)"
-except:
+except:  # noqa: E722
     pass
 
 
@@ -111,7 +110,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     # this searches for static files in <appname>/static
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    #'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 TEMPLATE_DIRS = (
@@ -269,7 +268,7 @@ ACCOUNT_ACTIVATION_DAYS = 7
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#languages
 # https://django.readthedocs.io/en/1.4.X/topics/i18n/translation.html#how-django-discovers-language-preference
-gettext_dummy = lambda s: s
+gettext_dummy = lambda s: s  # noqa: E731
 
 # Define languages -> otherwise templates will be compiled in all possible languages
 LANGUAGES = (

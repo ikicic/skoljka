@@ -3,9 +3,7 @@ from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext
+from django.shortcuts import get_object_or_404
 
 from skoljka.activity import action as _action
 from skoljka.mathcontent.forms import MathContentForm

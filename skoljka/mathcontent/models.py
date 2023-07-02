@@ -2,8 +2,6 @@ import os
 
 from django.conf import settings
 from django.db import models
-from django.template.loader import render_to_string
-from django.utils.safestring import mark_safe
 
 from skoljka.utils.decorators import autoconnect
 from skoljka.utils.generators import LowerNumKeyGen

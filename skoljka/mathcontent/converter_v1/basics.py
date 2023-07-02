@@ -1,6 +1,6 @@
 from django.utils.translation import ugettext as _
 
-from skoljka.mathcontent.models import TYPE_HTML, TYPE_LATEX
+from skoljka.mathcontent.converter_v1.exceptions import ParseError
 
 COUNTER_EQUATION = 1
 COUNTER_FIGURE = 2
@@ -16,10 +16,6 @@ class State(object):
         self.tokens.append(tokens)  # Flatten later.
 
 
-class ParseError(Exception):
-    pass
-
-
 def float_to_str_pretty(val):
     return "{}".format(val).rstrip('0').rstrip('.')
 
@@ -27,12 +23,12 @@ def float_to_str_pretty(val):
 def img_parse_length(value):
     try:
         return int(value)
-    except:
+    except ValueError:
         pass
     if value[-2:] in ['px', 'pt']:
         try:
             return int(value[:-2])
-        except:
+        except ValueError:
             pass
     raise ParseError(_("Unexpected value:") + " " + value)
 
@@ -49,7 +45,7 @@ def img_params_to_html(params):
         elif name == 'scale':
             try:
                 scale = float(value)
-            except:
+            except ValueError:
                 raise ParseError(_("Unexpected value:") + " " + value)
             width = float_to_str_pretty(100 * scale) + "%"
             height = float_to_str_pretty(100 * scale) + "%"

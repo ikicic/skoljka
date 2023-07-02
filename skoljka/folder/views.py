@@ -14,18 +14,11 @@ from django.http import (
     HttpResponsePermanentRedirect,
     HttpResponseRedirect,
 )
-from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext
-from django.template.defaultfilters import slugify
+from django.shortcuts import get_object_or_404
 
 from skoljka.folder.decorators import folder_view
 from skoljka.folder.forms import FolderAdvancedCreateForm, FolderForm
-from skoljka.folder.models import (
-    FOLDER_NAMESPACE_FORMAT,
-    FOLDER_TASKS_DB_TABLE,
-    Folder,
-    FolderTask,
-)
+from skoljka.folder.models import FOLDER_TASKS_DB_TABLE, Folder, FolderTask
 from skoljka.folder.utils import (
     add_or_remove_folder_task,
     get_folder_descendant_ids,
@@ -34,10 +27,9 @@ from skoljka.folder.utils import (
     refresh_path_cache,
 )
 from skoljka.permissions.constants import DELETE, EDIT, EDIT_PERMISSIONS, VIEW
-from skoljka.permissions.models import ObjectPermission
 from skoljka.tags.utils import set_tags
 from skoljka.task.models import Task
-from skoljka.utils import get_referrer_path, ncache
+from skoljka.utils import get_referrer_path
 from skoljka.utils.decorators import response
 
 
@@ -104,7 +96,7 @@ def edit_tasks(request, folder, data):
         tasks = _edit_tasks_tasks(folder, request.user)
         task_info = dict(tasks.values_list('id', 'position'))
         for key, value in request.POST.iteritems():
-            if not re.match('^position-\d+$', key):
+            if not re.match(r'^position-\d+$', key):
                 continue
 
             id = int(key[9:])
@@ -165,13 +157,10 @@ def select(request, id):
     profile = request.user.profile
     if profile.selected_folder == folder:
         profile.selected_folder = None
-        response = 0
     else:
         profile.selected_folder = folder
-        response = 1
 
     profile.save()
-    # return HttpResponse(FOLDER_EDIT_LINK_CONTENT[response])
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 
@@ -285,7 +274,7 @@ def new(request, folder_id=None):
         if referrer and referrer.startswith('/folder/'):
             try:
                 initial_parent_id = int(referrer[8 : referrer.find('/', 8)])
-            except:
+            except:  # noqa: E722
                 pass
 
     if request.method == 'POST':
@@ -431,7 +420,7 @@ def _create_folders(author, parent, structure, p):
                 parent=parent, name=vars['name'], short_name=vars['short']
             )
             existing += 1
-        except:
+        except:  # noqa: E722
             # If not, create new folder.
             folder = Folder(
                 author=author,

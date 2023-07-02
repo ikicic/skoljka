@@ -8,18 +8,11 @@ from hashlib import sha1
 from django import template
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core import urlresolvers
 from django.core.cache import cache
 from django.db.models.signals import post_delete, post_save
-from django.dispatch import receiver
 from django.utils.safestring import mark_safe
 
-from skoljka.tags.models import (
-    CACHE_TAGS_AUTOCOMPLETE_JS_SRC,
-    VOTE_WRONG,
-    Tag,
-    TaggedItem,
-)
+from skoljka.tags.models import CACHE_TAGS_AUTOCOMPLETE_JS_SRC, VOTE_WRONG, Tag
 from skoljka.tags.utils import get_object_tagged_items, split_tags
 from skoljka.userprofile.models import UserProfile
 from skoljka.utils.decorators import cache_function
@@ -103,7 +96,7 @@ def tag_list(context, owner, plus_exclude=None):
 
 
 ###################
-## Autocomplete
+# Autocomplete
 ###################
 # Even though it is deprecated, we use this autocomplete plugin:
 # http://docs.jquery.com/Plugins/Autocomplete/autocomplete

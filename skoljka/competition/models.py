@@ -1,5 +1,4 @@
 import json
-import re
 from datetime import datetime
 
 from django.conf import settings
@@ -130,7 +129,7 @@ class Competition(BasePermissionsModel):
         translations, an empty dictionary is returned."""
         try:
             return json.loads(self.task_categories_trans)[lang]
-        except:
+        except:  # noqa: E722 do not use bare 'except'
             return {}
 
     @property

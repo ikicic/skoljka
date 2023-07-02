@@ -2,7 +2,6 @@ from collections import defaultdict
 
 from django import template
 from django.contrib.auth.models import Group, User
-from django.utils.safestring import mark_safe
 
 from skoljka.pm.models import MessageContent, MessageRecipient
 from skoljka.userprofile.templatetags.userprofile_tags import userlink

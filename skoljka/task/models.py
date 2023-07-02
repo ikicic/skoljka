@@ -1,20 +1,12 @@
-﻿import random
-
-from django.contrib.auth.models import User
-from django.contrib.contenttypes import generic
+﻿from django.contrib.auth.models import User
 from django.contrib.contenttypes.generic import GenericRelation
-from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Q
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from skoljka.mathcontent.models import Attachment, MathContent
-from skoljka.permissions.constants import EDIT, VIEW, VIEW_SOLUTIONS
-from skoljka.permissions.models import (
-    BasePermissionsModel,
-    convert_permission_names_to_values,
-)
+from skoljka.permissions.constants import EDIT, VIEW
+from skoljka.permissions.models import BasePermissionsModel
 from skoljka.post.generic import PostGenericRelation
 from skoljka.rating.fields import RatingField
 from skoljka.search.models import SearchCacheElement

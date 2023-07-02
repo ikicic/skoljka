@@ -2,13 +2,11 @@ from django.contrib.auth.models import Group, User
 from django.contrib.contenttypes import generic
 from django.db import models
 from django.db.models import Q
-from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from skoljka.mathcontent.models import MathContent
-from skoljka.permissions.constants import *
+from skoljka.permissions.constants import ADD_MEMBERS, MODEL_DEFAULT, VIEW
 from skoljka.permissions.models import (
-    BasePermissionsModel,
     ObjectPermission,
     get_permissions_for_object,
     has_group_perm,

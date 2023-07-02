@@ -2,13 +2,10 @@ import random
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext
+from django.shortcuts import get_object_or_404
 from django.utils.cache import patch_response_headers
 from django.views.i18n import javascript_catalog
 
-from skoljka.activity.models import Action
 from skoljka.base.utils import can_edit_featured_lectures
 from skoljka.folder.utils import add_or_remove_folder_task
 from skoljka.permissions.constants import VIEW

@@ -1,7 +1,6 @@
 from functools import wraps
 
-from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponseForbidden
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 
 from skoljka.folder.models import Folder
@@ -65,7 +64,7 @@ def folder_view(permission=VIEW):
             data['folder'] = folder
             try:
                 has_subfolders = bool(data['folder_children'][data['folder'].id])
-            except:
+            except:  # noqa: E722
                 has_subfolders = False
             data['has_subfolders'] = has_subfolders
 

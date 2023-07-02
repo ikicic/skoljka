@@ -7,7 +7,6 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import truncatechars
 from django.utils.html import mark_safe
-from django.utils.translation import ugettext as _
 from django.utils.translation import ungettext
 
 from skoljka.activity import action as _action

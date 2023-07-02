@@ -1,8 +1,12 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Group, User
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import Group
 from django.db import connection, transaction
-from django.http import Http404, HttpResponseRedirect
+from django.http import (
+    Http404,
+    HttpResponseBadRequest,
+    HttpResponseForbidden,
+    HttpResponseRedirect,
+)
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 
@@ -113,7 +117,7 @@ def pm_action(request, id):
             group_names = pm.author.username
         else:
             G = pm.groups.values_list('id', 'name')
-            groups = [name for id, name in G]
+            groups = [name for id, name in G]  # noqa: F812
 
             # add author to the list if not already in some of the groups
             if not pm.author.groups.through.objects.filter(

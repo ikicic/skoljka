@@ -1,8 +1,9 @@
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
 import skoljka.competition.evaluator_v0 as evaluator_v0
 import skoljka.competition.evaluator_v1 as evaluator_v1
-from skoljka.competition.evaluator_base import *
+from skoljka.competition.evaluator_base import InvalidDescriptor
 
 EVALUATOR_V0 = 0
 EVALUATOR_V1 = 1
@@ -59,7 +60,7 @@ def get_sample_solution(variables):
         return _("Error!")
     try:
         samples = [var.get_sample_solution() for var in variables]
-    except:
+    except:  # noqa: E722 do not use bare 'except'
         return _("Error!")
     delimiter = u" " + _(u"OR") + u" "
     return delimiter.join(samples)

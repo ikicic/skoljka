@@ -1,6 +1,6 @@
 ﻿import copy
 
-from django import forms, template
+from django import template
 from django.utils.datastructures import SortedDict
 from django.utils.formats import date_format
 from django.utils.safestring import mark_safe

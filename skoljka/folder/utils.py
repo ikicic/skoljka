@@ -1,9 +1,8 @@
 from collections import Counter, defaultdict
 
-from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, Max
-from django.db.models.signals import post_save, pre_delete, pre_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from skoljka.folder.models import (
@@ -30,7 +29,7 @@ def add_or_remove_folder_task(folder_id, task_id, add):
     """Add or remove given task from the given folder."""
     try:
         foldertask = FolderTask.objects.get(folder_id=folder_id, task_id=task_id)
-    except:
+    except FolderTask.DoesNotExist:
         foldertask = None
 
     if foldertask and not add:
@@ -187,7 +186,7 @@ def get_visible_folder_tree(folders, user, exclude_subtree=None):
     for x in all_folders.itervalues():
         # Ignore inaccessible folders. None means it is not an ancestor, 0
         # means no access.
-        if ancestor_counter.get(x.id) is not 0:
+        if ancestor_counter.get(x.id) != 0:
             folder_children[x.parent_id].append(x)
 
     try:

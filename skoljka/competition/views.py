@@ -1,15 +1,11 @@
 import re
-from collections import defaultdict
 from datetime import datetime
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
-from django.db.models import Count, F
-from django.forms.models import modelformset_factory
+from django.db.models import F
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
@@ -25,7 +21,6 @@ from skoljka.competition.evaluator import (
     safe_parse_descriptor,
 )
 from skoljka.competition.forms import (
-    BaseCompetitionTaskFormSet,
     ChainForm,
     ChainTasksForm,
     CompetitionSolutionForm,
@@ -135,7 +130,7 @@ class _Category(object):
                 order, name = match.groups()
                 order = int(order)
                 return order, name
-            except:
+            except:  # noqa: E722 do not use bare 'except'
                 pass
         return None, name
 
@@ -1005,7 +1000,6 @@ def chain_tasks_list(request, competition, data):
             'task__author', 'task__content__text', 'comment__text'
         )
     )
-    ctask_dict = {ctask.id: ctask for ctask in ctasks}
 
     for chain in chains:
         chain.competition = competition
@@ -1048,12 +1042,12 @@ def chain_tasks_list(request, competition, data):
 def chain_tasks_action(request, competition, data):
     action = request.POST['action']
     url_suffix = ""
-    if re.match('delete-chain-(\d+)', action):
+    if re.match(r'delete-chain-(\d+)', action):
         # Delete whole chain. Does not delete ctasks, of course.
         id = int(action[len('delete-chain-') :])
         chain = get_object_or_404(Chain, id=id, competition=competition)
         delete_chain(chain)
-    elif re.match('detach-(\d+)', action):
+    elif re.match(r'detach-(\d+)', action):
         # Detach ctask from a chain.
         id = int(action[len('detach-') :])
         ctask = get_object_or_404(CompetitionTask, id=id, competition=competition)
@@ -1095,7 +1089,7 @@ def chain_tasks_action(request, competition, data):
         new_ids = old_ids[:position] + selected_ids + old_ids[position:]
         update_chain_ctasks(competition, chain, old_ids, new_ids)
         url_suffix = '#chain-{}'.format(chain.id)
-    elif re.match('move-(lo|hi)-(\d+)', action):
+    elif re.match(r'move-(lo|hi)-(\d+)', action):
         id = int(action[len('move-lo-') :])
         ctask = get_object_or_404(
             CompetitionTask.objects.select_related('chain'),

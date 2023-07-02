@@ -9,12 +9,11 @@ from django.utils.translation import ugettext as _
 from django.utils.translation import ugettext_lazy
 
 from skoljka.competition.evaluator import (
-    InvalidDescriptor,
-    InvalidSolution,
     get_evaluator,
     get_solution_help_text,
     safe_parse_descriptor,
 )
+from skoljka.competition.evaluator_base import InvalidDescriptor, InvalidSolution
 from skoljka.competition.models import Chain, CompetitionTask, Team, TeamMember
 from skoljka.competition.utils import (
     comp_url,

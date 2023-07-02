@@ -2,7 +2,6 @@ from django.contrib import admin
 
 from skoljka.folder.models import Folder
 from skoljka.folder.utils import refresh_path_cache as _refresh_path_cache
-from skoljka.tags.utils import replace_with_original_tags
 
 
 class FolderAdmin(admin.ModelAdmin):

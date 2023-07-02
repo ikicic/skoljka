@@ -4,7 +4,7 @@
 
 from django.contrib.contenttypes.models import ContentType
 
-from skoljka.activity.constants import *
+from skoljka.activity.constants import POST_SEND, POST_SEND_CACHE_SEPARATOR
 from skoljka.activity.models import Action
 from skoljka.utils import xss
 

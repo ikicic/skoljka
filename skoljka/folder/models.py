@@ -1,27 +1,19 @@
 ﻿from __future__ import print_function
 
-import itertools
 import time
 
 from django.contrib.auth.models import User
-from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.generic import GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from django.core.cache import cache
 from django.db import connection, models, transaction
-from django.db.models import Count
 from django.utils.html import mark_safe
 
 from skoljka.permissions.constants import VIEW
 from skoljka.permissions.models import BasePermissionsModel
 from skoljka.permissions.utils import get_object_ids_with_exclusive_permission
 from skoljka.search.models import SearchCache, SearchCacheElement
-from skoljka.search.utils import search, search_tasks
-from skoljka.solution.models import (
-    SOLUTION_DETAILED_STATUS_MAX,
-    Solution,
-    SolutionDetailedStatus,
-)
+from skoljka.search.utils import search
+from skoljka.solution.models import SOLUTION_DETAILED_STATUS_MAX, SolutionDetailedStatus
 from skoljka.tags.managers import TaggableManager
 from skoljka.task.models import Task
 from skoljka.utils import interpolate_three_colors, ncache
@@ -312,10 +304,6 @@ class Folder(BasePermissionsModel):
 
         # Prepare folder-filters, i.e. FolderTasks for those folders
         Folder._prepare_folderfilters(folders)
-
-        # Get all the tasks in these folders. Check for permission to get the
-        # visible count immediately.
-        folder_task_ids = {}
 
         # {folder_id: [visible task count, solution statistics]}
         result = {

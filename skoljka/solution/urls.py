@@ -1,8 +1,6 @@
-from django.conf.urls.defaults import include, patterns, url
-from django.views.generic import DetailView, ListView, TemplateView
+from django.conf.urls.defaults import patterns
 
 import skoljka.solution.views as views
-from skoljka.solution.models import Solution
 
 urlpatterns = patterns(
     '',

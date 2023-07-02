@@ -10,7 +10,7 @@ class AttachmentAdmin(admin.ModelAdmin):
         for attachment in queryset:
             try:
                 attachment.cache_file_size = attachment.file.size
-            except:
+            except:  # noqa: E722
                 attachment.cache_file_size = -1
             attachment.save()
 

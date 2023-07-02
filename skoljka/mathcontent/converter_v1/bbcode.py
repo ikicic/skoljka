@@ -2,26 +2,15 @@ from django.conf import settings
 from django.utils.translation import ugettext as _
 
 from skoljka.mathcontent.converter_v1.basics import img_params_to_html, img_parse_length
-from skoljka.mathcontent.converter_v1.latex import (
+from skoljka.mathcontent.converter_v1.exceptions import (
+    BBCodeException,
+    BBUnexpectedParameters,
     LatexValueError,
-    convert_tex_length_to_html,
+    ParseError,
 )
+from skoljka.mathcontent.converter_v1.latex import convert_tex_length_to_html
 from skoljka.mathcontent.latex import latex_escape
 from skoljka.utils import xss
-
-
-class BBCodeException(Exception):
-    pass
-
-
-class BBUnexpectedParameters(BBCodeException):
-    def __init__(self, param=None):
-        if param is None:
-            msg = _("Unexpected parameter(s).")
-        else:
-            msg = _("Unexpected parameter:") + " " + param
-        super(BBUnexpectedParameters, self).__init__(msg)
-
 
 # def bb_code_link(type, url, content):
 #     """Output the <a...>...</a> tag or  \\url{...} or \\href{...}{...} command.

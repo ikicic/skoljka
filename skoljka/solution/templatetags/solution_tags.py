@@ -10,7 +10,6 @@ from skoljka.solution.models import (
     SOLUTION_STATUS_BY_NAME,
     Solution,
     SolutionDetailedStatus,
-    SolutionStatus,
 )
 from skoljka.task.models import Task
 from skoljka.task.utils import check_prerequisites_for_tasks

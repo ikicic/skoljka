@@ -1,6 +1,5 @@
 from django.test import TestCase
 
-from skoljka.folder.models import Folder
 from skoljka.folder.utils import get_folder_descendant_ids
 
 # TODO: Do not use fixtures.

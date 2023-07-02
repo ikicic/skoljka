@@ -1,5 +1,4 @@
 from django.contrib.contenttypes.models import ContentType
-from django.utils.html import mark_safe
 from taggit.utils import parse_tags
 
 from skoljka.tags.models import Tag, TaggedItem

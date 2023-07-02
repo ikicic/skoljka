@@ -5,18 +5,13 @@ from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.test.client import Client
 
-from skoljka.competition.models import (
-    Chain,
-    Competition,
-    CompetitionTask,
-    Submission,
-    Team,
-    TeamMember,
-)
+from skoljka.competition.models import Chain, Competition, Submission, Team, TeamMember
 from skoljka.competition.tests.test_utils import create_ctask
 from skoljka.permissions.constants import VIEW
 from skoljka.permissions.models import ObjectPermission
 from skoljka.utils.testcase import TestCase
+
+# TODO: replace noqa F841 (local variable not used) with assertions
 
 DAY = datetime.timedelta(days=1)
 HOUR = datetime.timedelta(hours=1)
@@ -607,7 +602,7 @@ class SubmissionTest(CompetitionViewsTestBase):
     def test_after_contest_end(self):
         self.init_competition(self.competitions[4], self.alice)
         self.login(self.alice)
-        response = self._send_solution(self.ctask1, "42")
+        response = self._send_solution(self.ctask1, "42")  # noqa: F841
         self.assertEqual(Submission.objects.all().count(), 0)
         self.assertEqual(self.team.cache_score, 0)
         self.logout()
@@ -639,29 +634,15 @@ class SubmissionTest(CompetitionViewsTestBase):
         self.assertEqual(Team.objects.get(id=self.team.id).cache_score, 0)
         self.logout()
 
-    def test_correctly_finish_chain(self):
-        self.init_competition(self.competitions[3], self.alice)
-        self.login(self.alice)
-        response = self._send_solution(self.ctask1, "42")
-        self.assertEqual(Submission.objects.all().count(), 1)
-        self.assertEqual(Team.objects.get(id=self.team.id).cache_score, 1)
-        response = self._send_solution(self.ctask2, "42")
-        self.assertEqual(Submission.objects.all().count(), 2)
-        self.assertEqual(Team.objects.get(id=self.team.id).cache_score, 11)
-        response = self._send_solution(self.ctask3, "42")
-        self.assertEqual(Submission.objects.all().count(), 3)
-        self.assertEqual(Team.objects.get(id=self.team.id).cache_score, 1111)
-        self.logout()
-
     def test_unlock_if_try_limit_exceeded(self):
         self.init_competition(self.competitions[3], self.alice)
         self.login(self.alice)
-        response = self._send_solution(self.ctask1, "-5")
-        response = self._send_solution(self.ctask1, "-4")
-        response = self._send_solution(self.ctask1, "-3")
+        response = self._send_solution(self.ctask1, "-5")  # noqa: F841
+        response = self._send_solution(self.ctask1, "-4")  # noqa: F841
+        response = self._send_solution(self.ctask1, "-3")  # noqa: F841
         self.assertEqual(Submission.objects.all().count(), 3)
         self.assertEqual(Team.objects.get(id=self.team.id).cache_score, 0)
-        response = self._send_solution(self.ctask2, "42")
+        response = self._send_solution(self.ctask2, "42")  # noqa: F841
         self.assertEqual(Submission.objects.all().count(), 4)
         self.assertEqual(Team.objects.get(id=self.team.id).cache_score, 10)
         self.logout()
@@ -669,13 +650,13 @@ class SubmissionTest(CompetitionViewsTestBase):
     def test_correctly_finish_chain(self):
         self.init_competition(self.competitions[3], self.alice)
         self.login(self.alice)
-        response = self._send_solution(self.ctask1, "42")
+        response = self._send_solution(self.ctask1, "42")  # noqa: F841
         self.assertEqual(Submission.objects.all().count(), 1)
         self.assertEqual(Team.objects.get(id=self.team.id).cache_score, 1)
-        response = self._send_solution(self.ctask2, "42")
+        response = self._send_solution(self.ctask2, "42")  # noqa: F841
         self.assertEqual(Submission.objects.all().count(), 2)
         self.assertEqual(Team.objects.get(id=self.team.id).cache_score, 11)
-        response = self._send_solution(self.ctask3, "42")
+        response = self._send_solution(self.ctask3, "42")  # noqa: F841
         self.assertEqual(Submission.objects.all().count(), 3)
         self.assertEqual(Team.objects.get(id=self.team.id).cache_score, 1111)
         self.logout()
@@ -683,15 +664,15 @@ class SubmissionTest(CompetitionViewsTestBase):
     def test_incorrectly_finish_chain(self):
         self.init_competition(self.competitions[3], self.alice)
         self.login(self.alice)
-        response = self._send_solution(self.ctask1, "-5")
-        response = self._send_solution(self.ctask1, "-4")
-        response = self._send_solution(self.ctask1, "-3")
+        response = self._send_solution(self.ctask1, "-5")  # noqa: F841
+        response = self._send_solution(self.ctask1, "-4")  # noqa: F841
+        response = self._send_solution(self.ctask1, "-3")  # noqa: F841
         self.assertEqual(Submission.objects.all().count(), 3)
         self.assertEqual(Team.objects.get(id=self.team.id).cache_score, 0)
-        response = self._send_solution(self.ctask2, "42")
+        response = self._send_solution(self.ctask2, "42")  # noqa: F841
         self.assertEqual(Submission.objects.all().count(), 4)
         self.assertEqual(Team.objects.get(id=self.team.id).cache_score, 10)
-        response = self._send_solution(self.ctask3, "42")
+        response = self._send_solution(self.ctask3, "42")  # noqa: F841
         self.assertEqual(Submission.objects.all().count(), 5)
         self.assertEqual(Team.objects.get(id=self.team.id).cache_score, 110)
         self.logout()
@@ -699,16 +680,16 @@ class SubmissionTest(CompetitionViewsTestBase):
     def test_nonadmin_cannot_delete_solution(self):
         self.init_competition(self.competitions[3], self.alice)
         self.login(self.alice)
-        response = self._send_solution(self.ctask1, "42")
-        response = self._delete_solution(self.ctask1, 1)
+        response = self._send_solution(self.ctask1, "42")  # noqa: F841
+        response = self._delete_solution(self.ctask1, 1)  # noqa: F841
         self.assertEqual(Submission.objects.all().count(), 1)
         self.logout()
 
     def test_admin_delete_solution(self):
         self.init_competition(self.competitions[3], self.admin)
         self.login(self.admin)
-        response = self._send_solution(self.ctask1, "42")
-        response = self._delete_solution(self.ctask1, 1)
+        response = self._send_solution(self.ctask1, "42")  # noqa: F841
+        response = self._delete_solution(self.ctask1, 1)  # noqa: F841
         self.assertEqual(Submission.objects.all().count(), 0)
         self.assertEqual(Team.objects.get(id=self.team.id).cache_score, 0)
         self.logout()
@@ -752,11 +733,11 @@ class ManualGradingTest(CompetitionViewsTestBase):
         self.init_competition(self.competitions[3])
 
         self.login(self.user1)
-        sub1 = self.send_manual_solution(self.ctask1, "answer 1 by 1")
-        sub2 = self.send_manual_solution(self.ctask2, "answer 2 by 1")
+        sub1 = self.send_manual_solution(self.ctask1, "answer 1 by user 1")
+        self.send_manual_solution(self.ctask2, "answer 2 by user 1")
 
         self.login(self.user2)
-        sub3 = self.send_manual_solution(self.ctask1, "answer 1 by 2")
+        self.send_manual_solution(self.ctask1, "answer 1 by user 2")
 
         # Test that a non-admin cannot view the submission detail admin page.
         self.assertEqual(self.client.get(sub1.get_admin_url()).status_code, 403)

@@ -1,6 +1,5 @@
 ﻿from django import template
 from django.conf import settings
-from django.utils.html import mark_safe
 
 from skoljka.mathcontent.utils import convert_to_html
 

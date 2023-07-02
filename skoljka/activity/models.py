@@ -4,9 +4,17 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.safestring import mark_safe
 
-from skoljka.activity.constants import *
-from skoljka.rating.templatetags.rating_tags import rating_display_bool
-from skoljka.userprofile.templatetags.userprofile_tags import userlink
+from skoljka.activity.constants import (
+    FILE_ADD,
+    POST_SEND,
+    SOLUTION_AS_OFFICIAL,
+    SOLUTION_AS_SOLVED,
+    SOLUTION_RATE,
+    SOLUTION_SUBMIT,
+    SOLUTION_TODO,
+    TASK_ADD,
+    action_label,
+)
 
 # TODO: napraviti neki shortcut za ttype = (A.type, A.subtype)
 
@@ -102,7 +110,7 @@ class Action(models.Model):
 
     def t_right_div_html(self):
         if (self.type, self.subtype) == SOLUTION_RATE:
-            from skoljka.solution.models import SOLUTION_CORRECT_SCORE, Solution
+            # from skoljka.solution.models import SOLUTION_CORRECT_SCORE, Solution
 
             if int(self.action_object_cache) == 1:
                 S = '<br><img src="/static/images/cross_circle.png">'

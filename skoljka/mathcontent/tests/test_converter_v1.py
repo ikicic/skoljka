@@ -25,14 +25,8 @@ from skoljka.mathcontent.converter_v1.tokens import (
     TokenText,
     TokenWarning,
 )
-from skoljka.mathcontent.models import TYPE_HTML, TYPE_LATEX, LatexElement
+from skoljka.mathcontent.models import LatexElement
 from skoljka.utils.testcase import SimpleTestCase
-
-# MOCK_URL_PREFIX = "http://mock.com/"
-#
-# class ConverterMock(Converter):
-#     def get_latex_picture(self, format, latex):
-#         return "<<{}||{}>>".format(format, latex)
 
 
 class MockFile(object):
@@ -184,13 +178,13 @@ class ConverterV1TestCase(SimpleTestCase):
             ],
         )
         self.assertTokenization(
-            "bla \( a+b  \)\n\n\[\n   c*d\n\]\n\nbla bla",
+            "bla \\( a+b  \\)\n\n\\[\n   c*d\n\\]\n\nbla bla",
             [
                 TokenText("bla"),
                 TokenSimpleWhitespace(" "),
-                TokenMath('\(%s\)', " a+b  "),
+                TokenMath(r'\(%s\)', " a+b  "),
                 TokenMultilineWhitespace("\n\n"),
-                TokenMath('\[%s\]', "\n   c*d\n"),
+                TokenMath(r'\[%s\]', "\n   c*d\n"),
                 TokenMultilineWhitespace("\n\n"),
                 TokenText("bla bla"),
             ],
@@ -526,17 +520,17 @@ class ConverterV1TestCase(SimpleTestCase):
         self.assertHTMLAutoLatexNoPar("bla\n\n\n\nbla", "bla<br>bla")
 
         self.assertHTMLAutoLatexNoPar(
-            "\\textbackslash begin\{...\} ... \\textbackslash end\{...\}",
+            "\\textbackslash begin\\{...\\} ... \\textbackslash end\\{...\\}",
             "\\begin{...} ... \\end{...}",
         )
         self.assertHTMLAutoLatexNoPar(
-            "\\textbackslash{}begin\{...\} ... \\textbackslash{}end\{...\}",
+            "\\textbackslash{}begin\\{...\\} ... \\textbackslash{}end\\{...\\}",
             "\\begin{...} ... \\end{...}",
         )
         self.assertHTMLAutoLatexNoPar(
             "\\textbackslash{}\\textasciicircum{}\\textasciitilde{}", "\\^~"
         )
-        self.assertHTMLAutoLatexNoPar("\{\}\%\_\&\$\#", "{}%_&amp;$#")
+        self.assertHTMLAutoLatexNoPar(r"\{\}\%\_\&\$\#", "{}%_&amp;$#")
         self.assertHTMLAutoLatexNoPar("\\&\"'<>", "&amp;&quot;&apos;&lt;&gt;")
 
         self.assertHTMLAutoLatexNoPar(
@@ -665,8 +659,8 @@ class ConverterV1TestCase(SimpleTestCase):
 
         # Math mode.
         self.assertHTMLAutoLatexNoPar("$a+b$", "<<$%s$||a+b>>")
-        self.assertHTMLAutoLatexNoPar("\(a+b\)", "<<\(%s\)||a+b>>")
-        self.assertHTMLAutoLatexNoPar("\[ a+b \]", "<<\[%s\]|| a+b >>")
+        self.assertHTMLAutoLatexNoPar(r"\(a+b\)", r"<<\(%s\)||a+b>>")
+        self.assertHTMLAutoLatexNoPar(r"\[ a+b \]", r"<<\[%s\]|| a+b >>")
         self.assertHTMLAutoLatexNoPar("$$  a+b $$", "<<$$%s$$||  a+b >>")
 
         # Figures and environment testing.
@@ -765,7 +759,7 @@ class ConverterV1TestCase(SimpleTestCase):
             '<p class="mc-noindent">no paragraph before div'
             '</div>',
         )
-        self.assertHTMLAutoLatex("\TeX", '<p class="mc-noindent">INLINE:<<%s||\\TeX>>')
+        self.assertHTMLAutoLatex("\\TeX", '<p class="mc-noindent">INLINE:<<%s||\\TeX>>')
 
         # Depending on the whitespace after environment, put indent or noindent.
         # (test _HTMLConverterState.last_was_block)
@@ -849,8 +843,8 @@ class ConverterV1TestCase(SimpleTestCase):
             "\\setlength{\\parskip}{0pt}\n\\setlength{\\parindent}{1em}\n",
         )
         self.assertHTMLAutoLatex(
-            "\setlength{\parindent}{2em}\n"
-            "\setlength{\parskip}{3em}\n"
+            "\\setlength{\\parindent}{2em}\n"
+            "\\setlength{\\parskip}{3em}\n"
             "\n"
             "First paragraph\n"
             "\n"
@@ -1018,15 +1012,15 @@ class ConverterV1TestCase(SimpleTestCase):
 
     def test_latex_formula(self):  # Test $ ... $ etc.
         self.assertHTMLLatexNoPar("$bla$", "<<$%s$||bla>>", "$bla$")
-        self.assertHTMLLatexNoPar("\[bla\]", "<<\[%s\]||bla>>", "\[bla\]")
+        self.assertHTMLLatexNoPar(r"\[bla\]", r"<<\[%s\]||bla>>", r"\[bla\]")
         self.assertHTMLLatexNoPar("$$$bla$$$", "<<%s||bla>>", "bla")
         self.assertHTMLLatexNoPar(
             "bla $$$something $a + b = c$ bla $$d + e = f$$ $$$ bla",
             "bla <<%s||something $a + b = c$ bla $$d + e = f$$ >> bla",
             "bla something $a + b = c$ bla $$d + e = f$$  bla",
         )
-        self.assertHTMLLatexNoPar("\(bla\)", "<<\(%s\)||bla>>", "\(bla\)")
-        self.assertHTMLLatexNoPar("\[bla\]", "<<\[%s\]||bla>>", "\[bla\]")
+        self.assertHTMLLatexNoPar(r"\(bla\)", r"<<\(%s\)||bla>>", r"\(bla\)")
+        self.assertHTMLLatexNoPar(r"\[bla\]", r"<<\[%s\]||bla>>", r"\[bla\]")
         self.assertHTMLLatexNoPar(
             "$$ asdf % commented out $$",
             "<<ERROR>>",

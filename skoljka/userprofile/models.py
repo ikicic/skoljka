@@ -14,7 +14,6 @@ from skoljka.solution.models import (
     SolutionDetailedStatus,
     SolutionStatus,
 )
-from skoljka.tags.models import Tag
 from skoljka.task.models import DIFFICULTY_RATING_ATTRS, Task
 from skoljka.utils.models import icon_help_text
 

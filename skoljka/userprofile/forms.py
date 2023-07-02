@@ -1,15 +1,12 @@
 ﻿from django import forms
-from django.contrib.admin import widgets
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import Group, User
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
-from registration.models import RegistrationProfile
 
 from skoljka.rating.widgets import RatingWidget
 from skoljka.task.models import DIFFICULTY_RATING_ATTRS
 from skoljka.userprofile.models import UserProfile
-from skoljka.utils.models import icon_help_text
 
 # TODO: Upgrado to Django 1.5 (merge UserProfile with User)
 

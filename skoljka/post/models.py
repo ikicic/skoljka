@@ -3,7 +3,6 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-from skoljka.mathcontent.forms import MathContentForm
 from skoljka.mathcontent.models import MathContent
 
 

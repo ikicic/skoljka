@@ -19,11 +19,11 @@ def get_referrer_path(request):
         return None
 
     # Remove http:// or https:// part
-    referrer = re.sub('^https?://', '', referrer)
+    referrer = re.sub(r'^https?://', '', referrer)
 
     # Check if the referrer is this domain itself
     server_name = request.META.get('SERVER_NAME')
-    if not re.match('^%s(:\d+)?/' % re.escape(server_name), referrer):
+    if not re.match(r'^%s(:\d+)?/' % re.escape(server_name), referrer):
         return None  # not this server
 
     # Return path

@@ -1,6 +1,5 @@
 ﻿from django import forms
 from django.contrib.auth.models import Group, User
-from django.core.exceptions import ObjectDoesNotExist
 
 from skoljka.permissions.constants import VIEW
 from skoljka.permissions.utils import filter_objects_with_permission

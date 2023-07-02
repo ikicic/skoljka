@@ -1,6 +1,4 @@
 from django.contrib.auth.models import Group, User
-from django.contrib.contenttypes import generic
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from skoljka.mathcontent.forms import MathContent

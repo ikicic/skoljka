@@ -1,7 +1,20 @@
 from django.contrib.contenttypes.models import ContentType
-from django.db import connection
 
-from skoljka.activity.constants import *
+from skoljka.activity.constants import (
+    COMPETITION_UPDATE_SUBMISSION_SCORE,
+    FILE_ADD,
+    GROUP_ADD,
+    GROUP_LEAVE,
+    LECTURE_ADD,
+    POST_SEND,
+    POST_SEND_CACHE_SEPARATOR,
+    SOLUTION_AS_OFFICIAL,
+    SOLUTION_AS_SOLVED,
+    SOLUTION_RATE,
+    SOLUTION_SUBMIT,
+    SOLUTION_TODO,
+    TASK_ADD,
+)
 from skoljka.activity.models import Action
 from skoljka.permissions.constants import VIEW
 from skoljka.permissions.utils import get_objects_with_permissions
@@ -107,7 +120,7 @@ def get_recent_activities(
     # Now, check solution accessibility...
     # Also, remove anything related to the official solutions.
     solutions_to_check_strict = []
-    solution_ids = [id for id, task_id, action_id in solutions_to_check]
+    solution_ids = [id for id, task_id, action_id in solutions_to_check]  # noqa: F812
     solutions = dict(
         Solution.objects.filter(id__in=solution_ids).values_list('id', 'is_official')
     )

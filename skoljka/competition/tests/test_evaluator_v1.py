@@ -9,7 +9,6 @@ from skoljka.competition.evaluator_v1 import (
     Fraction,
     IncorrectNumberOfElements,
     Integer,
-    InvalidDescriptor,
     InvalidModifiers,
     InvalidSolution,
     List,
@@ -32,7 +31,7 @@ class EvaluatorV1Test(SimpleTestCase):
         for test in tests:
             try:
                 result = parse_descriptor(test)
-            except:
+            except:  # noqa: E722
                 print("Failed on the test case {}.".format(test))
                 raise
             self.assertEqual(
