@@ -7,6 +7,7 @@ from django.utils.safestring import mark_safe
 
 from skoljka.userprofile.utils import get_useroption
 from skoljka.utils.decorators import response_update_cookie
+from skoljka.utils.python23 import basestring, unicode
 from skoljka.utils.templatetags.utils_tags import generate_get_query_string
 from skoljka.utils.xss import escape
 
@@ -14,11 +15,6 @@ register = template.Library()
 
 # TODO: refactor UserOptions!
 # view inc_task_list.html and inc_solution_list.html
-
-# TODO: Making flake8 happy. Remove after switching to Python 3:
-unicode = type(u'')
-basestring = str.__mro__[1]
-assert 'basestring' in str(basestring)
 
 
 def _remove_quotations(s):

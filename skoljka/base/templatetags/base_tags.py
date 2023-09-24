@@ -8,6 +8,7 @@ from template_preprocessor import preprocess_tag
 
 from skoljka.base.utils import get_featured_lectures
 from skoljka.search.utils import search_tasks
+from skoljka.utils.python23 import basestring, unicode
 
 register = template.Library()
 
