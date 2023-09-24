@@ -721,14 +721,15 @@ def task_detail(request, competition, data, ctask_id):
                     update_ctask_cache_admin_solved_count(
                         competition, ctask, ctask.chain
                     )
-                update_score_on_ctask_action(
-                    competition,
-                    team,
-                    ctask.chain,
-                    chain_ctasks=ctasks,
-                    old_chain_submissions=chain_submissions,
-                    new_chain_submissions=new_chain_submissions,
-                )
+                if ctask.chain:
+                    update_score_on_ctask_action(
+                        competition,
+                        team,
+                        ctask.chain,
+                        chain_ctasks=ctasks,
+                        old_chain_submissions=chain_submissions,
+                        new_chain_submissions=new_chain_submissions,
+                    )
 
                 # Prevent form resubmission.
                 return (ctask.get_absolute_url(),)
