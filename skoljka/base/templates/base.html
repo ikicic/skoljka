@@ -50,10 +50,10 @@
               class="form-inline hidden-xs-phone">
           {% csrf_token %}
           {# No whitespace between inline-block elements, CSS used instead. #}
-          <input id="id_username" name="username" type="text"
+          <input name="username" type="text"
               class="input-small" placeholder="{% trans "Username" %}" accesskey="l"
               {% if homepage %} autofocus{% endif %}
-          ><input id="id_password" name="password" type="password"
+          ><input name="password" type="password"
             class="input-small" placeholder="{% trans "Password" %}"
           ><input type="submit" class="btn" value="{% trans "Sign in" %}">
         </form>

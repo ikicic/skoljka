@@ -1,5 +1,3 @@
-from urllib import quote_plus
-
 from django.conf import settings
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
@@ -7,6 +5,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render_to_response
 from django.template import RequestContext
+from django.utils.http import urlencode
 from django.views.decorators.debug import sensitive_post_parameters
 from registration.views import register as _register
 
@@ -42,8 +41,8 @@ def new_register(request):
     if request.user.is_authenticated():
         return HttpResponseRedirect('/')
     if request.method == 'POST':
-        email = quote_plus(request.POST.get('email'))
-        success_url = '/accounts/register/complete/?email=' + email
+        query = urlencode({'email': request.POST.get('email')})
+        success_url = '/accounts/register/complete/?' + query
     else:
         success_url = None
     return _register(

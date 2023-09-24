@@ -1,7 +1,6 @@
 ﻿from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import Group, User
-from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from skoljka.rating.widgets import RatingWidget
@@ -47,7 +46,7 @@ class UserCreationForm(forms.Form):
     )
     tou = forms.BooleanField(
         required=True,
-        label=mark_safe(_(u'I accept the <a href="/tou/">Terms of Use</a>')),
+        label=_(u'I accept the <a href="/tou/">Terms of Use</a>'),
         error_messages={
             'required': _(
                 u"You may not use Školjka if you do not accept the Terms of Use."

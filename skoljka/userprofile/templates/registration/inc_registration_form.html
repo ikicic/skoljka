@@ -1,5 +1,5 @@
 {% load i18n %}
-<form method="post" action="/accounts/register/" class="no-table">
+<form method="post" action="/accounts/register/" class="no-table" data-cy="registration">
   {% csrf_token %}
   {{ form.non_field_errors }}
   {% for field in form %}

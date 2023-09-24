@@ -15,6 +15,11 @@ register = template.Library()
 # TODO: refactor UserOptions!
 # view inc_task_list.html and inc_solution_list.html
 
+# TODO: Making flake8 happy. Remove after switching to Python 3:
+unicode = type(u'')
+basestring = str.__mro__[1]
+assert 'basestring' in str(basestring)
+
 
 def _remove_quotations(s):
     """
@@ -149,10 +154,8 @@ def useroptions(parser, token):
 
 @register.inclusion_tag('registration/inc_login_form.html', takes_context=True)
 def login_form(context, no_new_account_link=False):
-    from skoljka.userprofile.forms import AuthenticationFormEx
-
     return {
-        'form': AuthenticationFormEx(),
+        'form': context['form'],
         'next': context.get('next', context['request'].get_full_path()),
         'no_new_account_link': no_new_account_link,
         'request': context['request'],

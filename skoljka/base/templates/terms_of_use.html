@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 
+{% block title %}
 {% if LANGUAGE_CODE == 'hr' %}
-{% block title %}Pomoć - Uvjeti korištenja i pravila privatnosti{% endblock %}
+  Pomoć - Uvjeti korištenja i pravila privatnosti
 {% else %}
-{% block title %}Help - Rules and Terms of Use{% endblock %}
+  Help - Rules and Terms of Use
 {% endif %}
-
+{% endblock %}
 
 {% block content %}
 

@@ -1,5 +1,5 @@
 describe("test registration", () => {
-  it("homepage registration form works", () => {
+  it("test registration using the homepage form", () => {
     cy.resetdb();
     cy.visit('/');
     cy.get('#content [name=username]').type("someusername");
@@ -8,14 +8,19 @@ describe("test registration", () => {
     cy.get('#content [name=password2]').type("abc");
     cy.get('#content [type=checkbox]').click();
     cy.get('#content [type=submit]').click();
+
+    // Test login does not work before activating the account.
+    cy.get('#hbar-login [name=username]').type("someusername");
+    cy.get('#hbar-login [name=password]').type("abc{enter}");
+    cy.url().should('contain', '/accounts/login/');
+    cy.get('[data-cy="login"] .errorlist').contains("This account is inactive.");
+
     cy.request({
       method: 'GET',
       url: '/test/latest_email/',
     })
       .its('body')
       .then((mail) => {
-        console.log(typeof(mail));
-        console.log(mail);
         cy.wrap(mail).should('contain', 'To: dummy@skoljka.org');
 
         let site = Cypress._.escapeRegExp(cy.config().baseUrl);
@@ -31,5 +36,20 @@ describe("test registration", () => {
         cy.get('#content [href="/"]').click();  // Continue button.
         cy.contains("someusername");            // Hello, someusername!
       });
+  });
+
+  it("test that non-ascii characters in username and email are rejected", () => {
+    cy.resetdb();
+    cy.visit('/');
+    cy.get('#content [name=username]').type("someusername-š");
+    cy.get('#content [name=email]').type("dummy-š@skoljka.org");
+    cy.get('#content [name=password1]').type("abc");
+    cy.get('#content [name=password2]').type("abc");
+    cy.get('#content [type=checkbox]').click();
+    cy.get('#content [type=submit]').click();
+
+    cy.url().should('contain', '/accounts/register/');
+    cy.get('[data-cy="registration"] [name="username"] + .errorlist').contains("Enter a valid value.");
+    cy.get('[data-cy="registration"] [name="email"] + .errorlist').contains("Enter a valid e-mail address.");
   });
 });
