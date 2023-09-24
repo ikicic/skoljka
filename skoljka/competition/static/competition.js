@@ -213,7 +213,7 @@
   // Option for admins to show all translations.
   $(function() {
     var enabled = localStorage.getItem('all-langs');
-    const body = $('body');
+    var body = $('body');
     if (enabled === '0' || !window.is_admin) {
       if (body.hasClass('all-langs')) {
         body.removeClass('all-langs');
