@@ -4,9 +4,12 @@
 
 from django.contrib.contenttypes.models import ContentType
 
+# Several pieces of code assume skoljka.activity.action contains the constants.
+from skoljka.activity.constants import *  # noqa F403
 from skoljka.activity.constants import POST_SEND, POST_SEND_CACHE_SEPARATOR
 from skoljka.activity.models import Action
 from skoljka.utils import xss
+from skoljka.utils.python23 import unicode
 
 
 def _filter(**kwargs):
