@@ -663,6 +663,7 @@ def task_detail(request, competition, data, ctask_id):
         if (
             (not team and not data['has_finished'])
             or not data['has_started']
+            or not ctask.chain
             or ctask.chain.unlock_minutes > data['minutes_passed']
         ):
             raise Http404
