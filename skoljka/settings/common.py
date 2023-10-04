@@ -10,8 +10,8 @@ from skoljka.settings.local import DEBUG, ENABLE_DEBUG_TOOLBAR, PROJECT_ROOT
 # GENERAL
 ######################################
 
-VERSION = 'v0.10.1'
-VERSION_FOOTER = "v0.10.1"
+VERSION = 'v0.11.0'
+VERSION_FOOTER = "v0.11.0"
 
 try:
     # TODO (Python 3): http://stackoverflow.com/a/12698328/2203044
