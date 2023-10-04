@@ -20,7 +20,12 @@ from skoljka.competition.models import (
     Team,
     TeamMember,
 )
+from skoljka.mathcontent.models import MathContent
+from skoljka.permissions.constants import EDIT, VIEW
+from skoljka.permissions.models import ObjectPermission
 from skoljka.post.models import Post
+from skoljka.tags.utils import add_tags
+from skoljka.task.models import Task
 
 
 def comp_url(competition, url_suffix):
@@ -41,6 +46,56 @@ def update_ctask_task(task, competition, chain, position, name, commit=False):
     task.source = competition.name
     if commit:
         task.save()
+
+
+def create_ctask(ctask, user, competition, text, comment, name=None):
+    """Save text and comment, and update chain caches, if needed.
+
+    Note: the chain_position should be unique, otherwise the order may be modified.
+    """
+    edit = bool(ctask.task_id)
+    if not edit:
+        content = MathContent(text=text)
+        content.save()
+        task = Task(content=content, author=user, hidden=True)
+        comment = MathContent(text=comment)
+        comment.save()
+        ctask.comment = comment
+    else:
+        task = ctask.task
+        task.content.text = text
+        task.content.save()
+        ctask.comment.text = comment
+        ctask.comment.save()
+
+    update_ctask_task(
+        task, competition, ctask.chain, ctask.chain_position + 1, name, commit=True
+    )
+
+    if not edit:
+        if competition.automatic_task_tags:
+            add_tags(task, competition.automatic_task_tags)
+        if competition.admin_group:
+            ObjectPermission.objects.create(
+                content_object=task, group=competition.admin_group, permission_type=VIEW
+            )
+            ObjectPermission.objects.create(
+                content_object=task, group=competition.admin_group, permission_type=EDIT
+            )
+        ctask.task = task
+
+    ctask.save()
+
+    if ctask.chain:
+        chain_ctasks = list(
+            CompetitionTask.objects.filter(chain=ctask.chain)
+            .select_related('comment')
+            .only('id', 'comment', 'task')
+        )
+
+        update_chain_comments_cache(ctask.chain, chain_ctasks)
+        update_chain_cache_is_verified(competition, ctask.chain)
+        ctask.chain.save()
 
 
 _is_important_re = re.compile(r'^IMPORTANT:', re.MULTILINE)

@@ -1,5 +1,6 @@
 {% extends "competition_base.html" %}
 
+{% load bootstrap_toolkit %}
 {% load competition_tags %}
 {% load sorting_tags %}
 {% load i18n %}
@@ -73,19 +74,19 @@
 </div>
 
 <br>
-<a href="{% comp_url 'task/new' %}" class="btn">{% trans "New task" %}</a>
+<a href="{% comp_url 'task/new' %}" class="btn" data-cy="new-task">{% trans "New task" %}</a>
 <br><br>
 
 <h3 class="comp-header">{% trans "Unused tasks" %}</h3>
 
 
 {% if created %}
-  <div class="alert alert-success">
+  <div class="alert alert-success" data-cy="chain-created-successfully">
     {% trans "Chain successfully created." %}
   </div>
 {% endif %}
 
-<form method="POST" action="" class="form-horizontal">
+<form method="POST" action="" class="form-horizontal" data-cy="create-chain">
   {% csrf_token %}
   <table class="table table-striped" id="cchain-unused-ctasks-table">
     <tr class="comp-tr-ctask">
@@ -109,11 +110,11 @@
   </table>
 
   <table class="kill-br">
-    {{ form }}
+    {{ form|as_bootstrap }}
     <tr>
       <td></td>
       <td>
-        <input type="submit" class="btn btn-primary"
+        <input type="submit" class="btn btn-primary" data-cy="create-chain"
                value="{% trans "Create chain" %}">
       </td>
     </tr>
@@ -174,7 +175,7 @@
         {% endif %}
         <td>
           <button type="submit" name="action" class="blank"
-                  value="delete-chain-{{ chain.id }}"
+                  value="delete-chain-{{ chain.id }}" data-cy="delete-chain"
                   title="{% trans "Delete" %}">
             <i class="icon-trash"></i>
           </button>

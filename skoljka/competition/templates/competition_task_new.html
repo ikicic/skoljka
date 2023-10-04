@@ -45,7 +45,7 @@
   {% mathcontent_bootstrap_preview form.instance.task.content form.text.auto_id "form-ctask-text" "" %}
   {% bootstrap_field form.comment layout="horizontal" %}
   {% mathcontent_bootstrap_preview form.instance.comment form.comment.auto_id "form-ctask-comment" form.t_comment_extra_class  %}
-  <button type="submit" value="next" value="stay" class="btn btn-primary">
+  <button type="submit" value="next" value="stay" class="btn btn-primary" data-cy="submit-primary">
     {% if ctask %}
       {% trans "Save changes" %}
     {% else %}
@@ -53,15 +53,15 @@
     {% endif %}
   </button>
   {% if not ctask %}
-    <button type="submit" name="next" value="next" class="btn">
+    <button type="submit" name="next" value="next" class="btn" data-cy="submit-and-new">
       {% trans "Submit and create new problem" %}
     </button>
   {% endif %}
-  <button type="submit" name="next" value="tasks" class="btn">
+  <button type="submit" name="next" value="tasks" class="btn" data-cy="submit-and-return">
     {% trans "Submit and go to the problem list" %}
   </button>
   {% if ctask %}
-    <a class="btn" href="{{ ctask.get_absolute_url }}">
+    <a class="btn" href="{{ ctask.get_absolute_url }}" data-cy="go-to-problem">
       {% trans "Go to problem" %}
     </a>
   {% endif %}

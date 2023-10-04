@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group
 from django.shortcuts import get_object_or_404
 
 from skoljka.activity import action as _action
@@ -9,6 +9,7 @@ from skoljka.permissions.models import ObjectPermission
 from skoljka.usergroup.decorators import group_view
 from skoljka.usergroup.forms import GroupForm, UserEntryForm, UserGroupForm
 from skoljka.usergroup.models import GroupExtended, is_group_member
+from skoljka.usergroup.utils import add_users_to_group
 from skoljka.userprofile.models import user_refresh_group_cache
 from skoljka.utils.decorators import response
 
@@ -154,26 +155,9 @@ def members(request, group, context_dict):
     if context_dict['can_add_members'] and request.method == 'POST':
         form = UserEntryForm(request.POST)
         if form.is_valid():
-            created_user_ids = []
             users = form.cleaned_data['list']
-            for user in users:
-                # user.groups.add(group)
-                dummy, created = User.groups.through.objects.get_or_create(
-                    user=user, group=group
-                )
-                if created:
-                    created_user_ids.append(user.id)
-                    _action.add(
-                        request.user,
-                        _action.GROUP_ADD,
-                        action_object=user,
-                        target=group,
-                        group=group,
-                    )
-            # TODO: manually create function like 'group_members_update'
-            user_refresh_group_cache(created_user_ids)
-            group.data.cache_member_count = group.data.get_members().count()
-            group.data.save()
+            add_users_to_group(users, group, added_by=request.user)
+
             form = UserEntryForm()
     else:
         form = UserEntryForm()

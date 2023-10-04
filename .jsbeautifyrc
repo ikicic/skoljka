@@ -1,0 +1,12 @@
+{
+  "brace-style": "preserve-inline",
+  "indent_size": 2,
+  "wrap_line_length": 120,
+  "html": {
+    "extra_liners": [],
+    "indent_inner_html": true
+  },
+  "css": {
+    "space_around_combinator": true
+  }
+}

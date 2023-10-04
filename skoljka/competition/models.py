@@ -19,22 +19,26 @@ from skoljka.utils import xss
 from skoljka.utils.models import gray_help_text
 from skoljka.utils.string_operations import join_urls
 
+KIND_CHOICES = (
+    (1, "Competition"),
+    (2, "Course"),
+)
+
 
 class Competition(BasePermissionsModel):
     """
-    Instruction:
+    Instructions:
         If using url_path_prefix, you also have to add ID and url prefix to
         COMPETITION_URLS in settings/local.py.
-        url_path_prefix must have leading / if used.
-        admin_group must have VIEW and EDIT permissions for the competition
-        object.
+        url_path_prefix must have a leading / if used.
+        admin_group must have the VIEW and EDIT permissions for the competition object.
     """
 
     KIND_COMPETITION = 1
     KIND_COURSE = 2
 
     name = models.CharField(max_length=64)
-    kind = models.SmallIntegerField(default=1, help_text="1=competition, 2=course")
+    kind = models.SmallIntegerField(default=1, choices=KIND_CHOICES)
     hidden = models.BooleanField(default=True)
     registration_open_date = models.DateTimeField()
     start_date = models.DateTimeField()

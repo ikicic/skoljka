@@ -2,7 +2,7 @@ from django.conf import settings
 from django.conf.urls.defaults import include, patterns
 from django.views.generic import TemplateView
 
-from skoljka.base.views_test import IS_TESTDB
+from skoljka.utils.testutils import IS_TESTDB
 
 _EXTRA_URLS = [
     (x[0], TemplateView.as_view(template_name=x[1])) for x in settings.EXTRA_BASE_URLS
@@ -48,6 +48,8 @@ urlpatterns = patterns(
 if IS_TESTDB:
     urlpatterns += patterns(
         '',
-        (r'^test/resetdb/', 'skoljka.base.views_test.reset_testdb'),
-        (r'^test/latest_email/', 'skoljka.base.views_test.get_latest_email'),
+        (r'^test/latest_email/$', 'skoljka.base.views_test.get_latest_email'),
+        (r'^test/login/$', 'skoljka.base.views_test.login'),
+        (r'^test/resetdb/$', 'skoljka.base.views_test.reset_testdb'),
+        (r'^test/setlang/$', 'skoljka.base.views_test.setlang'),
     )

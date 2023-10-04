@@ -68,8 +68,8 @@
     "model": "auth.user",
     "fields": {
       "username": "Bob",
-      "first_name": "BobLast",
-      "last_name": "User",
+      "first_name": "Bob",
+      "last_name": "BobLast",
       "is_active": true,
       "is_superuser": false,
       "is_staff": false,
@@ -78,7 +78,7 @@
         3
       ],
       "user_permissions": [],
-      "password": "pbkdf2_sha256$10000$y9itbwpyNscP$DYaDlY4ANdKgWgmJg+b36fdByQB0dTz3Z6USOLXQUWY=",
+      "password": "pbkdf2_sha256$10000$yMWdq1JG0YYR$2pAO7cu1RzhFMXrms0GSp5Y0gUJdc5/GV1kSQWMUg00=",
       "email": "bob@example.com",
       "date_joined": "2014-05-11T17:42:17"
     }

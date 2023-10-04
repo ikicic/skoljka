@@ -40,6 +40,7 @@ from skoljka.competition.models import (
 from skoljka.competition.templatetags.competition_tags import get_submission_actions
 from skoljka.competition.utils import (
     comp_url,
+    create_ctask,
     ctask_comment_verified_class,
     delete_chain,
     detach_ctask_from_chain,
@@ -54,22 +55,15 @@ from skoljka.competition.utils import (
     refresh_ctask_cache_new_activities_count,
     refresh_submissions_score,
     refresh_teams_cache_score,
-    update_chain_cache_is_verified,
-    update_chain_comments_cache,
     update_chain_ctasks,
     update_ctask_cache_admin_solved_count,
-    update_ctask_task,
     update_score_on_ctask_action,
 )
 from skoljka.mathcontent.forms import MathContentForm
 from skoljka.mathcontent.latex import latex_escape
-from skoljka.mathcontent.models import MathContent
 from skoljka.permissions.constants import EDIT, VIEW
-from skoljka.permissions.models import ObjectPermission
 from skoljka.post.forms import PostsForm
 from skoljka.post.models import Post
-from skoljka.tags.utils import add_tags
-from skoljka.task.models import Task
 from skoljka.userprofile.forms import AuthenticationFormEx
 from skoljka.utils.decorators import require, response
 
@@ -911,31 +905,17 @@ def task_new(request, competition, data, ctask_id=None):
         if not edit:
             ctask.competition = competition
             ctask.chain = None
-            ctask.chain_position = -1
+            ctask.chain_position = -1  # Determine au
             ctask.max_submissions = competition.default_max_submissions
 
-        _create_or_update_task(
+        create_ctask(
             ctask,
             request.user,
             competition,
-            ctask.chain,
-            ctask.chain_position,
             ctask._text,
             ctask._comment,
-            form.cleaned_data.get('name'),
+            name=form.cleaned_data.get('name'),
         )
-
-        ctask.save()
-
-        if ctask.chain:
-            chain_ctasks = (
-                CompetitionTask.objects.filter(chain=ctask.chain)
-                .select_related('comment')
-                .only('id', 'comment')
-            )
-            update_chain_comments_cache(ctask.chain, chain_ctasks)
-            update_chain_cache_is_verified(competition, ctask.chain)
-            ctask.chain.save()
 
         target = request.POST.get('next', 'stay')
         if target == 'next':
@@ -1062,7 +1042,7 @@ def chain_tasks_action(request, competition, data):
             after_what = request.POST['after-what']
             after_id = request.POST['after-id']
         except KeyError as e:
-            return (400, "POST arguments missing " + e.message)
+            return (400, "POST arguments missing {}".format(e))
         if after_what == 'chain':
             chain = get_object_or_404(Chain, id=after_id, competition=competition)
             position = 0
@@ -1103,12 +1083,17 @@ def chain_tasks_action(request, competition, data):
             .order_by('chain_position')
             .values_list('id', flat=True)
         )
+        # FIXME: Explain why is chain_position 1-based.
         pos = ctask.chain_position - 1
         new_ids = old_ids[:]
         if action[5] == 'l' and pos > 0:
             new_ids[pos], new_ids[pos - 1] = new_ids[pos - 1], new_ids[pos]
         elif action[5] == 'h' and pos < len(old_ids) - 1:
             new_ids[pos], new_ids[pos + 1] = new_ids[pos + 1], new_ids[pos]
+        else:
+            # It could be that chain_positions are non-unique, so call
+            # Call `update_chain_ctasks` to refresh them.
+            pass
 
         url_suffix = '#chain-{}'.format(ctask.chain.id)
         update_chain_ctasks(competition, ctask.chain, old_ids, new_ids)
@@ -1172,37 +1157,6 @@ def chain_list(request, competition, data):
 
     data['chains'] = chains
     return data
-
-
-def _create_or_update_task(ctask, user, competition, chain, index, text, comment, name):
-    edit = bool(ctask.task_id)
-    if not edit:
-        content = MathContent(text=text)
-        content.save()
-        task = Task(content=content, author=user, hidden=True)
-        comment = MathContent(text=comment)
-        comment.save()
-        ctask.comment = comment
-    else:
-        task = ctask.task
-        task.content.text = text
-        task.content.save()
-        ctask.comment.text = comment
-        ctask.comment.save()
-
-    update_ctask_task(task, competition, chain, index + 1, name, commit=True)
-
-    if not edit:
-        if competition.automatic_task_tags:
-            add_tags(task, competition.automatic_task_tags)
-        if competition.admin_group:
-            ObjectPermission.objects.create(
-                content_object=task, group=competition.admin_group, permission_type=VIEW
-            )
-            ObjectPermission.objects.create(
-                content_object=task, group=competition.admin_group, permission_type=EDIT
-            )
-        ctask.task = task
 
 
 @competition_view(permission=EDIT)

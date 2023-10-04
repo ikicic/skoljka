@@ -26,7 +26,11 @@ USERPROFILE_SCHOOL_CLASS_CHOICES = [(0, '-------------')] + [
 
 
 @receiver(user_registered)
-def create_user_profile(sender, user, request, **kwargs):
+def create_user_profile_listener(sender, user, request, **kwargs):
+    create_user_profile(user)
+
+
+def create_user_profile(user):
     # one member Group for each User
     group = Group(name=user.username)
     group.save()

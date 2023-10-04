@@ -2,11 +2,19 @@ from django.conf import settings
 from django.conf.urls.defaults import patterns, url
 
 from skoljka.utils.string_operations import join_urls
+from skoljka.utils.testutils import IS_TESTDB
 
 
-def _make_patterns(*patterns):
+def _make_patterns(patterns):
     result = []
     shorthands = settings.COMPETITION_URLS
+
+    if IS_TESTDB:
+        from skoljka.competition.tests.fixtures import TEST_COMPETITION_URLS
+
+        shorthands = shorthands.copy()
+        shorthands.update(TEST_COMPETITION_URLS)
+
     for competition_id, url_path_prefix in shorthands.iteritems():
         special = settings.COMPETITION_SPECIAL_URLS.get(competition_id, [])
         for _regex, view in list(patterns) + list(special):
@@ -21,7 +29,7 @@ def _make_patterns(*patterns):
 
 
 # Competition-related URLs, prefixed with competition/<id>/
-_patterns = _make_patterns(
+_patterns = [
     # NOTE: Do not complicate here with names, as there might be multiple links
     # to the same competition page (with /competition/{{ id }}/ prefix and with
     # /{{ comp_prefix }}/). Use comp_url instead. Also, this is not a list
@@ -46,10 +54,26 @@ _patterns = _make_patterns(
     (r'submission/(?P<submission_id>\d+)/$', 'submission_detail'),
     (r'task/(?P<ctask_id>\d+)/edit/$', 'task_new'),
     (r'team/(?P<team_id>\d+)/$', 'team_detail'),
-)
+]
 
 _extra_urls = [
     (r'competition/$', 'competition_list'),
 ]
 
-urlpatterns = patterns('skoljka.competition.views', *(_patterns + _extra_urls))
+if IS_TESTDB:
+    import skoljka.competition.tests.fixtures as _fixtures
+
+    _patterns += [
+        (r'test/create_chain/$', _fixtures.create_test_chain),
+        (r'test/create_ctasks/$', _fixtures.create_test_ctasks),
+    ]
+    _extra_urls += patterns(
+        '',
+        (r'^competition/test/fill/$', _fixtures.create_test_competitions),
+    )
+    del _fixtures
+
+
+urlpatterns = patterns(
+    'skoljka.competition.views', *(_make_patterns(_patterns) + _extra_urls)
+)
