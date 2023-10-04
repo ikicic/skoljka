@@ -49,14 +49,13 @@ em em {
   font-style: normal;
 }
 
-/* Form that doesn't use .as_table, but uses {{ field }} instead. */
-form.no-table {
-  button, input[type=submit], input[type=text], input[type=password] {
-    display: block;
-  }
-
+/* Remove margins from bootstrap_form. */
+form.remove-bootstrap-toolkit-margins {
   label {
-    display: inline-block;
+    margin-bottom: 0px;
+  }
+  .control-group {
+    margin-bottom: 0px;
   }
 }
 

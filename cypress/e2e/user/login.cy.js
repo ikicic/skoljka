@@ -3,7 +3,7 @@ describe("login", () => {
     cy.visit('/');
     cy.get('#hbar-login [name=username]').type("alice");
     cy.get('#hbar-login [name=password]').type("a{enter}");
-    cy.contains("Alice");  // Signed in. ("Hello, Alice!")
+    cy.contains("Alice"); // Signed in. ("Hello, Alice!")
   });
 
   it("test login using the menu form", () => {
@@ -13,7 +13,7 @@ describe("login", () => {
     cy.get('#content [type=text]').type("alice");
     cy.get('#content [type=password]').type("a");
     cy.get('#content [type=submit]').click();
-    cy.contains("Alice");  // Signed in. ("Hello, Alice!")
+    cy.contains("Alice"); // Signed in. ("Hello, Alice!")
   });
 
   it("test failed header login", () => {
@@ -21,7 +21,7 @@ describe("login", () => {
     cy.get('#hbar-login [name=username]').type("idonotexist");
     cy.get('#hbar-login [name=password]').type("a{enter}");
     cy.url().should('contain', '/accounts/login/');
-    cy.get('[data-cy="login"] .errorlist').contains("Please enter a correct username and password.");
+    cy.get('[data-cy="login"] .alert-error').contains("Please enter a correct username and password.");
   });
 
   it("test failed menu login", () => {
@@ -30,6 +30,6 @@ describe("login", () => {
     cy.get('#content [type=text]').type("idonotexist");
     cy.get('#content [type=password]').type("a{enter}");
     cy.url().should('contain', '/accounts/login/');
-    cy.get('[data-cy="login"] .errorlist').contains("Please enter a correct username and password.");
+    cy.get('[data-cy="login"] .alert-error').contains("Please enter a correct username and password.");
   });
 });

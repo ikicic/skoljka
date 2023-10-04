@@ -1,6 +1,7 @@
 ﻿from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import Group, User
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from skoljka.rating.widgets import RatingWidget
@@ -60,8 +61,12 @@ class UserCreationForm(forms.Form):
 
         for x in self.fields.itervalues():
             if not isinstance(x, forms.CharField):
+                # Terms of Use has a link.
+                x.label = mark_safe(x.label)
                 continue
+            # Show the label as a placeholder.
             x.widget.attrs['placeholder'] = x.label
+            x.label = ""
             if extra_class:
                 x.widget.attrs['class'] = (
                     x.widget.attrs.get('class', '') + ' ' + extra_class

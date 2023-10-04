@@ -50,6 +50,7 @@ if IS_TESTDB:
         '',
         (r'^test/latest_email/$', 'skoljka.base.views_test.get_latest_email'),
         (r'^test/login/$', 'skoljka.base.views_test.login'),
+        (r'^test/logout/$', 'skoljka.base.views_test.logout'),
         (r'^test/resetdb/$', 'skoljka.base.views_test.reset_testdb'),
         (r'^test/setlang/$', 'skoljka.base.views_test.setlang'),
     )

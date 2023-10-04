@@ -23,6 +23,11 @@ function login(username) {
   });
 }
 
+/// Sign the user out.
+function logout() {
+  cy.request({ method: 'POST', url: '/test/logout/' });
+}
+
 /// Reset the (test) database.
 function resetdb() {
   cy.request({
@@ -44,5 +49,6 @@ function setlang(lang) {
 Cypress.Commands.add('fieldError', { prevSubject: true }, fieldError);
 Cypress.Commands.add('requiredFieldError', { prevSubject: true }, requiredFieldError);
 Cypress.Commands.add('login', login);
+Cypress.Commands.add('logout', logout);
 Cypress.Commands.add('resetdb', resetdb);
 Cypress.Commands.add('setlang', setlang);

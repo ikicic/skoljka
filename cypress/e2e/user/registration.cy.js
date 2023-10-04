@@ -13,12 +13,9 @@ describe("test registration", () => {
     cy.get('#hbar-login [name=username]').type("someusername");
     cy.get('#hbar-login [name=password]').type("abc{enter}");
     cy.url().should('contain', '/accounts/login/');
-    cy.get('[data-cy="login"] .errorlist').contains("This account is inactive.");
+    cy.get('[data-cy="login"] .alert-error').contains("This account is inactive.");
 
-    cy.request({
-      method: 'GET',
-      url: '/test/latest_email/',
-    })
+    cy.request({ method: 'GET', url: '/test/latest_email/' })
       .its('body')
       .then((mail) => {
         cy.wrap(mail).should('contain', 'To: dummy@skoljka.org');
@@ -32,9 +29,9 @@ describe("test registration", () => {
 
         // Visit the activation link.
         cy.visit(links[0]);
-        cy.contains("someusername");            // Hello, someusername!
-        cy.get('#content [href="/"]').click();  // Continue button.
-        cy.contains("someusername");            // Hello, someusername!
+        cy.contains("someusername"); // Hello, someusername!
+        cy.get('#content [href="/"]').click(); // Continue button.
+        cy.contains("someusername"); // Hello, someusername!
       });
   });
 
@@ -45,11 +42,12 @@ describe("test registration", () => {
     cy.get('#content [name=email]').type("dummy-š@skoljka.org");
     cy.get('#content [name=password1]').type("abc");
     cy.get('#content [name=password2]').type("abc");
-    cy.get('#content [type=checkbox]').click();
     cy.get('#content [type=submit]').click();
 
     cy.url().should('contain', '/accounts/register/');
-    cy.get('[data-cy="registration"] [name="username"] + .errorlist').contains("Enter a valid value.");
-    cy.get('[data-cy="registration"] [name="email"] + .errorlist').contains("Enter a valid e-mail address.");
+    cy.get('[data-cy="registration"] [name="username"] + .help-block').contains("Enter a valid value.");
+    cy.get('[data-cy="registration"] [name="email"] + .help-block').contains("Enter a valid e-mail address.");
+    cy.get('[data-cy="registration"] [class="checkbox"] + .help-block').contains(
+      "You may not use Školjka if you do not accept the Terms of Use.");
   });
 });

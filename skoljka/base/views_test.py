@@ -4,6 +4,7 @@ import sys
 
 from django.conf import settings
 from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.core import mail
@@ -38,6 +39,14 @@ def login(request):
     auth_login(request, user)
 
     return HttpResponse('{"user": %d}' % user.id, mimetype='application/json')
+
+
+@csrf_exempt
+@assert_testdb
+def logout(request):
+    """Sign out the user. Silently ignored if the user is not authenticated."""
+    auth_logout(request)
+    return HttpResponse('{}', mimetype='application/json')
 
 
 @csrf_exempt

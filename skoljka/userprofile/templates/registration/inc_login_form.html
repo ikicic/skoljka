@@ -1,9 +1,10 @@
 {% load url from future %}
+{% load bootstrap_toolkit %}
 {% load i18n %}
 <form method="post" action="{% url 'django.contrib.auth.views.login' %}"
-    class="no-table" data-cy="login">
+      class="remove-bootstrap-toolkit-margins" data-cy="login">
   {% csrf_token %}
-  {{ form }}
+  {% bootstrap_form form %}
   <p>
     {% url 'auth_password_reset' as auth_password_reset_url %}
     {% blocktrans %}

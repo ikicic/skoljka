@@ -1,19 +1,9 @@
+{% load bootstrap_toolkit %}
 {% load i18n %}
-<form method="post" action="/accounts/register/" class="no-table" data-cy="registration">
+<form method="post" action="/accounts/register/" class="remove-bootstrap-toolkit-margins" data-cy="registration">
   {% csrf_token %}
-  {{ form.non_field_errors }}
-  {% for field in form %}
-    {% if field.html_name != 'tou' %}
-      {{ field }}
-      {{ field.errors }}
-    {% endif %}
-  {% endfor %}
-
-  <label for="id-tou">
-    {{ form.tou.label|safe }}:
-  </label>
-  <input type="checkbox" id="id-tou" name="tou">
-  {{ form.tou.errors }}
+  {% bootstrap_form form %}
+  <br>
   <button class="btn btn-primary" type="submit">
     {% trans "Register" context "action" %}
   </button>
