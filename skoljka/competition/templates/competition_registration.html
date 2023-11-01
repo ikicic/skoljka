@@ -1,4 +1,5 @@
 {% extends "competition_base.html" %}
+{% load bootstrap_toolkit %}
 {% load competition_tags %}
 {% load i18n %}
 
@@ -28,7 +29,7 @@
     <h3 class="comp-header">{% trans "Invitations" %}</h3>
     <form action="{{ requst.get_full_path }}" method="POST" class="row row-fix">
       {% csrf_token %}
-      <table id="creg-invitations-table" class="span6">
+      <table id="creg-invitations-table" class="span6" data-cy="invitations-table">
         <tr>
           <th>{% trans "Team" %}</th>
           <th>{% trans "Founder" %}</th>
@@ -53,34 +54,45 @@
   {% if team_form and not competition.is_course %}
     {% if team %}
       <h3 class="comp-header">{% trans "Edit Team" %}</h3>
+    {% elif competition.is_individual_competition %}
+      <h3 class="comp-header">{% trans "Competition Registration" %}</h3>
     {% else %}
       <h3 class="comp-header">{% trans "Team Registration" %}</h3>
     {% endif %}
 
-    <div class="instructions">
-      {% blocktrans %}
-        <p>Enter the team name in the first field.</p>
-        <p>In the second and third team enter the names of other team members,
-        if any.</p>
-        <p>In the case they have an account on školjka, press "Invite user"
-        and enter their usernames. After submitting the form, invitations
-        will be sent to the selected users. To accept the invitation, the
-        invited users should visit this same page (Registration) from their
-        accounts and press "Accept invitation".</p>
-      {% endblocktrans %}
-    </div>
+    {% if competition.is_individual_competition %}
+      {% if not team %}
+        <div class="instructions" data-cy="instructions">
+          <p>{% trans "Please register to participate in the competition." %}</p>
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="instructions">
+        {% if not team %}
+          <p>{% trans "To participate in the competition, please enter your team name and list the other team members." %}</p>
+        {% endif %}
+        {% blocktrans %}
+          <p>To invite other Školjka users to your team, press "Invite user"
+          and enter their usernames. After submitting the form, the specified
+          users will receive an invitation that they can accept by visiting the
+          registration page from their accounts and pressing "Accept invitation".</p>
+          <p>To list the team members without an account, simply enter their names.</p>
+        {% endblocktrans %}
+      </div>
 
-    {% reg_available_users %}
+      {% reg_available_users %}
+    {% endif %}
 
-    <form action="{{ request.get_full_path }}" method="POST" id="creg-form">
+    <form action="{{ request.get_full_path }}" method="POST" id="creg-form" data-cy="creg">
       {% csrf_token %}
       {{ team_form.non_field_errors }}
-      {{ team_form.name.errors }}
       <div id="creg-table">
-        <div>
-          <div>{% trans "Team name:" %}</div>
-          <div>{{ team_form.name }}</div>
-        </div>
+        {% if team_form.name %}
+          <div>
+            <div>{% trans "Team name:" %}</div>
+            {% bootstrap_field team_form.name %}
+          </div>
+        {% endif %}
         <div id="creg-table-category">  {# ID used by reg_add_member_field. #}
           {% if team_form.category %}
             <div>{% trans "Category:" context "competition-team" %}</div>
@@ -88,12 +100,20 @@
           {% endif %}
         </div>
       </div>
-      {% reg_add_member_fields %}
-      <script>
-        reg_add_listeners();
-      </script>
+
+      {% if not competition.is_individual_competition %}
+        {% reg_add_member_fields %}
+        <script>
+          reg_add_listeners();
+        </script>
+      {% endif %}
+
       <br>
-      <input type="submit" class="btn btn-primary" value="{% trans "Submit" %}">
+      {% if team %}
+        <input type="submit" class="btn btn-primary" value="{% trans "Submit" %}" data-cy="submit-team-changes">
+      {% else %}
+        <input type="submit" class="btn btn-primary" value="{% trans "Register" %}" data-cy="register">
+      {% endif %}
     </form>
   {% elif team_form and competition.is_course %}
     <h3 class="comp-header">{% trans "Course Registration" %}</h3>

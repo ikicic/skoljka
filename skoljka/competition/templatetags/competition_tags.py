@@ -73,11 +73,11 @@ def reg_add_member_fields(context):
     else:
         team_members = []
 
-    for k in xrange(len(team_members) + 1, competition.max_team_size + 1):
+    for k in range(len(team_members) + 1, competition.max_team_size + 1):
         team_members.append(('', '', TeamMember.INVITATION_UNANSWERED))
 
     output = []
-    for k in xrange(len(team_members) - 1):
+    for k in range(len(team_members) - 1):
         member_name, member_id, status = team_members[k]
         # If member_id isn't None, member_name is the same as username.
         output.append(

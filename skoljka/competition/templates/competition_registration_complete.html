@@ -6,7 +6,11 @@
 <h3 class="comp-header">{% trans "Registration" %}</h3>
 
 <div class="alert alert-success">
-  {% trans "Team successfully registered!" %}
+  {% if competition.max_team_size == 1 %}
+    {% trans "Registration successful!" context "competition" %}
+  {% else %}
+    {% trans "Team successfully registered!" %}
+  {% endif %}
 </div>
 
 {% if has_started %}
@@ -16,6 +20,8 @@
   will be available in the menu. Good luck!{% endblocktrans %}</p>
 {% endif %}
 
-<p>{% trans "To edit the team, click on the team name in the menu." %}</p>
+{% if competition.max_team_size > 1 %}
+  <p>{% trans "To edit the team, click on the team name in the menu." %}</p>
+{% endif %}
 
 {% endblock content %}

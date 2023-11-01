@@ -1,6 +1,5 @@
 from __future__ import print_function
 
-import json
 import re
 from collections import Counter, defaultdict
 
@@ -642,43 +641,6 @@ def refresh_ctask_cache_new_activities_count(competition):
 
     ids = [id for new_cnt, id in args]  # noqa: F812
     return ids
-
-
-def parse_team_categories(team_categories, lang):
-    """Parse `competition.team_categories` formatted string.
-
-    New format (JSON):
-        '{"lang": {"ID1": "name", ...}, ...}'
-    Old format:
-        "ID1: name | ..."
-
-    Returns a list `[(id, name), ...]`, where `id` is an `int`.
-
-    Raises ValueError, KeyError or TypeError if the format is invalid."""
-    if not team_categories.startswith('{'):
-        return _parse_team_categories_old(team_categories)
-
-    parsed = json.loads(team_categories)
-    categories = parsed[lang]
-    out = [(int(id), name) for id, name in categories.items()]
-    out.sort(key=lambda f: f[0])
-    return out
-
-
-def _parse_team_categories_old(team_categories):
-    # Format is "ID1:name1 | ID2:name2 | ...", where the last item is
-    # considered the default.
-    categories = []
-    for category in team_categories.split('|'):
-        if not category.strip():
-            continue
-        category = category.split(':')
-        if len(category) != 2:
-            raise ValueError("Invalid format of team_categories!")
-        ID = int(category[0])  # Might raise a ValueError.
-        name = category[1].strip()
-        categories.append((ID, name))
-    return categories
 
 
 @receiver(post_save, sender=Post)

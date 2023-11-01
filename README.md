@@ -176,16 +176,16 @@ You should now be in `~/projects/skoljka/skoljka/`.
 ## End to end tests (E2E)
 
 To run the E2E tests, first launch the test server in the Docker container:
-    ```sh
-    python2 manage.py testserver --noinput --traceback --addrport=0.0.0.0:8000 skoljka/userprofile/fixtures/test_userprofiles.json
-    ```
+```sh
+python2 manage.py testserver --noinput --traceback --addrport=0.0.0.0:8000 skoljka/userprofile/fixtures/test_userprofiles.json
+```
 
 Then, run the tests:
-    ```sh
-    npx cypress run
-    ```
+```sh
+npx cypress run
+```
 
 Or, launch the GUI with:
-    ```sh
-    npx cypress open
-    ```
+```sh
+npx cypress open
+```

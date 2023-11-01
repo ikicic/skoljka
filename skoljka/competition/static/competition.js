@@ -5,53 +5,53 @@
   };
 
   var _reg_member_field_row = function(index, manual, username, accepted) {
-    var extra = accepted
-        ? 'class="input-large creg-invitation-accepted" title="' + gettext("Accepted")+ '"'
-        : 'class="input-large"';
+    var extra = accepted ?
+      'class="input-large creg-invitation-accepted" title="' + gettext("Accepted") + '"' :
+      'class="input-large"';
     var cancel_or_delete = accepted ? gettext("Delete") : gettext("Cancel");
     var output = "<div>" + gettext("Member") + " #" + index + ":</div>";
 
     if (username) {
       output +=
-          '<div>' +
-            '<input type="hidden" value="' + username + '"' +
-                ' id="member' + index + '_username"' +
-                ' name="member' + index + '_username">\n' +
-            '<input type="text" value="' + manual + '" disabled="disabled"' +
-                ' id="member' + index + '_manual" ' + extra +
-                ' name="member' + index + '_manual">' +
-          '</div>\n' +
-          '<div>' +
-            '<button type="button" class="btn creg-cancel-invitation">' +
-              cancel_or_delete +
-            '</button>' +
-          '</div>';
+        '<div>' +
+        '<input type="hidden" value="' + username + '"' +
+        ' id="member' + index + '_username"' +
+        ' name="member' + index + '_username">\n' +
+        '<input type="text" value="' + manual + '" disabled="disabled"' +
+        ' id="member' + index + '_manual" ' + extra +
+        ' name="member' + index + '_manual">' +
+        '</div>\n' +
+        '<div>' +
+        '<button type="button" class="btn creg-cancel-invitation">' +
+        cancel_or_delete +
+        '</button>' +
+        '</div>';
     } else {
       output +=
-          '<div>' +
-            '<input type="hidden" value="" id="member' + index + '_username"' +
-                ' name="member' + index + '_username">\n' +
-            '<input type="text" value="' + manual + '" ' + extra +
-                ' id="member' + index + '_manual" ' +
-                ' name="member' + index + '_manual">' +
-          '</div>\n' +
-          '<div>' +
-            gettext('or') + ' ' +
-            '<button type="button" class="btn creg-invite">' +
-              gettext("Invite user") +
-            '</button>' +
-          '</div>';
+        '<div>' +
+        '<input type="hidden" value="" id="member' + index + '_username"' +
+        ' name="member' + index + '_username">\n' +
+        '<input type="text" value="' + manual + '" ' + extra +
+        ' id="member' + index + '_manual" ' +
+        ' name="member' + index + '_manual">' +
+        '</div>\n' +
+        '<div>' +
+        gettext('or') + ' ' +
+        '<button type="button" class="btn creg-invite">' +
+        gettext("Invite user") +
+        '</button>' +
+        '</div>';
     }
     return '<div class="creg-table-row" data-index="' + index + '">' +
-              output +
-           '</div>';
+      output +
+      '</div>';
   };
 
   window.reg_add_listeners = function() {
     $('#creg-form').on('click', '.creg-cancel-invitation', function() {
       var row = $(this).closest('.creg-table-row');
       row.replaceWith(
-          _reg_member_field_row(row.attr('data-index'), '', '', false));
+        _reg_member_field_row(row.attr('data-index'), '', '', false));
     });
 
     $('#creg-form').on('click', '.creg-invite', function() {
@@ -61,14 +61,21 @@
       manual_field.val("");
       manual_field.prop('disabled', true);
       manual_field.prop('class', 'input-large');
+      // FIXME: There are two inputs with the same name, a hidden field and a new one.
+      //        Either fix it or document how it works, because it is not clear it is
+      //        fully bug-free.
       $(this).replaceWith(
-          '<input type="text" class="creg-invite-member input-large"' +
-              ' name="member' + index + '_username"' +
-              ' placeholder="' + gettext("Enter username") + '">\n' +
-          '<button type="button" class="btn creg-cancel-invitation">' +
-            gettext("Cancel") +
-          '</button>'
+        '<input type="text" class="creg-invite-member input-large"' +
+        ' name="member' + index + '_username"' +
+        ' placeholder="' + gettext("Enter username") + '">\n' +
+        '<button type="button" class="btn creg-cancel-invitation">' +
+        gettext("Cancel") +
+        '</button>'
       );
+      // FIXME: Stop previous autocomplete, because they keep accumulating.
+      //        Also investigate whether we need 2 autocompletes for 2 extra members.
+      // FIXME: Delete should add the user to reg_available_users, since it
+      //        excludes existing members.
       $('.creg-invite-member').autocomplete(reg_available_users);
     });
   };
@@ -122,7 +129,7 @@
     $('.comp-chain-unfinished').click(function(event) {
       var id = $(this).attr('data-next');
       var current_url =
-          location.protocol + '//' + location.host + location.pathname;
+        location.protocol + '//' + location.host + location.pathname;
       window.location = current_url + id + '/';
     });
   });
@@ -162,7 +169,7 @@
         selection.splice(pos, 1);
       }
       $('#used-tasks-table').toggleClass('add-ctasks-here',
-                                         selection.length > 0);
+        selection.length > 0);
       $('#cchain-unused-ctasks-ids').val(selection.join(','));
     });
 
@@ -179,10 +186,10 @@
       var form = me.closest('form');
       var what = me.hasClass('cchain-list') ? 'chain' : 'ctask';
       form.append(
-          '<input type="hidden" name="action" value="add-after">' +
-          '<input type="hidden" name="ctask-ids" value="' + ctask_ids + '">' +
-          '<input type="hidden" name="after-what" value="' + what + '">' +
-          '<input type="hidden" name="after-id" value="' + id + '">'
+        '<input type="hidden" name="action" value="add-after">' +
+        '<input type="hidden" name="ctask-ids" value="' + ctask_ids + '">' +
+        '<input type="hidden" name="after-what" value="' + what + '">' +
+        '<input type="hidden" name="after-id" value="' + id + '">'
       );
       form.submit();
     });
@@ -197,7 +204,7 @@
       me.html(new_text);
       var div = $('#ctask-sample-solution');
       div.css('display',
-              div.css('display') == 'inline-block' ? 'none' : 'inline-block');
+        div.css('display') == 'inline-block' ? 'none' : 'inline-block');
     });
   });
 
@@ -220,7 +227,7 @@
       }
       $('#all-langs').prop('checked', false);
     } else {
-      body.addClass('all-langs');  // Default.
+      body.addClass('all-langs'); // Default.
     }
 
     $('#all-langs').click(function() {

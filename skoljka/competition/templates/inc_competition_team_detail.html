@@ -16,7 +16,7 @@
 {% trans "Members:" %}
 <ol>
   {% for team_member in preview_team_members %}
-    <li>
+    <li data-cy="team-member{{ forloop.counter }}">
       {% if user.is_authenticated and team_member.member_id %}
         {{ team_member.member|userlink }}
       {% else %}

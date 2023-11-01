@@ -51,10 +51,10 @@
         {% blocktrans with userlink=user|userlink:"first_name" %}
           Hello, {{ userlink }}!
         {% endblocktrans %}
-        {% if team and not competition.is_course %}
+        {% if team and competition.are_teams_editable %}
           <br>
           {% trans "Team:" %}
-          <a href="{% comp_url 'registration' %}">{{ team.name }}</a>
+          <a href="{% comp_url 'registration' %}" data-cy="edit-team">{{ team.name }}</a>
         {% endif %}
       </div>
     {% endif %}

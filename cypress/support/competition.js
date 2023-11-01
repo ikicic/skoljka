@@ -16,7 +16,7 @@ const CREATE_CHAIN_DEFAULTS = {
 };
 
 /// Returns {ctask_ids: [ids...]}.
-function createTasks(competition, numTasks, textFormat, commentFormat) {
+function createCTasks(competition, numTasks, textFormat, commentFormat) {
   return cy.request({
     method: 'POST',
     url: `/${competition}/test/create_ctasks/`,
@@ -56,5 +56,5 @@ function createChain(competition, options) {
   });
 }
 
-Cypress.Commands.add('createTasks', createTasks);
+Cypress.Commands.add('createCTasks', createCTasks);
 Cypress.Commands.add('createChain', createChain);

@@ -34,7 +34,7 @@ describe("test view permission", () => {
   it("homepage should return 404 to non-moderators", () => {
     cy.login('alice');
     cy.request({
-      url: '/empty_competition/',
+      url: '/hidden_competition/',
       failOnStatusCode: false,
     }).then((response) => {
       expect(response.status).to.equal(HTTP_STATUS_FORBIDDEN);
@@ -43,7 +43,7 @@ describe("test view permission", () => {
 
   it("should display the competition homepage to moderators", () => {
     cy.login('moderator0');
-    cy.visit('/empty_competition/');
+    cy.visit('/hidden_competition/');
     cy.get('#sidebar').contains("moderator0"); // Hello, moderator0!
   });
 
@@ -61,7 +61,7 @@ describe("test adding a new task", () => {
   });
 
   it("test the default values and the required fields", () => {
-    cy.visit('/empty_competition/task/new/');
+    cy.visit('/public_competition/task/new/');
     cy.get('textarea').should('have.length', 2); // Text + comment.
     cy.get('#content input').should('have.length', 3); // CSRF + descriptor + max_score.
     cy.get('#id_descriptor').should('have.value', "");
@@ -81,7 +81,7 @@ describe("test adding a new task", () => {
   });
 
   it("test the add task form and the primary submit button", () => {
-    cy.visit('/empty_competition/task/new/');
+    cy.visit('/public_competition/task/new/');
     cy.get('#id_descriptor').type("123");
     cy.get('#id_max_score').clear().type("10");
 
@@ -102,7 +102,7 @@ describe("test adding a new task", () => {
     // Test the primary submit button (save and stay).
     cy.get('[data-cy="submit-primary"]').contains("Submit");
     cy.get('[data-cy="submit-primary"]').click();
-    cy.url().should('match', /.*\/empty_competition\/task\/\d+\/edit\/$/);
+    cy.location('pathname').should('match', /^\/public_competition\/task\/\d+\/edit\/$/);
     cy.get('[data-cy="submit-primary"]').contains("Save changes");
     cy.get('#id_descriptor').should('have.value', "123");
     cy.get('#id_max_score').should('have.value', "10");
@@ -113,30 +113,30 @@ describe("test adding a new task", () => {
   });
 
   it("test adding a task with the submit-and-new button", () => {
-    cy.visit('/empty_competition/task/new/');
+    cy.visit('/public_competition/task/new/');
     cy.get('#id_descriptor').type("123");
     cy.get('#id_max_score').clear().type("10");
     cy.get('#id_text').clear().type("Text submit-and-new.");
     cy.get('#id_comment').clear().type("Comment submit-and-new.");
     cy.get('[data-cy="submit-and-new"]').click();
-    cy.url().should('match', /.*\/empty_competition\/task\/new\/$/);
+    cy.location('pathname').should('eq', '/public_competition/task/new/');
     cy.get('#id_descriptor').should('have.value', "");
     cy.get('#id_max_score').should('have.value', "1");
     cy.get('#id_text').should('have.value', "");
     cy.get('#id_comment').should('have.value', "");
-    cy.visit('/empty_competition/chain/tasks/');
+    cy.visit('/public_competition/chain/tasks/');
     cy.get('#cchain-unused-ctasks-table tr:last-child').contains("Text submit-and-new.");
     cy.get('#cchain-unused-ctasks-table tr:last-child').contains("Comment submit-and-new.");
   });
 
   it("test adding a task with the submit-and-return button", () => {
-    cy.visit('/empty_competition/task/new/');
+    cy.visit('/public_competition/task/new/');
     cy.get('#id_descriptor').type("123");
     cy.get('#id_max_score').clear().type("10");
     cy.get('#id_text').clear().type("Text submit-and-return.");
     cy.get('#id_comment').clear().type("Comment submit-and-return.");
     cy.get('[data-cy="submit-and-return"]').click();
-    cy.url().should('match', /.*\/empty_competition\/chain\/tasks\/$/);
+    cy.location('pathname').should('eq', '/public_competition/chain/tasks/');
     cy.get('#cchain-unused-ctasks-table tr:last-child').contains("Text submit-and-return.");
     cy.get('#cchain-unused-ctasks-table tr:last-child').contains("Comment submit-and-return.");
   });
@@ -155,7 +155,7 @@ describe("test adding and operating on chains", () => {
   });
 
   it("test the default values and the required fields", () => {
-    cy.visit('/empty_competition/chain/tasks/');
+    cy.visit('/public_competition/chain/tasks/');
     // CSRF + name + category + unlock minutes + bonus score + position + hidden task_ids + submit.
     cy.get('form[data-cy="create-chain"] input').should('have.length', 8);
     cy.get('form[data-cy="create-chain"] select').should('have.length', 1); // Unlock mode.
@@ -178,7 +178,7 @@ describe("test adding and operating on chains", () => {
   });
 
   it("test creating and deleting an empty chain", () => {
-    cy.visit('/empty_competition/chain/tasks/');
+    cy.visit('/public_competition/chain/tasks/');
     cy.get('#id_name').clear().type("empty test chain");
     cy.get('#id_category').clear().type("test category");
     cy.get('#id_unlock_minutes').clear().type("100");
@@ -202,9 +202,9 @@ describe("test adding and operating on chains", () => {
   });
 
   it("test creating and deleting a chain with 4 tasks", () => {
-    cy.createTasks('empty_competition', 4, "XYZW #{}", "task comment #{}").then((json) => {
+    cy.createCTasks('public_competition', 4, "XYZW #{}", "task comment #{}").then((json) => {
       const ctask_ids = json.ctask_ids;
-      cy.visit('/empty_competition/chain/tasks/');
+      cy.visit('/public_competition/chain/tasks/');
 
       // Select in some order, let's say 1302.
       cy.get('#cchain-unused-ctasks-table tr').contains("XYZW #1").click();
@@ -239,10 +239,10 @@ describe("test adding and operating on chains", () => {
   it("test changing the order of ctasks in a chain", () => {
     // Add some extra tasks to differentiate between indices and IDs, and to check
     // that the operations don't affect wrong tasks. Also, test cehckChainTasks itself.
-    cy.createChain('empty_competition', { numTasks: 3, position: 50, name: "unused chain A" });
-    cy.createChain('empty_competition', { numTasks: 3, position: 150, name: "unused chain B" });
-    cy.createChain('empty_competition', { numTasks: 4, position: 100 }).then((json) => {
-      cy.visit('/empty_competition/chain/tasks/');
+    cy.createChain('public_competition', { numTasks: 3, position: 50, name: "unused chain A" });
+    cy.createChain('public_competition', { numTasks: 3, position: 150, name: "unused chain B" });
+    cy.createChain('public_competition', { numTasks: 4, position: 100 }).then((json) => {
+      cy.visit('/public_competition/chain/tasks/');
 
       const chainId = json['chain_id'];
       const cids = json['ctask_ids'];
@@ -257,8 +257,8 @@ describe("test adding and operating on chains", () => {
   });
 
   it("test detaching a task from a chain", () => {
-    cy.createChain('empty_competition', { numTasks: 4 }).then((json) => {
-      cy.visit('/empty_competition/chain/tasks/');
+    cy.createChain('public_competition', { numTasks: 4 }).then((json) => {
+      cy.visit('/public_competition/chain/tasks/');
 
       const chainId = json['chain_id'];
       const cids = json['ctask_ids'];

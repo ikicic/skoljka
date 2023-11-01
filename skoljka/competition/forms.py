@@ -15,12 +15,9 @@ from skoljka.competition.evaluator import (
 )
 from skoljka.competition.evaluator_base import InvalidDescriptor, InvalidSolution
 from skoljka.competition.models import Chain, CompetitionTask, Team, TeamMember
-from skoljka.competition.utils import (
-    comp_url,
-    ctask_comment_class,
-    parse_team_categories,
-)
+from skoljka.competition.utils import comp_url, ctask_comment_class
 from skoljka.utils import xss
+from skoljka.utils.python23 import unicode
 
 
 class CompetitionSolutionForm(forms.Form):
@@ -40,7 +37,7 @@ class CompetitionSolutionForm(forms.Form):
             # a parameter).
             self.fields['result'].widget.attrs.update({'class': 'ctask-submit-error'})
             raise forms.ValidationError(unicode(e))
-        except InvalidDescriptor as e:
+        except InvalidDescriptor:
             self.fields['result'].widget.attrs.update({'class': 'ctask-submit-error'})
             raise forms.ValidationError(_("Descriptor error. Please notify admins!"))
         return data
@@ -215,13 +212,11 @@ class TeamForm(forms.ModelForm):
         instance = kwargs.get('instance', None)
         initial = dict(kwargs.pop('initial', {}))
         extra_fields = []
-        competition = kwargs.pop('competition')
-        self.competition_id = competition.id
-        self.max_team_size = kwargs.pop('max_team_size', 3)
+        self.competition = kwargs.pop('competition')
         self.user = kwargs.pop('user')
 
         if instance:
-            # Author cannot be removed from the team.
+            # The author cannot be removed from the team.
             team_members = list(
                 TeamMember.objects.filter(team=instance)
                 .exclude(member_id=instance.author_id)
@@ -231,7 +226,7 @@ class TeamForm(forms.ModelForm):
             team_members = []
 
         # Add extra fields for other members.
-        for k in xrange(2, self.max_team_size + 1):
+        for k in range(2, self.competition.max_team_size + 1):
             if k - 2 < len(team_members):
                 member_name = team_members[k - 2]
             else:
@@ -241,7 +236,7 @@ class TeamForm(forms.ModelForm):
             initial[field_manual] = member_name
             initial[field_username] = member_name
 
-            # Label empty because HTML generated via JavaScript anyway.
+            # Label empty because the HTML is generated via JavaScript anyway.
             extra_fields.append(
                 (field_manual, forms.CharField(required=False, label="", max_length=64))
             )
@@ -254,14 +249,18 @@ class TeamForm(forms.ModelForm):
                 )
             )
 
-        # Parse team category string.
+        # Parse the team category string.
         try:
-            categories = parse_team_categories(competition.team_categories, lang)
+            categories = self.competition.parse_team_categories()
+            if categories.configurable:
+                category_choices = categories.as_choices(lang)
+            else:
+                category_choices = []
         except (ValueError, KeyError, TypeError) as e:
-            categories = [(1, "team_categories invalid!!! " + e.message)]
-        self.team_categories = categories
-        if categories and (not instance or not instance.category):
-            initial['category'] = categories[-1][0]  # For simplicity.
+            category_choices = [(1, u"team_categories invalid!!! " + unicode(e))]
+        self.category_choices = category_choices
+        if category_choices and (not instance or not instance.category):
+            initial['category'] = category_choices[-1][0]  # For simplicity.
 
         super(TeamForm, self).__init__(initial=initial, *args, **kwargs)
 
@@ -269,12 +268,18 @@ class TeamForm(forms.ModelForm):
         for key, value in extra_fields:
             self.fields[key] = value
 
-        self.fields['name'].widget.attrs['class'] = 'input-large'
-        self.fields['name'].error_messages['required'] = _("Team name cannot be empty.")
+        if self.competition.are_team_names_configurable:
+            self.fields['name'].label = ""
+            self.fields['name'].widget.attrs['class'] = 'input-large'
+            self.fields['name'].error_messages['required'] = _(
+                "Please enter the team name."
+            )
+        else:
+            del self.fields['name']
 
-        if categories:
+        if category_choices:
             self.fields['category'].widget = forms.RadioSelect(
-                choices=categories, renderer=TeamCategoryRadioSelectRenderer
+                choices=category_choices, renderer=TeamCategoryRadioSelectRenderer
             )
         else:
             del self.fields['category']
@@ -293,7 +298,7 @@ class TeamForm(forms.ModelForm):
                 raise ValidationError(_("You are automatically added to the team."))
             if (
                 TeamMember.objects.filter(
-                    team__competition_id=self.competition_id,
+                    team__competition_id=self.competition.id,
                     member_id=user.id,
                     invitation_status=TeamMember.INVITATION_ACCEPTED,
                 )
@@ -310,7 +315,7 @@ class TeamForm(forms.ModelForm):
     def clean_name(self):
         name = self.cleaned_data['name'].strip()
         if (
-            Team.objects.filter(competition_id=self.competition_id, name__iexact=name)
+            Team.objects.filter(competition_id=self.competition.id, name__iexact=name)
             .exclude(id=self.instance.id)
             .exists()
         ):
@@ -318,31 +323,47 @@ class TeamForm(forms.ModelForm):
         return name
 
     def clean(self):
-        members = []
+        other_members = []
         ids = set()
-        for k in xrange(2, self.max_team_size + 1):
+        for k in range(2, self.competition.max_team_size + 1):
             member = self._clean_member(k)
             if not member:
                 continue
             if isinstance(member[1], User):
                 if member[1].id not in ids:
                     ids.add(member[1].id)
-                    members.append(member)
+                    other_members.append(member)
             else:
-                members.append(member)
+                other_members.append(member)
 
-        self._members = members
+        self.other_members = other_members
 
-        if self.team_categories:
+        if self.category_choices:
             try:
                 category = self.cleaned_data['category']
             except KeyError:
-                self.cleaned_data['category'] = self.team_categories[-1][0]
+                self.cleaned_data['category'] = self.category_choices[-1][0]
             else:
-                if not any(category == k for k, v in self.team_categories):
+                if not any(category == k for k, v in self.category_choices):
                     raise ValidationError(_("Unknown team category '%s'!") % category)
 
+        if not self.competition.are_team_names_configurable:
+            self.cleaned_data['name'] = self.user.username
+
         return self.cleaned_data
+
+    def save(self, *args, **kwargs):
+        """Automatically set the competition and the author."""
+        commit = kwargs.pop('commit', True)
+        instance = super(TeamForm, self).save(*args, commit=False, **kwargs)
+        if instance:
+            if not instance.competition_id:
+                instance.competition = self.competition
+            if not instance.author_id:
+                instance.author = self.user
+            if commit:
+                instance.save()
+        return instance
 
     class Meta:
         model = Team

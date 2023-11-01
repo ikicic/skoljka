@@ -81,6 +81,9 @@ class CompetitionViewsTestBase(TestCase):
         self.competitions = {x.id: x for x in Competition.objects.all()}
         self.competition = None
 
+        self.competitions[6].max_team_size = 1
+        self.competitions[6].save()
+
     def comp_get(self, suffix, *args, **kwargs):
         """Equivalent to self.client.get with the competition's URL prepended."""
         assert self.competition
@@ -353,7 +356,7 @@ class RegistrationTest(CompetitionViewsTestBase):
         response = self.client.post(
             '/competition/2/registration/', {'invitation-accept': team.id}
         )
-        self.assertIsNotNone(response.context['team'])
+        self.assertRedirects(response, '/competition/2/registration/')
         self.assertEqual(
             TeamMember.objects.filter(
                 invitation_status=TeamMember.INVITATION_ACCEPTED
@@ -532,7 +535,7 @@ class CourseTest(CompetitionViewsTestBase):
 
         # Test re-registration, should be rejected.
         response = self.client.post('/competition/6/registration/', {})
-        self.assertRedirects(response, '/competition/6/')
+        self.assertRedirects(response, '/competition/6/team/{}/'.format(team.id))
         self.logout()
 
     def test_chain_new(self):

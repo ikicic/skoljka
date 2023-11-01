@@ -20,7 +20,7 @@ describe("login", () => {
     cy.visit('/');
     cy.get('#hbar-login [name=username]').type("idonotexist");
     cy.get('#hbar-login [name=password]').type("a{enter}");
-    cy.url().should('contain', '/accounts/login/');
+    cy.location('pathname').should('eq', '/accounts/login/');
     cy.get('[data-cy="login"] .alert-error').contains("Please enter a correct username and password.");
   });
 
@@ -29,7 +29,7 @@ describe("login", () => {
     cy.get('#sidebar [href="/accounts/login/"]').click();
     cy.get('#content [type=text]').type("idonotexist");
     cy.get('#content [type=password]').type("a{enter}");
-    cy.url().should('contain', '/accounts/login/');
+    cy.location('pathname').should('eq', '/accounts/login/');
     cy.get('[data-cy="login"] .alert-error').contains("Please enter a correct username and password.");
   });
 });

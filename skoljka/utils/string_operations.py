@@ -24,6 +24,7 @@ def join_urls(a, b):
     Join two URLs making sure there is exactly one slash between them.
     urlparse.urljoin doesn't work well with regex URLs user for views.
     """
+    # TODO: Refactor to support more than two parameters.
     if not a or not b:
         return a + b
     if a[-1] == '/':

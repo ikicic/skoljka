@@ -35,6 +35,7 @@ from skoljka.competition.models import (
     CompetitionTask,
     Submission,
     Team,
+    TeamCategories,
     TeamMember,
 )
 from skoljka.competition.templatetags.competition_tags import get_submission_actions
@@ -48,7 +49,6 @@ from skoljka.competition.utils import (
     is_ctask_comment_important,
     load_and_preprocess_chain,
     lock_ctasks_in_chain,
-    parse_team_categories,
     preprocess_chain,
     refresh_chain_cache_is_verified,
     refresh_ctask_cache_admin_solved_count,
@@ -217,7 +217,7 @@ def _update_team_invitations(team, team_form):
     old_invitations_dict = {x.member_id: x for x in old_invitations if x.member_id}
 
     author = team.author
-    members = team_form._members
+    members = team_form.other_members
     members.append((author.username, author))  # Author is also a member
     new_invited_users_ids = set(user.id for name, user in members if user)
 
@@ -248,9 +248,13 @@ def team_detail(request, competition, data, team_id):
     data['preview_team'] = get_object_or_404(
         Team, id=team_id, competition_id=competition.id
     )
-    data['preview_team_members'] = TeamMember.objects.filter(
-        team_id=team_id, invitation_status=TeamMember.INVITATION_ACCEPTED
-    ).select_related('member')
+    data['preview_team_members'] = (
+        TeamMember.objects.filter(
+            team_id=team_id, invitation_status=TeamMember.INVITATION_ACCEPTED
+        )
+        .select_related('member')
+        .order_by('member_name')
+    )
     if data['is_admin']:
         data['submissions'] = list(
             Submission.objects.filter(team_id=team_id)
@@ -267,8 +271,13 @@ def team_detail(request, competition, data, team_id):
 @competition_view()
 @response('competition_registration.html')
 def registration(request, competition, data):
+    team = data['team']
     if data['has_finished']:
-        return (competition.get_absolute_url(),)
+        if team:
+            return (team.get_absolute_url(),)
+        else:
+            return (competition.get_absolute_url(),)
+
     if (
         competition.registration_open_date > data['current_time']
         and not data['is_admin']
@@ -278,20 +287,49 @@ def registration(request, competition, data):
         data['form'] = AuthenticationFormEx()
         return 'competition_registration_login.html', data
 
-    team = data['team']
-    edit = team is not None
-    team_form = None
-    is_course = competition.is_course
+    if team and not competition.are_teams_editable:
+        return (team.get_absolute_url(),)
 
-    if team and is_course:
-        return (competition.get_absolute_url(),)
+    team_form = None
+    if request.method == 'POST':
+        action = _handle_registration_post_request(request, competition, data)
+        if isinstance(action, TeamForm):
+            team_form = action
+        elif action:
+            return action
 
     if (
-        not team
-        and request.method == 'POST'
-        and not is_course
-        and 'invitation-accept' in request.POST
+        team_form is None
+        and not (team and team.author_id != request.user.id)
+        and not (team and team.team_type == Team.TYPE_ADMIN_PRIVATE)
     ):
+        team_form = TeamForm(
+            instance=team,
+            competition=competition,
+            user=request.user,
+        )
+
+    data['team_form'] = team_form
+    data['preview_team_members'] = (
+        TeamMember.objects.filter(
+            team=team, invitation_status=TeamMember.INVITATION_ACCEPTED
+        )
+        .select_related('member')
+        .order_by('member_name')
+    )
+    return data
+
+
+def _handle_registration_post_request(request, competition, data):
+    """Returns TeamForm or a redirect action or None."""
+    assert request.method == 'POST'
+    team = data['team']
+
+    if 'invitation-accept' in request.POST:
+        if team:
+            return None  # Ignore, team already selected.
+        if competition.is_individual_competition:
+            return (400, "Invitations only valid for team competitions.")
         team = get_object_or_404(Team, id=request.POST['invitation-accept'])
         team_member = get_object_or_404(TeamMember, team=team, member=request.user)
         team_member.invitation_status = TeamMember.INVITATION_ACCEPTED
@@ -305,47 +343,14 @@ def registration(request, competition, data):
         TeamMember.objects.filter(
             team__competition=competition, member=request.user
         ).exclude(id=team_member.id).update(is_selected=False)
-        data['team'] = team
         data['team_invitations'] = []
-    elif request.method == 'POST' and 'name' in request.POST and not is_course:
-        team_form = TeamForm(
-            request.POST,
-            competition=competition,
-            max_team_size=competition.max_team_size,
-            instance=team,
-            user=request.user,
-        )
-        if team_form.is_valid():
-            old_team = team
-            team = team_form.save(commit=False)
-            if not edit:
-                team.competition = competition
-                team.author = request.user
-                if data['is_admin']:
-                    team.team_type = Team.TYPE_UNOFFICIAL
-                else:
-                    team.team_type = Team.TYPE_NORMAL
-            team.save()
+        return (request.get_full_path(),)  # Prevent form resubmission.
 
-            _update_team_invitations(team, team_form)
-
-            if not old_team:
-                TeamMember.objects.filter(
-                    team__competition=competition, member=request.user
-                ).exclude(team=team).delete()
-                data['team'] = team
-                return ('competition_registration_complete.html', data)
-            # Need to refresh data from the decorator...
-            url = request.get_full_path()
-            if '?changes=1' not in url:
-                url += '?changes=1'
-            return (url,)
-    elif (
-        request.method == 'POST'
-        and data['is_admin']
-        and 'create-admin-private-team' in request.POST
-        and not data['has_private_team']
-    ):
+    if 'create-admin-private-team' in request.POST:
+        if not data['is_admin']:
+            return (400, "admin private teams are available only to admins")
+        if data['has_private_team']:
+            return None  # Ignore.
         name = request.user.username
         team = Team(
             name=name + " (private)",
@@ -365,43 +370,42 @@ def registration(request, competition, data):
             invitation_status=TeamMember.INVITATION_ACCEPTED,
         )
         return (request.get_full_path() + '?created=1',)
-    elif request.method == 'POST' and is_course:
-        assert not team
-        name = request.user.username
-        team = Team(
-            name=name,
-            author=request.user,
-            competition=competition,
-            team_type=Team.TYPE_NORMAL,
-        )
+
+    team_form = TeamForm(
+        request.POST,
+        competition=competition,
+        instance=team,
+        user=request.user,
+    )
+    if team_form.is_valid():
+        edit = team is not None
+        team = team_form.save(commit=False)
+        if not edit:
+            data['team'] = team
+            if data['is_admin']:
+                team.team_type = Team.TYPE_UNOFFICIAL
+            else:
+                team.team_type = Team.TYPE_NORMAL
         team.save()
-        TeamMember.objects.create(
-            team=team,
-            member=request.user,
-            member_name=name,
-            is_selected=True,
-            invitation_status=TeamMember.INVITATION_ACCEPTED,
-        )
-        data['team'] = team
-        return ('competition_registration_complete_course.html', data)
 
-    if (
-        team_form is None
-        and not (team and team.author_id != request.user.id)
-        and not (team and team.team_type == Team.TYPE_ADMIN_PRIVATE)
-    ):
-        team_form = TeamForm(
-            instance=team,
-            competition=competition,
-            max_team_size=competition.max_team_size,
-            user=request.user,
-        )
+        _update_team_invitations(team, team_form)
 
-    data['team_form'] = team_form
-    data['preview_team_members'] = TeamMember.objects.filter(
-        team=team, invitation_status=TeamMember.INVITATION_ACCEPTED
-    ).select_related('member')
-    return data
+        if not edit:
+            TeamMember.objects.filter(
+                team__competition=competition, member=request.user
+            ).exclude(team=team).delete()
+            if competition.is_course:
+                return ('competition_registration_complete_course.html', data)
+            else:
+                return ('competition_registration_complete.html', data)
+
+        # Need to refresh data from the decorator...
+        url = request.get_full_path()
+        if '?changes=1' not in url:
+            url += '?changes=1'
+        return (url,)
+
+    return team_form
 
 
 @competition_view()
@@ -469,13 +473,14 @@ def scoreboard(request, competition, data, as_participants=False):
     )
 
     try:
-        team_categories = parse_team_categories(
-            competition.team_categories, request.LANGUAGE_CODE
-        )
-    except ValueError:
-        team_categories = []
-    team_categories_dict = dict(team_categories)
-    data['team_categories_title'] = u", ".join(team_categories_dict.values())
+        categories = competition.parse_team_categories()
+        categories_dict = categories.lang_to_categories[request.LANGUAGE_CODE]
+        category_choices = categories.as_choices(request.LANGUAGE_CODE)
+    except (ValueError, KeyError, TypeError):
+        categories = TeamCategories()
+        categories_dict = {}
+        category_choices = []
+    data['team_categories_title'] = u", ".join(categories_dict.values())
 
     last_score = -1
     last_position = 1
@@ -485,9 +490,9 @@ def scoreboard(request, competition, data, as_participants=False):
         if team.is_normal() and team.cache_score_before_freeze != last_score:
             last_position = position
         team.t_position = i + 1 if order_by == 'name' else last_position
-        if team_categories:
-            team.t_category = team_categories_dict.get(
-                team.category, team_categories[-1][1]
+        if category_choices:
+            team.t_category = categories_dict.get(
+                team.category, category_choices[-1][1]
             )
         if team.is_normal():
             last_score = team.cache_score_before_freeze

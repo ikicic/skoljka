@@ -25,6 +25,38 @@ KIND_CHOICES = (
 )
 
 
+class TeamCategories(object):
+    """
+    Parsed representation of `Competition.team_categories`.
+
+    Attributes:
+        lang_to_categories: a dictionary {str lang: {int id: str name}}
+        configurable: whether the teams can configure their categories
+                      themselves, defaults to True
+    """
+
+    def __init__(self, lang_to_categories={}, configurable=True):
+        self.lang_to_categories = lang_to_categories
+        self.configurable = configurable
+
+    def as_choices(self, lang):
+        """Return a list of (category ID, category name), sorted by ID,
+        suitable for RadioSelect and similar.
+
+        Raises a KeyError if the language is not found.
+        """
+        choices = [(id, name) for id, name in self.lang_to_categories[lang].items()]
+        choices.sort(key=lambda f: f[0])
+        return choices
+
+    def is_configurable_and_nonempty(self):
+        """Returns True if the teams are allowed to configure the category
+        themselves and if there are any categories at all."""
+        return self.configurable and any(
+            len(categories) > 0 for categories in self.lang_to_categories.values()
+        )
+
+
 class Competition(BasePermissionsModel):
     """
     Instructions:
@@ -64,7 +96,9 @@ class Competition(BasePermissionsModel):
         help_text="Format is {\"lang\": {\"ID1\": \"name1\", ...}, ...}, "
         "old format is \"ID1:name1 | ID2:name2 | ... \", "
         "where ID is a number. "
-        "Last category is considered the default.",
+        "The last category is considered the default. "
+        "Optionally, add a '\"CONFIGURABLE\": false' element to denote that "
+        "teams cannot themselves modify the category.",
     )
     task_categories_trans = models.CharField(
         blank=False,
@@ -136,9 +170,77 @@ class Competition(BasePermissionsModel):
         except:  # noqa: E722 do not use bare 'except'
             return {}
 
+    def parse_team_categories(self):
+        """
+        Parse the `team_categories` field and return a TeamCategories.
+
+        Format (JSON):
+            '{"lang": {"ID1": "name", ...}, ..., "CONFIGURABLE": true/false}'
+        Old format (deprecated):
+            "ID1: name | ..."
+
+        The "CONFIGURABLE" key is optional and defaults to True.
+
+        Raises ValueError, KeyError or TypeError if the format is invalid."""
+        if not self.team_categories.startswith('{'):
+            return self._parse_team_categories_old(self.team_categories)
+
+        parsed = json.loads(self.team_categories)
+        configurable = parsed.pop("CONFIGURABLE", True)
+        lang_to_categories = {
+            lang: {int(id): key for id, key in categories.items()}
+            for lang, categories in parsed.items()
+        }
+        return TeamCategories(lang_to_categories, configurable)
+
+    @staticmethod
+    def _parse_team_categories_old(team_categories):
+        # TODO: Remove.
+
+        # Format is "ID1:name1 | ID2:name2 | ...", where the last item is
+        # considered the default.
+        categories = {}
+        for category in team_categories.split('|'):
+            if not category.strip():
+                continue
+            category = category.split(':')
+            if len(category) != 2:
+                raise ValueError("Invalid format of team_categories!")
+            ID = int(category[0])  # Might raise a ValueError.
+            name = category[1].strip()
+            categories[ID] = name
+
+        lang_to_categories = {
+            lang: categories for lang, lang_name in settings.LANGUAGES
+        }
+        return TeamCategories(lang_to_categories, configurable=True)
+
+    @property
+    def are_teams_editable(self):
+        """Teams are editable if at least one of the following holds:
+        - the competition is a team competition,
+        - teams can configure team categories, i.e. team_categories does not
+          contain a `"CONFIGURABLE": false` item.
+        """
+        if self.max_team_size > 1:
+            return True
+
+        try:
+            return self.parse_team_categories().is_configurable_and_nonempty()
+        except:  # noqa: E722 do not use bare 'except'
+            return False
+
+    @property
+    def are_team_names_configurable(self):
+        return self.max_team_size > 1
+
     @property
     def is_course(self):
         return self.kind == self.KIND_COURSE
+
+    @property
+    def is_individual_competition(self):
+        return self.max_team_size == 1
 
     def is_user_admin(self, user):
         return self.user_has_perm(user, EDIT)

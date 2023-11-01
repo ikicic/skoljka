@@ -12,7 +12,7 @@ describe("test registration", () => {
     // Test login does not work before activating the account.
     cy.get('#hbar-login [name=username]').type("someusername");
     cy.get('#hbar-login [name=password]').type("abc{enter}");
-    cy.url().should('contain', '/accounts/login/');
+    cy.location('pathname').should('eq', '/accounts/login/');
     cy.get('[data-cy="login"] .alert-error').contains("This account is inactive.");
 
     cy.request({ method: 'GET', url: '/test/latest_email/' })
@@ -44,7 +44,7 @@ describe("test registration", () => {
     cy.get('#content [name=password2]').type("abc");
     cy.get('#content [type=submit]').click();
 
-    cy.url().should('contain', '/accounts/register/');
+    cy.location('pathname').should('eq', '/accounts/register/');
     cy.get('[data-cy="registration"] [name="username"] + .help-block').contains("Enter a valid value.");
     cy.get('[data-cy="registration"] [name="email"] + .help-block').contains("Enter a valid e-mail address.");
     cy.get('[data-cy="registration"] [class="checkbox"] + .help-block').contains(
