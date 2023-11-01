@@ -323,3 +323,9 @@ def show_submission_posts(context, submission, unread_newer_than, actions=None):
         'request': context['request'],
         'user': user,
     }
+
+
+@register.inclusion_tag('inc_competition_solution_format.html', takes_context=True)
+def show_solution_format_instructions(context):
+    """Used optionally by the competition-specific rules HTML files."""
+    return context

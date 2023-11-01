@@ -15,23 +15,4 @@
   {% include competition.rules_template_filename %}
 {% endif %}
 
-<h3>{% trans "Solution format description" %}</h3>
-{% if is_admin %}
-  <p class="chelp-authors-general">{{ help_authors_general }}</p>
-{% endif %}
-
-<table class="chelp-var">
-  {% for var in variable_types %}
-    <tr>
-      <td class="chelp-var-type">{{ var.help_type }}</td>
-      <td>
-        {{ var.help_for_competitors }}
-        {% if var.help_for_authors %}
-          <p class="chelp-var-authors">({{ var.help_for_authors }})</p>
-        {% endif %}
-      </td>
-    </tr>
-  {% endfor %}
-</table>
-
 {% endblock content %}
