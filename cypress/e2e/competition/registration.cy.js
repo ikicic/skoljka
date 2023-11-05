@@ -78,7 +78,7 @@ describe("test registering for an individual competition", () => {
     cy.get('[data-cy=scoreboard] tr').eq(1).contains("Green");
     cy.get('[data-cy=scoreboard] tr').eq(1).contains("competitor0");
 
-    cy.get('a[data-cy=edit-team]').click();
+    cy.get('a[data-cy=edit-participation]').click();
     // No more instructions, we already have a team.
     cy.get('.instructions').should('not.exist');
     cy.get('form[data-cy=creg] label').contains("Red").click();
@@ -98,6 +98,7 @@ describe("test registering for an individual competition", () => {
 
     // Try to visit the team edit page.
     cy.contains("Team: competitor0").should('not.exist');
+    cy.get('[data-cy=edit-team]').should('not.exist');
     cy.visit('/individual_competition_with_nonconfigurable_categories/registration/');
     cy.location('pathname').should('eq', '/individual_competition_with_nonconfigurable_categories/team/1/');
   });
@@ -122,6 +123,7 @@ describe("test registering for a team competition without categories", () => {
     cy.get('#id_name').type("TeamName{enter}");
     cy.contains("Team successfully registered!");
     cy.contains("Team: TeamName");
+    cy.get('[data-cy=edit-participation]').should('not.exist'); // For individual competitions.
 
     // Test changing the name.
     cy.get('a').contains("TeamName").click();

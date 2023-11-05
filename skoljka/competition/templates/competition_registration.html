@@ -53,7 +53,11 @@
 
   {% if team_form and not competition.is_course %}
     {% if team %}
-      <h3 class="comp-header">{% trans "Edit Team" %}</h3>
+       {% if competition.is_team_competition %}
+        <h3 class="comp-header">{% trans "Edit Team" %}</h3>
+      {% else %}
+        <h3 class="comp-header">{% trans "Edit Participation" %}</h3>
+      {% endif %}
     {% elif competition.is_individual_competition %}
       <h3 class="comp-header">{% trans "Competition Registration" %}</h3>
     {% else %}

@@ -2,9 +2,14 @@
 {% load i18n %}
 
 <h3 class="comp-header">
-  {% trans "Team" %} {{ preview_team.name }}
+  {{ competition.get_team_metaname }} {{ preview_team.name }}
   {% if is_admin %}
     {% send_notification_link team_id=preview_team.id %}
+  {% endif %}
+  {% if competition.is_individual_competition %}
+    <a href="/profile/{{ team.author_id }}/">
+      <i class="icon-user"></i>
+    </a>
   {% endif %}
 </h3>
 
@@ -13,15 +18,17 @@
   <span class="team-score">{% team_score preview_team %}</span>
 </div>
 
-{% trans "Members:" %}
-<ol>
-  {% for team_member in preview_team_members %}
-    <li data-cy="team-member{{ forloop.counter }}">
-      {% if user.is_authenticated and team_member.member_id %}
-        {{ team_member.member|userlink }}
-      {% else %}
-        {{ team_member.member_name }}
-      {% endif %}
-    </li>
-  {% endfor %}
-</ol>
+{% if competition.is_team_competition %}
+  {% trans "Members:" %}
+  <ol>
+    {% for team_member in preview_team_members %}
+      <li data-cy="team-member{{ forloop.counter }}">
+        {% if user.is_authenticated and team_member.member_id %}
+          {{ team_member.member|userlink }}
+        {% else %}
+          {{ team_member.member_name }}
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+{% endif %}

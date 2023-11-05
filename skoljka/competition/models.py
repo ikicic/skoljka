@@ -242,8 +242,23 @@ class Competition(BasePermissionsModel):
     def is_individual_competition(self):
         return self.max_team_size == 1
 
+    @property
+    def is_team_competition(self):
+        return self.max_team_size > 1
+
     def is_user_admin(self, user):
         return self.user_has_perm(user, EDIT)
+
+    def get_team_metaname(self):
+        """Return "Team", "Competitor" or "Participant", depending on whether this
+        is a team competition or not, and whether it is a competition or a course."""
+        # TODO: We should probably take into account the gender, if specified.
+        if self.is_team_competition:
+            return _("Team")
+        elif self.is_course:
+            return _("Participant")
+        else:
+            return _("Competitor")
 
     def msg_has_finished(self):
         if self.is_course:

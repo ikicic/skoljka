@@ -52,11 +52,7 @@
           <th title="{{ team_categories_title }}">{% trans "Category" %}</th>
         {% endif %}
         <th><a href="{{ competition.get_scoreboard_url }}?sort=name">
-          {% if as_participants %}
-            {% trans "Participant" %}
-          {% else %}
-            {% trans "Team" %}
-          {% endif %}
+          {{ competition.get_team_metaname }}
         </a></th>
         <th><a href="{{ competition.get_scoreboard_url }}?sort=score">{% trans "Total score" %}</a></th>
       </tr>

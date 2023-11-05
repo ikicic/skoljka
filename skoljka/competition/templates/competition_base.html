@@ -51,7 +51,7 @@
         {% blocktrans with userlink=user|userlink:"first_name" %}
           Hello, {{ userlink }}!
         {% endblocktrans %}
-        {% if team and competition.are_teams_editable %}
+        {% if team and competition.are_teams_editable and competition.is_team_competition %}
           <br>
           {% trans "Team:" %}
           <a href="{% comp_url 'registration' %}" data-cy="edit-team">{{ team.name }}</a>
@@ -80,6 +80,10 @@
       {% if user.is_authenticated %}
         <li><a href="{% comp_url 'notifications' %}">
             {% trans "Notifications" %}</a></li>
+      {% endif %}
+      {% if team and competition.are_teams_editable and competition.is_individual_competition %}
+        <li><a href="{% comp_url 'registration' %}" data-cy="edit-participation">
+            {% trans "Edit participation" %}</a></li>
       {% endif %}
       {% if is_admin %}
         <li class="nav-header">{% trans "Admin" %}</li>
