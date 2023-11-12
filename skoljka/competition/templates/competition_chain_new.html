@@ -37,8 +37,13 @@
   <div class="form-section">{% trans "Chain" %}</div>
   {% bootstrap_form chain_form layout="horizontal" %}
   <div class="controls">
-    <input type="submit" value="{% trans "Submit" %}" class="btn btn-primary">
+    <input type="submit" value="{% trans "Update chain" %}" class="btn btn-primary"
+           data-cy="submit-chain">
   </div>
 </form>
+
+{% if chain.restricted_access %}
+  {% include 'inc_competition_chain_access.html' %}
+{% endif %}
 
 {% endblock content %}

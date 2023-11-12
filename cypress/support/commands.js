@@ -1,3 +1,19 @@
+/// Visit a page and expect the 403 status code (forbidden).
+function expectForbidden(url) {
+  return cy.request({
+    url: url,
+    failOnStatusCode: false,
+  }).its('status').should('equal', 403);
+}
+
+/// Visit a page and expect the 404 status code (not found).
+function expectNotFound(url) {
+  return cy.request({
+    url: url,
+    failOnStatusCode: false,
+  }).its('status').should('equal', 404);
+}
+
 /// Check that the given form field reported a value error.
 /// Returns the text of the error.
 function fieldError(subject) {
@@ -46,6 +62,8 @@ function setlang(lang) {
   });
 }
 
+Cypress.Commands.add('expectForbidden', expectForbidden);
+Cypress.Commands.add('expectNotFound', expectNotFound);
 Cypress.Commands.add('fieldError', { prevSubject: true }, fieldError);
 Cypress.Commands.add('requiredFieldError', { prevSubject: true }, requiredFieldError);
 Cypress.Commands.add('login', login);

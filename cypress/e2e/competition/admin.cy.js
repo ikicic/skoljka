@@ -1,4 +1,3 @@
-const HTTP_STATUS_FORBIDDEN = 403;
 const UNLOCK_GRADUAL = 1;
 const UNLOCK_ALL = 2;
 
@@ -33,12 +32,7 @@ describe("test view permission", () => {
 
   it("homepage should return 404 to non-moderators", () => {
     cy.login('alice');
-    cy.request({
-      url: '/hidden_competition/',
-      failOnStatusCode: false,
-    }).then((response) => {
-      expect(response.status).to.equal(HTTP_STATUS_FORBIDDEN);
-    });
+    cy.expectForbidden('/hidden_competition/');
   });
 
   it("should display the competition homepage to moderators", () => {
@@ -156,8 +150,9 @@ describe("test adding and operating on chains", () => {
 
   it("test the default values and the required fields", () => {
     cy.visit('/public_competition/chain/tasks/');
-    // CSRF + name + category + unlock minutes + bonus score + position + hidden task_ids + submit.
-    cy.get('form[data-cy="create-chain"] input').should('have.length', 8);
+    // CSRF + name + category + unlock minutes + bonus score + position +
+    // hidden task_ids + submit + restricted access.
+    cy.get('form[data-cy="create-chain"] input').should('have.length', 9);
     cy.get('form[data-cy="create-chain"] select').should('have.length', 1); // Unlock mode.
     cy.get('#id_name').should('have.value', "");
     cy.get('#id_category').should('have.value', "");
@@ -165,6 +160,7 @@ describe("test adding and operating on chains", () => {
     cy.get('#id_bonus_score').should('have.value', "1");
     cy.get('#id_position').should('have.value', "0");
     cy.get('#id_unlock_mode').should('have.value', "1");
+    cy.get('#id_restricted_access').should('not.be.checked');
 
     cy.get('#id_unlock_minutes').clear();
     cy.get('#id_bonus_score').clear();

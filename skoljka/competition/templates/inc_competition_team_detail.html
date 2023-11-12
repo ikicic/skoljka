@@ -7,7 +7,7 @@
     {% send_notification_link team_id=preview_team.id %}
   {% endif %}
   {% if competition.is_individual_competition %}
-    <a href="/profile/{{ team.author_id }}/">
+    <a href="/profile/{{ preview_team.author_id }}/">
       <i class="icon-user"></i>
     </a>
   {% endif %}

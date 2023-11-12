@@ -365,15 +365,15 @@ div#ctask-legend-container {
 
 
 .cchain-verified {
-  @include colored-tr-striped(lime, 8%);
+  @include colored-striped-tr-old(lime, 8%);
 }
 
 .cchain-important {
-  @include colored-tr-striped(red, 5%);
+  @include colored-striped-tr-old(red, 5%);
 }
 
 .cchain-important-my-ctasks {
-  @include colored-tr-striped(red, 10%);
+  @include colored-striped-tr-old(red, 10%);
 }
 
 .ctask-content {
@@ -535,4 +535,15 @@ $table-selected-bg: mix(blue, $table-bg, 5%);
 }
 .caction-info {
   color: gray;
+}
+
+/* Chain access rights. */
+#chain-access-table {
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+}
+.chain-access-tr:hover {
+  @include colored-striped-tr(lime, 8%);
+  cursor: pointer;
 }

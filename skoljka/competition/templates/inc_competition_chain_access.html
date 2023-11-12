@@ -1,0 +1,43 @@
+{% load i18n %}
+{% load competition_tags %}
+
+<h4>{% trans "Chain visibility" %}</h4>
+
+<form action="" method="POST" data-cy="chain-access">
+  {% csrf_token %}
+  <table id="chain-access-table" class="table-striped table-condensed">
+    <tr>
+      {% if has_team_categories %}
+        <th>{% trans "Team category" %}</th>
+      {% endif %}
+      <th>{% trans "Team" %}</th>
+      <th>{% trans "Visible?" context "chain-permission" %}</th>
+    </tr>
+    {% for t in teams %}
+      <tr class="chain-access-tr">
+        {% if has_team_categories %}
+          <td>{{ t.t_category_name }}</td>
+        {% endif %}
+        <td>{{ t.get_link }}</td>
+        <td>
+          <input type="checkbox"
+                 {% if t.t_has_chain_access %}checked="checked"{% endif %}
+                 name="team-{{ t.id }}"
+                 id="team-{{ t.id }}">
+        </td>
+      </tr>
+    {% endfor %}
+    {% if not teams %}
+      <tr>
+        <td {% if has_team_categories %}colspan="3"{% else %}colspan="2"{% endif %}>
+            <i>{% trans "No participants yet." %}</i>
+        </td>
+      </tr>
+    {% endif %}
+  </table>
+  {% if teams %}
+    <input type="submit" class="btn btn-primary" name="change-chain-access"
+           value="{% trans "Update visibility" context "chain-access" %}"
+           data-cy="change-chain-access">
+  {% endif %}
+</form>

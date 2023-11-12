@@ -87,7 +87,7 @@ h4.task-small-title {
 /* Don't remove !important. Otherwise odd rows won't be affected. */
 @mixin colored-tr-and-lecture($class, $color, $weight) {
   tr.#{$class} {
-    @include colored-tr-striped($color, $weight);
+    @include colored-striped-tr-old($color, $weight);
   }
   /* For lectures. */
   img.#{$class} {
@@ -103,7 +103,7 @@ h4.task-small-title {
 @include colored-tr-and-lecture(task-todo, yellow, 12%);
 
 .task-hidden {
-  @include colored-tr-striped(gray, 12%);
+  @include colored-striped-tr-old(gray, 12%);
 }
 
 .task-locked {

@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 
+import django
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
@@ -31,6 +32,7 @@ from skoljka.competition.forms import (
 )
 from skoljka.competition.models import (
     Chain,
+    ChainTeam,
     Competition,
     CompetitionTask,
     Submission,
@@ -171,7 +173,7 @@ def _init_categories_and_sort_chains(
     else:
         chains.sort(key=lambda chain: chain.t_category.sort_key)
 
-    categories = categories.values()
+    categories = list(categories.values())
     categories.sort(key=lambda cat: cat.sort_key)
 
     if sort_descending:
@@ -476,7 +478,7 @@ def scoreboard(request, competition, data, as_participants=False):
         categories = competition.parse_team_categories()
         categories_dict = categories.lang_to_categories[request.LANGUAGE_CODE]
         category_choices = categories.as_choices(request.LANGUAGE_CODE)
-    except (ValueError, KeyError, TypeError):
+    except (AttributeError, KeyError):
         categories = TeamCategories()
         categories_dict = {}
         category_choices = []
@@ -529,17 +531,32 @@ def pick_name_translation(name, competition, lang):
 @competition_view()
 @response('competition_task_list.html')
 def task_list(request, competition, data):
+    team = data['team']
+
     all_ctasks = list(CompetitionTask.objects.filter(competition=competition))
     all_ctasks_dict = {ctask.id: ctask for ctask in all_ctasks}
-    all_chains = list(
-        Chain.objects.filter(competition=competition, cache_is_verified=True)
-    )
-    all_chains_dict = {chain.id: chain for chain in all_chains}
-    all_my_submissions = list(
-        Submission.objects.filter(team=data['team']).only(
-            'id', 'ctask', 'score', 'oldest_unseen_admin_activity'
+    if data['is_admin']:
+        all_chains = list(
+            Chain.objects.filter(competition=competition, cache_is_verified=True)
         )
-    )
+    else:
+        all_chains = list(
+            Chain.objects.filter(
+                competition=competition, cache_is_verified=True, restricted_access=False
+            )
+        )
+        if team:
+            all_chains += list(team.explicitly_accessible_chains.all())
+    all_chains_dict = {chain.id: chain for chain in all_chains}
+
+    if team:
+        all_my_submissions = list(
+            Submission.objects.filter(team=team).only(
+                'id', 'ctask', 'score', 'oldest_unseen_admin_activity'
+            )
+        )
+    else:
+        all_my_submissions = []
 
     unverified_chains = set()
     for chain in all_chains:
@@ -655,6 +672,7 @@ def task_detail(request, competition, data, ctask_id):
         competition=competition,
         id=ctask_id,
     )
+
     ctask.competition = competition
     ctask_id = int(ctask_id)
     team = data['team']
@@ -664,6 +682,7 @@ def task_detail(request, competition, data, ctask_id):
             or not data['has_started']
             or not ctask.chain
             or ctask.chain.unlock_minutes > data['minutes_passed']
+            or not ctask.chain.team_has_access(data['team'])
         ):
             raise Http404
 
@@ -1186,16 +1205,14 @@ def chain_overview(request, competition, data, chain_id):
 @response('competition_chain_new.html')
 def chain_new(request, competition, data, chain_id=None):
     if chain_id:
-        chain = get_object_or_404(Chain, id=chain_id, competition_id=competition.id)
+        chain = get_object_or_404(Chain, id=chain_id, competition=competition)
         edit = True
     else:
         chain = None
         edit = False
 
-    POST = request.POST if request.method == 'POST' else None
-    chain_form = ChainForm(POST, competition=competition, instance=chain)
-
-    if request.method == 'POST':
+    if request.method == 'POST' and 'change-chain-access' not in request.POST:
+        chain_form = ChainForm(request.POST, competition=competition, instance=chain)
         if chain_form.is_valid():
             chain = chain_form.save(commit=False)
             if not edit:
@@ -1203,9 +1220,83 @@ def chain_new(request, competition, data, chain_id=None):
             chain.save()
 
             return (chain.get_absolute_url(),)
+    else:
+        chain_form = ChainForm(competition=competition, instance=chain)
+
+    if chain and chain.restricted_access:
+        if _edit_teams_with_chain_access(request, competition, data, chain):
+            return (chain.get_absolute_url(),)
 
     data['chain_form'] = chain_form
+    data['chain'] = chain
     return data
+
+
+def _edit_teams_with_chain_access(request, competition, data, chain):
+    """Process the POST form handling chain access and load all teams and
+    check which teams have access to the chain.
+
+    Adds the following context item:
+        has_team_categories: whether there are valid team categories
+        teams: a list of modified Team objects, with two extra fields:
+            team.t_has_chain_access: bool
+            team.t_team_category_name: str
+
+    Returns:
+        True if a POST query was processed. False otherwise.
+    """
+    team_categories = competition.parse_team_categories()
+    if team_categories is not None:
+        category_names = team_categories.lang_to_categories.get(
+            request.LANGUAGE_CODE, {}
+        )
+    else:
+        category_names = {}
+
+    # Always order by category, even if there are no team_categories specified
+    # on the level of the competition. It is rare that this will be non-zero
+    # anyway, but it may be useful to differentiate the teams while not
+    # actually having any visible categories.
+    teams = list(
+        Team.objects.filter(competition=competition)
+        .exclude(team_type=Team.TYPE_ADMIN_PRIVATE)
+        .only('id', 'name', 'category')
+        .order_by('category', 'name', 'id')
+    )
+    teams_with_access = set(
+        ChainTeam.objects.filter(chain=chain).values_list('team_id', flat=True)
+    )
+
+    if request.method == 'POST' and 'change-chain-access' in request.POST:
+        to_delete = []
+        to_add = []
+        for team in teams:
+            has_access = team.id in teams_with_access
+            should_have_access = 'team-{}'.format(team.id) in request.POST
+            if has_access and not should_have_access:
+                to_delete.append(team)
+            elif not has_access and should_have_access:
+                to_add.append(team)
+        if to_delete:
+            ChainTeam.objects.filter(chain=chain, team_id__in=to_delete).delete()
+        if to_add:
+            # TODO: Django 2.2 added ignore_conflicts to bulk_create.
+            for team in to_add:
+                try:
+                    ChainTeam.objects.create(chain=chain, team=team)
+                except django.db.IntegrityError:
+                    pass  # Avoid race condition problems.
+        return True  # Prevent form resubmission.
+
+    for team in teams:
+        team.t_category_name = category_names.get(team.category, str(team.category))
+        team.t_has_chain_access = team.id in teams_with_access
+
+    data['has_team_categories'] = bool(
+        team_categories and team_categories.lang_to_categories
+    )
+    data['teams'] = teams
+    return False
 
 
 def chain_edit(request, competition_id, chain_id):

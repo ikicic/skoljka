@@ -19,19 +19,21 @@ def G(male, female, gender):
     return male + '/' + female
 
 
-def join_urls(a, b):
+def join_urls(first, *parts):
     """
-    Join two URLs making sure there is exactly one slash between them.
-    urlparse.urljoin doesn't work well with regex URLs user for views.
+    Join two or more URLs parts, such that there is exactly one slash between
+    them, and that the URL ends with a / or with a regex $.
     """
-    # TODO: Refactor to support more than two parameters.
-    if not a or not b:
-        return a + b
-    if a[-1] == '/':
-        a = a[:-1]
-    if b[0] == '/':
-        b = b[1:]
-    return a + '/' + b
+    if parts:
+        first = first.rstrip('/')
+        other = [part.strip('/') for part in parts]
+        end = '' if other[-1].endswith('$') else '/'
+        return ''.join([first, '/', '/'.join(other), end])
+    else:
+        if first.endswith('$') or first.endswith('/'):
+            return first
+        else:
+            return first + '/'
 
 
 def media_path_to_url(path):

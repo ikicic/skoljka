@@ -4,7 +4,7 @@ from functools import wraps
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 
-from skoljka.competition.models import Competition, TeamMember
+from skoljka.competition.models import Competition, Team, TeamMember
 from skoljka.permissions.constants import EDIT, VIEW
 
 
@@ -73,7 +73,7 @@ def competition_view(permission=VIEW):
                 'team_invitations': team_invitations,
                 'is_admin': is_admin,
                 'has_private_team': any(
-                    x for x in teams if x.team_type == team.TYPE_ADMIN_PRIVATE
+                    x for x in teams if x.team_type == Team.TYPE_ADMIN_PRIVATE
                 ),
                 'has_started': has_started,
                 'has_finished': has_finished,

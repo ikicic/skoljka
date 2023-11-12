@@ -25,12 +25,16 @@ from skoljka.permissions.models import ObjectPermission
 from skoljka.post.models import Post
 from skoljka.tags.utils import add_tags
 from skoljka.task.models import Task
+from skoljka.utils.string_operations import join_urls
 
 
-def comp_url(competition, url_suffix):
-    # TODO: Do it the proper way. Use names, not suffices.
-    suffix = '/' if url_suffix else ''
-    return competition.get_absolute_url() + url_suffix + suffix
+def comp_url(competition, *parts):
+    """Concatenate the competition URL with parts, with a / between each part and at the end.
+
+    >>> comp_url(competition, 'chain', chain.id, 'overview')
+    '/competition_name/chain/123/overview/'
+    """
+    return join_urls(competition.get_absolute_url(), *parts)
 
 
 # TODO(ivica): Add commit argument to all update_* methods.

@@ -22,9 +22,8 @@ register = template.Library()
 
 
 @register.simple_tag(takes_context=True)
-def comp_url(context, url_suffix):
-    # TODO: Do it the proper way. Use names, not suffices.
-    return utils__comp_url(context['competition'], url_suffix)
+def comp_url(context, *parts):
+    return utils__comp_url(context['competition'], *parts)
 
 
 @register.simple_tag(takes_context=True)

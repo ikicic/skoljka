@@ -139,7 +139,7 @@ class Competition(BasePermissionsModel):
         translation and URL."""
         title = _("Participants") if self.is_course else _("Scoreboard")
         return mark_safe(
-            u'<a href="{}/">{}</a>'.format(self.get_scoreboard_url(), xss.escape(title))
+            u'<a href="{}">{}</a>'.format(self.get_scoreboard_url(), xss.escape(title))
         )
 
     def get_scoreboard_url(self):
@@ -181,17 +181,26 @@ class Competition(BasePermissionsModel):
 
         The "CONFIGURABLE" key is optional and defaults to True.
 
-        Raises ValueError, KeyError or TypeError if the format is invalid."""
-        if not self.team_categories.startswith('{'):
-            return self._parse_team_categories_old(self.team_categories)
+        Returns None if the format is invalid."""
 
-        parsed = json.loads(self.team_categories)
-        configurable = parsed.pop("CONFIGURABLE", True)
-        lang_to_categories = {
-            lang: {int(id): key for id, key in categories.items()}
-            for lang, categories in parsed.items()
-        }
-        return TeamCategories(lang_to_categories, configurable)
+        def inner():
+            if not self.team_categories.strip():
+                return TeamCategories(lang_to_categories={}, configurable=False)
+            if not self.team_categories.startswith('{'):
+                return self._parse_team_categories_old(self.team_categories)
+
+            parsed = json.loads(self.team_categories)
+            configurable = parsed.pop("CONFIGURABLE", True)
+            lang_to_categories = {
+                lang: {int(id): key for id, key in categories.items()}
+                for lang, categories in parsed.items()
+            }
+            return TeamCategories(lang_to_categories, configurable)
+
+        try:
+            return inner()
+        except Exception:
+            return None
 
     @staticmethod
     def _parse_team_categories_old(team_categories):
@@ -373,6 +382,17 @@ class Chain(models.Model):
         default=0, help_text=gray_help_text(ugettext_lazy("Position in the category."))
     )
     unlock_mode = models.SmallIntegerField(choices=UNLOCK_MODES, default=UNLOCK_GRADUAL)
+
+    # The restricted access is not called "hidden", as done elsewhere, because
+    # in this case we do not rely on ObjectPermission (which is Group-based),
+    # but on a custom ChainTeam many-to-many field.
+    restricted_access = models.BooleanField(
+        default=False,
+        help_text="If enabled, only teams with explicitly given access will be able to view and solve this chain.",
+    )
+    teams_with_access = models.ManyToManyField(
+        Team, related_name='explicitly_accessible_chains', through='ChainTeam'
+    )
     cache_ctask_comments_info = models.CharField(blank=True, max_length=255)
     cache_is_verified = models.BooleanField(default=False)
 
@@ -382,9 +402,28 @@ class Chain(models.Model):
     def get_absolute_url(self):
         return self.competition.get_absolute_url() + 'chain/{}/'.format(self.id)
 
+    def team_has_access(self, team):
+        if self.restricted_access:
+            if team:
+                return ChainTeam.objects.filter(chain=self, team=team).exists()
+            else:
+                return False
+        else:
+            return True
+
     @property
     def unlock_days(self):
         return self.unlock_minutes / (24 * 60.0)
+
+
+class ChainTeam(models.Model):
+    """Explicit Team-Chain permissions."""
+
+    chain = models.ForeignKey(Chain, db_index=True)
+    team = models.ForeignKey(Team, db_index=True)
+
+    class Meta:
+        unique_together = (('chain', 'team'),)
 
 
 class CompetitionTask(models.Model):

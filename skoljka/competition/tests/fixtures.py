@@ -6,7 +6,14 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.template.defaultfilters import capfirst
 from django.views.decorators.csrf import csrf_exempt
 
-from skoljka.competition.models import Chain, Competition, CompetitionTask
+from skoljka.competition.models import (
+    Chain,
+    ChainTeam,
+    Competition,
+    CompetitionTask,
+    Team,
+    TeamMember,
+)
 from skoljka.competition.utils import create_ctask
 from skoljka.mathcontent.models import MathContent
 from skoljka.permissions.constants import EDIT, VIEW
@@ -124,7 +131,7 @@ def create_test_competitions(request):
 
 def _create_test_ctasks(request, competition_id, chain=None):
     if not request.user.is_authenticated():
-        return HttpResponseBadRequest("must be signed in as the ctask author")
+        raise Exception("must be signed in as the ctask author")
 
     competition = Competition.objects.get(id=competition_id)
     num_tasks = int(request.POST['num-tasks'])
@@ -192,16 +199,58 @@ def create_test_chain(request, competition_id):
     Returns a JSON:
         {'chain_id': chain.id, 'ctask_ids': [...]}
     """
-    competition = Competition.objects.get(id=competition_id)
     chain = Chain.objects.create(
-        competition=competition,
+        competition_id=competition_id,
         name=request.POST['name'],
         unlock_minutes=request.POST['unlock-minutes'],
         category=request.POST['category'],
         bonus_score=request.POST['bonus'],
         position=request.POST['position'],
         unlock_mode=request.POST['unlock-mode'],
+        restricted_access=(request.POST['restricted-access'] == 'true'),
     )
     ctask_ids = _create_test_ctasks(request, competition_id, chain=chain)
     response = {'chain_id': chain.id, 'ctask_ids': ctask_ids}
     return HttpResponse(json.dumps(response), mimetype='application/json')
+
+
+@csrf_exempt
+@assert_testdb
+def create_test_team(request, competition_id):
+    """Create a team with one or more members. Returns a single number, the team ID."""
+    body = json.loads(request.body)
+    usernames = body['member-usernames']
+    members = list(User.objects.filter(username__in=usernames))
+    if len(members) != len(usernames):
+        return HttpResponseBadRequest("some usernames do not exist")
+    author = next(member for member in members if member.username == usernames[0])
+    team = Team.objects.create(
+        name=body['name'],
+        author=author,
+        competition_id=competition_id,
+        category=body['category'],
+    )
+    for member in members:
+        TeamMember.objects.create(
+            team=team,
+            member=member,
+            member_name=member.username,
+            invitation_status=TeamMember.INVITATION_ACCEPTED,
+        )
+    for chain_id in body['chain-access']:
+        ChainTeam.objects.create(chain_id=chain_id, team=team)
+
+    response = team.id
+    return HttpResponse(json.dumps(response), mimetype='application/json')
+
+
+@csrf_exempt
+@assert_testdb
+def delete_teams(request, competition_id):
+    """Delete teams, given a JSON list of the IDs. Check that the teams exist."""
+    team_ids = json.loads(request.body)
+    teams = Team.objects.filter(competition_id=competition_id, id__in=team_ids)
+    if len(teams) != len(team_ids):
+        return HttpResponseBadRequest("some teams don't exist")
+    teams.delete()
+    return HttpResponse('{}', mimetype='application/json')

@@ -13,7 +13,23 @@ const CREATE_CHAIN_DEFAULTS = {
   numTasks: 0,
   textFormat: "task text #{}",
   commentFormat: "task comment #{}",
+  restrictedAccess: false,
 };
+
+const CREATE_INDIVIDUAL_TEAM_DEFAULTS = {
+  category: 0,
+  chainAccess: [],
+};
+
+function _applyDefaults(options, defaults) {
+  options = options || {};
+  const unknownOptions = _.omit(options, Object.keys(defaults));
+  if (!_.isEmpty(unknownOptions)) {
+    throw new Error(`Unknown option(s): ${unknownOptions}`);
+  }
+  options = _.defaults({}, options, defaults);
+  return options
+}
 
 /// Returns {ctask_ids: [ids...]}.
 function createCTasks(competition, numTasks, textFormat, commentFormat) {
@@ -29,12 +45,7 @@ function createCTasks(competition, numTasks, textFormat, commentFormat) {
 
 /// Create a chain and ctasks in it. Returns {ctask_ids: [ids...], chain_id: ...}.
 function createChain(competition, options) {
-  options = options || {};
-  const unknownOptions = _.omit(options, Object.keys(CREATE_CHAIN_DEFAULTS));
-  if (!_.isEmpty(unknownOptions)) {
-    throw new Error(`Unknown option(s): ${unknownOptions}`);
-  }
-  options = _.defaults({}, options, CREATE_CHAIN_DEFAULTS);
+  options = _applyDefaults(options, CREATE_CHAIN_DEFAULTS);
 
   return cy.request({
     method: 'POST',
@@ -50,11 +61,45 @@ function createChain(competition, options) {
       'num-tasks': options.numTasks,
       'text-format': options.textFormat,
       'comment-format': options.commentFormat,
+      'restricted-access': options.restrictedAccess,
     }
   }).then((response) => {
     return response.body;
   });
 }
 
+
+/// Create a team. Returns team_id.
+function createIndividualTeam(competition, username, options) {
+  options = _applyDefaults(options, CREATE_INDIVIDUAL_TEAM_DEFAULTS);
+
+  return cy.request({
+    method: 'POST',
+    url: `/${competition}/test/create_team/`,
+    form: true,
+    body: JSON.stringify({
+      'name': username,
+      'member-usernames': [username],
+      'category': options.category,
+      'chain-access': options.chainAccess,
+    }),
+  }).then((response) => {
+    return response.body;
+  });
+}
+
+
+/// Delete teams, given their IDs.
+function deleteTeams(competition, teamIds) {
+  return cy.request({
+    method: 'POST',
+    url: `/${competition}/test/delete_teams/`,
+    form: true,
+    body: JSON.stringify(teamIds),
+  });
+}
+
 Cypress.Commands.add('createCTasks', createCTasks);
 Cypress.Commands.add('createChain', createChain);
+Cypress.Commands.add('createIndividualTeam', createIndividualTeam);
+Cypress.Commands.add('deleteTeams', deleteTeams);

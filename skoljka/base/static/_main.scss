@@ -37,11 +37,20 @@ $outset-box-shadow-color: rgba(128, 128, 128, 0.55);
   }
 }
 
-@mixin colored-tr-striped($color, $weight) {
+@mixin colored-striped-tr-old($color, $weight) {
   & td, &:hover td {
     background-color: mix($color, $table-bg, $weight) !important;
   }
   &:nth-child(odd) td, &:nth-child(odd):hover td {
     background-color: mix($color, $table-bg-odd, $weight) !important;
+  }
+}
+
+@mixin colored-striped-tr($color, $weight) {
+  &:nth-child(even) td {
+    background-color: mix($color, $table-bg, $weight);
+  }
+  &:nth-child(odd) td {
+    background-color: mix($color, $table-bg-odd, $weight);
   }
 }

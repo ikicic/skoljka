@@ -86,7 +86,7 @@
   </div>
 {% endif %}
 
-<form method="POST" action="" class="form-horizontal" data-cy="create-chain">
+<form method="POST" action="" class="form-horizontal fix-bootstrap-form" data-cy="create-chain">
   {% csrf_token %}
   <table class="table table-striped" id="cchain-unused-ctasks-table">
     <tr class="comp-tr-ctask">
@@ -109,16 +109,11 @@
     {% endfor %}
   </table>
 
-  <table class="kill-br">
-    {{ form|as_bootstrap }}
-    <tr>
-      <td></td>
-      <td>
-        <input type="submit" class="btn btn-primary" data-cy="create-chain"
-               value="{% trans "Create chain" %}">
-      </td>
-    </tr>
-  </table>
+  {% bootstrap_form form %}
+  <div class="controls">
+    <input type="submit" class="btn btn-primary" data-cy="create-chain"
+           value="{% trans "Create chain" %}">
+  </div>
 </form>
 
 <br><br>

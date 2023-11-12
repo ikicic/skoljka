@@ -135,6 +135,7 @@ class ChainForm(forms.ModelForm):
             'bonus_score',
             'position',
             'unlock_mode',
+            'restricted_access',
         ]
 
     def __init__(self, *args, **kwargs):
@@ -250,14 +251,14 @@ class TeamForm(forms.ModelForm):
             )
 
         # Parse the team category string.
-        try:
-            categories = self.competition.parse_team_categories()
+        categories = self.competition.parse_team_categories()
+        if categories:
             if categories.configurable:
                 category_choices = categories.as_choices(lang)
             else:
                 category_choices = []
-        except (ValueError, KeyError, TypeError) as e:
-            category_choices = [(1, u"team_categories invalid!!! " + unicode(e))]
+        else:
+            category_choices = [(1, u"team_categories invalid!!!")]
         self.category_choices = category_choices
         if category_choices and (not instance or not instance.category):
             initial['category'] = category_choices[-1][0]  # For simplicity.

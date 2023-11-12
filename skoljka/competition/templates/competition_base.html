@@ -29,7 +29,7 @@
     <a href="/">
       <img src="/static/images/shell32.png" alt="Školjka">
     </a>
-    <a href="{% comp_url '' %}" id="competition-name">
+    <a href="{% comp_url %}" id="competition-name">
       {{ competition.name }}
     </a>
   </h1>
@@ -60,7 +60,7 @@
     {% endif %}
     <ul class="nav nav-list">
       <li class="nav-header">{% trans "Menu" %}</li>
-      <li><a href="{% comp_url '' %}">{% trans "Home" %}</a></li>
+      <li><a href="{% comp_url %}">{% trans "Home" %}</a></li>
       {% if not team and not has_finished and current_time > competition.registration_open_date or is_admin %}
         <li><a href="{% comp_url 'registration' %}" class="register">
             {% trans "Registration" %}</a></li>

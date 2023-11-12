@@ -66,6 +66,8 @@ if IS_TESTDB:
     _patterns += [
         (r'test/create_chain/$', _fixtures.create_test_chain),
         (r'test/create_ctasks/$', _fixtures.create_test_ctasks),
+        (r'test/create_team/$', _fixtures.create_test_team),
+        (r'test/delete_teams/$', _fixtures.delete_teams),
     ]
     _extra_urls += patterns(
         '',

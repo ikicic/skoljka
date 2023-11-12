@@ -14,7 +14,7 @@
   <a href="{% comp_url 'chain/new' %}" class="btn">{% trans "New chain" %}</a>
 </div>
 
-<h3 class="comp-header">Lanci</h3>
+<h3 class="comp-header">{% trans "Chains" %}</h3>
 
 <table class="table table-striped">
   <tr>
@@ -38,7 +38,12 @@
     <tr class="{% admin_chain_class chain %}">
       <td>{{ chain.category }}</td>
       <td>{{ chain.position }}</td>
-      <td><a href="{{ chain.get_absolute_url }}">{{ chain.name }}</a></td>
+      <td>
+        {% if chain.restricted_access %}
+          <i class="icon-lock" title="{% trans "Restricted access" %}"></i>
+        {% endif %}
+        <a href="{{ chain.get_absolute_url }}">{{ chain.name }}</a>
+      </td>
       <td>{{ chain.t_ctask_count }}</td>
       {% if competition.is_course %}
         <td>{{ chain.unlock_days|floatformat }}</td>
