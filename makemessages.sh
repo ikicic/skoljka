@@ -4,5 +4,7 @@ SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 cd "$SCRIPTPATH/skoljka"
 
-django-admin.py makemessages -l hr --ignore=settings --ignore=local
-django-admin.py makemessages -l hr --ignore=settings --ignore=local --ignore=node_modules --ignore=build -d djangojs
+# TODO: Django 2.0: consider using --add-location=file
+OPTIONS="--ignore=settings --ignore=local"
+django-admin.py makemessages -l hr $OPTIONS
+django-admin.py makemessages -l hr $OPTIONS --ignore=node_modules --ignore=build -d djangojs

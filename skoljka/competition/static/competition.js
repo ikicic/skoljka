@@ -239,7 +239,7 @@
   /* Make the whole chain access row a label for the checkbox. */
   $(function() {
     $('#chain-access-table').on('click', '.chain-access-tr', function() {
-      const checkbox = $(this).find('[type=checkbox]');
+      var checkbox = $(this).find('[type=checkbox]');
       checkbox.prop('checked', !checkbox.prop('checked'));
     });
   });

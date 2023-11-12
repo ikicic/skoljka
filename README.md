@@ -17,6 +17,11 @@ docker attach skoljka
 ```
 (This command might look stuck, press enter to see the interactive shell.)
 
+From outside the container, run the following:
+```sh
+./docker/run_rsync.sh
+```
+
 Within the container, run the following:
 ```sh
 cd /app
@@ -37,8 +42,8 @@ After closing the container, run the following to resume it:
 ```sh
 docker start skoljka
 docker attach skoljka
-service mysql start  # Fails for some reason.
-service mysql start  # Try again.
+service mysql start                  # Sometimes fails on the first try.
+mysqlcheck --repair --all-databases  # Sometimes needed.
 ```
 
 
@@ -172,6 +177,13 @@ You should now be in `~/projects/skoljka/skoljka/`.
 
 
 # Testing
+
+## Unit tests
+
+The syntax to restrict which tests are executed:
+```sh
+python2 manage.py test --noinput competition.ChainSortingTest.test_custom_ordering
+```
 
 ## End to end tests (E2E)
 

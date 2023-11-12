@@ -21,8 +21,8 @@ if [ ! -d local/modules/django-template-preprocessor ]; then
     python setup.py install
     cd ../../..
 else
-    echo "local/modules/django-template-preprocessor already found, skipping" 
+    echo "local/modules/django-template-preprocessor already found, skipping"
 fi
 
 # Make a copy of local settings
-cp -n settings/local.template.py settings/local.py
+cp -n skoljka/settings/local.template.py skoljka/settings/local.py

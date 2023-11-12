@@ -21,12 +21,12 @@ fi
 (cd "$LOCAL/modules/django-template-preprocessor" && git pull && python setup.py install)
 
 # Make a copy of local settings
-cp -n settings/local.template.py settings/local.py
+cp -n skoljka/settings/local.template.py skoljka/settings/local.py
 
 set +x
 
 RANDOM_SECRET_KEY=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 64)
-sed -i "s/KEY_SHOULD_BE_SOMETHING_COMPLICATED/$RANDOM_SECRET_KEY/" settings/local.py
+sed -i "s/KEY_SHOULD_BE_SOMETHING_COMPLICATED/$RANDOM_SECRET_KEY/" skoljka/settings/local.py
 
 echo "DONE!"
 echo "Now run ./docker/setup_internal.sh"
