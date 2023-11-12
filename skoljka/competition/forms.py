@@ -144,9 +144,12 @@ class ChainForm(forms.ModelForm):
         if self.competition.is_course:
             del self.fields['unlock_minutes']
             days = self.instance.unlock_minutes / (24 * 60.0) if self.instance else 0
+            restricted_access_field = self.fields.pop('restricted_access')
             self.fields['unlock_days'] = forms.FloatField(
                 label=_("Unlock days"), min_value=0, initial=days
             )
+            # Reinsert the restricted_access field to put it at the end.
+            self.fields['restricted_access'] = restricted_access_field
 
     def clean(self):
         data = self.cleaned_data
