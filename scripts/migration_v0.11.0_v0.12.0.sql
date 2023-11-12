@@ -7,3 +7,5 @@ CREATE TABLE IF NOT EXISTS `competition_chainteam` (
   KEY `competition_chainteam_9bfe773a` (`chain_id`),
   KEY `competition_chainteam_fcf8ac47` (`team_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+call AddColumnUnlessExists('competition_chain', 'restricted_access', 'TINYINT NOT NULL DEFAULT 0 AFTER unlock_mode');
