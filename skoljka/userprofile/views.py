@@ -48,7 +48,9 @@ def new_register(request):
     return _register(
         request,
         'skoljka.userprofile.registration_backend.Backend',
-        form_class=UserCreationForm,
+        form_class=lambda *args, **kwargs: UserCreationForm(
+            *args, request=request, **kwargs
+        ),
         success_url=success_url,
         extra_context={'final_url': request.POST.get('final_url', '/')},
     )

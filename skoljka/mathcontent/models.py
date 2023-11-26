@@ -26,6 +26,11 @@ class LatexElement(models.Model):
         auto_now=True, help_text="If something goes wrong, date might be useful."
     )
 
+    def get_url(self):
+        """Return the relative URL of the image file."""
+        hash = self.hash
+        return '%s%s/%s/%s/%s.png' % (IMG_URL_PATH, hash[0], hash[1], hash[2], hash)
+
 
 @autoconnect
 class MathContent(models.Model):

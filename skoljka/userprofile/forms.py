@@ -1,14 +1,29 @@
-﻿from django import forms
+﻿import logging
+
+from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import Group, User
 from django.utils.safestring import mark_safe
+from django.utils.translation import pgettext_lazy
 from django.utils.translation import ugettext_lazy as _
 
 from skoljka.rating.widgets import RatingWidget
 from skoljka.task.models import DIFFICULTY_RATING_ATTRS
+from skoljka.userprofile.challenge import (
+    Challenge,
+    InvalidChallengeKey,
+    challenge_handler,
+)
 from skoljka.userprofile.models import UserProfile
+from skoljka.utils.testutils import IS_TESTDB
+from skoljka.utils.widgets import NonStickyTextInput
+
+if IS_TESTDB:
+    from skoljka.userprofile.challenge import test_challenge_handler
 
 # TODO: Upgrado to Django 1.5 (merge UserProfile with User)
+
+logger = logging.getLogger('skoljka.registration')
 
 
 class AuthenticationFormEx(AuthenticationForm):
@@ -25,6 +40,8 @@ class AuthenticationFormEx(AuthenticationForm):
 # na temelju django-registration/forms.py RegistrationForm
 
 attrs_dict = {'class': 'required'}
+CHALLENGE_KEY = 'ck'
+CHALLENGE_ANSWER = 'ca'
 
 
 class UserCreationForm(forms.Form):
@@ -45,6 +62,13 @@ class UserCreationForm(forms.Form):
         widget=forms.PasswordInput(attrs=attrs_dict, render_value=False),
         label=_(u"Confirm password"),
     )
+    # Obfuscate names.
+    ck = forms.CharField(required=True, widget=forms.HiddenInput())
+    ca = forms.CharField(
+        required=True,
+        label=pgettext_lazy(u"registration challenge", u"Answer"),
+        widget=NonStickyTextInput(),
+    )
     tou = forms.BooleanField(
         required=True,
         label=_(u'I accept the <a href="/tou/">Terms of Use</a>'),
@@ -56,8 +80,22 @@ class UserCreationForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        extra_class = kwargs.pop('extra_class', 'input-large')
-        super(UserCreationForm, self).__init__(*args, **kwargs)
+        request = kwargs.pop('request')
+        if IS_TESTDB and 'test_registration_challenge' in request.GET:
+            self.challenge_handler = test_challenge_handler
+            new_challenge = Challenge(
+                index=int(request.GET['test_registration_challenge'])
+            )
+        else:
+            self.challenge_handler = challenge_handler
+            new_challenge = challenge_handler.create_random()
+        initial = kwargs.pop('initial', {})
+        initial[CHALLENGE_KEY] = self.challenge_handler.to_key(new_challenge)
+
+        super(UserCreationForm, self).__init__(*args, initial=initial, **kwargs)
+
+        self.new_challenge = new_challenge
+        self.challenge_img = mark_safe(self.challenge_handler.to_html(new_challenge))
 
         for x in self.fields.itervalues():
             if not isinstance(x, forms.CharField):
@@ -67,10 +105,9 @@ class UserCreationForm(forms.Form):
             # Show the label as a placeholder.
             x.widget.attrs['placeholder'] = x.label
             x.label = ""
-            if extra_class:
-                x.widget.attrs['class'] = (
-                    x.widget.attrs.get('class', '') + ' ' + extra_class
-                )
+            x.widget.attrs['class'] = x.widget.attrs.get('class', '') + ' input-large'
+
+        self.fields[CHALLENGE_ANSWER].widget.attrs['class'] += ' reg-ch-input'
 
     def clean_username(self):
         username = self.cleaned_data['username']
@@ -88,6 +125,29 @@ class UserCreationForm(forms.Form):
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError(_(u"E-mail address already in use."))
         return self.cleaned_data['email']
+
+    def clean_ca(self):
+        """Clean challenge answer."""
+        if CHALLENGE_KEY not in self.cleaned_data:
+            logger.warn("Challenge info missing.")
+            raise forms.ValidationError(u"Broken form.")  # Bad request.
+        try:
+            challenge = self.challenge_handler.from_key(
+                self.cleaned_data[CHALLENGE_KEY]
+            )
+        except InvalidChallengeKey:
+            logger.warn("Bad challenge key.")
+            raise forms.ValidationError(u"Bad input.")
+
+        if not self.challenge_handler.is_answer_correct(
+            challenge, self.cleaned_data[CHALLENGE_ANSWER].strip()
+        ):
+            logger.info("Incorrect answer for index={}.".format(challenge.index))
+            raise forms.ValidationError(_(u"Incorrect answer, please try again."))
+        else:
+            logger.info("Correct answer for index={}.".format(challenge.index))
+
+        return self.cleaned_data[CHALLENGE_ANSWER]
 
     def clean(self):
         if 'password1' in self.cleaned_data and 'password2' in self.cleaned_data:

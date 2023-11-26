@@ -37,3 +37,19 @@
 .profile-task-submitted > a {
   color: #13F;
 }
+
+#content .row-fluid.reg-ch {
+  width: 210px;
+  display: flex;
+  align-items: center;
+  justify-content: right;
+  text-align: right;
+}
+
+#content #homepage-registration .row-fluid.reg-ch {
+  width: 100%;
+}
+
+.reg-ch-input {
+  width: 100%;
+}

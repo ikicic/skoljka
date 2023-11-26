@@ -122,6 +122,20 @@ FOLDER_HOMEPAGE_SHORTCUTS_OFFLINE = ['IMO', 'shortlist', 'MEMO']
 FOLDER_INLINE_YEAR_COUNT = 10
 
 ######################################
+# Registration challenges
+######################################
+
+REGISTRATION_CHALLENGES = [
+    (r'1 + \sqrt{4} =', '3'),
+    (r'2 + \sqrt{4} =', '4'),
+    (r'3 + \sqrt{4} =', '5'),
+    (r'4 + \sqrt{4} =', '6'),
+    (r'5 + \sqrt{4} =', '7'),
+    (r'6 + \sqrt{4} =', '8'),
+    (r'7 + \sqrt{4} =', '9'),
+]
+
+######################################
 # Other
 ######################################
 

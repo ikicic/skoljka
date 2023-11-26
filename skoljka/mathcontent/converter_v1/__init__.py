@@ -43,13 +43,9 @@ from skoljka.mathcontent.latex import (
     generate_png,
     get_available_latex_elements,
 )
-from skoljka.mathcontent.models import (
-    ERROR_DEPTH_VALUE,
-    IMG_URL_PATH,
-    TYPE_HTML,
-    TYPE_LATEX,
-)
+from skoljka.mathcontent.models import ERROR_DEPTH_VALUE, TYPE_HTML, TYPE_LATEX
 from skoljka.utils import flatten_ignore_none, xss
+from skoljka.utils.python23 import basestring
 
 # If changing these note that all the MathContents not setting these values
 # manually will be affected. Also, don't forget to update mathcontent.scss
@@ -579,8 +575,7 @@ def get_latex_html(latex_element, force_inline):
             xss.escape(latex_element.format % latex_element.text),
         )
 
-    hash = latex_element.hash
-    url = '%s%s/%s/%s/%s.png' % (IMG_URL_PATH, hash[0], hash[1], hash[2], hash)
+    url = latex_element.get_url()
     if inline:
         return (
             u'<img src="%s" alt="%s" class="latex" '

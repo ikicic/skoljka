@@ -1,8 +1,22 @@
 {% load bootstrap_toolkit %}
 {% load i18n %}
-<form method="post" action="/accounts/register/" class="remove-bootstrap-toolkit-margins" data-cy="registration">
+<form method="post" action="{{ action }}" class="remove-bootstrap-toolkit-margins" data-cy="registration">
   {% csrf_token %}
-  {% bootstrap_form form %}
+  {% bootstrap_form form exclude="ca,tou" %}
+  <div class="control-group required reg-ch-outer{% if form.ca.errors %} error{% endif %}">
+    <div class="row-fluid reg-ch">
+      <label class="control-label span7" for="{{ form.ca.id_for_label }}">{{ form.challenge_img }}</label>
+      <div class="control span5">
+        {{ form.ca }}
+      </div>
+    </div>
+    {% if form.ca.errors %}
+      {% for error in form.ca.errors %}
+        <p class="help-block">{{ error }}</p>
+      {% endfor %}
+    {% endif %}
+  </div>
+  {% bootstrap_field form.tou %}
   <br>
   <button class="btn btn-primary" type="submit">
     {% trans "Register" context "action" %}

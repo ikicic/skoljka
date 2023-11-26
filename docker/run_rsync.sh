@@ -29,5 +29,5 @@ while true; do
         -e 'docker exec -i' \
         . \
         $CONTAINER:/app/
-    sleep 8
+    sleep 5
 done

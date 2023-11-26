@@ -230,6 +230,11 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        'console-info': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
@@ -248,6 +253,11 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'skoljka.registration': {
+            'handlers': ['console-info'],
+            'level': 'INFO',
+            'propagate': True,
+        }
         #        'sentry.errors': {
         #            'level': 'DEBUG',
         #            'handlers': ['console'],

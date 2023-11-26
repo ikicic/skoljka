@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import logging
 from datetime import datetime
 
 from django.contrib.auth import login
@@ -9,6 +10,8 @@ from registration.backends.default import DefaultBackend
 from registration.signals import user_activated
 
 FINAL_URL_CACHE_PREFIX = '@final-url-'
+
+logger = logging.getLogger('skoljka.registration')
 
 
 class Backend(DefaultBackend):
@@ -29,7 +32,8 @@ class Backend(DefaultBackend):
         final_url = request.POST.get('final_url', '/')
         # Forget the final_url after 5 minutes.
         cache.set(FINAL_URL_CACHE_PREFIX + str(new_user.id), final_url, 300)
-        print("ADDING TO CACHE {} {}".format(new_user.id, final_url))
+        # Also, log that a new user was created.
+        logger.info("New user id={} final_url={}".format(new_user.id, final_url))
         return new_user
 
     def get_final_url(self, request):
@@ -37,7 +41,6 @@ class Backend(DefaultBackend):
         if not request.user.is_authenticated():
             return '/'
         final_url = cache.get(FINAL_URL_CACHE_PREFIX + str(request.user.id))
-        print(request.user, request.user.id, final_url, final_url or '/')
         return final_url or '/'
 
 

@@ -8,15 +8,41 @@ from django.core import mail
 from django.test import TestCase
 from django.test.client import Client
 
+import skoljka.userprofile.forms as userprofile_forms
+from skoljka.mathcontent.latex import LatexElement
+from skoljka.userprofile.challenge import Challenge, TestChallengeHandler
+from skoljka.userprofile.forms import CHALLENGE_ANSWER, CHALLENGE_KEY
 from skoljka.userprofile.models import UserProfile
+
+TEST_CHALLENGE_KEY_VALUE = 'TESTKEY-ANSWER-50'
+TEST_CHALLENGE_ANSWER_VALUE = '50'
+
+
+class MockChallengeHandler(TestChallengeHandler):
+    @staticmethod
+    def get_or_generate_png(format, content):
+        return LatexElement(hash='abcdef', format=format, text=content, depth=5)
+
+    def from_key(self, key):
+        if key == TEST_CHALLENGE_KEY_VALUE:
+            return Challenge(index=3)  # 30 + sqrt(400)
+        else:
+            return super(MockChallengeHandler, self).from_key(key)
 
 
 class UserViewsTestCase(TestCase):
     assertRegex = TestCase.assertRegexpMatches
 
+    def setUp(self):
+        self._old_challenge_handler = userprofile_forms.challenge_handler
+        userprofile_forms.challenge_handler = MockChallengeHandler()
+
+    def tearDown(self):
+        userprofile_forms.challenge_handler = self._old_challenge_handler
+
     def test_registration_and_login(self):
         def has_form_error(response):
-            return 'class="errorlist"' in response.content
+            return 'error' in response.content
 
         # Check everything is clean at the start.
         self.assertEqual(User.objects.all().count(), 0)
@@ -38,6 +64,8 @@ class UserViewsTestCase(TestCase):
                 'email': 'dummy@example.com',
                 'password1': 'testpwd',
                 'password2': 'testpwd',
+                CHALLENGE_KEY: TEST_CHALLENGE_KEY_VALUE,
+                CHALLENGE_ANSWER: TEST_CHALLENGE_ANSWER_VALUE,
             },
         )
         self.assertEqual(User.objects.all().count(), 0)
@@ -51,6 +79,8 @@ class UserViewsTestCase(TestCase):
                 'email': 'this-is-not-an-email',
                 'password1': 'testpwd',
                 'password2': 'testpwd',
+                CHALLENGE_KEY: TEST_CHALLENGE_KEY_VALUE,
+                CHALLENGE_ANSWER: TEST_CHALLENGE_ANSWER_VALUE,
                 'tou': 'on',
             },
         )
@@ -65,6 +95,8 @@ class UserViewsTestCase(TestCase):
                 'email': 'test@example.com',
                 'password1': 'testpwd',
                 'password2': 'testpwdwrong',
+                CHALLENGE_KEY: TEST_CHALLENGE_KEY_VALUE,
+                CHALLENGE_ANSWER: TEST_CHALLENGE_ANSWER_VALUE,
                 'tou': 'on',
             },
         )
@@ -79,6 +111,8 @@ class UserViewsTestCase(TestCase):
                 'email': 'test@example.com',
                 'password1': 'testpwd',
                 'password2': 'testpwd',
+                CHALLENGE_KEY: TEST_CHALLENGE_KEY_VALUE,
+                CHALLENGE_ANSWER: TEST_CHALLENGE_ANSWER_VALUE,
                 'tou': 'on',
             },
         )
@@ -94,6 +128,8 @@ class UserViewsTestCase(TestCase):
                 'email': 'anothertest@example.com',
                 'password1': 'testpwd',
                 'password2': 'testpwd',
+                CHALLENGE_KEY: TEST_CHALLENGE_KEY_VALUE,
+                CHALLENGE_ANSWER: TEST_CHALLENGE_ANSWER_VALUE,
                 'tou': 'on',
             },
         )
@@ -109,6 +145,8 @@ class UserViewsTestCase(TestCase):
                 'email': 'test@example.com',
                 'password1': 'testpwd',
                 'password2': 'testpwd',
+                CHALLENGE_KEY: TEST_CHALLENGE_KEY_VALUE,
+                CHALLENGE_ANSWER: TEST_CHALLENGE_ANSWER_VALUE,
                 'tou': 'on',
             },
         )

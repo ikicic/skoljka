@@ -30,10 +30,12 @@ describe("test sign in and account registration", () => {
   });
 
   it("test account registration", () => {
+    cy.visit('/public_competition/registration/?test_registration_challenge=5');
     cy.get('[data-cy=registration] [name=username]').type("someusername");
     cy.get('[data-cy=registration] [name=email]').type("dummy@skoljka.org");
     cy.get('[data-cy=registration] [name=password1]').type("abc");
     cy.get('[data-cy=registration] [name=password2]').type("abc");
+    cy.get('[data-cy=registration] [name=ca]').type("70"); // 50 + sqrt(400)
     cy.get('[data-cy=registration] [type=checkbox]').click();
     cy.get('[data-cy=registration] [type=submit]').click();
 

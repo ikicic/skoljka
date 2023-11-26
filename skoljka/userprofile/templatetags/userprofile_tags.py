@@ -3,8 +3,10 @@
 from django import template
 from django.conf import settings
 from django.template.base import TemplateSyntaxError
+from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
 
+from skoljka.userprofile.forms import UserCreationForm
 from skoljka.userprofile.utils import get_useroption
 from skoljka.utils.decorators import response_update_cookie
 from skoljka.utils.python23 import basestring, unicode
@@ -158,13 +160,19 @@ def login_form(context, no_new_account_link=False):
     }
 
 
-@register.inclusion_tag('registration/inc_registration_form.html')
-def registration_form(form=None, final_url=None):
-    from skoljka.userprofile.forms import UserCreationForm
-
+@register.inclusion_tag('registration/inc_registration_form.html', takes_context=True)
+def registration_form(context, form=None, final_url=None):
+    request = context['request']
     if form is None:
-        form = UserCreationForm()
-    return {'form': form, 'final_url': final_url or '/'}
+        form = UserCreationForm(request=request)
+    action = '/accounts/register/'
+    if 'test_registration_challenge' in request.GET:
+        # We need to inform the UserCreationForm to use the test_challenge_handler,
+        # but we do not want to have exactly the same challenge.
+        value = str(int(request.GET['test_registration_challenge']) + 1)
+        action += '?'
+        action += urlencode({'test_registration_challenge': value})
+    return {'form': form, 'final_url': final_url or '/', 'action': action}
 
 
 @register.filter

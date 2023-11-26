@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-12 18:00+0100\n"
+"POT-Creation-Date: 2023-11-26 18:14+0100\n"
 "PO-Revision-Date: 2017-10-03 01:49+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
@@ -263,11 +263,11 @@ msgstr ""
 msgid "Map editing"
 msgstr "Uređivanje mape"
 
-#: base/templates/base.html:54 userprofile/forms.py:18 userprofile/forms.py:35
+#: base/templates/base.html:54 userprofile/forms.py:33 userprofile/forms.py:52
 msgid "Username"
 msgstr "Korisničko ime"
 
-#: base/templates/base.html:57 userprofile/forms.py:19 userprofile/forms.py:42
+#: base/templates/base.html:57 userprofile/forms.py:34 userprofile/forms.py:59
 msgid "Password"
 msgstr "Lozinka"
 
@@ -766,46 +766,46 @@ msgstr "Nevaljano rješenje!"
 msgid "Solution"
 msgstr "Rješenje"
 
-#: competition/forms.py:148
+#: competition/forms.py:149
 msgid "Unlock days"
 msgstr "Vrijeme otključavanja u danima"
 
-#: competition/forms.py:276
+#: competition/forms.py:279
 msgid "Please enter the team name."
 msgstr "Molimo unesite ime tima."
 
-#: competition/forms.py:297
+#: competition/forms.py:300
 #, python-format
 msgid "Unknown username \"%s\"."
 msgstr "Nepoznato korisničko ime \"%s\"."
 
-#: competition/forms.py:299
+#: competition/forms.py:302
 msgid "You are automatically added to the team."
 msgstr "Vi ste automatski dodani u tim."
 
-#: competition/forms.py:309
+#: competition/forms.py:312
 #, python-format
 msgid "User \"%s\" is already a member of a team."
 msgstr "Korisnik \"%s\" je već član nekog tima."
 
-#: competition/forms.py:323
+#: competition/forms.py:326
 msgid "Team name already used!"
 msgstr "Ime tima se već koristi."
 
-#: competition/forms.py:349
+#: competition/forms.py:352
 #, python-format
 msgid "Unknown team category '%s'!"
 msgstr "Nepoznata timska kategorija '%s'."
 
-#: competition/forms.py:377
+#: competition/forms.py:380
 msgid "Competitors"
 msgstr "Natjecatelji"
 
-#: competition/forms.py:378
+#: competition/forms.py:381
 msgid "Unofficial"
 msgstr "Neslužbeni"
 
-#: competition/forms.py:379
+#: competition/forms.py:382
 msgid "Administrators"
 msgstr "Administratori"
 
@@ -1832,45 +1832,45 @@ msgstr "Moje kolekcije"
 msgid "Internal parser error. Please contact administrators."
 msgstr "Greška parsiranja. Molimo obavijestite administratore!"
 
-#: mathcontent/converter_v1/__init__.py:281
-#: mathcontent/converter_v1/__init__.py:293
+#: mathcontent/converter_v1/__init__.py:277
+#: mathcontent/converter_v1/__init__.py:289
 msgid "Ending not found:"
 msgstr "Kraj nije pronađen:"
 
-#: mathcontent/converter_v1/__init__.py:309
+#: mathcontent/converter_v1/__init__.py:305
 msgid "None of the endings found:"
 msgstr "Niti jedan od krajeva nije pronađen:"
 
-#: mathcontent/converter_v1/__init__.py:370
+#: mathcontent/converter_v1/__init__.py:366
 msgid "Unknown LaTeX command."
 msgstr "Nepoznata LaTeX naredba."
 
-#: mathcontent/converter_v1/__init__.py:410
+#: mathcontent/converter_v1/__init__.py:406
 msgid "Expected a '{' bracket."
 msgstr "Očekuje se '{' zagrada."
 
-#: mathcontent/converter_v1/__init__.py:431
+#: mathcontent/converter_v1/__init__.py:427
 #, python-format
 msgid "Expected a '%s' bracket."
 msgstr "Očekuje se '%s' zagrada."
 
-#: mathcontent/converter_v1/__init__.py:527
+#: mathcontent/converter_v1/__init__.py:523
 msgid "Unexpected '}'."
 msgstr "Neočekivana zagrada '}'."
 
-#: mathcontent/converter_v1/__init__.py:549
+#: mathcontent/converter_v1/__init__.py:545
 msgid "Expected a '}' bracket."
 msgstr "Očekuje se '}' zagrada."
 
-#: mathcontent/converter_v1/__init__.py:551
+#: mathcontent/converter_v1/__init__.py:547
 msgid "End delimiter missing."
 msgstr "Nedostaje krajnja oznaka."
 
-#: mathcontent/converter_v1/__init__.py:578
+#: mathcontent/converter_v1/__init__.py:574
 msgid "Invalid LaTeX."
 msgstr "Nevaljan LaTeX."
 
-#: mathcontent/converter_v1/__init__.py:849
+#: mathcontent/converter_v1/__init__.py:844
 msgid "Unexpected '}'"
 msgstr "Neočekivana zagrada '}'."
 
@@ -2677,31 +2677,40 @@ msgstr "Dodaj"
 msgid "Cancel"
 msgstr "Odustani"
 
-#: userprofile/forms.py:38
+#: userprofile/forms.py:55
 msgid "Email"
 msgstr "Email"
 
-#: userprofile/forms.py:46
+#: userprofile/forms.py:63
 msgid "Confirm password"
 msgstr "Potvrda lozinke"
 
-#: userprofile/forms.py:50
+#: userprofile/forms.py:69
+msgctxt "registration challenge"
+msgid "Answer"
+msgstr "Rješenje"
+
+#: userprofile/forms.py:74
 msgid "I accept the <a href=\"/tou/\">Terms of Use</a>"
 msgstr "Prihvaćam <a href=\"/tou/\">Uvjete korištenja</a>"
 
-#: userprofile/forms.py:53
+#: userprofile/forms.py:77
 msgid "You may not use Školjka if you do not accept the Terms of Use."
 msgstr "Ne možete koristiti Školjku ako ne prihvaćate Uvjete korištenja."
 
-#: userprofile/forms.py:82
+#: userprofile/forms.py:119
 msgid "This name is already reserved. Please choose another."
 msgstr "Navedeno ime je već iskorišteno. Molimo izaberite drugo."
 
-#: userprofile/forms.py:89
+#: userprofile/forms.py:126
 msgid "E-mail address already in use."
 msgstr "Email adresa se već koristi."
 
-#: userprofile/forms.py:95
+#: userprofile/forms.py:145
+msgid "Incorrect answer, please try again."
+msgstr "Netočno rješenje, molimo pokušajte ponovno."
+
+#: userprofile/forms.py:154
 msgid "Passwords do not match!"
 msgstr "Lozinke se ne slažu!"
 
@@ -2755,7 +2764,7 @@ msgstr ""
 msgid "Do not have an account?"
 msgstr "Nemate korisnički račun"
 
-#: userprofile/templates/registration/inc_registration_form.html:8
+#: userprofile/templates/registration/inc_registration_form.html:22
 msgctxt "action"
 msgid "Register"
 msgstr "Registracija"
