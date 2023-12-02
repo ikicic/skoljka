@@ -41,6 +41,7 @@
   {% if form.max_score %}
     {% bootstrap_field form.max_score %}
   {% endif %}
+  {% bootstrap_field form.max_submissions %}
   {% bootstrap_field form.text layout="horizontal" %}
   {% mathcontent_bootstrap_preview form.instance.task.content form.text.auto_id "form-ctask-text" "" %}
   {% bootstrap_field form.comment layout="horizontal" %}

@@ -57,13 +57,15 @@ class CompetitionTaskForm(ModelForm):
     comment = forms.CharField(widget=forms.Textarea, required=False)
 
     def __init__(self, *args, **kwargs):
-        self.competition = kwargs.pop('competition')
-        self.evaluator = get_evaluator(self.competition.evaluator_version)
-        self.fixed_score = self.competition.fixed_task_score
+        competition = kwargs.pop('competition')
+        self.competition = competition
+        self.evaluator = get_evaluator(competition.evaluator_version)
+        self.fixed_score = competition.fixed_task_score
         user = kwargs.pop('user')
         super(CompetitionTaskForm, self).__init__(*args, **kwargs)
 
         self.t_comment_extra_class = "ctask-comment"
+        self.fields['max_submissions'].initial = competition.default_max_submissions
         if self.instance.pk:
             self.fields['name'].initial = self.instance.task.name
             self.fields['text'].initial = self.instance.task.content.text
@@ -79,12 +81,12 @@ class CompetitionTaskForm(ModelForm):
         self.fields['descriptor'].label = mark_safe(
             xss.escape(_("Solution"))
             + ' <a href="'
-            + comp_url(self.competition, 'rules')
+            + comp_url(competition, 'rules')
             + '" target="_blank"><i class="icon-question-sign" title="'
             + xss.escape(_("Help"))
             + '"></i></a>'
         )
-        if not self.competition.use_custom_ctask_names():
+        if not competition.use_custom_ctask_names():
             del self.fields['name']
         if self.fixed_score:
             del self.fields['max_score']
@@ -116,7 +118,7 @@ class CompetitionTaskForm(ModelForm):
 
     class Meta:
         model = CompetitionTask
-        fields = ('descriptor', 'max_score')
+        fields = ('descriptor', 'max_score', 'max_submissions')
 
 
 class ChainForm(forms.ModelForm):

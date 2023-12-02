@@ -35,6 +35,12 @@
           {{ ctask.cache_new_activities_count }}
       </a>
     {% endif %}
+    {% if ctask.max_submissions != competition.default_max_submissions %}
+      <span title="{% trans "Max submissions" %}"
+            data-cy="non-default-max-submissions">
+        ({{ ctask.max_submissions }})
+      </span>
+    {% endif %}
   </td>
   <td>
     {% if ctask.chain_id %}

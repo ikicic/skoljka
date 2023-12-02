@@ -126,9 +126,14 @@ def chain_ctask_comments_info(context, chain):
     return ""
 
 
-@register.inclusion_tag('inc_competition_chain_ctask_tr.html')
-def chain_ctask_tr(ctask, counter=None, total_ctasks=None):
-    return {'ctask': ctask, 'counter': counter, 'total_ctasks': total_ctasks}
+@register.inclusion_tag('inc_competition_chain_ctask_tr.html', takes_context=True)
+def chain_ctask_tr(context, ctask, counter=None, total_ctasks=None):
+    return {
+        'competition': context['competition'],
+        'ctask': ctask,
+        'counter': counter,
+        'total_ctasks': total_ctasks,
+    }
 
 
 @register.simple_tag(takes_context=False)

@@ -936,7 +936,6 @@ def task_new(request, competition, data, ctask_id=None):
             ctask.competition = competition
             ctask.chain = None
             ctask.chain_position = -1  # Determine au
-            ctask.max_submissions = competition.default_max_submissions
 
         create_ctask(
             ctask,
@@ -1041,7 +1040,9 @@ def chain_tasks_list(request, competition, data):
     data['form'] = form
     data['chains'] = chains
     data['unused_ctasks'] = unused_ctasks
-    data['trans_checked_title'] = _("Number of admins that solved this task.")
+    data['trans_checked_title'] = _(
+        "Number of admins that solved this task. (In parentheses: non-default max submissions)"
+    )
     data['updated_chains_count'] = updated_chains_count
     data['updated_ctasks_count'] = updated_ctasks_count
     data['updated_submissions_score_count'] = updated_submissions_score_count

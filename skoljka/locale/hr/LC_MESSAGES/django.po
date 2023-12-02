@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-26 18:14+0100\n"
+"POT-Creation-Date: 2023-12-03 00:14+0100\n"
 "PO-Revision-Date: 2017-10-03 01:49+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
@@ -215,7 +215,7 @@ msgstr "Neki tekst."
 msgid "Incomplete."
 msgstr "Nedovršeno."
 
-#: base/templates/about.html:5 base/templates/base.html:129
+#: base/templates/about.html:5 base/templates/base.html:130
 #: competition/templates/competition_base.html:125
 msgid "About Us"
 msgstr "O nama"
@@ -271,7 +271,7 @@ msgstr "Korisničko ime"
 msgid "Password"
 msgstr "Lozinka"
 
-#: base/templates/base.html:58 base/templates/base.html.py:99
+#: base/templates/base.html:58 base/templates/base.html.py:100
 #: base/templates/homepage_offline.html:20
 msgid "Sign in"
 msgstr "Prijava"
@@ -301,15 +301,19 @@ msgstr "Predavanja"
 msgid "Competitions"
 msgstr "Natjecanja"
 
-#: base/templates/base.html:94
+#: base/templates/base.html:86
+msgid "Courses"
+msgstr "Tečajevi"
+
+#: base/templates/base.html:95
 msgid "Users"
 msgstr "Korisnici"
 
-#: base/templates/base.html:96
+#: base/templates/base.html:97
 msgid "Groups"
 msgstr "Grupe"
 
-#: base/templates/base.html:98 base/templates/homepage_offline.html:15
+#: base/templates/base.html:99 base/templates/homepage_offline.html:15
 #: base/templates/homepage_offline.html:23
 #: competition/templates/competition_base.html:66
 #: competition/templates/competition_list.html:37
@@ -321,35 +325,35 @@ msgstr "Grupe"
 msgid "Registration"
 msgstr "Registracija"
 
-#: base/templates/base.html:102
+#: base/templates/base.html:103
 msgid "All tasks"
 msgstr "Svi zadaci"
 
-#: base/templates/base.html:103 solution/templates/inc_solution_list.html:28
+#: base/templates/base.html:104 solution/templates/inc_solution_list.html:28
 #: solution/templates/solution_list.html:4
 msgid "Solutions"
 msgstr "Rješenja"
 
-#: base/templates/base.html:104 search/templates/inc_search_inline.html:4
+#: base/templates/base.html:105 search/templates/inc_search_inline.html:4
 #: search/templates/search.html:7
 msgctxt "menu"
 msgid "Search"
 msgstr "Pretraživanje"
 
-#: base/templates/base.html:107
+#: base/templates/base.html:108
 msgid "Sign out"
 msgstr "Odjava"
 
-#: base/templates/base.html:111 competition/forms.py:84
+#: base/templates/base.html:112 competition/forms.py:86
 #: task/templates/task_new.html:91
 msgid "Help"
 msgstr "Pomoć"
 
-#: base/templates/base.html:112
+#: base/templates/base.html:113
 msgid "About us"
 msgstr "O nama"
 
-#: base/templates/base.html:130 competition/templates/competition_base.html:126
+#: base/templates/base.html:131 competition/templates/competition_base.html:126
 msgid "Terms of Use"
 msgstr "Uvjeti korištenja"
 
@@ -758,115 +762,123 @@ msgstr ""
 msgid "Descriptor error. Please notify admins!"
 msgstr "Nevaljan deskriptor. Molimo obavijestite administratore!"
 
-#: competition/forms.py:77
+#: competition/forms.py:79
 msgid "Invalid!"
 msgstr "Nevaljano rješenje!"
 
-#: competition/forms.py:80 solution/templates/inc_solution_list.html:35
+#: competition/forms.py:82 solution/templates/inc_solution_list.html:35
 msgid "Solution"
 msgstr "Rješenje"
 
-#: competition/forms.py:149
+#: competition/forms.py:151
 msgid "Unlock days"
 msgstr "Vrijeme otključavanja u danima"
 
-#: competition/forms.py:279
+#: competition/forms.py:281
 msgid "Please enter the team name."
 msgstr "Molimo unesite ime tima."
 
-#: competition/forms.py:300
+#: competition/forms.py:302
 #, python-format
 msgid "Unknown username \"%s\"."
 msgstr "Nepoznato korisničko ime \"%s\"."
 
-#: competition/forms.py:302
+#: competition/forms.py:304
 msgid "You are automatically added to the team."
 msgstr "Vi ste automatski dodani u tim."
 
-#: competition/forms.py:312
+#: competition/forms.py:314
 #, python-format
 msgid "User \"%s\" is already a member of a team."
 msgstr "Korisnik \"%s\" je već član nekog tima."
 
-#: competition/forms.py:326
+#: competition/forms.py:328
 msgid "Team name already used!"
 msgstr "Ime tima se već koristi."
 
-#: competition/forms.py:352
+#: competition/forms.py:354
 #, python-format
 msgid "Unknown team category '%s'!"
 msgstr "Nepoznata timska kategorija '%s'."
 
-#: competition/forms.py:380
+#: competition/forms.py:382
 msgid "Competitors"
 msgstr "Natjecatelji"
 
-#: competition/forms.py:381
+#: competition/forms.py:383
 msgid "Unofficial"
 msgstr "Neslužbeni"
 
-#: competition/forms.py:382
+#: competition/forms.py:384
 msgid "Administrators"
 msgstr "Administratori"
 
-#: competition/models.py:120 competition/models.py:304
-#: competition/models.py:519 competition/views.py:1399
+#: competition/models.py:23
+msgid "Competition"
+msgstr "Natjecanje"
+
+#: competition/models.py:24
+msgid "Course"
+msgstr "Tečaj"
+
+#: competition/models.py:125 competition/models.py:314
+#: competition/models.py:529 competition/views.py:1406
 msgid "Message"
 msgstr "Poruka"
 
-#: competition/models.py:140
+#: competition/models.py:150
 #: competition/templates/competition_scoreboard.html:9
 msgid "Participants"
 msgstr "Polaznici"
 
-#: competition/models.py:140
+#: competition/models.py:150
 #: competition/templates/competition_scoreboard.html:11
 msgid "Scoreboard"
 msgstr "Bodovna lista"
 
-#: competition/models.py:266
+#: competition/models.py:276
 #: competition/templates/competition_registration.html:34
 #: competition/templates/inc_competition_chain_access.html:13
 msgid "Team"
 msgstr "Tim"
 
-#: competition/models.py:268
+#: competition/models.py:278
 msgid "Participant"
 msgstr "Polaznik"
 
-#: competition/models.py:270
+#: competition/models.py:280
 msgid "Competitor"
 msgstr "Natjecatelj"
 
-#: competition/models.py:274
+#: competition/models.py:284
 msgid "Course has finished."
 msgstr "Tečaj je završio!"
 
-#: competition/models.py:276
+#: competition/models.py:286
 msgid "Competition has finished."
 msgstr "Natjecanje je završilo!"
 
-#: competition/models.py:280
+#: competition/models.py:290
 msgid "Course has not started yet."
 msgstr "Tečaj još nije počeo!"
 
-#: competition/models.py:282
+#: competition/models.py:292
 msgid "Competition has not started yet."
 msgstr "Natjecanje još nije počelo!"
 
-#: competition/models.py:367
+#: competition/models.py:377
 msgid "Gradual unlocking"
 msgstr "Postepeno otključavanje"
 
-#: competition/models.py:368
+#: competition/models.py:378
 msgid "All tasks unlocked"
 msgstr "Svi zadaci otključani"
 
-#: competition/models.py:382
+#: competition/models.py:392
 msgid "Position in the category."
 msgstr "Pozicija u kategoriji."
 
-#: competition/views.py:585 competition/templatetags/competition_tags.py:187
+#: competition/views.py:591 competition/templatetags/competition_tags.py:192
 #, python-format
 msgid "This task is worth %d point."
 msgid_plural "This task is worth %d points."
@@ -874,19 +886,23 @@ msgstr[0] "Ovaj zadatak vrijedi %d bod."
 msgstr[1] "Ovaj zadatak vrijedi %d boda."
 msgstr[2] "Ovaj zadatak vrijedi %d bodova."
 
-#: competition/views.py:603
+#: competition/views.py:609
 msgid "There are new messages."
 msgstr "Nove poruke."
 
-#: competition/views.py:1038
-msgid "Number of admins that solved this task."
-msgstr "Broj administratora koji su riješili ovaj zadatak."
+#: competition/views.py:1044
+msgid ""
+"Number of admins that solved this task. (In parentheses: non-default max "
+"submissions)"
+msgstr ""
+"Broj administratora koji su riješili ovaj zadatak. (U zagradama: promijenjem "
+"max. broj pokušaja)"
 
-#: competition/views.py:1308
+#: competition/views.py:1315
 msgid "Task:"
 msgstr "Zadatak:"
 
-#: competition/views.py:1312
+#: competition/views.py:1319
 msgid "Write the question / message here."
 msgstr "Napišite pitanje / poruku ovdje."
 
@@ -1012,7 +1028,7 @@ msgstr "Komentari"
 #: competition/templates/competition_chain_list.html:55
 #: competition/templates/competition_notifications_admin.html:30
 #: competition/templates/competition_task_detail.html:13
-#: competition/templates/inc_competition_chain_ctask_tr.html:63
+#: competition/templates/inc_competition_chain_ctask_tr.html:69
 #: folder/templates/folder_detail.html:36 post/templates/inc_post.html:10
 msgid "Edit"
 msgstr "Uredi"
@@ -1160,10 +1176,6 @@ msgstr "Ažuriraj lanac"
 #: task/templates/inc_task_bulk_preview_single.html:19
 msgid "Author:"
 msgstr "Autor:"
-
-#: competition/templates/competition_list.html:17
-msgid "Competition"
-msgstr "Natjecanje"
 
 #: competition/templates/competition_list.html:18
 msgid "Registration start"
@@ -1346,7 +1358,7 @@ msgstr "Kategorija:"
 #: competition/templates/competition_submission_detail.html:44
 #: competition/templates/competition_task_detail.html:70
 #: competition/templates/competition_task_detail.html:119
-#: competition/templates/competition_task_new.html:52
+#: competition/templates/competition_task_new.html:53
 #: mathcontent/templates/mathcontent_edit_attachments.html:44
 #: solution/templates/solution_submit.html:18 tags/templates/tags_list.html:58
 #: task/templates/task_bulk_new_2nd.html:28
@@ -1646,58 +1658,58 @@ msgid ""
 msgstr ""
 "Ako namjeravati pregledavati zadatak, molimo ne gledajte rješenje in advance."
 
-#: competition/templates/competition_task_new.html:50
+#: competition/templates/competition_task_new.html:51
 msgid "Save changes"
 msgstr "Spremi promjene"
 
-#: competition/templates/competition_task_new.html:57
+#: competition/templates/competition_task_new.html:58
 msgid "Submit and create new problem"
 msgstr "Pošalji i napravi novi zadatak"
 
-#: competition/templates/competition_task_new.html:61
+#: competition/templates/competition_task_new.html:62
 msgid "Submit and go to the problem list"
 msgstr "Pošalji i odi na listu zadataka"
 
-#: competition/templates/competition_task_new.html:65
+#: competition/templates/competition_task_new.html:66
 msgid "Go to problem"
 msgstr "Otvori zadatak"
 
-#: competition/templates/competition_task_new.html:72
+#: competition/templates/competition_task_new.html:73
 msgid "Hint: Press <b>Ctrl+M</b> to preview the formatted text."
 msgstr "Pritisnite <b>Ctrl+M</b> za pregled formatiranog teksta."
 
-#: competition/templates/competition_task_new.html:73
+#: competition/templates/competition_task_new.html:74
 msgid "Format instructions can be found here:"
 msgstr "Upute o formatu možete pronaći ovdje:"
 
-#: competition/templates/competition_task_new.html:75
+#: competition/templates/competition_task_new.html:76
 msgid "Instructions to add images:"
 msgstr "Upute za dodavanje slika"
 
-#: competition/templates/competition_task_new.html:77
+#: competition/templates/competition_task_new.html:78
 msgid "Click here:"
 msgstr "Pritisnite ovdje:"
 
-#: competition/templates/competition_task_new.html:77
+#: competition/templates/competition_task_new.html:78
 msgid "Attachments"
 msgstr "Datoteke"
 
-#: competition/templates/competition_task_new.html:78
+#: competition/templates/competition_task_new.html:79
 msgid "Upload the image."
 msgstr "Uploadajte sliku."
 
-#: competition/templates/competition_task_new.html:79
+#: competition/templates/competition_task_new.html:80
 msgid "Add the following code to the text:"
 msgstr "Dodajte sljedeći tekst:"
 
-#: competition/templates/competition_task_new.html:81
+#: competition/templates/competition_task_new.html:82
 msgid ""
 "Note 1: Probably only the author of the problem can edit the attachments..."
 msgstr ""
 "Komentar 1: Vjerojatno samo autor zadatka može pristupiti datotekama "
 "(slikama)..."
 
-#: competition/templates/competition_task_new.html:82
+#: competition/templates/competition_task_new.html:83
 msgid ""
 "Note 2: The image will not be available in the preview mode, you have to "
 "save changes to see the result."
@@ -1735,19 +1747,23 @@ msgstr "Broj admin rješenja."
 msgid "Number of new activities."
 msgstr "Broj novih aktivnosti."
 
-#: competition/templates/inc_competition_chain_ctask_tr.html:42
+#: competition/templates/inc_competition_chain_ctask_tr.html:39
+msgid "Max submissions"
+msgstr "Max. pokušaja"
+
+#: competition/templates/inc_competition_chain_ctask_tr.html:48
 msgid "Remove"
 msgstr "Makni"
 
-#: competition/templates/inc_competition_chain_ctask_tr.html:47
+#: competition/templates/inc_competition_chain_ctask_tr.html:53
 msgid "Move up"
 msgstr "Pomakni gore"
 
-#: competition/templates/inc_competition_chain_ctask_tr.html:55
+#: competition/templates/inc_competition_chain_ctask_tr.html:61
 msgid "Move down"
 msgstr "Pomakni dolje"
 
-#: competition/templates/inc_competition_chain_ctask_tr.html:64
+#: competition/templates/inc_competition_chain_ctask_tr.html:70
 msgid "Open"
 msgstr "Otvori"
 
@@ -1800,7 +1816,7 @@ msgstr[0] "%d moj zadatak"
 msgstr[1] "%d moja zadatka"
 msgstr[2] "%d mojih zadataka"
 
-#: competition/templatetags/competition_tags.py:264
+#: competition/templatetags/competition_tags.py:269
 #, python-format
 msgid "%(actor)s updated the score to %(score)d."
 msgid_plural "%(actor)s updated the score to %(score)d."
@@ -2706,11 +2722,11 @@ msgstr "Navedeno ime je već iskorišteno. Molimo izaberite drugo."
 msgid "E-mail address already in use."
 msgstr "Email adresa se već koristi."
 
-#: userprofile/forms.py:145
+#: userprofile/forms.py:146
 msgid "Incorrect answer, please try again."
 msgstr "Netočno rješenje, molimo pokušajte ponovno."
 
-#: userprofile/forms.py:154
+#: userprofile/forms.py:155
 msgid "Passwords do not match!"
 msgstr "Lozinke se ne slažu!"
 
