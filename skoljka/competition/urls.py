@@ -22,13 +22,18 @@ def _make_patterns(patterns):
             result.append(url(regex, view, {'competition_id': competition_id}))
 
     for _regex, view in patterns:
+        # In case of a course, this link will redirect to the competition.
         regex = join_urls(r'^competition/(?P<competition_id>\d+)/', _regex)
+        result.append(url(regex, view))
+
+        # And vice versa.
+        regex = join_urls(r'^course/(?P<competition_id>\d+)/', _regex)
         result.append(url(regex, view))
 
     return result
 
 
-# Competition-related URLs, prefixed with competition/<id>/
+# Competition-related URLs, prefixed with competition_name/<id>/, competition/<id>/, or course/<id>/
 _patterns = [
     # NOTE: Do not complicate here with names, as there might be multiple links
     # to the same competition page (with /competition/{{ id }}/ prefix and with
@@ -58,6 +63,7 @@ _patterns = [
 
 _extra_urls = [
     (r'competition/$', 'competition_list'),
+    (r'course/$', 'course_list'),
 ]
 
 if IS_TESTDB:

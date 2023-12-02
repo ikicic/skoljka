@@ -19,10 +19,10 @@ from skoljka.utils import xss
 from skoljka.utils.models import gray_help_text
 from skoljka.utils.string_operations import join_urls
 
-KIND_CHOICES = (
-    (1, "Competition"),
-    (2, "Course"),
-)
+KIND_CHOICES = [
+    (1, ugettext_lazy("Competition")),
+    (2, ugettext_lazy("Course")),
+]
 
 
 class TeamCategories(object):
@@ -68,6 +68,7 @@ class Competition(BasePermissionsModel):
 
     KIND_COMPETITION = 1
     KIND_COURSE = 2
+    KIND = dict(KIND_CHOICES)
 
     name = models.CharField(max_length=64)
     kind = models.SmallIntegerField(default=1, choices=KIND_CHOICES)
@@ -81,7 +82,11 @@ class Competition(BasePermissionsModel):
     automatic_task_tags = models.CharField(blank=True, max_length=64)
     description_template_filename = models.CharField(blank=True, max_length=255)
     rules_template_filename = models.CharField(blank=True, max_length=255)
-    url_path_prefix = models.CharField(blank=True, max_length=64)
+    url_path_prefix = models.CharField(
+        blank=True,
+        max_length=64,
+        help_text="The URL with a leading and a trailing slash, e.g. /somename/",
+    )
     scoreboard_freeze_date = models.DateTimeField()
     evaluator_version = models.IntegerField(default=EVALUATOR_V1)
     fixed_task_score = models.IntegerField(default=0, help_text="Use 0 to disable.")
@@ -126,7 +131,12 @@ class Competition(BasePermissionsModel):
         return self.is_user_admin(user)
 
     def get_absolute_url(self):
-        return self.url_path_prefix or '/competition/{}/'.format(self.id)
+        if self.url_path_prefix:
+            return self.url_path_prefix
+        elif self.is_course:
+            return '/course/{}/'.format(self.id)
+        else:
+            return '/competition/{}/'.format(self.id)
 
     def get_registration_url(self):
         # Can this be achieved with Django's URL reversing?

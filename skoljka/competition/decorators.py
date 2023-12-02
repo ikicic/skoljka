@@ -1,11 +1,51 @@
 from datetime import datetime
 from functools import wraps
 
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 
 from skoljka.competition.models import Competition, Team, TeamMember
 from skoljka.permissions.constants import EDIT, VIEW
+
+
+def _normalize_url_slashes(url):
+    """Normalize an url to start and end with a slash."""
+    if not url.startswith('/'):
+        url = '/' + url
+    if not url.endswith('/'):
+        url += '/'
+    return url
+
+
+def _fix_url_prefix(competition, url):
+    """Fix the URL prefix.
+
+    If competition.url_path_prefix is set:
+        - from /competition/<id>/ to the competition.url_path_prefix, or
+        - from /course/<id>/ to the competition.url_path_prefix.
+    Otherwise,
+        - from /competition/<id>/ to /course/<id>/, if competition is a course,
+        - from /course/<id>/ to /competition/<id>/, if competition is a competition.
+
+    Returns either the new URL or None, if no changes are needed.
+    """
+    prefix = '/competition/{}/'.format(competition.id)
+    if url.startswith(prefix) and (
+        competition.url_path_prefix or competition.is_course
+    ):
+        # Note: We cannot use join_urls, because it puts a slash at the end,
+        # whereas the `url` may contain GET parameters.
+        competition_url = _normalize_url_slashes(competition.get_absolute_url())
+        return competition_url + url[len(prefix) :]
+
+    prefix = '/course/{}/'.format(competition.id)
+    if url.startswith(prefix) and (
+        competition.url_path_prefix or not competition.is_course
+    ):
+        competition_url = _normalize_url_slashes(competition.get_absolute_url())
+        return competition_url + url[len(prefix) :]
+
+    return None
 
 
 def competition_view(permission=VIEW):
@@ -34,6 +74,12 @@ def competition_view(permission=VIEW):
                 return HttpResponseForbidden(
                     "No permission to view this competition or do this action!"
                 )
+
+            # Redirect to the correct URL (only on GET requests).
+            if request.method == 'GET':
+                new_url = _fix_url_prefix(competition, request.get_full_path())
+                if new_url:
+                    return HttpResponseRedirect(new_url)
 
             is_admin = EDIT in perm
             current_time = datetime.now()

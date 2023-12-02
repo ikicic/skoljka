@@ -31,6 +31,8 @@ TEST_COMPETITION_URLS = {
     10005: 'individual_competition_without_categories',
     10006: 'individual_competition_with_nonconfigurable_categories',
     10007: 'individual_course_without_categories',
+    10008: 'competition_with_no_url_path_prefix',
+    10009: 'course_with_no_url_path_prefix',
 }
 _COMPETITION_URL_TO_ID = {url: id for id, url in TEST_COMPETITION_URLS.items()}
 
@@ -130,6 +132,17 @@ def create_test_competitions(request):
         "individual_course_without_categories",
         max_team_size=1,
         kind=Competition.KIND_COURSE,
+    )
+    create_competition(
+        moderators,
+        "competition_with_no_url_path_prefix",
+        url_path_prefix="",
+    )
+    create_competition(
+        moderators,
+        "course_with_no_url_path_prefix",
+        kind=Competition.KIND_COURSE,
+        url_path_prefix="",
     )
 
     response = {}

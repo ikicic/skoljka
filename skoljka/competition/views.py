@@ -189,11 +189,12 @@ def _init_categories_and_sort_chains(
 
 
 @response('competition_list.html')
-def competition_list(request):
+def competition_list(request, kind=Competition.KIND_COMPETITION):
     competitions = (
         Competition.objects.for_user(request.user, VIEW)
+        .filter(kind=kind)
         .distinct()
-        .order_by('-start_date')
+        .order_by('-start_date', '-id')
     )
     member_of = list(
         TeamMember.objects.filter(
@@ -202,10 +203,15 @@ def competition_list(request):
     )
 
     return {
+        'kind_name': Competition.KIND[kind],
         'competitions': competitions,
         'current_time': datetime.now(),
         'member_of': member_of,
     }
+
+
+def course_list(request):
+    return competition_list(request, kind=Competition.KIND_COURSE)
 
 
 @competition_view()
