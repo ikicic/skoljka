@@ -43,12 +43,18 @@
   </div>
 {% endif %}
 
+{% if not are_team_categories_visible and is_admin %}
+  <div class="alert">
+    {% trans "Team categories shown only to admins." %}
+  </div>
+{% endif %}
+
 <div class="row row-fix">
   <div class="span6">
     <table class="table-striped" id="comp-scoreboard-table" data-cy="scoreboard">
       <tr>
         <th>#</th>
-        {% if competition.team_categories %}
+        {% if are_team_categories_visible or is_admin %}
           <th title="{{ team_categories_title }}">{% trans "Category" %}</th>
         {% endif %}
         <th><a href="{{ competition.get_scoreboard_url }}?sort=name">
@@ -61,7 +67,7 @@
             {% if t.id == team.id %}comp-my-team{% endif %}
             {{ t.get_type_css_class }}">
           <td>{{ t.t_position }}{{ t.is_normal|yesno:",*" }}</td>
-          {% if competition.team_categories %}
+          {% if are_team_categories_visible or is_admin %}
             <td>{{ t.t_category }}</td>
           {% endif %}
           <td>{{ t.get_link }}</td>

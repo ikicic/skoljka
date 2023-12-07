@@ -5,6 +5,8 @@
 ### New features
 - [competition] add the ability to restrict problem chains to selected teams
 - [competition] per-task customizable submission count limit
+- [competition] optionally make team categories non-configurable by teams themselves
+- [competition] optionally hide team categories from teams themselves
 - [userprofile] add a registration challenge to fight spam
 
 ### Changes

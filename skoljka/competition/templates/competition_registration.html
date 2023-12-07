@@ -97,7 +97,7 @@
             {% bootstrap_field team_form.name %}
           </div>
         {% endif %}
-        <div id="creg-table-category">  {# ID used by reg_add_member_field. #}
+        <div id="creg-table-category" data-cy="category-choice">  {# ID used by reg_add_member_field. #}
           {% if team_form.category %}
             <div>{% trans "Category:" context "competition-team" %}</div>
             <div>{{ team_form.category }}</div>

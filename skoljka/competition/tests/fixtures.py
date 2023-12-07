@@ -53,20 +53,20 @@ def create_competition(moderators, url, **kwargs):
     )
     add_users_to_group(moderators, group, added_by=None)
 
-    competition = Competition(
-        id=_COMPETITION_URL_TO_ID[url],
-        name=capfirst(url.replace("_", " ")),
-        kind=Competition.KIND_COMPETITION,
-        hidden=False,
-        admin_group_id=group.id,
-        registration_open_date=NOW - 24 * HOUR,
-        start_date=NOW - 1 * HOUR,
-        scoreboard_freeze_date=NOW - 23 * HOUR,
-        end_date=NOW + 24 * HOUR,
-        url_path_prefix='/{}/'.format(url),
-    )
-    for key, value in kwargs.items():
-        setattr(competition, key, value)
+    default_kwargs = {
+        'id': _COMPETITION_URL_TO_ID[url],
+        'name': capfirst(url.replace("_", " ")),
+        'kind': Competition.KIND_COMPETITION,
+        'hidden': False,
+        'admin_group_id': group.id,
+        'registration_open_date': NOW - 24 * HOUR,
+        'start_date': NOW - 1 * HOUR,
+        'scoreboard_freeze_date': NOW - 23 * HOUR,
+        'end_date': NOW + 24 * HOUR,
+        'url_path_prefix': '/{}/'.format(url),
+    }
+    default_kwargs.update(kwargs)
+    competition = Competition(**default_kwargs)
     competition.save()
 
     ObjectPermission.objects.create(
@@ -108,45 +108,45 @@ def create_test_competitions(request):
     moderators = create_n_users("moderator", 5)
     create_n_users("competitor", 10)
 
-    create_competition(moderators, "public_competition")
-    create_competition(moderators, "hidden_competition", hidden=True)
-    create_competition(
-        moderators, "competition_with_categories", team_categories=TEAM_CATEGORIES
-    )
-    create_competition(
-        moderators,
+    if request.body.strip():
+        body = json.loads(request.body)
+    else:
+        body = {}
+    kwargs_for_all = body.get('kwargs', "")
+
+    def create(name, **kwargs):
+        kwargs.update(kwargs_for_all)
+        return create_competition(moderators, name, **kwargs)
+
+    create("public_competition")
+    create("hidden_competition", hidden=True)
+    create("competition_with_categories", team_categories=TEAM_CATEGORIES)
+    create(
         "individual_competition_with_categories",
         max_team_size=1,
         team_categories=TEAM_CATEGORIES,
     )
-    create_competition(
-        moderators, "individual_competition_without_categories", max_team_size=1
-    )
-    create_competition(
-        moderators,
+    create("individual_competition_without_categories", max_team_size=1)
+    create(
         "individual_competition_with_nonconfigurable_categories",
         max_team_size=1,
         team_categories=NONCONFIGURABLE_TEAM_CATEGORIES,
     )
-    create_competition(
-        moderators,
+    create(
         "individual_course_without_categories",
         max_team_size=1,
         kind=Competition.KIND_COURSE,
     )
-    create_competition(
-        moderators,
+    create(
         "competition_with_no_url_path_prefix",
         url_path_prefix="",
     )
-    create_competition(
-        moderators,
+    create(
         "course_with_no_url_path_prefix",
         kind=Competition.KIND_COURSE,
         url_path_prefix="",
     )
-    create_competition(
-        moderators,
+    create(
         "competition_with_default_max_submissions_2",
         default_max_submissions=2,
     )

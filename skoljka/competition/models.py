@@ -33,11 +33,14 @@ class TeamCategories(object):
         lang_to_categories: a dictionary {str lang: {int id: str name}}
         configurable: whether the teams can configure their categories
                       themselves, defaults to True
+        hidden: If True, teams will not see their categories.
+                `hidden == True` implies `configurable == False`.
     """
 
-    def __init__(self, lang_to_categories={}, configurable=True):
+    def __init__(self, lang_to_categories={}, configurable=True, hidden=False):
         self.lang_to_categories = lang_to_categories
-        self.configurable = configurable
+        self.configurable = configurable and not hidden
+        self.hidden = hidden
 
     def as_choices(self, lang):
         """Return a list of (category ID, category name), sorted by ID,
@@ -185,11 +188,18 @@ class Competition(BasePermissionsModel):
         Parse the `team_categories` field and return a TeamCategories.
 
         Format (JSON):
-            '{"lang": {"ID1": "name", ...}, ..., "CONFIGURABLE": true/false}'
+            {
+                "lang1": {"ID1": "name", ...},
+                ...,
+                "CONFIGURABLE": true/false,
+                "HIDDEN": true/false
+            }'
         Old format (deprecated):
             "ID1: name | ..."
 
         The "CONFIGURABLE" key is optional and defaults to True.
+        The "HIDDEN" key is optional and defaults to False.
+        Note: HIDDEN == False impliest CONFIGURABLE == False.
 
         Returns None if the format is invalid."""
 
@@ -201,11 +211,12 @@ class Competition(BasePermissionsModel):
 
             parsed = json.loads(self.team_categories)
             configurable = parsed.pop("CONFIGURABLE", True)
+            hidden = parsed.pop("HIDDEN", False)
             lang_to_categories = {
                 lang: {int(id): key for id, key in categories.items()}
                 for lang, categories in parsed.items()
             }
-            return TeamCategories(lang_to_categories, configurable)
+            return TeamCategories(lang_to_categories, configurable, hidden)
 
         try:
             return inner()

@@ -508,6 +508,7 @@ def scoreboard(request, competition, data, as_participants=False):
 
     data['teams'] = teams
     data['as_participants'] = as_participants
+    data['are_team_categories_visible'] = not categories.hidden
     return data
 
 

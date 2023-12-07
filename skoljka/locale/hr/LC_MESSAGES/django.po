@@ -1497,7 +1497,11 @@ msgstr "Sortiraj po zamrznutim bodovima"
 msgid "Sort by real score"
 msgstr "Sortitaj po pravim bodovima"
 
-#: competition/templates/competition_scoreboard.html:57
+#: competition/templates/competition_scoreboard.html:48
+msgid "Team categories shown only to admins."
+msgstr "Kategorije timova prikazane samo administratorima."
+
+#: competition/templates/competition_scoreboard.html:63
 msgid "Total score"
 msgstr "Ukupni bodovi"
 
