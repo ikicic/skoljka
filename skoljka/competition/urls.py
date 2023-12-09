@@ -59,6 +59,8 @@ _patterns = [
     (r'submission/(?P<submission_id>\d+)/$', 'submission_detail'),
     (r'task/(?P<ctask_id>\d+)/edit/$', 'task_new'),
     (r'team/(?P<team_id>\d+)/$', 'team_detail'),
+    (r'team/list/admin/$', 'team_list_admin'),
+    (r'team/list/admin/confirm/$', 'team_list_admin_confirm'),
 ]
 
 _extra_urls = [

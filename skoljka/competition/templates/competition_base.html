@@ -87,6 +87,7 @@
       {% endif %}
       {% if is_admin %}
         <li class="nav-header">{% trans "Admin" %}</li>
+        <li><a href="{% comp_url 'team/list/admin' %}">{{ competition.get_team_metaname_plural }}</a></li>
         <li><a href="{% comp_url 'chain/tasks' %}">{% trans "Problems" %}</a></li>
         <li><a href="{% comp_url 'chain' %}">{% trans "Chains" %}</a></li>
         <li><a href="{% comp_url 'notifications/admin' %}">

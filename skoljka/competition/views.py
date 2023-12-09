@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db.models import F
-from django.http import Http404
+from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
@@ -429,19 +429,130 @@ def rules(request, competition, data):
     return data
 
 
-def participants(*args, **kwargs):
-    return scoreboard(*args, as_participants=True, **kwargs)
+@competition_view()
+@response('competition_scoreboard.html')
+def participants(request, competition, data):
+    if not competition.is_course:
+        return (competition.get_scoreboard_url(),)  # Go to /scoreboard/.
+
+    return _team_list(request, competition, data)
 
 
 @competition_view()
 @response('competition_scoreboard.html')
-def scoreboard(request, competition, data, as_participants=False):
+def scoreboard(request, competition, data):
+    if competition.is_course:
+        return (competition.get_scoreboard_url(),)  # Go to /participants/.
+
+    return _team_list(request, competition, data)
+
+
+class TeamCategoryChange:
+    def __init__(
+        self, team_id, team_name, old_category_name, new_category_name, new_category_id
+    ):
+        self.team_id = team_id
+        self.team_name = team_name
+        self.new_category_id = new_category_id
+        self.old_category_name = old_category_name
+        self.new_category_name = new_category_name
+
+    def __unicode__(self):
+        return _(
+            u"Change the category of the team \"%(team)s\" from \"%(old)s\" to \"%(new)s\"."
+        ) % {
+            'team': self.team_name,
+            'old': self.old_category_name,
+            'new': self.new_category_name,
+        }
+
+
+@competition_view(permission=EDIT)
+@response('competition_team_list_admin.html')
+def team_list_admin(request, competition, data):
+    if request.method == 'POST':
+        changes = _parse_team_list_admin_post(request, competition)
+        if isinstance(changes, HttpResponse):
+            return changes
+
+        # TODO: Django 2.2: use bulk_update
+        for change in changes:
+            Team.objects.filter(id=change.team_id).update(
+                category=change.new_category_id
+            )
+        return (request.get_full_path(),)
+
+    return _team_list(request, competition, data)
+
+
+@competition_view(permission=EDIT)
+@response('competition_team_list_admin_confirmation.html')
+def team_list_admin_confirm(request, competition, data):
+    # Only POST makes sense here.
+    if request.method != 'POST':
+        return (comp_url(competition, 'team/list/admin'),)
+
+    changes = _parse_team_list_admin_post(request, competition)
+    if isinstance(changes, HttpResponse):
+        return changes
+    data['changes'] = changes
+    return data
+
+
+def _parse_team_list_admin_post(request, competition):
+    team_categories = competition.parse_team_categories()
+    if team_categories is None:
+        return HttpResponse("Competition has no valid team_categories.")
+    try:
+        category_dict = team_categories.as_ordered_dict(request.LANGUAGE_CODE)
+    except KeyError:
+        return HttpResponse(
+            "Team categories for the language '{}' not specified.".format(
+                request.LANGUAGE_CODE
+            )
+        )
+
+    def to_name(category_id):
+        name = category_dict.get(category_id)
+        if name is None:
+            # This is visible only to admins, okay to show the ID.
+            # (Contrary to team.t_category, which will be visible publicly.)
+            return _(u"Invalid category #%d") % category_id
+        return name
+
+    teams = list(
+        Team.objects.filter(competition=competition).values_list(
+            'id', 'name', 'category'
+        )
+    )
+    changes = []
+
+    for team_id, name, old_category in teams:
+        new_category = request.POST.get('team-{}-category'.format(team_id))
+        if new_category is not None:
+            try:
+                new_category = int(new_category)
+            except ValueError:
+                return HttpResponseBadRequest()
+            if new_category != old_category:
+                changes.append(
+                    TeamCategoryChange(
+                        team_id,
+                        name,
+                        to_name(old_category),
+                        to_name(new_category),
+                        new_category,
+                    )
+                )
+
+    return changes
+
+
+def _team_list(request, competition, data):
     """Joint view for scoreboard and participants list.
 
     The two are identical, up to the default sorting and terminology.
     """
-    if competition.is_course != as_participants:
-        return (competition.get_scoreboard_url(),)
 
     if not competition.public_scoreboard and not data['is_admin']:
         return (competition.get_absolute_url(),)  # Redirect to home.
@@ -457,11 +568,14 @@ def scoreboard(request, competition, data, as_participants=False):
     sort_by = request.GET.get('sort')
     if sort_by == 'actual_score' and data['is_admin']:
         order_by = '-cache_score'
+    elif sort_by == 'category' and data['is_admin']:
+        # Only for admins, because the sort is by ID, which is unintuitive.
+        order_by = 'category'
     elif sort_by == 'name':
         order_by = 'name'
     elif sort_by == 'score':
         order_by = '-cache_score_before_freeze'
-    elif as_participants:
+    elif competition.is_course:
         order_by = 'name'
     else:
         order_by = '-cache_score_before_freeze'
@@ -499,16 +613,22 @@ def scoreboard(request, competition, data, as_participants=False):
             last_position = position
         team.t_position = i + 1 if order_by == 'name' else last_position
         if category_choices:
-            team.t_category = categories_dict.get(
-                team.category, category_choices[-1][1]
-            )
+            team.t_category = categories_dict.get(team.category)
+            if team.t_category is None:
+                team.t_is_category_valid = False
+                # One will be publicly visible, so do not expose the number there.
+                team.t_category = _("Invalid category")
+                team.t_category_admin = _("Invalid category #%d") % team.category
+            else:
+                team.t_is_category_valid = True
         if team.is_normal():
             last_score = team.cache_score_before_freeze
             position += 1
 
     data['teams'] = teams
-    data['as_participants'] = as_participants
-    data['are_team_categories_visible'] = not categories.hidden
+    data['as_participants'] = competition.is_course
+    data['are_team_categories_visible'] = category_choices and not categories.hidden
+    data['team_categories'] = category_choices
     return data
 
 

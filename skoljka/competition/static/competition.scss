@@ -547,3 +547,19 @@ $table-selected-bg: mix(blue, $table-bg, 5%);
   @include colored-striped-tr(lime, 8%);
   cursor: pointer;
 }
+
+/* Team list admin page. */
+#team-list-admin {
+  margin-bottom: 1em;
+  text-align: center;
+  width: 100%;
+
+  td, th {
+    padding: 4px 5px;
+  }
+
+  select {
+    margin: 0px 0px;
+    width: 180px;
+  }
+}

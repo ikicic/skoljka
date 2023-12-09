@@ -1,4 +1,5 @@
 import json
+from collections import OrderedDict
 from datetime import datetime
 
 from django.conf import settings
@@ -48,9 +49,18 @@ class TeamCategories(object):
 
         Raises a KeyError if the language is not found.
         """
+        # TODO: If lang is not found, pick whichever is available.
+        # TODO: Change the input format to something like {id: (name OR {lang: name})}.
         choices = [(id, name) for id, name in self.lang_to_categories[lang].items()]
         choices.sort(key=lambda f: f[0])
         return choices
+
+    def as_ordered_dict(self, lang):
+        """Return an OrderedDict {category ID: category name}, sorted by ID.
+
+        Raises a KeyError if the language is not found.
+        """
+        return OrderedDict(self.as_choices(lang))
 
     def is_configurable_and_nonempty(self):
         """Returns True if the teams are allowed to configure the category
@@ -106,7 +116,8 @@ class Competition(BasePermissionsModel):
         "where ID is a number. "
         "The last category is considered the default. "
         "Optionally, add a '\"CONFIGURABLE\": false' element to denote that "
-        "teams cannot themselves modify the category.",
+        "teams cannot themselves modify the category. "
+        "Add '\"HIDDEN\": true' to hide team categories from non-admins.",
     )
     task_categories_trans = models.CharField(
         blank=False,
@@ -289,6 +300,16 @@ class Competition(BasePermissionsModel):
             return _("Participant")
         else:
             return _("Competitor")
+
+    def get_team_metaname_plural(self):
+        """Return "Teams", "Competitors" or "Participants", depending on whether this
+        is a team competition or not, and whether it is a competition or a course."""
+        if self.is_team_competition:
+            return _("Teams")
+        elif self.is_course:
+            return _("Participants")
+        else:
+            return _("Competitors")
 
     def msg_has_finished(self):
         if self.is_course:

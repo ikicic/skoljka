@@ -1,0 +1,30 @@
+{% extends "competition_base.html" %}
+{% load competition_tags %}
+{% load i18n %}
+
+{% block content %}
+
+<h3 class="comp-header">{{ competition.get_team_metaname_plural }}</h3>
+
+<div class="alert">
+  {% trans "Visible only to the admins!" %}
+</div>
+
+<div class="alert alert-info">
+  {% trans "Please confirm the following changes:" %}
+  <ul data-cy="changes-confirmation">
+    {% for change in changes %}
+      <li>{{ change }}</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<form method="POST" action="{% comp_url 'team/list/admin' %}" data-cy="confirm-changes-form">
+  {% csrf_token %}
+  {% for change in changes %}
+    <input type="hidden" name="team-{{ change.team_id }}-category" value="{{ change.new_category_id }}">
+  {% endfor %}
+  <input type="submit" class="btn btn-primary" value="{% trans "Confirm changes" %}" data-cy="confirm-changes">
+</form>
+
+{% endblock content %}

@@ -3,7 +3,6 @@ import datetime
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
-from django.test.client import Client
 
 from skoljka.competition.models import (
     Chain,
@@ -49,7 +48,6 @@ class CompetitionViewsTestBase(TestCase):
         self.admin = User.objects.get(id=1)
         self.alice = self.user1 = User.objects.get(id=2)
         self.bob = self.user2 = User.objects.get(id=3)
-        self.client = Client()
 
         now = datetime.datetime.now()
         past1 = now - DAY
@@ -106,7 +104,7 @@ class CompetitionViewsTestBase(TestCase):
     def comp_post(self, suffix, *args, **kwargs):
         """Equivalent to self.client.post with the competition's URL prepended."""
         assert self.competition
-        return self.client.get(
+        return self.client.post(
             self.competition.get_absolute_url() + suffix, *args, **kwargs
         )
 

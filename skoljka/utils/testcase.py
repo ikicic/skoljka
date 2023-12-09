@@ -31,7 +31,7 @@ class SimpleTestCase(_SimpleTestCase):
                 raise
 
     def assertMultilineRegex(self, text, pattern, dotall=True):
-        """Assert that the given pattern does appears in the text.
+        """Assert that the given pattern appears in the text.
         Uses dotall (. contains '\\n') by default."""
         flags = re.DOTALL if dotall else 0
         if not re.search(pattern, text, flags):
@@ -61,15 +61,22 @@ class TestCase(_TestCase, SimpleTestCase):
     def logout(self):
         self.client.logout()
 
+    assertRegex = _TestCase.assertRegexpMatches
+
     def assertResponse(self, response, status_code=None, content=None):
         """Helper function for testing the status code and the content of a
         response."""
         self.assertIsInstance(response, HttpResponse)
         if status_code is not None and response.status_code != status_code:
+            headers = u"".join(u"{}: {}\n".format(k, v) for k, v in response.items())
             self.fail(
-                "Expected status code of {}, got {}. Content:\n{}".format(
-                    status_code, response.status_code, response.content
+                u"Expected status code of {}, got {}. Headers:\n{}\nContent:\n{}".format(
+                    status_code, response.status_code, headers, response.content
                 )
             )
         if content is not None:
-            self.assertMultiLineEqual(content, response.content)
+            # TODO: Python 3.7: Renamed to re.Pattern
+            if isinstance(content, re._pattern_type):
+                self.assertRegex(response.content, content)
+            else:
+                self.assertMultiLineEqual(response.content, content)

@@ -5,14 +5,13 @@ import re
 from django.contrib import auth
 from django.contrib.auth.models import Group, User
 from django.core import mail
-from django.test import TestCase
-from django.test.client import Client
 
 import skoljka.userprofile.forms as userprofile_forms
 from skoljka.mathcontent.latex import LatexElement
 from skoljka.userprofile.challenge import Challenge, TestChallengeHandler
 from skoljka.userprofile.forms import CHALLENGE_ANSWER, CHALLENGE_KEY
 from skoljka.userprofile.models import UserProfile
+from skoljka.utils.testcase import TestCase
 
 TEST_CHALLENGE_KEY_VALUE = 'TESTKEY-ANSWER-50'
 TEST_CHALLENGE_ANSWER_VALUE = '50'
@@ -31,8 +30,6 @@ class MockChallengeHandler(TestChallengeHandler):
 
 
 class UserViewsTestCase(TestCase):
-    assertRegex = TestCase.assertRegexpMatches
-
     def setUp(self):
         self._old_challenge_handler = userprofile_forms.challenge_handler
         userprofile_forms.challenge_handler = MockChallengeHandler()
@@ -50,7 +47,7 @@ class UserViewsTestCase(TestCase):
         self.assertEqual(UserProfile.objects.all().count(), 0)
         self.assertEqual(len(mail.outbox), 0)
 
-        c = Client()
+        c = self.client
 
         # Test the page without POST arguments.
         response = c.get('/accounts/register/')

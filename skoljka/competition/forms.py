@@ -258,14 +258,21 @@ class TeamForm(forms.ModelForm):
         # Parse the team category string.
         categories = self.competition.parse_team_categories()
         if categories:
-            if categories.configurable:
+            try:
                 category_choices = categories.as_choices(lang)
-            else:
-                category_choices = []
+            except KeyError:
+                category_choices = [
+                    (
+                        1,
+                        u"team_categories empty or not available for the current language",
+                    )
+                ]
+            if not category_choices:
+                category_choices = [(1, u"team_categories empty!!!")]
         else:
             category_choices = [(1, u"team_categories invalid!!!")]
         self.category_choices = category_choices
-        if category_choices and (not instance or not instance.category):
+        if category_choices and (not instance or instance.category is None):
             initial['category'] = category_choices[-1][0]  # For simplicity.
 
         super(TeamForm, self).__init__(initial=initial, *args, **kwargs)
@@ -283,7 +290,7 @@ class TeamForm(forms.ModelForm):
         else:
             del self.fields['name']
 
-        if category_choices:
+        if categories.configurable:
             self.fields['category'].widget = forms.RadioSelect(
                 choices=category_choices, renderer=TeamCategoryRadioSelectRenderer
             )
