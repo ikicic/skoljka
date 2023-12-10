@@ -114,7 +114,8 @@ class Competition(BasePermissionsModel):
         help_text="Format is {\"lang\": {\"ID1\": \"name1\", ...}, ...}, "
         "old format is \"ID1:name1 | ID2:name2 | ... \", "
         "where ID is a number. "
-        "The last category is considered the default. "
+        "The category 0 is the default. "
+        "Thus, it is recommended to always define the category 0. "
         "Optionally, add a '\"CONFIGURABLE\": false' element to denote that "
         "teams cannot themselves modify the category. "
         "Add '\"HIDDEN\": true' to hide team categories from non-admins.",

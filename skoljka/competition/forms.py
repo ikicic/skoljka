@@ -256,10 +256,10 @@ class TeamForm(forms.ModelForm):
             )
 
         # Parse the team category string.
-        categories = self.competition.parse_team_categories()
-        if categories:
+        self.categories = self.competition.parse_team_categories()
+        if self.categories:
             try:
-                category_choices = categories.as_choices(lang)
+                category_choices = self.categories.as_choices(lang)
             except KeyError:
                 category_choices = [
                     (
@@ -268,12 +268,10 @@ class TeamForm(forms.ModelForm):
                     )
                 ]
             if not category_choices:
-                category_choices = [(1, u"team_categories empty!!!")]
+                category_choices = [(0, u"team_categories empty!!!")]
         else:
-            category_choices = [(1, u"team_categories invalid!!!")]
+            category_choices = [(0, u"team_categories invalid!!!")]
         self.category_choices = category_choices
-        if category_choices and (not instance or instance.category is None):
-            initial['category'] = category_choices[-1][0]  # For simplicity.
 
         super(TeamForm, self).__init__(initial=initial, *args, **kwargs)
 
@@ -290,7 +288,7 @@ class TeamForm(forms.ModelForm):
         else:
             del self.fields['name']
 
-        if categories.configurable:
+        if self.categories.configurable:
             self.fields['category'].widget = forms.RadioSelect(
                 choices=category_choices, renderer=TeamCategoryRadioSelectRenderer
             )
@@ -323,7 +321,7 @@ class TeamForm(forms.ModelForm):
             return (user.username, user)
         if manual and manual.strip():
             return (manual.strip(), None)
-        return None
+        return (None, None)
 
     def clean_name(self):
         name = self.cleaned_data['name'].strip()
@@ -335,30 +333,29 @@ class TeamForm(forms.ModelForm):
             raise ValidationError(_("Team name already used!"))
         return name
 
+    def clean_category(self):
+        category = self.cleaned_data['category']
+
+        if all(category != key for key, value in self.category_choices):
+            raise ValidationError(_("Unknown team category '%s'!") % category)
+
+        return category
+
     def clean(self):
         other_members = []
         ids = set()
         for k in range(2, self.competition.max_team_size + 1):
-            member = self._clean_member(k)
-            if not member:
+            member_name, member_user = self._clean_member(k)
+            if not member_name:
                 continue
-            if isinstance(member[1], User):
-                if member[1].id not in ids:
-                    ids.add(member[1].id)
-                    other_members.append(member)
+            if isinstance(member_user, User):
+                if member_user.id not in ids:
+                    ids.add(member_user.id)
+                    other_members.append((member_name, member_user))
             else:
-                other_members.append(member)
+                other_members.append((member_name, member_user))
 
         self.other_members = other_members
-
-        if self.category_choices:
-            try:
-                category = self.cleaned_data['category']
-            except KeyError:
-                self.cleaned_data['category'] = self.category_choices[-1][0]
-            else:
-                if not any(category == k for k, v in self.category_choices):
-                    raise ValidationError(_("Unknown team category '%s'!") % category)
 
         if not self.competition.are_team_names_configurable:
             self.cleaned_data['name'] = self.user.username

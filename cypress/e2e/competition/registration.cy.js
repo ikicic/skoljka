@@ -48,7 +48,9 @@ describe("test registering for an individual competition", () => {
     cy.visit('/individual_competition_with_nonconfigurable_categories/registration/');
     cy.get('form[data-cy=creg] [data-cy=register]').click();
     cy.visit('/individual_competition_with_nonconfigurable_categories/scoreboard/');
-    cy.get('[data-cy=scoreboard] tr').eq(1).contains("Blue"); // Last category is the default.
+
+    // Category 0 by default, the competition should define such a category.
+    cy.get('[data-cy=scoreboard] tr').eq(1).contains("Invalid category");
 
     // Try to visit the team edit page.
     cy.contains("Team: competitor0").should('not.exist');
