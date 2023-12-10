@@ -27,6 +27,8 @@ from skoljka.tags.utils import add_tags
 from skoljka.task.models import Task
 from skoljka.utils.string_operations import join_urls
 
+# TODO: Formalize when update_ does .save() or not.
+
 
 def comp_url(competition, *parts):
     """Concatenate the competition URL with parts, with a / between each part and at the end.
@@ -34,6 +36,7 @@ def comp_url(competition, *parts):
     >>> comp_url(competition, 'chain', chain.id, 'overview')
     '/competition_name/chain/123/overview/'
     """
+    # TODO: Replace with Competition.make_url or something like that.
     return join_urls(competition.get_absolute_url(), *parts)
 
 

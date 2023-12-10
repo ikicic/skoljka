@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.conf.urls.defaults import patterns, url
 
+import skoljka.competition.views as views
 from skoljka.utils.string_operations import join_urls
 from skoljka.utils.testutils import IS_TESTDB
 
@@ -39,28 +40,28 @@ _patterns = [
     # to the same competition page (with /competition/{{ id }}/ prefix and with
     # /{{ comp_prefix }}/). Use comp_url instead. Also, this is not a list
     # of url()s, the following list is first processed by _make_patterns.
-    (r'$', 'homepage'),
-    (r'chain/$', 'chain_list'),
-    (r'chain/tasks/$', 'chain_tasks_list'),
-    (r'chain/tasks/action/$', 'chain_tasks_action'),
-    (r'chain/(?P<chain_id>\d+)/$', 'chain_edit'),
-    (r'chain/(?P<chain_id>\d+)/overview/$', 'chain_overview'),
-    (r'chain/new/$', 'chain_new'),
-    (r'notifications/$', 'notifications'),
-    (r'notifications/(?P<ctask_id>\d+)/$', 'notifications'),
-    (r'notifications/admin/$', 'notifications_admin'),
-    (r'participants/$', 'participants'),
-    (r'registration/$', 'registration'),
-    (r'rules/$', 'rules'),
-    (r'scoreboard/$', 'scoreboard'),
-    (r'task/$', 'task_list'),
-    (r'task/new/$', 'task_new'),
-    (r'task/(?P<ctask_id>\d+)/$', 'task_detail'),
-    (r'submission/(?P<submission_id>\d+)/$', 'submission_detail'),
-    (r'task/(?P<ctask_id>\d+)/edit/$', 'task_new'),
-    (r'team/(?P<team_id>\d+)/$', 'team_detail'),
-    (r'team/list/admin/$', 'team_list_admin'),
-    (r'team/list/admin/confirm/$', 'team_list_admin_confirm'),
+    (r'$', views.homepage),
+    (r'chain/$', views.chain_list),
+    (r'chain/tasks/$', views.chain_tasks_list),
+    (r'chain/tasks/action/$', views.chain_tasks_action),
+    (r'chain/(?P<chain_id>\d+)/$', views.chain_edit),
+    (r'chain/(?P<chain_id>\d+)/overview/$', views.chain_overview),
+    (r'chain/new/$', views.chain_new),
+    (r'notifications/$', views.notifications),
+    (r'notifications/(?P<ctask_id>\d+)/$', views.notifications),
+    (r'notifications/admin/$', views.notifications_admin),
+    (r'participants/$', views.participants),
+    (r'registration/$', views.registration),
+    (r'rules/$', views.rules),
+    (r'scoreboard/$', views.scoreboard),
+    (r'task/$', views.task_list),
+    (r'task/new/$', views.task_new),
+    (r'task/(?P<ctask_id>\d+)/$', views.task_detail),
+    (r'submission/(?P<submission_id>\d+)/$', views.submission_detail),
+    (r'task/(?P<ctask_id>\d+)/edit/$', views.task_new),
+    (r'team/(?P<team_id>\d+)/$', views.team_detail),
+    (r'team/list/admin/$', views.team_list_admin),
+    (r'team/list/admin/confirm/$', views.team_list_admin_confirm),
 ]
 
 _extra_urls = [

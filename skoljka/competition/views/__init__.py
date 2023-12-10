@@ -1,0 +1,16 @@
+from skoljka.competition.views.chain_list import *  # noqa: F401,F403
+from skoljka.competition.views.chain_new import *  # noqa: F401,F403
+from skoljka.competition.views.chain_overview import *  # noqa: F401,F403
+from skoljka.competition.views.chain_tasks_action import *  # noqa: F401,F403
+from skoljka.competition.views.chain_tasks_list import *  # noqa: F401,F403
+from skoljka.competition.views.competition_list import *  # noqa: F401,F403
+from skoljka.competition.views.homepage import *  # noqa: F401,F403
+from skoljka.competition.views.notifications import *  # noqa: F401,F403
+from skoljka.competition.views.participants import *  # noqa: F401,F403
+from skoljka.competition.views.registration import *  # noqa: F401,F403
+from skoljka.competition.views.rules import *  # noqa: F401,F403
+from skoljka.competition.views.submission_detail import *  # noqa: F401,F403
+from skoljka.competition.views.task_detail import *  # noqa: F401,F403
+from skoljka.competition.views.task_list import *  # noqa: F401,F403
+from skoljka.competition.views.task_new import *  # noqa: F401,F403
+from skoljka.competition.views.team_detail import *  # noqa: F401,F403
