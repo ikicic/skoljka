@@ -95,10 +95,12 @@
       $('#comp-post-target').val(team_id);
     });
 
+    // TODO: This does not really work in combination with close_minutes.
+    // Better do it properly as a separate stats page.
     var STATUS_CLASS = {
       'S': 'bar ctask-solved',
       'F': 'bar ctask-failed',
-      'T': 'bar ctask-tried'
+      'T': 'bar ctask-attempted'
     };
 
     $('.ctask-solution-help i').click(function(event) {

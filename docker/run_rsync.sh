@@ -20,6 +20,7 @@ while true; do
         --exclude=*.pyc \
         --exclude=*.swp \
         --exclude=*~ \
+        --exclude=*.mo \
         --exclude=.DS_Store \
         --exclude=.git \
         --exclude=bower_components  \

@@ -20,13 +20,13 @@ from skoljka.utils import xss
 from skoljka.utils.python23 import unicode
 
 
-class CompetitionSolutionForm(forms.Form):
+class SubmissionForm(forms.Form):
     result = forms.CharField(max_length=255)
 
     def __init__(self, *args, **kwargs):
         self.descriptor = kwargs.pop('descriptor')
         self.evaluator = kwargs.pop('evaluator')
-        super(CompetitionSolutionForm, self).__init__(*args, **kwargs)
+        super(SubmissionForm, self).__init__(*args, **kwargs)
 
     def clean_result(self):
         data = self.cleaned_data['result']
@@ -124,8 +124,8 @@ class CompetitionTaskForm(ModelForm):
 class ChainForm(forms.ModelForm):
     """Form for creating or editing chains.
 
-    For course-like competitions, the `unlock_minutes` field is replaced with
-    an `unlock_days` field.
+    For course-like competitions, the `unlock_minutes` and `close_minutes`
+    fields are replaced with `unlock_days` and `close_days` fields.
     """
 
     class Meta:
@@ -133,10 +133,14 @@ class ChainForm(forms.ModelForm):
         fields = [
             'name',
             'category',
-            'unlock_minutes',
-            'bonus_score',
             'position',
+            'bonus_score',
             'unlock_mode',
+            # Note: `unlock/close_minutes` are replaced with `unlock_close/days`
+            # for courses. If changing the order, make sure that `__init__` correctly
+            # orders the fields in `self.fields` after these changes are made.
+            'unlock_minutes',
+            'close_minutes',
             'restricted_access',
         ]
 
@@ -144,21 +148,39 @@ class ChainForm(forms.ModelForm):
         self.competition = kwargs.pop('competition')
         super(ChainForm, self).__init__(*args, **kwargs)
         if self.competition.is_course:
-            del self.fields['unlock_minutes']
-            days = self.instance.unlock_minutes / (24 * 60.0) if self.instance else 0
+            instance = self.instance
             restricted_access_field = self.fields.pop('restricted_access')
             self.fields['unlock_days'] = forms.FloatField(
-                label=_("Unlock days"), min_value=0, initial=days
+                label=_("Unlock time"),
+                min_value=0,
+                initial=(instance.unlock_minutes / (24 * 60.0) if instance else 0),
+                help_text=self.fields['unlock_minutes'].help_text,
             )
+            self.fields['close_days'] = forms.FloatField(
+                label=_("Close time"),
+                min_value=0,
+                initial=(instance.close_minutes / (24 * 60.0) if instance else 0),
+                help_text=self.fields['close_minutes'].help_text,
+            )
+            del self.fields['unlock_minutes']
+            del self.fields['close_minutes']
             # Reinsert the restricted_access field to put it at the end.
             self.fields['restricted_access'] = restricted_access_field
 
     def clean(self):
         data = self.cleaned_data
         if self.competition.is_course:
-            self.cleaned_data['unlock_minutes'] = int(
-                (data['unlock_days'] or 0) * 24 * 60
-            )
+            try:
+                data['close_minutes'] = int((data['close_days'] or 0) * 24 * 60)
+            except KeyError:
+                raise forms.ValidationError("close_days missing")
+
+            try:
+                data['unlock_minutes'] = int((data['unlock_days'] or 0) * 24 * 60)
+            except KeyError:
+                raise forms.ValidationError("unlock_days missing")
+
+            del data['close_days']
             del data['unlock_days']
         return data
 
@@ -188,14 +210,36 @@ class ChainTasksForm(ChainForm):
     def __init__(self, *args, **kwargs):
         super(ChainTasksForm, self).__init__(*args, **kwargs)
 
-        self.fields['name'].widget.attrs.update({'class': 'span6'})
-        self.fields['category'].widget.attrs.update({'class': 'span2'})
+        def configure_field(
+            field_name, class_=None, help_to_label=False, help_text=None
+        ):
+            field = self.fields[field_name]
+            if class_:
+                field.widget.attrs.update({'class': class_})
+            if help_to_label:
+                field.label = mark_safe(
+                    u'{} <i class="icon-question-sign" title="{}"></i>'.format(
+                        field.label, xss.escape(unicode(field.help_text))
+                    )
+                )
+                field.help_text = ""
+            if help_text:
+                field.help_text = help_text
+
+        configure_field('name', 'span6')
+        configure_field('category', 'span6')
+        configure_field('position', 'span1')
+        configure_field('bonus_score', 'span1')
+        configure_field('unlock_mode', None, True)
         if 'unlock_minutes' in self.fields:
-            self.fields['unlock_minutes'].widget.attrs.update({'class': 'span1'})
+            configure_field('unlock_minutes', 'span1', True, _("[minutes]"))
+            configure_field('close_minutes', 'span1', True, _("[minutes]"))
+            self.fields['unlock_minutes'].label = _("Unlock time")
+            self.fields['close_minutes'].label = _("Close time")
         else:
-            self.fields['unlock_days'].widget.attrs.update({'class': 'span1'})
-        self.fields['bonus_score'].widget.attrs.update({'class': 'span1'})
-        self.fields['position'].widget.attrs.update({'class': 'span1'})
+            configure_field('unlock_days', 'span1', True, _("[days]"))
+            configure_field('close_days', 'span1', True, _("[days]"))
+        configure_field('restricted_access', None, True)
         self.fields['ctask_ids'].widget.attrs.update({'id': 'cchain-unused-ctasks-ids'})
 
     def clean_ctask_ids(self):

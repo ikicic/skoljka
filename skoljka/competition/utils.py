@@ -305,7 +305,7 @@ def lock_ctasks_in_chain(chain, ctasks):
             locked = True
 
 
-def load_and_preprocess_chain(competition, chain, team, preloaded_ctask=None):
+def load_and_preprocess_chain(competition, chain, team=None, preloaded_ctask=None):
     ctasks = list(
         CompetitionTask.objects.filter(chain=chain)
         .order_by('chain_position', 'id')
@@ -318,13 +318,18 @@ def load_and_preprocess_chain(competition, chain, team, preloaded_ctask=None):
         ]
 
     ctask_ids = [ctask.id for ctask in ctasks]
-    submissions = list(Submission.objects.filter(ctask_id__in=ctask_ids, team=team))
+    if team:
+        team_submissions = list(
+            Submission.objects.filter(ctask_id__in=ctask_ids, team=team)
+        )
+    else:
+        team_submissions = []
 
-    preprocess_chain(competition, chain, ctasks, submissions)
-    return ctasks, submissions
+    preprocess_chain(competition, chain, ctasks, team_submissions)
+    return ctasks, team_submissions
 
 
-def preprocess_chain(competition, chain, ctasks, submissions):
+def preprocess_chain(competition, chain, ctasks, team_submissions):
     """
 
     Note: ctasks must be sorted by chain position!
@@ -343,7 +348,7 @@ def preprocess_chain(competition, chain, ctasks, submissions):
         prev_ctask.t_next = None
 
     ctasks_dict = {ctask.id: ctask for ctask in ctasks}
-    for submission in submissions:
+    for submission in team_submissions:
         ctask = ctasks_dict[submission.ctask_id]
         ctask.t_submission_count += 1
         ctask.t_is_partially_solved |= submission.score > 0

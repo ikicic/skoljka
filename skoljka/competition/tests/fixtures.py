@@ -23,6 +23,8 @@ from skoljka.usergroup.utils import add_users_to_group
 from skoljka.userprofile.models import create_user_profile
 from skoljka.utils.testutils import assert_testdb
 
+# TODO: Standardize naming of JSON keys: 'some-name', 'some_name' vs 'someName'.
+
 TEST_COMPETITION_URLS = {
     10001: 'public_competition',
     10002: 'hidden_competition',
@@ -212,6 +214,7 @@ def create_test_chain(request, competition_id):
     Chain POST arguments:
         name
         unlock-minutes
+        close-minutes
         category
         bonus
         position
@@ -229,6 +232,7 @@ def create_test_chain(request, competition_id):
         competition_id=competition_id,
         name=request.POST['name'],
         unlock_minutes=request.POST['unlock-minutes'],
+        close_minutes=request.POST['close-minutes'],
         category=request.POST['category'],
         bonus_score=request.POST['bonus'],
         position=request.POST['position'],
@@ -279,4 +283,38 @@ def delete_teams(request, competition_id):
     if len(teams) != len(team_ids):
         return HttpResponseBadRequest("some teams don't exist")
     teams.delete()
+    return HttpResponse('{}', mimetype='application/json')
+
+
+@csrf_exempt
+@assert_testdb
+def update_chain(request, chain_id):
+    """See create_test_chain for the explanation of POST arguments."""
+    chain = Chain.objects.get(id=chain_id)
+    post = request.POST.copy()
+
+    def pop(name):
+        value = post.pop(name)
+        assert len(value) == 1, value
+        return value[0]
+
+    if 'name' in post:
+        chain.name = pop('name')
+    if 'unlock-minutes' in post:
+        chain.unlock_minutes = pop('unlock-minutes')
+    if 'close-minutes' in post:
+        chain.close_minutes = pop('close-minutes')
+    if 'category' in post:
+        chain.category = pop('category')
+    if 'bonus' in post:
+        chain.bonus_score = pop('bonus')
+    if 'position' in post:
+        chain.position = pop('position')
+    if 'unlock-mode' in post:
+        chain.unlock_mode = pop('unlock-mode')
+    if 'restricted-access' in post:
+        chain.restricted_access = pop('restricted-access') == 'true'
+    if len(post):
+        raise Exception("Unexpected POST: {}".format(post))
+    chain.save()
     return HttpResponse('{}', mimetype='application/json')

@@ -10,6 +10,7 @@ const CREATE_CHAIN_DEFAULTS = {
   bonus: +1,
   unlockMode: UNLOCK_GRADUAL,
   unlockMinutes: 0,
+  closeMinutes: 0,
   numTasks: 0,
   textFormat: "task text #{}",
   commentFormat: "task comment #{}",
@@ -58,6 +59,7 @@ function createChain(competition, options) {
       'bonus': options.bonus,
       'unlock-mode': options.unlockMode,
       'unlock-minutes': options.unlockMinutes,
+      'close-minutes': options.closeMinutes,
       'num-tasks': options.numTasks,
       'text-format': options.textFormat,
       'comment-format': options.commentFormat,
@@ -99,7 +101,20 @@ function deleteTeams(competition, teamIds) {
   });
 }
 
+
+/// Create a chain and ctasks in it. Returns the cy.request promise.
+function updateChain(chain_id, body) {
+  return cy.request({
+    method: 'POST',
+    url: `/competition/test/update_chain/${chain_id}/`,
+    form: true,
+    body: body,
+  });
+}
+
+
 Cypress.Commands.add('createCTasks', createCTasks);
 Cypress.Commands.add('createChain', createChain);
 Cypress.Commands.add('createIndividualTeam', createIndividualTeam);
 Cypress.Commands.add('deleteTeams', deleteTeams);
+Cypress.Commands.add('updateChain', updateChain);

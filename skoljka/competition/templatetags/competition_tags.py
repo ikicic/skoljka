@@ -98,17 +98,19 @@ def ctask_statistics_json(context):
     return json.dumps(stats)
 
 
-@register.simple_tag()
-def ctask_class(ctask):
+@register.simple_tag(takes_context=True)
+def ctask_class(context, ctask):
     if ctask.t_is_locked:
         return "ctask-locked"
     if ctask.t_is_solved:
         return "bar ctask-solved"
+    if ctask.chain.is_closed(minutes_passed=context['minutes_passed']):
+        return "bar ctask-closed"
     if ctask.t_submission_count == 0:
         return "bar ctask-open"
     if ctask.t_submission_count >= ctask.max_submissions:
         return "bar ctask-failed"
-    return "bar ctask-tried"
+    return "bar ctask-attempted"
 
 
 @register.simple_tag(takes_context=True)

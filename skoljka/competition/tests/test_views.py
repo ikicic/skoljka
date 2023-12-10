@@ -589,8 +589,9 @@ class CourseTest(CompetitionViewsTestBase):
                 'name': "Chain-ABC",
                 'category': "Category-DEF",
                 'bonus_score': "2",
-                'unlock_days': "14",
                 'unlock_mode': "1",
+                'unlock_days': "14",
+                'close_days': "0",
                 'position': "0",
             },
         )

@@ -114,9 +114,10 @@
           <table>
             {% legend_ctask "bar ctask-solved" _("A successfully solved problem") %}
             {% legend_ctask "bar ctask-failed" _("Used up all attempts") %}
-            {% legend_ctask "bar ctask-open" _("An unlocked problem") %}
-            {% legend_ctask "bar ctask-tried" _("Partially or incorrectly solved problem") %}
-            {% legend_ctask "ctask-locked" _("A locked problem") %}
+            {% legend_ctask "bar ctask-open" _("Problem not solved") %}
+            {% legend_ctask "bar ctask-attempted" _("Partially or incorrectly solved problem") %}
+            {% legend_ctask "bar ctask-closed" _("Problem closed") %}
+            {% legend_ctask "ctask-locked" _("Problem not yet available") %}
             {% legend_chain "badge-success" _("Bonus won") %}
             {% legend_chain "" _("Bonus not available anymore") %}
             {% legend_chain "badge-info" _("Bonus available, but not won") %}

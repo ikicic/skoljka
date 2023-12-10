@@ -1,3 +1,5 @@
+source scripts/migration_utils.sql
+
 CREATE TABLE IF NOT EXISTS `competition_chainteam` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `chain_id` int(11) NOT NULL,
@@ -9,3 +11,4 @@ CREATE TABLE IF NOT EXISTS `competition_chainteam` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 call AddColumnUnlessExists('competition_chain', 'restricted_access', 'TINYINT NOT NULL DEFAULT 0 AFTER unlock_mode');
+call AddColumnUnlessExists('competition_chain', 'close_minutes', 'INT NOT NULL DEFAULT 0 AFTER unlock_minutes');

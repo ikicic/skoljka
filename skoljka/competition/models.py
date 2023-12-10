@@ -17,7 +17,6 @@ from skoljka.permissions.models import BasePermissionsModel
 from skoljka.post.generic import PostGenericRelation
 from skoljka.task.models import Task
 from skoljka.utils import xss
-from skoljka.utils.models import gray_help_text
 from skoljka.utils.string_operations import join_urls
 
 KIND_CHOICES = [
@@ -406,36 +405,74 @@ class TeamMember(models.Model):
 class Chain(models.Model):
     UNLOCK_GRADUAL = 1
     UNLOCK_ALL = 2
-    UNLOCK_MODES = (
+    UNLOCK_MODES = [
         (UNLOCK_GRADUAL, ugettext_lazy("Gradual unlocking")),
         (UNLOCK_ALL, ugettext_lazy("All tasks unlocked")),
-    )
+    ]
 
     competition = models.ForeignKey(Competition)
     name = models.CharField(max_length=200)
-    unlock_minutes = models.IntegerField(default=0)
+    unlock_minutes = models.IntegerField(
+        default=0,
+        help_text=ugettext_lazy(
+            # Note: this text should work for unlock_days as well.
+            "The time after the beginning of the competition/course, "
+            "after which the chain becomes visible to participants."
+        ),
+    )
+
+    # Note: "close_minutes" and "unlock_minutes" do not have a fully symmetric
+    # meaning, hence the different name. "Unlock" means that the chain is going
+    # to become visible, whereas "close" means that no submissions will be
+    # possible but that the chain will still be visible.
+    close_minutes = models.IntegerField(
+        default=0,
+        help_text=ugettext_lazy(
+            # Note: this text should work for close_days as well.
+            "The time after the beginning of the competition/course, "
+            "after which tasks of the chain are closed for submissions. "
+            "Note: all tasks of the chain will become visible after closing the chain! "
+            "Set to 0 to disable. "
+        ),
+    )
 
     # Category is currently a string which stores the category name (title),
-    # translations and ordering. See views.py for more info. Categories are
-    # considered equal if the strings match exactly. In the future, we may
-    # consider adding a new model Category. So far this suffices.
+    # translations and ordering. See views/utils_chain.py for more info.
+    # Categories are considered equal if the strings match exactly. In the
+    # future, we may consider adding a new model Category. So far this suffices.
     category = models.CharField(blank=True, db_index=True, max_length=200)
-    bonus_score = models.IntegerField(default=1)
     position = models.IntegerField(
-        default=0, help_text=gray_help_text(ugettext_lazy("Position in the category."))
+        default=0,
+        help_text=ugettext_lazy("Position in the category."),
     )
-    unlock_mode = models.SmallIntegerField(choices=UNLOCK_MODES, default=UNLOCK_GRADUAL)
+    bonus_score = models.IntegerField(
+        default=1,
+        help_text=ugettext_lazy(
+            "Additional points awarded for fully solving all tasks of the chain."
+        ),
+    )
+    unlock_mode = models.SmallIntegerField(
+        choices=UNLOCK_MODES,
+        default=UNLOCK_GRADUAL,
+        help_text=ugettext_lazy(
+            "Either gradual unlocking (tasks unlocked one by one as they are solved "
+            "or as all attempts are used up), or all tasks unlocked simultaneously."
+        ),
+    )
 
     # The restricted access is not called "hidden", as done elsewhere, because
     # in this case we do not rely on ObjectPermission (which is Group-based),
     # but on a custom ChainTeam many-to-many field.
     restricted_access = models.BooleanField(
         default=False,
-        help_text="If enabled, only teams with explicitly given access will be able to view and solve this chain.",
+        help_text=ugettext_lazy(
+            "If enabled, only teams with explicitly given access will be able to view and solve this chain."
+        ),
     )
     teams_with_access = models.ManyToManyField(
         Team, related_name='explicitly_accessible_chains', through='ChainTeam'
     )
+
     cache_ctask_comments_info = models.CharField(blank=True, max_length=255)
     cache_is_verified = models.BooleanField(default=False)
 
@@ -454,9 +491,18 @@ class Chain(models.Model):
         else:
             return True
 
+    def is_closed(self, minutes_passed):
+        """Given the current relative competition time in minutes, return whether
+        the chain is already closed, with respect to the `close_minutes` field."""
+        return self.close_minutes > 0 and minutes_passed >= self.close_minutes
+
     @property
     def unlock_days(self):
         return self.unlock_minutes / (24 * 60.0)
+
+    @property
+    def close_days(self):
+        return self.close_minutes / (24 * 60.0)
 
 
 class ChainTeam(models.Model):

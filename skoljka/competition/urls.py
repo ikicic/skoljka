@@ -81,6 +81,7 @@ if IS_TESTDB:
     _extra_urls += patterns(
         '',
         (r'^competition/test/fill/$', _fixtures.create_test_competitions),
+        (r'^competition/test/update_chain/(?P<chain_id>\d+)/$', _fixtures.update_chain),
     )
     del _fixtures
 

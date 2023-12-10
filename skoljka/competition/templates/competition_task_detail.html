@@ -48,27 +48,34 @@
   {% endif %}
 
   {% if submissions|length >= ctask.max_submissions and not is_solved %}
-    <div class="ctask-submissions-count">
+    <div class="ctask-submission-info">
       {% trans "You've used up all available attempts." %}
     </div>
   {% endif %}
 
   {% if submissions|length < ctask.max_submissions and not is_solved %}
-    {% if not has_finished %}
-      <form action="{{ request.get_full_path }}" method="POST"
-          class="form-inline">
+    {% if has_finished %}
+      <div class="ctask-submision-closed">
+        {{ competition.msg_has_finished }}
+      </div>
+    {% elif submissions_closed %}
+      <div class="ctask-submission-closed">
+        {% trans "Submissions are now closed." %}
+      </div>
+    {% else %}
+      <form action="{{ request.get_full_path }}" method="POST" class="form-inline">
         {% csrf_token %}
-        <div class="ctask-submissions-count">
+        <div class="ctask-submission-info">
           {% trans "Attempts left:" %} {{ submissions_left }}
+          {% if chain_open_until %}
+            <br>{% trans "Time remaining:" %} {{ chain_open_until|timeuntil }}
+          {% endif %}
+          {% if help_text %}
+            <br>{{ help_text }}
+          {% endif %}
         </div>
-        {% if help_text %}
-          <div class="ctask-format-help">
-            {{ help_text }}
-          </div>
-        {% endif %}
         {{ solution_form.result }}
-        <input type="submit" value="{% trans "Submit" %}"
-            class="btn btn-primary">
+        <input type="submit" value="{% trans "Submit" %}" class="btn btn-primary">
         {% if solution_form.errors %}
           <span class="comp-error">
             {% for error in solution_form.result.errors %}
@@ -80,10 +87,6 @@
       <a href="{{ ctask.get_send_clarification_request_url }}">
         {% trans "Ask for a clarification" %}
       </a>
-    {% else %}
-      <div class="ctask-submit-already-finished">
-        {{ competition.msg_has_finished }}
-      </div>
     {% endif %}
   {% endif %}
 

@@ -38,23 +38,26 @@ describe("test adding and operating on chains", () => {
     cy.visit('/public_competition/chain/tasks/');
     // CSRF + name + category + unlock minutes + bonus score + position +
     // hidden task_ids + submit + restricted access.
-    cy.get('form[data-cy="create-chain"] input').should('have.length', 9);
+    cy.get('form[data-cy="create-chain"] input').should('have.length', 10);
     cy.get('form[data-cy="create-chain"] select').should('have.length', 1); // Unlock mode.
     cy.get('#id_name').should('have.value', "");
     cy.get('#id_category').should('have.value', "");
     cy.get('#id_unlock_minutes').should('have.value', "0");
+    cy.get('#id_close_minutes').should('have.value', "0");
     cy.get('#id_bonus_score').should('have.value', "1");
     cy.get('#id_position').should('have.value', "0");
     cy.get('#id_unlock_mode').should('have.value', "1");
     cy.get('#id_restricted_access').should('not.be.checked');
 
     cy.get('#id_unlock_minutes').clear();
+    cy.get('#id_close_minutes').clear();
     cy.get('#id_bonus_score').clear();
     cy.get('#id_position').clear();
     cy.get('form[data-cy="create-chain"] [type="submit"]').type('{enter}'); // Submit.
 
     cy.get('#id_name').requiredFieldError();
     cy.get('#id_unlock_minutes').requiredFieldError();
+    cy.get('#id_close_minutes').requiredFieldError();
     cy.get('#id_bonus_score').requiredFieldError();
     cy.get('#id_position').requiredFieldError();
   });

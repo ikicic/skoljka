@@ -302,8 +302,11 @@ td.comp-chain-bonus {
   @include gradient-vertical(#5bc0de, #339bb9);
   // @include gradient-vertical(white, white);
 }
-.progress .ctask-tried {
+.progress .ctask-attempted {
   @include gradient-vertical(lighten($orange, 15%), $orange);
+}
+.progress .ctask-closed {
+  @include gradient-vertical(lighten(#999, 15%), #999);
 }
 .progress .ctask-locked {
   // nothing
@@ -384,7 +387,7 @@ div#ctask-legend-container {
   margin: 0.5em 0 1em 0;
 }
 
-.ctask-submissions-count, .ctask-format-help, .ctask-score-text {
+.ctask-submission-info, .ctask-score-text {
   color: gray;
   font-size: 12px;
   font-style: italic;
@@ -425,7 +428,7 @@ div#ctask-legend-container {
   text-align: right;
 }
 
-.ctask-submit-already-finished {
+.ctask-submission-closed {
   color: gray;
 }
 
