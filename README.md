@@ -3,22 +3,25 @@
 ## Školjka v0.12.0
 
 ### New features
-- [competition] made it possible to restrict problem chains to selected teams
-- [competition] per-task customizable submission count limit
+- [competition] chains can now be restricted to selected teams
+- [competition] submission count limit can be customized per-task now
 - [competition] optionally make team categories non-configurable by teams themselves
 - [competition] optionally hide team categories from teams themselves
 - [competition] added a new "teams/participants/competitors" admin page, used to change team categories
+- [competition] added `Chain.close_minutes`, used to close the submission for a given chain after a given period of time
 - [userprofile] added a registration challenge to fight spam
 
 ### Changes
 - [competition] individual (non-team) competitions and courses: adjusted the GUI based on `Competition.max_team_size`
-- [competition] made the solution help optional in the competition and course help pages
+- [general] improved the design of some forms by utilizing `bootstrap_toolkit`
+- [general] added a "courses" link in the main menu, separately list competitions and courses
+
+### Technical
 - [competition] added some Cypress tests for competitions
 - [competition] courses now use the `/course/<id>/` URL pattern by default
 - [competition] courses and competitions URLs are automatically redirected to the correct URL (as returned by `get_absolute_url()`)
-- [general] improved the design of some forms by using `bootstrap_toolkit`
-- [general] added a "courses" link in the main menu, separately list competitions and courses
-
+- [competition] made the solution help optional in the competition and course help pages
+- [competition] split `views.py` into multiple files `views/*.py`
 
 # Installation (Docker)
 
