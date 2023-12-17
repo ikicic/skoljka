@@ -1,10 +1,11 @@
+from collections import defaultdict
 from datetime import datetime
 
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.utils.translation import ugettext as _
 
 from skoljka.competition.decorators import competition_view
-from skoljka.competition.models import Team, TeamCategories
+from skoljka.competition.models import Scoreboard, Team, TeamCategories
 from skoljka.competition.utils import comp_url, refresh_teams_cache_score
 from skoljka.permissions.constants import EDIT
 from skoljka.utils.decorators import response
@@ -87,7 +88,7 @@ def _parse_team_list_admin_post(request, competition):
     if team_categories is None:
         return HttpResponse("Competition has no valid team_categories.")
     try:
-        category_dict = team_categories.as_ordered_dict(request.LANGUAGE_CODE)
+        category_dict = team_categories.lang_to_categories[request.LANGUAGE_CODE]
     except KeyError:
         return HttpResponse(
             "Team categories for the language '{}' not specified.".format(
@@ -129,6 +130,23 @@ def _parse_team_list_admin_post(request, competition):
                 )
 
     return changes
+
+
+class ScoreboardTableEntry:
+    """A single row in a scoreboard table."""
+
+    def __init__(self, team, position):
+        self.team = team
+        self.position = position
+        self.category = None
+        self.category_admin = None
+        self.is_category_valid = None
+
+
+class ScoreboardTable:
+    def __init__(self, entries, title=None):
+        self.entries = entries
+        self.title = title
 
 
 def _team_list(request, competition, data):
@@ -177,39 +195,102 @@ def _team_list(request, competition, data):
         )
     )
 
-    try:
-        categories = competition.parse_team_categories()
-        categories_dict = categories.lang_to_categories[request.LANGUAGE_CODE]
-        category_choices = categories.as_choices(request.LANGUAGE_CODE)
-    except (AttributeError, KeyError):
+    categories = competition.parse_team_categories()
+    if not categories:
         categories = TeamCategories()
-        categories_dict = {}
-        category_choices = []
+    categories_dict = categories.lang_to_categories.get(request.LANGUAGE_CODE, {})
     data['team_categories_title'] = u", ".join(categories_dict.values())
 
+    for team in teams:
+        team.competition = competition
+
+    data['main_scoreboard'] = _make_scoreboard(teams, order_by, categories_dict)
+    data['extra_scoreboards'] = _prepare_extra_scoreboards(
+        teams,
+        order_by,
+        categories_dict,
+        categories.scoreboard,
+        data['team'],
+    )
+    if data['extra_scoreboards']:
+        # When `categories.hidden == True`, we need to show the team categories,
+        # otherwise it wouldn't be clear what the extra tables are for.
+        # However, it turns out that even with `categories.hidden == False`
+        # only showing tables efeels weird. So we add the titles whenever extra
+        # scoreboards are shown.
+        data['main_scoreboard'].title = competition.get_team_metaname_plural_all
+        for scoreboard in data['extra_scoreboards']:
+            if scoreboard.entries:  # This should always be non-empty.
+                scoreboard.title = scoreboard.entries[0].category
+
+    data['teams'] = teams
+    data['as_participants'] = competition.is_course
+    data['are_team_categories_visible'] = categories_dict and not categories.hidden
+    data['categories_dict'] = categories_dict
+    return data
+
+
+def _make_scoreboard(teams, order_by, categories_dict):
     last_score = -1
     last_position = 1
     position = 1
+    entries = []
     for i, team in enumerate(teams):
-        team.competition = competition
         if team.is_normal() and team.cache_score_before_freeze != last_score:
             last_position = position
-        team.t_position = i + 1 if order_by == 'name' else last_position
-        if category_choices:
-            team.t_category = categories_dict.get(team.category)
-            if team.t_category is None:
-                team.t_is_category_valid = False
+
+        team_position = i + 1 if order_by == 'name' else last_position
+        entry = ScoreboardTableEntry(team, team_position)
+
+        if categories_dict:
+            entry.category = categories_dict.get(team.category)
+            if entry.category is None:
+                entry.is_category_valid = False
                 # One will be publicly visible, so do not expose the number there.
-                team.t_category = _("Invalid category")
-                team.t_category_admin = _("Invalid category #%d") % team.category
+                entry.category = _("Invalid category")
+                entry.category_admin = _("Invalid category #%d") % team.category
             else:
-                team.t_is_category_valid = True
+                entry.is_category_valid = True
         if team.is_normal():
             last_score = team.cache_score_before_freeze
             position += 1
 
-    data['teams'] = teams
-    data['as_participants'] = competition.is_course
-    data['are_team_categories_visible'] = category_choices and not categories.hidden
-    data['team_categories'] = category_choices
-    return data
+        entries.append(entry)
+
+    return ScoreboardTable(entries)
+
+
+def _prepare_extra_scoreboards(teams, order_by, categories_dict, scoreboard, my_team):
+    """Prepare the scoreboards that are shown next to the main scoreboard.
+    Returns a list of scoreboards. Each scoreboard is a list of teams.
+
+    Types of scoreboards:
+        ALL: only the main scoreboard shown
+        ALL_AND_MY_CATEGORY: the main scoreboard + only scoreboard of my team category
+        ALL_AND_MY_THEN_REST: the main scoreboard + one scoreboard per team category
+                              (with my being on top)
+    """
+    if my_team and scoreboard == Scoreboard.ALL_AND_MY_CATEGORY:
+        filtered_teams = [team for team in teams if team.category == my_team.category]
+        return [_make_scoreboard(filtered_teams, order_by, categories_dict)]
+    elif (
+        scoreboard == Scoreboard.ALL_AND_MY_THEN_REST
+        or scoreboard == Scoreboard.ALL_AND_PER_CATEGORY
+    ):
+        team_groups = defaultdict(list)
+        for team in teams:
+            team_groups[team.category].append(team)
+
+        team_groups = list(team_groups.items())
+        if my_team and scoreboard == Scoreboard.ALL_AND_MY_THEN_REST:
+            # Put my team at the top.
+            team_groups.sort(key=lambda item: (item[0] != my_team.category, item[0]))
+        else:
+            team_groups.sort(key=lambda item: item[0])
+
+        return [
+            _make_scoreboard(team_group, order_by, categories_dict)
+            for category, team_group in team_groups
+        ]
+    else:
+        return []  # No side scoreboards.

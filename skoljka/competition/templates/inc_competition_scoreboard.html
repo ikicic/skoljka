@@ -1,0 +1,32 @@
+{% load competition_tags %}
+{% load i18n %}
+
+{% if scoreboard.title %}
+  <h3>{{ scoreboard.title }}</h3>
+{% endif %}
+<table class="table-striped comp-scoreboard" data-cy="scoreboard-{{ data_cy_suffix }}">
+  <tr class="comp-scoreboard-tr">
+    <th>#</th>
+    {% if are_team_categories_visible %}
+      <th title="{{ team_categories_title }}">{% trans "Category" %}</th>
+    {% endif %}
+    <th><a href="{{ competition.get_scoreboard_url }}?sort=name">
+      {{ competition.get_team_metaname }}
+    </a></th>
+    <th><a href="{{ competition.get_scoreboard_url }}?sort=score">
+      {% trans "Total score" %}
+    </a></th>
+  </tr>
+  {% for t in scoreboard.entries %}
+    <tr class="
+        {% if t.team.id == team.id %}comp-my-team{% endif %}
+        {{ t.team.get_type_css_class }}">
+      <td>{{ t.position }}{{ t.team.is_normal|yesno:",*" }}</td>
+      {% if are_team_categories_visible %}
+        <td>{{ t.category }}</td>
+      {% endif %}
+      <td>{{ t.team.get_link }}</td>
+      <td>{% team_score t.team %}</td>
+    </tr>
+  {% endfor %}
+</table>

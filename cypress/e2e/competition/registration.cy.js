@@ -28,9 +28,9 @@ describe("test registering for an individual competition", () => {
     cy.contains("Registration successful!");
 
     cy.get('a').contains("Scoreboard").click();
-    cy.get('[data-cy=scoreboard] tr').should('have.length', 2);
-    cy.get('[data-cy=scoreboard] tr').eq(1).contains("Green");
-    cy.get('[data-cy=scoreboard] tr').eq(1).contains("competitor0");
+    cy.get('[data-cy=scoreboard-main] tr').should('have.length', 2);
+    cy.get('[data-cy=scoreboard-main] tr').eq(1).contains("Green");
+    cy.get('[data-cy=scoreboard-main] tr').eq(1).contains("competitor0");
 
     cy.get('a[data-cy=edit-participation]').click();
     // No more instructions, we already have a team.
@@ -39,9 +39,9 @@ describe("test registering for an individual competition", () => {
     cy.get('form[data-cy=creg] [data-cy="submit-team-changes"]').click();
 
     cy.get('a').contains("Scoreboard").click();
-    cy.get('[data-cy=scoreboard] tr').should('have.length', 2);
-    cy.get('[data-cy=scoreboard] tr').eq(1).contains("Red");
-    cy.get('[data-cy=scoreboard] tr').eq(1).contains("competitor0");
+    cy.get('[data-cy=scoreboard-main] tr').should('have.length', 2);
+    cy.get('[data-cy=scoreboard-main] tr').eq(1).contains("Red");
+    cy.get('[data-cy=scoreboard-main] tr').eq(1).contains("competitor0");
   });
 
   it("test with non-configurable team categories (i.e. only set by moderators)", () => {
@@ -50,7 +50,7 @@ describe("test registering for an individual competition", () => {
     cy.visit('/individual_competition_with_nonconfigurable_categories/scoreboard/');
 
     // Category 0 by default, the competition should define such a category.
-    cy.get('[data-cy=scoreboard] tr').eq(1).contains("Invalid category");
+    cy.get('[data-cy=scoreboard-main] tr').eq(1).contains("Invalid category");
 
     // Try to visit the team edit page.
     cy.contains("Team: competitor0").should('not.exist');
@@ -300,6 +300,6 @@ describe("test registering for a team competition with categories", () => {
 
     // Check the category.
     cy.visit('/competition_with_categories/scoreboard/');
-    cy.get('[data-cy=scoreboard] .comp-my-team td').contains("Green");
+    cy.get('[data-cy=scoreboard-main] .comp-my-team td').contains("Green");
   });
 });

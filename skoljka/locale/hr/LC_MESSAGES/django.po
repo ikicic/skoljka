@@ -770,138 +770,150 @@ msgstr "Nevaljano rješenje!"
 msgid "Solution"
 msgstr "Rješenje"
 
-#: competition/forms.py:154 competition/forms.py:229
+#: competition/forms.py:154 competition/forms.py:237
 #: competition/templates/competition_chain_list.html:28
 #: competition/templates/competition_chain_list.html:30
 #: competition/templates/competition_chain_list_tasks.html:130
 msgid "Unlock time"
 msgstr "Vrijeme otključavanja"
 
-#: competition/forms.py:160 competition/forms.py:230
+#: competition/forms.py:160 competition/forms.py:238
 msgid "Close time"
 msgstr "Vrijeme zatvaranja"
 
-#: competition/forms.py:227 competition/forms.py:228
+#: competition/forms.py:235 competition/forms.py:236
 msgid "[minutes]"
 msgstr "[minute]"
 
-#: competition/forms.py:232 competition/forms.py:233
+#: competition/forms.py:240 competition/forms.py:241
 msgid "[days]"
 msgstr "[dani]"
 
-#: competition/forms.py:322
+#: competition/forms.py:330
 msgid "Please enter the team name."
 msgstr "Molimo unesite ime tima."
 
-#: competition/forms.py:343
+#: competition/forms.py:351
 #, python-format
 msgid "Unknown username \"%s\"."
 msgstr "Nepoznato korisničko ime \"%s\"."
 
-#: competition/forms.py:345
+#: competition/forms.py:353
 msgid "You are automatically added to the team."
 msgstr "Vi ste automatski dodani u tim."
 
-#: competition/forms.py:355
+#: competition/forms.py:363
 #, python-format
 msgid "User \"%s\" is already a member of a team."
 msgstr "Korisnik \"%s\" je već član nekog tima."
 
-#: competition/forms.py:369
+#: competition/forms.py:377
 msgid "Team name already used!"
 msgstr "Ime tima se već koristi."
 
-#: competition/forms.py:376
+#: competition/forms.py:384
 #, python-format
 msgid "Unknown team category '%s'!"
 msgstr "Nepoznata timska kategorija '%s'."
 
-#: competition/forms.py:422 competition/models.py:313
+#: competition/forms.py:430 competition/models.py:349
 msgid "Competitors"
 msgstr "Natjecatelji"
 
-#: competition/forms.py:423
+#: competition/forms.py:431
 msgid "Unofficial"
 msgstr "Neslužbeni"
 
-#: competition/forms.py:424
+#: competition/forms.py:432
 msgid "Administrators"
 msgstr "Administratori"
 
-#: competition/models.py:24
+#: competition/models.py:25
 msgid "Competition"
 msgstr "Natjecanje"
 
-#: competition/models.py:25
+#: competition/models.py:26
 msgid "Course"
 msgstr "Tečaj"
 
-#: competition/models.py:140 competition/models.py:347
-#: competition/models.py:609 competition/views/notifications.py:103
+#: competition/models.py:172 competition/models.py:394
+#: competition/models.py:656 competition/views/notifications.py:103
 msgid "Message"
 msgstr "Poruka"
 
-#: competition/models.py:165 competition/models.py:311
+#: competition/models.py:197 competition/models.py:347
 #: competition/templates/competition_scoreboard.html:9
 msgid "Participants"
 msgstr "Polaznici"
 
-#: competition/models.py:165
+#: competition/models.py:197
 #: competition/templates/competition_scoreboard.html:11
 msgid "Scoreboard"
 msgstr "Bodovna lista"
 
-#: competition/models.py:299
+#: competition/models.py:335
 #: competition/templates/competition_registration.html:34
 #: competition/templates/inc_competition_chain_access.html:13
 msgid "Team"
 msgstr "Tim"
 
-#: competition/models.py:301
+#: competition/models.py:337
 msgid "Participant"
 msgstr "Polaznik"
 
-#: competition/models.py:303
+#: competition/models.py:339
 msgid "Competitor"
 msgstr "Natjecatelj"
 
-#: competition/models.py:309
+#: competition/models.py:345
 msgid "Teams"
 msgstr "Timovi"
 
-#: competition/models.py:317
+#: competition/models.py:356
+msgid "All teams"
+msgstr "Svi timovi"
+
+#: competition/models.py:358
+msgid "All participants"
+msgstr "Svi polaznici"
+
+#: competition/models.py:360
+msgid "All competitors"
+msgstr "Svi natjecatelji"
+
+#: competition/models.py:364
 msgid "Course has finished."
 msgstr "Tečaj je završio!"
 
-#: competition/models.py:319
+#: competition/models.py:366
 msgid "Competition has finished."
 msgstr "Natjecanje je završilo!"
 
-#: competition/models.py:323
+#: competition/models.py:370
 msgid "Course has not started yet."
 msgstr "Tečaj još nije počeo!"
 
-#: competition/models.py:325
+#: competition/models.py:372
 msgid "Competition has not started yet."
 msgstr "Natjecanje još nije počelo!"
 
-#: competition/models.py:410
+#: competition/models.py:457
 msgid "Gradual unlocking"
 msgstr "Postepeno otključavanje"
 
-#: competition/models.py:411
+#: competition/models.py:458
 msgid "All tasks unlocked"
 msgstr "Svi zadaci otključani"
 
-#: competition/models.py:420
+#: competition/models.py:467
 msgid ""
-"The time after the beginning of the competition/course, after which the chain becomes "
-"visible to participants."
+"The time after the beginning of the competition/course, after which the "
+"chain becomes visible to participants."
 msgstr ""
 "Vrijeme nakon početka natjecanja/kursa nakon kojeg lanac postaje vidljiv "
 "polaznicima."
 
-#: competition/models.py:433
+#: competition/models.py:480
 msgid ""
 "The time after the beginning of the competition/course, after which tasks of "
 "the chain are closed for submissions. Note: all tasks of the chain will "
@@ -911,16 +923,16 @@ msgstr ""
 "rješenja. Napomena: nakon što je lanac zatvoren, svi zadaci postaju "
 "vidljivi! Vrijednost 0 isključuje ovu opciju."
 
-#: competition/models.py:447
+#: competition/models.py:494
 msgid "Position in the category."
 msgstr "Pozicija u kategoriji."
 
-#: competition/models.py:452
+#: competition/models.py:499
 msgid "Additional points awarded for fully solving all tasks of the chain."
 msgstr ""
 "Dodatni bodovi dodijeljeni za potpuno točna rješenja svih zadataka u lancu."
 
-#: competition/models.py:459
+#: competition/models.py:506
 msgid ""
 "Either gradual unlocking (tasks unlocked one by one as they are solved or as "
 "all attempts are used up), or all tasks unlocked simultaneously."
@@ -929,7 +941,7 @@ msgstr ""
 "riješeni ili kako su svi pokušaji iskorišteni) ili se svi zadaci "
 "otključavaju odjednom."
 
-#: competition/models.py:470
+#: competition/models.py:517
 msgid ""
 "If enabled, only teams with explicitly given access will be able to view and "
 "solve this chain."
@@ -1165,8 +1177,8 @@ msgid "Chains (used problems)"
 msgstr "Lanci (iskorišteni zadaci)"
 
 #: competition/templates/competition_chain_list_tasks.html:127
-#: competition/templates/competition_scoreboard.html:58
 #: competition/templates/competition_team_list_admin.html:20
+#: competition/templates/inc_competition_scoreboard.html:11
 msgid "Category"
 msgstr "Kategorija"
 
@@ -1523,15 +1535,6 @@ msgstr "Sortiraj po zamrznutim bodovima"
 msgid "Sort by real score"
 msgstr "Sortitaj po pravim bodovima"
 
-#: competition/templates/competition_scoreboard.html:48
-msgid "Team categories shown only to admins."
-msgstr "Kategorije timova prikazane samo administratorima."
-
-#: competition/templates/competition_scoreboard.html:63
-#: competition/templates/competition_team_list_admin.html:26
-msgid "Total score"
-msgstr "Ukupni bodovi"
-
 #: competition/templates/competition_submission_detail.html:26
 msgid "Mark as read"
 msgstr "Označi kao pročitano"
@@ -1760,6 +1763,11 @@ msgstr ""
 "Komentar 2: Slika neće biti vidljiva u pregledu, morate spremiti promjene "
 "kako biste vidjeli konačan rezultat."
 
+#: competition/templates/competition_team_list_admin.html:26
+#: competition/templates/inc_competition_scoreboard.html:17
+msgid "Total score"
+msgstr "Ukupni bodovi"
+
 #: competition/templates/competition_team_list_admin.html:55
 #: task/templates/task_bulk_new.html:82
 #: userprofile/templates/registration/activation_complete.html:15
@@ -1906,18 +1914,18 @@ msgstr "Zadatak:"
 msgid "Write the question / message here."
 msgstr "Napišite pitanje / poruku ovdje."
 
-#: competition/views/participants.py:45
+#: competition/views/participants.py:46
 #, python-format
 msgid ""
 "Change the category of the team \"%(team)s\" from \"%(old)s\" to \"%(new)s\"."
 msgstr "Promijeni kategoriju tima \"%(team)s\" sa \"%(old)s\" na \"%(new)s\"."
 
-#: competition/views/participants.py:103 competition/views/participants.py:204
+#: competition/views/participants.py:104 competition/views/participants.py:251
 #, python-format
 msgid "Invalid category #%d"
 msgstr "Nevaljana kategorija #%d"
 
-#: competition/views/participants.py:203
+#: competition/views/participants.py:250
 msgid "Invalid category"
 msgstr "Nevaljana kategorija"
 

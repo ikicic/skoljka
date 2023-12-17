@@ -43,39 +43,17 @@
   </div>
 {% endif %}
 
-{% if not are_team_categories_visible and is_admin %}
-  <div class="alert">
-    {% trans "Team categories shown only to admins." %}
-  </div>
-{% endif %}
-
 <div class="row row-fix">
   <div class="span6">
-    <table class="table-striped" id="comp-scoreboard-table" data-cy="scoreboard">
-      <tr>
-        <th>#</th>
-        {% if are_team_categories_visible or is_admin %}
-          <th title="{{ team_categories_title }}">{% trans "Category" %}</th>
-        {% endif %}
-        <th><a href="{{ competition.get_scoreboard_url }}?sort=name">
-          {{ competition.get_team_metaname }}
-        </a></th>
-        <th><a href="{{ competition.get_scoreboard_url }}?sort=score">{% trans "Total score" %}</a></th>
-      </tr>
-      {% for t in teams %}
-        <tr class="
-            {% if t.id == team.id %}comp-my-team{% endif %}
-            {{ t.get_type_css_class }}">
-          <td>{{ t.t_position }}{{ t.is_normal|yesno:",*" }}</td>
-          {% if are_team_categories_visible or is_admin %}
-            <td>{{ t.t_category }}</td>
-          {% endif %}
-          <td>{{ t.get_link }}</td>
-          <td>{% team_score t %}</td>
-        </tr>
-      {% endfor %}
-    </table>
+    {% include 'inc_competition_scoreboard.html' with scoreboard=main_scoreboard data_cy_suffix="main" %}
   </div>
+  {% if extra_scoreboards %}
+    <div class="span6">
+      {% for scoreboard in extra_scoreboards %}
+        {% include 'inc_competition_scoreboard.html' with scoreboard=scoreboard data_cy_suffix=forloop.counter0 %}
+      {% endfor %}
+    </div>
+  {% endif %}
 </div>
 
 {% if is_admin %}

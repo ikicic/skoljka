@@ -1,6 +1,7 @@
 import json
 from collections import OrderedDict
 from datetime import datetime
+from enum import Enum
 
 from django.conf import settings
 from django.contrib.auth.models import Group, User
@@ -17,6 +18,7 @@ from skoljka.permissions.models import BasePermissionsModel
 from skoljka.post.generic import PostGenericRelation
 from skoljka.task.models import Task
 from skoljka.utils import xss
+from skoljka.utils.python23 import basestring
 from skoljka.utils.string_operations import join_urls
 
 KIND_CHOICES = [
@@ -25,41 +27,66 @@ KIND_CHOICES = [
 ]
 
 
+class Scoreboard(Enum):
+    ALL = 0
+    ALL_AND_MY_CATEGORY = 1
+    ALL_AND_PER_CATEGORY = 2
+    ALL_AND_MY_THEN_REST = 3
+
+
+_SCOREBOARD = {item.name: item for item in Scoreboard}
+
+
 class TeamCategories(object):
     """
     Parsed representation of `Competition.team_categories`.
 
     Attributes:
-        lang_to_categories: a dictionary {str lang: {int id: str name}}
+        lang_to_categories: a dictionary {str lang: OrderedDict{int id: str name}}
         configurable: whether the teams can configure their categories
                       themselves, defaults to True
         hidden: If True, teams will not see their categories.
                 `hidden == True` implies `configurable == False`.
+        scoreboard: Scoreboard enum.
     """
 
-    def __init__(self, lang_to_categories={}, configurable=True, hidden=False):
-        self.lang_to_categories = lang_to_categories
+    def __init__(
+        self,
+        lang_to_categories={},
+        configurable=True,
+        hidden=False,
+        scoreboard=Scoreboard.ALL,
+    ):
+        if not isinstance(lang_to_categories, dict) or not all(
+            isinstance(lang, basestring)
+            and isinstance(categories, dict)
+            and all(
+                isinstance(id, int) and isinstance(name, basestring)
+                for id, name in categories.items()
+            )
+            for lang, categories in lang_to_categories.items()
+        ):
+            raise TypeError(lang_to_categories)
+        if not isinstance(configurable, bool):
+            raise TypeError(configurable)
+        if not isinstance(hidden, bool):
+            raise TypeError(hidden)
+        if not isinstance(scoreboard, Scoreboard):
+            raise TypeError(scoreboard)
+        if scoreboard not in _SCOREBOARD.values():
+            raise ValueError(scoreboard)
+
+        def sort(categories):
+            choices = [(id, name) for id, name in categories.items()]
+            choices.sort(key=lambda f: f[0])
+            return OrderedDict(choices)
+
+        self.lang_to_categories = {
+            lang: sort(categories) for lang, categories in lang_to_categories.items()
+        }
         self.configurable = configurable and not hidden
         self.hidden = hidden
-
-    def as_choices(self, lang):
-        """Return a list of (category ID, category name), sorted by ID,
-        suitable for RadioSelect and similar.
-
-        Raises a KeyError if the language is not found.
-        """
-        # TODO: If lang is not found, pick whichever is available.
-        # TODO: Change the input format to something like {id: (name OR {lang: name})}.
-        choices = [(id, name) for id, name in self.lang_to_categories[lang].items()]
-        choices.sort(key=lambda f: f[0])
-        return choices
-
-    def as_ordered_dict(self, lang):
-        """Return an OrderedDict {category ID: category name}, sorted by ID.
-
-        Raises a KeyError if the language is not found.
-        """
-        return OrderedDict(self.as_choices(lang))
+        self.scoreboard = scoreboard
 
     def is_configurable_and_nonempty(self):
         """Returns True if the teams are allowed to configure the category
@@ -117,8 +144,14 @@ class Competition(BasePermissionsModel):
         "Thus, it is recommended to always define the category 0. "
         "Optionally, add a '\"CONFIGURABLE\": false' element to denote that "
         "teams cannot themselves modify the category. "
-        "Add '\"HIDDEN\": true' to hide team categories from non-admins.",
+        "Add '\"HIDDEN\": true' to hide team categories from non-admins. "
+        "Set \"SCOREBOARD\" to \"ALL_AND_PER_CATEGORY\" to show separate scoreboards "
+        "per categories, to \"ALL_AND_MY_CATEGORY\" to show only the scoreboard of "
+        "the active team, to \"ALL_AND_MY_THEN_REST\" to show separate but with "
+        "active team's category on top, or to \"ALL\" to only show one scoreboard. "
+        "Note: team categories will be visible even if \"HIDDEN\" is false!",
     )
+    # TODO: Remove this field.
     task_categories_trans = models.CharField(
         blank=False,
         default='',
@@ -204,6 +237,7 @@ class Competition(BasePermissionsModel):
                 ...,
                 "CONFIGURABLE": true/false,
                 "HIDDEN": true/false
+                "SCOREBOARD": true/false,
             }'
         Old format (deprecated):
             "ID1: name | ..."
@@ -214,6 +248,8 @@ class Competition(BasePermissionsModel):
 
         Returns None if the format is invalid."""
 
+        # TODO: The function should return a human readable message in case of
+        # a format error.
         def inner():
             if not self.team_categories.strip():
                 return TeamCategories(lang_to_categories={}, configurable=False)
@@ -221,13 +257,14 @@ class Competition(BasePermissionsModel):
                 return self._parse_team_categories_old(self.team_categories)
 
             parsed = json.loads(self.team_categories)
-            configurable = parsed.pop("CONFIGURABLE", True)
-            hidden = parsed.pop("HIDDEN", False)
+            configurable = bool(parsed.pop("CONFIGURABLE", True))
+            hidden = bool(parsed.pop("HIDDEN", False))
+            scoreboard = _SCOREBOARD[parsed.pop("SCOREBOARD", "ALL")]
             lang_to_categories = {
                 lang: {int(id): key for id, key in categories.items()}
                 for lang, categories in parsed.items()
             }
-            return TeamCategories(lang_to_categories, configurable, hidden)
+            return TeamCategories(lang_to_categories, configurable, hidden, scoreboard)
 
         try:
             return inner()
@@ -310,6 +347,17 @@ class Competition(BasePermissionsModel):
             return _("Participants")
         else:
             return _("Competitors")
+
+    def get_team_metaname_plural_all(self):
+        """Return "All teams", "All competitors" or "All participants",
+        depending on whether this is a team competition or not, and whether it
+        is a competition or a course."""
+        if self.is_team_competition:
+            return _("All teams")
+        elif self.is_course:
+            return _("All participants")
+        else:
+            return _("All competitors")
 
     def msg_has_finished(self):
         if self.is_course:

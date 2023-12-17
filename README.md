@@ -9,6 +9,7 @@
 - [competition] optionally hide team categories from teams themselves
 - [competition] added a new "teams/participants/competitors" admin page, used to change team categories
 - [competition] added `Chain.close_minutes`, used to close the submission for a given chain after a given period of time
+- [competition] added an option to show per-category scoreboards
 - [userprofile] added a registration challenge to fight spam
 
 ### Changes

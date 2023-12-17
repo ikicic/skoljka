@@ -172,11 +172,16 @@ form#comp-scoreboard-admin-refresh {
   margin: 15px 0 0 0;
   color: gray;
 }
-#comp-scoreboard-table {
+.comp-scoreboard {
   text-align: center;
   width: 100%;
 
-  th {
+  /* Gap between consecutive tables. */
+  & + .comp-scoreboard {
+    margin-bottom: 2em;
+  }
+
+  &.table-striped tr.comp-scoreboard-tr th {
     background-color: #f4f7f6 * 0.95;
     padding: 5px;
   }

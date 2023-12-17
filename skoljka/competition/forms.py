@@ -303,7 +303,7 @@ class TeamForm(forms.ModelForm):
         self.categories = self.competition.parse_team_categories()
         if self.categories:
             try:
-                category_choices = self.categories.as_choices(lang)
+                category_choices = self.categories.lang_to_categories[lang].items()
             except KeyError:
                 category_choices = [
                     (
@@ -332,7 +332,7 @@ class TeamForm(forms.ModelForm):
         else:
             del self.fields['name']
 
-        if self.categories.configurable:
+        if self.categories and self.categories.configurable:
             self.fields['category'].widget = forms.RadioSelect(
                 choices=category_choices, renderer=TeamCategoryRadioSelectRenderer
             )

@@ -15,7 +15,7 @@
     <table class="table-striped" id="team-list-admin" data-cy="team-list">
       <tr>
         <th>#</th>
-        {% if team_categories %}
+        {% if categories_dict %}
           <th title="{{ team_categories_title }}">
             <a href="{% comp_url 'team/list/admin' %}?sort=category">{% trans "Category" %}</a>
           </th>
@@ -25,25 +25,25 @@
         </a></th>
         <th><a href="{% comp_url 'team/list/admin' %}?sort=score">{% trans "Total score" %}</a></th>
       </tr>
-      {% for t in teams %}
+      {% for t in main_scoreboard.entries %}
         <tr class="
-            {% if t.id == team.id %}comp-my-team{% endif %}
-            {{ t.get_type_css_class }}">
-          <td>{{ t.t_position }}{{ t.is_normal|yesno:",*" }}</td>
-          {% if team_categories %}
+            {% if t.team.id == team.id %}comp-my-team{% endif %}
+            {{ t.team.get_type_css_class }}">
+          <td>{{ t.position }}{{ t.team.is_normal|yesno:",*" }}</td>
+          {% if categories_dict %}
             <td>
-              <select name="team-{{ t.id }}-category" form="team-list-form">
-                {% if not t.t_is_category_valid %}
-                  <option value="{{ t.category }}" selected>{{ t.t_category_admin }}</option>
+              <select name="team-{{ t.team.id }}-category" form="team-list-form">
+                {% if not t.is_category_valid %}
+                  <option value="{{ t.team.category }}" selected>{{ t.category_admin }}</option>
                 {% endif %}
-                {% for category in team_categories %}
-                  <option value="{{ category.0 }}"{% if t.category == category.0 %} selected{% endif %}>{{ category.1 }}</option>
+                {% for category_id, category_name in categories_dict.items %}
+                  <option value="{{ category_id }}"{% if t.team.category == category_id %} selected{% endif %}>{{ category_name }}</option>
                 {% endfor %}
               </select>
             </td>
           {% endif %}
-          <td>{{ t.get_link }}</td>
-          <td>{% team_score t %}</td>
+          <td>{{ t.team.get_link }}</td>
+          <td>{% team_score t.team %}</td>
         </tr>
       {% endfor %}
     </table>
