@@ -46,6 +46,7 @@ describe("test scoreboard and categories", () => {
   function testWithTeamCategories(hidden) {
     fillWithCategories(`{${RGB}, "HIDDEN": ${hidden}}`);
 
+    cy.createIndividualTeam(COMPETITION, 'competitor0', { category: 0 });
     cy.createIndividualTeam(COMPETITION, 'competitor1', { category: 1 });
     cy.createIndividualTeam(COMPETITION, 'competitor2', { category: 2 });
     cy.createIndividualTeam(COMPETITION, 'competitor3', { category: 3 });
@@ -54,8 +55,8 @@ describe("test scoreboard and categories", () => {
     testTable(
       '[data-cy=scoreboard-main] tr',
       hidden,
-      ['competitor1', 'competitor2', 'competitor3'],
-      ["Red", "Green", "Blue"]);
+      ['competitor0', 'competitor1', 'competitor2', 'competitor3'],
+      ["Invalid category", "Red", "Green", "Blue"]);
   }
 
   it("test with visible team categories", () => {
@@ -70,11 +71,12 @@ describe("test scoreboard and categories", () => {
   function testInvalidScoreboard(scoreboard) {
     fillWithCategories(`{${RGB}, "HIDDEN": true, "SCOREBOARD": ${scoreboard}}`);
 
+    cy.createIndividualTeam(COMPETITION, 'competitor0', { category: 0 });
     cy.createIndividualTeam(COMPETITION, 'competitor1', { category: 1 });
     cy.createIndividualTeam(COMPETITION, 'competitor2', { category: 2 });
 
     cy.visit(`/${COMPETITION}/scoreboard/`);
-    testTable('[data-cy=scoreboard-main] tr', HIDDEN, ['competitor1', 'competitor2']);
+    testTable('[data-cy=scoreboard-main] tr', HIDDEN, ['competitor0', 'competitor1', 'competitor2']);
     cy.get('[data-cy=scoreboard-0]').should('not.exist');
   }
 
@@ -92,10 +94,14 @@ describe("test scoreboard and categories", () => {
 
 
   function testAllAndMyCategory(hidden) {
-    fillWithCategories(`{${RGB}, "HIDDEN": ${hidden}, "SCOREBOARD": "ALL_AND_MY_CATEGORY"}`);
-    const ALL = ['competitor1', 'competitor2', 'competitor3', 'competitor4', 'competitor5', 'competitor6'];
-    const ALL_CATEGORIES = ["Red", "Red", "Green", "Green", "Blue", "Blue"];
+    fillWithCategories(`{${RGB}, "HIDDEN": ${hidden}, "SCOREBOARD": "ALL_AND_NONZERO_MY"}`);
+    const ALL = [
+      'competitor0', 'competitor1', 'competitor2', 'competitor3',
+      'competitor4', 'competitor5', 'competitor6'
+    ];
+    const ALL_CATEGORIES = ["Invalid category", "Red", "Red", "Green", "Green", "Blue", "Blue"];
 
+    cy.createIndividualTeam(COMPETITION, 'competitor0', { category: 0 });
     cy.createIndividualTeam(COMPETITION, 'competitor1', { category: 1 });
     cy.createIndividualTeam(COMPETITION, 'competitor2', { category: 1 });
     cy.createIndividualTeam(COMPETITION, 'competitor3', { category: 2 });
@@ -108,29 +114,40 @@ describe("test scoreboard and categories", () => {
     testTable('[data-cy=scoreboard-main] tr', hidden, ALL, ALL_CATEGORIES);
     cy.get('[data-cy=scoreboard-0]').should('not.exist');
 
-    // Signed in (and registered). Only one extra table.
+    // Signed in and registered. Only one extra table.
     cy.login('competitor3');
     cy.setlang('en');
     cy.visit(`/${COMPETITION}/scoreboard/`);
     testTable('[data-cy=scoreboard-main] tr', hidden, ALL, ALL_CATEGORIES);
     testTable('[data-cy=scoreboard-0] tr', hidden, ['competitor3', 'competitor4'], ["Green", "Green"]);
     cy.get('[data-cy=scoreboard-1]').should('not.exist');
+
+    // Signed in and registered, but category #0. No extra tables.
+    cy.login('competitor0');
+    cy.setlang('en');
+    cy.visit(`/${COMPETITION}/scoreboard/`);
+    testTable('[data-cy=scoreboard-main] tr', hidden, ALL, ALL_CATEGORIES);
+    cy.get('[data-cy=scoreboard-0]').should('not.exist');
   }
 
-  it("test with visible team categories and SCOREBOARD == ALL_AND_MY_CATEGORY", () => {
+  it("test with visible team categories and SCOREBOARD == ALL_AND_NONZERO_MY", () => {
     testAllAndMyCategory(VISIBLE);
   });
 
-  it("test with hidden team categories and SCOREBOARD == ALL_AND_MY_CATEGORY", () => {
+  it("test with hidden team categories and SCOREBOARD == ALL_AND_NONZERO_MY", () => {
     testAllAndMyCategory(HIDDEN);
   });
 
 
   function testWithSeparateScoreboards(hidden, scoreboard) {
     fillWithCategories(`{${RGB}, "HIDDEN": ${hidden}, "SCOREBOARD": "${scoreboard}"}`);
-    const ALL = ['competitor1', 'competitor2', 'competitor3', 'competitor4', 'competitor5', 'competitor6'];
-    const ALL_CATEGORIES = ["Red", "Red", "Green", "Green", "Blue", "Blue"];
+    const ALL = [
+      'competitor0', 'competitor1', 'competitor2', 'competitor3',
+      'competitor4', 'competitor5', 'competitor6'
+    ];
+    const ALL_CATEGORIES = ["Invalid category", "Red", "Red", "Green", "Green", "Blue", "Blue"];
 
+    cy.createIndividualTeam(COMPETITION, 'competitor0', { category: 0 });
     cy.createIndividualTeam(COMPETITION, 'competitor1', { category: 1 });
     cy.createIndividualTeam(COMPETITION, 'competitor2', { category: 1 });
     cy.createIndividualTeam(COMPETITION, 'competitor3', { category: 2 });
@@ -150,11 +167,11 @@ describe("test scoreboard and categories", () => {
     cy.setlang('en');
     cy.visit(`/${COMPETITION}/scoreboard/`);
     testTable('[data-cy=scoreboard-main] tr', hidden, ALL, ALL_CATEGORIES);
-    if (scoreboard == "ALL_AND_PER_CATEGORY") {
+    if (scoreboard == "ALL_AND_NONZERO_EACH") {
       testTable('[data-cy=scoreboard-0] tr', hidden, ['competitor1', 'competitor2'], ["Red", "Red"]);
       testTable('[data-cy=scoreboard-1] tr', hidden, ['competitor3', 'competitor4'], ["Green", "Green"]);
       testTable('[data-cy=scoreboard-2] tr', hidden, ['competitor5', 'competitor6'], ["Blue", "Blue"]);
-    } else if (scoreboard == "ALL_AND_MY_THEN_REST") {
+    } else if (scoreboard == "ALL_AND_NONZERO_MY_THEN_REST") {
       testTable('[data-cy=scoreboard-0] tr', hidden, ['competitor3', 'competitor4'], ["Green", "Green"]);
       testTable('[data-cy=scoreboard-1] tr', hidden, ['competitor1', 'competitor2'], ["Red", "Red"]);
       testTable('[data-cy=scoreboard-2] tr', hidden, ['competitor5', 'competitor6'], ["Blue", "Blue"]);
@@ -163,19 +180,19 @@ describe("test scoreboard and categories", () => {
     }
   }
 
-  it("test with visible team categories and SCOREBOARD == ALL_AND_PER_CATEGORY", () => {
-    testWithSeparateScoreboards(VISIBLE, "ALL_AND_PER_CATEGORY");
+  it("test with visible team categories and SCOREBOARD == ALL_AND_NONZERO_EACH", () => {
+    testWithSeparateScoreboards(VISIBLE, "ALL_AND_NONZERO_EACH");
   });
 
-  it("test with visible team categories and SCOREBOARD == ALL_AND_MY_THEN_REST", () => {
-    testWithSeparateScoreboards(VISIBLE, "ALL_AND_MY_THEN_REST");
+  it("test with visible team categories and SCOREBOARD == ALL_AND_NONZERO_MY_THEN_REST", () => {
+    testWithSeparateScoreboards(VISIBLE, "ALL_AND_NONZERO_MY_THEN_REST");
   });
 
-  it("test with hidden team categories and SCOREBOARD == ALL_AND_PER_CATEGORY", () => {
-    testWithSeparateScoreboards(HIDDEN, "ALL_AND_PER_CATEGORY");
+  it("test with hidden team categories and SCOREBOARD == ALL_AND_NONZERO_EACH", () => {
+    testWithSeparateScoreboards(HIDDEN, "ALL_AND_NONZERO_EACH");
   });
 
-  it("test with hidden team categories and SCOREBOARD == ALL_AND_MY_THEN_REST", () => {
-    testWithSeparateScoreboards(HIDDEN, "ALL_AND_MY_THEN_REST");
+  it("test with hidden team categories and SCOREBOARD == ALL_AND_NONZERO_MY_THEN_REST", () => {
+    testWithSeparateScoreboards(HIDDEN, "ALL_AND_NONZERO_MY_THEN_REST");
   });
 });

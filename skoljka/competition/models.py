@@ -29,9 +29,9 @@ KIND_CHOICES = [
 
 class Scoreboard(Enum):
     ALL = 0
-    ALL_AND_MY_CATEGORY = 1
-    ALL_AND_PER_CATEGORY = 2
-    ALL_AND_MY_THEN_REST = 3
+    ALL_AND_NONZERO_MY = 1
+    ALL_AND_NONZERO_EACH = 2
+    ALL_AND_NONZERO_MY_THEN_REST = 3
 
 
 _SCOREBOARD = {item.name: item for item in Scoreboard}
@@ -145,10 +145,10 @@ class Competition(BasePermissionsModel):
         "Optionally, add a '\"CONFIGURABLE\": false' element to denote that "
         "teams cannot themselves modify the category. "
         "Add '\"HIDDEN\": true' to hide team categories from non-admins. "
-        "Set \"SCOREBOARD\" to \"ALL_AND_PER_CATEGORY\" to show separate scoreboards "
-        "per categories, to \"ALL_AND_MY_CATEGORY\" to show only the scoreboard of "
-        "the active team, to \"ALL_AND_MY_THEN_REST\" to show separate but with "
-        "active team's category on top, or to \"ALL\" to only show one scoreboard. "
+        "Set \"SCOREBOARD\" to \"ALL_AND_NONZERO_EACH\" to show separate scoreboards per non-zero categories, "
+        "to \"ALL_AND_NONZERO_MY\" to show only the scoreboard of the active team if its category is non-zero, "
+        "to \"ALL_AND_NONZERO_MY_THEN_REST\" to show separate but with active team's category on top, "
+        "or to \"ALL\" to only show one scoreboard. "
         "Note: team categories will be visible even if \"HIDDEN\" is false!",
     )
     # TODO: Remove this field.

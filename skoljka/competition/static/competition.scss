@@ -177,8 +177,8 @@ form#comp-scoreboard-admin-refresh {
   width: 100%;
 
   /* Gap between consecutive tables. */
-  & + .comp-scoreboard {
-    margin-bottom: 2em;
+  & + h3 {
+    margin-top: 2em;
   }
 
   &.table-striped tr.comp-scoreboard-tr th {

@@ -266,23 +266,27 @@ def _prepare_extra_scoreboards(teams, order_by, categories_dict, scoreboard, my_
 
     Types of scoreboards:
         ALL: only the main scoreboard shown
-        ALL_AND_MY_CATEGORY: the main scoreboard + only scoreboard of my team category
-        ALL_AND_MY_THEN_REST: the main scoreboard + one scoreboard per team category
-                              (with my being on top)
+        ALL_AND_NONZERO_MY: the main scoreboard + scoreboard of my team category, if non-zero
+        ALL_AND_NONZERO_EACH: the main scoreboard + one scoreboard per non-zero team category
+        ALL_AND_NONZERO_MY_THEN_REST: same as ALL_AND_NONZERO_EACH, with my being on top, if non-zero
     """
-    if my_team and scoreboard == Scoreboard.ALL_AND_MY_CATEGORY:
-        filtered_teams = [team for team in teams if team.category == my_team.category]
-        return [_make_scoreboard(filtered_teams, order_by, categories_dict)]
+    if scoreboard == Scoreboard.ALL_AND_NONZERO_MY:
+        if my_team and my_team.category != 0:
+            filtered_teams = [t for t in teams if t.category == my_team.category]
+            return [_make_scoreboard(filtered_teams, order_by, categories_dict)]
+        else:
+            return []  # No side scoreboards.
     elif (
-        scoreboard == Scoreboard.ALL_AND_MY_THEN_REST
-        or scoreboard == Scoreboard.ALL_AND_PER_CATEGORY
+        scoreboard == Scoreboard.ALL_AND_NONZERO_EACH
+        or scoreboard == Scoreboard.ALL_AND_NONZERO_MY_THEN_REST
     ):
         team_groups = defaultdict(list)
         for team in teams:
-            team_groups[team.category].append(team)
+            if team.category != 0:
+                team_groups[team.category].append(team)
 
         team_groups = list(team_groups.items())
-        if my_team and scoreboard == Scoreboard.ALL_AND_MY_THEN_REST:
+        if my_team and scoreboard == Scoreboard.ALL_AND_NONZERO_MY_THEN_REST:
             # Put my team at the top.
             team_groups.sort(key=lambda item: (item[0] != my_team.category, item[0]))
         else:
