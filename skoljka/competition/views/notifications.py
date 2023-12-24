@@ -148,4 +148,4 @@ def _notification_ctask_prefix(ctask, is_admin):
     )
     if is_admin:
         return task_link
-    return task_link + '<' + _("Write the question / message here.") + '>'
+    return task_link + _("Write the question / message here.")
