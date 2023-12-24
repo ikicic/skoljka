@@ -52,7 +52,7 @@ def task_detail(request, competition, data, ctask_id):
         )
         if response:
             return response
-        if view.chain.close_minutes:
+        if view.chain and view.chain.close_minutes:
             data['chain_open_until'] = competition.start_date + datetime.timedelta(
                 minutes=view.chain.close_minutes
             )
