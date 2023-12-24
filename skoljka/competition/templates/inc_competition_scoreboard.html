@@ -10,10 +10,10 @@
     {% if are_team_categories_visible %}
       <th title="{{ team_categories_title }}">{% trans "Category" %}</th>
     {% endif %}
-    <th><a href="{{ competition.get_scoreboard_url }}?sort=name">
+    <th><a href="{% competition_scoreboard_url scoreboard.sort_key 'name' %}" data-cy="sort-by-name">
       {{ competition.get_team_metaname }}
     </a></th>
-    <th><a href="{{ competition.get_scoreboard_url }}?sort=score">
+    <th><a href="{% competition_scoreboard_url scoreboard.sort_key 'score' %}" data-cy="sort-by-score">
       {% trans "Total score" %}
     </a></th>
   </tr>

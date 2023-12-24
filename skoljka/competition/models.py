@@ -453,10 +453,10 @@ class TeamMember(models.Model):
 class Chain(models.Model):
     UNLOCK_GRADUAL = 1
     UNLOCK_ALL = 2
-    UNLOCK_MODES = [
-        (UNLOCK_GRADUAL, ugettext_lazy("Gradual unlocking")),
-        (UNLOCK_ALL, ugettext_lazy("All tasks unlocked")),
-    ]
+    UNLOCK_MODES = {
+        UNLOCK_GRADUAL: ugettext_lazy("Gradual unlocking"),
+        UNLOCK_ALL: ugettext_lazy("All tasks unlocked"),
+    }
 
     competition = models.ForeignKey(Competition)
     name = models.CharField(max_length=200)
@@ -500,7 +500,7 @@ class Chain(models.Model):
         ),
     )
     unlock_mode = models.SmallIntegerField(
-        choices=UNLOCK_MODES,
+        choices=list(UNLOCK_MODES.items()),
         default=UNLOCK_GRADUAL,
         help_text=ugettext_lazy(
             "Either gradual unlocking (tasks unlocked one by one as they are solved "

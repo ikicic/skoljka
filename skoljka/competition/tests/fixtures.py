@@ -264,7 +264,11 @@ def create_test_team(request, competition_id):
         author=author,
         competition_id=competition_id,
         category=body['category'],
+        cache_score=body['cache-score'],
+        cache_score_before_freeze=body['cache-score'],
+        cache_max_score_after_freeze=body['cache-score'],
     )
+    print("TEAM", team.cache_score)
     for member in members:
         TeamMember.objects.create(
             team=team,
@@ -306,20 +310,55 @@ def update_chain(request, chain_id):
     if 'name' in post:
         chain.name = pop('name')
     if 'unlock-minutes' in post:
-        chain.unlock_minutes = pop('unlock-minutes')
+        chain.unlock_minutes = int(pop('unlock-minutes'))
     if 'close-minutes' in post:
-        chain.close_minutes = pop('close-minutes')
+        chain.close_minutes = int(pop('close-minutes'))
     if 'category' in post:
-        chain.category = pop('category')
+        chain.category = int(pop('category'))
     if 'bonus' in post:
-        chain.bonus_score = pop('bonus')
+        chain.bonus_score = int(pop('bonus'))
     if 'position' in post:
-        chain.position = pop('position')
+        chain.position = int(pop('position'))
     if 'unlock-mode' in post:
-        chain.unlock_mode = pop('unlock-mode')
+        chain.unlock_mode = int(pop('unlock-mode'))
+        assert chain.unlock_mode in Chain.UNLOCK_MODES
     if 'restricted-access' in post:
         chain.restricted_access = pop('restricted-access') == 'true'
     if len(post):
         raise Exception("Unexpected POST: {}".format(post))
     chain.save()
+    return HttpResponse('{}', mimetype='application/json')
+
+
+@csrf_exempt
+@assert_testdb
+def update_competition(request, competition_id):
+    competition = Competition.objects.get(id=competition_id)
+    post = request.POST.copy()
+
+    def pop(name):
+        value = post.pop(name)
+        assert len(value) == 1, value
+        return value[0]
+
+    if 'name' in post:
+        competition.name = pop('name')
+    if 'kind' in post:
+        competition.kind = int(pop('kind'))
+        assert competition.kind in Competition.KIND
+    if 'hidden' in post:
+        competition.hidden = pop('hidden') == 'true'
+    if 'default-max-submissions' in post:
+        competition.default_max_submissions = int(pop('default-max-submissions'))
+    if 'max-team-size' in post:
+        competition.max_team_size = int(pop('max-team-size'))
+    if 'fixed-task-score' in post:
+        competition.fixed_task_score = int(pop('fixed-task-score'))
+    if 'min-admin-solved-count' in post:
+        competition.min_admin_solved_count = int(pop('min-admin-solved-count'))
+    if 'team-categories' in post:
+        competition.team_categories = pop('team-categories')
+    if len(post):
+        raise Exception("Unexpected POST: {}".format(post))
+    competition.save()
     return HttpResponse('{}', mimetype='application/json')

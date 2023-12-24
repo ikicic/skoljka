@@ -2,6 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 
 from django.http import HttpResponse, HttpResponseBadRequest
+from django.utils.http import urlencode
 from django.utils.translation import ugettext as _
 
 from skoljka.competition.decorators import competition_view
@@ -144,9 +145,10 @@ class ScoreboardTableEntry:
 
 
 class ScoreboardTable:
-    def __init__(self, entries, title=None):
+    def __init__(self, entries, sort_key, title=None):
         self.entries = entries
         self.title = title
+        self.sort_key = sort_key
 
 
 def _team_list(request, competition, data):
@@ -154,7 +156,6 @@ def _team_list(request, competition, data):
 
     The two are identical, up to the default sorting and terminology.
     """
-
     if not competition.public_scoreboard and not data['is_admin']:
         return (competition.get_absolute_url(),)  # Redirect to home.
 
@@ -166,25 +167,8 @@ def _team_list(request, competition, data):
 
     extra = {} if data['is_admin'] else {'team_type': Team.TYPE_NORMAL}
 
-    sort_by = request.GET.get('sort')
-    if sort_by == 'actual_score' and data['is_admin']:
-        order_by = '-cache_score'
-    elif sort_by == 'category' and data['is_admin']:
-        # Only for admins, because the sort is by ID, which is unintuitive.
-        order_by = 'category'
-    elif sort_by == 'name':
-        order_by = 'name'
-    elif sort_by == 'score':
-        order_by = '-cache_score_before_freeze'
-    elif competition.is_course:
-        order_by = 'name'
-    else:
-        order_by = '-cache_score_before_freeze'
-
     teams = list(
-        Team.objects.filter(competition=competition, **extra)
-        .order_by(order_by, 'id')
-        .only(
+        Team.objects.filter(competition=competition, **extra).only(
             'id',
             'name',
             'cache_score',
@@ -204,13 +188,17 @@ def _team_list(request, competition, data):
     for team in teams:
         team.competition = competition
 
-    data['main_scoreboard'] = _make_scoreboard(teams, order_by, categories_dict)
+    data['main_scoreboard'] = _make_scoreboard(
+        request, competition, teams, categories_dict, data['is_admin'], sort_key='sort'
+    )
     data['extra_scoreboards'] = _prepare_extra_scoreboards(
+        request,
+        competition,
         teams,
-        order_by,
         categories_dict,
         categories.scoreboard,
         data['team'],
+        data['is_admin'],
     )
     if data['extra_scoreboards']:
         # When `categories.hidden == True`, we need to show the team categories,
@@ -220,8 +208,18 @@ def _team_list(request, competition, data):
         # scoreboards are shown.
         data['main_scoreboard'].title = competition.get_team_metaname_plural_all
         for scoreboard in data['extra_scoreboards']:
-            if scoreboard.entries:  # This should always be non-empty.
+            if scoreboard.entries:  # Just in case (we expect this to be non-empty).
                 scoreboard.title = scoreboard.entries[0].category
+
+    all_sort_keys = [scoreboard.sort_key for scoreboard in data['extra_scoreboards']]
+    all_sort_keys.append(data['main_scoreboard'].sort_key)
+    url_prefix = competition.get_scoreboard_url() + '?'
+    data['sort_all_by_score_url'] = url_prefix + urlencode(
+        {key: 'score' for key in all_sort_keys}
+    )
+    data['sort_all_by_actual_score_url'] = url_prefix + urlencode(
+        {key: 'actual_score' for key in all_sort_keys}
+    )
 
     data['teams'] = teams
     data['as_participants'] = competition.is_course
@@ -230,7 +228,10 @@ def _team_list(request, competition, data):
     return data
 
 
-def _make_scoreboard(teams, order_by, categories_dict):
+def _make_scoreboard(request, competition, teams, categories_dict, is_admin, sort_key):
+    order_by = _get_order_by(request, sort_key)
+    _inplace_sort_teams(competition, teams, order_by, is_admin)
+
     last_score = -1
     last_position = 1
     position = 1
@@ -246,7 +247,7 @@ def _make_scoreboard(teams, order_by, categories_dict):
             entry.category = categories_dict.get(team.category)
             if entry.category is None:
                 entry.is_category_valid = False
-                # One will be publicly visible, so do not expose the number there.
+                # Category will be publicly visible, so do not expose the number there.
                 entry.category = _("Invalid category")
                 entry.category_admin = _("Invalid category #%d") % team.category
             else:
@@ -257,10 +258,37 @@ def _make_scoreboard(teams, order_by, categories_dict):
 
         entries.append(entry)
 
-    return ScoreboardTable(entries)
+    return ScoreboardTable(entries, sort_key)
 
 
-def _prepare_extra_scoreboards(teams, order_by, categories_dict, scoreboard, my_team):
+def _get_order_by(request, sort_key):
+    """Return the order_by according to the GET parameter given by the `sort_key`
+    variable, or (with a lower priority), the `sortall` key, or `None`."""
+    order_by = request.GET.get(sort_key)
+    if order_by is None:
+        order_by = request.GET.get('sortall')
+    return order_by
+
+
+def _inplace_sort_teams(competition, teams, order_by, is_admin):
+    """Sort the teams according to the given order_by."""
+    if order_by == 'actual_score' and is_admin:
+        teams.sort(key=lambda team: (-team.cache_score, team.id))
+    elif order_by == 'category' and is_admin:
+        teams.sort(key=lambda team: (team.category, team.id))
+    elif order_by == 'name':
+        teams.sort(key=lambda team: (team.name, team.id))
+    elif order_by == 'score':
+        teams.sort(key=lambda team: (-team.cache_score_before_freeze, team.id))
+    elif competition.is_course:
+        teams.sort(key=lambda team: (team.name, team.id))
+    else:
+        teams.sort(key=lambda team: (-team.cache_score_before_freeze, team.id))
+
+
+def _prepare_extra_scoreboards(
+    request, competition, teams, categories_dict, scoreboard, my_team, is_admin
+):
     """Prepare the scoreboards that are shown next to the main scoreboard.
     Returns a list of scoreboards. Each scoreboard is a list of teams.
 
@@ -273,7 +301,15 @@ def _prepare_extra_scoreboards(teams, order_by, categories_dict, scoreboard, my_
     if scoreboard == Scoreboard.ALL_AND_NONZERO_MY:
         if my_team and my_team.category != 0:
             filtered_teams = [t for t in teams if t.category == my_team.category]
-            return [_make_scoreboard(filtered_teams, order_by, categories_dict)]
+            scoreboard = _make_scoreboard(
+                request,
+                competition,
+                filtered_teams,
+                categories_dict,
+                is_admin,
+                sort_key='sort{}'.format(my_team.category),
+            )
+            return [scoreboard]
         else:
             return []  # No side scoreboards.
     elif (
@@ -293,7 +329,14 @@ def _prepare_extra_scoreboards(teams, order_by, categories_dict, scoreboard, my_
             team_groups.sort(key=lambda item: item[0])
 
         return [
-            _make_scoreboard(team_group, order_by, categories_dict)
+            _make_scoreboard(
+                request,
+                competition,
+                team_group,
+                categories_dict,
+                is_admin,
+                sort_key='sort{}'.format(category),
+            )
             for category, team_group in team_groups
         ]
     else:

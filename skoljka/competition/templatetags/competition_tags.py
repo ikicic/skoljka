@@ -27,6 +27,14 @@ def comp_url(context, *parts):
 
 
 @register.simple_tag(takes_context=True)
+def competition_scoreboard_url(context, key, value):
+    """Return a scoreboard URL with an additional key=value GET parameter."""
+    get_params = context['request'].GET.copy()
+    get_params[key] = value
+    return '?' + get_params.urlencode()
+
+
+@register.simple_tag(takes_context=True)
 def cdebug(context, var):
     return dir(var)
 

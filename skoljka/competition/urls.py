@@ -77,6 +77,7 @@ if IS_TESTDB:
         (r'test/create_ctasks/$', _fixtures.create_test_ctasks),
         (r'test/create_team/$', _fixtures.create_test_team),
         (r'test/delete_teams/$', _fixtures.delete_teams),
+        (r'test/update_competition/$', _fixtures.update_competition),
     ]
     _extra_urls += patterns(
         '',

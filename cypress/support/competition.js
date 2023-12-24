@@ -22,6 +22,7 @@ const CREATE_CHAIN_DEFAULTS = {
 const CREATE_INDIVIDUAL_TEAM_DEFAULTS = {
   category: 0,
   chainAccess: [],
+  cacheScore: 0,
 };
 
 function _applyDefaults(options, defaults) {
@@ -79,7 +80,12 @@ function createChain(competition, options) {
 }
 
 
-/// Create a team. Returns team_id.
+/**
+ * Create a team. Returns team_id.
+ *
+ * Note that a non-zero cache_score may be reset by various actions such as
+ * submitting a solution or changing tasks.
+ */
 function createIndividualTeam(competition, username, options) {
   options = _applyDefaults(options, CREATE_INDIVIDUAL_TEAM_DEFAULTS);
 
@@ -92,6 +98,7 @@ function createIndividualTeam(competition, username, options) {
       'member-usernames': [username],
       'category': options.category,
       'chain-access': options.chainAccess,
+      'cache-score': options.cacheScore,
     }),
   }).then((response) => {
     return response.body;
@@ -110,7 +117,7 @@ function deleteTeams(competition, teamIds) {
 }
 
 
-/// Create a chain and ctasks in it. Returns the cy.request promise.
+/// Update a chain. Returns the cy.request promise.
 function updateChain(chain_id, body) {
   return cy.request({
     method: 'POST',
@@ -121,8 +128,19 @@ function updateChain(chain_id, body) {
 }
 
 
+/// Update a competition. Returns the cy.request promise.
+function updateCompetition(competition, body) {
+  return cy.request({
+    method: 'POST',
+    url: `/${competition}/test/update_competition/`,
+    form: true,
+    body: body,
+  });
+}
+
 Cypress.Commands.add('createCTasks', createCTasks);
 Cypress.Commands.add('createChain', createChain);
 Cypress.Commands.add('createIndividualTeam', createIndividualTeam);
 Cypress.Commands.add('deleteTeams', deleteTeams);
 Cypress.Commands.add('updateChain', updateChain);
+Cypress.Commands.add('updateCompetition', updateCompetition);
