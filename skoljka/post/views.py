@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 
 from skoljka.activity import action as _action
-from skoljka.mathcontent.forms import MathContentForm
+from skoljka.post.forms import PostsForm, PostsLargeForm
 from skoljka.post.models import Post
 from skoljka.utils.decorators import require
 
@@ -22,7 +22,7 @@ def add_post(request):
         else get_object_or_404(Post.objects.select_related('author'), pk=reply_to_id)
     )
 
-    math_content_form = MathContentForm(request.POST)
+    math_content_form = PostsForm(request.POST)
     if math_content_form.is_valid():
         content_type = get_object_or_404(
             ContentType, pk=request.POST['content_type_id']
@@ -58,14 +58,13 @@ def add_post(request):
             content=content,
         )
 
+        reply_to_author_group = None
         if reply_to:
             try:
                 reply_to_author_group = Group.objects.get(name=reply_to.author.username)
             except Group.DoesNotExist:
                 pass
                 # TODO: report error
-        else:
-            reply_to_author_group = None
 
         _action.add(
             request.user,
@@ -85,7 +84,7 @@ def edit_post(request, post_id=None):
         return HttpResponseForbidden("Not allowed to edit this post.")
 
     if request.method == 'POST':
-        math_content_form = MathContentForm(request.POST, instance=post.content)
+        math_content_form = PostsLargeForm(request.POST, instance=post.content)
         if math_content_form.is_valid():
             math_content_form.save()
             post.last_edit_by = request.user
@@ -96,7 +95,7 @@ def edit_post(request, post_id=None):
         'post_edit.html',
         {
             'next': request.GET.get('next', '/'),
-            'math_content_form': MathContentForm(instance=post.content),
+            'math_content_form': PostsLargeForm(instance=post.content),
             'post': post,
         },
         context_instance=RequestContext(request),

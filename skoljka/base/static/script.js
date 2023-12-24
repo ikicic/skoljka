@@ -13,27 +13,27 @@
 /* Django & Ajax POST method */
 /* http://stackoverflow.com/questions/5100539/django-csrf-check-failing-with-an-ajax-post-request */
 $.ajaxSetup({
-     beforeSend: function(xhr, settings) {
-         function getCookie(name) {
-             var cookieValue = null;
-             if (document.cookie && document.cookie != '') {
-                 var cookies = document.cookie.split(';');
-                 for (var i = 0; i < cookies.length; i++) {
-                     var cookie = jQuery.trim(cookies[i]);
-                     // Does this cookie string begin with the name we want?
-                 if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                     break;
-                 }
-             }
-         }
-         return cookieValue;
-         }
-         if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-             // Only send the token to relative URLs i.e. locally.
-             xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-         }
-     }
+  beforeSend: function(xhr, settings) {
+    function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+          var cookie = jQuery.trim(cookies[i]);
+          // Does this cookie string begin with the name we want?
+          if (cookie.substring(0, name.length + 1) == (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+      // Only send the token to relative URLs i.e. locally.
+      xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+    }
+  }
 });
 
 
@@ -48,9 +48,9 @@ $.ajaxSetup({
   });
 */
 
-typewatch = (function(){
+typewatch = (function() {
   var timer = 0;
-  return function(callback, ms){
+  return function(callback, ms) {
     clearTimeout(timer);
     timer = setTimeout(callback, ms);
   }
@@ -61,7 +61,7 @@ typewatch = (function(){
 /* MathContent View source & quote link */
 function quote(mc) {
   var s = $.trim(mc.find('.mc-viewsource-text').text());
-  $('#id_text').val('\n\n[quote]' + s + '[/quote]');
+  $('#id_posts-text').val('\n\n[quote]' + s + '[/quote]');
 };
 
 function set_reply(id) {
@@ -74,9 +74,9 @@ function set_reply(id) {
 };
 window.set_reply = set_reply;
 
-$(function(){
+$(function() {
   /* Post reply */
-  $('.post-reply').click(function(){
+  $('.post-reply').click(function() {
     var id = $(this).attr('id').substr(2)
 
     set_reply(id);
@@ -88,7 +88,7 @@ $(function(){
   });
 
   /* Cancel post reply */
-  $('#reply-to-info a:last').click(function(){
+  $('#reply-to-info a:last').click(function() {
     set_reply('');
   });
 
@@ -107,16 +107,20 @@ $(function(){
 
 
 /* Task tooltip */
-$(function(){
+$(function() {
   if (!is_authenticated) return;
-  if (!( $('a.task').length)) return;
+  if (!($('a.task').length)) return;
   $('body').append(
-      '<div id="task-tooltip" class="btn-group">'
-    + '<a id="task-tt-submit" href="#" title="' + gettext("Submit a solution") + '" class="btn btn-mini"><i class="icon-file"></i></a>'
-    + '<a id="task-tt-as-solved" href="#" title="' + gettext("Mark as solved") + '" class="btn btn-mini"><i class="icon-ok"></i></a>'
-    + '<a id="task-tt-todo" href="#" title="' + gettext("To do") + '" class="btn btn-mini"><i class="icon-tag"></i></a>'
-    + '<a id="task-tt-blank" href="#" title="' + gettext("Delete solution") + '" class="btn btn-mini"><i class="icon-remove"></i></a>'
-    + '</div>'
+    '<div id="task-tooltip" class="btn-group">' +
+    '<a id="task-tt-submit" href="#" title="' + gettext("Submit a solution") +
+    '" class="btn btn-mini"><i class="icon-file"></i></a>' +
+    '<a id="task-tt-as-solved" href="#" title="' + gettext("Mark as solved") +
+    '" class="btn btn-mini"><i class="icon-ok"></i></a>' +
+    '<a id="task-tt-todo" href="#" title="' + gettext("To do") +
+    '" class="btn btn-mini"><i class="icon-tag"></i></a>' +
+    '<a id="task-tt-blank" href="#" title="' + gettext("Delete solution") +
+    '" class="btn btn-mini"><i class="icon-remove"></i></a>' +
+    '</div>'
   );
 
   var solution_action = function(e, action) {
@@ -139,20 +143,22 @@ $(function(){
     }
 
     $.post('/ajax/task/' + container.attr('data-task-id') + '/', {
-        action: action,
-      }, function(json) {
-        info = $.parseJSON(json);
-        if (label) { /* small box */
-          if (action == 'blank') {
-            label.remove();
-          } else {
-            label.attr('class', 'label ' + info.label_class);
-            label.html(info.label_text);
-          }
-        } else {  /* table view */
-          /* container == tr */
-          container.attr('class', 'task-container ' + info.tr_class);
+      action: action,
+    }, function(json) {
+      info = $.parseJSON(json);
+      if (label) {
+        /* small box */
+        if (action == 'blank') {
+          label.remove();
+        } else {
+          label.attr('class', 'label ' + info.label_class);
+          label.html(info.label_text);
         }
+      } else {
+        /* table view */
+        /* container == tr */
+        container.attr('class', 'task-container ' + info.tr_class);
+      }
     }).fail(function() {
       if (label)
         label.html(gettext("Error!"));
@@ -161,9 +167,9 @@ $(function(){
     });
   };
 
-  $('#task-tt-as-solved').click(function(e) {solution_action(e, 'as_solved');});
-  $('#task-tt-todo').click(function(e) {solution_action(e, 'todo');});
-  $('#task-tt-blank').click(function(e) {solution_action(e, 'blank');});
+  $('#task-tt-as-solved').click(function(e) { solution_action(e, 'as_solved'); });
+  $('#task-tt-todo').click(function(e) { solution_action(e, 'todo'); });
+  $('#task-tt-blank').click(function(e) { solution_action(e, 'blank'); });
 
   /* Tooltip will be shown only for tasks with this marker. */
   $('.task-tt-marker').tooltip({
@@ -208,17 +214,18 @@ $(function() {
   });
 
   /* Search toggler */
-  $(".toggler").click(function(e){
+  $(".toggler").click(function(e) {
     e.preventDefault();
     $(".toggle").toggle();
   });
 
   /* Task prerequisites ajax information */
   var pre = $('.task-prerequisites')
-  pre.attr('data-old', pre.val());  /* remember old value */
+  pre.attr('data-old', pre.val()); /* remember old value */
   pre.parent().append(' <span id="task-pre-info"></span>');
-  pre.keyup(function () {          /* ajax info */
-    typewatch(function () {
+  pre.keyup(function() {
+    /* ajax info */
+    typewatch(function() {
       var value = pre.val();
       if (value == pre.attr('data-old'))
         return; /* if value not changed, ignore */

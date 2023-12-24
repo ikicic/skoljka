@@ -57,6 +57,9 @@ def task_detail(request, competition, data, ctask_id):
                 minutes=view.chain.close_minutes
             )
 
+    if view.ctask.is_manually_graded():
+        view.handle_manual_grading_submission(submissions, data)
+
     if view.is_admin:
         data['all_ctask_submissions'] = view.get_all_ctask_submissions()
 
@@ -207,20 +210,19 @@ class _TaskDetailView(object):
         return self.is_admin or not self.ctask.t_is_locked
 
     def handle_form(self, evaluator, chain_ctasks, chain_submissions, submissions):
-        if self.can_submit_solutions():
-            if self.ctask.is_automatically_graded():
-                return self._handle_automatic_grading_form(
-                    evaluator, chain_ctasks, chain_submissions, submissions
-                )
-            else:
-                assert self.ctask.is_manually_graded(), self.ctask
-                return self._handle_manual_grading_form(submissions)
+        if self.ctask.is_automatically_graded():
+            return self._handle_automatic_grading_form(
+                evaluator, chain_ctasks, chain_submissions, submissions
+            )
         else:
-            return None
+            assert self.ctask.is_manually_graded(), self.ctask
+            return self._handle_manual_grading_form(submissions)
 
     def _handle_automatic_grading_form(
         self, evaluator, chain_ctasks, chain_submissions, submissions
     ):
+        assert self.can_submit_solutions()
+
         ctask = self.ctask
         if (
             self.request.method == 'POST'
@@ -255,6 +257,8 @@ class _TaskDetailView(object):
         self.data['solution_form'] = solution_form
 
     def _handle_manual_grading_form(self, submissions):
+        assert self.can_submit_solutions()
+
         data = self.data
         if submissions:
             # If it somehow happens that there is more than one submission,
@@ -278,12 +282,25 @@ class _TaskDetailView(object):
             submission.mark_unseen_team_activity()
             submission.save()
 
-            # There is no score update update, because grading is done separately by moderators.
-            # Prevent form resubmission.
+            # There is no score update update, because grading is done
+            # separately by moderators. Redirect to prevent form resubmission.
             return (self.ctask.get_absolute_url(),)
-        elif (
+
+        data['content_form'] = content_form
+
+    def handle_manual_grading_submission(self, submissions, data):
+        if not submissions:
+            return
+
+        # If it somehow happens that there is more than one submission,
+        # consider only the first one.
+        submission = submissions[0]
+        data['submission'] = submission
+        data['submission_actions'], data['not_graded'] = get_submission_actions(
             submission
-            and submission.oldest_unseen_admin_activity
+        )
+        if (
+            submission.oldest_unseen_admin_activity
             != Submission.NO_UNSEEN_ACTIVITIES_DATETIME
         ):
             data['unread_newer_than'] = submission.oldest_unseen_admin_activity
@@ -291,13 +308,6 @@ class _TaskDetailView(object):
                 Submission.NO_UNSEEN_ACTIVITIES_DATETIME
             )
             submission.save()
-
-        data['content_form'] = content_form
-        data['submission'] = submission
-        if submission:
-            data['submission_actions'], data['not_graded'] = get_submission_actions(
-                submission
-            )
 
     def get_all_ctask_submissions(self):
         ctask = self.ctask

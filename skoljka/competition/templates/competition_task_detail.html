@@ -55,7 +55,7 @@
 
   {% if submissions|length < ctask.max_submissions and not is_solved %}
     {% if has_finished %}
-      <div class="ctask-submision-closed">
+      <div class="ctask-submission-closed">
         {{ competition.msg_has_finished }}
       </div>
     {% elif submissions_closed %}
@@ -104,25 +104,42 @@
   {% endif %}
 {% elif team and ctask.is_manually_graded %}
   {% if submission or not has_finished %}
-    <h4>{% trans "Answer:" %}</h4>
+    {% if not submissions_closed %}
+      <h4>{% trans "Answer:" %}</h4>
+    {% endif %}
   {% endif %}
   {% if submission and submission.content %}
-    <div class="outset ctask-answer">
+    <div class="outset ctask-answer" data-cy="ctask-answer">
       {% mathcontent_render submission.content %}
     </div>
   {% endif %}
-  {% if not has_finished %}
+
+  {% if has_finished %}
+    <div class="ctask-submission-closed">
+      {{ competition.msg_has_finished }}
+    </div>
+  {% elif submissions_closed %}
+    <div class="ctask-submission-closed">
+      {% trans "Submissions are now closed." %}
+    </div>
+  {% else %}
     <form action="{{ request.get_full_path }}" method="POST" class="form-inline">
       {% csrf_token %}
       {{ content_form.text }}
       <input type="hidden" name="action" value="solution">
       {% if submission %}
-        <input type="submit" class="btn btn-primary" value="{% trans "Save" %}" />
+        <input type="submit" class="btn btn-primary" value="{% trans "Save" %}" data-cy="save-solution"/>
       {% else %}
-        <input type="submit" class="btn btn-primary" value="{% trans "Submit" %}" />
+        <input type="submit" class="btn btn-primary" value="{% trans "Submit" %}" data-cy="submit-solution"/>
       {% endif %}
     </form>
+    {% if chain_open_until %}
+      <div class="ctask-submission-info">
+        {% trans "Time remaining:" %} {{ chain_open_until|timeuntil }}
+      </div>
+    {% endif %}
   {% endif %}
+
   {% if submission %}
     <div style="margin:2em 0 2em 0;">
       <h4>{% trans "Score:" %}</h4>
@@ -130,6 +147,11 @@
     </div>
   {% else %}
     {% ctask_score_text ctask %}
+    {% if not has_finished and not submissions_closed %}
+      <a href="{{ ctask.get_send_clarification_request_url }}">
+        {% trans "Ask for a clarification" %}
+      </a>
+    {% endif %}
   {% endif %}
 {% endif %}
 

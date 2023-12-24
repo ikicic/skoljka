@@ -23,6 +23,7 @@
 - [competition] courses and competitions URLs are automatically redirected to the correct URL (as returned by `get_absolute_url()`)
 - [competition] made the solution help optional in the competition and course help pages
 - [competition] split `views.py` into multiple files `views/*.py`
+- [posts] changed the prefix of PostsForm to avoid `id` collision
 
 # Installation (Docker)
 

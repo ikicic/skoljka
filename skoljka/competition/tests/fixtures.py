@@ -165,16 +165,19 @@ def _create_test_ctasks(request, competition_id, chain=None):
     num_tasks = int(request.POST['num-tasks'])
     text_format = request.POST['text-format']
     comment_format = request.POST['comment-format']
+    max_score = request.POST.get('max-score', 1)
+    descriptor = request.POST.get('descriptor')
 
     ctask_ids = []
     for i in range(num_tasks):
         # Note: chain_position is for some reason assumed to be 1-based.
         ctask = CompetitionTask(
             competition=competition,
-            descriptor=str(100 + i),
+            descriptor=descriptor if descriptor else str(100 + i),
             max_submissions=competition.default_max_submissions,
             chain=chain,
             chain_position=(-1 if chain is None else i + 1),
+            max_score=max_score,
         )
         create_ctask(
             ctask,
@@ -224,6 +227,8 @@ def create_test_chain(request, competition_id):
         num-tasks: number of ctasks to create and assign to the chain
         text-format: .format()-compatible format for the ctask text
         comment-format: .format()-compatible format for the ctask comment
+        max-score: maximum ctask score (optional, defaults to 1)
+        descriptor: the solution descriptor (optional, defaults to 100 + i)
 
     Returns a JSON:
         {'chain_id': chain.id, 'ctask_ids': [...]}

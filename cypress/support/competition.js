@@ -15,6 +15,8 @@ const CREATE_CHAIN_DEFAULTS = {
   textFormat: "task text #{}",
   commentFormat: "task comment #{}",
   restrictedAccess: false,
+  maxScore: 1,
+  descriptor: null, // null denotes the default of 100 + i.
 };
 
 const CREATE_INDIVIDUAL_TEAM_DEFAULTS = {
@@ -38,7 +40,11 @@ function createCTasks(competition, numTasks, textFormat, commentFormat) {
     method: 'POST',
     url: `/${competition}/test/create_ctasks/`,
     form: true,
-    body: { 'num-tasks': numTasks, 'text-format': textFormat, 'comment-format': commentFormat },
+    body: {
+      'num-tasks': numTasks,
+      'text-format': textFormat,
+      'comment-format': commentFormat,
+    },
   }).then((response) => {
     return response.body;
   });
@@ -64,6 +70,8 @@ function createChain(competition, options) {
       'text-format': options.textFormat,
       'comment-format': options.commentFormat,
       'restricted-access': options.restrictedAccess,
+      'max-score': options.maxScore,
+      'descriptor': options.descriptor, // Same descriptor for every task.
     }
   }).then((response) => {
     return response.body;
