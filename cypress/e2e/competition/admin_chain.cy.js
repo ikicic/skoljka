@@ -178,6 +178,16 @@ describe("test adding and operating on chains", () => {
         cy.wrap(ctaskTrs[2]).find('[data-cy=non-default-max-submissions]').should('not.exist');
       });
     });
+  });
 
+  it("test unlock_minutes vs unlock_days depending on duration", () => {
+    cy.visit('/public_competition/chain/tasks/');
+    cy.get('#id_unlock_minutes').should('exist');
+    cy.get('#id_unlock_days').should('not.exist');
+
+    cy.updateCompetition('public_competition', { 'end-hours-after-now': 48 });
+    cy.visit('/public_competition/chain/tasks/');
+    cy.get('#id_unlock_minutes').should('not.exist');
+    cy.get('#id_unlock_days').should('exist');
   });
 });

@@ -147,7 +147,7 @@ class ChainForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.competition = kwargs.pop('competition')
         super(ChainForm, self).__init__(*args, **kwargs)
-        if self.competition.is_course:
+        if self.competition.use_days_for_chain_time:
             instance = self.instance
             restricted_access_field = self.fields.pop('restricted_access')
             self.fields['unlock_days'] = forms.FloatField(
@@ -169,7 +169,7 @@ class ChainForm(forms.ModelForm):
 
     def clean(self):
         data = self.cleaned_data
-        if self.competition.is_course:
+        if self.competition.use_days_for_chain_time:
             try:
                 data['close_minutes'] = int((data['close_days'] or 0) * 24 * 60)
             except KeyError:

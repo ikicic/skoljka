@@ -40,12 +40,12 @@ TEST_COMPETITION_URLS = {
 _COMPETITION_URL_TO_ID = {url: id for id, url in TEST_COMPETITION_URLS.items()}
 
 TEST_USER_PASSWORD = 'a'
+HOUR = datetime.timedelta(hours=1)
 
 
 def create_competition(moderators, url, **kwargs):
     """Create an empty public competition."""
-    HOUR = datetime.timedelta(hours=1)
-    NOW = datetime.datetime.now()
+    now = datetime.datetime.now()
 
     # TODO: Use some kind of API for creating a group.
     group = Group.objects.create(name="{}_group".format(url))
@@ -61,10 +61,10 @@ def create_competition(moderators, url, **kwargs):
         'kind': Competition.KIND_COMPETITION,
         'hidden': False,
         'admin_group_id': group.id,
-        'registration_open_date': NOW - 24 * HOUR,
-        'start_date': NOW - 1 * HOUR,
-        'scoreboard_freeze_date': NOW - 23 * HOUR,
-        'end_date': NOW + 24 * HOUR,
+        'registration_open_date': now - 24 * HOUR,
+        'start_date': now - 1 * HOUR,
+        'scoreboard_freeze_date': now - 23 * HOUR,
+        'end_date': now + 24 * HOUR,
         'url_path_prefix': '/{}/'.format(url),
     }
     default_kwargs.update(kwargs)
@@ -106,6 +106,7 @@ def create_test_competitions(request):
     """Fill the database will all default data for testing competitions."""
     TEAM_CATEGORIES = '{"hr": {"1": "Crvena", "2": "Zelena", "3": "Plava"}, "en": {"1": "Red", "2": "Green", "3": "Blue"}}'
     NONCONFIGURABLE_TEAM_CATEGORIES = '{"hr": {"1": "Crvena", "2": "Zelena", "3": "Plava"}, "en": {"1": "Red", "2": "Green", "3": "Blue"}, "CONFIGURABLE": false}'
+    now = datetime.datetime.now()
 
     moderators = create_n_users("moderator", 5)
     create_n_users("competitor", 10)
@@ -138,6 +139,7 @@ def create_test_competitions(request):
         "individual_course_without_categories",
         max_team_size=1,
         kind=Competition.KIND_COURSE,
+        end_date=now + 48 * HOUR,
     )
     create(
         "competition_with_no_url_path_prefix",
@@ -147,6 +149,7 @@ def create_test_competitions(request):
         "course_with_no_url_path_prefix",
         kind=Competition.KIND_COURSE,
         url_path_prefix="",
+        end_date=now + 48 * HOUR,
     )
     create(
         "competition_with_default_max_submissions_2",
@@ -358,6 +361,9 @@ def update_competition(request, competition_id):
         competition.min_admin_solved_count = int(pop('min-admin-solved-count'))
     if 'team-categories' in post:
         competition.team_categories = pop('team-categories')
+    if 'end-hours-after-now' in post:
+        now = datetime.datetime.now()
+        competition.end_date = now + int(pop('end-hours-after-now')) * HOUR
     if len(post):
         raise Exception("Unexpected POST: {}".format(post))
     competition.save()

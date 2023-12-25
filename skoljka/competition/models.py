@@ -324,6 +324,15 @@ class Competition(BasePermissionsModel):
     def is_team_competition(self):
         return self.max_team_size > 1
 
+    @property
+    def use_days_for_chain_time(self):
+        """Return whether unlock and close time should be displayed and entered
+        in days instead of minutes."""
+        return (
+            self.end_date - self.start_date
+            >= settings.USE_DAYS_FOR_CHAIN_TIME_THRESHOLD
+        )
+
     def is_user_admin(self, user):
         return self.user_has_perm(user, EDIT)
 

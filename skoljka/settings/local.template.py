@@ -1,6 +1,8 @@
 # coding=utf-8
 # local.py is ignored by git!
 
+import datetime
+
 ######################################
 # General
 ######################################
@@ -166,3 +168,7 @@ FEATURED_LECTURES_FOLDER_ID = None
 FOLDER_PATH_MIGRATIONS = [
     # ('oldpath', 'newpath'),
 ]
+
+# Competition/course taking longer than the given thresholds will use
+# unlock_days and close_days instead of unlock_minutes and close_minutes.
+USE_DAYS_FOR_CHAIN_TIME_THRESHOLD = datetime.timedelta(hours=36)
