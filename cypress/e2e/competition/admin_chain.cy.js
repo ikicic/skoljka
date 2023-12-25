@@ -190,4 +190,16 @@ describe("test adding and operating on chains", () => {
     cy.get('#id_unlock_minutes').should('not.exist');
     cy.get('#id_unlock_days').should('exist');
   });
+
+  it("test that the restricted_access field is after unlock_days", () => {
+    // unlock_days and close_days are inserted manually, which automatically
+    // puts them at the end of the form. However, we want to keep the
+    // restricted_access at the end.
+    cy.login('moderator0');
+    cy.visit('/individual_course_without_categories/chain/tasks/');
+    cy.get('[data-cy=create-chain] .control-group').eq(-4).find('#id_unlock_mode').should('exist');
+    cy.get('[data-cy=create-chain] .control-group').eq(-3).find('#id_unlock_days').should('exist');
+    cy.get('[data-cy=create-chain] .control-group').eq(-2).find('#id_close_days').should('exist');
+    cy.get('[data-cy=create-chain] .control-group').eq(-1).find('#id_restricted_access').should('exist');
+  });
 });

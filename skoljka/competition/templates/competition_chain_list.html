@@ -24,7 +24,7 @@
     </th>
     <th>{% trans "Chain" %}</th>
     <th>{% trans "Length" %}</th>
-    {% if competition.is_course %}
+    {% if competition.use_days_for_chain_time %}
       <th title="{% trans "Unlock time" %}">{% anchor 'unlock_minutes' _("Days") %}</th>
     {% else %}
       <th title="{% trans "Unlock time" %}">{% anchor 'unlock_minutes' _("Minutes") %}</th>
@@ -45,7 +45,7 @@
         <a href="{{ chain.get_absolute_url }}">{{ chain.name }}</a>
       </td>
       <td>{{ chain.t_ctask_count }}</td>
-      {% if competition.is_course %}
+      {% if competition.use_days_for_chain_time %}
         <td>{{ chain.unlock_days|floatformat }}</td>
       {% else %}
         <td>{{ chain.unlock_minutes }}</td>

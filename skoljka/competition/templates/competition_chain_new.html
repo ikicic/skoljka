@@ -9,7 +9,7 @@
 <div class="instructions">
   <h4>{% trans "Instructions" %}</h4>
   <p>Kategorija je bilo kakav string. Po unesenim kategorijama automatski će se grupirati lanci u pregledu zadataka.</p>
-  {% if competition.is_course %}
+  {% if competition.use_days_for_chain_time %}
     <p>
       <i>Unlock days</i> predstavlja broj dana nakon početka kursa nakon kojih lanac postaje vidljiv.
       Npr. ako želite da se zadatak vidi tek nakon 2 tjedna, stavite 14.

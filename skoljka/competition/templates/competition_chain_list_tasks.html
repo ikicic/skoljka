@@ -57,10 +57,10 @@
     something is wrong with the task.{% endblocktrans %}
   </p>
   <p>
-    {% if competition.is_course %}
-      To update chain name, category or unlock minutes, use the "Edit chain" link.
-    {% else %}
+    {% if competition.use_days_for_chain_time %}
       To update chain name, category or unlock days, use the "Edit chain" link.
+    {% else %}
+      To update chain name, category or unlock minutes, use the "Edit chain" link.
     {% endif %}
   </p>
   <p>
@@ -128,7 +128,7 @@
       </th>
       <th colspan="2">{% trans "Title" %}</th>
       <th style="white-space:nowrap;" title="{% trans "Unlock time" %}">
-        {% if competition.is_course %}
+        {% if competition.use_days_for_chain_time %}
           {% anchor 'unlock_minutes' _("Days") %}
         {% else %}
           {% anchor 'unlock_minutes' _("Minutes") %}
@@ -163,7 +163,7 @@
         <td colspan="2">
           <a href="{{ chain.get_absolute_url }}overview/">{{ chain.name }}</a>
         </td>
-        {% if competition.is_course %}
+        {% if competition.use_days_for_chain_time %}
           <td>{{ chain.unlock_days|floatformat }} d.</td>
         {% else %}
           <td>{{ chain.unlock_minutes }} min.</td>

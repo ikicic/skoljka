@@ -15,6 +15,7 @@
 ### Changes
 - [competition] individual (non-team) competitions and courses: adjusted the GUI based on `Competition.max_team_size`
 - [competition] removed the confusing angle brackets in "&lt;Write the question/message here&gt;"
+- [competition] using "unlock days" and "close days" not only for courses, but depending on the competition/course duration
 - [general] improved the design of some forms by utilizing `bootstrap_toolkit`
 - [general] added a "courses" link in the main menu, separately list competitions and courses
 

@@ -124,8 +124,9 @@ class CompetitionTaskForm(ModelForm):
 class ChainForm(forms.ModelForm):
     """Form for creating or editing chains.
 
-    For course-like competitions, the `unlock_minutes` and `close_minutes`
-    fields are replaced with `unlock_days` and `close_days` fields.
+    For competitions lasting longer than `settings.USE_DAYS_FOR_CHAIN_TIME_THRESHOLD`,
+    the `unlock_minutes` and `close_minutes` fields are replaced with
+    `unlock_days` and `close_days` fields.
     """
 
     class Meta:
@@ -137,8 +138,9 @@ class ChainForm(forms.ModelForm):
             'bonus_score',
             'unlock_mode',
             # Note: `unlock/close_minutes` are replaced with `unlock_close/days`
-            # for courses. If changing the order, make sure that `__init__` correctly
-            # orders the fields in `self.fields` after these changes are made.
+            # for sufficiently long competitions. If changing the order, make
+            # sure that `__init__` correctly orders the fields in `self.fields`
+            # after these changes are made.
             'unlock_minutes',
             'close_minutes',
             'restricted_access',
