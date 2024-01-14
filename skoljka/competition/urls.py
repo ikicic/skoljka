@@ -53,6 +53,7 @@ _patterns = [
     (r'participants/$', views.participants),
     (r'registration/$', views.registration),
     (r'rules/$', views.rules),
+    (r'instructions/$', views.instructions),
     (r'scoreboard/$', views.scoreboard),
     (r'task/$', views.task_list),
     (r'task/new/$', views.task_new),

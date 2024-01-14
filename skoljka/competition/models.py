@@ -34,6 +34,11 @@ class Scoreboard(Enum):
     ALL_AND_NONZERO_MY_THEN_REST = 3
 
 
+class RulesTerminology(Enum):
+    RULES = 1
+    INSTRUCTIONS = 2
+
+
 _SCOREBOARD = {item.name: item for item in Scoreboard}
 
 
@@ -335,6 +340,27 @@ class Competition(BasePermissionsModel):
 
     def is_user_admin(self, user):
         return self.user_has_perm(user, EDIT)
+
+    def get_rules_page_name(self):
+        """For competitions use "rules", but for courses use "instructions"."""
+        if self.is_course:
+            return _("Course Instructions")
+        else:
+            return _("Competition Rules")
+
+    def get_rules_terminology(self):
+        if self.is_course:
+            return RulesTerminology.INSTRUCTIONS
+        else:
+            return RulesTerminology.RULES
+
+    def get_rules_url(self):
+        """Return the URL for either the rules (for competitions) or the
+        instructions (for courses)."""
+        if self.is_course:
+            return join_urls(self.get_absolute_url(), 'instructions')
+        else:
+            return join_urls(self.get_absolute_url(), 'rules')
 
     def get_team_metaname(self):
         """Return "Team", "Competitor" or "Participant", depending on whether this

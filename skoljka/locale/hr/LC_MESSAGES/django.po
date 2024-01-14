@@ -851,7 +851,15 @@ msgstr "Polaznici"
 msgid "Scoreboard"
 msgstr "Bodovna lista"
 
-#: competition/models.py:335
+#: competition/models.py:347
+msgid "Course Instructions"
+msgstr "Upute"
+
+#: competition/models.py:349
+msgid "Competition Rules"
+msgstr "Pravila natjecanja"
+
+#: competition/models.py:370
 #: competition/templates/competition_registration.html:34
 #: competition/templates/inc_competition_chain_access.html:13
 msgid "Team"
@@ -1001,14 +1009,6 @@ msgstr "Debug prijevoda"
 #: competition/templates/competition_list.html:11
 msgid "Time:"
 msgstr "Vrijeme:"
-
-#: competition/templates/competition_base.html:130
-msgid "Course Rules"
-msgstr "Pravila tečaja"
-
-#: competition/templates/competition_base.html:132
-msgid "Competition Rules"
-msgstr "Pravila natjecanja"
 
 #: competition/templates/competition_chain_list.html:10
 #: competition/templates/competition_chain_list_tasks.html:11

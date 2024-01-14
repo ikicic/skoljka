@@ -125,12 +125,8 @@
   <span class="footer">Školjka {% settings_constant VERSION_FOOTER %} 2012-2022</span>
   <a class="footer" href="/about/">{% trans "About Us" %}</a>
   <a class="footer" href="/tou/" target="_blank">{% trans "Terms of Use" %}</a>
-  <a class="footer" href="{% comp_url 'rules' %}" target="_blank">
-    {% if competition.is_course %}
-      {% trans "Course Rules" %}
-    {% else %}
-      {% trans "Competition Rules" %}
-    {% endif %}
+  <a class="footer" href="{{ competition.get_rules_url }}" target="_blank">
+    {{ competition.get_rules_page_name }}
   </a>
 </div>
 
