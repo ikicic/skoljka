@@ -12,7 +12,7 @@ from skoljka.utils.testcase import TemporaryMediaRootMixin
 
 class MathContentViewsTest(TemporaryMediaRootMixin, TestCaseWithUsersAndFolders):
     def get_preview(self, text):
-        response = self.client.get(
+        response = self.client.post(
             '/ajax/mathcontent/preview/',
             {'text': text},
             HTTP_X_REQUESTED_WITH='XMLHttpRequest',
@@ -28,6 +28,16 @@ class MathContentViewsTest(TemporaryMediaRootMixin, TestCaseWithUsersAndFolders)
         self.assertResponse(
             self.get_preview("Hello!"), 200, '<p class="mc-noindent">Hello!'
         )
+
+        # Test very large requests.
+        text = "0123456789" * 5000  # ~50kB
+        self.assertResponse(
+            self.get_preview(text), 200, '<p class="mc-noindent">' + text
+        )
+
+        # Test too large requests.
+        text = "0123456789" * 20000  # ~200kB
+        self.assertResponse(self.get_preview(text), 400, "Message too long.")
 
         # Check preview with LaTeX.
         response = self.get_preview("$x + y$")

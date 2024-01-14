@@ -18,6 +18,7 @@
 - [competition] using "unlock days" and "close days" not only for courses, but depending on the competition/course duration
 - [general] improved the design of some forms by utilizing `bootstrap_toolkit`
 - [general] added a "courses" link in the main menu, separately list competitions and courses
+- [general] max length of text previews increased from 4 kB to ~100 kB
 
 ### Technical
 - [competition] added some Cypress tests for competitions

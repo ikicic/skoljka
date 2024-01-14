@@ -5,9 +5,9 @@ from skoljka.mathcontent.utils import convert_to_html_safe
 from skoljka.utils.decorators import ajax
 
 
-@ajax(get='text')
+@ajax(post='text')
 def preview(request):
-    text = request.GET['text']
+    text = request.POST['text']
 
     if len(text) > MAX_LENGTH:
         return HttpResponseBadRequest("Message too long.")

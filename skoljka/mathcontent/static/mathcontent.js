@@ -1,8 +1,8 @@
-$(function(){
+$(function() {
   /* Automatically add preview button, help link and div after each
    * MathContentForm marked with .mc-auto-preview-button. */
   var counter = 0;
-  $('.mc-auto-preview-button').each(function(index) {
+  $('.mc-auto-preview-button').each(function() {
     var mc = $(this);
     var form = mc.closest('form');
     var source_id = mc.attr('id');
@@ -12,41 +12,41 @@ $(function(){
     }
     var target_id = 'mc-target-auto-id' + counter;
     form.children('input[type=submit]').after(
-        ' <button type="button" class="btn mc-preview-button" ' +
-            'data-source="' + source_id + '" ' +
-            'data-target="' + target_id + '">' +
-          gettext("Preview") + '</button> '
-        /*
-        '<span style="color:gray;font-style:italic;">' +
-            'U tijeku je testiranje (nedovršenog) ' +
-            '<a href="/help/format/" target="_blank">' +
-                'novog formata unosa' +
-            '</a>, koji bi trebao biti kompatibilniji samom LaTeX-u. ' +
-            'Ukoliko vam ovaj format ne radi ili ako iz bilo kojeg razloga ' +
-            'želite stari format, dodajte <code>%V0</code> na početak teksta.' +
-        '</span>'
-        */
+      ' <button type="button" class="btn mc-preview-button" ' +
+      'data-source="' + source_id + '" ' +
+      'data-target="' + target_id + '">' +
+      gettext("Preview") + '</button> '
+      /*
+      '<span style="color:gray;font-style:italic;">' +
+          'U tijeku je testiranje (nedovršenog) ' +
+          '<a href="/help/format/" target="_blank">' +
+              'novog formata unosa' +
+          '</a>, koji bi trebao biti kompatibilniji samom LaTeX-u. ' +
+          'Ukoliko vam ovaj format ne radi ili ako iz bilo kojeg razloga ' +
+          'želite stari format, dodajte <code>%V0</code> na početak teksta.' +
+      '</span>'
+      */
     );
     form.append(
       '<div class="mc-preview outset" id="' + target_id + '" ' +
-        'style="display:none;"></div>');
+      'style="display:none;"></div>');
     ++counter;
   });
 
   /* Preview button, send AJAX request to convert to html (and generate
    * necessarry .png files). */
-  $('.mc-preview-button').click(function(){
+  $('.mc-preview-button').click(function() {
     var source = $('#' + $(this).attr('data-source'));
     var text = source.val();
     /* Currently we ignore only if the response from the last click already
      * arrived, and not if there is an AJAX request still running. */
-    if (text == source.data('mc-last-refresh'))
+    if (text === source.data('mc-last-refresh'))
       return;
     var preview = $('#' + $(this).attr('data-target'));
     if (text.length) {
       preview.html(gettext("Loading..."));
       preview.attr('style', '');
-      $.get('/ajax/mathcontent/preview/', {text: text}, function(result){
+      $.post('/ajax/mathcontent/preview/', { text: text }, function(result) {
         source.data('mc-last-refresh', text);
         preview.html(result);
       });
@@ -68,7 +68,7 @@ $(function(){
 
   /* Handle [hide]...[/hide] show/hide links. */
   $('body').on('click', '.mc-hide-link', function(event) {
-      event.preventDefault();
-      $(this).next().toggle();
+    event.preventDefault();
+    $(this).next().toggle();
   });
 });
