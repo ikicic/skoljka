@@ -240,9 +240,29 @@
 
   /* Make the whole chain access row a label for the checkbox. */
   $(function() {
-    $('#chain-access-table').on('click', '.chain-access-tr', function() {
-      var checkbox = $(this).find('[type=checkbox]');
-      checkbox.prop('checked', !checkbox.prop('checked'));
+    var lastCheckbox = null;
+
+    $('#chain-access-table').on('click', '.chain-access-tr', function(event) {
+      var checkbox = $(this).find(':checkbox');
+
+      // If the row was clicked, toggle the checkbox.
+      // However, if the checkbox itself was clicked, do not double-toggle.
+      if (!$(event.target).is(':checkbox')) {
+        checkbox.prop('checked', !checkbox.prop('checked'));
+      }
+
+      // On a shift-click, toggle the whole range from the previous to the current checkbox.
+      if (event.shiftKey && lastCheckbox !== null) {
+        var allCheckboxes = $('#chain-access-table .chain-access-tr :checkbox');
+        var start = allCheckboxes.index(lastCheckbox);
+        var end = allCheckboxes.index(checkbox);
+        var range = allCheckboxes.slice(Math.min(start, end), Math.max(start, end) + 1);
+        range.prop('checked', checkbox.prop('checked'));
+
+        // Shift-click causes the text to be selected. Remove the selection.
+        document.getSelection().removeAllRanges();
+      }
+      lastCheckbox = checkbox;
     });
   });
 }).call(this);

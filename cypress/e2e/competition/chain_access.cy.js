@@ -25,37 +25,82 @@ describe("test chain access", () => {
       cy.contains("Chain visibility").should('exist');
       cy.contains("No participants yet.").should('exist');
 
-      // Create two teams.
+      function test(teamId0, teamId1, teamId2, teamId3) {
+        cy.reload();
+        cy.contains("No participants yet.").should('not.exist');
+        cy.get('#chain-access-table th').should('have.length', 3); // Category, team, checkbox.
+        cy.get('#chain-access-table input[type=checkbox]').should('have.length', 4);
+        cy.get(`[name=team-${teamId0}]`).should('not.be.checked');
+        cy.get(`[name=team-${teamId1}]`).should('not.be.checked');
+        cy.get(`[name=team-${teamId2}]`).should('not.be.checked');
+        cy.get(`[name=team-${teamId3}]`).should('not.be.checked');
+
+        // Check the second.
+        cy.get(`[name=team-${teamId1}]`).myCheck();
+        cy.get(`[name=team-${teamId1}]`).should('be.checked');
+        cy.get('[data-cy=change-chain-access]').click();
+        cy.get(`[name=team-${teamId0}]`).should('not.be.checked');
+        cy.get(`[name=team-${teamId1}]`).should('be.checked');
+
+        // Check the first. Uncheck second.
+        cy.get(`[name=team-${teamId0}]`).myCheck();
+        cy.get(`[name=team-${teamId1}]`).myUncheck();
+        cy.get('[data-cy=change-chain-access]').click();
+        cy.get(`[name=team-${teamId0}]`).should('be.checked');
+        cy.get(`[name=team-${teamId1}]`).should('not.be.checked');
+
+        // Test clickability of the whole row. Select the first td, because
+        // Cypress apparently clicks the middle of the selection, which is
+        // the team link in this case.
+        cy.get(`[name=team-${teamId0}]`).parents('tr').get('td').first().click();
+        cy.get(`[name=team-${teamId0}]`).should('not.be.checked');
+        cy.get(`[name=team-${teamId0}]`).parents('tr').get('td').first().click();
+        cy.get(`[name=team-${teamId0}]`).should('be.checked');
+
+        // Note: testing the click on the actual checkbox doesn't seem to work.
+
+        // Test shift+click to check. Click 2, click 3, then 2..3 should all be checked.
+        // Note: rows are sorted by team category.
+        cy.get(`[name=team-${teamId0}]`).myUncheck();
+        cy.get(`[name=team-${teamId2}]`).myUncheck();
+        cy.get(`[name=team-${teamId1}]`).myUncheck();
+        cy.get(`[name=team-${teamId3}]`).myUncheck();
+
+        cy.get(`[name=team-${teamId2}]`).parents('tr').find('td').first().click();
+        cy.get(`[name=team-${teamId3}]`).parents('tr').find('td').first().click({ shiftKey: true });
+        cy.get(`[name=team-${teamId0}]`).should('not.be.checked');
+        cy.get(`[name=team-${teamId2}]`).should('be.checked');
+        cy.get(`[name=team-${teamId1}]`).should('be.checked');
+        cy.get(`[name=team-${teamId3}]`).should('be.checked');
+
+        // Shift+click should set the check to whatever the 2nd click did.
+        cy.get(`[name=team-${teamId0}]`).parents('tr').find('td').first().click({ shiftKey: true });
+        cy.get(`[name=team-${teamId0}]`).should('be.checked');
+        cy.get(`[name=team-${teamId2}]`).should('be.checked');
+        cy.get(`[name=team-${teamId1}]`).should('be.checked');
+        cy.get(`[name=team-${teamId3}]`).should('be.checked');
+
+        // Test shift+click to uncheck. Click 3, then 0..3 should all be unchecked.
+        cy.get(`[name=team-${teamId3}]`).parents('tr').find('td').first().click({ shiftKey: true });
+        cy.get(`[name=team-${teamId0}]`).should('not.be.checked');
+        cy.get(`[name=team-${teamId2}]`).should('not.be.checked');
+        cy.get(`[name=team-${teamId1}]`).should('not.be.checked');
+        cy.get(`[name=team-${teamId3}]`).should('not.be.checked');
+
+        // Prepare the access rights for the rest of the test. Only competitor0 sees the chain.
+        cy.get(`[name=team-${teamId0}]`).myCheck();
+        cy.get('[data-cy=change-chain-access]').click();
+      }
+
+      // Create multiple teams.
       cy.createIndividualTeam(COMPETITION, 'competitor0', { category: 1 }).then((teamId0) => {
         cy.createIndividualTeam(COMPETITION, 'competitor1', { category: 2 }).then((teamId1) => {
-          cy.reload();
-          cy.contains("No participants yet.").should('not.exist');
-          cy.get('#chain-access-table th').should('have.length', 3); // Category, team, checkbox.
-          cy.get('#chain-access-table input[type=checkbox]').should('have.length', 2);
-          cy.get(`[name=team-${teamId0}]`).should('not.be.checked');
-          cy.get(`[name=team-${teamId1}]`).should('not.be.checked');
-
-          // Check the second.
-          cy.get(`[name=team-${teamId1}]`).myCheck();
-          cy.get(`[name=team-${teamId1}]`).should('be.checked');
-          cy.get('[data-cy=change-chain-access]').click();
-          cy.get(`[name=team-${teamId0}]`).should('not.be.checked');
-          cy.get(`[name=team-${teamId1}]`).should('be.checked');
-
-          // Check the first. Uncheck second.
-          cy.get(`[name=team-${teamId0}]`).myCheck();
-          cy.get(`[name=team-${teamId1}]`).myUncheck();
-          cy.get('[data-cy=change-chain-access]').click();
-          cy.get(`[name=team-${teamId0}]`).should('be.checked');
-          cy.get(`[name=team-${teamId1}]`).should('not.be.checked');
-
-          // Test clickability of the whole row. Select the first td, because
-          // Cypress apparently clicks the middle of the selection, which is
-          // the team link in this case.
-          cy.get(`[name=team-${teamId0}]`).parents('tr').get('td').first().click();
-          cy.get(`[name=team-${teamId0}]`).should('not.be.checked');
-          cy.get(`[name=team-${teamId0}]`).parents('tr').get('td').first().click();
-          cy.get(`[name=team-${teamId0}]`).should('be.checked');
+          cy.createIndividualTeam(COMPETITION, 'competitor2', { category: 1 }).then((teamId2) => {
+            cy.createIndividualTeam(COMPETITION, 'competitor3', { category: 2 })
+              .then((teamId3) => {
+                test(teamId0, teamId1, teamId2, teamId3);
+              });
+          });
         });
       });
 
@@ -64,7 +109,7 @@ describe("test chain access", () => {
       cy.visit(`/${COMPETITION}/task/`);
       cy.contains("some chain name").should('exist');
 
-      // Check that the second team does see the chain.
+      // Check that the second team does not see the chain.
       cy.login('competitor1');
       cy.visit(`/${COMPETITION}/task/`);
       cy.contains("some chain name").should('not.exist');
