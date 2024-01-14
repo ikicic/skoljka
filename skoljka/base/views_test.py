@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.core import mail
 from django.core.management import call_command
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.i18n import set_language
@@ -29,8 +29,6 @@ def get_latest_email(request):
 @assert_testdb
 def login(request):
     """Sign in a user credentials."""
-    for user in User.objects.all():
-        print(user)
     username = request.POST.get('username')
     user = get_object_or_404(User, username=username)
 
@@ -38,7 +36,14 @@ def login(request):
     user.backend = settings.AUTHENTICATION_BACKENDS[0]
     auth_login(request, user)
 
-    return HttpResponse('{"user": %d}' % user.id, mimetype='application/json')
+    if request.GET.get('revisit', '0') == '1':
+        referer = request.META.get('HTTP_REFERER')
+        if referer:
+            return HttpResponseRedirect(referer)
+        else:
+            return HttpResponseRedirect('/')
+    else:
+        return HttpResponse('{"user": %d}' % user.id, mimetype='application/json')
 
 
 @csrf_exempt

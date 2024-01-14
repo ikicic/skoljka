@@ -153,7 +153,16 @@ COMPETITION_MANUAL_GRADING_TAG = 'MANUAL'
 
 DISABLE_PREF_COOKIES = True
 
-EXTRA_HEADER_TOP = "<div style=\"text-align: center; background-color: orange;\">example of EXTRA_HEADER_TOP</div>"
+EXTRA_HEADER_TOP = '''
+    <div style="text-align: center; background-color: orange;">
+        This is EXTRA_HEADER_TOP.
+        Sign in as:
+        <form action="/test/login/?revisit=1" method="POST" style="display: inline;">
+            <input type="submit" name="username" value="moderator0">
+            <input type="submit" name="username" value="competitor0">
+        </form>
+    </div>
+'''
 
 EXTRA_MENU_TOP = "--EXTRA_MENU_TOP--"
 # OR
