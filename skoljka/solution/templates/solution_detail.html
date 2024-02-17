@@ -46,7 +46,7 @@
   <i>{% trans "User" %}: {{ solution.author|userlink }}</i><br>
   <i>{% trans "Task" %}: {{ solution.task.get_link }}</i>
   <a href="#" id="solution-toggle-task">
-    (Sakrij tekst zadatka)
+    {% trans "(Hide problem text)" %}
   </a>
 </div>
 
@@ -60,19 +60,16 @@
       <div class="center-vertically">
         <div>
           <div>
-            Upozorenje: Ovaj zadatak još niste riješili!<br>
-            Kliknite ovdje kako biste prikazali rješenje.
+            {% trans "Warning: You haven't solved this problem yet.<br>Click here to display the solution." %}
           </div>
         </div>
       </div>
     </div>
     <div id="solution-inner-container" style="visibility: hidden;">
-  {% endif %}
-
-  {% mathcontent_render solution.content quote=user.is_authenticated %}
-
-  {% if obfuscate %}
-    </div> {# solution-inner-container #}
+      {% mathcontent_render solution.content quote=user.is_authenticated %}
+    </div>
+  {% else %}
+    {% mathcontent_render solution.content quote=user.is_authenticated %}
   {% endif %}
 </div>
 

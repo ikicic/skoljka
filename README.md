@@ -21,7 +21,8 @@
 - [general] max length of text previews increased from 4 kB to ~100 kB
 
 ### Removed
-- [task] Removed `Task.prerequisites`
+- [task] removed `Task.prerequisites`, the ability to restrict the visibility of a task based on the completion of other tasks
+- [task] removed `Task.solution_settings`, the ability to customize when task solution are accessible
 
 ### Technical
 - [competition] added some Cypress tests for competitions

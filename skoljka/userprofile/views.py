@@ -166,12 +166,7 @@ def profile(request, pk):
 
     if pk != request.user.pk:
         # TODO: optimize, do not load unnecessary my_solution
-        # (separate check_accessibility should_obfuscate?)
         cache_solution_info(request.user, solved)
-        for x in solved:
-            x.t_can_view, dummy = x.check_accessibility(
-                request.user, x._cache_my_solution
-            )
 
     task_added = tasks.filter(author_id=pk).order_by('-id')[:10]
 

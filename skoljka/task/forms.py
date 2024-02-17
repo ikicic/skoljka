@@ -108,7 +108,6 @@ class TaskForm(forms.ModelForm):
             'source',
             'hidden',
             'solvable',
-            'solution_settings',
         ]
 
 

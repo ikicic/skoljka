@@ -47,16 +47,9 @@
             {% if s.is_official %}
               <span class="label label-info">{% trans "Official" context "solution" %}</span>
             {% endif %}
-            {% if can_view_solution %}
-              <a href="/solution/{{ s.id }}/" {{ obfuscation_title }}>
-                {{ obfuscation_text }}
-              </a>
-            {% else %}
-              <span class="sol-not-accessible"
-                    title="{{ no_access_explanation }}">
-                {{ obfuscation_text }}
-              </span>
-            {% endif %}
+            <a href="/solution/{{ s.id }}/" {{ obfuscation_title }}>
+              {{ obfuscation_text }}
+            </a>
           </td>
           <td style="width:70px;">
             {% rating_display_bool manager=s.correctness red_if_lt=SOLUTION_CORRECT_SCORE empty_if_no_votes=1 %}

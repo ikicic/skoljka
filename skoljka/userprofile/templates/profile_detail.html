@@ -92,9 +92,7 @@
     {% if x.is_submitted %}
       <span class="profile-task-submitted">
         {{ x.task.get_link }}
-        {% if x.author == user or x.t_can_view %}
-          <a href="/solution/{{ x.id }}/" class="icon-search" title="Rješenje"></a>
-        {% endif %}
+        <a href="/solution/{{ x.id }}/" class="icon-search" title="Rješenje"></a>
       </span>
     {% else %}
       {{ x.task.get_link }}

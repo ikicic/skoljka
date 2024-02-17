@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-17 19:51+0100\n"
+"POT-Creation-Date: 2024-02-17 21:30+0100\n"
 "PO-Revision-Date: 2017-10-03 01:49+0200\n"
 "Last-Translator: Ivica Kicic <ivicakicic@gmail.com>\n"
 "Language: hr\n"
@@ -2233,11 +2233,11 @@ msgctxt "solution"
 msgid "Official"
 msgstr "Službeni"
 
-#: solution/templates/inc_solution_list.html:69
+#: solution/templates/inc_solution_list.html:62
 msgid "empty"
 msgstr "prazno"
 
-#: solution/templates/inc_solution_list.html:70
+#: solution/templates/inc_solution_list.html:63
 msgid "to do"
 msgstr "to do"
 
@@ -2274,7 +2274,19 @@ msgstr "Uredi"
 msgid "Official solution"
 msgstr "Sakrij rješenje"
 
-#: solution/templates/solution_detail.html:82
+#: solution/templates/solution_detail.html:49
+msgid "(Hide problem text)"
+msgstr "(Sakrij tekst zadatka)"
+
+#: solution/templates/solution_detail.html:63
+msgid ""
+"Warning: You haven't solved this problem yet.<br>Click here to display the "
+"solution."
+msgstr ""
+"Upozorenje: Ovaj zadatak još niste riješili!<br>Kliknite ovdje kako biste "
+"prikazali rješenje."
+
+#: solution/templates/solution_detail.html:79
 msgid "Ratings"
 msgstr "Ocjene"
 
@@ -2286,6 +2298,10 @@ msgstr "Rješenja zadatka"
 msgctxt "title"
 msgid "Submit a solution"
 msgstr "Pošalji rješenje"
+
+#: solution/templatetags/solution_tags.py:112
+msgid "You haven't solved this problem!"
+msgstr "Niste riješili ovaj zadatak!"
 
 #: tags/managers.py:25 tags/models.py:17
 #: task/templates/inc_task_list_table.html:15
@@ -2320,91 +2336,91 @@ msgstr "Težina"
 msgid "New difficulty"
 msgstr "Nova težina"
 
-#: task/bulk_format.py:135
+#: task/bulk_format.py:126
 #, python-format
 msgid "User \"%s\" not found."
 msgstr "Korisnik \"%s\" nije pronađen."
 
-#: task/bulk_format.py:142
+#: task/bulk_format.py:133
 #, python-format
 msgid "Folder #%d does not exist or no edit permission."
 msgstr "Direktorij #%d ne postoji ili nemate prava za uređivanje."
 
-#: task/bulk_format.py:157
+#: task/bulk_format.py:148
 #, python-format
 msgid "User or group \"%s\" not found."
 msgstr "Nije pronađen korisnik ili grupa \"%s\"."
 
-#: task/bulk_format.py:181
+#: task/bulk_format.py:172
 msgid "Expected a non-empty string."
 msgstr "Traži se neprazan string."
 
-#: task/bulk_format.py:185
+#: task/bulk_format.py:176
 #, python-format
 msgid "Expected an integer between 0 and %d, inclusive."
 msgstr "Traži se cijeli broj između 0 i %d, uključujući."
 
-#: task/bulk_format.py:189
+#: task/bulk_format.py:180
 msgid "Expected a nonnegative integer or an empty string."
 msgstr "Traži se nenegativan cijeli broj ili prazan string."
 
-#: task/bulk_format.py:193
+#: task/bulk_format.py:184
 msgid "Expected an integer or an empty string."
 msgstr "Traži se cijeli broj ili prazan string."
 
-#: task/bulk_format.py:196
+#: task/bulk_format.py:187
 msgid "Expected 0 or 1."
 msgstr "Traži se 0 ili 1."
 
-#: task/bulk_format.py:227
+#: task/bulk_format.py:215
 msgid "Missing a '}' brace."
 msgstr "Nedostaje zagrada '}'."
 
-#: task/bulk_format.py:258
+#: task/bulk_format.py:246
 msgid "Expected @{factor*variable-name}."
 msgstr "Traži se @{facotr*variable-name}."
 
-#: task/bulk_format.py:264
+#: task/bulk_format.py:252
 #, python-format
 msgid "Cyclic dependency detected for the variable \"%s\"."
 msgstr "Pronađena ciklična ovisnost za varijablu \"%s\"."
 
-#: task/bulk_format.py:273
+#: task/bulk_format.py:261
 msgid "Unknown variable name:"
 msgstr "Nepoznata varijabla:"
 
-#: task/bulk_format.py:281
+#: task/bulk_format.py:269
 #, python-format
 msgid "Value of the variable \"%s\" too long."
 msgstr "Vrijednost varijable \"%s\" predugačka."
 
-#: task/bulk_format.py:300
+#: task/bulk_format.py:288
 msgid "Invalid parameter count."
 msgstr "Nevaljan broj parametara."
 
-#: task/bulk_format.py:310
+#: task/bulk_format.py:298
 msgid "Unrecognized permission name."
 msgstr "Nepoznat naziv privilegije."
 
-#: task/bulk_format.py:360
+#: task/bulk_format.py:347
 msgid "Invalid variable:"
 msgstr "Nevaljana varijabla:"
 
-#: task/bulk_format.py:368
+#: task/bulk_format.py:355
 #, python-format
 msgid "Error at line number %d:"
 msgstr "Greška u liniji %d:"
 
-#: task/bulk_format.py:390
+#: task/bulk_format.py:377
 #, python-format
 msgid "Parsing error for the task #%d:"
 msgstr "Greška parsiranja za zadatak #%d:"
 
-#: task/bulk_format.py:419
+#: task/bulk_format.py:406
 msgid "Unknown command."
 msgstr "Nepoznata naredba."
 
-#: task/bulk_format.py:432
+#: task/bulk_format.py:419
 #, python-format
 msgid "Invalid value(s) for the task #%d:"
 msgstr "Nevaljana/e vrijednost/i za zadatak #%d:"
@@ -2433,7 +2449,7 @@ msgstr "ID"
 msgid "The tag 'news' is not allowed."
 msgstr "Oznaka 'news' nije dozvoljena."
 
-#: task/forms.py:127
+#: task/forms.py:126
 msgid ""
 "ID of the folder containing the problems and files related to this lecture."
 msgstr "ID kolekcije koja sadrži probleme i datoteke vezane uz ovo predavanje."
@@ -2455,7 +2471,7 @@ msgstr "Riješivo"
 msgid "Can solutions be submitted?"
 msgstr "Mogu li se slati rješenja?"
 
-#: task/models.py:134
+#: task/models.py:116
 msgid "Lecture video URL"
 msgstr "URL videa predavanja"
 

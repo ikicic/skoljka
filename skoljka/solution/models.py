@@ -4,7 +4,7 @@ from django.db.models import Q
 
 from skoljka.activity.constants import SOLUTION_RATE
 from skoljka.mathcontent.models import MathContent
-from skoljka.permissions.constants import VIEW, VIEW_SOLUTIONS
+from skoljka.permissions.constants import VIEW
 from skoljka.post.generic import PostGenericRelation
 from skoljka.rating.fields import RatingField
 from skoljka.task.models import Task
@@ -244,69 +244,37 @@ class Solution(ModelEx):
         """
         return self.author_id == user.id or user.is_staff
 
-    def check_accessibility(self, user, users_solution=_USERS_SOLUTION_NOT_PROVIDED):
+    def should_obfuscate(self, user, users_solution=_USERS_SOLUTION_NOT_PROVIDED):
         """
-        Checks if the user can view the solution, and if it should be
-        obfuscated.
-        Returns a pair of booleans:
-            can_view, should_obfuscate
+        Checks if the solution should be obfuscated prior showing it to the user.
+
+        It is assumed that the user has acesss to the task.
 
         The result depends on:
-            Task solution settings      (can_view)
-            Explicit permission         (can_view)
-            Did user solve the task     (can_view, should_obfuscate)
-            Profile preferences         (should_obfuscate)
+            Did user solve the task
+            Profile preferences
 
         If users_solution is not given, it will be manually retrieved.
         """
-        # The implentation is quite complex, because there are millions of
-        # different cases. When updating, please make sure everything is
-        # correct.
-        # TODO: for example, write tests...
-        task_settings = self.task.solution_settings
-
         if not user.is_authenticated():
-            # obfuscate by default
-            return task_settings == Task.SOLUTIONS_VISIBLE, True
+            return True  # Obfuscate by default.
 
         if self.author_id == user.id:
-            return True, False  # always show my own solutions
+            return False  # Always show my own solutions.
 
-        if task_settings != Task.SOLUTIONS_VISIBLE:
-            # Currently, the task's author can't make solutions unavailable
-            # to himself/herself.
-            can_view = getattr(self.task, '_cache_can_view_solutions', None)
-            if can_view is None:
-                can_view = self.task.user_has_perm(user, VIEW_SOLUTIONS)
-
-            # Also, solution check may be done before the explicit permission
-            # check. Not a big performance difference, both are assumed to be
-            # preloaded anyway.
-            if not can_view:
-                if task_settings == Task.SOLUTIONS_NOT_VISIBLE:
-                    return False, True  # bye
-                elif task_settings == Task.SOLUTIONS_VISIBLE_IF_ACCEPTED:
-                    users_solution = self._get_user_solution(user, users_solution)
-                    if not users_solution or not users_solution.is_correct():
-                        return False, True  # can't view solution, bye
-                    # Otherwise, fine, can_view is actually True
-
-        # Ok, now the user definitely has the right to view the solution.
-        # Now we have to check if he/she wants to view it.
-
+        # Check if the user wants to see the solution immediately.
         profile = user.get_profile()
         if not profile.check_solution_obfuscation_preference(
             self.task.difficulty_rating_avg
         ):
-            # User is fine with seeing the solution.
-            return True, False
+            return False  # User is fine with seeing the solution.
 
         # Load, if not loaded yet.
         users_solution = self._get_user_solution(user, users_solution)
 
         # if there is no solution -> obfuscate
         # if there is, check if it is solved
-        return True, not users_solution or not users_solution.is_solved()
+        return not users_solution or not users_solution.is_solved()
 
 
 # nuzno(?) da bi queryji koristili JOIN, a ne subqueryje

@@ -17,8 +17,6 @@ from skoljka.task.models import Task
 
 CORRECT = SolutionDetailedStatus.SUBMITTED_CORRECT
 
-# TODO: does EDIT imply VIEW_SOLUTIONS?
-
 
 def get_task_folder_data(task, user):
     folder_ids = get_task_folder_ids(task)  # unsafe, no permission check!

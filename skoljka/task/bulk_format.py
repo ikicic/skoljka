@@ -6,7 +6,7 @@ from django.utils.translation import ugettext as _
 
 from skoljka.folder.models import Folder
 from skoljka.permissions.constants import EDIT, PERMISSION_GROUPS
-from skoljka.task.models import DIFFICULTY_RATING_ATTRS, Task
+from skoljka.task.models import DIFFICULTY_RATING_ATTRS
 from skoljka.utils.python23 import long
 
 SEPARATION_EMPTY_LINES = 3  # Minimum number of separation lines between tasks.
@@ -55,13 +55,6 @@ class CyclicDependency(BulkFormatError):
 
 class ValueTooLong(BulkFormatError):
     pass
-
-
-SOLUTION_SETTINGS_MAPPING = {
-    'ALWAYS': Task.SOLUTIONS_VISIBLE,
-    'IF_SOLVED': Task.SOLUTIONS_VISIBLE_IF_ACCEPTED,
-    'EXPLICIT': Task.SOLUTIONS_NOT_VISIBLE,
-}
 
 
 class PrefetchData(object):
@@ -113,8 +106,6 @@ class InternalTaskInfo(object):
             'hidden': bool(int(variables['HIDDEN'] or False)),
             'name': variables['NAME'],
             'source': variables['SOURCE'],
-            # 'solution_settings': SOLUTION_SETTINGS_MAPPING[
-            #         variables['SOLUTION_SETTINGS'].upper()],
             '_content': self.text,
             '_difficulty': int(variables['DIFFICULTY'] or 0),
             '_folder_id': int(variables['FOLDER_ID'] or 0),
@@ -194,9 +185,6 @@ def _precheck_task_var_value(var, value, prefetch):
     elif var == 'HIDDEN':
         if value.strip() not in ['0', '1']:
             raise InvalidValue(_("Expected 0 or 1."))
-    # elif var == 'SOLUTION_SETTINGS':
-    #     if value.upper() not in SOLUTION_SETTINGS_MAPPING:
-    #         raise InvalidValue(_("Invalid value."))
 
 
 # Internal.
@@ -331,7 +319,6 @@ def parse_bulk(user, full_content):
         'AUTHOR': user.username,
         'HIDDEN': 0,
         'NAME': "",
-        # 'SOLUTION_SETTINGS': 'ALWAYS',
         'SOURCE': "",
         # Values with some logic (that have an underscore in the name in json).
         'DIFFICULTY': 0,

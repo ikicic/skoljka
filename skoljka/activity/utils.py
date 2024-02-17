@@ -19,7 +19,6 @@ from skoljka.activity.models import Action
 from skoljka.permissions.constants import VIEW
 from skoljka.permissions.utils import get_objects_with_permissions
 from skoljka.solution.models import Solution
-from skoljka.solution.templatetags.solution_tags import cache_solution_info
 from skoljka.task.models import Task
 
 
@@ -30,8 +29,7 @@ def get_recent_activities(
     Returns recent activities visible to the given user.
     Selects also actors and actor profiles.
 
-    Specifically, for SOLUTION_SUBMIT checks if the user can view the
-    solution, and saves as ._hide_solution_link.
+    Specifically, for SOLUTION_SUBMIT checks if the user can view the solution.
     """
     # Currently, to show recent N activities, we load 2 * N and then manually
     # iterate and remove those that are not visible to the current user. So,
@@ -55,7 +53,6 @@ def get_recent_activities(
         'actor', 'actor__profile', 'target_content_type'
     ).order_by('-id')[: int(max_count * 2)]
     activity = list(activity)
-    activity_by_id = {x.id: x for x in activity}
 
     task_content_type_id = ContentType.objects.get_for_model(Task).id
 
@@ -84,7 +81,6 @@ def get_recent_activities(
             # check task permissions...
             to_check.append((x.target_content_type_id, x.target_id, x.id))
             if ttype == SOLUTION_SUBMIT:
-                # for ._hide_solution_link (kind of hack)
                 solutions_to_check.append((x.action_object_id, x.target_id, x.id))
         elif ttype in [GROUP_ADD, GROUP_LEAVE]:
             # check group
@@ -119,7 +115,6 @@ def get_recent_activities(
 
     # Now, check solution accessibility...
     # Also, remove anything related to the official solutions.
-    solutions_to_check_strict = []
     solution_ids = [id for id, task_id, action_id in solutions_to_check]  # noqa: F812
     solutions = dict(
         Solution.objects.filter(id__in=solution_ids).values_list('id', 'is_official')
@@ -127,43 +122,9 @@ def get_recent_activities(
     for solution_id, task_id, action_id in solutions_to_check:
         is_official = solutions.get(solution_id)
         # Remove if not found or official (first case should never happen).
-        if is_official is None or is_official is True:
+        if is_official is None or is_official:
             kill.add(action_id)
             continue
-
-        task = visible_objects.get((task_content_type_id, task_id))
-        if not task:
-            # kill.add(action_id) # already added
-            continue
-        if task.solution_settings != Task.SOLUTIONS_VISIBLE:
-            solutions_to_check_strict.append((solution_id, action_id))
-
-    if solutions_to_check_strict:
-        solution_ids = [id for id, action_id in solutions_to_check_strict]
-        # Ah, just reload those tasks...
-        # TODO: or is it safe to reuse old task instances?
-        solutions = list(
-            Solution.objects.filter(id__in=solution_ids).select_related('task')
-        )
-
-        # Yes, this is the easiest way to do this...
-        cache_solution_info(user, solutions)
-        solution_by_id = {x.id: x for x in solutions}
-        for solution_id, action_id in solutions_to_check_strict:
-            solution = solution_by_id[solution_id]
-            # TODO: separate can_view and obfuscate into two different methods?
-            # we don't need should_obfuscate here...
-            can_view, obfuscate = solution.check_accessibility(
-                user, solution._cache_my_solution
-            )
-            if can_view:
-                continue
-            action = activity_by_id[action_id]
-            if (action.type, action.subtype) in (SOLUTION_SUBMIT, SOLUTION_RATE):
-                # don't kill, just remove link
-                action._hide_solution_link = True
-            else:
-                kill.add(action_id)
 
     # And, finally, remove hidden activities and limit the size of the output.
     activity = [x for x in activity if x.id not in kill]

@@ -38,11 +38,7 @@ def prepare_action_data(context, A):
     elif ttype == LECTURE_ADD:
         S = u'je doda%s novo predavanje' % G1
     elif ttype == SOLUTION_SUBMIT:
-        link = (
-            u'rješenje'
-            if getattr(A, '_hide_solution_link', False)
-            else A.A('solution', u'rješenje')
-        )
+        link = A.A('solution', u'rješenje')
         S = u'je posla%s %s zadatka' % (G1, link)
     elif ttype == SOLUTION_AS_SOLVED:
         S = u'je označi%s kao riješen zadatak' % G1
@@ -89,11 +85,7 @@ def prepare_action_data(context, A):
                     task_author_id,
                 ) = (-1, '{{ error }}', -1, '{{ error }}', -1)
 
-            solution = (
-                u'rješenje'
-                if getattr(A, '_hide_solution_link', False)
-                else A.T('solution', u'rješenje')
-            )
+            solution = A.T('solution', u'rješenje')
             task = u'<a href="/task/%s/">%s</a>' % (task_id, task_name)
 
             if user.id == int(task_author_id):

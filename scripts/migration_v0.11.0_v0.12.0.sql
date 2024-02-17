@@ -13,3 +13,5 @@ CREATE TABLE IF NOT EXISTS `competition_chainteam` (
 call AddColumnUnlessExists('competition_chain', 'restricted_access', 'TINYINT NOT NULL DEFAULT 0 AFTER unlock_mode');
 call AddColumnUnlessExists('competition_chain', 'close_minutes', 'INT NOT NULL DEFAULT 0 AFTER unlock_minutes');
 call DropColumnIfExists('task_task', 'prerequisites');
+call DropColumnIfExists('task_task', 'solution_settings');
+DELETE FROM `permissions_objectpermission` WHERE `permission_type` = 6;

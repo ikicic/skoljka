@@ -45,28 +45,11 @@ def detail(request, solution_id):
     else:
         ratings = []
 
-    # If I can view the solution, it means I can view the Task, i.e. that I
-    # have the VIEW_SOLUTION permission or that I am the task author.
-    # (look at the docs of is_allowed_to_solve in task/models.py)
-
-    can_view, obfuscate = solution.check_accessibility(request.user)
-
-    if not can_view:
-        if solution.task.solution_settings == Task.SOLUTIONS_NOT_VISIBLE:
-            return (
-                403,
-                u"Autor zadatka je onemogućio pristup rješenjima drugih korisnika.",
-            )
-        else:  # Task.SOLUTIONS_VISIBLE_IF_ACCEPTED
-            return (
-                403,
-                u"Rješenje dostupno samo korisnicima s točnim vlastitim rješenjem.",
-            )
+    obfuscate = solution.should_obfuscate(request.user)
 
     return {
         'can_edit': solution.can_edit(request.user),
         'can_mark_as_official': can_mark_as_official(request.user, solution.task),
-        'can_view': can_view,
         'obfuscate': obfuscate,
         'ratings': ratings,
         'solution': solution,
@@ -293,11 +276,6 @@ def solution_list(request, task_id=None, user_id=None, status=None):
         specific user if user_id is defined.
     If some ID is not defined, skips that condition.
     """
-    # Currently, even if the user can't view some of the solution (due to task
-    # settings), he/she may still view the correctness.
-    # If necessary, add new option to task.solution_settings, for example, to
-    # completely remove solutions from solution list etc.
-
     # If status filtering is enabled in this view?
     # As a single task will probably have very few solutions at all, it is a
     # much better information if there are any solutions at all.

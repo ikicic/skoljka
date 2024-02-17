@@ -2,17 +2,15 @@
 
 from django import template
 from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext as _
 
-from skoljka.permissions.constants import VIEW_SOLUTIONS
-from skoljka.permissions.utils import get_object_ids_with_exclusive_permission
 from skoljka.solution.models import (
     HTML_INFO,
     SOLUTION_STATUS_BY_NAME,
     Solution,
     SolutionDetailedStatus,
 )
-from skoljka.task.models import Task
-from skoljka.utils import interpolate_colors
+from skoljka.utils import interpolate_colors, xss
 from skoljka.utils.string_operations import obfuscate_text
 
 register = template.Library()
@@ -99,30 +97,8 @@ def cache_solution_info(user, solutions):
     else:
         my_solutions = {}
 
-    # Can view solutions?
-    # First, ignore those with SOLUTIONS_VISIBLE setting, and remove duplicates.
-    explicit_ids = set(
-        [
-            x.task_id
-            for x in solutions
-            if x.task.solution_settings != Task.SOLUTIONS_VISIBLE
-            and x.task.author_id != user.id
-        ]
-    )
-    if explicit_ids:
-        # Second, if any left, ask for permissions.
-        explicit_ids = get_object_ids_with_exclusive_permission(
-            user, VIEW_SOLUTIONS, model=Task, filter_ids=explicit_ids
-        )
-    explicit_ids = set(explicit_ids)
-
     for y in solutions:
         y._cache_my_solution = my_solutions.get(y.task_id)
-        y.task._cache_can_view_solutions = (
-            y.task_id in explicit_ids
-            or y.task.solution_settings == Task.SOLUTIONS_VISIBLE
-            or y.task.author_id == user.id
-        )
 
     return ''
 
@@ -130,25 +106,14 @@ def cache_solution_info(user, solutions):
 @register.simple_tag(takes_context=True)
 def check_solution_for_accessibility(context, solution, text):
     my_solution = getattr(solution, '_cache_my_solution', None)
-    can_view, should_obfuscate = solution.check_accessibility(
-        context['user'], my_solution
-    )
-
-    if should_obfuscate:
+    if solution.should_obfuscate(context['user'], my_solution):
         text = obfuscate_text(text)
-        title = mark_safe(u'title="Niste riješili ovaj zadatak!"')
+        title = mark_safe(
+            u'title="%s"' % xss.escape(_("You haven't solved this problem!"))
+        )
     else:
         title = u''
 
-    if not can_view:
-        if solution.task.solution_settings == Task.SOLUTIONS_NOT_VISIBLE:
-            context['no_access_explanation'] = u'Rješenje nedostupno'
-        else:  # Task.SOLUTIONS_VISIBLE_IF_ACCEPTED
-            context[
-                'no_access_explanation'
-            ] = u'Rješenje dostupno samo korisnicima s točnim vlastitim rješenjem'
-
-    context['can_view_solution'] = can_view
     context['obfuscation_text'] = text
     context['obfuscation_title'] = title
 

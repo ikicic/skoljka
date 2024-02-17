@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 from skoljka.mathcontent.models import MathContent
-from skoljka.permissions.constants import EDIT, EDIT_PERMISSIONS, VIEW, VIEW_SOLUTIONS
+from skoljka.permissions.constants import EDIT, EDIT_PERMISSIONS, VIEW
 from skoljka.task.models import Task
 
 
@@ -20,5 +20,5 @@ class TaskUtilsTestCase(TestCase):
     def test_author_permissions(self):
         self.assertEqual(
             set(self.task1.get_user_permissions(self.user1)),
-            set([VIEW, EDIT, EDIT_PERMISSIONS, VIEW_SOLUTIONS]),
+            set([VIEW, EDIT, EDIT_PERMISSIONS]),
         )

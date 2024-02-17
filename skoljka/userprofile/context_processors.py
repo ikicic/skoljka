@@ -2,9 +2,7 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils.html import mark_safe
 
-from skoljka.permissions.constants import VIEW_SOLUTIONS
 from skoljka.permissions.signals import objectpermissions_changed
-from skoljka.permissions.utils import get_object_ids_with_exclusive_permission
 from skoljka.solution.models import Solution, SolutionDetailedStatus
 from skoljka.task.models import Task
 from skoljka.usergroup.models import UserGroup
@@ -37,84 +35,37 @@ def find_unrated_solutions(user):
     )
 
     # Solution is interesting iff task is interesting. So, we are checking
-    # tasks, not solutions.
+    # tasks, not solutions. A task is interesting if the user wants to see the
+    # solution, depending on the user preference and whether they themselves
+    # solved the task.
     tasks = {}
     for x in solutions:
         if x.task_id not in tasks:
             tasks[x.task_id] = x.task
 
-    # Task is accepted if
-    #   a) we have permission to view other solutions (check task & my solution)
-    #   b) we want to view solutions (check profile & my solution)
+    # List of task ids.
+    task_solutions_to_check = []  # solutions to check for CORRECT or AS_SOLVED
+    interesting_tasks = set()
 
-    # List of task ids
-    get_solution_correct = []  # solutions to check for CORRECT
-    get_solution_solved = []  # solutions to check for CORRECT or AS_SOLVED
-    get_view_solutions = []  # VIEW_SOLUTIONS permissions to check
-
-    with_permission = []  # tasks with permission to view solutions
-
-    for id, x in tasks.iteritems():
-        if x.author_id != user.id:
-            if x.solution_settings == Task.SOLUTIONS_NOT_VISIBLE:
-                # Visible only with the VIEW_SOLUTIONS permission
-                get_view_solutions.append(id)
-            elif x.solution_settings == Task.SOLUTIONS_VISIBLE_IF_ACCEPTED:
-                # Visible with VIEW_SOLUTIONS, or with a correct solution
-                get_solution_correct.append(id)
-            else:
-                with_permission.append(id)
+    for id, task in tasks.iteritems():
+        if profile.check_solution_obfuscation_preference(task.difficulty_rating_avg):
+            # User wouldn't like to see the solutions of the problem they
+            # haven't solved. Hence, check if they solved it.
+            task_solutions_to_check.append(id)
         else:
-            with_permission.append(id)
+            interesting_tasks.add(id)
 
-        if profile.check_solution_obfuscation_preference(x.difficulty_rating_avg):
-            # User wouldn't like to see the solutions of the problem he/she
-            # didn't solve. Check for the solution then.
-            get_solution_solved.append(id)
+    if task_solutions_to_check:
+        tasks_solved_by_user = Solution.objects.filter(
+            author_id=user.id,
+            task_id__in=task_solutions_to_check,
+            detailed_status__in=[CORRECT, AS_SOLVED],
+        ).values_list('task_id', flat=True)
 
-    get_any_solution = get_solution_correct + get_solution_solved
-    if get_any_solution:
-        # dict {task_id: detailed_status}
-        my_solutions = dict(
-            Solution.objects.filter(
-                author_id=user.id,
-                task_id__in=get_any_solution,
-                detailed_status__in=[CORRECT, AS_SOLVED],
-            ).values_list('task_id', 'detailed_status')
-        )
+        interesting_tasks.update(tasks_solved_by_user)
 
-        # Accept SOLUTIONS_VISIBLE_IF_ACCEPTED tasks if the solution is correct
-        for id in get_solution_correct:
-            if my_solutions.get(id) == CORRECT:
-                with_permission.append(id)
-            else:
-                # no solution --> check for permissions
-                get_view_solutions.append(id)
-    else:
-        my_solutions = {}
-
-    if get_view_solutions:
-        # WARNING: checking permissions manually!
-        with_permission.extend(
-            get_object_ids_with_exclusive_permission(
-                user, VIEW_SOLUTIONS, model=Task, filter_ids=get_view_solutions
-            )
-        )
-
-    # Now when I know which tasks I'm able to see, filter those I want to see.
-    # Remember, I want to see if 1) I solved the problem OR 2) I'm fine with
-    # seeing the solution anyway (depending on the difficulty rating).
-    accepted_tasks = set(
-        id
-        for id in with_permission
-        if id in my_solutions
-        or not profile.check_solution_obfuscation_preference(
-            tasks[id].difficulty_rating_avg
-        )
-    )
-
-    # Finally, filter solutions with accepted tasks
-    return [x for x in solutions if x.task_id in accepted_tasks]
+    # Finally, filter solutions with interesting tasks.
+    return [x for x in solutions if x.task_id in interesting_tasks]
 
 
 def userprofile(request):
@@ -163,7 +114,7 @@ def userprofile(request):
 # TODO: some detailed_status changes will call this method twice (because
 # some statistics in UserProfile are also being updated)
 @receiver(objectpermissions_changed, sender=Task)  # permissions
-@receiver(post_save, sender=Task)  # hidden, solution settings
+@receiver(post_save, sender=Task)  # hidden
 @receiver(post_save, sender=UserGroup)  # group m2m change
 @receiver(post_save, sender=UserProfile)  # options
 @receiver(post_delete, sender=Solution)  # some weird cases
