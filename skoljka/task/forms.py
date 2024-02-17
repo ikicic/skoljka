@@ -2,8 +2,6 @@
 from django.utils.translation import ugettext
 from django.utils.translation import ugettext_lazy as _
 
-from skoljka.permissions.constants import VIEW
-from skoljka.permissions.utils import filter_objects_with_permission
 from skoljka.task.bulk_format import BulkFormatError, parse_bulk
 from skoljka.task.models import Task, TaskBulkTemplate
 from skoljka.utils.models import icon_help_text
@@ -83,67 +81,15 @@ class TaskAdvancedForm(forms.ModelForm):
         fields = ['name', 'source', 'hidden']
 
 
-def check_prerequisites(prerequisites, user, task_id):
-    """
-    Check if all given ids are accessible.
-    Returns the list of ids and list of accessible task instances.
-    """
-    if not prerequisites.strip():
-        return [], []
-
-    try:
-        # Remove duplicates
-        ids = set([int(x) for x in prerequisites.split(',')])
-    except ValueError:
-        raise forms.ValidationError(_("Invalid format."))
-
-    if task_id and task_id in ids:
-        raise forms.ValidationError(u"Zadatak ne može biti sam sebi preduvjet!")
-
-    tasks = Task.objects.filter(id__in=ids)
-    accessible = filter_objects_with_permission(tasks, user, VIEW, model=Task)
-
-    if len(ids) != len(accessible):
-        diff = ids - set(x.id for x in accessible)
-        raise forms.ValidationError(
-            "Nepoznati ili nedostupni zadaci: {}".format(
-                ', '.join(str(x) for x in diff)
-            )
-        )
-
-    for x in accessible:
-        if not x.solvable:
-            raise forms.ValidationError(
-                u"Nije moguće slati rješenja za zadatak #{}!".format(x.id)
-            )
-
-    return ids, accessible
-
-
 class TaskForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
 
         super(TaskForm, self).__init__(*args, **kwargs)
 
-        task_id = str(self.instance.id) if self.instance and self.instance.id else ''
-        self.fields['prerequisites'].widget.attrs.update(
-            {'class': 'task-prerequisites', 'data-task-id': task_id}
-        )
         self.fields['tags'].widget.attrs.update({'class': 'ac-tags span6'})
         for x in ['name', 'source']:
             self.fields[x].widget.attrs.update({'class': 'span6'})
-
-    def clean(self):
-        super(TaskForm, self).clean()
-        if self.cleaned_data[
-            'solution_settings'
-        ] == Task.SOLUTIONS_VISIBLE and self.cleaned_data.get('prerequisites'):
-            raise forms.ValidationError(
-                u"Ukoliko su postavljeni preduvjeti, "
-                u"rješenja ne mogu biti 'uvijek vidljiva'!"
-            )
-        return self.cleaned_data
 
     def clean_tags(self):
         tags = self.cleaned_data['tags']
@@ -152,18 +98,6 @@ class TaskForm(forms.ModelForm):
             if any(('news' == x.strip().lower() for x in tags)):
                 raise forms.ValidationError(_("The tag 'news' is not allowed."))
         return tags
-
-    def clean_prerequisites(self):
-        # Trim whitespace.
-        prerequisites = self.cleaned_data['prerequisites'].strip()
-        self.cleaned_data['prerequisites'] = prerequisites
-
-        # This will raise an exception if something is wrong.
-        check_prerequisites(
-            prerequisites, self.user, self.instance and self.instance.id
-        )
-
-        return prerequisites
 
     class Meta:
         # Currently, you will have to manually add new fields to the template.
@@ -175,7 +109,6 @@ class TaskForm(forms.ModelForm):
             'hidden',
             'solvable',
             'solution_settings',
-            'prerequisites',
         ]
 
 

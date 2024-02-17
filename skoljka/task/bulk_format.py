@@ -7,6 +7,7 @@ from django.utils.translation import ugettext as _
 from skoljka.folder.models import Folder
 from skoljka.permissions.constants import EDIT, PERMISSION_GROUPS
 from skoljka.task.models import DIFFICULTY_RATING_ATTRS, Task
+from skoljka.utils.python23 import long
 
 SEPARATION_EMPTY_LINES = 3  # Minimum number of separation lines between tasks.
 VALUE_LENGTH_LIMIT = 10000
@@ -114,7 +115,6 @@ class InternalTaskInfo(object):
             'source': variables['SOURCE'],
             # 'solution_settings': SOLUTION_SETTINGS_MAPPING[
             #         variables['SOLUTION_SETTINGS'].upper()],
-            # 'prerequisites': variables['PREREQUISITES'],
             '_content': self.text,
             '_difficulty': int(variables['DIFFICULTY'] or 0),
             '_folder_id': int(variables['FOLDER_ID'] or 0),
@@ -196,9 +196,6 @@ def _precheck_task_var_value(var, value, prefetch):
             raise InvalidValue(_("Expected 0 or 1."))
     # elif var == 'SOLUTION_SETTINGS':
     #     if value.upper() not in SOLUTION_SETTINGS_MAPPING:
-    #         raise InvalidValue(_("Invalid value."))
-    # elif var == 'PREREQUISITES':
-    #     if not re.match('^(CHAIN|\d+\s*(,\s*\d+\s*)*|)$', value):
     #         raise InvalidValue(_("Invalid value."))
 
 
@@ -325,7 +322,6 @@ def parse_bulk(user, full_content):
     Returns list of dictionaries describing the tasks, compatible with
     create_tasks_from_json.
     """
-    # TODO: prerequisites
     # TODO: CHAIN
     # TODO: add an option to automatically create missing folders
 
@@ -342,7 +338,6 @@ def parse_bulk(user, full_content):
         'FOLDER_ID': 0,
         'FOLDER_POSITION': 0,
         'TAGS': "",
-        # 'PREREQUISITES': '',
         # Built-in values.
         'COUNTER': 1,
         'TOTAL_COUNTER': 1,
@@ -366,11 +361,6 @@ def parse_bulk(user, full_content):
                 )
                 raise type(e)(msg)
 
-        # if var_values['PREREQUISITES'].strip() and \
-        #         var_values['SOLUTION_SETTINGS'] == 'ALWAYS':
-        #     raise ParseError(_(
-        #             "If prerequisites are used, SOLUTION_SETTINGS "
-        #             "cannot be set to ALWAYS."))
         return InternalTaskInfo(text, var_values, current_perms)
 
     def _line_error(message):

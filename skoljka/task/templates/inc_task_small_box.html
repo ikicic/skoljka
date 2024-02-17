@@ -19,11 +19,7 @@
       </div>
     </div>
 
-    {% if task.cache_prerequisites_met %}
-      {% mathcontent_render task.content %}
-    {% else %}
-      <i>Nište riješili neke od preduvjeta za ovaj zadatak!</i>
-    {% endif %}
+    {% mathcontent_render task.content %}
 
     {% if 'timesince' in options %}
       <div class="task-timesince">{{ task.date_created|timesince }}</div>

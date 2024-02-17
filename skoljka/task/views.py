@@ -45,12 +45,7 @@ from skoljka.task.forms import (
     TaskLectureForm,
 )
 from skoljka.task.models import SimilarTask, Task, TaskBulkTemplate
-from skoljka.task.utils import (
-    check_prerequisites_for_task,
-    check_prerequisites_for_tasks,
-    create_tasks_from_json,
-    get_task_folder_data,
-)
+from skoljka.task.utils import create_tasks_from_json, get_task_folder_data
 from skoljka.utils.decorators import response
 from skoljka.utils.string_operations import media_path_to_url
 from skoljka.utils.timeout import run_command
@@ -353,8 +348,6 @@ def detail(request, id):
     perm = task.get_user_permissions(request.user)
     if VIEW not in perm:
         return (403, 'Not allowed to view this task!')
-    if not check_prerequisites_for_task(task, request.user, perm):
-        return (403, 'Prerequisites not met, not allowed to view the task!')
 
     # Remember my solution.
     try:
@@ -613,14 +606,6 @@ def export(request, format=None, ids=None):
     if len(tasks) != len(id_list):
         raise Http404('Neki od navedenih zadataka ne postoje ili su skriveni.')
 
-    check_prerequisites_for_tasks(tasks, request.user)
-    removed_tasks = [x for x in tasks if not x.cache_prerequisites_met]
-
-    if removed_tasks:
-        # Remove them for the list.
-        id_list = [x.id for x in tasks if x.cache_prerequisites_met]
-        ids = ','.join(str(x) for x in id_list)
-
     # permission ok, use shortened query
     tasks = Task.objects.filter(id__in=id_list)
 
@@ -628,9 +613,6 @@ def export(request, format=None, ids=None):
     task_position = {id: position for position, id in enumerate(id_list)}
     sorted_tasks = list(tasks)
     sorted_tasks.sort(key=lambda task: task_position[task.id])
-
-    for x in sorted_tasks:
-        x.cache_prerequisites_met = True
 
     # force queryset evaluation and prepare all attachments...
     content_to_task = {}
@@ -691,11 +673,9 @@ def export(request, format=None, ids=None):
         form.fields['create_archive'].widget = forms.HiddenInput()
 
     return {
-        'all_tasks': removed_tasks + sorted_tasks,
         'attachments': attachments,
         'form': form,
         'format': available_formats[format],
         'invalid_tasks': invalid_tasks,
-        'removed_tasks': removed_tasks,
         'tasks': sorted_tasks,
     }

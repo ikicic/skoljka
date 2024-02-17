@@ -9,7 +9,6 @@ from skoljka.permissions.constants import PERMISSION_NAMES
 from skoljka.solution.models import HTML_INFO, Solution, SolutionDetailedStatus
 from skoljka.tags.models import TaggedItem
 from skoljka.tags.templatetags.tags_tags import tag_list_preview
-from skoljka.task.utils import check_prerequisites_for_tasks
 from skoljka.usergroup.templatetags.usergroup_tags import grouplink
 from skoljka.userprofile.utils import get_useroption
 
@@ -97,12 +96,7 @@ def cache_task_info_lite(context, tasks):
     """
     ids = [x.id for x in tasks]
 
-    check_prerequisites_for_tasks(tasks, context['user'])
-    unlocked_ids = [x.id for x in tasks if not x.cache_prerequisites_met]
-
-    # ------ context variables --------
     context['task_ids'] = ids
-    context['unlocked_task_count'] = len(unlocked_ids)
     return ''
 
 
@@ -138,8 +132,6 @@ def cache_task_info(context, tasks):
         solutions = {x.task_id: x for x in solutions}
         for task in tasks:
             task.cache_solution = solutions.get(task.id)
-
-    check_prerequisites_for_tasks(tasks, user)
 
     # ----- folder edit -----
     if user.is_authenticated():

@@ -218,37 +218,4 @@ $(function() {
     e.preventDefault();
     $(".toggle").toggle();
   });
-
-  /* Task prerequisites ajax information */
-  var pre = $('.task-prerequisites')
-  pre.attr('data-old', pre.val()); /* remember old value */
-  pre.parent().append(' <span id="task-pre-info"></span>');
-  pre.keyup(function() {
-    /* ajax info */
-    typewatch(function() {
-      var value = pre.val();
-      if (value == pre.attr('data-old'))
-        return; /* if value not changed, ignore */
-
-      pre.attr('data-old', value);
-
-      $.get('/task/ajax/prerequisites/', {
-        ids: value,
-        task_id: pre.attr('data-task-id')
-      }, function(json) {
-        result = $.parseJSON(json);
-        var info = $('#task-pre-info');
-        if (typeof result == 'string') {
-          info.css('color', 'red');
-          info.html(result);
-        } else {
-          info.css('color', '');
-          var values = new Array();
-          for (var key in result)
-            values.push(result[key]);
-          info.html(values.join(', '));
-        }
-      });
-    }, 500);
-  });
 });

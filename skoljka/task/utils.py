@@ -10,115 +10,14 @@ from skoljka.folder.utils import (
     prepare_folder_menu,
 )
 from skoljka.mathcontent.models import MathContent
-from skoljka.permissions.constants import VIEW_SOLUTIONS
 from skoljka.permissions.models import ObjectPermission
-from skoljka.permissions.utils import get_object_ids_with_exclusive_permission
-from skoljka.solution.models import Solution, SolutionDetailedStatus
+from skoljka.solution.models import SolutionDetailedStatus
 from skoljka.tags.utils import set_tags
 from skoljka.task.models import Task
 
 CORRECT = SolutionDetailedStatus.SUBMITTED_CORRECT
 
 # TODO: does EDIT imply VIEW_SOLUTIONS?
-
-
-def check_prerequisites_for_task(task, user, perm=None):
-    """
-    Slighty optimized version of check_prerequisites_for_tasks for a single
-    task. Uses already loaded list of permissions `perm`, if given.
-
-    Saves the result in:
-        task.cache_prerequisites_met (Boolean)
-
-    Return value:
-        task.cache_prerequisites_met (Boolean)
-
-    Does not check visibility!
-    """
-
-    # Cheap tests first, expensive last.
-    if task.author_id == user.id:
-        task.cache_prerequisites_met = True
-    else:
-        prerequisites = task._get_prerequisites()
-        if not prerequisites:
-            task.cache_prerequisites_met = True
-        elif user.is_anonymous():
-            task.cache_prerequisites_met = False
-        elif (perm is not None and VIEW_SOLUTIONS in perm) or (
-            perm is None and task.user_has_perm(user, VIEW_SOLUTIONS)
-        ):
-            task.cache_prerequisites_met = True
-        else:
-            solved_tasks = Solution.objects.filter(
-                author_id=user.id, task_id__in=prerequisites, detailed_status=CORRECT
-            ).values_list('task_id', flat=True)
-
-            task.cache_prerequisites_met = set(solved_tasks) == set(prerequisites)
-
-    return task.cache_prerequisites_met
-
-
-def check_prerequisites_for_tasks(tasks, user):
-    """
-    Checks if all of the prerequisite tasks have been solved for each of the
-    given task.
-
-    Saves the result in:
-        task.cache_prerequisites_met
-
-    Return value:
-        None
-
-    Does not check visibility!
-
-    Prerequisites are met if:
-        a) user is the author of the task
-        b) there are no task prerequisites at all
-        c) user solved all of the prerequisites
-        d) user has the VIEW_SOLUTION permission
-    """
-    to_check = []  # for solutions or VIEW_SOLUTIONS
-    for x in tasks:
-        x._cache_prerequisites = x._get_prerequisites()
-        if not x._cache_prerequisites or x.author_id == user.id:
-            x.cache_prerequisites_met = True
-        else:
-            to_check.append(x)
-
-    if not user.is_authenticated():
-        for x in to_check:
-            x.cache_prerequisites_met = False
-        return
-
-    if to_check:
-        # All tasks for which solutions we are interested in.
-        all_tasks = sum([x._cache_prerequisites for x in tasks], [])
-
-        solved_tasks = set(
-            Solution.objects.filter(
-                author_id=user.id, task_id__in=all_tasks, detailed_status=CORRECT
-            ).values_list('task_id', flat=True)
-        )
-
-        another_check = []  # VIEW_SOLUTIONS check
-        for x in to_check:
-            if set(x._cache_prerequisites).issubset(solved_tasks):
-                x.cache_prerequisites_met = True
-            else:
-                another_check.append(x)
-
-        if another_check:
-            # Tasks with VIEW_SOLUTIONS permission
-            ids = [x.id for x in another_check]
-            # Author already checked.
-            accepted = set(
-                get_object_ids_with_exclusive_permission(
-                    user, VIEW_SOLUTIONS, model=Task, filter_ids=ids
-                )
-            )
-            for x in another_check:
-                x.cache_prerequisites_met = x.id in accepted
 
 
 def get_task_folder_data(task, user):

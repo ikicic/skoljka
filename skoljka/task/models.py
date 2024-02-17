@@ -117,28 +117,6 @@ class Task(BasePermissionsModel):
         ),
     )
 
-    # Comma-separator list of task IDs that are prerequisites for this task.
-    # If prerequisites are set, solution_settings MUST NOT be SOLUTIONS_VISIBLE.
-    # This makes logically more sense, and also extremely simplifies
-    # the implementation. For example, we don't have to care anything about
-    # the solution visibility, because solution_settings will check it anyway.
-    # It is assumed that if the user already solved correctly the task itself,
-    # it automatically met all prerequisites. If the author wants to add
-    # new prerequisites at some point, that's his problem, it will have no
-    # effect on the users that already solved the task.
-    # Thus, just make sure not to show the task content in task view, list etc.
-    prerequisites = models.CharField(
-        max_length=100,
-        verbose_name="Preduvjeti",
-        blank=True,
-        default='',
-        help_text=icon_help_text(
-            u"Popis ID-eva zadataka, odvojenih zarezom, "
-            u"koji su preduvjet ovom zadatku. Korisnik će moći pristupiti "
-            u"zadatku samo uz poslana i točna rješenja navedenih zadataka."
-        ),
-    )
-
     ###############################
     # Derived classes
     ###############################
@@ -185,35 +163,17 @@ class Task(BasePermissionsModel):
         """
         Check if the user is allowed to solve current problem.
 
-        User is allowed to solve the task if it is solvable, visible and all
-        the prerequisites are met.
+        User is allowed to solve the task if it is solvable and visible.
         """
         if not self.solvable:
             return False
 
         perm = self.get_user_permissions(user)
-        if VIEW not in perm:
-            return False
-
-        from skoljka.task.utils import check_prerequisites_for_task
-
-        return check_prerequisites_for_task(self, user, perm)
+        return VIEW in perm
 
     def get_link(self, tooltip=False, url_suffix=''):
         # TODO: EDIT permission should immediately imply view permission
         # everywhere, not only here.
-
-        # If prerequisites not met, do not output link.
-        if EDIT not in getattr(self, '_cache_perm', []) and not getattr(
-            self, 'cache_prerequisites_met', False
-        ):
-            # Do not show if this is a file or not, it doesn't matter.
-            # Especially, don't put the link to the file itself!
-            return mark_safe(
-                u'<i class="icon-lock" title="Niste riješili neke '
-                u'od preduvjeta za ovaj zadatak!"></i> '
-                u'<span class="task-locked">{}</span>'.format(xss.escape(self.name))
-            )
 
         if self.file_attachment_id:
             url = self.cache_file_attachment_url
@@ -236,12 +196,6 @@ class Task(BasePermissionsModel):
                 xss.escape(self.name),
             )
         )
-
-    def _get_prerequisites(self):
-        try:
-            return [int(x) for x in self.prerequisites.split(',')]
-        except ValueError:
-            return []
 
     def is_file(self):
         return self.file_attachment_id

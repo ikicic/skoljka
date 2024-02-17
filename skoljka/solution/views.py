@@ -45,9 +45,8 @@ def detail(request, solution_id):
     else:
         ratings = []
 
-    # If I can view the solution, it means I can view the Task. Note that I
-    # might not even have met the actual prerequisites, but it means that I do
-    # have VIEW_SOLUTION permission or am the author of the task itself.
+    # If I can view the solution, it means I can view the Task, i.e. that I
+    # have the VIEW_SOLUTION permission or that I am the task author.
     # (look at the docs of is_allowed_to_solve in task/models.py)
 
     can_view, obfuscate = solution.check_accessibility(request.user)

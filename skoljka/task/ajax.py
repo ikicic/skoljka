@@ -1,9 +1,4 @@
-﻿import json
-
-from django import forms
-
-from skoljka.task.bulk_format import BulkFormatError, parse_bulk
-from skoljka.task.forms import check_prerequisites
+﻿from skoljka.task.bulk_format import BulkFormatError, parse_bulk
 from skoljka.utils.decorators import ajax, response
 
 
@@ -17,16 +12,3 @@ def bulk_preview(request):
         return e.message
 
     return {'task_infos': task_infos}
-
-
-@ajax(get=['ids'])
-def prerequisites(request):
-    task_id = request.GET.get('task_id')
-    if task_id:
-        task_id = int(task_id)
-    try:
-        ids, accessible = check_prerequisites(request.GET['ids'], request.user, task_id)
-    except forms.ValidationError as e:
-        return json.dumps(e.messages[0])
-
-    return json.dumps({x.id: x.name for x in accessible})

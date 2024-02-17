@@ -33,20 +33,15 @@
          class="btn btn-primary">
 
   <br><br>
-  {% if removed_tasks %}
-    <b style="color:red;">Ukupno izbačenih neotključanih zadataka: {{ removed_tasks|length }}</b><br>
-  {% endif %}
   <b>Ukupno zadataka: {{ tasks|length }}</b><br>
   <br>
   <table width="40%" class="table-striped table-condensed" style="text-align:center;">
-    {% for x in all_tasks %}
-      <tr{% if not x.cache_prerequisites_met %} style="color:red;"{% endif %}>
+    {% for x in tasks %}
+      <tr>
         <td>{{ x.id }}</td>
         <td>{{ x.get_link }}</td>
         <td>
-          {% if x.cache_prerequisites_met %}
-            {% mathcontent_attachments_small attachments=x.cache_file_list %}
-          {% endif %}
+          {% mathcontent_attachments_small attachments=x.cache_file_list %}
         </td>
       </tr>
     {% endfor %}

@@ -12,7 +12,6 @@ from skoljka.solution.models import (
     SolutionDetailedStatus,
 )
 from skoljka.task.models import Task
-from skoljka.task.utils import check_prerequisites_for_tasks
 from skoljka.utils import interpolate_colors
 from skoljka.utils.string_operations import obfuscate_text
 
@@ -93,8 +92,6 @@ def _cache_solution_info(context, solutions):
 
 def cache_solution_info(user, solutions):
     task_ids = [x.task_id for x in solutions]
-    tasks = [x.task for x in solutions]
-    check_prerequisites_for_tasks(tasks, user)
 
     if user.is_authenticated():
         my_solutions = Solution.objects.filter(author=user, task_id__in=task_ids)

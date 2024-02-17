@@ -20,6 +20,9 @@
 - [general] added a "courses" link in the main menu, separately list competitions and courses
 - [general] max length of text previews increased from 4 kB to ~100 kB
 
+### Removed
+- [task] Removed `Task.prerequisites`
+
 ### Technical
 - [competition] added some Cypress tests for competitions
 - [competition] courses now use the `/course/<id>/` URL pattern by default

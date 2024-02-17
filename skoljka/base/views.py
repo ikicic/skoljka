@@ -13,7 +13,6 @@ from skoljka.recommend.models import UserRecommendation
 from skoljka.solution.models import Solution, SolutionStatus
 from skoljka.task.models import Task
 from skoljka.task.templatetags.task_tags import cache_task_info
-from skoljka.task.utils import check_prerequisites_for_tasks
 from skoljka.utils.decorators import require, response
 
 
@@ -79,14 +78,6 @@ def homepage_online(request, recent_tasks):
     if all_tasks_to_read:
         all_tasks = Task.objects.select_related('content').in_bulk(all_tasks_to_read)
 
-        # Just in case something went wrong (probably with recommendations).
-        check_prerequisites_for_tasks(all_tasks.itervalues(), request.user)
-        all_tasks = {
-            id: task
-            for id, task in all_tasks.iteritems()
-            if task.cache_prerequisites_met
-        }
-
         recommend = [all_tasks[id] for id in recommend]
         todo = [all_tasks[id] for id in todo]
 
@@ -112,11 +103,6 @@ def homepage(request):
         .select_related('content')
         .order_by('-id')[:10]
     )
-
-    check_prerequisites_for_tasks(recent_tasks, request.user)
-
-    # Filter visible tasks
-    recent_tasks = [x for x in recent_tasks if x.cache_prerequisites_met]
 
     if len(recent_tasks) > 2:
         recent_tasks = random.sample(recent_tasks, 2)

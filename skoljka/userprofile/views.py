@@ -14,7 +14,6 @@ from skoljka.recommend.models import UserTagScore
 from skoljka.solution.models import Solution, SolutionStatus
 from skoljka.solution.templatetags.solution_tags import cache_solution_info
 from skoljka.task.models import DIFFICULTY_RATING_ATTRS, Task
-from skoljka.task.utils import check_prerequisites_for_tasks
 from skoljka.userprofile.forms import (
     UserCreationForm,
     UserEditForm,
@@ -175,10 +174,6 @@ def profile(request, pk):
             )
 
     task_added = tasks.filter(author_id=pk).order_by('-id')[:10]
-
-    all_tasks = [x.task for x in solved] + [x.task for x in todo] + list(task_added)
-
-    check_prerequisites_for_tasks(all_tasks, request.user)
 
     return render_to_response(
         'profile_detail.html',

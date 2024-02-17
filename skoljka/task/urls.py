@@ -7,7 +7,6 @@ urlpatterns = patterns(
     '',
     # TODO: this ajax url is different from the other ajax urls
     (r'^ajax/bulk/preview/', 'skoljka.task.ajax.bulk_preview'),
-    (r'^ajax/prerequisites/', 'skoljka.task.ajax.prerequisites'),
     (r'^$', views.task_list),
     (r'^user/(?P<user_id>\d+)/$', views.task_list),
     (r'^(?P<id>\d+)/$', views.detail),

@@ -115,3 +115,30 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS DropColumnIfExists $$
+CREATE PROCEDURE DropColumnIfExists(
+    IN given_table VARCHAR(255),
+    IN given_column VARCHAR(255)
+)
+BEGIN
+    DECLARE column_count INT;
+
+    SELECT COUNT(*)
+        INTO column_count
+        FROM information_schema.columns
+        WHERE table_schema = DATABASE()
+        AND table_name = given_table
+        AND column_name = given_column;
+
+    IF column_count > 0 THEN
+        SELECT CONCAT('Dropping column ', given_column, ' from table ', given_table) AS '';
+        SET @statement = CONCAT('ALTER TABLE ', given_table, ' DROP COLUMN ', given_column);
+        PREPARE st FROM @statement;
+        EXECUTE st;
+        DEALLOCATE PREPARE st;
+    END IF;
+END $$
+DELIMITER ;

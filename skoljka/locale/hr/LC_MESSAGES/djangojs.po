@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-01 23:26+0100\n"
+"POT-Creation-Date: 2024-02-17 19:47+0100\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -17,23 +17,23 @@ msgstr ""
 msgid "Submit a solution"
 msgstr "Pošalji rješenje"
 
-#: base/static/script.js:116
+#: base/static/script.js:117
 msgid "Mark as solved"
 msgstr "Označi kao riješeno"
 
-#: base/static/script.js:117
+#: base/static/script.js:119
 msgid "To do"
 msgstr "To do"
 
-#: base/static/script.js:118
+#: base/static/script.js:121
 msgid "Delete solution"
 msgstr "Izbriši rješenje"
 
-#: base/static/script.js:158 base/static/script.js.c:160 tags/static/tags.js:68
+#: base/static/script.js:164 base/static/script.js.c:166 tags/static/tags.js:68
 msgid "Error!"
 msgstr "Greška!"
 
-#: base/static/script.js:207
+#: base/static/script.js:213
 msgid "Cancel rating"
 msgstr "Izbriši ocjenu"
 
