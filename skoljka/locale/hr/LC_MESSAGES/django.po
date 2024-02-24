@@ -2262,7 +2262,7 @@ msgstr "Označi kao službeno"
 
 #: solution/templates/solution_detail.html:30
 msgid "Mark as solved"
-msgstr "Označi kao službeno"
+msgstr "Označi kao riješeno"
 
 #: solution/templates/solution_detail.html:32
 #: task/templates/task_detail.html:16
