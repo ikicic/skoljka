@@ -25,6 +25,7 @@
 - [task] removed `Task.solution_settings`, the ability to customize when task solution are accessible
 
 ### Technical
+- [general] improved the setup scripts and clarified the Docker-based installation instructions
 - [competition] added some Cypress tests for competitions
 - [competition] courses now use the `/course/<id>/` URL pattern by default
 - [competition] courses and competitions URLs are automatically redirected to the correct URL (as returned by `get_absolute_url()`)
@@ -37,45 +38,55 @@
 Note: docker-based installation is work in progress.
 The docker files are not optimal nor secure for production.
 
-In the current setup, the container is given read-write access to the repository root folder, because media files are stored in `local/` and similar subfolders.
+The containers and the repository worktree are organized as follows:
+- No shared volumes are used, thus the container contains the copies of source and other files (because of performance issues of shared volumes in Docker on certain systems).
+- Instead, when developing, use `./docker/docker_rsync.sh` to continuously synchronize source files from the worktree to the container. Avoid editing source files directly in the container, because they will be overwritten by this script.
+- This includes `./skoljka/settings/local.py`. Thus, if you want to have two different containers (two different instances of skoljka image), create another git worktree.
+- The `local/` folder (media and other files) are stored only in the container.
+- This Docker setup should be considered a dev image, not a production or deploy image. Concretely, any changes to the JavaScript or SCSS files requires running the build script from within the container.
 
-First, build the image and start the container:
+To set up the container, first build the image and start the container:
 ```sh
-./docker/build.sh
-./docker/run_mount.sh
+./docker/docker_build.sh skoljka-image-name
+./docker/docker_mount.sh skoljka-image-name skoljka-container-name
 ```
 
-Then, attach to the container:
+From outside the container, run the following to prepare the worktree (i.e. `local.py`) and start synchronizing the container with the worktree:
 ```sh
-docker attach skoljka
+./docker/setup_external.sh
+./docker/docker_rsync.sh skoljka-container-name
 ```
-(This command might look stuck, press enter to see the interactive shell.)
 
-From outside the container, run the following:
+In another terminal, open a terminal in the container:
 ```sh
-./docker/run_rsync.sh
+docker exec -it skoljka-container-name /bin/bash
 ```
+(If this command looks stuck, press enter to see the interactive shell.)
 
 Within the container, run the following:
 ```sh
 cd /app
-./docker/build_internal.sh
 ./docker/setup_internal.sh
 ```
-The default mysql root password is empty.
 
 To run skoljka, run
 ```sh
 cd /app
 python2 manage.py runserver 0.0.0.0:8000
 ```
-and open http://localhost:8000/ .
-Set `DEBUG` in `settings/local.py` to `True` for CSS and JS files to work.
+The webserver is accessible at http://localhost:8000/ .
 
-After closing the container, run the following to resume it:
+To stop running the container, run:
+```
+docker stop skoljka-container-name
+```
+
+To resume the container, run:
 ```sh
-docker start skoljka
-docker attach skoljka
+# Outside the container.
+docker start skoljka-container-name
+
+# Within the container.
 service mysql start                  # Sometimes fails on the first try.
 mysqlcheck --repair --all-databases  # Sometimes needed.
 ```
@@ -223,7 +234,7 @@ python2 manage.py test --noinput competition.ChainSortingTest.test_custom_orderi
 
 To run the E2E tests, first launch the test server in the Docker container:
 ```sh
-python2 manage.py testserver --noinput --traceback --addrport=0.0.0.0:8000 skoljka/userprofile/fixtures/test_userprofiles.json
+python2 manage.py testserver --noinput --traceback --addrport=0.0.0.0:8000 skoljka/userprofile/fixtures/test_userprofiles.json skoljka/folder/fixtures/test_folders.json
 ```
 
 Then, run the tests:

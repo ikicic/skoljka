@@ -1,7 +1,12 @@
 #!/bin/bash
 
 SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-IMAGE=skoljka:ubuntu16.04
+
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 IMAGE"
+    exit 1
+fi
+IMAGE=$1
 
 cd "$SCRIPTPATH/.."
 

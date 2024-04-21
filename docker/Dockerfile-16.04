@@ -10,13 +10,11 @@ RUN set -ex \
         && (DEBIAN_FRONTEND=noninteractive apt-get install -y \
             mysql-client-core-5.7 \
             mysql-server-5.7) \
-        && apt-get install -y \
+        && DEBIAN_FRONTEND=noninteractive apt-get install -y \
             gettext \
             git \
             libmysqlclient-dev \
             memcached \
-            nodejs-legacy \
-            npm \
             python-pip \
             python-setuptools \
             python2.7-dev \
@@ -44,7 +42,14 @@ RUN python2 -m pip install --upgrade \
         setuptools==44.0.0
 COPY requirements.txt /tmp/
 
-# TODO: How to add git repos to requirements.txt?
 RUN python2 -m pip install -r /tmp/requirements.txt \
-        && python2 -m pip install git+https://github.com/ikicic/django-bootstrap-toolkit \
         && python2 -m pip cache purge
+
+# Install nodejs and npm. 10.24.1 seems to be the oldest version for which `npm install` succeeds.
+SHELL ["/bin/bash", "-ec"]
+RUN curl -o /tmp/nvm-install.sh https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh \
+    && echo "8e45fa547f428e9196a5613efad3bfa4d4608b74ca870f930090598f5af5f643  /tmp/nvm-install.sh" | sha256sum -c \
+    && bash /tmp/nvm-install.sh \
+    && rm /tmp/nvm-install.sh \
+    && source /root/.nvm/nvm.sh \
+    && nvm install 10.24.1

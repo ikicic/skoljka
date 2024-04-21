@@ -24,6 +24,7 @@ while true; do
         --exclude=.DS_Store \
         --exclude=.git \
         --exclude=bower_components  \
+        --exclude=node_modules \
         --exclude=build \
         --exclude=cypress \
         --exclude=local/ \

@@ -11,10 +11,15 @@ cssmin==0.2.0
 python-memcached==1.53
 slimit==0.8.1
 
+git+https://github.com/ikicic/django-bootstrap-toolkit.git
 git+https://github.com/ikicic/django-sorting.git
+git+https://github.com/ikicic/django-template-preprocessor.git
 
-# Consider to replace with linaro-django-pagination
+# Consider replacing with linaro-django-pagination
 django-pagination==1.0.7
 
 # TODO: update to 1.0
 django-registration==0.8
+
+# Python 2.7 compatibility, remove after switching to Python 3.4+
+enum34==1.1.10

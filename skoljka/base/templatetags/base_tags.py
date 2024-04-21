@@ -68,7 +68,19 @@ def settings_constant(*args):
         # Called from the template preprocessor, just return the value.
         out = getattr(settings, args[1])
         if isinstance(out, dict):
-            out = out[get_language()]
+            lang = get_language()
+            try:
+                return out[lang]
+            except KeyError:
+                pass
+            try:
+                return out[None]
+            except KeyError:
+                raise KeyError(
+                    "Settings variable {} has no key '{}' nor 'None': {}".format(
+                        args[1], lang, out
+                    )
+                )
         return out
     bits = args[1].split_contents()
     if len(bits) != 2:

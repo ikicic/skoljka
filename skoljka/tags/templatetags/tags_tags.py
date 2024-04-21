@@ -10,6 +10,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.db.models.signals import post_delete, post_save
+from django.db.utils import DatabaseError
 from django.utils.safestring import mark_safe
 
 from skoljka.tags.models import CACHE_TAGS_AUTOCOMPLETE_JS_SRC, VOTE_WRONG, Tag
@@ -176,4 +177,9 @@ post_save.connect(_invalidate_tags_autocomplete_js, sender=Tag)
 post_delete.connect(_invalidate_tags_autocomplete_js, sender=Tag)
 
 # Generate and cache immediately when Django starts.
-tags_autocomplete_js_src()
+try:
+    tags_autocomplete_js_src()
+except DatabaseError as e:
+    # Possibly the database isn't even initialized yet.
+    print(e)
+    print("Skipping building tags autocomplete.")

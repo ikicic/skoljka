@@ -48,7 +48,7 @@ DATABASES = {
     }
 }
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 ENABLE_DEBUG_TOOLBAR = True  # Works only if DEBUG is True.
 MATHCONTENT_DEBUG = False  # Not dependent on DEBUG.
@@ -153,16 +153,23 @@ COMPETITION_MANUAL_GRADING_TAG = 'MANUAL'
 
 DISABLE_PREF_COOKIES = True
 
-EXTRA_HEADER_TOP = '''
-    <div style="text-align: center; background-color: orange;">
-        This is EXTRA_HEADER_TOP.
-        Sign in as:
-        <form action="/test/login/?revisit=1" method="POST" style="display: inline;">
-            <input type="submit" name="username" value="moderator0">
-            <input type="submit" name="username" value="competitor0">
-        </form>
-    </div>
-'''
+if TEST_MODE and 'test' in DATABASES['default']['NAME']:
+    EXTRA_HEADER_TOP = '''
+        <div style="text-align: center; background-color: orange;">
+            This is EXTRA_HEADER_TOP.
+            Sign in as:
+            <form action="/test/login/?revisit=1" method="POST" style="display: inline;">
+                <input type="submit" name="username" value="moderator0">
+                <input type="submit" name="username" value="competitor0">
+            </form>
+        </div>
+    '''
+else:
+    EXTRA_HEADER_TOP = '''
+        <div style="text-align: center; background-color: orange;">
+            This is EXTRA_HEADER_TOP.
+        </div>
+    '''
 
 EXTRA_MENU_TOP = "--EXTRA_MENU_TOP--"
 # OR
