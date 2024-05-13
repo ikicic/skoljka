@@ -8,7 +8,7 @@ import time
 
 import skoljka.settings
 
-
+# test comment
 def run_command(cmd):
     print('Running "{0}"'.format(cmd))
     os.system(cmd)
