@@ -1,4 +1,5 @@
 $(function() {
+  console.log("DOM loaded (base.js)");
   $('.collapse-button').each(function() {
     // Add toggle icon.
     var target_id = $(this).attr('data-target');
@@ -29,5 +30,13 @@ $(function() {
   $('#history-select').change(function() {
     var index = parseInt($(this).val());
     $('#history-view').text(history_array[index]);
+  });
+
+  var b = document.querySelector('#change-theme-btn');
+  b.addEventListener('mouseenter', function() {
+    console.log("change-theme-btn mouseenter");
+  });
+  b.addEventListener('mouseleave', function() {
+    console.log("change-theme-btn mouseleave");
   });
 });

@@ -5,18 +5,100 @@
 /* TODO: Sass! Most of the colors are closely related. */
 /*   Changing the color now requires changing all the colors manually. */
 
+// Predefined theme until a custom one loads
+html {
+  --theme-paintbrush-icon-color: #00c3ff;
+
+  --header-background-from: #1b1d1e;
+  --header-background-to: #1e1e1e;
+  --skoljka-logo-text-color: #ffffff;  /* #000000 */
+  --skoljka-logo-text-color-hover: #ffffff;  /* #000000 */
+  --body-bg: #2a2c2f;
+  --header-box-shadow: 0 1px 4px #252e3a;
+
+  --outset-bg: #40444c;  /* #fafcfc */
+  --outset-box-shadow: 0 2px 4px rgb(64, 64, 100);  /* 0 2px 4px rgba(128, 128, 128, 0.55) */
+  --outdiv-bg: #363a40; /* -webkit-gradient(linear, left top, left bottom, from(#f6f8fa), to(#edf2f8)) */
+  --outdiv-box-shadow: 0 1px 2px rgb(64, 64, 100);  /* 0 1px 2px rgba(128, 128, 128, 0.35) */
+
+  --content-bg-color: #1f1f1f;
+  --sidebar-bg-color: #1f1f1f;
+  --content-box-shadow-color: #303d4e;
+  --sidebar-box-shadow-color: #303d4e;
+  --text-color: #e6e6e6 ;
+
+  --nav-anchor-bg-color-hover: #2b2f36;
+  --blue-anchor-color: #2da3e5;  /* 0088cc */
+  --blue-anchor-color-hover: #3dbeff;
+  --red-anchor-color-hover: #ff0000;
+  --profile-task-submitted-anchor: #116cff;  /* #13F */
+
+  --striped-table-header-bg-color: #47474f;
+  --striped-table-odd-row-bg-color: #303132;
+
+  --icon-filter: invert(180) contrast(150%);
+  --image-filter: invert(180) contrast(150%);
+
+  --solution-unhide-box-bg-color: inherit;
+  --solution-unhide-box-bg-color-hover: rgba(82, 86, 100, 0.45);
+}
+
 
 /* General */
 body {
-  background-color: $body-bg-color;
-  padding: 0px; /* change to bootstrap */
+  background: var(--body-bg);
+  padding: 0; /* change to bootstrap */
+  color: var(--text-color);
+}
+
+.nav-list > li > a:hover {
+  background-color: var(--nav-anchor-bg-color-hover);
+}
+
+.nav-list > li > a, h2, h3, h4, h4 a {
+  text-shadow: none !important;  /* Remove bootstrap's text shadow */
+}
+
+h2, h3, h4, .homepage-info, label {
+  color: var(--text-color);
+}
+
+a[href] {
+  color: var(--blue-anchor-color);
+}
+
+.nav-list > li > a:not([style="color: red;"]):hover, a[href]:hover {
+  color: var(--blue-anchor-color-hover);
+}
+
+.nav-list > li > a[style="color: red;"]:hover {
+  color: var(--red-anchor-color-hover);
+}
+
+/*li > a > i, */[class^="icon-"] {
+  filter: var(--icon-filter);
+}
+
+.latex, .latex-center, img[alt="Attachment image"] {
+  filter: var(--image-filter);
+}
+
+.table-striped tbody tr th {
+  background-color: var(--striped-table-header-bg-color);
+}
+
+.table-striped tbody tr:nth-child(odd) td {
+  background-color: var(--striped-table-odd-row-bg-color);
 }
 
 #header {
-  background: -webkit-gradient(linear,left top,left bottom,from(#2f3132),to(#323232));
-  box-shadow: 0 1px 4px $body-box-shadow-color;
+  background: -webkit-gradient(linear,left top,left bottom,from(var(--header-background-from)),to(var(--header-background-to)));
+  box-shadow: var(--header-box-shadow);
   margin-bottom: 3px;
   padding: 5px!important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
   form {
     padding: 0px!important;
@@ -24,39 +106,67 @@ body {
   }
 }
 
+#header.row:before, #header.row:after {
+  display: none;
+}
+
+#header-menu {
+  display: flex;
+}
+
 #site-container {
   padding: 10px;
 }
 
-#content, #sidebar {
+#content {
   border-radius: 5px;
-  box-shadow: 0 1px 4px $body-box-shadow-color;
+  box-shadow: 0 1px 4px var(--content-box-shadow-color);
+}
+
+#sidebar {
+  border-radius: 5px;
+  box-shadow: 0 1px 4px var(--sidebar-box-shadow-color);
 }
 
 #content {
   /* background-color: rgb(235, 231, 229); rgb(232, 236, 235) */
-  background-color: rgb(240, 245, 244);
+  background-color: var(--content-bg-color);
   padding: 10px;
 }
 
 #sidebar {
   /* background-color: rgb(245, 242, 240); */
-  background-color: rgb(246, 250, 249);
+  background-color: var(--sidebar-bg-color);
   margin-bottom: 10px;
   padding: 15px 5px;
 }
 
 #header-bar {
   float: right;
-  margin-top: 4px;
+  /* margin-top: 4px; ne znam cemu je ovo sluzilo */
+}
+
+#hbar-theme {
+  float: left;
+  margin-left: 5px;
+  position: relative;
+  padding: 0 5px 0 5px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 #hbar-flags {
   float: left;
-  margin: 4px 10px 0 10px;
+  margin: 0 10px 0 10px;
+  display: flex;
+  align-items: center;
+  column-gap: 5px;
   > button {
     padding: 0px;
     border: 0px;
+    display: flex;
+    align-items: center;
   }
   > button > img {
     width: 24px;
@@ -111,14 +221,14 @@ body {
   }
 
   a {
-    color: black;
+    color: var(--skoljka-logo-text-color);
     font-family: Georgia, Arial, serif;
     font-style: italic;
     text-shadow: 1px 1px 1px rgb(182, 182, 182);
   }
 
   a:hover {
-    color: black;
+    color: var(--skoljka-logo-text-color-hover);
     text-decoration: none;
   }
 }
