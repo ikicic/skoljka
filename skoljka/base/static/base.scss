@@ -6,6 +6,8 @@
 /*   Changing the color now requires changing all the colors manually. */
 
 // Predefined theme until a custom one loads
+// TODO: treba maknut ovo odavde, pustit da javascript stavi varijable ili ih staviti server-side
+// ovisno o korisnikovoj preferenci
 html {
   --theme-paintbrush-icon-color: #f2f2f2;  /* #323232 */
 
