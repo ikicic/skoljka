@@ -36,7 +36,7 @@ $(function() {
 });
 
 var THEMES = {
-  'theme-classic': {
+  'skoljka-classic': {
     name: 'Školjka Classic',
     author: 'Ivica Kičić',
     properties: {
@@ -105,7 +105,7 @@ var THEMES = {
       '--profile-distribution-column-fg-color': '#CCC'
     }
   },
-  'theme-dark': {
+  'skoljka-dark': {
     name: 'Školjka Dark',
     author: 'Dario Vuksan',
     properties: {
@@ -176,6 +176,15 @@ var THEMES = {
   }
 };
 
+/*
+Thanks, Babel!
+
+function applyTheme(theme) {
+  for (const [property, value] of Object.entries(theme.properties)) {
+      document.documentElement.style.setProperty(property, value);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   console.log("DOM loaded - vanilla (base.js)");
   var b = document.querySelector('#hbar-theme');
@@ -183,4 +192,61 @@ document.addEventListener('DOMContentLoaded', function() {
   b.addEventListener('click', function () {
     b.setAttribute('opened', '' + b.getAttribute('opened') !== 'true');
   });
+  for ([themeClassName, theme] of Object.entries(THEMES)) {
+    var themeDiv = document.createElement('div');
+    themeDiv.classList.add('listed-theme', themeClassName);
+    themeDiv.innerHTML = `
+      <span>${theme.name}</span>
+      <div>
+        Autor: <span>${theme.author}</span>
+      </div>
+    `;
+    themeDiv.theme = theme;
+    themeDiv.addEventListener('click', function () {
+      applyTheme(this.theme);
+    });
+  };
+  dropdown.appendChild(themeDiv);
+
+  applyTheme(THEMES['skoljka-classic']);
+});
+
+*/
+
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function applyTheme(theme) {
+  for (var _i = 0, _Object$entries = Object.entries(theme.properties); _i < _Object$entries.length; _i++) {
+    var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
+        property = _Object$entries$_i[0],
+        value = _Object$entries$_i[1];
+    document.documentElement.style.setProperty(property, value);
+  }
+}
+document.addEventListener('DOMContentLoaded', function () {
+  console.log("DOM loaded - vanilla (base.js)");
+  var b = document.querySelector('#hbar-theme');
+  var dropdown = document.querySelector('#theme-picker');
+  b.addEventListener('click', function () {
+    b.setAttribute('opened', '' + b.getAttribute('opened') !== 'true');
+  });
+  for (var _i2 = 0, _Object$entries2 = Object.entries(THEMES); _i2 < _Object$entries2.length; _i2++) {
+    var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2);
+    themeClassName = _Object$entries2$_i[0];
+    theme = _Object$entries2$_i[1];
+    var themeDiv = document.createElement('div');
+    themeDiv.classList.add('listed-theme', themeClassName);
+    themeDiv.innerHTML = "\n      <span>".concat(theme.name, "</span>\n      <div>\n        Autor: <span>").concat(theme.author, "</span>\n      </div>\n    ");
+    themeDiv.theme = theme;
+    themeDiv.addEventListener('click', function () {
+      applyTheme(this.theme);
+    });
+    dropdown.appendChild(themeDiv);
+  }
+
+  applyTheme(THEMES['skoljka-classic']);
 });

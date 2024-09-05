@@ -131,6 +131,7 @@ textarea {
   line-height: 1.4;
   position: fixed;
   top: 46px;
+  right: 0;  /* .outdiv's margin moves it away from the edge*/
   width: 200px;
   visibility: hidden;
   clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
@@ -151,10 +152,10 @@ textarea {
   font-weight: bold;
 }
 .listed-theme > div {
-  color: rgba(255, 255, 255, 0.5);
+  opacity: 0.5;
 }
 .listed-theme > div > span {
-  color: rgba(255, 255, 255, 0.75);
+  opacity: 0.75;
 }
 
 /* Theme picker button */
