@@ -15,13 +15,14 @@
   width: 20px;
   height: 100px;
   float: left;
-  background-color: #EEE;
+  background-color: var(--profile-distribution-column-bg-color);
   position: relative;
+  outline: var(--profile-distribution-column-outline);
 }
 
 .profile-distribution > div > div {
-  background-color: #CCC;
-  bottom: 0px;
+  background-color: var(--profile-distribution-column-fg-color);
+  bottom: 0;
   position: absolute;
   width: 20px;
 }

@@ -19,6 +19,9 @@
   box-sizing: border-box;
   margin-bottom: 0px;
   width: 100%;
+  background: var(--mathcontent-background);
+  border: var(--mathcontent-border);
+  color: var(--mathcontent-text-color);
 }
 
 .mc-inner {
@@ -128,9 +131,9 @@ object.latex-center {
 }
 
 .mc-quote {
-  background-color: #FAFAFA;
-  border-left: 1px solid #95C5F8;
-  color: #753A88;
+  background: var(--mc-quote-background); /*#FAFAFA*/
+  border-left: var(--mc-quote-border-left); /*1px solid #95C5F8*/
+  color: var(--mc-quote-text-color);  /*#753A88*/
   padding: 6px;
 }
 
