@@ -39,6 +39,8 @@ var THEMES = {
   'skoljka-classic': {
     name: 'Školjka Classic',
     author: 'Ivica Kičić',
+    href: 'https://github.com/ikicic/',
+    div: null,
     properties: {
       '--theme-paintbrush-icon-color': '#323232',
       '--header-background': '-webkit-gradient(linear, left top, left bottom, from(#dfe8eb), to(#d6e2e5))',
@@ -108,6 +110,8 @@ var THEMES = {
   'skoljka-dark': {
     name: 'Školjka Dark',
     author: 'Dario Vuksan',
+    href: 'https://github.com/IamMusavaRibica/',
+    div: null,
     properties: {
       '--theme-paintbrush-icon-color': '#f2f2f2',
       '--header-background': '#1b1d1e',
@@ -176,10 +180,15 @@ var THEMES = {
   }
 };
 
-/*
-Thanks, Babel!
 
+// Thanks, Babel!
+
+/*
 function applyTheme(theme) {
+  for (let t of Object.values(THEMES)) {
+    t.div.classList.remove('selected-theme');
+  }
+  theme.div.classList.add('selected-theme');
   for (const [property, value] of Object.entries(theme.properties)) {
       document.documentElement.style.setProperty(property, value);
   }
@@ -192,25 +201,41 @@ document.addEventListener('DOMContentLoaded', function() {
   b.addEventListener('click', function () {
     b.setAttribute('opened', '' + b.getAttribute('opened') !== 'true');
   });
+  // generated stylesheet for styling individual themes in the picker
+  var tpcss = document.createElement('style');
+
   for ([themeClassName, theme] of Object.entries(THEMES)) {
+    var a1 = 'x-' + themeClassName + '-anchor';
+    tpcss.innerText += `
+    .${a1} {
+        color: ${theme.properties['--blue-anchor-color']};
+    }
+    .${a1}:hover {
+        color: ${theme.properties['--blue-anchor-color-hover']};
+    }
+    `;
     var themeDiv = document.createElement('div');
     themeDiv.classList.add('listed-theme', themeClassName);
     themeDiv.innerHTML = `
       <span>${theme.name}</span>
       <div>
-        Autor: <span>${theme.author}</span>
+        Autor: <a class="${a1}" href=${theme.href} target="_blank">${theme.author}</a>
       </div>
     `;
     themeDiv.theme = theme;
     themeDiv.addEventListener('click', function () {
       applyTheme(this.theme);
     });
-  };
-  dropdown.appendChild(themeDiv);
+    themeDiv.style.setProperty('background', theme.properties['--body-bg']);
+    themeDiv.style.setProperty('color', theme.properties['--text-color']);
+    themeDiv.lastChild.lastChild.style
+    theme.div = themeDiv;
+    dropdown.appendChild(themeDiv);
+  }
+  document.head.appendChild(tpcss);
 
   applyTheme(THEMES['skoljka-classic']);
 });
-
 */
 
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
@@ -220,8 +245,13 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 function applyTheme(theme) {
-  for (var _i = 0, _Object$entries = Object.entries(theme.properties); _i < _Object$entries.length; _i++) {
-    var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
+  for (var _i = 0, _Object$values = Object.values(THEMES); _i < _Object$values.length; _i++) {
+    var t = _Object$values[_i];
+    t.div.classList.remove('selected-theme');
+  }
+  theme.div.classList.add('selected-theme');
+  for (var _i2 = 0, _Object$entries = Object.entries(theme.properties); _i2 < _Object$entries.length; _i2++) {
+    var _Object$entries$_i = _slicedToArray(_Object$entries[_i2], 2),
         property = _Object$entries$_i[0],
         value = _Object$entries$_i[1];
     document.documentElement.style.setProperty(property, value);
@@ -234,19 +264,26 @@ document.addEventListener('DOMContentLoaded', function () {
   b.addEventListener('click', function () {
     b.setAttribute('opened', '' + b.getAttribute('opened') !== 'true');
   });
-  for (var _i2 = 0, _Object$entries2 = Object.entries(THEMES); _i2 < _Object$entries2.length; _i2++) {
-    var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2);
+  // generated stylesheet for styling individual themes in the picker
+  var tpcss = document.createElement('style');
+  for (var _i3 = 0, _Object$entries2 = Object.entries(THEMES); _i3 < _Object$entries2.length; _i3++) {
+    var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i3], 2);
     themeClassName = _Object$entries2$_i[0];
     theme = _Object$entries2$_i[1];
+    var a1 = 'x-' + themeClassName + '-anchor';
+    tpcss.innerText += "\n    .".concat(a1, " {\n        color: ").concat(theme.properties['--blue-anchor-color'], ";\n    }\n    .").concat(a1, ":hover {\n        color: ").concat(theme.properties['--blue-anchor-color-hover'], ";\n    }\n    ");
     var themeDiv = document.createElement('div');
     themeDiv.classList.add('listed-theme', themeClassName);
-    themeDiv.innerHTML = "\n      <span>".concat(theme.name, "</span>\n      <div>\n        Autor: <span>").concat(theme.author, "</span>\n      </div>\n    ");
+    themeDiv.innerHTML = "\n      <span>".concat(theme.name, "</span>\n      <div>\n        Autor: <a class=\"").concat(a1, "\" href=").concat(theme.href, " target=\"_blank\">").concat(theme.author, "</a>\n      </div>\n    ");
     themeDiv.theme = theme;
     themeDiv.addEventListener('click', function () {
       applyTheme(this.theme);
     });
+    themeDiv.style.setProperty('background', theme.properties['--body-bg']);
+    themeDiv.style.setProperty('color', theme.properties['--text-color']);
+    theme.div = themeDiv;
     dropdown.appendChild(themeDiv);
   }
-
+  document.head.appendChild(tpcss);
   applyTheme(THEMES['skoljka-classic']);
 });
