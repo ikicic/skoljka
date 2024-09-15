@@ -2,7 +2,7 @@ Zahvaljujemo Vam što ste se registrirali na Školjci!
 
 Kako biste dovršili registraciju, molimo Vas da kliknete na sljedeći link:
 
-http://{{ site.domain }}/accounts/activate/{{ activation_key }}
+https://{{ site.domain }}/accounts/activate/{{ activation_key }}
 
 Školjka
 online arhiva zadataka iz matematike
@@ -15,7 +15,7 @@ Thank you for signing up for Školjka!
 
 To complete the registration, please follow the following link:
 
-http://{{ site.domain }}/accounts/activate/{{ activation_key }}
+https://{{ site.domain }}/accounts/activate/{{ activation_key }}
 
 Školjka
 online archive of mathematical problems
