@@ -14,6 +14,7 @@ html {
   --header-background: #1b1d1e;  /* -webkit-gradient(linear, left top, left bottom, from(#dfe8eb), to(#d6e2e5)); */
   --skoljka-logo-text-color: #ffffff;  /* #000000 */
   --skoljka-logo-text-color-hover: #ffffff;  /* #000000 */
+  --skoljka-logo-text-shadow: 1px 1px 1px #b6b6b6;  /* 1px 1px 1px #b6b6b6 */
   --body-bg: #2a2c2f;  /* #feffff */
   --header-box-shadow: 0 1px 4px #252e3a;  /* 0 1px 4px #666 */
 
@@ -420,7 +421,7 @@ a[href] {
     color: var(--skoljka-logo-text-color);
     font-family: Georgia, Arial, serif;
     font-style: italic;
-    text-shadow: 1px 1px 1px rgb(182, 182, 182);
+    text-shadow: var(--skoljka-logo-text-shadow);
   }
 
   a:hover {
