@@ -1,5 +1,17 @@
 #!/usr/bin/env python
 
+from BaseHTTPServer import BaseHTTPRequestHandler
+
+orig = BaseHTTPRequestHandler.address_string
+mapping = {}
+
+def decorated(self, *args, **kwargs):
+    if self.client_address not in mapping:
+        mapping[self.client_address] = orig(self, *args, **kwargs)
+    return mapping[self.client_address]
+
+BaseHTTPRequestHandler.address_string = decorated
+
 from django.core.management import execute_manager
 
 try:
