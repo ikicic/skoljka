@@ -110,7 +110,7 @@ h2, h3, h4, h4 a {
   border-radius: 5px;
   box-shadow: var(--outdiv-box-shadow);
   background: var(--outdiv-bg);
-  border: var(--outdiv-border);
+  outline: var(--outdiv-border);
   margin: 5px 5px 25px 5px;
   overflow: auto;
   padding: 15px 25px;
@@ -133,7 +133,7 @@ h2, h3, h4, h4 a {
   border-radius: 5px;
   box-shadow: var(--outset-box-shadow);
   padding: 15px 17px;
-  border: var(--outset-border);
+  outline: var(--outset-border);
 }
 
 .outset-margin {

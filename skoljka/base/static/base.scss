@@ -231,8 +231,8 @@ textarea:focus {
 .listed-theme > span {
   font-weight: bold;
 }
-.listed-theme > div {
-  font-size: 13px;
+.listed-theme > div {  /* Autor: Ime Prezime */
+  font-size: 11px;
 }
 
 /* Theme picker button */
@@ -351,7 +351,7 @@ a[href] {
 #content {
   border-radius: 5px;
   box-shadow: var(--content-box-shadow);
-  border: var(--content-border);
+  outline: var(--content-border);
   background-color: var(--content-bg-color);
   padding: 10px;
 }
@@ -359,7 +359,7 @@ a[href] {
 #sidebar {
   border-radius: 5px;
   box-shadow: var(--sidebar-box-shadow);
-  border: var(--sidebar-border);
+  outline: var(--sidebar-border);
   background-color: var(--sidebar-bg-color);
   margin-bottom: 10px;
   padding: 15px 5px;
