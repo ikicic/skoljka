@@ -144,7 +144,7 @@ textarea:focus {
   flex-direction: column;
   font-size: 15px;
   line-height: 1.4;
-  position: fixed;
+  position: absolute;
   padding: 10px 20px !important;
   top: 46px;
   right: 0;  /* .outdiv's margin moves it away from the edge*/
@@ -162,7 +162,7 @@ textarea:focus {
 
 #theme-picker-no-js {
   visibility: hidden;
-  position: fixed;
+  position: absolute;
   padding: 10px 10px;
   top: 46px;
   right: 0;
@@ -242,7 +242,7 @@ textarea:focus {
 
 #hbar-theme::before {
   content: "";
-  position: fixed;
+  position: absolute;
   top: 46px;
   right: 0;
   left: 0;
