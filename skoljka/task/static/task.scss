@@ -2,7 +2,7 @@
 
 /* Task action */
 .task-action-bar {
-  background-color: rgb(246, 248, 247);
+  background: var(--task-action-bar-bg);
   overflow:auto;
   position: relative;
 }

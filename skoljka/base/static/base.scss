@@ -14,6 +14,7 @@ html {
 
   --header-background: #1b1d1e;  /* -webkit-gradient(linear, left top, left bottom, from(#dfe8eb), to(#d6e2e5)); */
   --skoljka-logo-text-color: #ffffff;  /* #000000 */
+  --skoljka-logo-background: none;
   --skoljka-logo-text-color-hover: #ffffff;  /* #000000 */
   --skoljka-logo-text-shadow: 1px 1px 1px #b6b6b6;  /* 1px 1px 1px #b6b6b6 */
   --body-bg: #2a2c2f;  /* #feffff */
@@ -39,6 +40,7 @@ html {
   --post-info-text-color: #dedede;  /* #888 */
   --caction-info-text-color: #dedede;  /* gray */
   --task-file-info-text-color: #dedede;  /* gray */
+  --task-action-bar-bg: #393939; /* #f6f8f7 */
 
   --comp-my-team-td-bg-color: #314f25;  /* #dff0d8  */
 
@@ -47,6 +49,7 @@ html {
   --blue-anchor-color-hover: #3dbeff;  /* #005580 */
   --red-anchor-color-hover: #ff0000; /* red */
   --profile-task-submitted-anchor: #116cff;  /* #13F */
+  --anchor-footer: #C0D0F0; /* #C0D0F0 */
 
   --striped-table-header-bg-color: #47474f;  /* #f4f7f6 */
   --striped-table-odd-row-bg-color: #2b2c2d;  /* #f4f7f6*/
@@ -100,9 +103,12 @@ html {
   --profile-distribution-column-outline: 1px solid #2f2f2f;  /* none */
   --profile-distribution-column-bg-color: #4f4f4f;  /* #EEE */
   --profile-distribution-column-fg-color: #363636;  /* #CCC */
+
+  --solution-table-tr-bg-color: transparent !important;
+  --solution-table-tr-border-bottom: 1px solid #444;  /* none */
 }
 
-/* bootstrap overrides start */
+/* bootstrap overrides */
 .btn {
   text-shadow: var(--bootstrap-btn-text-shadow) !important;
   color: var(--bootstrap-btn-text-color) !important;
@@ -112,7 +118,7 @@ input {
   background-color: var(--input-bg-color) !important;
   color: var(--input-text-color) !important;
   border: var(--input-border) !important;
-  transition: none !important;
+  transition: box-shadow linear 0.2s !important;
 }
 input:focus {
   box-shadow: var(--input-box-shadow) !important;
@@ -121,10 +127,13 @@ textarea {
   background: var(--textarea-background) !important;
   border: var(--textarea-border) !important;
   color: var(--textarea-text-color) !important;
-  transition: none !important;
+  transition: box-shadow linear 0.2s !important;
 }
 textarea:focus {
   box-shadow: var(--textarea-box-shadow) !important;
+}
+.table tbody tr:hover td, .table tbody tr:hover th {
+  background-color: #f5f5f51f !important;  /* add opacity */
 }
 /* django overrides */
 .pagination a {
@@ -139,6 +148,10 @@ textarea:focus {
   border: var(--alert-border) !important;
 }
 
+.sol-table tbody tr {
+  background-color: var(--solution-table-tr-bg-color);
+  border-bottom: var(--solution-table-tr-border-bottom);
+}
 /* Theme picker dropdown */
 #theme-picker {
   display: flex;
@@ -229,7 +242,7 @@ textarea:focus {
 #hbar-theme {
   float: left;
   margin-left: 5px;
-  position: relative;
+  /* position: relative; */
   padding: 0 5px 0 5px;
   background-color: transparent;
   border: none;
@@ -429,6 +442,8 @@ a[href] {
     font-family: Georgia, Arial, serif;
     font-style: italic;
     text-shadow: var(--skoljka-logo-text-shadow);
+    -webkit-background-clip: text !important;
+    background: var(--skoljka-logo-background);
   }
 
   a:hover {
@@ -448,7 +463,7 @@ a[href] {
   white-space: nowrap;
 }
 a.footer {
-  color: #C0D0F0;
+  color: var(--anchor-footer);
 }
 
 a.register {
