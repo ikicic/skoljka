@@ -1,5 +1,4 @@
 $(function() {
-  console.log("DOM loaded - jquery (base.js)");
   $('.collapse-button').each(function() {
     // Add toggle icon.
     var target_id = $(this).attr('data-target');
@@ -31,13 +30,12 @@ $(function() {
     var index = parseInt($(this).val());
     $('#history-view').text(history_array[index]);
   });
-
-
 });
 
 var THEMES = {
   'skoljka-classic': {
     name: 'Školjka Classic',
+    identifier: 'skoljka-classic',
     author: 'Ivica Kičić',
     href: 'https://github.com/ikicic/',
     div: null,
@@ -109,6 +107,7 @@ var THEMES = {
   },
   'skoljka-dark': {
     name: 'Školjka Dark',
+    identifier: 'skoljka-dark',
     author: 'Dario Vuksan',
     href: 'https://github.com/IamMusavaRibica/',
     div: null,
@@ -185,8 +184,15 @@ var THEMES = {
 
 /*
 function applyTheme(theme) {
+  if (typeof theme === 'string') {
+    theme = THEMES[theme];
+  }
+  if (theme.div === null) {
+    return;
+  }
+  window.localStorage.setItem('skoljka-theme', theme.identifier);
   for (let t of Object.values(THEMES)) {
-    t.div.classList.remove('selected-theme');
+    t.div?.classList.remove('selected-theme');
   }
   theme.div.classList.add('selected-theme');
   for (const [property, value] of Object.entries(theme.properties)) {
@@ -195,7 +201,7 @@ function applyTheme(theme) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  console.log("DOM loaded - vanilla (base.js)");
+  // console.log("DOM loaded - vanilla (base.js)");
   var b = document.querySelector('#hbar-theme');
   var dropdown = document.querySelector('#theme-picker');
   b.addEventListener('click', function () {
@@ -234,7 +240,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   document.head.appendChild(tpcss);
 
-  applyTheme(THEMES['skoljka-classic']);
+  var selectedTheme = window.localStorage.getItem('skoljka-theme') || 'skoljka-classic';
+  applyTheme(THEMES[selectedTheme]);
 });
 */
 
@@ -245,9 +252,17 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 function applyTheme(theme) {
+  if (typeof theme === 'string') {
+    theme = THEMES[theme];
+  }
+  if (theme.div === null) {
+    return;
+  }
+  window.localStorage.setItem('skoljka-theme', theme.identifier);
   for (var _i = 0, _Object$values = Object.values(THEMES); _i < _Object$values.length; _i++) {
+    var _t$div;
     var t = _Object$values[_i];
-    t.div.classList.remove('selected-theme');
+    (_t$div = t.div) === null || _t$div === void 0 || _t$div.classList.remove('selected-theme');
   }
   theme.div.classList.add('selected-theme');
   for (var _i2 = 0, _Object$entries = Object.entries(theme.properties); _i2 < _Object$entries.length; _i2++) {
@@ -258,7 +273,7 @@ function applyTheme(theme) {
   }
 }
 document.addEventListener('DOMContentLoaded', function () {
-  console.log("DOM loaded - vanilla (base.js)");
+  // console.log("DOM loaded - vanilla (base.js)");
   var b = document.querySelector('#hbar-theme');
   var dropdown = document.querySelector('#theme-picker');
   b.addEventListener('click', function () {
@@ -281,9 +296,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     themeDiv.style.setProperty('background', theme.properties['--body-bg']);
     themeDiv.style.setProperty('color', theme.properties['--text-color']);
+    themeDiv.lastChild.lastChild.style;
     theme.div = themeDiv;
     dropdown.appendChild(themeDiv);
   }
   document.head.appendChild(tpcss);
-  applyTheme(THEMES['skoljka-classic']);
+  var selectedTheme = window.localStorage.getItem('skoljka-theme') || 'skoljka-classic';
+  applyTheme(THEMES[selectedTheme]);
 });
