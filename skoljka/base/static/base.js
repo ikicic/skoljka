@@ -306,5 +306,5 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   document.head.appendChild(tpcss);
   var selectedTheme = window.localStorage.getItem('skoljka-theme') || 'skoljka-classic';
-  applyTheme(THEMES[selectedTheme]);
+  // applyTheme(THEMES[selectedTheme]);
 });

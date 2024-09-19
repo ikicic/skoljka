@@ -8,6 +8,7 @@
 // Predefined theme until a custom one loads
 // TODO: treba maknut ovo odavde, pustit da javascript stavi varijable ili ih staviti server-side
 // ovisno o korisnikovoj preferenci
+
 html {
   --theme-paintbrush-icon-color: #f2f2f2;  /* #323232 */
 
@@ -20,13 +21,13 @@ html {
 
   --outset-bg: #40444c;  /* #fafcfc */
   --outset-box-shadow: 0 2px 4px rgb(64, 64, 100);  /* 0 2px 4px rgba(128, 128, 128, 0.55) */
-  --outset-border: none;  /* none */
   --outdiv-bg: #363a40; /* -webkit-gradient(linear, left top, left bottom, from(#f6f8fa), to(#edf2f8)) */
   --outdiv-box-shadow: 0 1px 2px rgb(64, 64, 100);  /* 0 1px 2px rgba(128, 128, 128, 0.35) */
-  --outdiv-border: none;  /* none */
 
   --content-bg-color: #1f1f1f;  /* #f6faf9 */
   --sidebar-bg-color: #1f1f1f;  /* #f0f5f4 */
+  --content-border: none;  /* none */
+  --sidebar-border: none;  /* none */
   --content-box-shadow: 0 1px 4px #303d4e;  /* 0 1px 4px #666 */
   --sidebar-box-shadow: 0 1px 4px #303d4e;  /* 0 1px 4px #666 */
   --text-color: #e6e6e6;  /* #333 */
@@ -96,7 +97,6 @@ html {
   --profile-distribution-column-bg-color: #4f4f4f;  /* #EEE */
   --profile-distribution-column-fg-color: #363636;  /* #CCC */
 }
-
 
 /* bootstrap overrides start */
 .btn {
@@ -330,21 +330,15 @@ a[href] {
 #content {
   border-radius: 5px;
   box-shadow: var(--content-box-shadow);
-}
-
-#sidebar {
-  border-radius: 5px;
-  box-shadow: var(--sidebar-box-shadow);
-}
-
-#content {
-  /* background-color: rgb(235, 231, 229); rgb(232, 236, 235) */
+  border: var(--content-border);
   background-color: var(--content-bg-color);
   padding: 10px;
 }
 
 #sidebar {
-  /* background-color: rgb(245, 242, 240); */
+  border-radius: 5px;
+  box-shadow: var(--sidebar-box-shadow);
+  border: var(--sidebar-border);
   background-color: var(--sidebar-bg-color);
   margin-bottom: 10px;
   padding: 15px 5px;
