@@ -6,11 +6,13 @@ orig = BaseHTTPRequestHandler.address_string
 mapping = {}
 
 def decorated(self, *args, **kwargs):
-    if self.client_address not in mapping:
-        mapping[self.client_address] = orig(self, *args, **kwargs)
-    return mapping[self.client_address]
+    #if self.client_address not in mapping:
+    #    mapping[self.client_address] = orig(self, *args, **kwargs)
+    #return mapping[self.client_address]
+    return self.client_address[0]
 
 BaseHTTPRequestHandler.address_string = decorated
+print "Patched BaseHTTPRequestHandler.address_string"
 
 from django.core.management import execute_manager
 
