@@ -234,7 +234,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     themeDiv.style.setProperty('background', theme.properties['--body-bg']);
     themeDiv.style.setProperty('color', theme.properties['--text-color']);
-    themeDiv.lastChild.lastChild.style
     theme.div = themeDiv;
     dropdown.appendChild(themeDiv);
   }
@@ -296,7 +295,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     themeDiv.style.setProperty('background', theme.properties['--body-bg']);
     themeDiv.style.setProperty('color', theme.properties['--text-color']);
-    themeDiv.lastChild.lastChild.style;
     theme.div = themeDiv;
     dropdown.appendChild(themeDiv);
   }
