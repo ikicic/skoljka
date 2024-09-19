@@ -142,9 +142,19 @@ textarea {
   z-index: 11;
 }
 
-#hbar-theme[opened=true] + #theme-picker {
+#hbar-theme[opened=true] ~ #theme-picker {
   visibility: visible;
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+#theme-picker-no-js {
+  visibility: hidden;
+  position: fixed;
+  padding: 10px 10px;
+  top: 46px;
+  right: 0;
+  max-width: 70%;
+  font-size: 16px;
 }
 
 .listed-theme {

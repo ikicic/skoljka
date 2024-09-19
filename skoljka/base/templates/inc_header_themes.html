@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <button id="hbar-theme" opened="false">
     <svg height="24px" width="24px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve" style="vertical-align: middle;">
         <style type="text/css">
@@ -31,4 +33,7 @@
 </button>
 <div id="theme-picker" class="outdiv">
 
+</div>
+<div id="theme-picker-no-js" class="outdiv">
+    {% trans "Please enable JavaScript to change page theme" %}
 </div>
