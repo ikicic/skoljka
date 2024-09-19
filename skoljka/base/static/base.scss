@@ -50,6 +50,7 @@ html {
   --red-anchor-color-hover: #ff0000; /* red */
   --profile-task-submitted-anchor: #116cff;  /* #13F */
   --anchor-footer: #C0D0F0; /* #C0D0F0 */
+  --hr-color: #d4d4d4;
 
   --striped-table-header-bg-color: #47474f;  /* #f4f7f6 */
   --striped-table-odd-row-bg-color: #2b2c2d;  /* #f4f7f6*/
@@ -134,6 +135,9 @@ textarea:focus {
 }
 .table tbody tr:hover td, .table tbody tr:hover th {
   background-color: #f5f5f51f !important;  /* add opacity */
+}
+hr {
+  border-color: var(--hr-color) !important;
 }
 /* django overrides */
 .pagination a {
