@@ -207,6 +207,7 @@ var THEMES = {
     author: 'Dario Vuksan',
     href: 'https://github.com/IamMusavaRibica/',
     div: null,
+    pickerBackground: 'rgb(49 5 64)',
     properties: {
       '--theme-paintbrush-icon-color': '#dc25ff',
       '--header-background': '#3a024a',
@@ -322,14 +323,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   for ([themeClassName, theme] of Object.entries(THEMES)) {
     var a1 = 'x-' + themeClassName + '-anchor';
-    tpcss.innerText += `
-    .${a1} {
-        color: ${theme.properties['--blue-anchor-color']};
-    }
-    .${a1}:hover {
-        color: ${theme.properties['--blue-anchor-color-hover']};
-    }
-    `;
+    tpcss.innerHTML += `.${a1} {color: ${theme.properties['--blue-anchor-color']} !important;}\n`
+    tpcss.innerHTML += `.${a1}:hover {color: ${theme.properties['--blue-anchor-color-hover']} !important;}\n`;
     var themeDiv = document.createElement('div');
     themeDiv.classList.add('listed-theme', themeClassName);
     themeDiv.innerHTML = `
@@ -342,8 +337,9 @@ document.addEventListener('DOMContentLoaded', function() {
     themeDiv.addEventListener('click', function () {
       applyTheme(this.theme);
     });
-    themeDiv.style.setProperty('background', theme.properties['--body-bg']);
+    themeDiv.style.setProperty('background', theme.pickerBackground || theme.properties['--body-bg']);
     themeDiv.style.setProperty('color', theme.properties['--text-color']);
+    themeDiv.style.setProperty('outline', '2px solid ' + theme.properties['--theme-paintbrush-icon-color']);
     theme.div = themeDiv;
     dropdown.appendChild(themeDiv);
   }
@@ -352,7 +348,8 @@ document.addEventListener('DOMContentLoaded', function() {
   var selectedTheme = window.localStorage.getItem('skoljka-theme') || 'skoljka-classic';
   applyTheme(THEMES[selectedTheme]);
 });
-*/
+ */
+
 
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -395,7 +392,8 @@ document.addEventListener('DOMContentLoaded', function () {
     themeClassName = _Object$entries2$_i[0];
     theme = _Object$entries2$_i[1];
     var a1 = 'x-' + themeClassName + '-anchor';
-    tpcss.innerText += "\n    .".concat(a1, " {\n        color: ").concat(theme.properties['--blue-anchor-color'], ";\n    }\n    .").concat(a1, ":hover {\n        color: ").concat(theme.properties['--blue-anchor-color-hover'], ";\n    }\n    ");
+    tpcss.innerHTML += ".".concat(a1, " {color: ").concat(theme.properties['--blue-anchor-color'], " !important;}\n");
+    tpcss.innerHTML += ".".concat(a1, ":hover {color: ").concat(theme.properties['--blue-anchor-color-hover'], " !important;}\n");
     var themeDiv = document.createElement('div');
     themeDiv.classList.add('listed-theme', themeClassName);
     themeDiv.innerHTML = "\n      <span>".concat(theme.name, "</span>\n      <div>\n        Autor: <a class=\"").concat(a1, "\" href=").concat(theme.href, " target=\"_blank\">").concat(theme.author, "</a>\n      </div>\n    ");
@@ -403,8 +401,9 @@ document.addEventListener('DOMContentLoaded', function () {
     themeDiv.addEventListener('click', function () {
       applyTheme(this.theme);
     });
-    themeDiv.style.setProperty('background', theme.properties['--body-bg']);
+    themeDiv.style.setProperty('background', theme.pickerBackground || theme.properties['--body-bg']);
     themeDiv.style.setProperty('color', theme.properties['--text-color']);
+    themeDiv.style.setProperty('outline', '2px solid ' + theme.properties['--theme-paintbrush-icon-color']);
     theme.div = themeDiv;
     dropdown.appendChild(themeDiv);
   }

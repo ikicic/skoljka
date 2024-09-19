@@ -193,7 +193,7 @@ textarea:focus {
 }
 
 .listed-theme.selected-theme {
-  outline: 2px solid var(--theme-paintbrush-icon-color);
+  /* outline: 2px solid var(--theme-paintbrush-icon-color); */
   box-shadow: 0 0 16px 3px /*rgba(0,153,0,1)*/ #9d9d9d;
 }
 
@@ -232,10 +232,7 @@ textarea:focus {
   font-weight: bold;
 }
 .listed-theme > div {
-  opacity: 1;
-}
-.listed-theme > div > span {
-  opacity: 1;
+  font-size: 13px;
 }
 
 /* Theme picker button */
