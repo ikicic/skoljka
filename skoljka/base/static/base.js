@@ -208,8 +208,6 @@ var THEMES = {
     href: 'https://github.com/IamMusavaRibica/',
     div: null,
     properties: {
-      // copy all properties from the above
-      // copilot, copy them all at once instead of line by line
       '--theme-paintbrush-icon-color': '#dc25ff',
       '--header-background': '#3a024a',
       '--skoljka-logo-text-color': 'transparent',
@@ -412,5 +410,5 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   document.head.appendChild(tpcss);
   var selectedTheme = window.localStorage.getItem('skoljka-theme') || 'skoljka-classic';
-  // applyTheme(THEMES[selectedTheme]);
+  applyTheme(THEMES[selectedTheme]);
 });
