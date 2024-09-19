@@ -162,7 +162,7 @@ var THEMES = {
       '--mathcontent-border': 'none',
       '--textarea-background': '#171717',
       '--textarea-text-color': '#eeeeee',
-      '--textarea-border': 'none',
+      '--textarea-border': '1px solid #444',
       '--textarea-box-shadow': 'inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(231, 231, 231, 0.6)',
       '--mc-quote-background': '#363b46',
       '--mc-quote-border-left': '1px solid #419dff',
