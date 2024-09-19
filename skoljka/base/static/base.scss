@@ -121,6 +121,7 @@ textarea {
   background: var(--textarea-background) !important;
   border: var(--textarea-border) !important;
   color: var(--textarea-text-color) !important;
+  transition: none !important;
 }
 textarea:focus {
   box-shadow: var(--textarea-box-shadow) !important;
