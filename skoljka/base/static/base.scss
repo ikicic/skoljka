@@ -269,16 +269,6 @@ body {
   background: var(--body-bg);
   padding: 0; /* change to bootstrap */
   color: var(--text-color);
-
-  /* ova tri trebaju kako bi #hbar-theme::before bio od ispod headera do dna stranice, cak i ako stranica ima scrollbar
-     za prema dolje (vidi css iznad ovoga). ne znam kako napraviti drugacije. ne moze biti top: 0 jer ga nisam mogao
-     staviti z-indexom "ispod" headera i pickera, a iznad svega ostalog, zato ima top: 46px. s druge strane, ako stavim
-     position: fixed na ::before onda se on ne mice kad se stranica scrolla. takoder, #hbar-theme ne smije imati
-     position: relative.
-     */
-  position: absolute;
-  left: 0;
-  right: 0;
 }
 
 div.outset code {
