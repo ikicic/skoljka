@@ -220,7 +220,7 @@ form#comp-scoreboard-admin-refresh {
 .comp-my-team {
   font-weight: bold;
   td {
-    background-color: #dff0d8 !important;
+    background-color: var(--comp-my-team-td-bg-color) !important;
   }
 }
 
@@ -242,7 +242,7 @@ form#comp-scoreboard-admin-refresh {
 }
 
 /*tr*/.comp-chain-unfinished:hover {
-  background-color: mix(blue, $page-content-bg-color, 5%);
+  background-color: var(--comp-chain-unfinished-hover);
 }
 
 tr.comp-chain-locked {

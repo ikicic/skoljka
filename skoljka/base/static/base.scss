@@ -5,21 +5,334 @@
 /* TODO: Sass! Most of the colors are closely related. */
 /*   Changing the color now requires changing all the colors manually. */
 
+// Predefined theme until a custom one loads
+// TODO: treba maknut ovo odavde, pustit da javascript stavi varijable ili ih staviti server-side
+// ovisno o korisnikovoj preferenci
+
+html {
+  --theme-paintbrush-icon-color: #f2f2f2;  /* #323232 */
+
+  --header-background: #1b1d1e;  /* -webkit-gradient(linear, left top, left bottom, from(#dfe8eb), to(#d6e2e5)); */
+  --skoljka-logo-text-color: #ffffff;  /* #000000 */
+  --skoljka-logo-background: none;
+  --skoljka-logo-text-color-hover: #ffffff;  /* #000000 */
+  --skoljka-logo-text-shadow: 1px 1px 1px #b6b6b6;  /* 1px 1px 1px #b6b6b6 */
+  --body-bg: #2a2c2f;  /* #feffff */
+  --header-box-shadow: 0 1px 4px #252e3a;  /* 0 1px 4px #666 */
+
+  --outset-bg: #40444c;  /* #fafcfc */
+  --outset-box-shadow: 0 2px 4px rgb(64, 64, 100);  /* 0 2px 4px rgba(128, 128, 128, 0.55) */
+  --outset-border: none;
+  --outdiv-bg: #363a40; /* -webkit-gradient(linear, left top, left bottom, from(#f6f8fa), to(#edf2f8)) */
+  --outdiv-box-shadow: 0 1px 2px rgb(64, 64, 100);  /* 0 1px 2px rgba(128, 128, 128, 0.35) */
+  --outdiv-border: none;
+
+  --content-bg-color: #1f1f1f;  /* #f6faf9 */
+  --sidebar-bg-color: #1f1f1f;  /* #f0f5f4 */
+  --content-border: none;  /* none */
+  --sidebar-border: none;  /* none */
+  --content-box-shadow: 0 1px 4px #303d4e;  /* 0 1px 4px #666 */
+  --sidebar-box-shadow: 0 1px 4px #303d4e;  /* 0 1px 4px #666 */
+  --text-color: #e6e6e6;  /* #333 */
+  --activity-day-text-color: #dddddd; /* #666 */
+  --homepage-info-text-color: #dcdcdc; /* #444 */
+  --comp-category-text-color: #dcdcdc;  /* #555 */
+  --post-info-text-color: #dedede;  /* #888 */
+  --caction-info-text-color: #dedede;  /* gray */
+  --task-file-info-text-color: #dedede;  /* gray */
+  --task-action-bar-bg: #393939; /* #f6f8f7 */
+
+  --comp-my-team-td-bg-color: #314f25;  /* #dff0d8  */
+
+  --nav-anchor-bg-color-hover: #2b2f36;  /* #eee */
+  --blue-anchor-color: #2da3e5;  /* 0088cc */
+  --blue-anchor-color-hover: #3dbeff;  /* #005580 */
+  --red-anchor-color-hover: #ff0000; /* red */
+  --profile-task-submitted-anchor: #116cff;  /* #13F */
+  --anchor-footer: #C0D0F0; /* #C0D0F0 */
+  --hr-color: #d4d4d4;
+
+  --striped-table-header-bg-color: #47474f;  /* #f4f7f6 */
+  --striped-table-odd-row-bg-color: #2b2c2d;  /* #f4f7f6*/
+
+  --icon-filter: invert(180) contrast(150%);  /* none */
+  --image-filter: invert(180) contrast(150%);  /* none */
+
+  --solution-unhide-box-bg-color: inherit;  /* #FEFEFE */
+  --solution-unhide-box-bg-color-hover: rgba(82, 86, 100, 0.45);  /* #F4F4F4 */
+
+  /* .mc-text i textarea su jako bliski u upotrebi na stranici */
+  --mathcontent-background: #171717;  /* #fff */
+  --mathcontent-text-color: #eeeeee; /* #555 */
+  --mathcontent-border: none;  /* 1px solid #ccc */
+  --textarea-background: #171717;  /*#FAFAFA*/
+  --textarea-text-color: #eeeeee;  /*#753A88*/
+  --textarea-border: 1px solid #444;  /* 1px solid #ccc */
+  --textarea-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(231, 231, 231, 0.6); /* inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6); */
+
+  --mc-quote-background: #363b46;  /*#FAFAFA*/
+  --mc-quote-border-left: 1px solid #419dff; /*1px solid #95C5F8*/
+  --mc-quote-text-color: #b5b5b5;  /*#753A88*/
+
+  --bootstrap-btn-text-shadow: none;  /* 0 1px 1px rgba(255, 255, 255, 0.75); */
+  --bootstrap-btn-background: #3d3d3d;  /* whitesmoke -webkit-linear-gradient(top, #fff, #e6e6e6) repeat-x */
+  --bootstrap-btn-text-color: #eeeeee;  /* #333 */
+
+
+  --input-bg-color: #171717;  /* #ffffff */
+  --input-text-color: #eeeeee;  /* #555 */
+  --input-border: 1px solid #444;  /* 1px solid #ccc */
+  --input-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+
+  --alert-bg-color: #36342a;  /* #fcf8e3 */
+  --alert-text-shadow: none;  /* 0 1px 0 rgba(255, 255, 255, 0.5); */
+  --alert-border: 1px solid #b67800; /* 1px solid #fbeed5 */
+  --alert-text-color: #f6ead4;  /* #c09853 */
+
+  --tag-tooltip-bg: #171717;  /* rgb(239, 241, 228) */
+  --tag-tooltip-border: 1px solid #000;  /* 1px solid #CCC */
+  --tag-tooltip-box-shadow: 1px 1px 3px #0c5b92;  /* 1px 1px 3px #c9c9c9 */
+
+  --pagination-anchor-border: 1px solid #444;  /* 1px solid #ddd */
+  --pagination-anchor-bg-color-hover: #2f2f2f;  /* #f5f5f5 */
+
+  --comp-chain-unfinished-hover: #2d2d36; /* mix(blue, #f0f5f4, 5%) */
+
+  --outset-code-bg-color: #31343c;   /* #f7f7f9 */
+  --outset-code-border: 1px solid #0e0e0e;  /* 1px solid #e1e1e8; */
+
+  --profile-distribution-column-outline: 1px solid #2f2f2f;  /* none */
+  --profile-distribution-column-bg-color: #4f4f4f;  /* #EEE */
+  --profile-distribution-column-fg-color: #363636;  /* #CCC */
+
+  --solution-table-tr-bg-color: transparent !important;
+  --solution-table-tr-border-bottom: 1px solid #444;  /* none */
+}
+
+/* bootstrap overrides */
+.btn {
+  text-shadow: var(--bootstrap-btn-text-shadow) !important;
+  color: var(--bootstrap-btn-text-color) !important;
+  background: var(--bootstrap-btn-background) !important;
+}
+input {
+  background-color: var(--input-bg-color) !important;
+  color: var(--input-text-color) !important;
+  border: var(--input-border) !important;
+  transition: box-shadow linear 0.2s !important;
+}
+input:focus {
+  box-shadow: var(--input-box-shadow) !important;
+}
+textarea {
+  background: var(--textarea-background) !important;
+  border: var(--textarea-border) !important;
+  color: var(--textarea-text-color) !important;
+  transition: box-shadow linear 0.2s !important;
+}
+textarea:focus {
+  box-shadow: var(--textarea-box-shadow) !important;
+}
+.table tbody tr:hover td, .table tbody tr:hover th {
+  background-color: #f5f5f51f !important;  /* add opacity */
+}
+hr {
+  border-color: var(--hr-color) !important;
+}
+/* django overrides */
+.pagination a {
+  border: var(--pagination-anchor-border) !important;
+}
+.pagination a:hover, .pagination .active a {
+  background-color: var(--pagination-anchor-bg-color-hover) !important;
+}
+.alert {
+  background-color: var(--alert-bg-color) !important;
+  text-shadow: var(--alert-text-shadow) !important;
+  border: var(--alert-border) !important;
+}
+
+.sol-table tbody tr {
+  background-color: var(--solution-table-tr-bg-color);
+  border-bottom: var(--solution-table-tr-border-bottom);
+}
+/* Theme picker dropdown */
+#theme-picker {
+  display: flex;
+  flex-direction: column;
+  font-size: 15px;
+  line-height: 1.4;
+  position: absolute;
+  padding: 10px 20px !important;
+  top: 46px;
+  right: 0;  /* .outdiv's margin moves it away from the edge*/
+  width: 200px;
+  visibility: hidden;
+  clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+  transition: clip-path .3s ease-in-out, visibility .3s linear;
+  z-index: 11;
+}
+
+#hbar-theme[opened=true] ~ #theme-picker {
+  visibility: visible;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+#theme-picker-no-js {
+  visibility: hidden;
+  position: absolute;
+  padding: 10px 10px;
+  top: 46px;
+  right: 0;
+  max-width: 70%;
+  font-size: 16px;
+}
+
+.listed-theme {
+  position: relative;
+  padding: 5px 8px 5px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: box-shadow .22s ease-in-out, outline .22s ease-in-out;
+}
+
+.listed-theme.selected-theme {
+  /* outline: 2px solid var(--theme-paintbrush-icon-color); */
+  box-shadow: 0 0 16px 3px /*rgba(0,153,0,1)*/ #9d9d9d;
+}
+
+.listed-theme::before {
+  transition: opacity .3s ease-in-out;
+}
+
+.listed-theme:not(.selected-theme)::before {
+  opacity: 0;
+}
+
+/*
+.listed-theme.selected-theme::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  background: linear-gradient(135deg, red, orange,
+          yellow, green,
+          blue, indigo,
+          violet);
+  border-radius: 20px;
+  filter: blur(30px);
+  opacity: 0.7777;
+  z-index: -1;
+}
+*/
+
+.listed-theme:not(:first-of-type) {
+  margin-top: 15px;
+}
+
+.listed-theme > span {
+  font-weight: bold;
+}
+.listed-theme > div {  /* Autor: Ime Prezime */
+  font-size: 11px;
+}
+
+/* Theme picker button */
+#hbar-theme {
+  float: left;
+  margin-left: 5px;
+  /* position: relative; */
+  padding: 0 5px 0 5px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+#hbar-theme[opened=true]::before {
+  visibility: visible;
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+#hbar-theme::before {
+  content: "";
+  position: absolute;
+  top: 46px;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  visibility: hidden;
+  background-color: rgba(0, 0, 0, 0);
+  transition: background-color .25s ease-in-out, visibility .25s linear;
+  z-index: 10;
+}
 
 /* General */
 body {
-  background-color: $body-bg-color;
-  padding: 0px; /* change to bootstrap */
+  background: var(--body-bg);
+  padding: 0; /* change to bootstrap */
+  color: var(--text-color);
+}
+
+div.outset code {
+  background-color: var(--outset-code-bg-color);
+  border: var(--outset-code-border);
+}
+.homepage-info {
+  color: var(--homepage-info-text-color);
+}
+.comp-category {
+  color: var(--comp-category-text-color);
+}
+.nav-list > li > a:hover {
+  background-color: var(--nav-anchor-bg-color-hover);
+}
+
+.nav-list > li > a, h2, h3, h4, h4 a {
+  text-shadow: none !important;  /* Remove bootstrap's text shadow */
+}
+
+h2, h3, h4, label {
+  color: var(--text-color);
+}
+
+a[href] {
+  color: var(--blue-anchor-color);
+}
+
+.nav-list > li > a:not([style="color: red;"]):hover, a[href]:hover {
+  color: var(--blue-anchor-color-hover);
+}
+
+.nav-list > li > a[style="color: red;"]:hover {
+  color: var(--red-anchor-color-hover);
+}
+
+/*li > a > i, */[class^="icon-"] {
+  filter: var(--icon-filter);
+}
+
+.latex, .latex-center, img[alt="Attachment image"] {
+  filter: var(--image-filter);
+}
+
+.table-striped tbody tr th {
+  background-color: var(--striped-table-header-bg-color) !important;
+}
+
+.table-striped tbody tr:nth-child(odd) td {
+  background-color: var(--striped-table-odd-row-bg-color) !important;
 }
 
 #header {
-  background-color: rgb(206, 216, 214);
-  background: -webkit-gradient(
-    linear, left top, left bottom,
-    from($header-color1), to($header-color2));
-  box-shadow: 0 1px 4px $body-box-shadow-color;
+  background: var(--header-background);
+  box-shadow: var(--header-box-shadow);
   margin-bottom: 3px;
   padding: 5px!important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
   form {
     padding: 0px!important;
@@ -27,39 +340,51 @@ body {
   }
 }
 
+#header.row:before, #header.row:after {
+  display: none;
+}
+
+#header-menu {
+  display: flex;
+}
+
 #site-container {
   padding: 10px;
 }
 
-#content, #sidebar {
-  border-radius: 5px;
-  box-shadow: 0 1px 4px $body-box-shadow-color;
-}
-
 #content {
-  /* background-color: rgb(235, 231, 229); rgb(232, 236, 235) */
-  background-color: rgb(240, 245, 244);
+  border-radius: 5px;
+  box-shadow: var(--content-box-shadow);
+  outline: var(--content-border);
+  background-color: var(--content-bg-color);
   padding: 10px;
 }
 
 #sidebar {
-  /* background-color: rgb(245, 242, 240); */
-  background-color: rgb(246, 250, 249);
+  border-radius: 5px;
+  box-shadow: var(--sidebar-box-shadow);
+  outline: var(--sidebar-border);
+  background-color: var(--sidebar-bg-color);
   margin-bottom: 10px;
   padding: 15px 5px;
 }
 
 #header-bar {
   float: right;
-  margin-top: 4px;
+  /* margin-top: 4px; ne znam cemu je ovo sluzilo */
 }
 
 #hbar-flags {
   float: left;
-  margin: 4px 10px 0 10px;
+  margin: 0 10px 0 10px;
+  display: flex;
+  align-items: center;
+  column-gap: 5px;
   > button {
     padding: 0px;
     border: 0px;
+    display: flex;
+    align-items: center;
   }
   > button > img {
     width: 24px;
@@ -114,14 +439,16 @@ body {
   }
 
   a {
-    color: black;
+    color: var(--skoljka-logo-text-color);
     font-family: Georgia, Arial, serif;
     font-style: italic;
-    text-shadow: 1px 1px 1px rgb(182, 182, 182);
+    text-shadow: var(--skoljka-logo-text-shadow);
+    -webkit-background-clip: text !important;
+    background: var(--skoljka-logo-background);
   }
 
   a:hover {
-    color: black;
+    color: var(--skoljka-logo-text-color-hover);
     text-decoration: none;
   }
 }
@@ -137,11 +464,11 @@ body {
   white-space: nowrap;
 }
 a.footer {
-  color: #C0D0F0;
+  color: var(--anchor-footer);
 }
 
 a.register {
-  color: red;
+  color: var(--red-anchor-color-hover);
 }
 
 .unread_pms_count {
