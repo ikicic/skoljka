@@ -42,7 +42,7 @@ def task_detail(request, competition, data, ctask_id):
     chain_ctasks, chain_submissions, submissions = view.load_chain_and_submissions(
         team=view.team
     )
-    if not view.has_access_to_ctask():
+    if not view.has_access_to_ctask(data):
         raise Http404
 
     data['submissions_closed'] = view.are_submissions_closed()
@@ -203,11 +203,11 @@ class _TaskDetailView(object):
             return False
         return not self.are_submissions_closed()
 
-    def has_access_to_ctask(self):
+    def has_access_to_ctask(self, data):
         """Return whether the user has access to the ctask, assuming they have
         an access to the chain. `load_chain_and_submissions` must be called
         before this function."""
-        return self.is_admin or not self.ctask.t_is_locked
+        return self.is_admin or not self.ctask.t_is_locked or data['has_finished']
 
     def handle_form(self, evaluator, chain_ctasks, chain_submissions, submissions):
         if self.ctask.is_automatically_graded():

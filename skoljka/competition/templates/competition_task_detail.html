@@ -25,8 +25,8 @@
   </div>
 {% endif %}
 
-{% if ctask.t_is_locked %}
-  {# if not admin, the request would be rejected anyway #}
+{% if is_admin and ctask.t_is_locked and not has_finished %}
+  {# "locked" ctasks are visible if the competition ended and the chain is unlocked #}
   <div class="alert">
     {% trans "You see this problem as an admin, despite not having solved all prerequisites." %}
   </div>

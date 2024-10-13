@@ -1,5 +1,11 @@
 # Release Notes
 
+## Školjka (unreleased)
+
+### Bug fixes
+
+- [competition] after the competition ends, make all ctasks of an unlocked chain visible
+
 ## Školjka v0.12.0
 
 ### New features

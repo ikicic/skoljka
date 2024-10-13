@@ -34,6 +34,15 @@ describe("test chain access", () => {
 
           // The first ctask of chain B should not be accessible.
           cy.expectNotFound(`/${COMPETITION}/task/${chainJsonB['ctask_ids'][0]}/`);
+
+          // After the competition ends, the chain A should be visible.
+          cy.updateCompetition('public_competition', { 'end-hours-after-now': -1 });
+          cy.visit(`/${COMPETITION}/task/${chainJsonA['ctask_ids'][2]}/`);
+
+          // However, the chain B should not be visible, because of its
+          // unlock_minutes. This allows us to hide a chain indefinitely (by
+          // setting unlock_minutes so some very large value).
+          cy.expectNotFound(`/${COMPETITION}/task/${chainJsonB['ctask_ids'][0]}/`);
         });
       });
     });
