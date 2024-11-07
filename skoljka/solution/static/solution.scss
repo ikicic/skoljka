@@ -27,7 +27,7 @@
 
 #solution-unhide-box {
   position: absolute;
-  background-color: #FEFEFE;
+  background-color: var(--solution-unhide-box-bg-color);  /* --outset-bg */
   border: 1px solid #DDDDDD;
   top: 7px;
   left: 7px;
@@ -37,7 +37,7 @@
 }
 
 #solution-unhide-box:hover {
-  background-color: #F4F4F4;
+  background-color: var(--solution-unhide-box-bg-color-hover);
 }
 
 .sol-table td {

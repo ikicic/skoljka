@@ -69,8 +69,7 @@
           <td class="comp-chain-name">{{ chain.t_translated_name }}</td>
           <td class="comp-chain-tasks">
             <div class="progress"
-                style="width: {% percentage chain.ctasks|length max_chain_length %};
-                       max-width: {% widthratio chain.ctasks|length max_chain_length 600 %}px;">
+                style="max-width: {% widthratio chain.ctasks|length max_chain_length 600 %}px;">
               {% for ctask in chain.ctasks %}
                 {% if not ctask.t_is_locked or is_admin %}
                   <a data-id="{{ ctask.id }}"

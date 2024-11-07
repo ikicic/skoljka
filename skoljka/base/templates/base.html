@@ -23,8 +23,8 @@
     <meta name="viewport" content="width=device-width">
     {% language_preference_style %}
   </head>
-<body>
-{% settings_constant EXTRA_HEADER_TOP %}
+<body style="text-rendering: optimizeLegibility;">
+<!--{% settings_constant EXTRA_HEADER_TOP %}-->
 <div id="header" class="row">
   <h1 id="sitename">
     <a href="/">
@@ -32,37 +32,36 @@
     </a>
   </h1>
 
-  <div id="header-bar">
-    <div class="row-fluid">
-      <div id="hbar-sel-folder">
-        {% if user.profile.selected_folder %}
-          {% trans "Map editing" %}
-          <a href="/folder/{{ user.profile.selected_folder.id }}/">
-            {{ user.profile.selected_folder.name }}
-          </a>
-        {% endif %}
-      </div>
-      <div id="hbar-search" class="hidden-phone">
-        {% include 'inc_search_inline.html' %}
-      </div>
-      {% if not user.is_authenticated %}
-        <form action="/accounts/login/" method="POST" id="hbar-login"
-              class="form-inline hidden-xs-phone">
-          {% csrf_token %}
-          {# No whitespace between inline-block elements, CSS used instead. #}
-          <input name="username" type="text"
-              class="input-small" placeholder="{% trans "Username" %}" accesskey="l"
-              {% if homepage %} autofocus{% endif %}
-          ><input name="password" type="password"
-            class="input-small" placeholder="{% trans "Password" %}"
-          ><input type="submit" class="btn" value="{% trans "Sign in" %}">
-        </form>
+  <div id="header-menu">
+    <div id="hbar-sel-folder">
+      {% if user.profile.selected_folder %}
+        {% trans "Map editing" %}
+        <a href="/folder/{{ user.profile.selected_folder.id }}/">
+          {{ user.profile.selected_folder.name }}
+        </a>
       {% endif %}
-      {% include 'inc_header_languages.html' %}
-      <a id="hbar-collapse-sidebar" class="collapse-button btn"
-          data-target="sidebar" href="#">
-      </a>
     </div>
+    <div id="hbar-search" class="hidden-phone">
+      {% include 'inc_search_inline.html' %}
+    </div>
+    {% if not user.is_authenticated %}
+      <form action="/accounts/login/" method="POST" id="hbar-login"
+            class="form-inline hidden-xs-phone">
+        {% csrf_token %}
+        {# No whitespace between inline-block elements, CSS used instead. #}
+        <input name="username" type="text"
+            class="input-small" placeholder="{% trans "Username" %}" accesskey="l"
+            {% if homepage %} autofocus{% endif %}
+        ><input name="password" type="password"
+          class="input-small" placeholder="{% trans "Password" %}"
+        ><input type="submit" class="btn" value="{% trans "Sign in" %}">
+      </form>
+    {% endif %}
+    {% include 'inc_header_themes.html' %}
+    {% include 'inc_header_languages.html' %}
+    <a id="hbar-collapse-sidebar" class="collapse-button btn"
+        data-target="sidebar" href="#">
+    </a>
   </div>
 </div>
 
@@ -126,12 +125,20 @@
 </div>
 
 <div id="footer">
-  <span class="footer">Školjka {% settings_constant VERSION_FOOTER %} 2012-2022</span>
+  <span class="footer">Školjka {% settings_constant VERSION_FOOTER %} 2012-2024</span>
   <a class="footer" href="/about/">{% trans "About Us" %}</a>
   <a class="footer" href="/tou/" target="_blank">{% trans "Terms of Use" %}</a>
   <a class="footer" href="https://github.com/ikicic/skoljka" target="_blank">GitHub</a>
 </div>
 
 <script src="{% tags_autocomplete_js_src %}"></script>
+
+<noscript>
+    <style>
+        #hbar-theme:hover ~ #theme-picker-no-js {
+            visibility: visible !important;
+        }
+    </style>
+</noscript>
 </body>
 </html>

@@ -32,10 +32,10 @@
 /* for jquery tools tooltip */
 /* cannot use `tooltip`, as it is already used by bootstrap.css */
 .tag-tooltip {
-  background: rgb(239, 241, 228);
-  border: 1px solid #CCC;
+  background: var(--tag-tooltip-bg);
+  border: var(--tag-tooltip-border);
   border-radius: 3px;
-  box-shadow: 1px 1px 3px rgb(201, 201, 201);
+  box-shadow: var(--tag-tooltip-box-shadow);
   color: #444;
   display: none;
   padding: 5px 6px 0px 6px;

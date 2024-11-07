@@ -8,7 +8,7 @@ import time
 
 import skoljka.settings
 
-
+# test comment 2
 def run_command(cmd):
     print('Running "{0}"'.format(cmd))
     os.system(cmd)
@@ -30,7 +30,7 @@ def main(argv):
     run_command('(cd skoljka && python ../manage.py compilemessages)')
 
     # TODO: no "--all" if --force
-    run_command('python manage.py compile_templates -v 0 --all --noinput')
+    # run_command('python manage.py compile_templates -v 0 --all --noinput')
 
 
 if __name__ == "__main__":
