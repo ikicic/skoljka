@@ -26,7 +26,7 @@ def news_list(request: HttpRequest):
         <Page request={request} title={_("News")} actions={_news_actions(request)}>
             {posts and (
                 <div class="news-list">
-                    {_news_list_item(post) for post in posts}
+                    {_news_list_item(post, request) for post in posts}
                 </div>
             )}
             {not posts and <p class="text-muted">{_("No news yet.")}</p>}
@@ -143,15 +143,21 @@ def _edit_actions(post: NewsPost):
     )
 
 
-def _news_list_item(post: NewsPost):
-    return news_post_card(post)
+def _news_list_item(post: NewsPost, request: HttpRequest):
+    return news_post_card(post, request=request)
 
 
-def news_post_card(post: NewsPost):
+def news_post_card(post: NewsPost, request: HttpRequest | None = None):
     content = post.content.first()
+    can_edit = bool(request and request.user.is_staff)
     return (
         <article class="news-list-item card">
             <h2>{post.title}</h2>
+            {can_edit and (
+                <a href={reverse("news_edit", kwargs={"pk": post.pk})} class="news-card-edit">
+                    {_("Edit")}
+                </a>
+            )}
             {content and (
                 <div class="math-content news-list-preview">
                     {SafeStr(content.html_for(get_language()))}

@@ -9,9 +9,14 @@
   background-color: var(--color-news);
 }
 
+.news-card-edit {
+  float: right;
+}
+
 .news-list-item h2 {
   margin: 0 0 0.25rem;
   font-size: 1.1rem;
+  display: inline-block;
 }
 
 .news-list-preview {

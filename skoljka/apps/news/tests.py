@@ -58,6 +58,21 @@ class NewsPostViewTest(TestCase):
         r = self.client.get("/news/")
         self.assertNotContains(r, "Archived news")
 
+    def test_news_list_edit_link_is_staff_only(self):
+        post = NewsPost.objects.create(
+            title="Editable news",
+            slug="editable-news",
+            hidden=False,
+        )
+
+        r = self.client.get("/news/")
+        self.assertNotContains(r, f"/news/manage/{post.pk}/edit/")
+
+        self.client.force_login(make_staff(username="news-card-admin"))
+        r = self.client.get("/news/")
+        self.assertContains(r, f'href="/news/manage/{post.pk}/edit/"')
+        self.assertContains(r, 'class="news-card-edit"')
+
 
 class NewsManageViewTest(TestCase):
     def setUp(self):

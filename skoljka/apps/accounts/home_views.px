@@ -84,7 +84,7 @@ def home(request: HttpRequest):
             {latest_news and (
                 <section class="section-card">
                     <div class="news-home-list">
-                        {news_post_card(post) for post in latest_news}
+                        {news_post_card(post, request=request) for post in latest_news}
                     </div>
                 </section>
             )}
