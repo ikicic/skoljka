@@ -1,0 +1,29 @@
+/* Card – elevated content blocks */
+
+.card {
+  padding: 0.875rem;
+  background: var(--color-surface-muted);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+.card > h2:first-child {
+  margin-top: 0;
+}
+
+.card > h2 {
+  margin-bottom: 0.5rem;
+}
+
+.section-card {
+  margin-bottom: 1.5rem;
+}
+
+.section-card h2 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.section-card h2:not(:first-child) {
+  margin-top: 0.5rem;
+}

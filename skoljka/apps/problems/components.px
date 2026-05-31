@@ -1,0 +1,365 @@
+from dataclasses import dataclass
+from django.core.paginator import Paginator
+from django.db.models import Prefetch
+from django.urls import reverse
+from django.utils.translation import get_language
+from django.utils.translation import gettext as _
+from pythonjsx.runtime import SafeStr
+
+from skoljka.apps.problems.models import Problem
+from skoljka.apps.problems.titles import problem_display_title, problem_title_context
+from skoljka.apps.tags.models import Tag
+from skoljka.components.pagination import Pagination
+
+
+PROBLEM_VIEW_COOKIE = "problem_views"
+PROBLEM_VIEW_CARDS = "cards"
+PROBLEM_VIEW_TABLE = "table"
+PROBLEM_VIEW_CODES = {
+    "c": PROBLEM_VIEW_CARDS,
+    "card": PROBLEM_VIEW_CARDS,
+    "cards": PROBLEM_VIEW_CARDS,
+    "t": PROBLEM_VIEW_TABLE,
+    "table": PROBLEM_VIEW_TABLE,
+}
+
+
+@dataclass
+class ProblemStatus:
+    solved: set[int]
+    bookmarked: set[int]
+    liked: set[int]
+    has_notes: set[int]
+
+
+def _problem_status_for_user(problems: list[Problem], user) -> ProblemStatus | None:
+    """Batch-fetch solved/bookmarked/liked/notes status for problems."""
+    if not user or not user.is_authenticated or not problems:
+        return None
+    ids = [p.id for p in problems]
+    from skoljka.apps.tracking.models import Bookmark, Like, Submission
+
+    solved = set(
+        Submission.objects.filter(user=user, problem_id__in=ids, solved=True).values_list("problem_id", flat=True)
+    )
+    bookmarked = set(Bookmark.objects.filter(user=user, problem_id__in=ids).values_list("problem_id", flat=True))
+    liked = set(Like.objects.filter(user=user, problem_id__in=ids).values_list("problem_id", flat=True))
+    has_notes = set(
+        Submission.objects.filter(user=user, problem_id__in=ids)
+        .exclude(note_md="")
+        .values_list("problem_id", flat=True)
+    )
+    return ProblemStatus(solved=solved, bookmarked=bookmarked, liked=liked, has_notes=has_notes)
+
+
+def tag_css_class(tag) -> str:
+    return "tag"
+
+
+def _tag_classes(tag) -> str:
+    return "tag"
+
+
+def _tag_link(tag):
+    return (
+        <a href={tag.get_absolute_url()} class={_tag_classes(tag)} title={tag.name()}>
+            {tag.display_name()}
+        </a>
+    )
+
+
+def problems_table_queryset(qs):
+    """Add select/prefetch needed by ProblemsTable to a Problem queryset."""
+    return qs.select_related("source").prefetch_related(
+        "content",
+        Prefetch("tags", queryset=Tag.objects.filter(hidden=False)),
+    )
+
+
+def ProblemsTable(
+    *,
+    queryset,
+    request,
+    per_page: int = 50,
+    page_param: str = "page",
+    paginate: bool = True,
+    view: str = PROBLEM_VIEW_TABLE,
+    view_key: str = "problems",
+    show_switcher: bool = True,
+    compact_generated_titles_for: tuple[int, int] | None = None,
+    export_url: str | None = None,
+):
+    qs = problems_table_queryset(queryset)
+    if paginate:
+        paginator = Paginator(qs, per_page)
+        page = paginator.get_page(request.GET.get(page_param))
+        problems = list(page.object_list)
+    else:
+        page = None
+        problems = list(qs)
+
+    content = ProblemsDisplay(
+        problems=problems,
+        request=request,
+        view=view,
+        view_key=view_key,
+        show_switcher=show_switcher,
+        compact_generated_titles_for=compact_generated_titles_for,
+        export_url=export_url,
+    )
+    if not page or page.paginator.num_pages <= 1:
+        return content
+    return (
+        <>
+            {content}
+            <Pagination page={page} request={request} page_param={page_param} />
+        </>
+    )
+
+
+def ProblemsDisplay(
+    *,
+    problems: list[Problem],
+    request,
+    view: str = PROBLEM_VIEW_TABLE,
+    view_key: str = "problems",
+    show_switcher: bool = True,
+    compact_generated_titles_for: tuple[int, int] | None = None,
+    export_url: str | None = None,
+):
+    active_view = _problem_view_for_request(request, view_key, view)
+    title_context = problem_title_context(problems, compact_generated_titles_for)
+    if active_view == PROBLEM_VIEW_CARDS:
+        table = _ProblemCards(problems, request.user, title_context=title_context)
+    else:
+        table = _ProblemsTableRows(problems, request.user, title_context=title_context)
+    return (
+        <>
+            {show_switcher and _problem_view_actions(request, view_key, active_view, export_url)}
+            {table}
+        </>
+    )
+
+
+def ProblemViewSwitcher(*, request, view_key: str = "problems", view: str = PROBLEM_VIEW_TABLE, export_url: str | None = None):
+    active_view = _problem_view_for_request(request, view_key, view)
+    return _problem_view_actions(request, view_key, active_view, export_url)
+
+
+def _problem_view_for_request(request, view_key: str, default_view: str) -> str:
+    query_view = _normalize_problem_view(request.GET.get("view"))
+    if query_view:
+        return query_view
+    cookie_view = _problem_view_cookie_map(request.COOKIES.get(PROBLEM_VIEW_COOKIE, "")).get(view_key)
+    if cookie_view:
+        return cookie_view
+    return _normalize_problem_view(default_view) or PROBLEM_VIEW_TABLE
+
+
+def _normalize_problem_view(raw: str | None) -> str | None:
+    if not raw:
+        return None
+    return PROBLEM_VIEW_CODES.get(raw.strip().lower())
+
+
+def _problem_view_cookie_map(raw: str) -> dict[str, str]:
+    views = {}
+    for item in raw.split(","):
+        key, sep, value = item.partition(":")
+        view = _normalize_problem_view(value)
+        if sep and key and view:
+            views[key] = view
+    return views
+
+
+def _problem_view_actions(request, view_key: str, active_view: str, export_url: str | None = None):
+    return (
+        <div class="problem-view-actions">
+            <div class="problem-view-button-group">
+                {_problem_view_link(request, view_key, active_view, PROBLEM_VIEW_CARDS, _("Cards"), "❏")}
+                {_problem_view_link(request, view_key, active_view, PROBLEM_VIEW_TABLE, _("Table"), "▤")}
+            </div>
+            {request.user.is_authenticated and export_url and (
+                <div class="problem-view-button-group">
+                    <a
+                        href={export_url}
+                        class="problem-view-button btn btn-toggle problem-export-button"
+                        title={_("Export PDF")}
+                    >
+                        <span class="problem-export-label">PDF</span>
+                    </a>
+                </div>
+            )}
+        </div>
+    )
+
+
+def _problem_view_link(request, view_key: str, active_view: str, view: str, label: str, icon: str):
+    active = active_view == view
+    code = "c" if view == PROBLEM_VIEW_CARDS else "t"
+    return (
+        <a
+            href={_problem_view_url(request, view)}
+            class={"problem-view-button btn btn-toggle" + (" btn-toggle-active" if active else "")}
+            data-problem-view-link=""
+            data-problem-view-key={view_key}
+            data-problem-view={code}
+            title={label}
+        >
+            {icon}
+        </a>
+    )
+
+
+def _problem_view_url(request, view: str) -> str:
+    params = request.GET.copy()
+    params["view"] = view
+    return request.path + "?" + params.urlencode()
+
+
+def _ProblemsTableRows(problems: list[Problem], user=None, *, title_context=None):
+    if not problems:
+        return <p class="text-muted">{_("No problems found.")}</p>
+    status = _problem_status_for_user(problems, user)
+    show_status = status is not None
+    return (
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>{_("Problem")}</th>
+                        <th>{_("Source")}</th>
+                        <th>{_("Tags")}</th>
+                        {show_status and <th class="problem-actions-col"></th>}
+                    </tr>
+                </thead>
+                <tbody>
+                    {_problem_row(p, status, show_status, title_context) for p in problems}
+                </tbody>
+            </table>
+        </div>
+    )
+
+
+def _ProblemCards(problems: list[Problem], user=None, *, title_context=None):
+    if not problems:
+        return <p class="text-muted">{_("No problems found.")}</p>
+    status = _problem_status_for_user(problems, user)
+    show_status = status is not None
+    return (
+        <div class="problem-card-list">
+            {_problem_card(p, status, show_status, title_context) for p in problems}
+        </div>
+    )
+
+
+def status_cell_fragment(problem: Problem, user) -> object:
+    """Render the status cell content. Used by tracking toggle endpoints for HTMX swap."""
+    status = _problem_status_for_user([problem], user)
+    if not status:
+        return None
+    return (
+        <span
+            data-status-payload=""
+            data-solved={"1" if problem.id in status.solved else "0"}
+            data-bookmarked={"1" if problem.id in status.bookmarked else "0"}
+            data-liked={"1" if problem.id in status.liked else "0"}
+            data-has-notes={"1" if problem.id in status.has_notes else "0"}
+        >
+        </span>
+    )
+
+
+def _problem_source_label(p: Problem) -> str:
+    source_label = ""
+    if p.source:
+        source_label = p.source.name()
+        if p.year:
+            source_label += f" {p.year}"
+    elif p.year:
+        source_label = str(p.year)
+    return source_label
+
+
+def _problem_row(p: Problem, status: ProblemStatus | None, show_status: bool, title_context=None):
+    source_label = _problem_source_label(p)
+
+    tags = list(p.tags.all())
+    row_class = status and p.id in status.solved and "solved"
+    return (
+        <tr class={row_class}>
+            <td><a href={p.get_absolute_url()}>{problem_display_title(p, title_context)}</a></td>
+            <td class="text-muted">
+                {p.source and <a href={p.source.get_absolute_url()} class="text-muted">{source_label}</a>}
+                {not p.source and source_label}
+            </td>
+            <td>
+                {tags and (
+                    <span class="tag-list-inline">
+                        {_tag_link(t) for t in tags}
+                    </span>
+                )}
+            </td>
+            {show_status and status and (
+                <td
+                    class="problem-actions"
+                    id={f"problem-actions-{p.id}"}
+                    data-problem-actions=""
+                    data-problem-id={str(p.id)}
+                    data-solved={"1" if p.id in status.solved else "0"}
+                    data-bookmarked={"1" if p.id in status.bookmarked else "0"}
+                    data-liked={"1" if p.id in status.liked else "0"}
+                    data-has-notes={"1" if p.id in status.has_notes else "0"}
+                >
+                </td>
+            )}
+        </tr>
+    )
+
+
+def _problem_card(p: Problem, status: ProblemStatus | None, show_status: bool, title_context=None):
+    tags = list(p.tags.all())
+    card_class = "problem-card card" + (" solved" if status and p.id in status.solved else "")
+    statement_html = _problem_statement_html(p)
+    return (
+        <article class={card_class}>
+            <header class="problem-card-header">
+                <a href={p.get_absolute_url()} class="problem-card-title">
+                    {problem_display_title(p, title_context)}
+                </a>
+                {tags and (
+                    <div class="tag-list-inline problem-card-tags">
+                        {_tag_link(t) for t in tags}
+                    </div>
+                )}
+            </header>
+            {statement_html and (
+                <div class="math-content problem-card-statement">
+                    {SafeStr(statement_html)}
+                </div>
+            )}
+            {not statement_html and (
+                <p class="text-muted problem-card-empty">{_("No problem statement available.")}</p>
+            )}
+            {show_status and status and (
+                <div
+                    class="problem-actions problem-card-actions"
+                    id={f"problem-actions-{p.id}"}
+                    data-problem-actions=""
+                    data-problem-id={str(p.id)}
+                    data-solved={"1" if p.id in status.solved else "0"}
+                    data-bookmarked={"1" if p.id in status.bookmarked else "0"}
+                    data-liked={"1" if p.id in status.liked else "0"}
+                    data-has-notes={"1" if p.id in status.has_notes else "0"}
+                >
+                </div>
+            )}
+        </article>
+    )
+
+
+def _problem_statement_html(problem: Problem) -> str:
+    content = next(iter(problem.content.all()), None)
+    if not content:
+        return ""
+    return content.html_for(get_language())

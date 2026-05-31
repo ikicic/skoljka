@@ -1,0 +1,212 @@
+import json
+
+from django.conf import settings
+from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.utils.translation import gettext as _
+from django.views.decorators.http import require_POST
+from pythonjsx.runtime import SafeStr
+
+from skoljka.apps.importer.tag_suggestions import suggest_tags_for_sources
+from skoljka.apps.problems.models import Problem
+from skoljka.apps.problems.export_views import (
+    ProblemPdfExportSpec,
+    problem_export_queryset,
+    problem_pdf_export_view,
+)
+from skoljka.apps.tracking.views import note_section_fragment, problem_actions_fragment
+from skoljka.components.layout import Page
+from skoljka.apps.problems.components import ProblemsTable
+from skoljka.transcription.cache import APICache
+from skoljka.utils.auth import login_redirect
+from skoljka.utils.px_view import px_view
+from skoljka.utils.staff import staff_required
+
+
+def _tag_detail_class(tag) -> str:
+    return "tag"
+
+
+def _tag_detail_link(tag):
+    return (
+        <a href={tag.get_absolute_url()} class={_tag_detail_class(tag)} title={tag.name()}>
+            {tag.display_name()}
+        </a>
+    )
+
+
+def _problem_breadcrumbs(problem: Problem) -> list:
+    crumbs = [(_("Archive"), reverse("source_list"))]
+    if problem.source:
+        # Walk up the source hierarchy.
+        ancestors = []
+        s = problem.source
+        while s:
+            ancestors.append(s)
+            s = s.parent
+        for a in reversed(ancestors):
+            crumbs.append((a.name(), a.get_absolute_url()))
+        if problem.year:
+            crumbs.append((
+                str(problem.year),
+                reverse("source_year_detail", kwargs={"slug": problem.source.slug, "year": problem.year}),
+            ))
+    crumbs.append((_problem_breadcrumb_label(problem), None))
+    return crumbs
+
+
+def _problem_breadcrumb_label(problem: Problem) -> str:
+    if problem.title:
+        return problem.title
+    if problem.problem_label:
+        return _("Problem %(number)s") % {"number": problem.problem_label}
+    if problem.source and problem.year:
+        return _("Problem")
+    return problem.display_title
+
+
+@px_view
+def problem_list(request: HttpRequest):
+    return (
+        <Page
+            request={request}
+            title={_("Problems")}
+            show_title={False}
+            actions={_problem_list_actions(request)}
+        >
+            <ProblemsTable
+                queryset={Problem.objects.for_user(request.user)}
+                request={request}
+                export_url={reverse("problem_list_pdf")}
+            />
+        </Page>
+    )
+
+
+@px_view
+def problem_list_pdf(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return login_redirect(request)
+    problems = list(problem_export_queryset(Problem.objects.for_user(request.user)))
+    return problem_pdf_export_view(request, ProblemPdfExportSpec(problems, _("Problems"), "problems.pdf"))
+
+
+@require_POST
+@staff_required
+def problem_suggest_tags(request: HttpRequest):
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": _("Invalid JSON")}, status=400)
+    if not isinstance(data, dict):
+        return JsonResponse({"error": _("Invalid JSON")}, status=400)
+
+    problems_data = data.get("problems", [])
+    if not isinstance(problems_data, list):
+        return JsonResponse({"error": _("Invalid problems")}, status=400)
+
+    source_md_list = []
+    for item in problems_data:
+        if not isinstance(item, dict):
+            return JsonResponse({"error": _("Invalid problems")}, status=400)
+        source_md = item.get("source_md", "")
+        if not isinstance(source_md, str):
+            return JsonResponse({"error": _("Invalid problems")}, status=400)
+        source_md_list.append(source_md)
+
+    cache_path = settings.TRANSCRIPTION_PRIVATE_DIR / "api_cache.sqlite"
+    cache = APICache(cache_path, ttl_seconds=settings.TRANSCRIPTION_TTL_DAYS * 86400)
+    suggestions = suggest_tags_for_sources(
+        source_md_list,
+        model=settings.TRANSCRIPTION_TAG_SUGGESTION_MODEL,
+        cache=cache,
+    )
+    return JsonResponse({"tags": suggestions})
+
+
+def _problem_list_actions(request: HttpRequest):
+    if not request.user.is_staff:
+        return None
+    return (
+        <>
+            <a href={reverse("problem_create")} class="btn btn-sm">{_("Add problem")}</a>
+            <a href={reverse("pdf_import")} class="btn btn-sm">{_("Import")}</a>
+            <a href={reverse("tag_admin_list")} class="btn btn-sm">{_("Manage Tags")}</a>
+        </>
+    )
+
+
+@px_view
+def problem_detail(request: HttpRequest, pk: int):
+    problem = get_object_or_404(Problem.objects.for_user(request.user), pk=pk)
+    content = problem.get_content()
+    tags = list(problem.tags.filter(hidden=False))
+
+    return (
+        <Page
+            request={request}
+            title={problem.display_title}
+            breadcrumbs={_problem_breadcrumbs(problem)}
+            actions={_problem_detail_actions(problem, request)}
+        >
+            <div class="problem-detail-controls">
+                {tags and (
+                    <div class="tag-list problem-detail-tags">
+                        {_tag_detail_link(t) for t in tags}
+                    </div>
+                )}
+            </div>
+            {content and (
+                <div class="math-content problem-statement card">
+                    {SafeStr(content.html_for("en"))}
+                </div>
+            )}
+            {content and _attachments_table(content.attachments.all())}
+            {not content and (
+                <p class="text-muted">{_("No problem statement available.")}</p>
+            )}
+            {problem_actions_fragment(problem, request.user)}
+            {note_section_fragment(problem, request)}
+        </Page>
+    )
+
+
+def _problem_detail_actions(problem: Problem, request: HttpRequest):
+    if not problem.user_has_perm(request.user, "edit"):
+        return None
+    return (
+        <a href={reverse("problem_edit", kwargs={"pk": problem.pk})} class="btn btn-sm">
+            {_("Edit")}
+        </a>
+    )
+
+
+def _attachments_table(attachments):
+    attachments = list(attachments)
+    if not attachments:
+        return None
+    return (
+        <div class="problem-attachments">
+            <ul class="problem-attachment-list">
+                {_attachment_row(a) for a in attachments}
+            </ul>
+        </div>
+    )
+
+
+def _attachment_row(attachment):
+    return (
+        <li>
+            <a href={attachment.file.url} target="_blank">{attachment.name}</a>
+            <span class="problem-attachment-size">{_format_size(attachment.size)}</span>
+        </li>
+    )
+
+
+def _format_size(size: int) -> str:
+    if size < 1024:
+        return f"{size} B"
+    if size < 1024 * 1024:
+        return f"{size / 1024:.1f} KB"
+    return f"{size / 1024 / 1024:.1f} MB"

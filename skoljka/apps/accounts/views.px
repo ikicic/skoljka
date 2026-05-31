@@ -1,0 +1,28 @@
+"""Compatibility exports for account views.
+
+URL configuration imports the workflow modules directly. These re-exports keep
+older imports working while the account views live in smaller files.
+"""
+
+from skoljka.apps.accounts.auth_views import (
+    login_view,
+    logout_view,
+    password_reset_confirm_view,
+    password_reset_done_view,
+    password_reset_request_view,
+    password_reset_sent_view,
+)
+from skoljka.apps.accounts.home_views import home
+from skoljka.apps.accounts.profile_views import (
+    profile_bookmarked_pdf,
+    profile_liked_pdf,
+    profile_view,
+    settings_view,
+)
+from skoljka.apps.accounts.registration_views import (
+    register_confirm_view,
+    register_sent_view,
+    register_view,
+    registration_challenge_image,
+    registration_label_image,
+)

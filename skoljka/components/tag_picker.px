@@ -1,0 +1,74 @@
+import json
+
+from django.utils.translation import gettext as _
+
+
+def TagPickerField(*,
+                   name: str,
+                   tags,
+                   selected_ids=None,
+                   selected_slugs=None,
+                   allow_new: bool = True,
+                   query_name: str | None = None,
+                   query_value: str = "",
+                   placeholder: str | None = None,
+                   input_type: str = "text",
+                   class_name: str | None = None,
+                   submit_on_enter: bool = False):
+    """Server-rendered tag picker container, enhanced by React on the client.
+
+    Without JS, renders a plain text input with comma-separated tag names.
+    With JS, React replaces it with the interactive pill UI and fetches
+    available tags from /tags/api/.
+
+    Args:
+        name: Form field name for hidden inputs.
+        tags: QuerySet or list of Tag objects (must have .pk and .display_name()).
+        selected_ids: Set or list of currently selected tag IDs.
+    """
+    if selected_slugs is None:
+        selected_ids = set(selected_ids or [])
+        selected_slugs = sorted(t.slug for t in tags if t.pk in selected_ids)
+    else:
+        selected_slugs = sorted(selected_slugs)
+    tag_names = {t.slug: t.display_name() for t in tags}
+    selected_json = json.dumps(selected_slugs)
+    selected_names_json = json.dumps([tag_names.get(slug, slug) for slug in selected_slugs])
+    placeholder = placeholder or _("Add tag...")
+    input_placeholder = "" if selected_slugs else placeholder
+    return (
+        <div
+            data-tag-picker=""
+            data-selected={selected_json}
+            data-selected-names={selected_names_json}
+            data-name={name}
+            data-query-name={query_name}
+            data-initial-query={query_value if query_name else None}
+            data-placeholder={placeholder}
+            data-input-type={input_type}
+            data-allow-new={"1" if allow_new else "0"}
+            data-submit-on-enter={"1" if submit_on_enter else None}
+            class={class_name}
+        >
+            <div class="tag-picker">
+                {<_TagPickerPill slug={tag_slug} name={tag_names.get(tag_slug, tag_slug)} /> for tag_slug in selected_slugs}
+                <input
+                    type={input_type}
+                    name={query_name}
+                    value={query_value}
+                    class="tag-picker-input"
+                    placeholder={input_placeholder}
+                />
+                {<input type="hidden" name={name} value={tag_slug} /> for tag_slug in selected_slugs}
+            </div>
+        </div>
+    )
+
+
+def _TagPickerPill(*, slug: str, name: str):
+    return (
+        <span class="tag-pill">
+            {name}
+            <button type="button" class="tag-pill-remove" tabindex="-1">×</button>
+        </span>
+    )

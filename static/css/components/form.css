@@ -1,0 +1,169 @@
+/* Forms – shared field layout and validation */
+
+.form,
+.form-stack {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.form {
+  max-width: 28rem;
+}
+
+.password-manager-username {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.form-field {
+  min-width: 0;
+}
+
+.form-field label,
+.form-field-label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.75rem;
+}
+
+.form-row .form-field {
+  min-width: 0;
+}
+
+.form-row-inline {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.form-row-inline .form-field {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.input-with-action {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.input-with-action > input,
+.input-with-action > select,
+.input-with-action > .form-field,
+.input-with-action > [data-tag-picker] {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.input-with-action > .btn {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.inline-panel {
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.form-actions,
+.content-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.8125rem;
+}
+
+.form-field-flex-3 {
+  grid-column: span 3;
+}
+
+.form-field-max-narrow {
+  max-width: 8rem;
+}
+
+.form-inline {
+  display: inline;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.checkbox-row {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+.checkbox-row small {
+  display: block;
+  margin-top: 0.125rem;
+  font-weight: 400;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
+.form-errors {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.form-errors li {
+  padding: 0.5rem 0.75rem;
+  background: var(--color-form-error-bg);
+  color: var(--color-error);
+  border-radius: var(--radius);
+  margin-bottom: 0.5rem;
+}
+
+.form-error {
+  color: var(--color-error);
+  margin-bottom: 1rem;
+}
+
+.form-success {
+  color: var(--color-success);
+  margin-bottom: 1rem;
+}
+
+.content-fieldset {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+.content-fieldset legend {
+  padding: 0 0.375rem;
+  font-weight: 600;
+}
+
+.content-original-language {
+  margin-bottom: 0.5rem;
+}

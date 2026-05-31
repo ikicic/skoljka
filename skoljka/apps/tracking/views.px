@@ -1,0 +1,183 @@
+from django.http import HttpRequest
+from django.middleware.csrf import get_token
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.translation import gettext as _
+from django.views.decorators.http import require_POST
+
+from skoljka.apps.lists.models import ProblemList
+from skoljka.apps.problems.components import status_cell_fragment
+from skoljka.apps.problems.models import Problem
+from skoljka.apps.sources.models import Source
+from skoljka.apps.tracking.favorites import favorite_problem_list_button, favorite_source_button
+from skoljka.apps.tracking.models import Bookmark, FavoriteProblemList, FavoriteSource, Like, Submission
+from skoljka.components.content_editor import ContentEditor
+from skoljka.utils.auth import login_required_htmx_view
+from skoljka.utils.px_view import px_view
+
+
+@px_view
+@require_POST
+@login_required_htmx_view
+def toggle_solved(request: HttpRequest, pk: int):
+    problem = get_object_or_404(Problem.objects.for_user(request.user), pk=pk)
+    sub, _ = Submission.objects.get_or_create(user=request.user, problem=problem)
+    sub.solved = not sub.solved
+    sub.solved_at = timezone.now() if sub.solved else None
+    sub.save()
+    if request.headers.get("HX-Target", "").startswith("problem-actions-"):
+        return status_cell_fragment(problem, request.user)
+    return _problem_actions(problem, request.user)
+
+
+@px_view
+@require_POST
+@login_required_htmx_view
+def toggle_bookmark(request: HttpRequest, pk: int):
+    problem = get_object_or_404(Problem.objects.for_user(request.user), pk=pk)
+    deleted, _ = Bookmark.objects.filter(user=request.user, problem=problem).delete()
+    if not deleted:
+        Bookmark.objects.create(user=request.user, problem=problem)
+    if request.headers.get("HX-Target", "").startswith("problem-actions-"):
+        return status_cell_fragment(problem, request.user)
+    return _problem_actions(problem, request.user)
+
+
+@px_view
+@require_POST
+@login_required_htmx_view
+def toggle_like(request: HttpRequest, pk: int):
+    problem = get_object_or_404(Problem.objects.for_user(request.user), pk=pk)
+    deleted, _ = Like.objects.filter(user=request.user, problem=problem).delete()
+    if not deleted:
+        Like.objects.create(user=request.user, problem=problem)
+    if request.headers.get("HX-Target", "").startswith("problem-actions-"):
+        return status_cell_fragment(problem, request.user)
+    return _problem_actions(problem, request.user)
+
+
+@px_view
+@require_POST
+@login_required_htmx_view
+def toggle_favorite_source(request: HttpRequest, pk: int):
+    source = get_object_or_404(Source.objects.for_user(request.user), pk=pk)
+    deleted, _ = FavoriteSource.objects.filter(user=request.user, source=source).delete()
+    active = False
+    if not deleted:
+        FavoriteSource.objects.create(user=request.user, source=source)
+        active = True
+    return favorite_source_button(source, {source.pk} if active else set())
+
+
+@px_view
+@require_POST
+@login_required_htmx_view
+def toggle_favorite_problem_list(request: HttpRequest, pk: int):
+    problem_list = get_object_or_404(ProblemList.objects.for_user(request.user), pk=pk)
+    deleted, _ = FavoriteProblemList.objects.filter(user=request.user, problem_list=problem_list).delete()
+    active = False
+    if not deleted:
+        FavoriteProblemList.objects.create(user=request.user, problem_list=problem_list)
+        active = True
+    return favorite_problem_list_button(problem_list, {problem_list.pk} if active else set())
+
+
+@px_view
+@require_POST
+@login_required_htmx_view
+def save_note(request: HttpRequest, pk: int):
+    problem = get_object_or_404(Problem.objects.for_user(request.user), pk=pk)
+    sub, _ = Submission.objects.get_or_create(user=request.user, problem=problem)
+    sub.note_md = request.POST.get("note_md", "")
+    sub.note_updated_at = timezone.now()
+    sub.save()
+    return redirect(problem.get_absolute_url() + "#note-section")
+
+
+def problem_actions_fragment(problem: Problem, user) -> object:
+    """Render the actions bar for a problem. Used by problem detail view."""
+    if not user.is_authenticated:
+        return <div class="problem-detail-status" id="problem-actions"></div>
+    return _problem_actions(problem, user)
+
+
+def _problem_actions(problem: Problem, user):
+    sub = Submission.objects.filter(user=user, problem=problem).first()
+    bookmarked = Bookmark.objects.filter(user=user, problem=problem).exists()
+    liked = Like.objects.filter(user=user, problem=problem).exists()
+    like_count = problem.likes.count()
+    solved = sub.solved if sub else False
+
+    return (
+        <div class="problem-detail-status" id="problem-actions">
+            <div class="btn-group">
+                <button
+                    class={"btn btn-xs btn-toggle btn-toggle-active" if solved else "btn btn-xs btn-toggle"}
+                    hx-post={reverse("toggle_solved", kwargs={"pk": problem.pk})}
+                    hx-target="#problem-actions"
+                    hx-swap="outerHTML"
+                >
+                    {_("Solved") if solved else _("Mark solved")}
+                </button>
+                <button
+                    class={"btn btn-xs btn-toggle btn-toggle-active" if bookmarked else "btn btn-xs btn-toggle"}
+                    hx-post={reverse("toggle_bookmark", kwargs={"pk": problem.pk})}
+                    hx-target="#problem-actions"
+                    hx-swap="outerHTML"
+                >
+                    {_("Bookmarked") if bookmarked else _("Bookmark")}
+                </button>
+                <button
+                    class={"btn btn-xs btn-toggle btn-toggle-active" if liked else "btn btn-xs btn-toggle"}
+                    hx-post={reverse("toggle_like", kwargs={"pk": problem.pk})}
+                    hx-target="#problem-actions"
+                    hx-swap="outerHTML"
+                >
+                    {_("Liked") if liked else _("Like")}
+                    {" ("}
+                    {str(like_count)}
+                    {")"}
+                </button>
+            </div>
+        </div>
+    )
+
+
+def note_section_fragment(problem: Problem, request: HttpRequest) -> object:
+    """Render the notes section. Used by problem detail view."""
+    user = request.user
+    if not user.is_authenticated:
+        return None
+    sub = Submission.objects.filter(user=user, problem=problem).first()
+    return _note_section(sub, problem=problem, csrf_token=get_token(request))
+
+
+def _note_section(sub: Submission | None, problem: Problem | None = None, csrf_token: str = ""):
+    problem_id = sub.problem.id if sub else problem.id
+    note_md = sub.note_md if sub else ""
+
+    return (
+        <div class="note-section" id="note-section">
+            <h2>{_("Personal notes")}</h2>
+            <form
+                class="note-form"
+                method="post"
+                action={reverse("save_note", kwargs={"pk": problem_id})}
+            >
+                <input type="hidden" name="csrfmiddlewaretoken" value={csrf_token} />
+                <ContentEditor
+                    name="note_md"
+                    value={note_md}
+                    rows={4}
+                    placeholder={_("Your private notes (Markdown + LaTeX)")}
+                    textarea_id="note-textarea"
+                    class_name="note-editor"
+                    preview_class_name="note-preview card"
+                    submit_label={_("Save note")}
+                    submit_class_name="btn btn-sm note-save"
+                    show_format_help={True}
+                />
+            </form>
+        </div>
+    )

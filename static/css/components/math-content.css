@@ -1,0 +1,22 @@
+/* Rendered Markdown + LaTeX (problems, news, help, previews) */
+
+.math-content {
+  font-size: 13px;
+}
+
+.math-content p {
+  margin: 0.75rem 0;
+}
+
+.math-content p:first-child {
+  margin-top: 0;
+}
+
+.math-content > :last-child {
+  margin-bottom: 0;
+}
+
+.math-content img {
+  max-width: 100%;
+  height: auto;
+}

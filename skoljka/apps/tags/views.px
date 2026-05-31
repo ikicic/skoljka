@@ -1,0 +1,314 @@
+from django.db.models import Count
+from django.http import HttpRequest, JsonResponse
+from django.middleware.csrf import get_token
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
+from django.utils.translation import gettext as _
+from django.views.decorators.http import require_POST
+
+from skoljka.apps.tags.forms import TagAdminForm
+from skoljka.apps.tags.models import Tag
+from skoljka.components.forms import form_errors
+from skoljka.components.layout import Page
+from skoljka.utils.px_view import px_view
+from skoljka.utils.staff import staff_required
+
+
+def tag_api(request: HttpRequest):
+    tags = list(Tag.objects.filter(hidden=False).order_by("slug"))
+    data = {
+        "names": [t.display_name() for t in tags],
+        "full_names": [t.name() for t in tags],
+        "slugs": [t.slug for t in tags],
+        "kinds": [t.kind for t in tags],
+    }
+    return JsonResponse(data, json_dumps_params={"separators": (",", ":")})
+
+
+@px_view
+@staff_required
+def tag_admin_list(request: HttpRequest):
+    create_form = TagAdminForm(initial=TagAdminForm.initial_for(None))
+    if request.method == "POST" and request.POST.get("action") == "create":
+        create_form = TagAdminForm(request.POST)
+        if create_form.is_valid():
+            create_form.save()
+            return redirect("tag_admin_list")
+
+    tags = _tag_queryset()
+    parent_tags = list(Tag.objects.all())
+    return (
+        <Page
+            request={request}
+            title={_("Manage Tags")}
+            breadcrumbs={[
+                (_("Problems"), reverse("problem_admin_list")),
+                (_("Manage Tags"), None),
+            ]}
+            wide={True}
+        >
+            {form_errors(create_form)}
+            <form method="post" class="form admin-form tag-admin-create">
+                <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+                <input type="hidden" name="action" value="create" />
+                <fieldset class="content-fieldset">
+                    <legend>{_("New Tag")}</legend>
+                    {_tag_form_fields(create_form, parent_tags, id_prefix="new_")}
+                    <button type="submit" class="btn btn-sm">{_("Create tag")}</button>
+                </fieldset>
+            </form>
+            <div class="table-wrapper">
+                <table class="table tag-admin-table">
+                    <thead>
+                        <tr>
+                            <th>{_("Slug")}</th>
+                            <th>{_("Kind")}</th>
+                            <th>{_("Parent")}</th>
+                            <th>{_("Hidden")}</th>
+                            <th>{_("Name (EN)")}</th>
+                            <th>{_("Name (HR)")}</th>
+                            <th>{_("Short (EN)")}</th>
+                            <th>{_("Short (HR)")}</th>
+                            <th class="right">{_("Problems")}</th>
+                            <th class="right">{_("Sources")}</th>
+                            <th class="right">{_("Children")}</th>
+                            <th>{_("Actions")}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {_tag_row(request, tag) for tag in tags}
+                    </tbody>
+                </table>
+            </div>
+        </Page>
+    )
+
+
+@px_view
+@staff_required
+def tag_admin_edit(request: HttpRequest, pk: int):
+    tag = get_object_or_404(Tag, pk=pk)
+    form = TagAdminForm(instance=tag, initial=TagAdminForm.initial_for(tag))
+    if request.method == "POST":
+        form = TagAdminForm(request.POST, instance=tag)
+        if form.is_valid():
+            form.save()
+            return redirect("tag_admin_list")
+
+    parent_tags = [t for t in Tag.objects.all() if t.pk != tag.pk]
+    return (
+        <Page
+            request={request}
+            title={_("Edit Tag")}
+            breadcrumbs={[
+                (_("Problems"), reverse("problem_admin_list")),
+                (_("Manage Tags"), reverse("tag_admin_list")),
+                (tag.slug, None),
+            ]}
+        >
+            {form_errors(form)}
+            <form method="post" class="form admin-form">
+                <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+                {_tag_form_fields(form, parent_tags, id_prefix="tag_")}
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-sm">{_("Save changes")}</button>
+                    <a href={reverse("tag_admin_list")} class="btn btn-sm">{_("Back")}</a>
+                </div>
+            </form>
+        </Page>
+    )
+
+
+@staff_required
+@require_POST
+def tag_admin_delete(request: HttpRequest, pk: int):
+    tag = get_object_or_404(Tag, pk=pk)
+    if tag.children.exists():
+        return redirect("tag_admin_list")
+    tag.delete()
+    return redirect("tag_admin_list")
+
+
+def _tag_queryset():
+    return list(
+        Tag.objects.select_related("parent")
+        .annotate(
+            problem_count=Count("problem", distinct=True),
+            source_count=Count("source", distinct=True),
+            child_count=Count("children", distinct=True),
+        )
+        .all()
+    )
+
+
+def _tag_row(request: HttpRequest, tag: Tag):
+    problem_count = getattr(tag, "problem_count", 0)
+    source_count = getattr(tag, "source_count", 0)
+    child_count = getattr(tag, "child_count", 0)
+    delete_message = _(
+        "Delete tag '%(slug)s'? Problems: %(problem_count)s. Sources: %(source_count)s. Child tags: %(child_count)s."
+    ) % {
+        "slug": tag.slug,
+        "problem_count": problem_count,
+        "source_count": source_count,
+        "child_count": child_count,
+    }
+    return (
+        <tr>
+            <td class="tag-admin-slug">{tag.slug}</td>
+            <td>{_kind_label(tag.kind)}</td>
+            <td>{tag.parent.name() if tag.parent else "—"}</td>
+            <td class="center">{"✓" if tag.hidden else "—"}</td>
+            <td>{tag.translations.get("en", "")}</td>
+            <td>{tag.translations.get("hr", "")}</td>
+            <td>{tag.short_translations.get("en", "")}</td>
+            <td>{tag.short_translations.get("hr", "")}</td>
+            <td class="right">{problem_count}</td>
+            <td class="right">{source_count}</td>
+            <td class="right">{child_count}</td>
+            <td>
+                <div class="form-actions">
+                    <a href={reverse("tag_admin_edit", kwargs={"pk": tag.pk})} class="btn btn-xs">
+                        {_("Edit")}
+                    </a>
+                    <form
+                        method="post"
+                        action={reverse("tag_admin_delete", kwargs={"pk": tag.pk})}
+                        data-confirm={delete_message}
+                    >
+                        <input
+                            type="hidden"
+                            name="csrfmiddlewaretoken"
+                            value={get_token(request)}
+                        />
+                        <button
+                            type="submit"
+                            class="btn btn-xs btn-danger"
+                            disabled={child_count > 0}
+                        >
+                            {_("Delete")}
+                        </button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+    )
+
+
+def _tag_form_fields(form: TagAdminForm, parent_tags: list[Tag], *, id_prefix: str):
+    slug = form["slug"].value() or ""
+    kind = form["kind"].value() or Tag.Kind.TOPIC
+    parent_id = form["parent"].value()
+    hidden = form["hidden"].value()
+    name_en = form["name_en"].value() or ""
+    name_hr = form["name_hr"].value() or ""
+    short_name_en = form["short_name_en"].value() or ""
+    short_name_hr = form["short_name_hr"].value() or ""
+    description_en = form["description_en"].value() or ""
+    description_hr = form["description_hr"].value() or ""
+
+    return (
+        <>
+            <div class="form-row">
+                <div class="form-field">
+                    <label for={id_prefix + "slug"}>{_("Slug")}</label>
+                    <input
+                        type="text"
+                        name="slug"
+                        id={id_prefix + "slug"}
+                        value={slug}
+                        required={True}
+                    />
+                </div>
+                <div class="form-field">
+                    <label for={id_prefix + "kind"}>{_("Kind")}</label>
+                    {_kind_select("kind", id_prefix + "kind", kind)}
+                </div>
+                <div class="form-field">
+                    <label for={id_prefix + "parent"}>{_("Parent")}</label>
+                    {_parent_select("parent", id_prefix + "parent", parent_tags, parent_id)}
+                </div>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="hidden" checked={hidden} />
+                    {_("Hidden")}
+                </label>
+            </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label for={id_prefix + "name_en"}>{_("Name (EN)")}</label>
+                    <input
+                        type="text"
+                        name="name_en"
+                        id={id_prefix + "name_en"}
+                        value={name_en}
+                        required={True}
+                    />
+                </div>
+                <div class="form-field">
+                    <label for={id_prefix + "name_hr"}>{_("Name (HR)")}</label>
+                    <input type="text" name="name_hr" id={id_prefix + "name_hr"} value={name_hr} />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label for={id_prefix + "short_name_en"}>{_("Short name (EN)")}</label>
+                    <input
+                        type="text"
+                        name="short_name_en"
+                        id={id_prefix + "short_name_en"}
+                        value={short_name_en}
+                    />
+                </div>
+                <div class="form-field">
+                    <label for={id_prefix + "short_name_hr"}>{_("Short name (HR)")}</label>
+                    <input
+                        type="text"
+                        name="short_name_hr"
+                        id={id_prefix + "short_name_hr"}
+                        value={short_name_hr}
+                    />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label for={id_prefix + "description_en"}>{_("Description (EN)")}</label>
+                    <textarea name="description_en" id={id_prefix + "description_en"} rows="2">
+                        {description_en}
+                    </textarea>
+                </div>
+                <div class="form-field">
+                    <label for={id_prefix + "description_hr"}>{_("Description (HR)")}</label>
+                    <textarea name="description_hr" id={id_prefix + "description_hr"} rows="2">
+                        {description_hr}
+                    </textarea>
+                </div>
+            </div>
+        </>
+    )
+
+
+def _kind_select(name: str, element_id: str, selected: str):
+    return (
+        <select name={name} id={element_id or None}>
+            {<option value={value} selected={value == selected}>{_kind_label(value)}</option> for value, _label in Tag.Kind.choices}
+        </select>
+    )
+
+
+def _kind_label(value: str) -> str:
+    if value == Tag.Kind.TOPIC:
+        return _("Topic")
+    if value == Tag.Kind.TECHNIQUE:
+        return _("Technique")
+    if value == Tag.Kind.META:
+        return _("Meta")
+    return value
+
+
+def _parent_select(name: str, element_id: str, tags: list[Tag], selected_id: int | None = None):
+    return (
+        <select name={name} id={element_id or None}>
+            <option value="">—</option>
+            {<option value={str(tag.pk)} selected={tag.pk == selected_id}>{tag.name()} ({tag.slug})</option> for tag in tags}
+        </select>
+    )

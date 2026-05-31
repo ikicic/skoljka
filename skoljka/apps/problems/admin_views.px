@@ -1,0 +1,272 @@
+from django.http import HttpRequest
+from django.middleware.csrf import get_token
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
+from django.utils.translation import gettext as _
+
+from skoljka.apps.content.models import Content
+from skoljka.apps.problems.forms import ProblemAdminForm
+from skoljka.apps.problems.models import Problem
+from skoljka.apps.sources.models import Source
+from skoljka.apps.tags.models import Tag
+from skoljka.components.forms import form_errors
+from skoljka.components.layout import Page
+from skoljka.components.content_editor import ContentEditor
+from skoljka.components.tag_picker import TagPickerField
+from skoljka.utils.px_view import px_view
+from skoljka.utils.staff import staff_required
+
+
+@px_view
+@staff_required
+def problem_admin_list(request: HttpRequest):
+    problems = Problem.objects.for_user(request.user, "edit").select_related("source")
+    return (
+        <Page
+            request={request}
+            title={_("Manage Problems")}
+            actions={
+                <div class="form-actions">
+                    <a href={reverse("tag_admin_list")} class="btn btn-sm">{_("Manage Tags")}</a>
+                    <a href={reverse("problem_create")} class="btn btn-sm">{_("New Problem")}</a>
+                </div>
+            }
+        >
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>{_("ID")}</th>
+                            <th>{_("Title")}</th>
+                            <th>{_("Source")}</th>
+                            <th>{_("Year")}</th>
+                            <th>{_("No.")}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {_problem_row(p) for p in problems}
+                    </tbody>
+                </table>
+            </div>
+        </Page>
+    )
+
+
+def _problem_row(problem: Problem):
+    return (
+        <tr>
+            <td><code>{str(problem.id)}</code></td>
+            <td>{problem.display_title}</td>
+            <td>{problem.source.name() if problem.source else "—"}</td>
+            <td>{str(problem.year) if problem.year else "—"}</td>
+            <td>{problem.problem_label or "—"}</td>
+            <td><a href={reverse("problem_edit", kwargs={"pk": problem.pk})}>{_("Edit")}</a></td>
+        </tr>
+    )
+
+
+@px_view
+@staff_required
+def problem_create(request: HttpRequest):
+    all_sources = Source.objects.for_user(request.user, "edit")
+    all_tags = Tag.objects.all()
+    form = ProblemAdminForm(user=request.user, initial=ProblemAdminForm.initial_for(None))
+    form.fields["tags"].choices = [(tag.slug, tag.slug) for tag in all_tags]
+    if request.method == "POST":
+        form = ProblemAdminForm(request.POST, request.FILES, user=request.user)
+        form.fields["tags"].choices = [(tag.slug, tag.slug) for tag in all_tags]
+        if form.is_valid():
+            problem = form.save(request)
+            return redirect(problem.get_absolute_url())
+
+    return (
+        <Page request={request} title={_("New Problem")}>
+            {form_errors(form)}
+            {_problem_form(request, form=form, problem=None, all_sources=all_sources, all_tags=all_tags)}
+        </Page>
+    )
+
+
+@px_view
+@staff_required
+def problem_edit(request: HttpRequest, pk: int):
+    problem = get_object_or_404(Problem.objects.for_user(request.user, "edit"), pk=pk)
+    all_sources = Source.objects.for_user(request.user, "edit")
+    all_tags = Tag.objects.all()
+    form = ProblemAdminForm(
+        user=request.user,
+        instance=problem,
+        initial=ProblemAdminForm.initial_for(problem),
+    )
+    form.fields["tags"].choices = [(tag.slug, tag.slug) for tag in all_tags]
+    if request.method == "POST":
+        form = ProblemAdminForm(request.POST, request.FILES, user=request.user, instance=problem)
+        form.fields["tags"].choices = [(tag.slug, tag.slug) for tag in all_tags]
+        if form.is_valid():
+            form.save(request)
+            return redirect(problem.get_absolute_url())
+
+    return (
+        <Page
+            request={request}
+            title={_("Edit: %(title)s") % {"title": problem.display_title}}
+            actions={
+                <>
+                    <a href={problem.get_absolute_url()}>{_("View problem")}</a>
+                    <a
+                        href={reverse("problem_delete", kwargs={"pk": problem.pk})}
+                        class="btn btn-danger btn-sm"
+                    >
+                        {_("Delete")}
+                    </a>
+                </>
+            }
+        >
+            {form_errors(form)}
+            {_problem_form(request, form=form, problem=problem, all_sources=all_sources, all_tags=all_tags)}
+        </Page>
+    )
+
+
+@px_view
+@staff_required
+def problem_delete(request: HttpRequest, pk: int):
+    problem = get_object_or_404(Problem.objects.for_user(request.user, "edit"), pk=pk)
+    if request.method == "POST":
+        problem.delete()
+        return redirect("problem_admin_list")
+
+    return (
+        <Page request={request} title={_("Delete problem")}>
+            <div class="card form-stack">
+                <p>{_("Are you sure you want to delete this problem?")}</p>
+                <p><strong>{problem.display_title}</strong></p>
+                <form method="post" class="form-actions">
+                    <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+                    <button type="submit" class="btn btn-danger">{_("Delete")}</button>
+                    <a href={reverse("problem_edit", kwargs={"pk": problem.pk})}>{_("Cancel")}</a>
+                </form>
+            </div>
+        </Page>
+    )
+
+
+def _problem_form(
+    request: HttpRequest,
+    form: ProblemAdminForm,
+    problem: Problem | None = None,
+    *,
+    all_sources,
+    all_tags,
+):
+    title = form["title"].value() or ""
+    source_id = form["source"].value()
+    year = form["year"].value()
+    year_str = str(year) if year is not None else ""
+    problem_label = form["problem_label"].value() or ""
+    selected_tags = set(
+        Tag.objects.filter(slug__in=form["tags"].value() or []).values_list("pk", flat=True)
+    )
+
+    content_obj = problem.content.first() if problem else None
+    languages = content_obj.languages() if content_obj else []
+
+    return (
+        <form method="post" enctype="multipart/form-data" class="form admin-form">
+            <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+            <div class="form-field">
+                <label for="title">{_("Title (optional)")}</label>
+                <input type="text" name="title" id="title" value={title} />
+            </div>
+            <div class="form-row">
+                <div class="form-field form-field-flex-3">
+                    <label for="source">{_("Source")}</label>
+                    <select name="source" id="source">
+                        <option value="">— None —</option>
+                        {(
+                            <option value={str(s.pk)} selected={str(s.pk) == str(source_id or "")}>
+                                {s.name()}
+                            </option>
+                        ) for s in all_sources}
+                    </select>
+                </div>
+                <div class="form-field form-field-flex-fixed">
+                    <label for="year">{_("Year")}</label>
+                    <input type="number" name="year" id="year" value={year_str} />
+                </div>
+                <div class="form-field form-field-flex-narrow">
+                    <label for="problem_label">{_("No.")}</label>
+                    <input
+                        type="text"
+                        name="problem_label"
+                        id="problem_label"
+                        value={problem_label}
+                    />
+                </div>
+            </div>
+            <div class="form-field">
+                <label>{_("Tags")}</label>
+                <TagPickerField name="tags" tags={all_tags} selected_ids={selected_tags} />
+            </div>
+            {_content_section(content_obj, lang) for lang in languages}
+            {_new_content_section(content_obj)}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-sm">{_("Save")}</button>
+                <a href={reverse("help_format")} target="_blank" rel="noopener">
+                    {_("Input format help")}
+                </a>
+            </div>
+        </form>
+    )
+
+
+def _content_section(content: Content, lang: str):
+    language_count = len(content.languages())
+    is_original = lang == content.original_language
+    return (
+        <fieldset class="content-fieldset">
+            <legend>{_("Content")}: {lang}</legend>
+            <input type="hidden" name="existing_lang" value={lang} />
+            {language_count > 1 and (
+                <label class="checkbox-label content-original-language">
+                    <input
+                        type="radio"
+                        name="original_language"
+                        value={lang}
+                        checked={is_original}
+                    />
+                    Original language
+                </label>
+            )}
+            <ContentEditor
+                name={f"content_md_{lang}"}
+                value={content.source_for(lang)}
+                content_id={content.id}
+                attachments={content.attachments.all()}
+                upload_name={f"content_attachments_{content.id}"}
+            />
+        </fieldset>
+    )
+
+
+def _new_content_section(content: Content | None):
+    label = _("Add translation") if content else _("Content")
+    default_lang = "" if content else "en"
+    return (
+        <fieldset class="content-fieldset">
+            <legend>{label}</legend>
+            <div class="form-field">
+                <label for="new_lang">{_("Language")}</label>
+                <input
+                    type="text"
+                    name="new_lang"
+                    id="new_lang"
+                    value={default_lang}
+                    placeholder={_("e.g. en, hr")}
+                    class="form-field-max-narrow"
+                />
+            </div>
+            <ContentEditor name="new_md" />
+        </fieldset>
+    )

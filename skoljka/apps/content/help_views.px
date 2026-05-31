@@ -1,0 +1,143 @@
+from django.http import HttpRequest
+from django.urls import reverse
+from django.utils.translation import get_language, gettext as _
+from pythonjsx.runtime import SafeStr
+
+from skoljka.components.layout import Page
+from skoljka.utils.markdown import compile_markdown
+from skoljka.utils.px_view import px_view
+
+
+HELP_CONTENT = {
+    "en": {
+        "help_title": "Help",
+        "format_title": "Input format",
+        "intro": "Problem statements and notes use Markdown with LaTeX math and a small set of LaTeX-style text commands.",
+        "feature": "Feature",
+        "code": "Code",
+        "rendered": "Rendered",
+        "notes": "Notes",
+        "note_items": [
+            "Use $...$ for inline math and $$...$$ for display math.",
+            "Raw HTML is escaped and shown as text.",
+            "Uploaded attachments can be referenced as Markdown images, for example: ![figure](attachment:figure.png).",
+        ],
+        "examples": [
+            ("Paragraphs", "First paragraph.\n\nSecond paragraph."),
+            ("Bold and italic", r"\textbf{bold}, \emph{italic}, and \textit{also italic}"),
+            ("Markdown emphasis", "**bold** and _italic_"),
+            ("Inline math", r"Let $a^2 + b^2 = c^2$."),
+            ("Display math", r"$$\sum_{k=1}^{n} k = \frac{n(n+1)}{2}$$"),
+            ("Line break", r"First line\\Second line"),
+            ("Links", r"\url{https://example.com} and \href{https://example.com}{example link}"),
+            ("Underline, strike, monospace", r"\uline{underlined}, \sout{removed}, \texttt{code}"),
+            ("Non-wrapping text", r"\mbox{do not break this} and \fbox{boxed text}"),
+            ("Special characters", r"\{ \} \% \_ \& \$ \# \textasciicircum{} \textasciitilde{} \textbackslash{}"),
+            ("HTML is shown as text", r'<script>alert("x")</script>'),
+        ],
+    },
+    "hr": {
+        "help_title": "Pomoć",
+        "format_title": "Format unosa",
+        "intro": "Tekstovi zadataka i bilješke koriste Markdown s LaTeX matematikom i malim skupom tekstualnih naredbi u LaTeX stilu.",
+        "feature": "Mogućnost",
+        "code": "Kod",
+        "rendered": "Prikaz",
+        "notes": "Napomene",
+        "note_items": [
+            "Koristite $...$ za matematiku unutar teksta i $$...$$ za izdvojenu matematiku.",
+            "Sirovi HTML se neutralizira i prikazuje kao tekst.",
+            "Preneseni privitci mogu se referencirati kao Markdown slike, na primjer: ![slika](attachment:slika.png).",
+        ],
+        "examples": [
+            ("Odlomci", "Prvi odlomak.\n\nDrugi odlomak."),
+            ("Podebljano i kurziv", r"\textbf{podebljano}, \emph{kurziv} i \textit{također kurziv}"),
+            ("Markdown isticanje", "**podebljano** i _kurziv_"),
+            ("Matematika unutar teksta", r"Neka vrijedi $a^2 + b^2 = c^2$."),
+            ("Izdvojena matematika", r"$$\sum_{k=1}^{n} k = \frac{n(n+1)}{2}$$"),
+            ("Prijelom retka", r"Prvi redak\\Drugi redak"),
+            ("Poveznice", r"\url{https://example.com} i \href{https://example.com}{primjer poveznice}"),
+            ("Podcrtano, precrtano, fiksna širina", r"\uline{podcrtano}, \sout{uklonjeno}, \texttt{kod}"),
+            ("Tekst bez prijeloma", r"\mbox{ne prelamaj ovaj tekst} i \fbox{tekst u okviru}"),
+            ("Posebni znakovi", r"\{ \} \% \_ \& \$ \# \textasciicircum{} \textasciitilde{} \textbackslash{}"),
+            ("HTML se prikazuje kao tekst", r'<script>alert("x")</script>'),
+        ],
+    },
+}
+
+
+def _help_content(request: HttpRequest) -> dict:
+    language = (getattr(request, "LANGUAGE_CODE", None) or get_language() or "en").split("-")[0]
+    return HELP_CONTENT.get(language, HELP_CONTENT["en"])
+
+
+@px_view
+def help_index(request: HttpRequest):
+    content = _help_content(request)
+    return (
+        <Page
+            request={request}
+            title={content["help_title"]}
+            breadcrumbs={[
+                (_("Home"), reverse("home")),
+                (content["help_title"], None),
+            ]}
+        >
+            <ul>
+                <li><a href={reverse("help_format")}>{content["format_title"]}</a></li>
+            </ul>
+        </Page>
+    )
+
+
+@px_view
+def format_help(request: HttpRequest):
+    content = _help_content(request)
+    return (
+        <Page
+            request={request}
+            title={content["format_title"]}
+            breadcrumbs={[
+                (_("Home"), reverse("home")),
+                (content["help_title"], reverse("help_index")),
+                (content["format_title"], None),
+            ]}
+            wide={True}
+        >
+            <div>
+                <p>{content["intro"]}</p>
+                <div class="table-wrapper">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>{content["feature"]}</th>
+                                <th>{content["code"]}</th>
+                                <th>{content["rendered"]}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {_example_row(label, source) for label, source in content["examples"]}
+                        </tbody>
+                    </table>
+                </div>
+                <br />
+                <div class="card">
+                    <h2>{content["notes"]}</h2>
+                    <ul>
+                        {<li>{item}</li> for item in content["note_items"]}
+                    </ul>
+                </div>
+            </div>
+        </Page>
+    )
+
+
+def _example_row(label: str, source: str):
+    html, _text = compile_markdown(source)
+    return (
+        <tr>
+            <td>{label}</td>
+            <td><pre><code>{source}</code></pre></td>
+            <td class="math-content">{SafeStr(html)}</td>
+        </tr>
+    )

@@ -1,0 +1,224 @@
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.postgres.search import SearchQuery, SearchVector
+from django.db.models import Q
+from django.http import HttpRequest
+from django.urls import reverse
+from django.utils.translation import gettext as _, ngettext, pgettext
+
+from skoljka.apps.content.models import Content
+from skoljka.apps.problems.models import Problem
+from skoljka.apps.problems.export_views import (
+    ProblemPdfExportSpec,
+    problem_export_queryset,
+    problem_pdf_export_view,
+)
+from skoljka.apps.sources.hierarchy import source_options_with_hierarchy_labels
+from skoljka.apps.sources.models import Source
+from skoljka.apps.tags.models import Tag
+from skoljka.apps.tracking.models import Submission
+from skoljka.components.layout import Page
+from skoljka.components.tag_picker import TagPickerField
+from skoljka.apps.problems.components import ProblemsTable, ProblemViewSwitcher
+from skoljka.utils.auth import login_redirect
+from skoljka.utils.px_view import px_view
+
+
+@px_view
+def search_view(request: HttpRequest):
+    filters = _search_filters(request)
+    q, source_slug, year_str, tag_slugs, status = filters
+    problems = _search_queryset(request, filters)
+
+    result_count = problems.count()
+
+    # Data for filter dropdowns.
+    sources = list(Source.objects.for_user(request.user).order_by("order", "slug"))
+    source_options = _source_options(sources)
+    years = sorted(
+        (y for y in Problem.objects.for_user(request.user).order_by().values_list("year", flat=True).distinct() if y),
+        reverse=True,
+    )
+    tags = list(Tag.objects.filter(kind=Tag.Kind.TOPIC, hidden=False).order_by("slug"))
+
+    return (
+        <Page request={request} title={_("Search")}>
+            <form method="get" class="search-form form-stack card">
+                <div class="input-with-action">
+                    <div class="form-field form-field-flex-3">
+                        <TagPickerField
+                            name="tags"
+                            tags={tags}
+                            selected_slugs={tag_slugs}
+                            allow_new={False}
+                            query_name="q"
+                            query_value={q}
+                            placeholder={_("Search problems...")}
+                            input_type="search"
+                            submit_on_enter={True}
+                        />
+                    </div>
+                    <button type="submit" class="btn">
+                        {pgettext("search action button", "Search")}
+                    </button>
+                </div>
+                <div class="form-row">
+                    <div class="form-field">
+                        <select name="source" id="search-source">
+                            <option value="">{_("All sources")}</option>
+                            {(
+                                <option value={s.slug} selected={s.slug == source_slug}>
+                                    {label}
+                                </option>
+                            ) for s, label in source_options}
+                        </select>
+                    </div>
+                    <div class="form-field form-field-flex-fixed">
+                        <select name="year" id="search-year">
+                            <option value="">{_("All years")}</option>
+                            {(
+                                <option value={str(y)} selected={str(y) == year_str}>
+                                    {str(y)}
+                                </option>
+                            ) for y in years}
+                        </select>
+                    </div>
+                    {request.user.is_authenticated and (
+                        <div class="form-field form-field-flex-fixed">
+                            <select name="status" id="search-status">
+                                <option value="" selected={status == ""}>{_("All")}</option>
+                                <option value="solved" selected={status == "solved"}>
+                                    {_("Solved")}
+                                </option>
+                                <option value="unsolved" selected={status == "unsolved"}>
+                                    {_("Unsolved")}
+                                </option>
+                            </select>
+                        </div>
+                    )}
+                </div>
+            </form>
+            {(q or source_slug or year_str or tag_slugs or status) and (
+                <>
+                    <div class="search-results-toolbar">
+                        <p class="text-muted">{_result_count_text(result_count)}</p>
+                        <ProblemViewSwitcher
+                            request={request}
+                            view_key="search"
+                            export_url={_search_pdf_url(request)}
+                        />
+                    </div>
+                    <ProblemsTable
+                        queryset={problems}
+                        request={request}
+                        view_key="search"
+                        show_switcher={False}
+                    />
+                </>
+            )}
+        </Page>
+    )
+
+
+@px_view
+def search_pdf(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return login_redirect(request)
+    problems = list(problem_export_queryset(_search_queryset(request, _search_filters(request))))
+    return problem_pdf_export_view(request, ProblemPdfExportSpec(problems, _("Search results"), "search-results.pdf"))
+
+
+def _search_filters(request: HttpRequest) -> tuple[str, str, str, list[str], str]:
+    q = request.GET.get("q", "").strip()
+    source_slug = request.GET.get("source", "")
+    year_str = request.GET.get("year", "")
+    tag_slugs = request.GET.getlist("tags")
+    legacy_tag_slug = request.GET.get("tag", "")
+    if legacy_tag_slug and legacy_tag_slug not in tag_slugs:
+        tag_slugs.append(legacy_tag_slug)
+    status = request.GET.get("status", "")
+    return q, source_slug, year_str, tag_slugs, status
+
+
+def _search_queryset(request: HttpRequest, filters: tuple[str, str, str, list[str], str]):
+    q, source_slug, year_str, tag_slugs, status = filters
+    problems = Problem.objects.for_user(request.user)
+
+    if q:
+        problem_ct = ContentType.objects.get_for_model(Problem)
+        search_query = SearchQuery(q, search_type="websearch")
+        matching_ids = list(
+            Content.objects.filter(content_type=problem_ct)
+            .annotate(search=SearchVector("search_text"))
+            .filter(search=search_query)
+            .values_list("object_id", flat=True)
+        )
+        fallback = Q(id__in=matching_ids)
+        token_fallback = None
+        for token in q.split():
+            token_match = (
+                Q(title__icontains=token)
+                | Q(source__slug__icontains=token)
+                | Q(source__translations__en__name__icontains=token)
+                | Q(source__translations__hr__name__icontains=token)
+            )
+            token_fallback = token_match if token_fallback is None else token_fallback & token_match
+        if token_fallback is not None:
+            fallback |= token_fallback
+        problems = problems.filter(fallback).distinct()
+
+    if source_slug:
+        source_ids = _source_and_descendant_ids(source_slug, request.user)
+        problems = problems.filter(source_id__in=source_ids) if source_ids else problems.none()
+    if year_str:
+        try:
+            problems = problems.filter(year=int(year_str))
+        except ValueError:
+            pass
+    for tag_slug in tag_slugs:
+        problems = problems.filter(tags__slug=tag_slug)
+    if status == "solved" and request.user.is_authenticated:
+        solved_ids = Submission.objects.filter(user=request.user, solved=True).values_list("problem_id", flat=True)
+        problems = problems.filter(id__in=solved_ids)
+    elif status == "unsolved" and request.user.is_authenticated:
+        solved_ids = Submission.objects.filter(user=request.user, solved=True).values_list("problem_id", flat=True)
+        problems = problems.exclude(id__in=solved_ids)
+    return problems
+
+
+def _search_pdf_url(request: HttpRequest) -> str:
+    query = request.GET.urlencode()
+    url = reverse("search_pdf")
+    return f"{url}?{query}" if query else url
+
+
+def _result_count_text(count: int) -> str:
+    return ngettext(
+        "%(count)d result",
+        "%(count)d results",
+        count,
+    ) % {"count": count}
+
+
+def _source_options(sources: list[Source]) -> list[tuple[Source, str]]:
+    return source_options_with_hierarchy_labels(sources)
+
+
+def _source_and_descendant_ids(source_slug: str, user) -> set[int]:
+    sources = list(Source.objects.for_user(user).only("id", "slug", "parent_id"))
+    selected = next((source for source in sources if source.slug == source_slug), None)
+    if selected is None:
+        return set()
+
+    by_parent: dict[int | None, list[Source]] = {}
+    for source in sources:
+        by_parent.setdefault(source.parent_id, []).append(source)
+
+    result: set[int] = set()
+
+    def visit(source: Source) -> None:
+        result.add(source.pk)
+        for child in by_parent.get(source.pk, []):
+            visit(child)
+
+    visit(selected)
+    return result

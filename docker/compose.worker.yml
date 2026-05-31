@@ -1,0 +1,22 @@
+services:
+  worker:
+    image: ${SKOLJKA_WORKER_IMAGE:-skoljka-worker:latest}
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+      args:
+        APP_UID: ${APP_UID:-1000}
+        APP_GID: ${APP_GID:-1000}
+    working_dir: /worker
+    init: true
+    environment:
+      EXTERNAL_WORKER_PORT: "8765"
+      EXTERNAL_WORKER_TOKEN: ${EXTERNAL_WORKER_TOKEN:-}
+    ports:
+      - "127.0.0.1:${EXTERNAL_WORKER_PORT:-8765}:8765"
+    volumes:
+      - ../worker-files:/app/worker-files
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

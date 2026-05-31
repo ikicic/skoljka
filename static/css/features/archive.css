@@ -1,0 +1,74 @@
+/* Archive index – source tree table, progress, bulk delete */
+
+.category-row td {
+  background: var(--color-bg-header);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.category-row + .source-child-row td,
+.category-row + .source-own-row td {
+  border-top: none;
+}
+
+.source-child-row .source-name-cell,
+.source-own-row .source-name-cell {
+  padding-left: 1rem;
+}
+
+.source-own-row .source-name-cell a {
+  font-weight: 500;
+}
+
+.col-progress {
+  text-align: center;
+  white-space: nowrap;
+  width: 120px;
+}
+
+th.col-grid,
+td.col-grid {
+  text-align: right;
+  width: 9rem;
+  min-width: 9rem;
+  white-space: nowrap;
+}
+
+.progress-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.progress-text {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.progress-text .solved-count {
+  font-weight: 600;
+}
+
+.bulk-delete-problems-form {
+  align-items: center;
+  justify-content: flex-end;
+  margin: 1rem 0 0 0;
+}
+
+.bulk-delete-problems-form label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: normal;
+  line-height: var(--control-line-height);
+}
+
+.bulk-delete-count-input {
+  width: 4rem;
+  vertical-align: middle;
+}

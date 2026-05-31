@@ -1,0 +1,411 @@
+import json
+
+from django.http import HttpRequest, HttpResponse
+from django.middleware.csrf import get_token
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.text import slugify
+from django.utils.translation import gettext as _t, ngettext
+from django.views.decorators.http import require_POST
+
+from skoljka.apps.problems.bulk_edit import ProblemBulkEditSet, render_problem_bulk_edit, save_problem_bulk_edit
+from skoljka.apps.problems.components import ProblemsDisplay, problems_table_queryset
+from skoljka.apps.problems.export_views import (
+    ProblemPdfExportSpec,
+    problem_export_queryset,
+    problem_pdf_export_view,
+)
+from skoljka.apps.problems.models import Problem
+from skoljka.apps.sources.components import (
+    comp_grid,
+    problem_grid_labels,
+    problem_year_sections,
+    source_competition_table,
+    source_documents_section,
+    year_section,
+)
+from skoljka.apps.sources.models import Source, SourceDocument
+from skoljka.apps.sources.selectors import (
+    can_bulk_edit_problem_ids,
+    compact_source_year_title_context,
+    source_document_queryset,
+    source_problem_queryset,
+    source_year_problem_queryset,
+)
+from skoljka.apps.tracking.models import Submission
+from skoljka.components.layout import Page
+from skoljka.utils.auth import login_required_view
+from skoljka.utils.px_view import px_view
+from skoljka.utils.staff import staff_required
+
+
+@px_view
+def source_list(request: HttpRequest):
+    roots = list(
+        Source.objects.for_user(request.user)
+        .filter(parent__isnull=True)
+    )
+
+    return (
+        <Page
+            request={request}
+            title={_t("Competitions")}
+            show_title={False}
+            actions={_archive_actions(request)}
+        >
+            {source_competition_table(roots, request.user, group_leaf_roots=True)}
+        </Page>
+    )
+
+
+def _archive_actions(request: HttpRequest):
+    if not request.user.is_staff:
+        return None
+    return <a href={reverse("source_admin_list")} class="btn btn-sm">{_t("Edit")}</a>
+
+
+def _source_breadcrumbs(source: Source, year: int | None = None) -> list:
+    ancestors = []
+    s = source.parent
+    while s:
+        ancestors.append(s)
+        s = s.parent
+    crumbs = [(_t("Archive"), reverse("source_list"))]
+    for ancestor in reversed(ancestors):
+        crumbs.append((ancestor.name(), ancestor.get_absolute_url()))
+    crumbs.append((source.name(), source.get_absolute_url() if year is not None else None))
+    if year is not None:
+        crumbs.append((str(year), None))
+    return crumbs
+
+
+@px_view
+def source_detail(request: HttpRequest, slug: str, year: int | None = None):
+    source = get_object_or_404(Source.objects.for_user(request.user), slug=slug)
+    sub_sources = list(
+        Source.objects.for_user(request.user)
+        .filter(parent=source)
+        .order_by("order", "slug")
+    )
+
+    selected_year = year if year is not None else _parse_year(request.GET.get("year"))
+    has_selected_year = selected_year is not None
+    if has_selected_year:
+        problem_qs = source_year_problem_queryset(request.user, source, selected_year)
+        documents = list(source_document_queryset(request.user, source, selected_year))
+    else:
+        problem_qs = source_problem_queryset(request.user, source)
+        documents = list(source_document_queryset(request.user, source))
+
+    problems = list(problems_table_queryset(problem_qs))
+    sorted_years = _problems_by_year(problems)
+    grid_labels = problem_grid_labels(sorted_years)
+    solved_ids = _solved_problem_ids(problems, request.user)
+    page_title = f"{source.name()} {selected_year}" if has_selected_year else source.name()
+    problem_ids = [problem.pk for problem in problems]
+    actions = _source_detail_actions(request, source, selected_year, problem_ids)
+    compact_title_context = compact_source_year_title_context(problems, source, selected_year)
+
+    return (
+        <Page
+            request={request}
+            title={page_title}
+            breadcrumbs={_source_breadcrumbs(source, selected_year if has_selected_year else None)}
+            actions={actions}
+        >
+            {sub_sources and (
+                <div class="section-card">
+                    {source_competition_table(sub_sources, request.user, group_leaf_roots=False)}
+                </div>
+            )}
+            {has_selected_year and (
+                <>
+                    {source_documents_section(
+                        request,
+                        documents,
+                        bulk_edit_url=reverse("source_year_bulk_edit", kwargs={"slug": source.slug, "year": selected_year}),
+                    )}
+                    {problems and (
+                        <>
+                            <ProblemsDisplay
+                                problems={problems}
+                                request={request}
+                                view="cards"
+                                view_key="source-year"
+                                compact_generated_titles_for={compact_title_context}
+                                export_url={reverse("source_year_pdf", kwargs={"slug": source.slug, "year": selected_year})}
+                            />
+                            {_bulk_delete_problems_form(
+                                request,
+                                count=len(problems),
+                                action=reverse("source_year_bulk_delete", kwargs={"slug": source.slug, "year": selected_year}),
+                            )}
+                        </>
+                    )}
+                    {not problems and <p class="text-muted">{_t("No problems for this year.")}</p>}
+                </>
+            )}
+            {not has_selected_year and (
+                <>
+                    {sorted_years and grid_labels and (
+                        <>
+                            <h2>{_t("Overview")}</h2>
+                            {comp_grid(source, sorted_years, grid_labels, solved_ids)}
+                        </>
+                    )}
+                    {source_documents_section(request, documents)}
+                    {sorted_years and not grid_labels and (
+                        <>
+                            <h2>{_t("Overview")}</h2>
+                            {year_section(year, year_problems) for year, year_problems in sorted_years}
+                        </>
+                    )}
+                    {problems and (
+                        <>
+                            <h2>{_t("Problems")}</h2>
+                            {problem_year_sections(request, source, sorted_years)}
+                            {_bulk_delete_problems_form(
+                                request,
+                                count=len(problems),
+                                action=reverse("source_bulk_delete", kwargs={"slug": source.slug}),
+                            )}
+                        </>
+                    )}
+                </>
+            )}
+        </Page>
+    )
+
+
+def _problems_by_year(problems: list[Problem]) -> list[tuple[int | None, list[Problem]]]:
+    years: dict[int | None, list[Problem]] = {}
+    for problem in problems:
+        years.setdefault(problem.year, []).append(problem)
+    return sorted(
+        years.items(),
+        key=lambda item: (item[0] is None, -(item[0] or 0)),
+    )
+
+
+def _source_detail_actions(request: HttpRequest, source: Source, year: int | None, problem_ids: list[int]):
+    actions = []
+    if request.user.is_staff and source.user_has_perm(request.user, "edit"):
+        actions.append(
+            <a href={reverse("source_edit", kwargs={"pk": source.pk})} class="btn btn-sm">
+                {_t("Edit")}
+            </a>
+        )
+        actions.append(
+            <a href={reverse("source_export") + "?" + f"source={source.slug}"} class="btn btn-sm">
+                {_t("Export")}
+            </a>
+        )
+    if request.user.is_staff and year is not None and can_bulk_edit_problem_ids(request.user, problem_ids):
+        actions.append(
+            <a
+                href={reverse("source_year_bulk_edit", kwargs={"slug": source.slug, "year": year})}
+                class="btn btn-sm"
+            >
+                {_t("Bulk edit")}
+            </a>
+        )
+    if not actions:
+        return None
+    return (
+        <span class="btn-group">
+            {actions}
+        </span>
+    )
+
+
+@px_view
+@staff_required
+def source_year_bulk_edit(request: HttpRequest, slug: str, year: int):
+    source = get_object_or_404(Source.objects.for_user(request.user, "edit"), slug=slug)
+    problems = list(source_year_problem_queryset(request.user, source, year))
+    if not can_bulk_edit_problem_ids(request.user, [problem.pk for problem in problems]):
+        return HttpResponse(_t("Forbidden"), status=403)
+
+    document_url = ""
+    document_label = ""
+    document_pk = request.GET.get("document")
+    if document_pk:
+        try:
+            document_id = int(document_pk)
+        except (TypeError, ValueError):
+            return HttpResponse(_t("Not found"), status=404)
+        document = get_object_or_404(
+            source_document_queryset(request.user, source, year),
+            pk=document_id,
+        )
+        document_url = document.file.url
+        document_label = document.label()
+
+    context_label = f"{source.name()} {year}"
+    return render_problem_bulk_edit(request, ProblemBulkEditSet(
+        title=_t("Bulk edit: %(title)s") % {"title": context_label},
+        context_label=_t("Competition year: %(title)s") % {"title": context_label},
+        back_url=reverse("source_year_detail", kwargs={"slug": source.slug, "year": year}),
+        save_url=reverse("source_year_bulk_edit_save", kwargs={"slug": source.slug, "year": year}),
+        problems=problems,
+        document_url=document_url,
+        document_label=document_label,
+    ))
+
+
+@require_POST
+@staff_required
+def source_year_bulk_edit_save(request: HttpRequest, slug: str, year: int):
+    source = get_object_or_404(Source.objects.for_user(request.user, "edit"), slug=slug)
+    problem_ids = set(source_year_problem_queryset(request.user, source, year).values_list("pk", flat=True))
+    if not can_bulk_edit_problem_ids(request.user, list(problem_ids)):
+        return HttpResponse(_t("Forbidden"), status=403)
+    return save_problem_bulk_edit(
+        request,
+        allowed_problem_ids=problem_ids,
+        redirect_url=reverse("source_year_detail", kwargs={"slug": source.slug, "year": year}),
+    )
+
+
+def _bulk_delete_problems_form(request: HttpRequest, *, count: int, action: str):
+    if not request.user.is_staff or count <= 0:
+        return None
+    return (
+        <form
+            method="post"
+            action={action}
+            class="bulk-delete-problems-form form-actions"
+            data-confirm-count-form=""
+            data-confirm={_bulk_delete_confirm_message(count)}
+        >
+            <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+            <input
+                type="hidden"
+                name="expected_count"
+                value={str(count)}
+                data-confirm-count-expected=""
+            />
+            <label>
+                {_t("Type %(count)s to delete these problems:") % {"count": count}}
+                <input
+                    type="text"
+                    name="confirm_count"
+                    inputmode="numeric"
+                    pattern="[0-9]+"
+                    class="bulk-delete-count-input"
+                    data-confirm-count-input=""
+                    required
+                />
+            </label>
+            <button type="submit" class="btn btn-sm btn-danger" disabled>
+                {_t("Delete problems")}
+            </button>
+        </form>
+    )
+
+
+def _bulk_delete_confirm_message(count: int) -> str:
+    message = ngettext(
+        "Delete %(count)s problem? This cannot be undone.",
+        "Delete %(count)s problems? This cannot be undone.",
+        count,
+    ) % {"count": count}
+    return message
+
+
+@require_POST
+@staff_required
+def source_bulk_delete(request: HttpRequest, slug: str):
+    source = get_object_or_404(Source.objects.for_user(request.user, "edit"), slug=slug)
+    problem_ids = list(source_problem_queryset(request.user, source).values_list("pk", flat=True))
+    if err := _validate_bulk_delete_count(request, len(problem_ids)):
+        return err
+    Problem.objects.for_user(request.user, "edit").filter(pk__in=problem_ids).delete()
+    return redirect(source.get_absolute_url())
+
+
+@require_POST
+@staff_required
+def source_year_bulk_delete(request: HttpRequest, slug: str, year: int):
+    source = get_object_or_404(Source.objects.for_user(request.user, "edit"), slug=slug)
+    problem_ids = list(source_year_problem_queryset(request.user, source, year).values_list("pk", flat=True))
+    if err := _validate_bulk_delete_count(request, len(problem_ids)):
+        return err
+    Problem.objects.for_user(request.user, "edit").filter(pk__in=problem_ids).delete()
+    return redirect(reverse("source_year_detail", kwargs={"slug": source.slug, "year": year}))
+
+
+def _validate_bulk_delete_count(request: HttpRequest, actual_count: int) -> HttpResponse | None:
+    try:
+        expected_count = int(request.POST.get("expected_count", ""))
+        confirm_count = int(request.POST.get("confirm_count", ""))
+    except ValueError:
+        return HttpResponse(_t("Invalid confirmation count."), status=400)
+    if actual_count <= 0 or expected_count != actual_count or confirm_count != actual_count:
+        return HttpResponse(_t("Invalid confirmation count."), status=400)
+    return None
+
+
+def _solved_problem_ids(problems: list[Problem], user) -> set[int]:
+    if not user or not user.is_authenticated or not problems:
+        return set()
+    return set(
+        Submission.objects.filter(
+            user=user,
+            solved=True,
+            problem_id__in=[problem.id for problem in problems],
+        ).values_list("problem_id", flat=True)
+    )
+
+
+@require_POST
+@staff_required
+def source_document_delete(request: HttpRequest, pk: int):
+    editable_source_ids = Source.objects.for_user(request.user, "edit").values("id")
+    document = get_object_or_404(SourceDocument, pk=pk, source_id__in=editable_source_ids)
+    redirect_url = request.POST.get("next") or document.source.get_absolute_url()
+    if not url_has_allowed_host_and_scheme(redirect_url, allowed_hosts={request.get_host()}):
+        redirect_url = document.source.get_absolute_url()
+    if document.file:
+        document.file.delete(save=False)
+    document.delete()
+    return redirect(redirect_url)
+
+
+@px_view
+@login_required_view
+def source_pdf(request: HttpRequest, slug: str):
+    source = get_object_or_404(Source.objects.for_user(request.user), slug=slug)
+    problems = list(problem_export_queryset(problems_table_queryset(source_problem_queryset(request.user, source))))
+    return problem_pdf_export_view(request, ProblemPdfExportSpec(problems, source.name(), _pdf_filename(source.name())))
+
+
+@px_view
+@login_required_view
+def source_year_pdf(request: HttpRequest, slug: str, year: int):
+    source = get_object_or_404(Source.objects.for_user(request.user), slug=slug)
+    title = f"{source.name()} {year}"
+    problems = list(problem_export_queryset(source_year_problem_queryset(request.user, source, year)))
+    return problem_pdf_export_view(
+        request,
+        ProblemPdfExportSpec(
+            problems,
+            title,
+            _pdf_filename(title),
+            compact_generated_titles_for=compact_source_year_title_context(problems, source, year),
+        ),
+    )
+
+
+def _pdf_filename(label: str) -> str:
+    return f"{slugify(label) or 'problems'}.pdf"
+
+
+def _parse_year(raw: str | None) -> int | None:
+    if not raw:
+        return None
+    try:
+        return int(raw)
+    except ValueError:
+        return None

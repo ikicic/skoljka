@@ -1,0 +1,213 @@
+from django.db.models import Case, Count, IntegerField, When
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.utils.text import slugify
+from django.utils.translation import get_language, gettext as _
+
+from skoljka.apps.accounts.models import User
+from skoljka.apps.problems.components import ProblemsTable
+from skoljka.apps.problems.export_views import (
+    ProblemPdfExportSpec,
+    problem_export_queryset,
+    problem_pdf_export_view,
+)
+from skoljka.apps.problems.models import Problem
+from skoljka.apps.tracking.models import Bookmark, Like, Submission
+from skoljka.components.forms import csrf_input
+from skoljka.components.layout import Page
+from skoljka.utils.auth import login_redirect
+from skoljka.utils.px_view import px_view
+
+
+@px_view
+def profile_view(request: HttpRequest, username: str):
+    user = get_object_or_404(User, username=username)
+    if not user.profile_public and request.user != user:
+        return HttpResponse(_("Profile is private"), status=404)
+
+    is_own = request.user == user
+    visible_problem_ids = Problem.objects.for_user(request.user).values("id")
+    solved_submissions = Submission.objects.filter(
+        user=user,
+        solved=True,
+        problem_id__in=visible_problem_ids,
+    )
+    solved_count = solved_submissions.count()
+    bookmark_count = user.bookmarks.count() if is_own else 0
+
+    by_source = (
+        solved_submissions
+        .filter(problem__source__isnull=False)
+        .values("problem__source__slug", "problem__source__translations")
+        .annotate(count=Count("id"))
+        .order_by("-count")
+    )
+
+    liked_ids = list(
+        Like.objects.filter(user=user)
+        .order_by("-created_at")
+        .values_list("problem_id", flat=True)[:50]
+    )
+    liked_problems = _ordered_problem_queryset(liked_ids, request.user)
+
+    bookmarked_problems = Problem.objects.none()
+    if is_own:
+        bookmarked_ids = list(
+            Bookmark.objects.filter(user=user)
+            .order_by("-created_at")
+            .values_list("problem_id", flat=True)[:50]
+        )
+        bookmarked_problems = _ordered_problem_queryset(bookmarked_ids, request.user)
+
+    return (
+        <Page request={request} title={user.username}>
+            <div class="profile-stats card">
+                <span>{_("Solved")}: <strong>{str(solved_count)}</strong></span>
+                {is_own and <span>{_("Bookmarked")}: <strong>{str(bookmark_count)}</strong></span>}
+            </div>
+            {is_own and (
+                <p><a href={reverse("settings")}>{_("Edit profile")}</a></p>
+            )}
+            {by_source and (
+                <>
+                    <h2>{_("Solved by source")}</h2>
+                    <div class="table-wrapper">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>{_("Source")}</th>
+                                    <th>{_("Solved")}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {_source_stat_row(s) for s in by_source}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
+            )}
+            {liked_problems and (
+                <>
+                    <h2>{_("Liked problems")}</h2>
+                    <ProblemsTable
+                        queryset={liked_problems}
+                        request={request}
+                        page_param="liked_page"
+                        view_key="problems"
+                        export_url={reverse("profile_liked_pdf", kwargs={"username": user.username})}
+                    />
+                </>
+            )}
+            {bookmarked_problems and (
+                <>
+                    <h2>{_("Bookmarked problems")}</h2>
+                    <ProblemsTable
+                        queryset={bookmarked_problems}
+                        request={request}
+                        page_param="bookmarked_page"
+                        view_key="problems"
+                        export_url={reverse("profile_bookmarked_pdf", kwargs={"username": user.username})}
+                    />
+                </>
+            )}
+        </Page>
+    )
+
+
+@px_view
+def profile_liked_pdf(request: HttpRequest, username: str):
+    if not request.user.is_authenticated:
+        return login_redirect(request)
+    user = get_object_or_404(User, username=username)
+    if not user.profile_public and request.user != user:
+        return HttpResponse(_("Profile is private"), status=404)
+    ids = list(Like.objects.filter(user=user).order_by("-created_at").values_list("problem_id", flat=True)[:50])
+    problems = list(problem_export_queryset(_ordered_problem_queryset(ids, request.user)))
+    title = _("%(username)s liked problems") % {"username": user.username}
+    return problem_pdf_export_view(
+        request,
+        ProblemPdfExportSpec(problems, title, f"{slugify(title) or 'problems'}.pdf"),
+    )
+
+
+@px_view
+def profile_bookmarked_pdf(request: HttpRequest, username: str):
+    if not request.user.is_authenticated:
+        return login_redirect(request)
+    user = get_object_or_404(User, username=username)
+    if request.user != user:
+        return HttpResponse(_("Not found"), status=404)
+    ids = list(Bookmark.objects.filter(user=user).order_by("-created_at").values_list("problem_id", flat=True)[:50])
+    problems = list(problem_export_queryset(_ordered_problem_queryset(ids, request.user)))
+    title = _("Bookmarked problems")
+    return problem_pdf_export_view(
+        request,
+        ProblemPdfExportSpec(problems, title, f"{slugify(title) or 'problems'}.pdf"),
+    )
+
+
+def _ordered_problem_queryset(problem_ids: list[int], user=None):
+    if not problem_ids:
+        return Problem.objects.none()
+    ordering = Case(
+        *[When(pk=problem_id, then=pos) for pos, problem_id in enumerate(problem_ids)],
+        output_field=IntegerField(),
+    )
+    qs = Problem.objects.for_user(user) if user is not None else Problem.objects
+    return qs.filter(id__in=problem_ids).order_by(ordering)
+
+
+def _source_stat_row(stat: dict):
+    tr = stat.get("problem__source__translations", {})
+    language = (get_language() or "en").split("-")[0]
+    localized = tr.get(language, tr.get("en", {})) if isinstance(tr, dict) else {}
+    name = (
+        localized.get("name", stat["problem__source__slug"])
+        if isinstance(localized, dict)
+        else stat["problem__source__slug"]
+    )
+    return (
+        <tr>
+            <td>
+                <a href={reverse("source_detail", kwargs={"slug": stat["problem__source__slug"]})}>
+                    {name}
+                </a>
+            </td>
+            <td>{str(stat["count"])}</td>
+        </tr>
+    )
+
+
+@px_view
+def settings_view(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return login_redirect(request, reverse("settings"))
+    user = request.user
+    saved = False
+    if request.method == "POST":
+        profile_public = request.POST.get("profile_public") == "on"
+        user.profile_public = profile_public
+        user.save(update_fields=["profile_public"])
+        saved = True
+
+    return (
+        <Page request={request} title={_("Settings")}>
+            {saved and <p class="form-success">{_("Settings saved.")}</p>}
+            <form method="post" class="form card">
+                {csrf_input(request)}
+                <div class="form-field">
+                    <label class="checkbox-label">
+                        <input
+                            type="checkbox"
+                            name="profile_public"
+                            checked={user.profile_public}
+                        />
+                        {" "}
+                        {_("Public profile")}
+                    </label>
+                </div>
+                <button type="submit" class="btn">{_("Save")}</button>
+            </form>
+        </Page>
+    )

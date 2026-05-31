@@ -1,0 +1,181 @@
+/* Buttons */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-height);
+  padding: 4px 1rem;
+  font-size: var(--control-font-size);
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-surface);
+  background: var(--gradient-btn-primary);
+  border: 1px solid var(--color-btn-primary-border);
+  border-bottom-color: var(--color-btn-primary-border-dark);
+  border-radius: var(--radius);
+  cursor: pointer;
+  line-height: var(--control-line-height);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 1px 1px rgba(0, 0, 0, 0.14);
+}
+
+.btn:hover {
+  background: var(--gradient-btn-primary-hover);
+  border-color: var(--color-btn-primary-border-hover);
+  border-bottom-color: var(--color-btn-primary-border-hover-dark);
+  color: var(--color-surface);
+  text-decoration: none;
+}
+
+.btn:active {
+  background: var(--gradient-btn-primary-active);
+  border-color: var(--color-btn-primary-border-hover);
+  color: var(--color-surface);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
+  transform: translateY(1px);
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.btn-sm {
+  min-height: var(--control-height);
+  padding: 4px 0.75rem;
+  font-size: var(--control-font-size);
+}
+
+.btn-xs {
+  min-height: 1.35rem;
+  padding: 1px 0.45rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.btn-secondary,
+.btn-toggle {
+  color: var(--color-text);
+  background: var(--gradient-btn-secondary);
+  border-color: var(--color-btn-secondary-border);
+  border-bottom-color: var(--color-btn-secondary-border-dark);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 1px rgba(0, 0, 0, 0.12);
+}
+
+.btn-secondary:hover,
+.btn-toggle:hover {
+  color: var(--color-link);
+  background: var(--gradient-btn-secondary-hover);
+  border-color: var(--color-btn-secondary-hover-border);
+  border-bottom-color: var(--color-btn-secondary-hover-border-dark);
+}
+
+.btn-secondary:active,
+.btn-toggle:active {
+  color: var(--color-text);
+  background: var(--gradient-btn-secondary-active);
+  border-color: var(--color-btn-secondary-hover-border);
+  box-shadow: inset 0 2px 5px rgba(36, 41, 46, 0.22);
+}
+
+.btn-toggle-active,
+.btn-toggle-active:hover {
+  color: var(--color-surface);
+  background: var(--gradient-btn-primary-active);
+  border-color: var(--color-btn-primary-border-hover);
+  border-bottom-color: var(--color-btn-primary-border-hover-dark);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.28);
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.25),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.btn-toggle-active:active {
+  background: linear-gradient(var(--color-btn-primary-border-hover), var(--color-btn-primary-hover-end));
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.32);
+}
+
+.btn-danger {
+  color: var(--color-surface);
+  background: var(--gradient-btn-danger);
+  border-color: var(--color-danger-border);
+  border-bottom-color: var(--color-danger-dark);
+}
+
+.btn-danger:hover {
+  color: var(--color-surface);
+  background: var(--gradient-btn-danger-hover);
+  border-color: var(--color-danger-border-dark);
+  border-bottom-color: var(--color-danger-border-darker);
+}
+
+.btn-danger:active {
+  color: var(--color-surface);
+  background: var(--gradient-btn-danger-active);
+  border-color: var(--color-danger-border-dark);
+}
+
+.btn-group {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.btn-group > .btn {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.btn-group > .btn + .btn {
+  margin-left: -1px;
+}
+
+.btn-group > .btn:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.btn-group > .btn:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.btn-group > .btn:hover,
+.btn-group > .btn:focus,
+.btn-group > .btn:active,
+.btn-group > .btn-toggle-active {
+  z-index: 1;
+}
+
+.btn-group > .btn:active {
+  transform: none;
+}
+
+.btn-link {
+  display: inline-block;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  padding: 0;
+  font: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  appearance: none;
+  text-decoration: none;
+}
+
+.btn-link:hover {
+  color: var(--color-text);
+  background: none;
+  text-decoration: underline;
+}
+
+.btn-link-danger:hover {
+  color: var(--color-error);
+}

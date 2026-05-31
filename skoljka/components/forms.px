@@ -1,0 +1,26 @@
+from django.http import HttpRequest
+from django.middleware.csrf import get_token
+
+
+def csrf_input(request: HttpRequest):
+    return <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+
+
+def error_list(errors: list[str]):
+    if not errors:
+        return None
+    return (
+        <ul class="form-errors">
+            {<li>{error}</li> for error in errors}
+        </ul>
+    )
+
+
+def form_errors(form) -> object:
+    """Render Django Form / FormSet validation errors."""
+    if form is None:
+        return error_list([])
+    errors = list(form.non_field_errors())
+    for field_errors in form.errors.values():
+        errors.extend(str(error) for error in field_errors)
+    return error_list(errors)

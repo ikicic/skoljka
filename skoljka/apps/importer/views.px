@@ -1,0 +1,481 @@
+import json
+import base64
+import binascii
+import re
+from datetime import timedelta
+
+from django.conf import settings
+from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import transaction
+from django.http import HttpRequest, JsonResponse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.translation import gettext as _t
+from django.views.decorators.http import require_GET, require_POST
+from pythonjsx.runtime import SafeStr
+
+from skoljka.apps.content.models import Content, ContentAttachment
+from skoljka.apps.importer import backends
+from skoljka.apps.importer.models import TranscriptionJob
+from skoljka.apps.importer.pdf_slice import slice_pdf
+from skoljka.apps.importer.tag_suggestions import suggest_tags_for_sources
+from skoljka.apps.importer.worker import start_job_thread
+from skoljka.apps.problems.models import Problem
+from skoljka.apps.sources.hierarchy import source_options_payload
+from skoljka.apps.sources.models import Source, SourceDocument
+from skoljka.apps.tags.utils import resolve_tags
+from skoljka.components.layout import Page
+from skoljka.transcription.crypto import decrypt_blob, encrypt_blob, file_key
+from skoljka.utils.px_view import csrf_header_json, px_view
+from skoljka.utils.staff import staff_required
+from skoljka.utils.static import static_url
+
+
+def _empty_progress() -> dict:
+    return {"current": None, "steps": []}
+
+
+def _sources_json(user) -> str:
+    sources = list(Source.objects.for_user(user, "edit").order_by("order", "slug"))
+    return json.dumps(source_options_payload(sources))
+
+
+def _source_context(source: Source) -> dict:
+    children = list(source.children.order_by("order", "slug"))
+    allowed = [{"key": source.slug, "id": source.pk, "name": source.name()}]
+    allowed.extend({"key": child.slug, "id": child.pk, "name": child.name()} for child in children)
+    return {
+        "default_source_key": source.slug,
+        "allowed_sources": allowed,
+    }
+
+
+def _allowed_import_source_ids(source: Source) -> set[int]:
+    return {source.pk, *source.children.values_list("pk", flat=True)}
+
+
+def _job_allowed_source_ids(job_id, user) -> set[int] | None:
+    if not job_id:
+        return None
+    try:
+        job = TranscriptionJob.objects.get(pk=job_id, user=user)
+        context = json.loads(job.source_context_json or "{}")
+    except (TranscriptionJob.DoesNotExist, ValueError, json.JSONDecodeError):
+        return set()
+    allowed = context.get("allowed_sources")
+    if not isinstance(allowed, list):
+        return set()
+    ids: set[int] = set()
+    for item in allowed:
+        if not isinstance(item, dict):
+            continue
+        try:
+            ids.add(int(item.get("id")))
+        except (TypeError, ValueError):
+            continue
+    return ids
+
+
+@px_view
+@staff_required
+def pdf_import(request: HttpRequest):
+    return (
+        <Page request={request} title={_t("Import from PDF")} wide={True}>
+            <script type="application/json" id="pdf-sources-data">
+                {SafeStr(_sources_json(request.user))}
+            </script>
+            <div
+                id="pdf-import"
+                data-csrf={csrf_header_json(request)}
+                data-transcribe-url={reverse("pdf_transcribe")}
+                data-active-url={reverse("pdf_transcribe_active")}
+                data-suggest-tags-url={reverse("problem_suggest_tags")}
+                data-create-source-url={reverse("source_create_inline")}
+                data-confirm-url={reverse("pdf_confirm")}
+            >
+            </div>
+            <script type="module" src={static_url("js/pdf-import.js")}></script>
+        </Page>
+    )
+
+
+_ACTIVE_STATUSES = [
+    TranscriptionJob.Status.PENDING,
+    TranscriptionJob.Status.RUNNING,
+]
+
+
+def _job_payload(job: TranscriptionJob, include_result: bool = False) -> dict:
+    data = {
+        "id": str(job.id),
+        "status": job.status,
+        "created_at": job.created_at.isoformat(),
+        "updated_at": job.updated_at.isoformat(),
+        "progress": _job_progress(job),
+        "has_original_pdf": bool(job.original_pdf),
+    }
+    if job.status == TranscriptionJob.Status.FAILED:
+        data["error"] = job.error
+    if include_result and job.status == TranscriptionJob.Status.DONE and job.result_ciphertext:
+        result_json = decrypt_blob(bytes(job.result_ciphertext), file_key())
+        result = json.loads(result_json)
+        if isinstance(result, list):
+            data["problems"] = result
+        elif isinstance(result, dict):
+            data["year"] = result.get("year")
+            data["language"] = result.get("language")
+            data["problems"] = result.get("problems", [])
+            data["images"] = result.get("images", {})
+    return data
+
+
+def _job_progress(job: TranscriptionJob) -> dict:
+    try:
+        progress = json.loads(job.progress_json or "{}")
+    except json.JSONDecodeError:
+        return _empty_progress()
+    if not isinstance(progress, dict) or not isinstance(progress.get("steps"), list):
+        return _empty_progress()
+    return progress
+
+
+def _mark_if_zombie(job: TranscriptionJob) -> TranscriptionJob:
+    """If a 'running' job hasn't been touched in too long, mark it failed."""
+    if job.status != TranscriptionJob.Status.RUNNING:
+        return job
+    cutoff = timezone.now() - timedelta(minutes=settings.TRANSCRIPTION_ZOMBIE_MINUTES)
+    if job.updated_at < cutoff:
+        TranscriptionJob.objects.filter(
+            pk=job.pk, status=TranscriptionJob.Status.RUNNING,
+        ).update(
+            status=TranscriptionJob.Status.FAILED,
+            error="Worker timed out (presumed dead)",
+            updated_at=timezone.now(),
+        )
+        job.refresh_from_db()
+    return job
+
+
+@require_POST
+@staff_required
+def pdf_transcribe(request: HttpRequest) -> JsonResponse:
+    """Create a transcription job and start a worker thread."""
+    pdf_file = request.FILES.get("pdf")
+    if not pdf_file:
+        return JsonResponse({"error": _t("Missing 'pdf' upload")}, status=400)
+
+    pages_json = request.POST.get("pages", "[]")
+    try:
+        pages = json.loads(pages_json)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": _t("Invalid pages parameter")}, status=400)
+    if not isinstance(pages, list) or not pages:
+        return JsonResponse({"error": _t("No pages selected")}, status=400)
+    if not all(isinstance(p, int) and p >= 0 for p in pages):
+        return JsonResponse({"error": _t("Invalid page indices")}, status=400)
+
+    source_id = request.POST.get("source_id", "").strip()
+    if not source_id:
+        return JsonResponse({"error": _t("Choose a source before importing.")}, status=400)
+    try:
+        source = Source.objects.for_user(request.user, "edit").get(pk=source_id)
+    except (Source.DoesNotExist, ValueError):
+        return JsonResponse({"error": _t("Source not found")}, status=400)
+
+    pdf_bytes = pdf_file.read()
+    try:
+        sliced = slice_pdf(pdf_bytes, pages)
+    except Exception as exc:
+        return JsonResponse({"error": _t("Failed to slice PDF: %(error)s") % {"error": exc}}, status=400)
+
+    job = TranscriptionJob.objects.create(
+        user=request.user,
+        pdf_ciphertext=encrypt_blob(sliced, file_key()),
+        pages_json=json.dumps(sorted(set(pages))),
+        source_context_json=json.dumps(_source_context(source), ensure_ascii=False),
+    )
+    if request.POST.get("keep_original_pdf") == "1":
+        # Store the full upload, not the selected-page slice. Empty
+        # original_pdf means the user chose not to keep an archive copy; it
+        # does not mean /transcribe/ did not receive a PDF.
+        job.original_filename = pdf_file.name
+        job.original_pdf.save(pdf_file.name, ContentFile(pdf_bytes), save=True)
+    start_job_thread(str(job.id), backends.make_default_backend)
+    return JsonResponse(_job_payload(job))
+
+
+@require_GET
+@staff_required
+def pdf_transcribe_status(request: HttpRequest, job_id: str) -> JsonResponse:
+    job = get_object_or_404(TranscriptionJob, pk=job_id, user=request.user)
+    job = _mark_if_zombie(job)
+    return JsonResponse(_job_payload(job, include_result=True))
+
+
+@require_POST
+@staff_required
+def pdf_transcribe_cancel(request: HttpRequest, job_id: str) -> JsonResponse:
+    affected = TranscriptionJob.objects.filter(
+        pk=job_id, user=request.user, status__in=_ACTIVE_STATUSES,
+    ).update(status=TranscriptionJob.Status.CANCELLED, updated_at=timezone.now())
+    if not affected:
+        return JsonResponse({"error": _t("Job not found or already terminal")}, status=404)
+    return JsonResponse({"id": job_id, "status": TranscriptionJob.Status.CANCELLED})
+
+
+@require_POST
+@staff_required
+def pdf_transcribe_delete(request: HttpRequest, job_id: str) -> JsonResponse:
+    """Delete a terminal job."""
+    jobs = list(TranscriptionJob.objects.filter(
+        pk=job_id, user=request.user,
+    ).exclude(status__in=_ACTIVE_STATUSES))
+    if not jobs:
+        return JsonResponse({"error": _t("Job not found or still active")}, status=404)
+    _delete_job_files(jobs)
+    TranscriptionJob.objects.filter(pk__in=[job.pk for job in jobs]).delete()
+    return JsonResponse({"ok": True})
+
+
+def _delete_job_files(jobs: list[TranscriptionJob]) -> None:
+    for job in jobs:
+        if job.original_pdf:
+            job.original_pdf.delete(save=False)
+
+
+@require_GET
+@staff_required
+def pdf_transcribe_active(request: HttpRequest) -> JsonResponse:
+    jobs = TranscriptionJob.objects.filter(
+        user=request.user, status__in=_ACTIVE_STATUSES,
+    ).order_by("-created_at")[:10]
+    return JsonResponse({"jobs": [_job_payload(j) for j in jobs]})
+
+
+@require_POST
+@staff_required
+def pdf_suggest_tags(request: HttpRequest) -> JsonResponse:
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": _t("Invalid JSON")}, status=400)
+    if not isinstance(data, dict):
+        return JsonResponse({"error": _t("Invalid JSON")}, status=400)
+
+    problems_data = data.get("problems", [])
+    if not isinstance(problems_data, list):
+        return JsonResponse({"error": _t("Invalid problems")}, status=400)
+    source_md_list = []
+    for item in problems_data:
+        if not isinstance(item, dict):
+            return JsonResponse({"error": _t("Invalid problems")}, status=400)
+        source_md = item.get("source_md", "")
+        if not isinstance(source_md, str):
+            return JsonResponse({"error": _t("Invalid problems")}, status=400)
+        source_md_list.append(source_md)
+
+    cache_path = settings.TRANSCRIPTION_PRIVATE_DIR / "api_cache.sqlite"
+    from skoljka.transcription.cache import APICache
+
+    cache = APICache(cache_path, ttl_seconds=settings.TRANSCRIPTION_TTL_DAYS * 86400)
+    suggestions = suggest_tags_for_sources(
+        source_md_list,
+        model=settings.TRANSCRIPTION_TAG_SUGGESTION_MODEL,
+        cache=cache,
+    )
+    return JsonResponse({"tags": suggestions})
+
+
+@require_POST
+@staff_required
+def pdf_confirm(request: HttpRequest) -> JsonResponse:
+    """Create Problem + Content objects from the confirmed import data."""
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": _t("Invalid JSON")}, status=400)
+    if not isinstance(data, dict):
+        return JsonResponse({"error": _t("Invalid JSON")}, status=400)
+
+    source_id = data.get("source_id")
+    year = data.get("year")
+    language = data.get("language", "en")
+    global_tag_slugs: list[str] = data.get("global_tags", [])
+    global_new_tag_names: list[str] = data.get("global_new_tags", [])
+    problems_data: list[dict] = data.get("problems", [])
+    job_id = data.get("job_id")
+
+    if not isinstance(problems_data, list) or not problems_data:
+        return JsonResponse({"error": _t("No problems to import")}, status=400)
+    if not isinstance(global_tag_slugs, list) or not isinstance(global_new_tag_names, list):
+        return JsonResponse({"error": _t("Invalid tags")}, status=400)
+    if not isinstance(language, str):
+        return JsonResponse({"error": _t("Invalid language")}, status=400)
+    if year is not None:
+        try:
+            year = int(year)
+        except (TypeError, ValueError):
+            return JsonResponse({"error": _t("Invalid year")}, status=400)
+
+    if not source_id:
+        return JsonResponse({"error": _t("Choose a source before importing.")}, status=400)
+    try:
+        source = Source.objects.for_user(request.user, "edit").get(pk=source_id)
+    except Source.DoesNotExist:
+        return JsonResponse({"error": _t("Source not found")}, status=400)
+    allowed_source_ids = _allowed_import_source_ids(source)
+    if job_allowed_source_ids := _job_allowed_source_ids(job_id, request.user):
+        allowed_source_ids &= job_allowed_source_ids
+    if source.pk not in allowed_source_ids:
+        return JsonResponse({"error": _t("Source not found")}, status=400)
+
+    normalized_problems = []
+    for i, p in enumerate(problems_data):
+        if not isinstance(p, dict):
+            return JsonResponse({"error": _t("Invalid problems")}, status=400)
+        source_md = p.get("source_md", "")
+        if not isinstance(source_md, str):
+            return JsonResponse({"error": _t("Invalid problems")}, status=400)
+        problem_source_id = p.get("source_id") or source.pk
+        try:
+            problem_source_id = int(problem_source_id)
+        except (TypeError, ValueError):
+            return JsonResponse({"error": _t("Source not found")}, status=400)
+        if problem_source_id not in allowed_source_ids:
+            return JsonResponse({"error": _t("Source not found")}, status=400)
+        try:
+            problem_source = Source.objects.for_user(request.user, "edit").get(pk=problem_source_id)
+        except Source.DoesNotExist:
+            return JsonResponse({"error": _t("Source not found")}, status=400)
+        per_tag_slugs: list[str] = p.get("tags", [])
+        per_new_tag_names: list[str] = p.get("new_tags", [])
+        if not isinstance(per_tag_slugs, list) or not isinstance(per_new_tag_names, list):
+            return JsonResponse({"error": _t("Invalid tags")}, status=400)
+        problem_label = str(p.get("problem_label") or p.get("problem_number") or "").strip() or str(i + 1)
+        normalized_problems.append((problem_source, problem_label, source_md, per_tag_slugs, per_new_tag_names))
+
+    # Create everything in a transaction.
+    created_ids = []
+    document_id = None
+    job_images = _job_images(job_id, request.user)
+    with transaction.atomic():
+        global_tags = resolve_tags(global_tag_slugs, global_new_tag_names)
+        for problem_source, problem_label, source_md, per_tag_slugs, per_new_tag_names in normalized_problems:
+            problem = Problem.objects.create(
+                source=problem_source,
+                year=year,
+                problem_label=problem_label,
+                created_by=request.user,
+                is_public=True,
+            )
+
+            content = Content.objects.create(
+                content_object=problem,
+                original_language=language or "en",
+                source_md={language or "en": source_md},
+            )
+            if job_images:
+                _attach_referenced_images(content, source_md, job_images)
+
+            # Combine global + per-problem tags.
+            all_tags = global_tags + resolve_tags(per_tag_slugs, per_new_tag_names)
+            if all_tags:
+                problem.tags.set(all_tags)
+
+            created_ids.append(problem.id)
+
+        document_id = _promote_original_pdf(job_id, request.user, source, year, language)
+
+    # Build redirect URL.
+    redirect_url = source.get_absolute_url()
+    if year:
+        redirect_url = source.get_absolute_url() + f"{year}/"
+
+    return JsonResponse({
+        "created": len(created_ids),
+        "ids": created_ids,
+        "document_id": document_id,
+        "redirect_url": redirect_url,
+    })
+
+
+ATTACHMENT_REF_RE = re.compile(r"attachment:([^)\s\"'}]+)")
+
+
+def _job_images(job_id, user) -> dict[str, str]:
+    if not job_id:
+        return {}
+    try:
+        job = TranscriptionJob.objects.get(pk=job_id, user=user, status=TranscriptionJob.Status.DONE)
+    except (TranscriptionJob.DoesNotExist, ValueError):
+        return {}
+    if not job.result_ciphertext:
+        return {}
+    try:
+        result_json = decrypt_blob(bytes(job.result_ciphertext), file_key())
+        result = json.loads(result_json)
+    except (json.JSONDecodeError, ValueError):
+        return {}
+    images = result.get("images", {}) if isinstance(result, dict) else {}
+    if not isinstance(images, dict):
+        return {}
+    return {name: value for name, value in images.items() if isinstance(name, str) and isinstance(value, str)}
+
+
+def _attach_referenced_images(content: Content, source_md: str, images: dict[str, str]) -> None:
+    referenced = []
+    seen = set()
+    for match in ATTACHMENT_REF_RE.finditer(source_md):
+        name = match.group(1)
+        if name in images and name not in seen:
+            seen.add(name)
+            referenced.append(name)
+    if not referenced:
+        return
+
+    for name in referenced:
+        try:
+            data = base64.b64decode(images[name], validate=True)
+        except (binascii.Error, ValueError):
+            continue
+        upload = SimpleUploadedFile(name, data, content_type="image/png")
+        ContentAttachment.from_upload(content, upload, name=name)
+    # The first Content.save() ran before attachments existed. Recompile now
+    # that attachment: URLs can be resolved to their real media URLs.
+    content.save()
+
+
+def _promote_original_pdf(job_id, user, source: Source, year: int | None, language: str) -> int | None:
+    if not job_id:
+        return None
+    try:
+        job = TranscriptionJob.objects.get(pk=job_id, user=user, status=TranscriptionJob.Status.DONE)
+    except (TranscriptionJob.DoesNotExist, ValueError):
+        return None
+    if not job.original_pdf:
+        return None
+
+    job.original_pdf.open("rb")
+    try:
+        content = ContentFile(job.original_pdf.read())
+    finally:
+        job.original_pdf.close()
+
+    document = SourceDocument(
+        source=source,
+        year=year,
+        language=language or "",
+        kind=SourceDocument.Kind.PROBLEMS,
+        original_filename=job.original_filename,
+        uploaded_by=user,
+    )
+    document.file.save(job.original_filename or "original.pdf", content, save=True)
+
+    # The archive document now owns its copy. Remove the temporary import copy
+    # so transcription job cleanup can stay independent from public documents.
+    job.original_pdf.delete(save=False)
+    job.original_pdf = None
+    job.save(update_fields=["original_pdf"])
+    return document.pk

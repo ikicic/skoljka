@@ -1,0 +1,22 @@
+{
+    "private": true,
+    "scripts": {
+        "build": "node esbuild.mjs",
+        "build:prod": "node esbuild.mjs --production",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@types/react": "^19.2.14",
+        "@types/react-dom": "^19.2.3",
+        "htmx.org": "^2.0.4",
+        "katex": "^0.16.21",
+        "marked": "^17.0.4",
+        "pdfjs-dist": "^5.5.207",
+        "react": "^19.2.4",
+        "react-dom": "^19.2.4"
+    },
+    "devDependencies": {
+        "esbuild": "^0.25.0",
+        "typescript": "^5.7.0"
+    }
+}

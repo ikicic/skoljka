@@ -1,0 +1,92 @@
+/* Responsive styles */
+
+@media (max-width: 768px) {
+  .container,
+  .container-wide {
+    margin-top: 0.5rem;
+    padding: 1rem 0.75rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.4rem;
+  }
+
+  main > h2 {
+    font-size: 1.15rem;
+  }
+
+  main > h3 {
+    font-size: 1rem;
+  }
+
+  .table {
+    font-size: 0.9rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.12rem 0.25rem;
+  }
+
+  .form-field-flex-3,
+  .form-field-flex-fixed,
+  .form-field-flex-narrow {
+    grid-column: auto;
+  }
+
+  .form-row-inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .problem-detail-controls {
+    align-items: stretch;
+  }
+
+  .problem-detail-status .btn-group > .btn {
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+  }
+
+  .profile-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mini-grid-cell {
+    width: 12px;
+    height: 12px;
+  }
+
+  .comp-grid-wrapper {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .footer {
+    padding: 1rem 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container,
+  .container-wide {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .form {
+    max-width: none;
+  }
+
+  #pdf-import {
+    min-height: 300px;
+  }
+
+  .mini-grid-cell {
+    width: 10px;
+    height: 10px;
+  }
+}

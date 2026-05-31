@@ -1,0 +1,427 @@
+import json
+from tempfile import NamedTemporaryFile
+import os
+
+from django.http import FileResponse, HttpRequest, JsonResponse
+from django.middleware.csrf import get_token
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
+from django.utils.text import slugify
+from django.utils.translation import gettext as _
+from django.views.decorators.http import require_POST
+
+from skoljka.apps.sources.archive_transfer import ExportOptions, export_archive
+from skoljka.apps.sources.forms import SourceChildrenForm, SourceDetailsForm
+from skoljka.apps.sources.hierarchy import ordered_sources_with_depth, source_option_payload, source_options_with_hierarchy_labels
+from skoljka.apps.sources.models import Source
+from skoljka.apps.tags.models import Tag
+from skoljka.components.forms import error_list, form_errors
+from skoljka.components.layout import Page
+from skoljka.components.tag_picker import TagPickerField
+from skoljka.utils.px_view import px_view
+from skoljka.utils.staff import staff_required
+
+
+@px_view
+@staff_required
+def source_admin_list(request: HttpRequest):
+    sources = list(Source.objects.for_user(request.user, "edit").select_related("parent"))
+    ordered_sources = ordered_sources_with_depth(sources)
+    return (
+        <Page request={request} title={_("Manage Sources")}>
+            <p><a href={reverse("source_create")} class="btn">{_("New Source")}</a></p>
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>{_("Name")}</th>
+                            <th>{_("Slug")}</th>
+                            <th>{_("Parent")}</th>
+                            <th>{_("Order")}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {_source_row(s, depth) for s, depth in ordered_sources}
+                    </tbody>
+                </table>
+            </div>
+        </Page>
+    )
+
+
+def _source_row(source: Source, depth: int):
+    return (
+        <tr>
+            <td style={f"padding-left:{1 + depth * 1.25:.2f}rem"}>{source.name()}</td>
+            <td><code>{source.slug}</code></td>
+            <td>{source.parent.name() if source.parent else "—"}</td>
+            <td>{str(source.order)}</td>
+            <td><a href={reverse("source_edit", kwargs={"pk": source.pk})}>{_("Edit")}</a></td>
+        </tr>
+    )
+
+
+@px_view
+@staff_required
+def source_export(request: HttpRequest):
+    sources = [
+        source
+        for source, _depth in ordered_sources_with_depth(list(Source.objects.for_user(request.user, "edit")))
+    ]
+    selected_slugs = _selected_export_slugs(request, sources)
+    if request.method == "POST":
+        if not selected_slugs:
+            return _source_export_page(request, sources, selected_slugs, [_("Choose at least one source.")])
+        include_children = request.POST.get("include_children") == "on"
+        with NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
+            output_path = tmp.name
+        export_archive(ExportOptions(
+            source_slugs=_export_source_slugs(selected_slugs, sources, include_children),
+            output=output_path,
+            include_children=False,
+            include_documents=request.POST.get("include_documents") == "on",
+            include_attachments=request.POST.get("include_attachments") == "on",
+            public_only=request.POST.get("public_only") == "on",
+        ))
+        filename = _export_filename(selected_slugs)
+        response = FileResponse(open(output_path, "rb"), as_attachment=True, filename=filename)
+        response._resource_closers.append(lambda: os.unlink(output_path))
+        return response
+
+    return _source_export_page(request, sources, selected_slugs, [])
+
+
+def _selected_export_slugs(request: HttpRequest, sources: list[Source]) -> list[str]:
+    slugs = request.POST.getlist("sources") if request.method == "POST" else request.GET.getlist("source")
+    valid = {source.slug for source in sources}
+    return [slug for slug in slugs if slug in valid]
+
+
+def _export_source_slugs(selected_slugs: list[str], sources: list[Source], include_children: bool) -> list[str]:
+    if not include_children:
+        return selected_slugs
+    by_slug = {source.slug: source for source in sources}
+    by_parent: dict[int | None, list[Source]] = {}
+    for source in sources:
+        by_parent.setdefault(source.parent_id, []).append(source)
+
+    result: list[str] = []
+    seen: set[int] = set()
+
+    def visit(source: Source) -> None:
+        if source.pk in seen:
+            return
+        seen.add(source.pk)
+        result.append(source.slug)
+        for child in by_parent.get(source.pk, []):
+            visit(child)
+
+    for slug in selected_slugs:
+        source = by_slug.get(slug)
+        if source:
+            visit(source)
+    return result
+
+
+def _source_export_page(request: HttpRequest, sources: list[Source], selected_slugs: list[str], errors: list[str]):
+    return (
+        <Page request={request} title={_("Export archive")}>
+            {error_list(errors)}
+            <form method="post" class="form card">
+                <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+                <div class="form-field">
+                    <label for="export-sources">{_("Sources")}</label>
+                    <select
+                        name="sources"
+                        id="export-sources"
+                        multiple={True}
+                        size={min(max(len(sources), 4), 12)}
+                    >
+                        {(
+                            <option value={source.slug} selected={source.slug in selected_slugs}>
+                                {label}
+                                {" ("}
+                                {source.slug}
+                                {")"}
+                            </option>
+                        ) for source, label in source_options_with_hierarchy_labels(sources)}
+                    </select>
+                </div>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="include_children" checked={True} />
+                    {" "}
+                    {_("Include child sources")}
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="include_documents" checked={True} />
+                    {" "}
+                    {_("Include source documents")}
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="include_attachments" checked={True} />
+                    {" "}
+                    {_("Include problem attachments")}
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="public_only" />
+                    {" "}
+                    {_("Public only")}
+                </label>
+                <div class="form-actions">
+                    <button type="submit" class="btn">{_("Export")}</button>
+                    <a href={reverse("source_list")}>{_("Back")}</a>
+                </div>
+            </form>
+        </Page>
+    )
+
+
+def _export_filename(selected_slugs: list[str]) -> str:
+    if len(selected_slugs) == 1:
+        base = selected_slugs[0]
+    else:
+        base = "sources"
+    return f"skoljka-{base}.zip"
+
+
+@px_view
+@staff_required
+def source_create(request: HttpRequest):
+    all_sources = Source.objects.for_user(request.user, "edit")
+    all_tags = Tag.objects.all()
+    form = SourceDetailsForm(
+        user=request.user,
+        initial=SourceDetailsForm.initial_for(None),
+    )
+    form.fields["tags"].choices = [(tag.slug, tag.slug) for tag in all_tags]
+    if request.method == "POST":
+        form = SourceDetailsForm(request.POST, user=request.user)
+        form.fields["tags"].choices = [(tag.slug, tag.slug) for tag in all_tags]
+        if form.is_valid():
+            form.save()
+            return redirect("source_admin_list")
+
+    return (
+        <Page request={request} title={_("New Source")}>
+            {form_errors(form)}
+            {_source_form(request, form=form, all_sources=all_sources, all_tags=all_tags)}
+        </Page>
+    )
+
+
+@px_view
+@staff_required
+def source_edit(request: HttpRequest, pk: int):
+    source = get_object_or_404(Source.objects.for_user(request.user, "edit"), pk=pk)
+    all_sources = Source.objects.for_user(request.user, "edit").exclude(pk=source.pk)
+    all_tags = Tag.objects.all()
+    details_form = SourceDetailsForm(
+        user=request.user,
+        instance=source,
+        initial=SourceDetailsForm.initial_for(source),
+    )
+    details_form.fields["tags"].choices = [(tag.slug, tag.slug) for tag in all_tags]
+    children_form = None
+    if request.method == "POST":
+        if request.POST.get("action") == "children":
+            children_form = SourceChildrenForm(request.POST, source=source, user=request.user)
+            if children_form.is_valid():
+                children_form.save()
+                return redirect("source_edit", pk=source.pk)
+        else:
+            details_form = SourceDetailsForm(request.POST, user=request.user, instance=source)
+            details_form.fields["tags"].choices = [(tag.slug, tag.slug) for tag in all_tags]
+            if details_form.is_valid():
+                details_form.save()
+                return redirect("source_edit", pk=source.pk)
+    children = list(
+        Source.objects.for_user(request.user, "edit")
+        .filter(parent=source)
+        .order_by("order", "slug")
+    )
+    return (
+        <Page request={request} title={_("Edit: %(title)s") % {"title": source.name()}}>
+            <p><a href={reverse("source_admin_list")}>{_("Back")}</a></p>
+            <section class="card source-admin-section">
+                <h2>{_("Details")}</h2>
+                {form_errors(details_form)}
+                {_source_form(request, form=details_form, source=source, all_sources=all_sources, all_tags=all_tags)}
+            </section>
+            <section class="card source-admin-section">
+                <h2>{_("Children")}</h2>
+                {form_errors(children_form)}
+                {_children_form(request, source, children)}
+            </section>
+        </Page>
+    )
+
+
+@require_POST
+@staff_required
+def source_create_inline(request: HttpRequest) -> JsonResponse:
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": _("Invalid JSON")}, status=400)
+
+    if not isinstance(data, dict):
+        return JsonResponse({"error": _("Invalid source data.")}, status=400)
+
+    slug = _json_string(data.get("slug"))
+    name_en = _json_string(data.get("name_en"))
+    name_hr = _json_string(data.get("name_hr"))
+    parent_id = _json_string(data.get("parent"))
+
+    if not slug and name_en:
+        slug = slugify(name_en)
+
+    errors: list[str] = []
+    if not slug:
+        errors.append(_("Slug is required."))
+    if not name_en:
+        errors.append(_("Name (EN) is required."))
+    if slug and Source.objects.filter(slug=slug).exists():
+        errors.append(_("A source with this slug already exists."))
+    parent = None
+    if parent_id:
+        try:
+            parent = Source.objects.for_user(request.user, "edit").get(pk=parent_id)
+        except Source.DoesNotExist:
+            errors.append(_("Parent source not found."))
+
+    if errors:
+        return JsonResponse({"error": "\n".join(errors), "errors": errors}, status=400)
+
+    translations = {"en": {"name": name_en}}
+    if name_hr:
+        translations["hr"] = {"name": name_hr}
+    source = Source.objects.create(
+        slug=slug,
+        parent=parent,
+        translations=translations,
+    )
+    return JsonResponse({"source": source_option_payload(source)})
+
+
+def _json_string(value: object) -> str:
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, int):
+        return str(value)
+    return ""
+
+
+def _source_form(
+    request: HttpRequest,
+    form: SourceDetailsForm,
+    source: Source | None = None,
+    all_sources=None,
+    all_tags=None,
+):
+    slug = form["slug"].value() or ""
+    name_en = form["name_en"].value() or ""
+    name_hr = form["name_hr"].value() or ""
+    description_en = form["description_en"].value() or ""
+    parent_id = form["parent"].value()
+    order = form["order"].value() if form["order"].value() is not None else "0"
+    selected_tags = set(
+        Tag.objects.filter(slug__in=form["tags"].value() or []).values_list("pk", flat=True)
+    )
+
+    return (
+        <form method="post" class="form admin-form">
+            <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+            <input type="hidden" name="action" value="details" />
+            <div class="form-field">
+                <label for="slug">{_("Slug")}</label>
+                <input type="text" name="slug" id="slug" value={slug} required={True} />
+            </div>
+            <div class="form-field">
+                <label for="name_en">{_("Name (EN)")}</label>
+                <input type="text" name="name_en" id="name_en" value={name_en} required={True} />
+            </div>
+            <div class="form-field">
+                <label for="name_hr">{_("Name (HR)")}</label>
+                <input type="text" name="name_hr" id="name_hr" value={name_hr} />
+            </div>
+            <div class="form-field">
+                <label for="description_en">{_("Description (EN)")}</label>
+                <textarea name="description_en" id="description_en" rows="3">
+                    {description_en}
+                </textarea>
+            </div>
+            <div class="form-field">
+                <label for="parent">{_("Parent")}</label>
+                <select name="parent" id="parent">
+                    <option value="">— None —</option>
+                    {(
+                        <option value={str(s.pk)} selected={s.pk == parent_id}>{label}</option>
+                    ) for s, label in source_options_with_hierarchy_labels(list(all_sources or []))}
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="order">{_("Order")}</label>
+                <input type="number" name="order" id="order" value={order} />
+            </div>
+            <div class="form-field">
+                <label>{_("Tags")}</label>
+                <TagPickerField
+                    name="tags"
+                    tags={all_tags}
+                    selected_ids={selected_tags}
+                    allow_new={False}
+                />
+            </div>
+            <button type="submit" class="btn">{_("Save")}</button>
+        </form>
+    )
+
+
+def _children_form(request: HttpRequest, source: Source, children: list[Source]):
+    rows = children + [None, None, None, None]
+    return (
+        <form method="post" class="form-stack">
+            <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+            <input type="hidden" name="action" value="children" />
+            <div class="table-wrapper">
+                <table class="table source-children-table">
+                    <thead>
+                        <tr>
+                            <th>{_("Slug")}</th>
+                            <th>{_("Name (EN)")}</th>
+                            <th>{_("Name (HR)")}</th>
+                            <th>{_("Order")}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {_child_row(child, i) for i, child in enumerate(rows)}
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn">{_("Save children")}</button>
+            </div>
+        </form>
+    )
+
+
+def _child_row(child: Source | None, index: int):
+    child_id = str(child.pk) if child else ""
+    slug = child.slug if child else ""
+    en = child.translations.get("en", {}) if child and child.translations else {}
+    hr = child.translations.get("hr", {}) if child and child.translations else {}
+    name_en = en.get("name", "")
+    name_hr = hr.get("name", "")
+    order = str(child.order) if child else str((index + 1) * 10)
+    return (
+        <tr>
+            <td>
+                <input type="hidden" name="child_id" value={child_id} />
+                <input type="text" name="child_slug" value={slug} />
+            </td>
+            <td><input type="text" name="child_name_en" value={name_en} /></td>
+            <td><input type="text" name="child_name_hr" value={name_hr} /></td>
+            <td><input type="number" name="child_order" value={order} /></td>
+        </tr>
+    )

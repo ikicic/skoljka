@@ -1,0 +1,246 @@
+from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
+from django.utils.text import slugify
+from django.utils.translation import gettext as _
+from django.views.decorators.http import require_POST
+
+from skoljka.apps.lists.components import list_index_table
+from skoljka.apps.lists.forms import ProblemListForm
+from skoljka.apps.lists.models import ProblemList
+from skoljka.apps.lists.selectors import (
+    ordered_list_problem_queryset,
+    visible_problem_counts,
+    visible_solved_problem_counts,
+)
+from skoljka.apps.problems.bulk_edit import ProblemBulkEditSet, render_problem_bulk_edit, save_problem_bulk_edit
+from skoljka.apps.problems.export_views import (
+    ProblemPdfExportSpec,
+    problem_export_queryset,
+    problem_pdf_export_view,
+)
+from skoljka.apps.problems.models import Problem
+from skoljka.components.layout import Page
+from skoljka.components.forms import csrf_input, error_list
+from skoljka.apps.problems.components import ProblemsTable
+from skoljka.apps.tracking.favorites import favorite_problem_list_ids
+from skoljka.utils.auth import login_required_view
+from skoljka.utils.px_view import px_view
+
+
+@px_view
+def list_index(request: HttpRequest):
+    if request.user.is_authenticated:
+        my_lists = list(ProblemList.objects.for_user(request.user, "edit"))
+    else:
+        my_lists = []
+    public_lists = list(
+        ProblemList.objects.for_user(request.user)
+        .filter(is_public=True)
+        .select_related("created_by")[:20]
+    )
+    table_lists = my_lists + public_lists
+    counts = visible_problem_counts(table_lists, request.user)
+    solved_counts = visible_solved_problem_counts(table_lists, request.user)
+    favorite_ids = favorite_problem_list_ids(request.user, [pl.pk for pl in table_lists])
+
+    return (
+        <Page
+            request={request}
+            title={_("Lists")}
+            show_title={False}
+            actions={_list_index_actions(request)}
+        >
+            {my_lists and (
+                <div class="section-card">
+                    <h2>{_("My Lists")}</h2>
+                    {list_index_table(my_lists, counts, solved_counts, favorite_ids, request.user)}
+                </div>
+            )}
+            {public_lists and (
+                <div class="section-card">
+                    <h2>{_("Public Lists")}</h2>
+                    {list_index_table(public_lists, counts, solved_counts, favorite_ids, request.user, show_owner=True)}
+                </div>
+            )}
+        </Page>
+    )
+
+
+def _list_index_actions(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return None
+    return <a href={reverse("list_create")} class="btn btn-sm">{_("New list")}</a>
+
+
+@px_view
+def list_detail(request: HttpRequest, pk: int):
+    pl = get_object_or_404(ProblemList.objects.for_user(request.user), pk=pk)
+
+    problems = ordered_list_problem_queryset(pl, request.user)
+    can_edit = pl.user_has_perm(request.user, "edit")
+
+    return (
+        <Page request={request} title={pl.title} actions={can_edit and _list_detail_actions(pl)}>
+            {pl.description and <p>{pl.description}</p>}
+            <ProblemsTable
+                queryset={problems}
+                request={request}
+                view_key="list"
+                export_url={reverse("list_pdf", kwargs={"pk": pl.pk})}
+            />
+        </Page>
+    )
+
+
+@px_view
+@login_required_view
+def list_pdf(request: HttpRequest, pk: int):
+    pl = get_object_or_404(ProblemList.objects.for_user(request.user), pk=pk)
+    problems = list(problem_export_queryset(ordered_list_problem_queryset(pl, request.user)))
+    return problem_pdf_export_view(
+        request,
+        ProblemPdfExportSpec(problems, pl.title, f"{slugify(pl.title) or 'list'}.pdf"),
+    )
+
+
+def _list_detail_actions(pl: ProblemList):
+    return (
+        <>
+            <a href={reverse("list_edit", kwargs={"pk": pl.pk})} class="btn btn-sm">{_("Edit")}</a>
+            <a href={reverse("list_bulk_edit", kwargs={"pk": pl.pk})} class="btn btn-sm">
+                {_("Bulk edit")}
+            </a>
+        </>
+    )
+
+
+@px_view
+@login_required_view
+def list_create(request: HttpRequest):
+    form = ProblemListForm()
+    if request.method == "POST":
+        form = ProblemListForm(request.POST)
+        if form.is_valid():
+            pl = form.save(request.user)
+            return redirect("list_edit", pk=pl.pk)
+
+    return (
+        <Page request={request} title={_("New List")}>
+            {error_list(form.non_field_errors())}
+            {error_list([str(error) for field_errors in form.errors.values() for error in field_errors])}
+            {_list_form(request, form=form)}
+        </Page>
+    )
+
+
+@px_view
+@login_required_view
+def list_edit_details(request: HttpRequest, pk: int):
+    pl = get_object_or_404(ProblemList.objects.for_user(request.user), pk=pk)
+    if not pl.user_has_perm(request.user, "edit"):
+        return HttpResponse(_("Forbidden"), status=403)
+    form = ProblemListForm(initial={
+        "title": pl.title,
+        "description": pl.description,
+        "public": pl.is_public,
+    })
+    if request.method == "POST":
+        form = ProblemListForm(request.POST)
+        if form.is_valid():
+            form.save(request.user, instance=pl)
+            return redirect("list_edit", pk=pl.pk)
+
+    return (
+        <Page
+            request={request}
+            title={_("Edit details: %(title)s") % {"title": pl.title}}
+            actions={_list_edit_details_actions(pl)}
+        >
+            {error_list(form.non_field_errors())}
+            {error_list([str(error) for field_errors in form.errors.values() for error in field_errors])}
+            {_list_form(request, pl=pl, form=form)}
+        </Page>
+    )
+
+
+@px_view
+@login_required_view
+def list_bulk_edit(request: HttpRequest, pk: int):
+    pl = get_object_or_404(ProblemList.objects.for_user(request.user), pk=pk)
+    if not pl.user_has_perm(request.user, "edit"):
+        return HttpResponse(_("Forbidden"), status=403)
+
+    items = list(
+        pl.items
+        .select_related("problem", "problem__source")
+        .prefetch_related("problem__tags", "problem__content")
+        .order_by("order", "id")
+    )
+    problems = [item.problem for item in items]
+    editable_ids = set(
+        Problem.objects.for_user(request.user, "edit")
+        .filter(pk__in=[p.pk for p in problems])
+        .values_list("pk", flat=True)
+    )
+    if editable_ids != {p.pk for p in problems}:
+        return HttpResponse(_("Forbidden"), status=403)
+
+    return render_problem_bulk_edit(request, ProblemBulkEditSet(
+        title=_("Bulk edit: %(title)s") % {"title": pl.title},
+        context_label=_("List: %(title)s") % {"title": pl.title},
+        back_url=pl.get_absolute_url(),
+        save_url=reverse("list_bulk_edit_save", kwargs={"pk": pl.pk}),
+        problems=problems,
+    ))
+
+
+@require_POST
+@login_required_view
+def list_bulk_edit_save(request: HttpRequest, pk: int):
+    pl = get_object_or_404(ProblemList.objects.for_user(request.user), pk=pk)
+    if not pl.user_has_perm(request.user, "edit"):
+        return JsonResponse({"error": _("Forbidden")}, status=403)
+
+    list_problem_ids = set(pl.items.values_list("problem_id", flat=True))
+    return save_problem_bulk_edit(request, allowed_problem_ids=list_problem_ids, redirect_url=pl.get_absolute_url())
+
+
+def _list_edit_details_actions(pl: ProblemList):
+    return (
+        <a href={pl.get_absolute_url()} class="btn btn-sm btn-secondary">
+            {_("Back")}
+        </a>
+    )
+
+
+def _list_form(request: HttpRequest, pl: ProblemList | None = None, form: ProblemListForm | None = None):
+    form = form or ProblemListForm(
+        initial={"title": pl.title, "description": pl.description, "public": pl.is_public} if pl else None
+    )
+    title = form["title"].value() or ""
+    description = form["description"].value() or ""
+    is_public = form["public"].value()
+
+    return (
+        <form method="post" class={"form admin-form card" + (" list-edit-form" if pl else "")}>
+            {csrf_input(request)}
+            <input type="hidden" name="action" value={pl and "update"} />
+            <div class="form-field">
+                <label for="title">{_("Title")}</label>
+                <input type="text" name="title" id="title" value={title} required={True} />
+            </div>
+            <div class="form-field">
+                <label for="description">{_("Description")}</label>
+                <textarea name="description" id="description" rows="2">{description}</textarea>
+            </div>
+            <div class="form-field">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="public" checked={is_public} />
+                    {" "}
+                    {_("Public")}
+                </label>
+            </div>
+            <button type="submit" class="btn btn-sm">{_("Update") if pl else _("Create")}</button>
+        </form>
+    )

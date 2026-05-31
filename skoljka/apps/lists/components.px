@@ -1,0 +1,87 @@
+from django.utils.translation import gettext as _
+
+from skoljka.apps.lists.models import ProblemList
+from skoljka.apps.tracking.favorites import favorite_problem_list_button
+
+
+def list_index_table(
+    lists: list[ProblemList],
+    counts: dict[int, int],
+    solved_counts: dict[int, int],
+    favorite_ids: set[int],
+    user,
+    *,
+    show_owner: bool = False,
+):
+    show_solved = user.is_authenticated
+    show_favorites = user.is_authenticated
+    return (
+        <table class="table problem-list-table">
+            <thead>
+                <tr>
+                    <th>{_("Name")}</th>
+                    <th class="col-progress">{_("Solved") if show_solved else _("Problems")}</th>
+                    {show_favorites and <th class="favorite-col"></th>}
+                </tr>
+            </thead>
+            <tbody>
+                {
+                    _list_index_row(
+                        pl,
+                        counts,
+                        solved_counts,
+                        favorite_ids,
+                        show_solved,
+                        show_favorites,
+                        show_owner=show_owner,
+                    )
+                    for pl in lists
+                }
+            </tbody>
+        </table>
+    )
+
+
+def _list_index_row(
+    pl: ProblemList,
+    counts: dict[int, int],
+    solved_counts: dict[int, int],
+    favorite_ids: set[int],
+    show_solved: bool,
+    show_favorites: bool,
+    *,
+    show_owner: bool = False,
+):
+    total = counts.get(pl.pk, 0)
+    solved = solved_counts.get(pl.pk, 0)
+    pct = int(100 * solved / total) if total > 0 else 0
+    return (
+        <tr>
+            <td class="list-name-cell">
+                <a href={pl.get_absolute_url()}>{pl.title}</a>
+                {show_owner and pl.created_by and <span class="text-muted">{" by " + pl.created_by.username}</span>}
+            </td>
+            <td class="col-progress">
+                {show_solved and (
+                    <div class="progress-inner">
+                        <span class="progress-text">
+                            <span class="solved-count">{solved}</span>
+                            /
+                            {total}
+                        </span>
+                        <span class="progress-bar">
+                            <span class="progress-bar-fill" style={f"width:{pct}%"}></span>
+                        </span>
+                    </div>
+                )}
+                {not show_solved and (
+                    <span class="progress-text">{str(total)}</span>
+                )}
+            </td>
+            {show_favorites and (
+                <td class="favorite-col">
+                    {favorite_problem_list_button(pl, favorite_ids)}
+                </td>
+            )}
+        </tr>
+    )

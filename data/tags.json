@@ -1,0 +1,1127 @@
+{
+  "tags": [
+    {
+      "slug": "algebra",
+      "kind": "topic",
+      "translations": {
+        "en": "Algebra",
+        "hr": "Algebra"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "geometry",
+      "kind": "topic",
+      "translations": {
+        "en": "Geometry",
+        "hr": "Geometrija"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "number-theory",
+      "kind": "topic",
+      "translations": {
+        "en": "Number theory",
+        "hr": "Teorija brojeva"
+      },
+      "descriptions": {},
+      "short_translations": {
+        "en": "NT",
+        "hr": "TB"
+      }
+    },
+    {
+      "slug": "combinatorics",
+      "kind": "topic",
+      "translations": {
+        "en": "Combinatorics",
+        "hr": "Kombinatorika"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "equations",
+      "kind": "topic",
+      "parent_slug": "algebra",
+      "translations": {
+        "en": "Equations",
+        "hr": "Jednadžbe"
+      },
+      "descriptions": {
+        "en": "Solving or proving properties of equations.",
+        "hr": "Rješavanje ili dokazivanje svojstava jednadžbi."
+      },
+      "short_translations": {
+        "en": "Eq",
+        "hr": "Jednadžbe"
+      }
+    },
+    {
+      "slug": "systems-of-equations",
+      "kind": "topic",
+      "parent_slug": "algebra",
+      "translations": {
+        "en": "Systems of equations",
+        "hr": "Sustavi jednadžbi"
+      },
+      "descriptions": {
+        "en": "Multiple equations in multiple unknowns.",
+        "hr": "Više jednadžbi s više nepoznanica."
+      },
+      "short_translations": {
+        "en": "Systems",
+        "hr": "Sustavi"
+      }
+    },
+    {
+      "slug": "functional-equations",
+      "kind": "topic",
+      "parent_slug": "algebra",
+      "translations": {
+        "en": "Functional equations",
+        "hr": "Funkcijske jednadžbe"
+      },
+      "descriptions": {
+        "en": "Equations whose unknowns are functions.",
+        "hr": "Jednadžbe u kojima su nepoznanice funkcije."
+      },
+      "short_translations": {
+        "en": "Functional",
+        "hr": "Funkcijske"
+      }
+    },
+    {
+      "slug": "functions",
+      "kind": "topic",
+      "parent_slug": "algebra",
+      "translations": {
+        "en": "Functions",
+        "hr": "Funkcije"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "inequalities",
+      "kind": "topic",
+      "parent_slug": "algebra",
+      "translations": {
+        "en": "Inequalities",
+        "hr": "Nejednakosti"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "sequences",
+      "kind": "topic",
+      "parent_slug": "algebra",
+      "translations": {
+        "en": "Sequences",
+        "hr": "Nizovi"
+      },
+      "descriptions": {},
+      "short_translations": {
+        "en": "Seq",
+        "hr": "Nizovi"
+      }
+    },
+    {
+      "slug": "recurrences",
+      "kind": "topic",
+      "parent_slug": "sequences",
+      "translations": {
+        "en": "Recurrences",
+        "hr": "Rekurzije"
+      },
+      "descriptions": {
+        "en": "Sequences defined recursively.",
+        "hr": "Nizovi zadani rekurzivno."
+      }
+    },
+    {
+      "slug": "polynomials",
+      "kind": "topic",
+      "parent_slug": "algebra",
+      "translations": {
+        "en": "Polynomials",
+        "hr": "Polinomi"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "quadratics",
+      "kind": "topic",
+      "parent_slug": "polynomials",
+      "translations": {
+        "en": "Quadratics",
+        "hr": "Kvadratne jednadžbe"
+      },
+      "descriptions": {
+        "en": "Quadratic equations, functions, or expressions.",
+        "hr": "Kvadratne jednadžbe, funkcije ili izrazi."
+      },
+      "short_translations": {
+        "en": "Quadratics",
+        "hr": "Kvadratna"
+      }
+    },
+    {
+      "slug": "complex-numbers",
+      "kind": "topic",
+      "parent_slug": "algebra",
+      "translations": {
+        "en": "Complex numbers",
+        "hr": "Kompleksni brojevi"
+      },
+      "descriptions": {},
+      "short_translations": {
+        "en": "Complex",
+        "hr": "Kompleksni"
+      }
+    },
+    {
+      "slug": "logarithms",
+      "kind": "topic",
+      "parent_slug": "algebra",
+      "translations": {
+        "en": "Logarithms",
+        "hr": "Logaritmi"
+      },
+      "descriptions": {},
+      "short_translations": {
+        "en": "Log",
+        "hr": "Log"
+      }
+    },
+    {
+      "slug": "exponentials",
+      "kind": "topic",
+      "parent_slug": "algebra",
+      "translations": {
+        "en": "Exponentials",
+        "hr": "Eksponencijalni izrazi"
+      },
+      "descriptions": {
+        "en": "Exponential equations or expressions.",
+        "hr": "Eksponencijalne jednadžbe ili izrazi."
+      },
+      "short_translations": {
+        "en": "Exp",
+        "hr": "Exp"
+      }
+    },
+    {
+      "slug": "absolute-value",
+      "kind": "topic",
+      "parent_slug": "algebra",
+      "translations": {
+        "en": "Absolute value",
+        "hr": "Apsolutna vrijednost"
+      },
+      "descriptions": {},
+      "short_translations": {
+        "en": "Abs",
+        "hr": "Abs"
+      }
+    },
+    {
+      "slug": "sums",
+      "kind": "topic",
+      "parent_slug": "algebra",
+      "translations": {
+        "en": "Sums",
+        "hr": "Sume"
+      },
+      "descriptions": {
+        "en": "Finite sums or summation identities.",
+        "hr": "Konačne sume ili identiteti sa sumama."
+      }
+    },
+    {
+      "slug": "roots-and-radicals",
+      "kind": "topic",
+      "parent_slug": "algebra",
+      "translations": {
+        "en": "Roots and radicals",
+        "hr": "Korijeni i radikali"
+      },
+      "descriptions": {},
+      "short_translations": {
+        "en": "Radicals",
+        "hr": "Korijeni"
+      }
+    },
+    {
+      "slug": "triangle",
+      "kind": "topic",
+      "parent_slug": "geometry",
+      "translations": {
+        "en": "Triangle",
+        "hr": "Trokut"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "right-triangle",
+      "kind": "topic",
+      "parent_slug": "triangle",
+      "translations": {
+        "en": "Right triangle",
+        "hr": "Pravokutni trokut"
+      },
+      "descriptions": {},
+      "short_translations": {
+        "en": "Right triangle",
+        "hr": "Pravokutni"
+      }
+    },
+    {
+      "slug": "isosceles-triangle",
+      "kind": "topic",
+      "parent_slug": "triangle",
+      "translations": {
+        "en": "Isosceles triangle",
+        "hr": "Jednakokračni trokut"
+      },
+      "descriptions": {},
+      "short_translations": {
+        "en": "Isosceles",
+        "hr": "Jednakokračni"
+      }
+    },
+    {
+      "slug": "equilateral-triangle",
+      "kind": "topic",
+      "parent_slug": "triangle",
+      "translations": {
+        "en": "Equilateral triangle",
+        "hr": "Jednakostranični trokut"
+      },
+      "descriptions": {},
+      "short_translations": {
+        "en": "Equilateral",
+        "hr": "Jednakostranični"
+      }
+    },
+    {
+      "slug": "circle",
+      "kind": "topic",
+      "parent_slug": "geometry",
+      "translations": {
+        "en": "Circle",
+        "hr": "Kružnica"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "incircle",
+      "kind": "topic",
+      "parent_slug": "circle",
+      "translations": {
+        "en": "Incircle",
+        "hr": "Upisana kružnica"
+      },
+      "descriptions": {
+        "en": "Circle tangent to all sides of a triangle or polygon.",
+        "hr": "Kružnica tangentna na sve stranice trokuta ili mnogokuta."
+      },
+      "short_translations": {
+        "en": "Incircle",
+        "hr": "Upisana"
+      }
+    },
+    {
+      "slug": "circumcircle",
+      "kind": "topic",
+      "parent_slug": "circle",
+      "translations": {
+        "en": "Circumcircle",
+        "hr": "Opisana kružnica"
+      },
+      "descriptions": {
+        "en": "Circle passing through vertices of a triangle or polygon.",
+        "hr": "Kružnica kroz vrhove trokuta ili mnogokuta."
+      },
+      "short_translations": {
+        "en": "Circumcircle",
+        "hr": "Opisana"
+      }
+    },
+    {
+      "slug": "tangent",
+      "kind": "topic",
+      "parent_slug": "circle",
+      "translations": {
+        "en": "Tangent",
+        "hr": "Tangenta"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "polygon",
+      "kind": "topic",
+      "parent_slug": "geometry",
+      "translations": {
+        "en": "Polygon",
+        "hr": "Mnogokut"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "quadrilateral",
+      "kind": "topic",
+      "parent_slug": "polygon",
+      "translations": {
+        "en": "Quadrilateral",
+        "hr": "Četverokut"
+      },
+      "descriptions": {},
+      "short_translations": {
+        "en": "Quad",
+        "hr": "Četverokut"
+      }
+    },
+    {
+      "slug": "cyclic-quadrilateral",
+      "kind": "topic",
+      "parent_slug": "quadrilateral",
+      "translations": {
+        "en": "Cyclic quadrilateral",
+        "hr": "Tetivni četverokut"
+      },
+      "descriptions": {},
+      "short_translations": {
+        "en": "Cyclic quad",
+        "hr": "Tetivni"
+      }
+    },
+    {
+      "slug": "parallelogram",
+      "kind": "topic",
+      "parent_slug": "quadrilateral",
+      "translations": {
+        "en": "Parallelogram",
+        "hr": "Paralelogram"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "trapezoid",
+      "kind": "topic",
+      "parent_slug": "quadrilateral",
+      "translations": {
+        "en": "Trapezoid",
+        "hr": "Trapez"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "square",
+      "kind": "topic",
+      "parent_slug": "quadrilateral",
+      "translations": {
+        "en": "Square",
+        "hr": "Kvadrat"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "angles",
+      "kind": "topic",
+      "parent_slug": "geometry",
+      "translations": {
+        "en": "Angles",
+        "hr": "Kutovi"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "lengths",
+      "kind": "topic",
+      "parent_slug": "geometry",
+      "translations": {
+        "en": "Lengths",
+        "hr": "Duljine"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "area",
+      "kind": "topic",
+      "parent_slug": "geometry",
+      "translations": {
+        "en": "Area",
+        "hr": "Površina"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "similarity",
+      "kind": "topic",
+      "parent_slug": "geometry",
+      "translations": {
+        "en": "Similarity",
+        "hr": "Sličnost"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "collinear",
+      "kind": "topic",
+      "parent_slug": "geometry",
+      "translations": {
+        "en": "Collinear",
+        "hr": "Kolinearne"
+      },
+      "descriptions": {
+        "en": "Proving points lie on one line.",
+        "hr": "Dokazivanje da točke leže na istom pravcu."
+      }
+    },
+    {
+      "slug": "concyclic",
+      "kind": "topic",
+      "parent_slug": "geometry",
+      "translations": {
+        "en": "Concyclic",
+        "hr": "Konciklične"
+      },
+      "descriptions": {
+        "en": "Proving points lie on one circle.",
+        "hr": "Dokazivanje da točke leže na istoj kružnici."
+      }
+    },
+    {
+      "slug": "orthocenter",
+      "kind": "topic",
+      "parent_slug": "triangle",
+      "translations": {
+        "en": "Orthocenter",
+        "hr": "Ortocentar"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "centroid",
+      "kind": "topic",
+      "parent_slug": "triangle",
+      "translations": {
+        "en": "Centroid",
+        "hr": "Težište"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "perpendicularity",
+      "kind": "topic",
+      "parent_slug": "geometry",
+      "translations": {
+        "en": "Perpendicularity",
+        "hr": "Okomitost"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "coordinate-geometry",
+      "kind": "topic",
+      "parent_slug": "geometry",
+      "translations": {
+        "en": "Coordinate geometry",
+        "hr": "Koordinatna geometrija"
+      },
+      "descriptions": {
+        "en": "Geometry using coordinates.",
+        "hr": "Geometrija pomoću koordinata."
+      },
+      "short_translations": {
+        "en": "Coord",
+        "hr": "Koordinate"
+      }
+    },
+    {
+      "slug": "solid-geometry",
+      "kind": "topic",
+      "parent_slug": "geometry",
+      "translations": {
+        "en": "Solid geometry",
+        "hr": "Stereometrija"
+      },
+      "descriptions": {
+        "en": "Three-dimensional geometry.",
+        "hr": "Trodimenzionalna geometrija."
+      },
+      "short_translations": {
+        "en": "3D",
+        "hr": "3D"
+      }
+    },
+    {
+      "slug": "cube",
+      "kind": "topic",
+      "parent_slug": "solid-geometry",
+      "translations": {
+        "en": "Cube",
+        "hr": "Kocka"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "tetrahedron",
+      "kind": "topic",
+      "parent_slug": "solid-geometry",
+      "translations": {
+        "en": "Tetrahedron",
+        "hr": "Tetraedar"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "divisibility",
+      "kind": "topic",
+      "parent_slug": "number-theory",
+      "translations": {
+        "en": "Divisibility",
+        "hr": "Djeljivost"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "primes",
+      "kind": "topic",
+      "parent_slug": "number-theory",
+      "translations": {
+        "en": "Primes",
+        "hr": "Prosti brojevi"
+      },
+      "descriptions": {},
+      "short_translations": {
+        "en": "Primes",
+        "hr": "Prosti"
+      }
+    },
+    {
+      "slug": "composite-numbers",
+      "kind": "topic",
+      "parent_slug": "number-theory",
+      "translations": {
+        "en": "Composite numbers",
+        "hr": "Složeni brojevi"
+      },
+      "descriptions": {},
+      "short_translations": {
+        "en": "Composite",
+        "hr": "Složeni"
+      }
+    },
+    {
+      "slug": "digits",
+      "kind": "topic",
+      "parent_slug": "number-theory",
+      "translations": {
+        "en": "Digits",
+        "hr": "Znamenke"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "diophantine-equations",
+      "kind": "topic",
+      "parent_slug": "number-theory",
+      "translations": {
+        "en": "Diophantine equations",
+        "hr": "Diofantske jednadžbe"
+      },
+      "descriptions": {
+        "en": "Equations over integers.",
+        "hr": "Jednadžbe nad cijelim brojevima."
+      },
+      "short_translations": {
+        "en": "Diophantine",
+        "hr": "Diofantska"
+      }
+    },
+    {
+      "slug": "gcd",
+      "kind": "topic",
+      "parent_slug": "number-theory",
+      "translations": {
+        "en": "GCD",
+        "hr": "NZD"
+      },
+      "descriptions": {
+        "en": "Greatest common divisor.",
+        "hr": "Najveći zajednički djelitelj."
+      }
+    },
+    {
+      "slug": "lcm",
+      "kind": "topic",
+      "parent_slug": "number-theory",
+      "translations": {
+        "en": "LCM",
+        "hr": "NZV"
+      },
+      "descriptions": {
+        "en": "Least common multiple.",
+        "hr": "Najmanji zajednički višekratnik."
+      }
+    },
+    {
+      "slug": "modular-arithmetic",
+      "kind": "topic",
+      "parent_slug": "number-theory",
+      "translations": {
+        "en": "Modular arithmetic",
+        "hr": "Kongruencije"
+      },
+      "descriptions": {
+        "en": "Congruences and arithmetic modulo n.",
+        "hr": "Kongruencije i računanje modulo n."
+      },
+      "short_translations": {
+        "en": "Mod",
+        "hr": "Mod"
+      }
+    },
+    {
+      "slug": "remainders",
+      "kind": "topic",
+      "parent_slug": "number-theory",
+      "translations": {
+        "en": "Remainders",
+        "hr": "Ostatci"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "parity",
+      "kind": "topic",
+      "parent_slug": "number-theory",
+      "translations": {
+        "en": "Parity",
+        "hr": "Parnost"
+      },
+      "descriptions": {
+        "en": "Even and odd numbers.",
+        "hr": "Parni i neparni brojevi."
+      }
+    },
+    {
+      "slug": "relatively-prime",
+      "kind": "topic",
+      "parent_slug": "number-theory",
+      "translations": {
+        "en": "Relatively prime",
+        "hr": "Relativno prosti"
+      },
+      "descriptions": {},
+      "short_translations": {
+        "en": "Coprime",
+        "hr": "Rel. prosti"
+      }
+    },
+    {
+      "slug": "factorial",
+      "kind": "topic",
+      "parent_slug": "number-theory",
+      "translations": {
+        "en": "Factorial",
+        "hr": "Faktorijel"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "powers",
+      "kind": "topic",
+      "parent_slug": "number-theory",
+      "translations": {
+        "en": "Powers",
+        "hr": "Potencije"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "rational-numbers",
+      "kind": "topic",
+      "parent_slug": "number-theory",
+      "translations": {
+        "en": "Rational numbers",
+        "hr": "Racionalni brojevi"
+      },
+      "descriptions": {},
+      "short_translations": {
+        "en": "Rational",
+        "hr": "Racionalni"
+      }
+    },
+    {
+      "slug": "counting",
+      "kind": "topic",
+      "parent_slug": "combinatorics",
+      "translations": {
+        "en": "Counting",
+        "hr": "Prebrojavanje"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "permutations",
+      "kind": "topic",
+      "parent_slug": "combinatorics",
+      "translations": {
+        "en": "Permutations",
+        "hr": "Permutacije"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "combinations",
+      "kind": "topic",
+      "parent_slug": "combinatorics",
+      "translations": {
+        "en": "Combinations",
+        "hr": "Kombinacije"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "graph-theory",
+      "kind": "topic",
+      "parent_slug": "combinatorics",
+      "translations": {
+        "en": "Graph theory",
+        "hr": "Teorija grafova"
+      },
+      "descriptions": {
+        "en": "Vertices, edges, paths, trees, or graph colorings.",
+        "hr": "Vrhovi, bridovi, putevi, stabla ili bojanja grafova."
+      },
+      "short_translations": {
+        "en": "Graphs",
+        "hr": "Grafovi"
+      }
+    },
+    {
+      "slug": "coloring",
+      "kind": "topic",
+      "parent_slug": "combinatorics",
+      "translations": {
+        "en": "Coloring",
+        "hr": "Bojanje"
+      },
+      "descriptions": {
+        "en": "Objects assigned colors under constraints.",
+        "hr": "Objekti kojima se dodjeljuju boje uz uvjete."
+      }
+    },
+    {
+      "slug": "tiling",
+      "kind": "topic",
+      "parent_slug": "combinatorics",
+      "translations": {
+        "en": "Tiling",
+        "hr": "Popločavanje"
+      },
+      "descriptions": {
+        "en": "Covering boards or regions with tiles.",
+        "hr": "Prekrivanje ploča ili područja pločicama."
+      }
+    },
+    {
+      "slug": "board",
+      "kind": "topic",
+      "parent_slug": "combinatorics",
+      "translations": {
+        "en": "Board",
+        "hr": "Ploča"
+      },
+      "descriptions": {
+        "en": "Grid or board problems.",
+        "hr": "Zadaci na mreži ili ploči."
+      }
+    },
+    {
+      "slug": "games",
+      "kind": "topic",
+      "parent_slug": "combinatorics",
+      "translations": {
+        "en": "Games",
+        "hr": "Igre"
+      },
+      "descriptions": {
+        "en": "Two-player games, moves, or winning strategies.",
+        "hr": "Igre za dva igrača, potezi ili pobjedničke strategije."
+      }
+    },
+    {
+      "slug": "probability",
+      "kind": "topic",
+      "parent_slug": "combinatorics",
+      "translations": {
+        "en": "Probability",
+        "hr": "Vjerojatnost"
+      },
+      "descriptions": {}
+    },
+    {
+      "slug": "tables",
+      "kind": "topic",
+      "parent_slug": "combinatorics",
+      "translations": {
+        "en": "Tables",
+        "hr": "Tablice"
+      },
+      "descriptions": {
+        "en": "Problems involving arrays or tables of entries.",
+        "hr": "Zadaci s poljima ili tablicama vrijednosti."
+      }
+    },
+    {
+      "slug": "optimization",
+      "kind": "topic",
+      "translations": {
+        "en": "Optimization",
+        "hr": "Optimizacija"
+      },
+      "descriptions": {
+        "en": "Maximization, minimization, or best possible bounds.",
+        "hr": "Maksimizacija, minimizacija ili najbolje moguće granice."
+      }
+    },
+    {
+      "slug": "construction",
+      "kind": "topic",
+      "translations": {
+        "en": "Construction",
+        "hr": "Konstrukcija"
+      },
+      "descriptions": {
+        "en": "Constructing an example satisfying the conditions.",
+        "hr": "Konstrukcija primjera koji zadovoljava uvjete."
+      }
+    },
+    {
+      "slug": "induction",
+      "kind": "technique",
+      "hidden": true,
+      "translations": {
+        "en": "Induction",
+        "hr": "Indukcija"
+      },
+      "descriptions": {
+        "en": "Solution naturally uses mathematical induction.",
+        "hr": "Rješenje prirodno koristi matematičku indukciju."
+      }
+    },
+    {
+      "slug": "pigeonhole-principle",
+      "kind": "technique",
+      "hidden": true,
+      "translations": {
+        "en": "Pigeonhole principle",
+        "hr": "Dirichletov princip"
+      },
+      "descriptions": {
+        "en": "More objects than boxes force a collision.",
+        "hr": "Više objekata nego kutija prisiljava ponavljanje."
+      },
+      "short_translations": {
+        "en": "Pigeonhole",
+        "hr": "Dirichlet"
+      }
+    },
+    {
+      "slug": "invariant",
+      "kind": "technique",
+      "hidden": true,
+      "translations": {
+        "en": "Invariant",
+        "hr": "Invarijanta"
+      },
+      "descriptions": {
+        "en": "A quantity or property remains unchanged.",
+        "hr": "Veličina ili svojstvo ostaje nepromijenjeno."
+      }
+    },
+    {
+      "slug": "monovariant",
+      "kind": "technique",
+      "hidden": true,
+      "translations": {
+        "en": "Monovariant",
+        "hr": "Monovarijanta"
+      },
+      "descriptions": {
+        "en": "A quantity changes monotonically until termination.",
+        "hr": "Veličina se monotono mijenja do završetka."
+      }
+    },
+    {
+      "slug": "extremal-principle",
+      "kind": "technique",
+      "hidden": true,
+      "translations": {
+        "en": "Extremal principle",
+        "hr": "Princip ekstrema"
+      },
+      "descriptions": {
+        "en": "Choose a smallest, largest, or otherwise extremal object.",
+        "hr": "Odabir najmanjeg, najvećeg ili ekstremnog objekta."
+      },
+      "short_translations": {
+        "en": "Extremal",
+        "hr": "Ekstrem"
+      }
+    },
+    {
+      "slug": "bijection",
+      "kind": "technique",
+      "hidden": true,
+      "translations": {
+        "en": "Bijection",
+        "hr": "Bijekcija"
+      },
+      "descriptions": {
+        "en": "Counting by a one-to-one correspondence.",
+        "hr": "Prebrojavanje pomoću jednoznačne korespondencije."
+      }
+    },
+    {
+      "slug": "angle-chasing",
+      "kind": "technique",
+      "hidden": true,
+      "translations": {
+        "en": "Angle chasing",
+        "hr": "Angle chasing"
+      },
+      "descriptions": {
+        "en": "Geometry solution driven by angle equalities.",
+        "hr": "Geometrijsko rješenje vođeno jednakostima kutova."
+      }
+    },
+    {
+      "slug": "ceva",
+      "kind": "technique",
+      "hidden": true,
+      "translations": {
+        "en": "Ceva",
+        "hr": "Ceva"
+      },
+      "descriptions": {
+        "en": "Use of Ceva's theorem.",
+        "hr": "Korištenje Cevina poučka."
+      }
+    },
+    {
+      "slug": "menelaus",
+      "kind": "technique",
+      "hidden": true,
+      "translations": {
+        "en": "Menelaus",
+        "hr": "Menelaj"
+      },
+      "descriptions": {
+        "en": "Use of Menelaus' theorem.",
+        "hr": "Korištenje Menelajeva poučka."
+      }
+    },
+    {
+      "slug": "vieta-jumping",
+      "kind": "technique",
+      "hidden": true,
+      "translations": {
+        "en": "Vieta jumping",
+        "hr": "Vieteov skok"
+      },
+      "descriptions": {
+        "en": "Number theory descent using Vieta's formulas.",
+        "hr": "Silaz u teoriji brojeva pomoću Vieteovih formula."
+      },
+      "short_translations": {
+        "en": "Vieta",
+        "hr": "Viete"
+      }
+    },
+    {
+      "slug": "chinese-remainder-theorem",
+      "kind": "technique",
+      "hidden": true,
+      "translations": {
+        "en": "Chinese remainder theorem",
+        "hr": "Kineski teorem o ostatcima"
+      },
+      "descriptions": {
+        "en": "Use of CRT.",
+        "hr": "Korištenje kineskog teorema o ostatcima."
+      },
+      "short_translations": {
+        "en": "CRT",
+        "hr": "KTO"
+      }
+    },
+    {
+      "slug": "bezout",
+      "kind": "technique",
+      "hidden": true,
+      "translations": {
+        "en": "Bezout",
+        "hr": "Bézout"
+      },
+      "descriptions": {
+        "en": "Use of Bezout identity or theorem.",
+        "hr": "Korištenje Bézoutova identiteta ili poučka."
+      },
+      "short_translations": {
+        "en": "Bezout",
+        "hr": "Bézout"
+      }
+    },
+    {
+      "slug": "am-gm",
+      "kind": "technique",
+      "hidden": true,
+      "translations": {
+        "en": "AM-GM",
+        "hr": "AG nejednakost"
+      },
+      "descriptions": {
+        "en": "Use of the arithmetic-geometric mean inequality.",
+        "hr": "Korištenje aritmetičko-geometrijske nejednakosti."
+      },
+      "short_translations": {
+        "en": "AM-GM",
+        "hr": "AG"
+      }
+    },
+    {
+      "slug": "cauchy-schwarz",
+      "kind": "technique",
+      "hidden": true,
+      "translations": {
+        "en": "Cauchy-Schwarz",
+        "hr": "Cauchy-Schwarz"
+      },
+      "descriptions": {
+        "en": "Use of Cauchy-Schwarz inequality.",
+        "hr": "Korištenje Cauchy-Schwarzove nejednakosti."
+      },
+      "short_translations": {
+        "en": "C-S",
+        "hr": "C-S"
+      }
+    },
+    {
+      "slug": "jensen",
+      "kind": "technique",
+      "hidden": true,
+      "translations": {
+        "en": "Jensen",
+        "hr": "Jensen"
+      },
+      "descriptions": {
+        "en": "Use of Jensen's inequality.",
+        "hr": "Korištenje Jensenove nejednakosti."
+      }
+    }
+  ]
+}

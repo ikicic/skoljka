@@ -1,0 +1,27 @@
+/* News */
+
+.news-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.news-list-item h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+}
+
+.news-list-preview {
+  margin-top: 0.5rem;
+}
+
+.news-meta {
+  margin-top: 0.75rem;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+.news-home-list {
+  display: grid;
+  gap: 0.35rem;
+}

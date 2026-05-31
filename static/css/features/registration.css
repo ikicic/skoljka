@@ -1,0 +1,51 @@
+/* Account registration email step */
+
+.register-email-form {
+  max-width: none;
+}
+
+.register-email-form .btn {
+  justify-self: start;
+  width: auto;
+}
+
+.register-email-table {
+  border-collapse: collapse;
+  width: auto;
+}
+
+.register-email-table th,
+.register-email-table td {
+  padding: 0.25rem 0.5rem 0.25rem 0;
+  vertical-align: baseline;
+}
+
+.register-email-table th {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+  font-weight: 500;
+}
+
+.register-email-table label {
+  display: inline-block;
+  margin: 0;
+  line-height: var(--control-height);
+}
+
+.register-email-table img {
+  display: inline-block;
+  height: auto;
+}
+
+.register-email-table input {
+  vertical-align: baseline;
+}
+
+.register-email-table input[type="email"] {
+  width: min(24rem, 100%);
+}
+
+.register-email-table input[name="math_challenge"] {
+  width: 6rem;
+}

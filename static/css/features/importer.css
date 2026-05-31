@@ -1,0 +1,331 @@
+/* PDF import wizard */
+
+#pdf-import {
+  min-height: 400px;
+}
+
+.pdf-step {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+}
+
+/* Upload step */
+.pdf-step input[type="file"] {
+  font-size: 0.875rem;
+}
+
+/* Page selection thumbnails */
+.pdf-pages-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pdf-thumbnails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.pdf-thumb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.375rem;
+  background: var(--color-surface);
+  transition: border-color 0.15s;
+  position: relative;
+}
+
+.pdf-thumb:hover {
+  border-color: var(--color-accent);
+}
+
+.pdf-thumb.selected {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.25);
+}
+
+.pdf-thumb canvas {
+  display: block;
+  max-width: 180px;
+  border-radius: var(--radius-sm);
+}
+
+.pdf-thumb input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pdf-thumb-num {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* Spinner */
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3rem 1rem;
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.transcription-progress {
+  display: grid;
+  gap: 0.4rem;
+  min-width: min(100%, 18rem);
+  font-size: 0.875rem;
+}
+
+.transcription-progress-step {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-muted);
+}
+
+.transcription-progress-step.running {
+  color: var(--color-text);
+}
+
+.transcription-progress-step.done .transcription-progress-dot {
+  background: var(--color-success);
+}
+
+.transcription-progress-step.failed .transcription-progress-dot {
+  background: var(--color-error);
+}
+
+.transcription-progress-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--color-border);
+}
+
+.transcription-progress-step.running .transcription-progress-dot {
+  background: var(--color-accent);
+}
+
+.transcription-progress-status {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* Review: side-by-side columns */
+.pdf-review-columns {
+  display: grid;
+  grid-template-columns: var(--pdf-left-width, 30%) 8px minmax(0, 1fr);
+  align-items: start;
+  gap: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  overflow: visible;
+}
+
+.pdf-col {
+  box-sizing: border-box;
+  padding: 0.75rem;
+  min-height: 0;
+  min-width: 0;
+}
+
+.pdf-col-pdf {
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--color-importer-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0.5rem;
+}
+
+.pdf-col-problems {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.pdf-col-problems > * {
+  flex-shrink: 0;
+}
+
+.pdf-review-columns > .resize-divider {
+  align-self: stretch;
+  width: 8px;
+  min-height: 100%;
+}
+
+.pdf-page-canvas {
+  display: block;
+  max-width: 100%;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Problem cards */
+.pdf-problem-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(31, 35, 40, 0.04);
+}
+
+.pdf-problem-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-bg-header);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.875rem;
+}
+
+.pdf-problem-index {
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--color-text);
+}
+
+.pdf-problem-header .tag-picker {
+  min-height: 2rem;
+  flex: 1;
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+}
+
+.pdf-problem-header .tag-pill {
+  font-size: 0.75rem;
+}
+
+.pdf-problem-meta {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.pdf-problem-meta-fields {
+  align-items: flex-end;
+}
+
+.pdf-problem-body {
+  padding: 0;
+}
+
+.pdf-content-editor {
+  margin: 0;
+}
+
+.pdf-content-editor .content-editor-textarea {
+  min-height: 8.5rem;
+  padding: 0.625rem;
+  font-size: 0.72rem;
+  border: none;
+  border-radius: 0;
+}
+
+.pdf-content-editor .content-editor-textarea:focus {
+  border-color: transparent;
+  box-shadow: inset 0 0 0 2px rgba(9, 105, 218, 0.18);
+}
+
+.pdf-problem-body .content-editor-preview,
+.pdf-problem-body.content-editor-preview {
+  min-height: 8.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--color-surface);
+  border: none;
+  border-radius: 0;
+}
+
+/* Meta form */
+.pdf-meta-form {
+  padding: 0.75rem;
+  background: var(--color-bg-header);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+/* Review action bar */
+.pdf-review-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.problem-draft-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Responsive: stack columns on narrow screens */
+@media (max-width: 768px) {
+  .pdf-review-columns {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .pdf-col {
+    flex: none !important;
+  }
+
+  .pdf-col-pdf {
+    position: static;
+    max-height: 70vh;
+  }
+
+  .pdf-content-editor.content-editor-vertical {
+    grid-template-columns: 1fr;
+  }
+
+  .pdf-content-editor.content-editor-preview-source > .content-editor-source,
+  .pdf-content-editor.content-editor-preview-source > .content-editor-rendered {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .pdf-content-editor > .resize-divider {
+    display: none;
+  }
+
+  .pdf-review-columns > .resize-divider {
+    width: auto;
+    height: 5px;
+    cursor: row-resize;
+  }
+}

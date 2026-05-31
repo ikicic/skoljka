@@ -1,0 +1,86 @@
+from django.core.paginator import Page
+from django.utils.translation import gettext as _
+
+
+def Pagination(
+    *,
+    page: Page,
+    request,
+    page_param: str = "page",
+    show_summary: bool = False,
+):
+    if page.paginator.num_pages <= 1:
+        return None
+    return (
+        <nav class="pagination">
+            {show_summary and (
+                <div class="pagination-summary">
+                    {_pagination_summary(page)}
+                </div>
+            )}
+            <div class="pagination-pages">
+                {_prev_link(page, request, page_param)}
+                {_page_link(item, page, request, page_param) for item in _page_items(page)}
+                {_next_link(page, request, page_param)}
+            </div>
+        </nav>
+    )
+
+
+def _pagination_summary(page: Page) -> str:
+    return _("Showing %(start)d-%(end)d of %(count)d") % {
+        "start": page.start_index(),
+        "end": page.end_index(),
+        "count": page.paginator.count,
+    }
+
+
+def _page_items(page: Page):
+    return page.paginator.get_elided_page_range(
+        number=page.number,
+        on_each_side=2,
+        on_ends=1,
+    )
+
+
+def _page_link(item, page: Page, request, page_param: str):
+    if item == page.paginator.ELLIPSIS:
+        return <span class="pagination-ellipsis">{item}</span>
+    if item == page.number:
+        return <span class="pagination-page active">{item}</span>
+    return (
+        <a class="pagination-page" href={_page_url(request, page_param, item)}>{item}</a>
+    )
+
+
+def _prev_link(page: Page, request, page_param: str):
+    if page.has_previous():
+        return (
+            <a
+                class="pagination-prev-next"
+                href={_page_url(request, page_param, page.previous_page_number())}
+            >
+                {_("‹ Prev")}
+            </a>
+        )
+    return <span class="pagination-prev-next disabled">{_("‹ Prev")}</span>
+
+
+def _next_link(page: Page, request, page_param: str):
+    if page.has_next():
+        return (
+            <a
+                class="pagination-prev-next"
+                href={_page_url(request, page_param, page.next_page_number())}
+            >
+                {_("Next ›")}
+            </a>
+        )
+    return <span class="pagination-prev-next disabled">{_("Next ›")}</span>
+
+
+def _page_url(request, page_param: str, page_number: int) -> str:
+    params = request.GET.copy()
+    params[page_param] = str(page_number)
+    query = params.urlencode()
+    return request.path + (f"?{query}" if query else "")

@@ -1,0 +1,521 @@
+import re
+from dataclasses import dataclass
+
+from django.db import models
+from django.http import HttpRequest
+from django.middleware.csrf import get_token
+from django.urls import reverse
+from django.utils.translation import gettext as _t, ngettext
+
+from skoljka.apps.problems.components import ProblemViewSwitcher, ProblemsDisplay
+from skoljka.apps.problems.models import Problem
+from skoljka.apps.sources.models import Source, SourceDocument
+from skoljka.apps.tracking.favorites import favorite_source_button, favorite_source_ids
+from skoljka.apps.tracking.models import Submission
+
+
+type YearProgress = list[tuple[int, int, int]]
+type YearStats = dict[int, tuple[int | None, int | None, int]]
+
+
+@dataclass
+class SourceTableStats:
+    year_stats: YearStats
+    solved_counts: dict[int, int]
+    year_progress: dict[int, YearProgress]
+
+
+@dataclass
+class SourceTableContext:
+    children_by_parent: dict[int, list[Source]]
+    stats: SourceTableStats
+    favorite_ids: set[int]
+    show_solved: bool
+    show_favorites: bool
+    counter: int = 0
+
+    def next_number(self) -> int:
+        self.counter += 1
+        return self.counter
+
+
+def source_competition_table(root_sources: list[Source], user, *, group_leaf_roots: bool):
+    if not root_sources:
+        return None
+
+    show_solved = user.is_authenticated
+    children_by_parent, descendant_sources = _source_descendant_tree(root_sources, user)
+
+    table_sources = [*root_sources, *descendant_sources]
+    ctx = SourceTableContext(
+        children_by_parent=children_by_parent,
+        stats=_source_table_stats(table_sources, user),
+        favorite_ids=favorite_source_ids(user, [source.pk for source in table_sources]),
+        show_solved=show_solved,
+        show_favorites=user.is_authenticated,
+    )
+
+    grouped_roots = [root for root in root_sources if children_by_parent.get(root.pk)]
+    ungrouped_roots = [root for root in root_sources if not children_by_parent.get(root.pk)]
+    return (
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="col-num">{"#"}</th>
+                    <th>{_t("Competition")}</th>
+                    <th>{_t("Years")}</th>
+                    <th class="col-progress">{_t("Solved") if show_solved else _t("Problems")}</th>
+                    <th class="col-grid">{_t("Years")}</th>
+                    {ctx.show_favorites and <th class="favorite-col"></th>}
+                </tr>
+            </thead>
+            <tbody>
+                {_source_table_group(root, ctx, depth=0) for root in grouped_roots}
+                {
+                    _source_other_group(ungrouped_roots, ctx)
+                    if group_leaf_roots
+                    else _source_rows(ungrouped_roots, ctx, depth=0)
+                }
+            </tbody>
+        </table>
+    )
+
+
+def _source_descendant_tree(root_sources: list[Source], user) -> tuple[dict[int, list[Source]], list[Source]]:
+    children_by_parent: dict[int, list[Source]] = {source.pk: [] for source in root_sources}
+    descendants: list[Source] = []
+    frontier = root_sources
+    seen = {source.pk for source in root_sources}
+    while frontier:
+        children = list(
+            Source.objects.for_user(user)
+            .filter(parent__in=frontier)
+            .order_by("order", "slug")
+        )
+        children = [child for child in children if child.pk not in seen]
+        if not children:
+            break
+        descendants.extend(children)
+        for child in children:
+            seen.add(child.pk)
+            children_by_parent.setdefault(child.parent_id, []).append(child)
+            children_by_parent.setdefault(child.pk, [])
+        frontier = children
+    return children_by_parent, descendants
+
+
+def _source_table_stats(table_sources: list[Source], user) -> SourceTableStats:
+    year_stats: YearStats = {}
+    if table_sources:
+        rows = (
+            Problem.objects.for_user(user).filter(source__in=table_sources)
+            .values("source_id")
+            .annotate(
+                min_year=models.Min("year"),
+                max_year=models.Max("year"),
+                total=models.Count("id"),
+            )
+        )
+        for row in rows:
+            year_stats[row["source_id"]] = (row["min_year"], row["max_year"], row["total"])
+
+    solved_counts: dict[int, int] = {}
+    year_progress: dict[int, YearProgress] = {}
+    year_totals: dict[tuple[int, int], int] = {}
+    visible_problem_ids = Problem.objects.for_user(user).filter(source__in=table_sources).values("id")
+    if table_sources and user.is_authenticated:
+        solved_rows = (
+            Submission.objects.filter(
+                user=user,
+                solved=True,
+                problem_id__in=visible_problem_ids,
+            )
+            .values("problem__source_id")
+            .annotate(total=models.Count("problem_id", distinct=True))
+        )
+        solved_counts = {row["problem__source_id"]: row["total"] for row in solved_rows}
+
+    if table_sources:
+        year_rows = (
+            Problem.objects.for_user(user).filter(source__in=table_sources, year__isnull=False)
+            .values("source_id", "year")
+            .annotate(total=models.Count("id"))
+            .order_by("source_id", "year")
+        )
+        year_totals = {
+            (row["source_id"], row["year"]): row["total"]
+            for row in year_rows
+        }
+
+    year_solved: dict[tuple[int, int], int] = {}
+    if year_totals and user.is_authenticated:
+        solved_year_rows = (
+            Submission.objects.filter(
+                user=user,
+                solved=True,
+                problem_id__in=visible_problem_ids,
+                problem__year__isnull=False,
+            )
+            .values("problem__source_id", "problem__year")
+            .annotate(total=models.Count("problem_id", distinct=True))
+        )
+        year_solved = {
+            (row["problem__source_id"], row["problem__year"]): row["total"]
+            for row in solved_year_rows
+        }
+
+    for (source_id, year), total in year_totals.items():
+        year_progress.setdefault(source_id, []).append((year, year_solved.get((source_id, year), 0), total))
+
+    return SourceTableStats(year_stats, solved_counts, year_progress)
+
+
+def _source_table_group(source: Source, ctx: SourceTableContext, *, depth: int):
+    children = ctx.children_by_parent.get(source.pk, [])
+    has_own_problems = source.pk in ctx.stats.year_stats
+    return (
+        <>
+            <tr class="category-row">
+                <td
+                    colspan={"6" if ctx.show_favorites else "5"}
+                    style={_source_indent_style(depth)}
+                >
+                    {_source_category_label(source)}
+                </td>
+            </tr>
+            {has_own_problems and _source_data_row(source, ctx, "source-own-row", depth=depth + 1)}
+            {_source_table_child(c, ctx, depth=depth + 1) for c in children}
+        </>
+    )
+
+
+def _source_table_child(source: Source, ctx: SourceTableContext, *, depth: int):
+    if ctx.children_by_parent.get(source.pk):
+        return _source_table_group(source, ctx, depth=depth)
+    return _source_data_row(source, ctx, "source-child-row", depth=depth)
+
+
+def _source_rows(sources: list[Source], ctx: SourceTableContext, *, depth: int = 1):
+    return (
+        <>
+            {_source_data_row(source, ctx, "source-child-row", depth=depth) for source in sources}
+        </>
+    )
+
+
+def _source_other_group(sources: list[Source], ctx: SourceTableContext):
+    if not sources:
+        return None
+    return (
+        <>
+            <tr class="category-row">
+                <td colspan={"6" if ctx.show_favorites else "5"}>{_t("Other competitions")}</td>
+            </tr>
+            {_source_data_row(source, ctx, "source-child-row", depth=1) for source in sources}
+        </>
+    )
+
+
+def _source_category_label(source: Source):
+    return <a href={source.get_absolute_url()}>{source.name()}</a>
+
+
+def _source_indent_style(depth: int) -> str | None:
+    return f"padding-left:{1 + (depth * 1.25):.2f}rem" if depth else None
+
+
+def _source_data_row(
+    source: Source,
+    ctx: SourceTableContext,
+    row_class: str,
+    *,
+    depth: int = 1,
+):
+    num = ctx.next_number()
+
+    stats = ctx.stats.year_stats.get(source.pk)
+    if stats:
+        min_year, max_year, total = stats
+        if min_year and max_year and min_year != max_year:
+            years_label = f"{min_year}\u2013{max_year}"
+        elif min_year:
+            years_label = str(min_year)
+        else:
+            years_label = ""
+    else:
+        total = 0
+        years_label = ""
+
+    solved = ctx.stats.solved_counts.get(source.pk, 0)
+    pct = int(100 * solved / total) if total > 0 else 0
+
+    return (
+        <tr class={row_class}>
+            <td class="col-num">{str(num)}</td>
+            <td class="source-name-cell" style={_source_indent_style(depth)}>
+                <a href={source.get_absolute_url()}>{source.name()}</a>
+            </td>
+            <td>{years_label}</td>
+            <td class="col-progress">
+                {total > 0 and ctx.show_solved and (
+                    <div class="progress-inner">
+                        <span class="progress-text">
+                            <span class="solved-count">{solved}</span>
+                            /
+                            {total}
+                        </span>
+                        <span class="progress-bar">
+                            <span class="progress-bar-fill" style={f"width:{pct}%"}></span>
+                        </span>
+                    </div>
+                )}
+                {total > 0 and not ctx.show_solved and (
+                    <span class="progress-text">{str(total)}</span>
+                )}
+            </td>
+            <td class="col-grid">
+                {_source_year_progress(source, ctx.stats.year_progress.get(source.pk, []))}
+            </td>
+            {ctx.show_favorites and (
+                <td class="favorite-col">
+                    {favorite_source_button(source, ctx.favorite_ids)}
+                </td>
+            )}
+        </tr>
+    )
+
+
+def _source_year_progress(source: Source, progress: YearProgress):
+    if not progress:
+        return None
+    return (
+        <div class="mini-grid">
+            {_source_year_progress_cell(source, year, solved, total) for year, solved, total in progress}
+        </div>
+    )
+
+
+def _source_year_progress_cell(source: Source, year: int, solved: int, total: int):
+    if solved >= total:
+        state = "solved"
+    elif solved > 0:
+        state = "partial"
+    else:
+        state = "unsolved"
+    return (
+        <a
+            href={year_url(source, year)}
+            class={"mini-grid-cell " + state}
+            title={_year_problem_count_title(year, total)}
+        >
+        </a>
+    )
+
+
+def _year_problem_count_title(year: int, total: int) -> str:
+    return ngettext(
+        "%(year)s: %(count)s problem",
+        "%(year)s: %(count)s problems",
+        total,
+    ) % {"year": year, "count": total}
+
+
+def source_documents_section(
+    request: HttpRequest,
+    documents: list[SourceDocument],
+    *,
+    bulk_edit_url: str = "",
+):
+    if not documents:
+        return None
+    show_actions = request.user.is_staff
+    return (
+        <section class="source-documents">
+            <h2>{_t("Documents")}</h2>
+            <div class="table-wrapper">
+                <table class="table source-document-table">
+                    <thead>
+                        <tr>
+                            <th>{_t("Year")}</th>
+                            <th>{_t("Filename")}</th>
+                            <th>{_t("Language")}</th>
+                            {show_actions and <th></th>}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {_source_document_row(request, document, show_actions, bulk_edit_url) for document in documents}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    )
+
+
+def _source_document_row(
+    request: HttpRequest,
+    document: SourceDocument,
+    show_actions: bool,
+    bulk_edit_url: str,
+):
+    bulk_edit_href = f"{bulk_edit_url}?document={document.pk}" if bulk_edit_url else ""
+    return (
+        <tr>
+            <td>
+                {str(document.year) if document.year is not None else <span class="text-muted">{"—"}</span>}
+            </td>
+            <td><a href={document.file.url}>{document.label()}</a></td>
+            <td>{document.language or <span class="text-muted">{"—"}</span>}</td>
+            {show_actions and (
+                <td class="source-document-actions">
+                    <form
+                        method="post"
+                        action={reverse("source_document_delete", kwargs={"pk": document.pk})}
+                        class="source-document-action-list"
+                        data-confirm={delete_document_confirm_message(document)}
+                    >
+                        <span class="btn-group">
+                            {bulk_edit_href and (
+                                <a
+                                    href={bulk_edit_href}
+                                    class="btn btn-xs"
+                                    title={
+                                        _t(
+                                            "Use this PDF as a visual aid while "
+                                            "bulk-editing the displayed problems."
+                                        )
+                                    }
+                                >
+                                    {_t("Bulk edit with this PDF")}
+                                </a>
+                            )}
+                            <button type="submit" class="btn btn-xs btn-danger">
+                                {_t("Delete")}
+                            </button>
+                        </span>
+                        <input
+                            type="hidden"
+                            name="csrfmiddlewaretoken"
+                            value={get_token(request)}
+                        />
+                        <input type="hidden" name="next" value={request.get_full_path()} />
+                    </form>
+                </td>
+            )}
+        </tr>
+    )
+
+
+def delete_document_confirm_message(document: SourceDocument) -> str:
+    return _t('Delete document "%(name)s"? This cannot be undone.') % {"name": document.label()}
+
+
+def problem_year_sections(request: HttpRequest, source: Source, sorted_years: list[tuple[int | None, list[Problem]]]):
+    return (
+        <div class="problem-year-sections">
+            <ProblemViewSwitcher
+                request={request}
+                view_key="source"
+                export_url={reverse("source_pdf", kwargs={"slug": source.slug})}
+            />
+            {_problem_year_section(request, source, year, problems) for year, problems in sorted_years}
+        </div>
+    )
+
+
+def year_section(year: int | None, problems: list[Problem]):
+    label = str(year) if year else _t("Other")
+    return (
+        <div class="year-section card">
+            <h3>{label}</h3>
+            <span class="problem-inline-list">
+                {_problem_inline(p) for p in problems}
+            </span>
+        </div>
+    )
+
+
+def _problem_inline(problem: Problem):
+    label = problem_grid_header(problem.problem_label) if problem.problem_label else problem.display_title
+    return (
+        <a href={problem.get_absolute_url()} class="problem-inline">{label}</a>
+    )
+
+
+def _problem_year_section(request: HttpRequest, source: Source, year: int | None, problems: list[Problem]):
+    label = str(year) if year else _t("Other")
+    return (
+        <section class="problem-year-section">
+            <h3>{year is not None and <a href={year_url(source, year)}>{label}</a> or label}</h3>
+            <ProblemsDisplay
+                problems={problems}
+                request={request}
+                view_key="source"
+                show_switcher={False}
+            />
+        </section>
+    )
+
+
+def problem_grid_labels(sorted_years: list[tuple[int | None, list[Problem]]]) -> list[str]:
+    labels = {p.problem_label for _, problems in sorted_years for p in problems if p.problem_label}
+    return sorted(labels, key=_problem_label_sort_key)
+
+
+def _problem_label_sort_key(label: str):
+    parts = re.split(r"(\d+)", label)
+    return [int(part) if part.isdigit() else part.lower() for part in parts]
+
+
+def comp_grid(source: Source, sorted_years: list, labels: list[str], solved_ids: set[int]):
+    return (
+        <div class="comp-grid-wrapper">
+            <table class="comp-grid">
+                <thead>
+                    <tr>
+                        <th>{_t("Year")}</th>
+                        {<th>{problem_grid_header(label)}</th> for label in labels}
+                        <th>{_t("Solved")}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {_comp_grid_row(source, year, probs, labels, solved_ids) for year, probs in sorted_years}
+                </tbody>
+            </table>
+        </div>
+    )
+
+
+def _comp_grid_row(source: Source, year: int | None, problems: list, labels: list[str], solved_ids: set[int]):
+    label = str(year) if year else _t("Other")
+    by_pnum = {p.problem_label: p for p in problems if p.problem_label}
+    solved_count = sum(1 for p in problems if p.id in solved_ids)
+    total = len(problems)
+    link_url = year_url(source, year)
+    return (
+        <tr class="comp-grid-row" data-row-href={link_url}>
+            <td class="year-label"><a href={link_url}>{label}</a></td>
+            {_comp_grid_cell(by_pnum.get(problem_label), solved_ids) for problem_label in labels}
+            <td class="year-summary">{str(solved_count) + "/" + str(total)}</td>
+        </tr>
+    )
+
+
+def problem_grid_header(label: str) -> str:
+    return f"P{label}" if label.isdigit() else label
+
+
+def _comp_grid_cell(problem, solved_ids: set[int]):
+    if not problem:
+        return <td class="cell empty"></td>
+    css = "cell solved" if problem.id in solved_ids else "cell unsolved"
+    return (
+        <td class={css}>
+            <a href={problem.get_absolute_url()} title={problem.display_title}></a>
+        </td>
+    )
+
+
+def year_url(source: Source, year: int | None) -> str:
+    if year is None:
+        return source.get_absolute_url()
+    return reverse("source_year_detail", kwargs={"slug": source.slug, "year": year})

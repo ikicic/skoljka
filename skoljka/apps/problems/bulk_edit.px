@@ -1,0 +1,146 @@
+import json
+from dataclasses import dataclass
+
+from django.db import transaction
+from django.http import HttpRequest, JsonResponse
+from django.urls import reverse
+from django.utils.translation import gettext as _, ngettext
+from pythonjsx.runtime import SafeStr
+
+from skoljka.apps.content.models import Content
+from skoljka.apps.problems.models import Problem
+from skoljka.apps.tags.utils import resolve_tags
+from skoljka.components.layout import Page
+from skoljka.utils.px_view import csrf_header_json
+from skoljka.utils.static import static_url
+
+
+@dataclass
+class ProblemBulkEditSet:
+    title: str
+    context_label: str
+    back_url: str
+    save_url: str
+    problems: list[Problem]
+    document_url: str = ""
+    document_label: str = ""
+
+
+def render_problem_bulk_edit(request: HttpRequest, edit_set: ProblemBulkEditSet):
+    initial_problems = [bulk_problem_payload(problem) for problem in edit_set.problems]
+    problem_count = len(edit_set.problems)
+    return (
+        <Page
+            request={request}
+            title={edit_set.title}
+            wide={True}
+            actions={
+                <a href={edit_set.back_url} class="btn btn-sm btn-secondary">
+                    {_("Back")}
+                </a>
+            }
+        >
+            <section class="card bulk-edit-context">
+                <h2>{edit_set.context_label}</h2>
+                <p class="text-muted">
+                    {ngettext("%(count)s problem", "%(count)s problems", problem_count) % {"count": problem_count}}
+                </p>
+            </section>
+            <div
+                id="list-bulk-edit"
+                data-csrf={csrf_header_json(request)}
+                data-save-url={edit_set.save_url}
+                data-suggest-tags-url={reverse("problem_suggest_tags")}
+                data-list-url={edit_set.back_url}
+            >
+                <script type="application/json" id="list-bulk-edit-data">
+                    {SafeStr(json.dumps({
+                        "problems": initial_problems,
+                        "document": (
+                            {"url": edit_set.document_url, "label": edit_set.document_label}
+                            if edit_set.document_url else None
+                        ),
+                    }))}
+                </script>
+            </div>
+            <script type="module" src={static_url("js/list-bulk-edit.js")}></script>
+        </Page>
+    )
+
+
+def bulk_problem_payload(problem: Problem) -> dict:
+    content = problem.content.first()
+    language = content.resolve_language() if content else "en"
+    source_md = content.source_for(language) if content else ""
+    tags = [
+        {"kind": "existing", "slug": tag.slug, "name": tag.display_name()}
+        for tag in problem.tags.filter(hidden=False)
+    ]
+    return {
+        "id": problem.pk,
+        "title": problem.display_title,
+        "sourceMd": source_md,
+        "language": language or "en",
+        "tags": tags,
+    }
+
+
+def save_problem_bulk_edit(request: HttpRequest, *, allowed_problem_ids: set[int], redirect_url: str) -> JsonResponse:
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError
+        problems_payload = payload.get("problems", [])
+        if not isinstance(problems_payload, list):
+            raise ValueError
+    except (ValueError, TypeError, json.JSONDecodeError):
+        return JsonResponse({"error": _("Invalid problem list.")}, status=400)
+
+    submitted_ids = set()
+    normalized = []
+    try:
+        for item in problems_payload:
+            if not isinstance(item, dict):
+                raise ValueError
+            problem_id = int(item.get("id"))
+            source_md = item.get("source_md", "")
+            language = item.get("language", "en") or "en"
+            tag_slugs = item.get("tags", [])
+            new_tag_names = item.get("new_tags", [])
+            if not isinstance(source_md, str) or not isinstance(language, str):
+                raise ValueError
+            if not isinstance(tag_slugs, list) or not isinstance(new_tag_names, list):
+                raise ValueError
+            submitted_ids.add(problem_id)
+            normalized.append((problem_id, source_md, language, tag_slugs, new_tag_names))
+    except (ValueError, TypeError):
+        return JsonResponse({"error": _("Invalid problem list.")}, status=400)
+
+    if not submitted_ids.issubset(allowed_problem_ids):
+        return JsonResponse({"error": _("Problem not found.")}, status=404)
+
+    editable_problems = {
+        problem.pk: problem
+        for problem in Problem.objects.for_user(request.user, "edit")
+        .filter(pk__in=submitted_ids)
+        .prefetch_related("tags", "content")
+    }
+    if set(editable_problems) != submitted_ids:
+        return JsonResponse({"error": _("Forbidden")}, status=403)
+
+    with transaction.atomic():
+        for problem_id, source_md, language, tag_slugs, new_tag_names in normalized:
+            problem = editable_problems[problem_id]
+            content = problem.content.first()
+            if not content:
+                content = Content(content_object=problem, original_language=language.strip() or "en", source_md={})
+            content.set_text(language, source_md)
+            if not content.original_language:
+                content.original_language = language.strip() or "en"
+            content.save()
+
+            visible_tags = resolve_tags([str(slug) for slug in tag_slugs], [str(name) for name in new_tag_names])
+            hidden_tags = list(problem.tags.filter(hidden=True))
+            problem.tags.set(hidden_tags + visible_tags)
+
+    return JsonResponse({"ok": True, "redirect_url": redirect_url})

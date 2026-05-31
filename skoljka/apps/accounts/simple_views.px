@@ -1,0 +1,74 @@
+from django.http import HttpRequest
+from django.utils.translation import gettext as _
+
+from skoljka.components.layout import Page
+from skoljka.utils.px_view import px_view
+
+
+@px_view
+def about_view(request: HttpRequest):
+    return (
+        <Page request={request} title={_("About")}>
+            <p>Školjka is a mathematical competition problem archive.</p>
+            <p>
+                {_(
+                    "Browse problems by source, topic, or search. Track your progress, "
+                    "bookmark problems, and take notes."
+                )}
+            </p>
+        </Page>
+    )
+
+
+@px_view
+def privacy_view(request: HttpRequest):
+    return (
+        <Page request={request} title={_("Privacy Policy")}>
+            <p>
+                {_(
+                    "Školjka stores the information needed to run your account, including "
+                    "your username, email address, profile settings, saved problems, "
+                    "solving progress, likes, lists, notes, and uploaded content."
+                )}
+            </p>
+            <p>
+                {_(
+                    "We use this data to provide the service, keep the site secure, and "
+                    "improve the application. We do not sell personal data."
+                )}
+            </p>
+            <p>
+                {_(
+                    "You may contact the site administrators to request account deletion "
+                    "or correction of your personal data."
+                )}
+            </p>
+        </Page>
+    )
+
+
+@px_view
+def terms_view(request: HttpRequest):
+    return (
+        <Page request={request} title={_("Terms of Use")}>
+            <p>
+                {_(
+                    "Školjka is provided as an educational problem archive. Use the site "
+                    "responsibly and do not upload unlawful, abusive, or misleading content."
+                )}
+            </p>
+            <p>
+                {_(
+                    "Problem statements and other materials may be subject to copyright. "
+                    "By adding content, you confirm that you have the right to share it or "
+                    "that your use is otherwise lawful."
+                )}
+            </p>
+            <p>
+                {_(
+                    "The service is provided without warranty. We may remove content or "
+                    "restrict accounts when needed to protect the site and its users."
+                )}
+            </p>
+        </Page>
+    )

@@ -1,0 +1,28 @@
+def render_translated_marker(text: str, *, marker: str, fallback: str, render_marked):
+    """Render one validated translation marker as a controlled HTML fragment.
+
+    Example:
+        render_translated_marker(
+            _("I accept the <a>Terms of Use</a>."),
+            marker="a",
+            fallback="I accept the <a>Terms of Use</a>.",
+            render_marked=lambda text: <a href="/terms/">{text}</a>,
+        )
+
+        With a translation string e.g. "Prihvaćam <a>uvjete korištenja</a>.",
+        this translates to a correct sentence with inline HTML exactly where
+        needed.
+    """
+    start = f"<{marker}>"
+    end = f"</{marker}>"
+    if text.count(start) != 1 or text.count(end) != 1 or text.index(start) > text.index(end):
+        text = fallback
+    before, rest = text.split(start, 1)
+    marked, after = rest.split(end, 1)
+    return (
+        <>
+            {before}
+            {render_marked(marked)}
+            {after}
+        </>
+    )

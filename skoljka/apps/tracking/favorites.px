@@ -1,0 +1,63 @@
+from django.urls import reverse
+from django.utils.translation import gettext as _
+
+from skoljka.apps.lists.models import ProblemList
+from skoljka.apps.sources.models import Source
+from skoljka.apps.tracking.models import FavoriteProblemList, FavoriteSource
+
+
+def favorite_source_ids(user, source_ids: list[int]) -> set[int]:
+    if not user or not user.is_authenticated or not source_ids:
+        return set()
+    return set(
+        FavoriteSource.objects.filter(user=user, source_id__in=source_ids)
+        .values_list("source_id", flat=True)
+    )
+
+
+def favorite_problem_list_ids(user, problem_list_ids: list[int]) -> set[int]:
+    if not user or not user.is_authenticated or not problem_list_ids:
+        return set()
+    return set(
+        FavoriteProblemList.objects.filter(user=user, problem_list_id__in=problem_list_ids)
+        .values_list("problem_list_id", flat=True)
+    )
+
+
+def favorite_source_button(source: Source, favorite_ids: set[int] | None = None):
+    active = bool(favorite_ids and source.pk in favorite_ids)
+    return _favorite_button(
+        active=active,
+        url=reverse("toggle_favorite_source", kwargs={"pk": source.pk}),
+        target_id=f"favorite-source-{source.pk}",
+    )
+
+
+def favorite_problem_list_button(problem_list: ProblemList, favorite_ids: set[int] | None = None):
+    active = bool(favorite_ids and problem_list.pk in favorite_ids)
+    return _favorite_button(
+        active=active,
+        url=reverse("toggle_favorite_problem_list", kwargs={"pk": problem_list.pk}),
+        target_id=f"favorite-list-{problem_list.pk}",
+    )
+
+
+def _favorite_button(*, active: bool, url: str, target_id: str):
+    label = _("Remove from favorites") if active else _("Add to favorites")
+    return (
+        <button
+            type="button"
+            id={target_id}
+            class="status-icon-btn favorite-toggle"
+            title={label}
+            hx-post={url}
+            hx-target={f"#{target_id}"}
+            hx-swap="outerHTML"
+        >
+            <span
+                class={"status-icon status-favorite active" if active else "status-icon status-favorite"}
+            >
+                {"★"}
+            </span>
+        </button>
+    )

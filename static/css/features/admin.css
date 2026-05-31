@@ -1,0 +1,69 @@
+/* Staff admin UI */
+
+.admin-form {
+  width: 100%;
+  max-width: none;
+}
+
+.admin-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-nav li {
+  margin: 0.5rem 0;
+}
+
+.admin-nav a {
+  display: inline-block;
+  padding: 0.5rem 0;
+}
+
+.tag-admin-create {
+  margin-bottom: 1rem;
+}
+
+.tag-admin-table .tag-admin-slug {
+  min-width: 9rem;
+  font-family: var(--font-mono);
+}
+
+.tag-admin-table .form-actions {
+  gap: 0.4rem;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.tag-admin-table .form-actions form {
+  display: inline;
+}
+
+.source-admin-section + .source-admin-section {
+  margin-top: 1rem;
+}
+
+.source-children-table input[type="text"],
+.source-children-table input[type="number"] {
+  width: 100%;
+  min-width: 0;
+  padding: 0.375rem 0.55rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.source-children-table input[type="text"]:focus,
+.source-children-table input[type="number"]:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.2);
+}
+
+.source-children-table th:last-child,
+.source-children-table td:last-child {
+  width: 5rem;
+}

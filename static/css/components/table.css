@@ -1,0 +1,64 @@
+/* Table – generic data tables */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.table th,
+.table td {
+  padding: 4px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+}
+
+.table th {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: var(--color-bg-header);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.table tbody tr:hover {
+  background: var(--color-surface-subtle);
+}
+
+.table tbody tr.solved {
+  background: var(--color-solved-row);
+}
+
+.table tbody tr.solved:hover {
+  background: var(--color-solved-row-hover);
+}
+
+.col-num {
+  text-align: right;
+  width: 1%;
+  color: var(--color-text-light);
+}
+
+.center {
+  text-align: center;
+}
+
+.table code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--color-bg);
+  padding: 0.15rem 0.35rem;
+  border-radius: var(--radius-sm);
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}

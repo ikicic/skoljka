@@ -1,0 +1,34 @@
+server {
+    listen 80;
+    server_name __DOMAIN__;
+
+    client_max_body_size 50m;
+
+    add_header Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'" always;
+
+    location ~ ^/static/(?<static_mjs>.+\.mjs)$ {
+        alias __REPO_ROOT__/staticfiles/$static_mjs;
+        default_type application/javascript;
+        access_log off;
+        expires 30d;
+    }
+
+    location /static/ {
+        alias __REPO_ROOT__/staticfiles/;
+        access_log off;
+        expires 30d;
+    }
+
+    location /media/ {
+        alias __REPO_ROOT__/media/;
+        expires 7d;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:__APP_PORT__;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

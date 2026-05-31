@@ -1,0 +1,153 @@
+from dataclasses import dataclass
+
+from django.http import HttpRequest, HttpResponse
+from django.middleware.csrf import get_token
+from django.utils.translation import get_language, gettext as _
+from pythonjsx.runtime import SafeStr
+
+from skoljka.apps.problems.models import Problem
+from skoljka.apps.problems.pdf_export import (
+    PDF_HEADING_NONE,
+    PDF_HEADING_LABEL,
+    PDF_HEADING_NUMBER,
+    PDF_HEADING_NUMBER_TITLE,
+    PDF_HEADING_TITLE,
+    PdfExportError,
+    export_problems_latex_zip,
+    export_problems_pdf,
+    normalize_pdf_heading_mode,
+    problem_export_heading,
+)
+from skoljka.apps.problems.titles import problem_title_context
+from skoljka.components.layout import Page
+
+
+@dataclass(frozen=True)
+class ProblemPdfExportSpec:
+    problems: list[Problem]
+    title: str
+    filename: str
+    compact_generated_titles_for: tuple[int, int] | None = None
+
+
+def problem_export_queryset(queryset):
+    return queryset.select_related("source").prefetch_related("tags", "content__attachments")
+
+
+def problem_pdf_export_view(request: HttpRequest, spec: ProblemPdfExportSpec):
+    title = (request.POST.get("title", "").strip() if request.method == "POST" else "") or spec.title
+    heading_mode = normalize_pdf_heading_mode(request.POST.get("heading_mode") if request.method == "POST" else None)
+    if request.method == "POST" and request.POST.get("action") == "download":
+        try:
+            exported = export_problems_pdf(
+                spec.problems,
+                title=title,
+                filename=spec.filename,
+                compact_generated_titles_for=spec.compact_generated_titles_for,
+                heading_mode=heading_mode,
+            )
+        except PdfExportError as exc:
+            return HttpResponse(str(exc), status=500, content_type="text/plain; charset=utf-8")
+        response = HttpResponse(exported.data, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{exported.filename}"'
+        return response
+    if request.method == "POST" and request.POST.get("action") == "latex":
+        try:
+            exported = export_problems_latex_zip(
+                spec.problems,
+                title=title,
+                filename=_latex_zip_filename(spec.filename),
+                compact_generated_titles_for=spec.compact_generated_titles_for,
+                heading_mode=heading_mode,
+            )
+        except PdfExportError as exc:
+            return HttpResponse(str(exc), status=500, content_type="text/plain; charset=utf-8")
+        response = HttpResponse(exported.data, content_type="application/zip")
+        response["Content-Disposition"] = f'attachment; filename="{exported.filename}"'
+        return response
+
+    return (
+        <Page request={request} title={_("Export PDF")}>
+            <form method="post" class="card form-stack pdf-export-form" data-pdf-export-form="">
+                <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+                <div class="form-row">
+                    <div class="form-field form-field-flex-3">
+                        <input type="text" name="title" value={title} placeholder={_("Title")} />
+                    </div>
+                    <div class="form-field">
+                        <select name="heading_mode">
+                            {_heading_option(PDF_HEADING_NUMBER, heading_mode, _("Numbers only"))}
+                            {_heading_option(PDF_HEADING_LABEL, heading_mode, _("Problem labels"))}
+                            {_heading_option(PDF_HEADING_NUMBER_TITLE, heading_mode, _("Numbers and titles"))}
+                            {_heading_option(PDF_HEADING_TITLE, heading_mode, _("Titles only"))}
+                            {_heading_option(PDF_HEADING_NONE, heading_mode, _("No headings"))}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" name="action" value="download">
+                        {_("Download PDF")}
+                    </button>
+                    <button type="submit" class="btn" name="action" value="latex">
+                        {_("Export to LaTeX")}
+                    </button>
+                </div>
+            </form>
+            {_problem_pdf_preview(spec.problems, title, spec.compact_generated_titles_for, heading_mode)}
+        </Page>
+    )
+
+
+def _heading_option(value: str, selected: str, label: str):
+    return <option value={value} selected={value == selected}>{label}</option>
+
+
+def _latex_zip_filename(filename: str) -> str:
+    base = filename.rsplit(".", 1)[0] if "." in filename else filename
+    return f"{base or 'problems'}.zip"
+
+
+def _problem_pdf_preview(
+    problems: list[Problem],
+    title: str,
+    compact_generated_titles_for: tuple[int, int] | None,
+    heading_mode: str,
+):
+    title_context = problem_title_context(problems, compact_generated_titles_for)
+    return (
+        <section class="card pdf-export-preview" data-pdf-export-preview="">
+            <h2>{title}</h2>
+            {not problems and <p class="text-muted">{_("No problems found.")}</p>}
+            {[
+                _preview_problem(index, problem, title_context, heading_mode)
+                for index, problem in enumerate(problems, start=1)
+            ]}
+        </section>
+    )
+
+
+def _preview_problem(index: int, problem: Problem, title_context, heading_mode: str):
+    heading = problem_export_heading(index, problem, title_context, heading_mode)
+    html = _problem_statement_html(problem)
+    inline_heading = normalize_pdf_heading_mode(heading_mode) in {PDF_HEADING_NUMBER, PDF_HEADING_LABEL}
+    return (
+        <article
+            class={"pdf-export-preview-problem pdf-export-preview-problem-numbered" if inline_heading else "pdf-export-preview-problem"}
+        >
+            {heading and not inline_heading and <h3>{heading}</h3>}
+            {html and (
+                <div class="math-content">
+                    {heading and inline_heading and <span class="pdf-export-inline-number">{heading}</span>}
+                    {SafeStr(html)}
+                </div>
+            )}
+            {not html and <p class="text-muted">{_("No problem statement available.")}</p>}
+        </article>
+    )
+
+
+def _problem_statement_html(problem: Problem) -> str:
+    content = next(iter(problem.content.all()), None)
+    if not content:
+        return ""
+    return content.html_for(get_language())

@@ -1,0 +1,253 @@
+from django.http import HttpRequest
+from django.middleware.csrf import get_token
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
+from django.utils.translation import get_language, gettext as _
+from pythonjsx.runtime import SafeStr
+
+from skoljka.apps.content.models import Content
+from skoljka.apps.news.forms import NewsPostForm
+from skoljka.apps.news.models import NewsPost
+from skoljka.components.content_editor import ContentEditor
+from skoljka.components.forms import form_errors
+from skoljka.components.layout import Page
+from skoljka.utils.px_view import px_view
+from skoljka.utils.staff import staff_required
+
+
+def published_posts():
+    return NewsPost.objects.filter(hidden=False)
+
+
+@px_view
+def news_list(request: HttpRequest):
+    posts = list(published_posts().select_related("created_by"))
+    return (
+        <Page request={request} title={_("News")} actions={_news_actions(request)}>
+            {posts and (
+                <div class="news-list">
+                    {_news_list_item(post) for post in posts}
+                </div>
+            )}
+            {not posts and <p class="text-muted">{_("No news yet.")}</p>}
+        </Page>
+    )
+
+
+@px_view
+@staff_required
+def news_manage(request: HttpRequest):
+    posts = list(NewsPost.objects.select_related("created_by"))
+    return (
+        <Page
+            request={request}
+            title={_("Manage News")}
+            actions={<a href={reverse("news_create")} class="btn btn-sm">{_("New Post")}</a>}
+        >
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>{_("Title")}</th>
+                            <th>{_("Status")}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {_manage_row(post) for post in posts}
+                    </tbody>
+                </table>
+            </div>
+        </Page>
+    )
+
+
+@px_view
+@staff_required
+def news_create(request: HttpRequest):
+    form = NewsPostForm(user=request.user, initial=NewsPostForm.initial_for(None))
+    if request.method == "POST":
+        form = NewsPostForm(request.POST, user=request.user)
+        if form.is_valid():
+            post = form.save()
+            return redirect("news_edit", pk=post.pk)
+
+    return (
+        <Page request={request} title={_("New Post")}>
+            {form_errors(form)}
+            {_post_form(request, form=form, post=None)}
+        </Page>
+    )
+
+
+@px_view
+@staff_required
+def news_edit(request: HttpRequest, pk: int):
+    post = get_object_or_404(NewsPost, pk=pk)
+    form = NewsPostForm(user=request.user, instance=post, initial=NewsPostForm.initial_for(post))
+    if request.method == "POST":
+        form = NewsPostForm(request.POST, user=request.user, instance=post)
+        if form.is_valid():
+            form.save()
+            return redirect("news_manage")
+
+    return (
+        <Page request={request} title={_("Edit News Post")} actions={_edit_actions(post)}>
+            {form_errors(form)}
+            {_post_form(request, form=form, post=post)}
+        </Page>
+    )
+
+
+@px_view
+@staff_required
+def news_delete(request: HttpRequest, pk: int):
+    post = get_object_or_404(NewsPost, pk=pk)
+    if request.method == "POST":
+        post.delete()
+        return redirect("news_manage")
+
+    return (
+        <Page request={request} title={_("Delete News Post")}>
+            <form method="post" class="form card">
+                <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+                <p>{_("Delete this news post?")}</p>
+                <p><strong>{post.title}</strong></p>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-danger">{_("Delete")}</button>
+                    <a
+                        href={reverse("news_edit", kwargs={"pk": post.pk})}
+                        class="btn btn-secondary"
+                    >
+                        {_("Cancel")}
+                    </a>
+                </div>
+            </form>
+        </Page>
+    )
+
+
+def _news_actions(request: HttpRequest):
+    if not request.user.is_staff:
+        return None
+    return <a href={reverse("news_manage")} class="btn btn-sm">{_("Manage News")}</a>
+
+
+def _edit_actions(post: NewsPost):
+    return (
+        <div class="form-actions">
+            <a href={reverse("news_delete", kwargs={"pk": post.pk})} class="btn btn-sm btn-danger">
+                {_("Delete")}
+            </a>
+        </div>
+    )
+
+
+def _news_list_item(post: NewsPost):
+    return news_post_card(post)
+
+
+def news_post_card(post: NewsPost):
+    content = post.content.first()
+    return (
+        <article class="news-list-item card">
+            <h2>{post.title}</h2>
+            {content and (
+                <div class="math-content news-list-preview">
+                    {SafeStr(content.html_for(get_language()))}
+                </div>
+            )}
+            {not content and <p class="text-muted">{_("No content yet.")}</p>}
+            <footer class="news-meta">{_news_meta(post)}</footer>
+        </article>
+    )
+
+
+def _manage_row(post: NewsPost):
+    return (
+        <tr>
+            <td>{post.title}</td>
+            <td>{_post_status(post)}</td>
+            <td class="text-right">
+                <a href={reverse("news_edit", kwargs={"pk": post.pk})}>{_("Edit")}</a>
+            </td>
+        </tr>
+    )
+
+
+def _post_status(post: NewsPost) -> str:
+    if post.hidden:
+        return _("Hidden")
+    return _("Visible")
+
+
+def _news_meta(post: NewsPost) -> str:
+    created = post.created_at.strftime("%Y-%m-%d %H:%M")
+    author = post.created_by.username if post.created_by else _("unknown")
+    if post.updated_at.replace(microsecond=0) == post.created_at.replace(microsecond=0):
+        return _("Created %(created)s by %(author)s") % {
+            "created": created,
+            "author": author,
+        }
+    updated = post.updated_at.strftime("%Y-%m-%d %H:%M")
+    return _("Created %(created)s, last edited %(updated)s by %(author)s") % {
+        "created": created,
+        "updated": updated,
+        "author": author,
+    }
+
+
+def _post_form(request: HttpRequest, form: NewsPostForm, post: NewsPost | None = None):
+    content = post.content.first() if post else None
+    title = form["title"].value() or ""
+    slug = form["slug"].value() or ""
+    language = form["language"].value() or "en"
+    content_md = form["content_md"].value() or ""
+    hidden = form["hidden"].value()
+
+    return (
+        <form method="post" class="form admin-form">
+            <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+            <div class="form-field">
+                <label for="title">{_("Title")}</label>
+                <input type="text" name="title" id="title" value={title} required={True} />
+            </div>
+            <div class="form-field">
+                <label for="slug">{_("Slug")}</label>
+                <input
+                    type="text"
+                    name="slug"
+                    id="slug"
+                    value={slug}
+                    placeholder={_("Generated from title if empty")}
+                />
+            </div>
+            <div class="form-field form-field-flex-narrow">
+                <label for="language">{_("Language")}</label>
+                <input type="text" name="language" id="language" value={language} />
+            </div>
+            <div class="form-field">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="hidden" checked={hidden} />
+                    {" "}
+                    {_("Hidden")}
+                </label>
+            </div>
+            <fieldset class="content-fieldset">
+                <legend>{_("Content")}</legend>
+                <ContentEditor
+                    name="content_md"
+                    value={content_md}
+                    content_id={content.id if content else None}
+                    attachments={content.attachments.all() if content else []}
+                    upload_name={f"content_attachments_{content.id}" if content else None}
+                    show_format_help={True}
+                />
+                {not content and <p class="text-muted">{_("Save once before uploading attachments.")}</p>}
+            </fieldset>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-sm">{_("Save")}</button>
+                <a href={reverse("news_manage")} class="btn btn-sm btn-secondary">{_("Back")}</a>
+            </div>
+        </form>
+    )

@@ -1,0 +1,168 @@
+from django.http import HttpRequest
+from django.urls import reverse
+from django.utils.translation import gettext as _
+
+from skoljka.apps.accounts.home_sampling import public_home_problem_queryset, random_public_home_problems
+from skoljka.apps.lists.components import list_index_table
+from skoljka.apps.lists.models import ProblemList
+from skoljka.apps.lists.selectors import visible_problem_counts, visible_solved_problem_counts
+from skoljka.apps.news.views import news_post_card, published_posts
+from skoljka.apps.problems.components import ProblemsDisplay, problems_table_queryset
+from skoljka.apps.problems.models import Problem
+from skoljka.apps.sources.components import source_competition_table
+from skoljka.apps.sources.models import Source
+from skoljka.apps.tracking.favorites import favorite_problem_list_ids
+from skoljka.components.layout import Page
+from skoljka.utils.px_view import px_view
+from skoljka.utils.translated_markup import render_translated_marker
+
+
+@px_view
+def home(request: HttpRequest):
+    user = request.user
+
+    favorite_sources: list = []
+    favorite_lists: list = []
+    favorite_list_counts = {}
+    favorite_list_solved_counts = {}
+    favorite_list_ids = set()
+    latest_news = list(published_posts())
+    recent_problems, random_problems = _home_problem_samples(request.user)
+    if user.is_authenticated:
+        favorite_sources = list(
+            Source.objects.for_user(user)
+            .filter(favorited_by__user=user)
+            .distinct()
+        )
+        favorite_lists = list(
+            ProblemList.objects
+            .for_user(user)
+            .filter(favorited_by__user=user)
+            .select_related("created_by")
+            .distinct()
+        )
+        favorite_list_counts = visible_problem_counts(favorite_lists, user)
+        favorite_list_solved_counts = visible_solved_problem_counts(favorite_lists, user)
+        favorite_list_ids = favorite_problem_list_ids(user, [pl.pk for pl in favorite_lists])
+
+    return (
+        <Page
+            request={request}
+            title={_("Home")}
+            show_title={False}
+            actions={_home_actions(request)}
+        >
+            {not user.is_authenticated and (
+                <section class="home-hero-card">
+                    <div class="home-hero-main">
+                        <h1>Školjka</h1>
+                        <p class="home-hero-lead">
+                            {_("An archive of problems from mathematical competitions.")}
+                        </p>
+                        <p>
+                            {_(
+                                "Browse by competition, year, or topic. Search by text and tags. "
+                                "Log in to track solved problems, bookmarks, and notes."
+                            )}
+                        </p>
+                    </div>
+                    <div class="home-hero-links">
+                        {_home_hero_link(
+                            reverse("source_list"),
+                            _("Archive"),
+                            _("Find problems by competition and year."),
+                        )}
+                        {_home_hero_link(reverse("search"), _("Search"), _home_search_description())}
+                        {_home_hero_link(
+                            reverse("register"),
+                            _("Register"),
+                            _("Keep your progress, bookmarks, and notes."),
+                        )}
+                    </div>
+                </section>
+            )}
+            {_home_problem_section(request, _("Recently added problems"), recent_problems)}
+            {_home_problem_section(request, _("Random problems"), random_problems)}
+            {latest_news and (
+                <section class="section-card">
+                    <div class="news-home-list">
+                        {news_post_card(post) for post in latest_news}
+                    </div>
+                </section>
+            )}
+            {favorite_sources and (
+                <section class="section-card">
+                    <h2>{_("Favorite competitions")}</h2>
+                    {source_competition_table(favorite_sources, user, group_leaf_roots=False)}
+                </section>
+            )}
+            {favorite_lists and (
+                <section class="section-card">
+                    <h2>{_("Favorite lists")}</h2>
+                    {list_index_table(
+                        favorite_lists,
+                        favorite_list_counts,
+                        favorite_list_solved_counts,
+                        favorite_list_ids,
+                        user,
+                        show_owner=True,
+                    )}
+                </section>
+            )}
+        </Page>
+    )
+
+
+def _home_actions(request: HttpRequest):
+    if not request.user.is_staff:
+        return None
+    return <a href={reverse("news_manage")} class="btn btn-sm">{_("Manage News")}</a>
+
+
+def _home_hero_link(url: str, title: str, description: object):
+    return (
+        <a href={url} class="home-hero-link">
+            <strong>{title}</strong>
+            <span class="home-hero-link-description">{description}</span>
+        </a>
+    )
+
+
+def _home_search_description():
+    return render_translated_marker(
+        _("Combine text search with topic <tag>tags</tag>."),
+        marker="tag",
+        fallback="Combine text search with topic <tag>tags</tag>.",
+        render_marked=_home_search_tag_pill,
+    )
+
+
+def _home_search_tag_pill(text: str):
+    return <span class="tag-pill home-hero-tag-pill">{text}</span>
+
+
+def _home_problem_samples(user) -> tuple[list[Problem], list[Problem]]:
+    base = public_home_problem_queryset(user)
+    recent = list(problems_table_queryset(base.order_by("-id")[:2]))
+    random_sample = random_public_home_problems(
+        exclude_ids=[p.pk for p in recent],
+        limit=2,
+    )
+    return recent, random_sample
+
+
+def _home_problem_section(request: HttpRequest, title: str, problems: list[Problem]):
+    if not problems:
+        return None
+    return (
+        <section class="home-problem-section">
+            <h2>{title}</h2>
+            <ProblemsDisplay
+                problems={problems}
+                request={request}
+                view="cards"
+                view_key="home"
+                show_switcher={False}
+            />
+        </section>
+    )

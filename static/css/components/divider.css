@@ -1,0 +1,19 @@
+/* Shared draggable split-pane divider */
+
+.resize-divider {
+  position: relative;
+  cursor: col-resize;
+  background: transparent;
+}
+
+.resize-divider::before {
+  content: "";
+  position: absolute;
+  inset: 0 3px;
+  background: var(--color-border);
+  transition: background-color 0.15s;
+}
+
+.resize-divider:hover::before {
+  background: var(--color-accent);
+}

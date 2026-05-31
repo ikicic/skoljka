@@ -1,0 +1,19 @@
+[project]
+name = "skoljka"
+version = "2.0.0alpha"
+requires-python = ">=3.13"
+dependencies = [
+    "django>=6.0,<7.0",
+    "psycopg[binary]>=3.2,<4.0",
+    "mistune>=3.1,<4.0",
+    "pythonjsx",
+    "django-types>=0.23.0",
+    "pymupdf>=1.24,<2.0",
+    "cryptography>=43,<46",
+    "gunicorn>=23,<24",
+    "mistralai>=2.3,<3.0",
+    "anthropic>=0.94,<1.0",
+]
+
+[tool.uv.sources]
+pythonjsx = { git = "https://github.com/ikicic/pythonjsx.git", rev = "2bd586e2779190903f4215bee588e694bf4a693a" }

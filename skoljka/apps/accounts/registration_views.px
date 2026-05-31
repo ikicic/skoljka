@@ -1,0 +1,360 @@
+from django.conf import settings
+from django.contrib.auth import login
+from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.password_validation import validate_password
+from django.core import signing
+from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.core.validators import validate_email
+from django.http import FileResponse, HttpRequest, HttpResponse
+from django.shortcuts import redirect
+from django.urls import reverse
+from django.utils.translation import gettext as _, pgettext
+
+from skoljka.apps.accounts.auth_views import password_reset_url
+from skoljka.apps.accounts.challenges import (
+    answer_is_correct,
+    challenge_image_path,
+    clear_challenge,
+    current_challenge,
+    registration_label_image_path,
+    registration_image_metrics,
+    rotate_challenge,
+    session_challenge_matches,
+)
+from skoljka.apps.accounts.models import User
+from skoljka.components.forms import csrf_input
+from skoljka.components.layout import Page
+from skoljka.utils.px_view import px_view
+from skoljka.utils.translated_markup import render_translated_marker
+
+REGISTRATION_SIGNING_SALT = "skoljka.registration"
+REGISTRATION_TOKEN_MAX_AGE_SECONDS = 24 * 60 * 60
+
+
+@px_view
+def register_view(request: HttpRequest):
+    errors: list[str] = []
+    challenge = current_challenge(request) if request.method == "POST" else rotate_challenge(request)
+    label_image = registration_image_metrics("label-email")
+    challenge_image = registration_image_metrics(challenge.id)
+    if request.method == "POST":
+        email = BaseUserManager.normalize_email(request.POST.get("email", "").strip())
+        challenge_answer = request.POST.get("math_challenge", "")
+
+        if not email:
+            errors.append(_("Email is required."))
+        else:
+            try:
+                validate_email(email)
+            except ValidationError:
+                errors.append(_("Enter a valid email address."))
+        if not answer_is_correct(challenge, challenge_answer):
+            errors.append(_("The math challenge answer is not correct."))
+            challenge = rotate_challenge(request)
+
+        if not errors:
+            if User.objects.filter(email__iexact=email).exists():
+                _send_existing_account_registration_email(request, email)
+            else:
+                _send_registration_email(request, email)
+            clear_challenge(request)
+            return redirect("register_sent")
+
+    return (
+        <Page request={request} title={_("Register")}>
+            <p>
+                {_(
+                    "Please enter your email address and solve the challenge. "
+                    "We will send you a link to finish registration."
+                )}
+            </p>
+            {errors and (
+                <ul class="form-errors">
+                    {<li>{e}</li> for e in errors}
+                </ul>
+            )}
+            <form method="post" class="form register-email-form">
+                {csrf_input(request)}
+                <table class="register-email-table">
+                    <tbody>
+                        <tr>
+                            <th>
+                                <label for="email">
+                                    <img
+                                        src={reverse("registration_label_image", kwargs={"label_id": "email"})}
+                                        width={label_image["width"]}
+                                        height={label_image["height"]}
+                                        style={label_image["style"]}
+                                        alt={_("Email")}
+                                    />
+                                </label>
+                            </th>
+                            <td>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    id="email"
+                                    placeholder={_("Email")}
+                                    required={True}
+                                />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <img
+                                    src={_registration_challenge_image_url(challenge)}
+                                    width={challenge_image["width"]}
+                                    height={challenge_image["height"]}
+                                    style={challenge_image["style"]}
+                                    alt=""
+                                    title={_("Enter the value of the expression.")}
+                                />
+                            </th>
+                            <td>
+                                <input
+                                    type="text"
+                                    name="math_challenge"
+                                    id="math_challenge"
+                                    inputmode="numeric"
+                                    autocomplete="off"
+                                    placeholder={_("Answer")}
+                                    title={_("Enter the value of the expression.")}
+                                    required={True}
+                                />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="submit" class="btn">{_("Send registration link")}</button>
+            </form>
+            <p>
+                {_("Already have an account?")}{" "}
+                <a href={reverse("login")}>
+                    {pgettext("account-action-link", "Log in.")}
+                </a>
+                <br />
+                <a href={reverse("password_reset")}>{_("Forgot password?")}</a>
+            </p>
+        </Page>
+    )
+
+
+@px_view
+def register_sent_view(request: HttpRequest):
+    return (
+        <Page request={request} title={_("Check your email")}>
+            <p>{_("Please follow the instructions we sent to your email.")}</p>
+            <p><a href={reverse("login")}>{_("Back to log in")}</a></p>
+        </Page>
+    )
+
+
+@px_view
+def register_confirm_view(request: HttpRequest, token: str):
+    email = _registration_email_from_token(token)
+    errors: list[str] = []
+
+    if not email:
+        return (
+            <Page request={request} title={_("Registration link expired")}>
+                <p class="form-error">{_("This registration link is invalid or has expired.")}</p>
+                <p><a href={reverse("register")}>{_("Request a new registration link")}</a></p>
+            </Page>
+        )
+
+    if User.objects.filter(email__iexact=email).exists():
+        return (
+            <Page request={request} title={_("Account already exists")}>
+                <p>{_("An account with this email already exists.")}</p>
+                <p><a href={reverse("password_reset")}>{_("Forgot password?")}</a></p>
+            </Page>
+        )
+
+    if request.method == "POST":
+        posted_token = request.POST.get("registration_token", "")
+        posted_email = _registration_email_from_token(posted_token)
+        username = request.POST.get("username", "").strip()
+        password = request.POST.get("password", "")
+        password2 = request.POST.get("password2", "")
+        accept_terms = request.POST.get("accept_terms") == "on"
+
+        if posted_email != email:
+            errors.append(_("This registration link is invalid or has expired."))
+        if not username:
+            errors.append(_("Username is required."))
+        if not password:
+            errors.append(_("Password is required."))
+        elif password != password2:
+            errors.append(_("Passwords do not match."))
+        else:
+            try:
+                validate_password(password)
+            except ValidationError as exc:
+                errors.extend(exc.messages)
+        if not accept_terms:
+            errors.append(_("You must accept the terms of use."))
+
+        if not errors:
+            if User.objects.filter(email__iexact=email).exists():
+                errors.append(_("An account with this email already exists."))
+            elif User.objects.filter(username=username).exists():
+                errors.append(_("This username is already taken."))
+
+        if not errors:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+            )
+            login(request, user)
+            return redirect("home")
+
+    return (
+        <Page request={request} title={_("Complete registration")}>
+            {errors and (
+                <ul class="form-errors">
+                    {<li>{e}</li> for e in errors}
+                </ul>
+            )}
+            <form method="post" class="form register-form">
+                {csrf_input(request)}
+                <input type="hidden" name="registration_token" value={token} />
+                <div class="form-field">
+                    <input
+                        type="email"
+                        name="email"
+                        id="email"
+                        value={email}
+                        autocomplete="email"
+                        readonly={True}
+                    />
+                </div>
+                <div class="form-field">
+                    <input
+                        type="text"
+                        name="username"
+                        id="username"
+                        placeholder={_("Username")}
+                        autocomplete="username"
+                        required={True}
+                        autofocus={True}
+                    />
+                </div>
+                <div class="form-field">
+                    <input
+                        type="password"
+                        name="password"
+                        id="password"
+                        placeholder={_("Password")}
+                        autocomplete="new-password"
+                        required={True}
+                    />
+                </div>
+                <div class="form-field">
+                    <input
+                        type="password"
+                        name="password2"
+                        id="password2"
+                        placeholder={_("Confirm password")}
+                        autocomplete="new-password"
+                        required={True}
+                    />
+                </div>
+                <div class="form-field">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="accept_terms" required={True} />
+                        {" "}
+                        {_terms_acceptance_text()}
+                    </label>
+                </div>
+                <button type="submit" class="btn">{_("Register")}</button>
+            </form>
+            <p>
+                {_("Already have an account?")}
+                <a href={reverse("login")}>{pgettext("account-action-link", "Log in")}</a>
+            </p>
+        </Page>
+    )
+
+
+def _terms_acceptance_text():
+    return render_translated_marker(
+        _("I accept the <a>Terms of Use</a>."),
+        marker="a",
+        fallback="I accept the <a>Terms of Use</a>.",
+        render_marked=_terms_acceptance_link,
+    )
+
+
+def _terms_acceptance_link(text: str):
+    return <a href={reverse("terms")}>{text}</a>
+
+
+def _registration_token(email: str) -> str:
+    return signing.dumps({"email": email}, salt=REGISTRATION_SIGNING_SALT)
+
+
+def _registration_email_from_token(token: str) -> str | None:
+    try:
+        data = signing.loads(
+            token,
+            salt=REGISTRATION_SIGNING_SALT,
+            max_age=REGISTRATION_TOKEN_MAX_AGE_SECONDS,
+        )
+    except signing.BadSignature:
+        return None
+    email = data.get("email")
+    if not isinstance(email, str):
+        return None
+    return BaseUserManager.normalize_email(email.strip())
+
+
+def _send_registration_email(request: HttpRequest, email: str) -> None:
+    token = _registration_token(email)
+    url = request.build_absolute_uri(reverse("register_confirm", kwargs={"token": token}))
+    subject = _("Continue your Školjka registration")
+    message = _(
+        "Use this link to continue your Školjka registration:\n\n%(url)s\n\n"
+        "If you did not request this, you can ignore this email."
+    ) % {"url": url}
+    send_mail(subject, message, getattr(settings, "DEFAULT_FROM_EMAIL", None), [email])
+
+
+def _send_existing_account_registration_email(request: HttpRequest, email: str) -> None:
+    user = User.objects.get(email__iexact=email)
+    reset_url = password_reset_url(request, user)
+    subject = _("Your Školjka account already exists")
+    message = _(
+        "Someone tried to register a Školjka account with this email address, "
+        "but an account already exists.\n\n"
+        "If you forgot your password, use this link to reset it:\n%(reset_url)s\n\n"
+        "If you did not request this, you can ignore this email."
+    ) % {"reset_url": reset_url}
+    send_mail(subject, message, getattr(settings, "DEFAULT_FROM_EMAIL", None), [email])
+
+
+def _registration_challenge_image_url(challenge):
+    return reverse("registration_challenge_image", kwargs={"challenge_id": challenge.id})
+
+
+def registration_challenge_image(request: HttpRequest, challenge_id: str):
+    if not session_challenge_matches(request, challenge_id):
+        return HttpResponse(status=404)
+    path = challenge_image_path(challenge_id)
+    if not path.exists():
+        return HttpResponse(status=404)
+    response = FileResponse(open(path, "rb"), content_type="image/png")
+    response["Cache-Control"] = "no-store"
+    return response
+
+
+def registration_label_image(request: HttpRequest, label_id: str):
+    if label_id != "email":
+        return HttpResponse(status=404)
+    path = registration_label_image_path(label_id)
+    if not path.exists():
+        return HttpResponse(status=404)
+    response = FileResponse(open(path, "rb"), content_type="image/png")
+    response["Cache-Control"] = "no-store"
+    return response

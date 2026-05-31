@@ -1,0 +1,18 @@
+{
+  "exclude": ["**/node_modules", "**/__pycache__", "build", "dist"],
+
+  "typeCheckingMode": "recommended",
+  "venvPath": ".",
+  "venv": "venv",
+
+  "reportAny": "none",
+  "reportExplicitAny": "none",
+  "reportImplicitStringConcatenation": "none",
+  "reportMissingTypeStubs": "none",
+  "reportUnannotatedClassAttribute": "none",
+  "reportUnknownArgumentType": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnusedCallResult": "none"
+}
+

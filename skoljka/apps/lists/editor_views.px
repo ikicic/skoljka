@@ -1,0 +1,237 @@
+import json
+
+from django.db import transaction
+from django.db.models import Q
+from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.utils.translation import gettext as _
+from django.views.decorators.http import require_GET, require_POST
+from pythonjsx.runtime import SafeStr
+
+from skoljka.apps.lists.models import ProblemList, ProblemListItem
+from skoljka.apps.lists.selectors import solved_problem_ids
+from skoljka.apps.problems.models import Problem
+from skoljka.components.forms import csrf_input
+from skoljka.components.layout import Page
+from skoljka.utils.auth import login_required_view
+from skoljka.utils.px_view import px_view
+
+
+@px_view
+@login_required_view
+def list_edit(request: HttpRequest, pk: int):
+    pl = get_object_or_404(ProblemList.objects.for_user(request.user), pk=pk)
+    if not pl.user_has_perm(request.user, "edit"):
+        return HttpResponse(_("Forbidden"), status=403)
+
+    items = list(
+        pl.items
+        .select_related("problem", "problem__source")
+        .prefetch_related("problem__tags")
+        .order_by("order", "id")
+    )
+    solved_ids = solved_problem_ids([item.problem for item in items], request.user)
+    initial_problems = [
+        _problem_payload(item.problem, already_added=True, solved_ids=solved_ids)
+        for item in items
+    ]
+
+    return (
+        <Page
+            request={request}
+            title={_("Edit: %(title)s") % {"title": pl.title}}
+            wide={True}
+            actions={_list_edit_actions(pl)}
+        >
+            <div
+                class="list-edit-layout"
+                data-list-editor=""
+                data-save-url={reverse("list_items_save", kwargs={"pk": pl.pk})}
+            >
+                <script type="application/json" data-list-initial="">
+                    {SafeStr(json.dumps(initial_problems))}
+                </script>
+                <div class="list-edit-main card">
+                    <div class="list-editor-header">
+                        <h2>{_("Problems")}</h2>
+                        <p class="text-muted" data-list-dirty-status=""></p>
+                    </div>
+                    <div data-list-table-container=""></div>
+                    <p class="text-muted" data-list-empty="" style={items and "display:none"}>
+                        {_("No problems yet.")}
+                    </p>
+                    <div class="list-editor-actions">
+                        <button type="button" class="btn btn-sm" data-list-save="" disabled={True}>
+                            {_("Save changes")}
+                        </button>
+                        <button
+                            type="button"
+                            class="btn-link btn-link-danger text-muted"
+                            data-list-remove-selected=""
+                            disabled={True}
+                            hidden={True}
+                        >
+                            {_("Remove selected")}
+                        </button>
+                    </div>
+                </div>
+                <aside class="list-edit-search">
+                    {_problem_picker(request, pl)}
+                </aside>
+            </div>
+        </Page>
+    )
+
+
+def _list_edit_actions(pl: ProblemList):
+    return (
+        <>
+            <a href={pl.get_absolute_url()} class="btn btn-sm btn-secondary">
+                {_("Back")}
+            </a>
+            <a href={reverse("list_edit_details", kwargs={"pk": pl.pk})} class="btn btn-sm">
+                {_("Details")}
+            </a>
+            <a href={reverse("list_bulk_edit", kwargs={"pk": pl.pk})} class="btn btn-sm">
+                {_("Bulk edit")}
+            </a>
+        </>
+    )
+
+
+def _problem_picker(request: HttpRequest, pl: ProblemList):
+    return (
+        <section
+            class="list-problem-picker card"
+            data-list-problem-picker=""
+            data-search-url={reverse("list_problem_search", kwargs={"pk": pl.pk})}
+        >
+            <h2>{_("Add problem")}</h2>
+            <form method="post" class="form admin-form list-problem-picker-form">
+                {csrf_input(request)}
+                <div class="form-field">
+                    <input
+                        type="search"
+                        id="problem-picker-q"
+                        data-list-problem-query=""
+                        placeholder={_("Find problem")}
+                        autocomplete="off"
+                    />
+                </div>
+                <div class="list-problem-picker-results" data-list-problem-results=""></div>
+            </form>
+        </section>
+    )
+
+
+def _problem_payload(
+    problem: Problem,
+    already_added: bool = False,
+    solved_ids: set[int] | None = None,
+):
+    tags = [
+        {"name": tag.display_name(), "full_name": tag.name(), "url": tag.get_absolute_url()}
+        for tag in problem.tags.all()
+        if not tag.hidden
+    ][:3]
+    return {
+        "id": problem.pk,
+        "title": problem.display_title,
+        "url": problem.get_absolute_url(),
+        "source": problem.source.name() if problem.source else "",
+        "source_url": problem.source.get_absolute_url() if problem.source else "",
+        "year": problem.year,
+        "number": problem.problem_label,
+        "tags": tags,
+        "already_added": already_added,
+        "solved": bool(solved_ids and problem.pk in solved_ids),
+    }
+
+
+@require_GET
+@login_required_view
+def list_problem_search(request: HttpRequest, pk: int):
+    pl = get_object_or_404(ProblemList.objects.for_user(request.user), pk=pk)
+    if not pl.user_has_perm(request.user, "edit"):
+        return JsonResponse({"error": _("Forbidden")}, status=403)
+
+    q = request.GET.get("q", "").strip()
+    selected_problem_ids = set(pl.items.values_list("problem_id", flat=True))
+    problems = Problem.objects.for_user(request.user).select_related("source").prefetch_related("tags")
+
+    if q:
+        query_filter = Q()
+        for token in q.split():
+            token_filter = (
+                Q(title__icontains=token)
+                | Q(source__slug__icontains=token)
+                | Q(source__translations__en__name__icontains=token)
+                | Q(source__translations__hr__name__icontains=token)
+                | Q(tags__slug__icontains=token)
+                | Q(tags__translations__en__icontains=token)
+                | Q(tags__translations__hr__icontains=token)
+                | Q(problem_label__icontains=token)
+            )
+            if token.isdigit():
+                token_filter |= Q(year=int(token))
+            query_filter &= token_filter
+        problems = problems.filter(query_filter)
+    else:
+        problems = problems.none()
+
+    problem_results = list(problems.distinct()[:12])
+    solved_ids = solved_problem_ids(problem_results, request.user)
+    return JsonResponse({
+        "results": [
+            _problem_payload(
+                problem,
+                already_added=problem.pk in selected_problem_ids,
+                solved_ids=solved_ids,
+            )
+            for problem in problem_results
+        ],
+    })
+
+
+@require_POST
+@login_required_view
+def list_items_save(request: HttpRequest, pk: int):
+    pl = get_object_or_404(ProblemList.objects.for_user(request.user), pk=pk)
+    if not pl.user_has_perm(request.user, "edit"):
+        return JsonResponse({"error": _("Forbidden")}, status=403)
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError
+        raw_ids = payload.get("problem_ids", [])
+        if not isinstance(raw_ids, list):
+            raise ValueError
+        problem_ids = []
+        seen = set()
+        for raw_id in raw_ids:
+            problem_id = int(raw_id)
+            if problem_id not in seen:
+                seen.add(problem_id)
+                problem_ids.append(problem_id)
+    except (ValueError, TypeError, json.JSONDecodeError):
+        return JsonResponse({"error": _("Invalid problem list.")}, status=400)
+
+    accessible_ids = set(
+        Problem.objects.for_user(request.user)
+        .filter(pk__in=problem_ids)
+        .values_list("pk", flat=True)
+    )
+    if accessible_ids != set(problem_ids):
+        return JsonResponse({"error": _("Problem not found.")}, status=404)
+
+    with transaction.atomic():
+        pl.items.all().delete()
+        ProblemListItem.objects.bulk_create(
+            [
+                ProblemListItem(problem_list=pl, problem_id=problem_id, order=order)
+                for order, problem_id in enumerate(problem_ids, start=1)
+            ]
+        )
+
+    return JsonResponse({"ok": True})

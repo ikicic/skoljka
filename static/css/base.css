@@ -1,0 +1,98 @@
+/* Base styles */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+a {
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-link-hover);
+  text-decoration: underline;
+}
+
+a:active {
+  color: var(--color-link-active);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.16);
+}
+
+pre {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+textarea,
+select {
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 4px 0.55rem;
+  font-family: inherit;
+  font-size: var(--control-font-size);
+  line-height: var(--control-line-height);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.2);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.render-error {
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+.latex-fbox {
+  display: inline-block;
+  padding: 0 0.25em;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+.latex-mbox {
+  white-space: nowrap;
+}

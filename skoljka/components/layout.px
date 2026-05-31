@@ -1,0 +1,254 @@
+from django.conf import settings
+from django.http import HttpRequest
+from django.middleware.csrf import get_token
+from django.urls import reverse
+from django.utils.translation import get_language, gettext as _
+from pythonjsx.runtime import JSXResult
+
+from skoljka.apps.tags.models import Tag
+from skoljka.components.tag_picker import TagPickerField
+from skoljka.utils.px_view import csrf_header_json
+from skoljka.utils.static import static_url
+
+Breadcrumb = tuple[str, str | None]  # (label, url)
+
+def Page(*children,
+         request: HttpRequest,
+         title: str,
+         breadcrumbs: list[Breadcrumb] | None = None,
+         wide: bool = False,
+         show_title: bool = True,
+         actions = None):
+    main_class = "container container-wide" if wide else "container"
+    has_header = show_title or breadcrumbs or actions
+    current_language = getattr(request, "LANGUAGE_CODE", None) or get_language() or "en"
+    return (
+        <html lang={current_language.split("-")[0]}>
+            <head>
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <title>{title} - Školjka</title>
+                {_katex_font_preloads()}
+                <link rel="stylesheet" href={static_url("vendor/katex/katex.min.css")} />
+                <link rel="stylesheet" href={static_url(settings.STATIC_CSS_MAIN)} />
+            </head>
+            <body hx-headers={csrf_header_json(request)}>
+                <Nav request={request} />
+                <main class={main_class}>
+                    {has_header and (
+                        <header class="page-header">
+                            {breadcrumbs and (
+                                <nav class="breadcrumb">
+                                    {_render_breadcrumbs(breadcrumbs)}
+                                </nav>
+                            )}
+                            {(show_title or actions) and (
+                                <div class="page-header-main">
+                                    {show_title and <h1>{title}</h1>}
+                                    {actions and <div class="page-actions">{actions}</div>}
+                                </div>
+                            )}
+                        </header>
+                    )}
+                    {*children}
+                </main>
+                <Footer request={request} />
+                <script src={static_url("vendor/htmx/htmx.min.js")}></script>
+                <script src={reverse("javascript-catalog")}></script>
+                <script type="module" src={static_url("js/main.js")}></script>
+            </body>
+        </html>
+)
+
+
+def _katex_font_preloads():
+    # Match the exact relative URLs used by katex.min.css. If these use
+    # static_url() cache-busting query params, browsers treat them as different
+    # resources and warn that the preloads were not used.
+    fonts = [
+        "KaTeX_Main-Regular.woff2",
+        "KaTeX_Math-Italic.woff2",
+        "KaTeX_Size1-Regular.woff2",
+        "KaTeX_Size2-Regular.woff2",
+        "KaTeX_AMS-Regular.woff2",
+    ]
+    return (
+        <>
+            {(
+                <link
+                    rel="preload"
+                    href={"/static/vendor/katex/fonts/" + font}
+                    as="font"
+                    type="font/woff2"
+                    crossorigin="anonymous"
+                />
+            ) for font in fonts}
+        </>
+    )
+
+
+def _render_breadcrumbs(crumbs: list[Breadcrumb]):
+    result: list[JSXResult] = []
+    for i, (label, url) in enumerate(crumbs):
+        if i > 0:
+            result.append(<span class="breadcrumb-sep"></span>)
+        if url:
+            result.append(<a href={url}>{label}</a>)
+        else:
+            result.append(<span>{label}</span>)
+    return result
+
+
+def Nav(request: HttpRequest):
+    user = request.user
+    path = request.path
+    selected_tag_slugs = request.GET.getlist("tags") if path.startswith("/search") else []
+    legacy_tag_slug = request.GET.get("tag", "") if path.startswith("/search") else ""
+    if legacy_tag_slug and legacy_tag_slug not in selected_tag_slugs:
+        selected_tag_slugs.append(legacy_tag_slug)
+    selected_tags = list(Tag.objects.filter(slug__in=selected_tag_slugs)) if selected_tag_slugs else []
+    search_query = request.GET.get("q", "") if path.startswith("/search") else ""
+    return (
+        <nav class="nav">
+            <div class="nav-inner">
+                <a href={reverse("home")} class="nav-brand">Školjka</a>
+                <div class="nav-menu">
+                    <a
+                        href={reverse("source_list")}
+                        class={path.startswith("/archive") and "active"}
+                    >
+                        {_("Archive")}
+                    </a>
+                    <a
+                        href={reverse("problem_list")}
+                        class={path.startswith("/problems") and "active"}
+                    >
+                        {_("Problems")}
+                    </a>
+                    {_nav_menu_links(request, path)}
+                </div>
+                <form class="nav-search" action={reverse("search")} method="get">
+                    <TagPickerField
+                        name="tags"
+                        tags={selected_tags}
+                        selected_slugs={selected_tag_slugs}
+                        allow_new={False}
+                        query_name="q"
+                        query_value={search_query}
+                        placeholder={_("Search problems...")}
+                        input_type="search"
+                        class_name="nav-search-picker"
+                        submit_on_enter={True}
+                    />
+                    <button type="submit" class="nav-search-submit" title={_("Search")}>
+                        <svg viewBox="0 0 16 16" width="14" height="14">
+                            <circle cx="7" cy="7" r="4.5"></circle>
+                            <path d="M10.5 10.5 14 14"></path>
+                        </svg>
+                    </button>
+                </form>
+                {_nav_inline_account(request)}
+                {_nav_inline_auth(request)}
+                <button class="nav-toggle" data-nav-toggle="">
+                    ☰
+                </button>
+            </div>
+        </nav>
+    )
+
+
+def _nav_menu_links(request: HttpRequest, path: str = ""):
+    user = request.user
+    if user.is_authenticated:
+        return (
+            <>
+                <a href={reverse("list_index")} class={path.startswith("/lists") and "active"}>
+                    {_("Lists")}
+                </a>
+                {user.is_staff and (
+                    <a
+                        href={reverse("admin:index")}
+                        class={path.startswith("/admin/") and "active"}
+                    >
+                        {_("Admin")}
+                    </a>
+                )}
+            </>
+        )
+    return (
+        <a href={reverse("register")} class="nav-register-link">{_("Register")}</a>
+    )
+
+
+def _nav_inline_account(request: HttpRequest):
+    user = request.user
+    if not user.is_authenticated:
+        return None
+    return (
+        <div class="nav-inline-account">
+            <a href={reverse("profile", kwargs={"username": user.username})} class="nav-user">
+                {user.username}
+            </a>
+            <a href={reverse("logout")}>{_("Log out")}</a>
+        </div>
+    )
+
+
+def _nav_inline_auth(request: HttpRequest):
+    if request.user.is_authenticated:
+        return None
+    return (
+        <div class="nav-inline-auth">
+            <form class="nav-login-form" method="post" action={reverse("login")}>
+                <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+                <input type="text" name="login" placeholder={_("Username")} required={True} />
+                <input
+                    type="password"
+                    name="password"
+                    placeholder={_("Password")}
+                    required={True}
+                />
+                <button type="submit" class="btn btn-secondary btn-sm">{_("Log in")}</button>
+            </form>
+        </div>
+    )
+
+
+def _LangButton(value: str, label: str, current_language: str):
+    active = current_language == value
+    return (
+        <button
+            type="submit"
+            name="language"
+            value={value}
+            class={"btn-link footer-active-lang" if active else "btn-link"}
+        >
+            {label}
+        </button>
+    )
+
+
+def Footer(request: HttpRequest):
+    current_language = (getattr(request, "LANGUAGE_CODE", None) or get_language() or "en").split("-")[0]
+    return (
+        <footer class="footer">
+            <span>
+                <a href={reverse("home")}>Školjka</a>
+                {" · "}
+                <a href={reverse("help_index")}>{_("Help")}</a>
+                {" · "}
+                <a href={reverse("about")}>{_("About")}</a>
+                {" · "}
+                <a href={reverse("privacy")}>{_("Privacy")}</a>
+                {" · "}
+                <a href={reverse("terms")}>{_("Terms")}</a>
+            </span>
+            <form class="footer-lang" action={reverse("set_language")} method="post">
+                <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+                <input type="hidden" name="next" value={request.get_full_path()} />
+                <_LangButton value="en" label="EN" current_language={current_language} />
+                {" · "}
+                <_LangButton value="hr" label="HR" current_language={current_language} />
+            </form>
+        </footer>
+    )

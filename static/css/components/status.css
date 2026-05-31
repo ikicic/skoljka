@@ -1,0 +1,46 @@
+/* Tracking status icons (solved, bookmark, like, favorite) */
+
+.status-icon-btn {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.status-icon-btn:hover .status-icon {
+  opacity: 0.5;
+}
+
+.status-icon-btn .status-icon.active {
+  opacity: 1;
+}
+
+.status-icon {
+  display: inline-block;
+  vertical-align: middle;
+  opacity: 0.25;
+  color: var(--color-text-muted);
+}
+
+.status-favorite {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.status-icon.active {
+  opacity: 1;
+  color: var(--color-accent);
+}
+
+.status-icon.status-solved.active {
+  color: var(--color-success);
+}
+
+.favorite-col {
+  width: 1%;
+  white-space: nowrap;
+  text-align: center;
+}

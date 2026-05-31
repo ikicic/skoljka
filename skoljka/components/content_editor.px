@@ -1,0 +1,81 @@
+import json
+
+from django.utils.translation import gettext as _
+
+
+def ContentEditor(
+    *,
+    name: str,
+    value: str = "",
+    rows: int = 10,
+    placeholder: str = "Markdown + LaTeX",
+    textarea_id: str | None = None,
+    layout: str = "horizontal",
+    class_name: str = "",
+    preview_class_name: str = "",
+    vertical_order: str = "source-preview",
+    submit_label: str | None = None,
+    submit_class_name: str = "btn btn-sm",
+    show_format_help: bool = False,
+    content_id: int | None = None,
+    attachments=None,
+    upload_name: str | None = None,
+):
+    attachment_data = [
+        {
+            "name": a.name,
+            "url": a.file.url,
+            "is_image": a.mime_type.startswith("image/"),
+        }
+        for a in (attachments or [])
+        if a.file
+    ]
+    return (
+        <div
+            class={"content-editor content-editor-fallback " + class_name}
+            data-content-editor=""
+            data-content-id={str(content_id) if content_id else ""}
+            data-layout={layout}
+            data-class-name={class_name}
+            data-preview-class-name={preview_class_name}
+            data-vertical-order={vertical_order}
+            data-submit-label={submit_label or ""}
+            data-submit-class-name={submit_class_name}
+            data-show-format-help={"1" if show_format_help else ""}
+            data-attachments={json.dumps(attachment_data)}
+            data-upload-name={upload_name or ""}
+        >
+            <textarea
+                name={name}
+                id={textarea_id}
+                rows={str(rows)}
+                placeholder={placeholder}
+                class="content-editor-textarea"
+            >
+                {value}
+            </textarea>
+            {(submit_label or show_format_help) and (
+                <div class="content-editor-actions">
+                    {submit_label and <button type="submit" class={submit_class_name}>{submit_label}</button>}
+                    {show_format_help and (
+                        <a href="/help/format/" target="_blank" rel="noopener">
+                            {_("Input format help")}
+                        </a>
+                    )}
+                </div>
+            )}
+            <div
+                data-content-preview=""
+                class={"content-editor-preview math-content " + preview_class_name}
+            >
+            </div>
+            {upload_name and (
+                <div class="content-editor-attachments">
+                    <label class="content-editor-upload">
+                        <span>{_("Upload attachments")}</span>
+                        <input type="file" name={upload_name} multiple={True} />
+                    </label>
+                </div>
+            )}
+        </div>
+    )

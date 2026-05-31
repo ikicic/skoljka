@@ -1,0 +1,97 @@
+/* Source detail, documents, year sections, bulk edit layout */
+
+.source-list,
+.problem-list,
+.tag-tree {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.source-list li,
+.problem-list li,
+.tag-tree li {
+  margin: 0.35rem 0;
+}
+
+.source-list ul,
+.tag-tree ul {
+  list-style: none;
+  padding-left: 1.25rem;
+  margin: 0.25rem 0;
+  border-left: 2px solid var(--color-border);
+}
+
+.source-documents {
+  margin: 1rem 0;
+}
+
+.source-document-table {
+  margin-bottom: 0;
+}
+
+.source-document-actions {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.source-document-action-list {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.source-document-action-list > input[type="hidden"] {
+  display: none;
+}
+
+.bulk-edit-with-pdf {
+  margin-bottom: 1rem;
+}
+
+.bulk-edit-pdf-col {
+  padding: 1rem 0.5rem;
+}
+
+.year-section {
+  margin: 1rem 0;
+}
+
+.year-section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.problem-inline-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+}
+
+.problem-inline {
+  font-size: 0.9rem;
+}
+
+.problem-year-sections {
+  display: grid;
+  gap: 1rem;
+}
+
+.bulk-edit-context {
+  margin-bottom: 1rem;
+}
+
+.bulk-edit-context h2,
+.bulk-edit-context p {
+  margin: 0;
+}
+
+.bulk-edit-context h2 + p {
+  margin-top: 0.25rem;
+}
+
+.problem-year-section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}

@@ -1,0 +1,12 @@
+/* Profile page */
+
+.profile-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.profile-stats span {
+  color: var(--color-text-muted);
+}
