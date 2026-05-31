@@ -28,7 +28,7 @@ STAGES: list[Stage] = ["ocr", "ocr-pdf", "cleanup-prompt", "cleanup", "cleanup-p
 DEFAULT_UNTIL: Stage = "cleanup-pdf"
 
 PROBLEM_SECTION_RE = re.compile(
-    r"\\section\*\{(?:Problem|Zadatak)\s+([A-Za-z]?\d+[A-Za-z]?)\}",
+    r"\\section\*\{(?:Problem|Zadatak)\s+([A-Za-z0-9][A-Za-z0-9-]*)\}",
     re.IGNORECASE,
 )
 

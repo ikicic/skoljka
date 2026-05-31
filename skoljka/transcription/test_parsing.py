@@ -34,3 +34,11 @@ class TranscriptionParsingTest(SimpleTestCase):
         self.assertEqual([p["problem_label"] for p in problems], ["A1", "A2"])
         self.assertEqual([p["source_key"] for p in problems], ["imo-shortlist", "imo-shortlist"])
         self.assertEqual([p["set"] for p in problems], ["Algebra", "Algebra"])
+
+    def test_splits_letter_dash_problem_labels(self):
+        problems = split_problems(
+            "\\section*{Problem I-1}\nFirst\n"
+            "\\section*{Problem T-2}\nSecond"
+        )
+
+        self.assertEqual([p["problem_label"] for p in problems], ["I-1", "T-2"])
