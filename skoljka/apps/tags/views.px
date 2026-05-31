@@ -1,5 +1,5 @@
 from django.db.models import Count
-from django.http import HttpRequest, JsonResponse
+from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -7,22 +7,23 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from skoljka.apps.tags.forms import TagAdminForm
+from skoljka.apps.tags.cache import tag_api_data, tag_api_url, tag_api_version
 from skoljka.apps.tags.models import Tag
 from skoljka.components.forms import form_errors
 from skoljka.components.layout import Page
 from skoljka.utils.px_view import px_view
+from skoljka.utils.cache_headers import set_immutable_cache
 from skoljka.utils.staff import staff_required
 
 
-def tag_api(request: HttpRequest):
-    tags = list(Tag.objects.filter(hidden=False).order_by("slug"))
-    data = {
-        "names": [t.display_name() for t in tags],
-        "full_names": [t.name() for t in tags],
-        "slugs": [t.slug for t in tags],
-        "kinds": [t.kind for t in tags],
-    }
-    return JsonResponse(data, json_dumps_params={"separators": (",", ":")})
+def tag_api(request: HttpRequest, language: str, version: str):
+    if version != tag_api_version():
+        response = HttpResponseRedirect(tag_api_url(language))
+        response["Cache-Control"] = "no-store"
+        return response
+    data = tag_api_data(language)
+    response = JsonResponse(data, json_dumps_params={"separators": (",", ":")})
+    return set_immutable_cache(response)
 
 
 @px_view

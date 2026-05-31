@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include, path
-from django.views.i18n import JavaScriptCatalog
 
 import skoljka.apps.accounts.urls
 import skoljka.apps.content.urls
@@ -18,11 +17,16 @@ import skoljka.apps.lists.urls
 import skoljka.apps.news.urls
 from skoljka.apps.accounts import home_views
 from skoljka.apps.content import help_views
+from skoljka.config.views import versioned_javascript_catalog
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("i18n/", include("django.conf.urls.i18n")),
-    path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
+    path(
+        "jsi18n/<str:language>/<str:version>.js",
+        versioned_javascript_catalog,
+        name="javascript-catalog",
+    ),
     path("accounts/", include(skoljka.apps.accounts.urls)),
     path("content/", include(skoljka.apps.content.urls)),
     path("help/", help_views.help_index, name="help_index"),

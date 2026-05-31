@@ -1,12 +1,13 @@
 .PHONY: venv build build-prod frontend-watch typecheck format makemessages makemessages-py generate-i18n-messages makemessages-js compilemessages test
 
-.DEFAULT_GOAL := venv
+.DEFAULT_GOAL := build
 
 venv:
 	[ -d venv ] || uv venv venv --python=3.13
 	uv pip install -r pyproject.toml --python=venv/bin/python
 
-build:
+build: venv
+	npm install
 	node esbuild.mjs
 
 build-prod:

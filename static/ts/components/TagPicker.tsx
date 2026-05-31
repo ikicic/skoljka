@@ -48,7 +48,9 @@ function queryAutocompletePart(query: string): { prefix: string; term: string } 
 export function fetchTags(): Promise<TagOption[]> {
   if (cachedTags) return Promise.resolve(cachedTags);
   if (!fetchPromise) {
-    fetchPromise = fetch("/tags/api/")
+    const url = document.body.dataset.tagApiUrl;
+    if (!url) return Promise.reject(new Error("Missing tag API URL."));
+    fetchPromise = fetch(url)
       .then((r) => r.json())
       .then((data: TagApiResponse) => {
         cachedTags = data.slugs.map((slug, i) => ({

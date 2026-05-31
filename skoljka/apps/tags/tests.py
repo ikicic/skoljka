@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import override
 
+from skoljka.apps.tags.cache import tag_api_url
 from skoljka.apps.tags.models import Tag
 from skoljka.tests.factories import make_problem, make_source, make_staff, make_tag, make_user
 
@@ -67,8 +68,9 @@ class TagPageRoutesRemovedTest(TestCase):
 class TagApiViewTest(TestCase):
     def test_returns_json_with_expected_shape(self):
         t = make_tag(slug="api1", name="ApiOne", short_translations={"en": "API"})
-        r = self.client.get("/tags/api/")
+        r = self.client.get(tag_api_url("en"))
         self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.headers["Cache-Control"], "public, max-age=31536000, immutable")
         data = json.loads(r.content)
         self.assertIn("names", data)
         self.assertIn("full_names", data)
@@ -81,7 +83,7 @@ class TagApiViewTest(TestCase):
     def test_excludes_hidden(self):
         make_tag(slug="apivis", name="Vis")
         make_tag(slug="apihid", name="Hid", hidden=True)
-        r = self.client.get("/tags/api/")
+        r = self.client.get(tag_api_url("en"))
         data = json.loads(r.content)
         self.assertIn("apivis", data["slugs"])
         self.assertNotIn("apihid", data["slugs"])

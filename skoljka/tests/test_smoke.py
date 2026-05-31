@@ -2,6 +2,7 @@
 
 from django.test import TestCase
 
+from skoljka.apps.tags.cache import tag_api_url
 from skoljka.tests.factories import make_list, make_problem, make_source, make_staff, make_tag, make_user
 
 
@@ -37,7 +38,7 @@ class PublicUrlSmokeTest(TestCase):
             f"/archive/{self.src.slug}/",
             "/problems/",
             f"/problems/{self.problem.id}/",
-            "/tags/api/",
+            tag_api_url("en"),
             "/search/",
             "/lists/",
             f"/lists/{self.list.pk}/",
