@@ -29,6 +29,22 @@ DATABASES = {
 EMAIL_BACKEND = "skoljka.utils.email_backends.PlainConsoleEmailBackend"
 DEFAULT_FROM_EMAIL = "noreply@localhost"
 
+# Registration and password-reset flows send email through Django's email
+# settings. The console backend above is only for local development. In
+# production, use SMTP credentials from your mail provider, for example:
+#
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = "smtp.example.com"
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = "smtp-user"
+# EMAIL_HOST_PASSWORD = "smtp-password"
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False
+# DEFAULT_FROM_EMAIL = "Skoljka <noreply@your.domain>"
+#
+# Verify that your DNS/SPF/DKIM/DMARC settings authorize this sender address,
+# then test registration with a real mailbox before opening signups.
+
 # External tool execution. "direct" mode runs XeLaTeX, pdfLaTeX, Poppler, and
 # Pandoc on the same host as Django. Markdown's Node renderer always runs in
 # the Django environment because it uses the app's generated JS bundles.
@@ -54,12 +70,12 @@ EXTERNAL_PROCESS_MODE = "direct"
 # DEBUG = False
 # ALLOWED_HOSTS = ["your.domain"]
 # SECRET_KEY = "<long random value, not the dev placeholder>"
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"  # or your provider
 # Run: make build-prod && ./venv/bin/python manage.py collectstatic && migrate
 
 # --- HTTPS / SSL ---
 # After enabling HTTPS at Nginx/Certbot, uncomment and adjust:
 # CSRF_TRUSTED_ORIGINS = ["https://your.domain"]
+# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # SESSION_COOKIE_SECURE = True
 # CSRF_COOKIE_SECURE = True
 # SECURE_SSL_REDIRECT = True
