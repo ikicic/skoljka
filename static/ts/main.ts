@@ -48,3 +48,11 @@ document.addEventListener("input", (event) => {
 document
   .querySelectorAll<HTMLFormElement>("[data-confirm-count-form]")
   .forEach(updateConfirmCountForm);
+
+document.querySelectorAll<HTMLAnchorElement>("[data-obfem]").forEach((link) => {
+  const encoded = link.dataset.obfem;
+  if (!encoded) return;
+  const address = atob(encoded);
+  link.href = `mailto:${address}`;
+  link.textContent = address;
+});

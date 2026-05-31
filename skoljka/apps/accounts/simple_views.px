@@ -16,6 +16,12 @@ def about_view(request: HttpRequest):
                     "bookmark problems, and take notes."
                 )}
             </p>
+            <p>
+                {_("Contact: ")}
+                <a href="#" data-obfem="c2tvbGprYUBza29samthLm9yZw==">
+                    {_("email")}
+                </a>
+            </p>
         </Page>
     )
 

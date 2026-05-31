@@ -244,6 +244,8 @@ def Footer(request: HttpRequest):
                 <a href={reverse("privacy")}>{_("Privacy")}</a>
                 {" · "}
                 <a href={reverse("terms")}>{_("Terms")}</a>
+                {" · "}
+                <a href="https://github.com/ikicic/skoljka" target="_blank">GitHub</a>
             </span>
             <form class="footer-lang" action={reverse("set_language")} method="post">
                 <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />

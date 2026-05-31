@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-26 18:12+0000\n"
+"POT-Creation-Date: 2026-05-31 20:03+0000\n"
 "PO-Revision-Date: 2026-05-04 21:26+0000\n"
 "Last-Translator: Skoljka Team\n"
 "Language-Team: Croatian\n"
@@ -14,254 +14,121 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 
-#: skoljka/apps/accounts/simple_views.px:11 skoljka/components/layout.px:239
-msgid "About"
-msgstr "O nama"
-
-#: skoljka/apps/accounts/simple_views.px:15
-msgid ""
-"Browse problems by source, topic, or search. Track your progress, bookmark "
-"problems, and take notes."
-msgstr ""
-"Pregledavajte zadatke po izvoru, temi ili pretraživanjem. Pratite napredak, "
-"spremajte zadatke i pišite bilješke."
-
-#: skoljka/apps/accounts/simple_views.px:26
-msgid "Privacy Policy"
-msgstr "Pravila privatnosti"
-
-#: skoljka/apps/accounts/simple_views.px:29
-msgid ""
-"Školjka stores the information needed to run your account, including your "
-"username, email address, profile settings, saved problems, solving progress, "
-"likes, lists, notes, and uploaded content."
-msgstr ""
-"Školjka pohranjuje podatke potrebne za rad vašeg računa, uključujući "
-"korisničko ime, e-mail adresu, postavke profila, spremljene zadatke, "
-"napredak u rješavanju, oznake sviđanja, popise, bilješke i preneseni sadržaj."
-
-#: skoljka/apps/accounts/simple_views.px:36
-msgid ""
-"We use this data to provide the service, keep the site secure, and improve "
-"the application. We do not sell personal data."
-msgstr ""
-"Te podatke koristimo za pružanje usluge, održavanje sigurnosti stranice i "
-"poboljšavanje aplikacije. Ne prodajemo osobne podatke."
-
-#: skoljka/apps/accounts/simple_views.px:42
-msgid ""
-"You may contact the site administrators to request account deletion or "
-"correction of your personal data."
-msgstr ""
-"Možete se obratiti administratorima stranice kako biste zatražili brisanje "
-"računa ili ispravak svojih osobnih podataka."
-
-#: skoljka/apps/accounts/simple_views.px:53
-msgid "Terms of Use"
-msgstr "Uvjeti korištenja"
-
-#: skoljka/apps/accounts/simple_views.px:56
-msgid ""
-"Školjka is provided as an educational problem archive. Use the site "
-"responsibly and do not upload unlawful, abusive, or misleading content."
-msgstr ""
-"Školjka se pruža kao obrazovna arhiva zadataka. Koristite stranicu odgovorno "
-"i nemojte prenositi nezakonit, uvredljiv ili obmanjujući sadržaj."
-
-#: skoljka/apps/accounts/simple_views.px:62
-msgid ""
-"Problem statements and other materials may be subject to copyright. By "
-"adding content, you confirm that you have the right to share it or that your "
-"use is otherwise lawful."
-msgstr ""
-"Tekstovi zadataka i drugi materijali mogu biti zaštićeni autorskim pravom. "
-"Dodavanjem sadržaja potvrđujete da ga imate pravo dijeliti ili da je vaše "
-"korištenje na drugi način zakonito."
-
-#: skoljka/apps/accounts/simple_views.px:69
-msgid ""
-"The service is provided without warranty. We may remove content or restrict "
-"accounts when needed to protect the site and its users."
-msgstr ""
-"Usluga se pruža bez jamstva. Možemo ukloniti sadržaj ili ograničiti račune "
-"kada je to potrebno radi zaštite stranice i njezinih korisnika."
-
-#: skoljka/apps/accounts/views.px:92 skoljka/apps/content/help_views.px:82
-#: skoljka/apps/content/help_views.px:101
-msgid "Home"
-msgstr "Početna"
-
-#: skoljka/apps/accounts/views.px:101
-msgid "An archive of problems from mathematical competitions."
-msgstr "Arhiva zadataka s matematičkih natjecanja."
-
-#: skoljka/apps/accounts/views.px:104
-msgid ""
-"Browse by competition, year, or topic. Search by text and tags. Log in to "
-"track solved problems, bookmarks, and notes."
-msgstr ""
-"Pregledavajte po natjecanju, godini ili temi. Pretražujte po tekstu i "
-"oznakama. Prijavite se kako biste pratili riješene zadatke, spremljene "
-"zadatke i bilješke."
-
-#: skoljka/apps/accounts/views.px:108 skoljka/apps/problems/views.px:40
-#: skoljka/apps/sources/views.px:74 skoljka/components/layout.px:119
-msgid "Archive"
-msgstr "Arhiva"
-
-#: skoljka/apps/accounts/views.px:108
-msgid "Find problems by competition and year."
-msgstr "Pronađite zadatke po natjecanju i godini."
-
-#: skoljka/apps/accounts/views.px:109 skoljka/apps/search/views.px:44
-#: skoljka/components/layout.px:142
-msgid "Search"
-msgstr "Pretraživanje"
-
-#: skoljka/apps/accounts/views.px:110 skoljka/apps/accounts/views.px:471
-#: skoljka/apps/accounts/views.px:674 skoljka/components/layout.px:178
-msgid "Register"
-msgstr "Registracija"
-
-#: skoljka/apps/accounts/views.px:110
-msgid "Keep your progress, bookmarks, and notes."
-msgstr "Sačuvajte svoj napredak, spremljene zadatke i bilješke."
-
-#: skoljka/apps/accounts/views.px:114
-msgid "Recently added problems"
-msgstr "Nedavno dodani zadaci"
-
-#: skoljka/apps/accounts/views.px:115
-msgid "Random problems"
-msgstr "Nasumični zadaci"
-
-#: skoljka/apps/accounts/views.px:125
-msgid "Favorite competitions"
-msgstr "Omiljena natjecanja"
-
-#: skoljka/apps/accounts/views.px:131
-msgid "Favorite lists"
-msgstr "Omiljene liste"
-
-#: skoljka/apps/accounts/views.px:149 skoljka/apps/news/views.px:44
-#: skoljka/apps/news/views.px:130
-msgid "Manage News"
-msgstr "Upravljanje novostima"
-
-#: skoljka/apps/accounts/views.px:163
-msgid "Combine text search with topic <tag>tags</tag>."
-msgstr "Kombinirajte pretraživanje teksta s tematskim <tag>oznakama</tag>."
-
-#: skoljka/apps/accounts/views.px:227
-msgid "I accept the <a>Terms of Use</a>."
-msgstr "Prihvaćam <a>uvjete korištenja</a>."
-
-#: skoljka/apps/accounts/views.px:248
+#: skoljka/apps/accounts/auth_views.px:31
 msgid "Invalid email/username or password."
 msgstr "Neispravan e-mail, korisničko ime ili lozinka."
 
-#: skoljka/apps/accounts/views.px:251 skoljka/apps/accounts/views.px:274
-#: skoljka/apps/accounts/views.px:418 skoljka/components/layout.px:210
+#: skoljka/apps/accounts/auth_views.px:34
+#: skoljka/apps/accounts/auth_views.px:57
+#: skoljka/apps/accounts/auth_views.px:201 skoljka/components/layout.px:213
 msgid "Log in"
 msgstr "Prijava"
 
-#: skoljka/apps/accounts/views.px:260
+#: skoljka/apps/accounts/auth_views.px:43
 msgid "Email or username"
 msgstr "E-mail ili korisničko ime"
 
-#: skoljka/apps/accounts/views.px:270 skoljka/apps/accounts/views.px:652
-#: skoljka/components/layout.px:207
+#: skoljka/apps/accounts/auth_views.px:53
+#: skoljka/apps/accounts/registration_views.px:249
+#: skoljka/components/layout.px:210
 msgid "Password"
 msgstr "Lozinka"
 
-#: skoljka/apps/accounts/views.px:277 skoljka/apps/accounts/views.px:540
-#: skoljka/apps/accounts/views.px:573
+#: skoljka/apps/accounts/auth_views.px:60
+#: skoljka/apps/accounts/registration_views.px:137
+#: skoljka/apps/accounts/registration_views.px:170
 msgid "Forgot password?"
 msgstr "Zaboravili ste lozinku?"
 
-#: skoljka/apps/accounts/views.px:279
+#: skoljka/apps/accounts/auth_views.px:62
 msgid "Don't have an account?"
 msgstr "Nemate račun?"
 
-#: skoljka/apps/accounts/views.px:281
+#: skoljka/apps/accounts/auth_views.px:64
 msgctxt "account-action-link"
 msgid "Register."
 msgstr "Registrirajte se"
 
-#: skoljka/apps/accounts/views.px:302
+#: skoljka/apps/accounts/auth_views.px:85
 msgid "Reset password"
 msgstr "Resetiraj lozinku"
 
-#: skoljka/apps/accounts/views.px:310 skoljka/apps/accounts/views.px:492
-#: skoljka/apps/accounts/views.px:501
+#: skoljka/apps/accounts/auth_views.px:93
+#: skoljka/apps/accounts/registration_views.px:89
+#: skoljka/apps/accounts/registration_views.px:98
 msgid "Email"
 msgstr "E-mail"
 
-#: skoljka/apps/accounts/views.px:315
+#: skoljka/apps/accounts/auth_views.px:98
 msgid "Send reset link"
 msgstr "Pošalji poveznicu za resetiranje"
 
-#: skoljka/apps/accounts/views.px:317 skoljka/apps/accounts/views.px:327
-#: skoljka/apps/accounts/views.px:551
+#: skoljka/apps/accounts/auth_views.px:100
+#: skoljka/apps/accounts/auth_views.px:110
+#: skoljka/apps/accounts/registration_views.px:148
 msgid "Back to log in"
 msgstr "Natrag na prijavu"
 
-#: skoljka/apps/accounts/views.px:325 skoljka/apps/accounts/views.px:549
+#: skoljka/apps/accounts/auth_views.px:108
+#: skoljka/apps/accounts/registration_views.px:146
 msgid "Check your email"
 msgstr "Provjerite e-mail"
 
-#: skoljka/apps/accounts/views.px:326
+#: skoljka/apps/accounts/auth_views.px:109
 msgid ""
 "If an account with that email exists, we sent password reset instructions."
 msgstr ""
 "Ako račun s tom e-mail adresom postoji, poslali smo upute za poništavanje "
 "lozinke."
 
-#: skoljka/apps/accounts/views.px:342 skoljka/apps/accounts/views.px:590
+#: skoljka/apps/accounts/auth_views.px:125
+#: skoljka/apps/accounts/registration_views.px:187
 msgid "Password is required."
 msgstr "Lozinka je obavezna."
 
-#: skoljka/apps/accounts/views.px:344 skoljka/apps/accounts/views.px:592
+#: skoljka/apps/accounts/auth_views.px:127
+#: skoljka/apps/accounts/registration_views.px:189
 msgid "Passwords do not match."
 msgstr "Lozinke se ne podudaraju."
 
-#: skoljka/apps/accounts/views.px:358
+#: skoljka/apps/accounts/auth_views.px:141
 msgid "Choose a new password"
 msgstr "Odaberite novu lozinku"
 
-#: skoljka/apps/accounts/views.px:362
+#: skoljka/apps/accounts/auth_views.px:145
 msgid "This password reset link is invalid or has expired."
 msgstr "Ova poveznica za poništavanje lozinke nije valjana ili je istekla."
 
-#: skoljka/apps/accounts/views.px:364
+#: skoljka/apps/accounts/auth_views.px:147
 msgid "Request a new reset link"
 msgstr "Zatraži novu poveznicu za poništavanje"
 
-#: skoljka/apps/accounts/views.px:389
+#: skoljka/apps/accounts/auth_views.px:172
 msgid "New password"
 msgstr "Nova lozinka"
 
-#: skoljka/apps/accounts/views.px:400 skoljka/apps/accounts/views.px:662
+#: skoljka/apps/accounts/auth_views.px:183
+#: skoljka/apps/accounts/registration_views.px:259
 msgid "Confirm password"
 msgstr "Potvrdi lozinku"
 
-#: skoljka/apps/accounts/views.px:405
+#: skoljka/apps/accounts/auth_views.px:188
 msgid "Change password"
 msgstr "Promijeni lozinku"
 
-#: skoljka/apps/accounts/views.px:416
+#: skoljka/apps/accounts/auth_views.px:199
 msgid "Password changed"
 msgstr "Lozinka promijenjena"
 
-#: skoljka/apps/accounts/views.px:417
+#: skoljka/apps/accounts/auth_views.px:200
 msgid "Your password has been changed."
 msgstr "Vaša lozinka je promijenjena."
 
-#: skoljka/apps/accounts/views.px:433
+#: skoljka/apps/accounts/auth_views.px:221
 msgid "Reset your Školjka password"
 msgstr "Resetirajte svoju Školjka lozinku"
 
-#: skoljka/apps/accounts/views.px:435
+#: skoljka/apps/accounts/auth_views.px:223
 #, python-format
 msgid ""
 "Use this link to reset your Školjka password:\n"
@@ -276,19 +143,156 @@ msgstr ""
 "\n"
 "Ako to niste zatražili, možete zanemariti ovu poruku."
 
-#: skoljka/apps/accounts/views.px:452
+#: skoljka/apps/accounts/home_views.px:51 skoljka/apps/content/help_views.px:82
+#: skoljka/apps/content/help_views.px:101
+msgid "Home"
+msgstr "Početna"
+
+#: skoljka/apps/accounts/home_views.px:60
+msgid "An archive of problems from mathematical competitions."
+msgstr "Arhiva zadataka s matematičkih natjecanja."
+
+#: skoljka/apps/accounts/home_views.px:64
+msgid ""
+"Browse by competition, year, or topic. Search by text and tags. Log in to "
+"track solved problems, bookmarks, and notes."
+msgstr ""
+"Pregledavajte po natjecanju, godini ili temi. Pretražujte po tekstu i "
+"oznakama. Prijavite se kako biste pratili riješene zadatke, spremljene "
+"zadatke i bilješke."
+
+#: skoljka/apps/accounts/home_views.px:72 skoljka/apps/problems/views.px:40
+#: skoljka/apps/sources/views.px:74 skoljka/components/layout.px:122
+msgid "Archive"
+msgstr "Arhiva"
+
+#: skoljka/apps/accounts/home_views.px:73
+msgid "Find problems by competition and year."
+msgstr "Pronađite zadatke po natjecanju i godini."
+
+#: skoljka/apps/accounts/home_views.px:75 skoljka/apps/search/views.px:44
+#: skoljka/components/layout.px:145
+msgid "Search"
+msgstr "Pretraživanje"
+
+#: skoljka/apps/accounts/home_views.px:78
+#: skoljka/apps/accounts/registration_views.px:65
+#: skoljka/apps/accounts/registration_views.px:271
+#: skoljka/components/layout.px:181
+msgid "Register"
+msgstr "Registracija"
+
+#: skoljka/apps/accounts/home_views.px:79
+msgid "Keep your progress, bookmarks, and notes."
+msgstr "Sačuvajte svoj napredak, spremljene zadatke i bilješke."
+
+#: skoljka/apps/accounts/home_views.px:84
+msgid "Recently added problems"
+msgstr "Nedavno dodani zadaci"
+
+#: skoljka/apps/accounts/home_views.px:85
+msgid "Random problems"
+msgstr "Nasumični zadaci"
+
+#: skoljka/apps/accounts/home_views.px:95
+msgid "Favorite competitions"
+msgstr "Omiljena natjecanja"
+
+#: skoljka/apps/accounts/home_views.px:101
+msgid "Favorite lists"
+msgstr "Omiljene liste"
+
+#: skoljka/apps/accounts/home_views.px:119 skoljka/apps/news/views.px:44
+#: skoljka/apps/news/views.px:133
+msgid "Manage News"
+msgstr "Upravljanje novostima"
+
+#: skoljka/apps/accounts/home_views.px:133
+msgid "Combine text search with topic <tag>tags</tag>."
+msgstr "Kombinirajte pretraživanje teksta s tematskim <tag>oznakama</tag>."
+
+#: skoljka/apps/accounts/profile_views.px:27
+#: skoljka/apps/accounts/profile_views.px:124
+msgid "Profile is private"
+msgstr "Profil je privatan"
+
+#: skoljka/apps/accounts/profile_views.px:66
+#: skoljka/apps/accounts/profile_views.px:80
+#: skoljka/apps/lists/components.px:23 skoljka/apps/search/views.px:90
+#: skoljka/apps/sources/components.px:67 skoljka/apps/sources/components.px:477
+#: skoljka/apps/tracking/views.px:121
+msgid "Solved"
+msgstr "Riješeno"
+
+#: skoljka/apps/accounts/profile_views.px:67 skoljka/apps/tracking/views.px:129
+msgid "Bookmarked"
+msgstr "Spremljeno"
+
+#: skoljka/apps/accounts/profile_views.px:70
+msgid "Edit profile"
+msgstr "Uredi profil"
+
+#: skoljka/apps/accounts/profile_views.px:74
+msgid "Solved by source"
+msgstr "Riješeno po izvoru"
+
+#: skoljka/apps/accounts/profile_views.px:79
+#: skoljka/apps/problems/admin_views.px:41
+#: skoljka/apps/problems/admin_views.px:184
+#: skoljka/apps/problems/components.px:231 skoljka/apps/problems/forms.py:18
+#: skoljka/task/templates/task_detail.html:99
+msgid "Source"
+msgstr "Izvor"
+
+#: skoljka/apps/accounts/profile_views.px:92
+msgid "Liked problems"
+msgstr "Zadaci koji vam se sviđaju"
+
+#: skoljka/apps/accounts/profile_views.px:104
+#: skoljka/apps/accounts/profile_views.px:143
+msgid "Bookmarked problems"
+msgstr "Spremljeni zadaci"
+
+#: skoljka/apps/accounts/profile_views.px:127
+#, python-format
+msgid "%(username)s liked problems"
+msgstr "Zadaci koji se sviđaju korisniku %(username)s"
+
+#: skoljka/apps/accounts/profile_views.px:140 skoljka/apps/sources/views.px:237
+msgid "Not found"
+msgstr "Nije pronađeno"
+
+#: skoljka/apps/accounts/profile_views.px:195
+msgid "Settings"
+msgstr "Postavke"
+
+#: skoljka/apps/accounts/profile_views.px:196
+msgid "Settings saved."
+msgstr "Postavke su spremljene."
+
+#: skoljka/apps/accounts/profile_views.px:207
+msgid "Public profile"
+msgstr "Javni profil"
+
+#: skoljka/apps/accounts/profile_views.px:210 skoljka/apps/news/views.px:249
+#: skoljka/apps/problems/admin_views.px:215
+#: skoljka/apps/sources/admin_views.px:376
+msgid "Save"
+msgstr "Spremi"
+
+#: skoljka/apps/accounts/registration_views.px:46
 msgid "Email is required."
 msgstr "E-mail je obavezan."
 
-#: skoljka/apps/accounts/views.px:457
+#: skoljka/apps/accounts/registration_views.px:51
 msgid "Enter a valid email address."
 msgstr "Unesite valjanu e-mail adresu."
 
-#: skoljka/apps/accounts/views.px:459
+#: skoljka/apps/accounts/registration_views.px:53
 msgid "The math challenge answer is not correct."
 msgstr "Odgovor na matematički izazov nije točan."
 
-#: skoljka/apps/accounts/views.px:473
+#: skoljka/apps/accounts/registration_views.px:68
 msgid ""
 "Please enter your email address and solve the challenge. We will send you a "
 "link to finish registration."
@@ -296,81 +300,90 @@ msgstr ""
 "Molimo unesite svoju e-mail adresu i riješite izazov. Poslat ćemo vam "
 "poveznicu za dovršetak registracije."
 
-#: skoljka/apps/accounts/views.px:514 skoljka/apps/accounts/views.px:525
+#: skoljka/apps/accounts/registration_views.px:111
+#: skoljka/apps/accounts/registration_views.px:122
 msgid "Enter the value of the expression."
 msgstr "Unesite vrijednost izraza."
 
-#: skoljka/apps/accounts/views.px:524
+#: skoljka/apps/accounts/registration_views.px:121
 msgid "Answer"
 msgstr "Odgovor"
 
-#: skoljka/apps/accounts/views.px:532
+#: skoljka/apps/accounts/registration_views.px:129
 msgid "Send registration link"
 msgstr "Pošalji poveznicu za registraciju"
 
-#: skoljka/apps/accounts/views.px:535 skoljka/apps/accounts/views.px:676
+#: skoljka/apps/accounts/registration_views.px:132
+#: skoljka/apps/accounts/registration_views.px:274
 msgid "Already have an account?"
 msgstr "Već imate račun?"
 
-#: skoljka/apps/accounts/views.px:537
+#: skoljka/apps/accounts/registration_views.px:134
 msgctxt "account-action-link"
 msgid "Log in."
 msgstr "Prijavite se."
 
-#: skoljka/apps/accounts/views.px:550
+#: skoljka/apps/accounts/registration_views.px:147
 msgid "Please follow the instructions we sent to your email."
 msgstr "Slijedite upute koje smo poslali na vašu e-mail adresu."
 
-#: skoljka/apps/accounts/views.px:563
+#: skoljka/apps/accounts/registration_views.px:160
 msgid "Registration link expired"
 msgstr "Poveznica za registraciju je istekla"
 
-#: skoljka/apps/accounts/views.px:564 skoljka/apps/accounts/views.px:586
+#: skoljka/apps/accounts/registration_views.px:161
+#: skoljka/apps/accounts/registration_views.px:183
 msgid "This registration link is invalid or has expired."
 msgstr "Ova poveznica za registraciju nije valjana ili je istekla."
 
-#: skoljka/apps/accounts/views.px:565
+#: skoljka/apps/accounts/registration_views.px:162
 msgid "Request a new registration link"
 msgstr "Zatraži novu poveznicu za registraciju"
 
-#: skoljka/apps/accounts/views.px:571
+#: skoljka/apps/accounts/registration_views.px:168
 msgid "Account already exists"
 msgstr "Račun već postoji"
 
-#: skoljka/apps/accounts/views.px:572 skoljka/apps/accounts/views.px:603
+#: skoljka/apps/accounts/registration_views.px:169
+#: skoljka/apps/accounts/registration_views.px:200
 msgid "An account with this email already exists."
 msgstr "Račun s ovom e-mail adresom već postoji."
 
-#: skoljka/apps/accounts/views.px:588
+#: skoljka/apps/accounts/registration_views.px:185
 msgid "Username is required."
 msgstr "Korisničko ime je obavezno."
 
-#: skoljka/apps/accounts/views.px:599
+#: skoljka/apps/accounts/registration_views.px:196
 msgid "You must accept the terms of use."
 msgstr "Morate prihvatiti uvjete korištenja."
 
-#: skoljka/apps/accounts/views.px:605
+#: skoljka/apps/accounts/registration_views.px:202
 msgid "This username is already taken."
 msgstr "Ovo korisničko ime je već zauzeto."
 
-#: skoljka/apps/accounts/views.px:617
+#: skoljka/apps/accounts/registration_views.px:214
 msgid "Complete registration"
 msgstr "Dovršite registraciju"
 
-#: skoljka/apps/accounts/views.px:641 skoljka/components/layout.px:203
+#: skoljka/apps/accounts/registration_views.px:238
+#: skoljka/components/layout.px:206
 msgid "Username"
 msgstr "Korisničko ime"
 
-#: skoljka/apps/accounts/views.px:676
+#: skoljka/apps/accounts/registration_views.px:275
 msgctxt "account-action-link"
 msgid "Log in"
 msgstr "Prijavite se"
 
-#: skoljka/apps/accounts/views.px:703
+#: skoljka/apps/accounts/registration_views.px:283
+msgid "I accept the <a>Terms of Use</a>."
+msgstr "Prihvaćam <a>uvjete korištenja</a>."
+
+#: skoljka/apps/accounts/registration_views.px:316
 msgid "Continue your Školjka registration"
 msgstr "Nastavite svoju Školjka registraciju"
 
-#: skoljka/apps/accounts/views.px:705
+#: skoljka/apps/accounts/registration_views.px:318
 #, python-format
 msgid ""
 "Use this link to continue your Školjka registration:\n"
@@ -385,11 +398,11 @@ msgstr ""
 "\n"
 "Ako to niste zatražili, možete zanemariti ovu poruku."
 
-#: skoljka/apps/accounts/views.px:722
+#: skoljka/apps/accounts/registration_views.px:327
 msgid "Your Školjka account already exists"
 msgstr "Vaš Školjka račun već postoji"
 
-#: skoljka/apps/accounts/views.px:724
+#: skoljka/apps/accounts/registration_views.px:329
 #, python-format
 msgid ""
 "Someone tried to register a Školjka account with this email address, but an "
@@ -408,272 +421,346 @@ msgstr ""
 "\n"
 "Ako to niste zatražili, možete zanemariti ovu poruku."
 
-#: skoljka/apps/accounts/views.px:767 skoljka/apps/accounts/views.px:860
-msgid "Profile is private"
-msgstr "Profil je privatan"
+#: skoljka/apps/accounts/simple_views.px:11 skoljka/components/layout.px:242
+msgid "About"
+msgstr "O nama"
 
-#: skoljka/apps/accounts/views.px:801 skoljka/apps/accounts/views.px:815
-#: skoljka/apps/lists/components.px:23 skoljka/apps/search/views.px:90
-#: skoljka/apps/sources/components.px:71 skoljka/apps/sources/components.px:483
-#: skoljka/apps/tracking/views.px:114
-msgid "Solved"
-msgstr "Riješeno"
+#: skoljka/apps/accounts/simple_views.px:15
+msgid ""
+"Browse problems by source, topic, or search. Track your progress, bookmark "
+"problems, and take notes."
+msgstr ""
+"Pregledavajte zadatke po izvoru, temi ili pretraživanjem. Pratite napredak, "
+"spremajte zadatke i pišite bilješke."
 
-#: skoljka/apps/accounts/views.px:802 skoljka/apps/tracking/views.px:122
-msgid "Bookmarked"
-msgstr "Spremljeno"
+#: skoljka/apps/accounts/simple_views.px:20
+msgid "Contact: "
+msgstr "Kontakt: "
 
-#: skoljka/apps/accounts/views.px:805
-msgid "Edit profile"
-msgstr "Uredi profil"
+#: skoljka/apps/accounts/simple_views.px:22
+msgid "email"
+msgstr "e-mail"
 
-#: skoljka/apps/accounts/views.px:809
-msgid "Solved by source"
-msgstr "Riješeno po izvoru"
+#: skoljka/apps/accounts/simple_views.px:32
+msgid "Privacy Policy"
+msgstr "Pravila privatnosti"
 
-#: skoljka/apps/accounts/views.px:814 skoljka/apps/problems/admin_views.px:41
-#: skoljka/apps/problems/admin_views.px:263
-#: skoljka/apps/problems/components.px:289
-#: skoljka/task/templates/task_detail.html:99
-msgid "Source"
-msgstr "Izvor"
+#: skoljka/apps/accounts/simple_views.px:35
+msgid ""
+"Školjka stores the information needed to run your account, including your "
+"username, email address, profile settings, saved problems, solving progress, "
+"likes, lists, notes, and uploaded content."
+msgstr ""
+"Školjka pohranjuje podatke potrebne za rad vašeg računa, uključujući "
+"korisničko ime, e-mail adresu, postavke profila, spremljene zadatke, "
+"napredak u rješavanju, oznake sviđanja, popise, bilješke i preneseni sadržaj."
 
-#: skoljka/apps/accounts/views.px:827
-msgid "Liked problems"
-msgstr "Zadaci koji vam se sviđaju"
+#: skoljka/apps/accounts/simple_views.px:42
+msgid ""
+"We use this data to provide the service, keep the site secure, and improve "
+"the application. We do not sell personal data."
+msgstr ""
+"Te podatke koristimo za pružanje usluge, održavanje sigurnosti stranice i "
+"poboljšavanje aplikacije. Ne prodajemo osobne podatke."
 
-#: skoljka/apps/accounts/views.px:839 skoljka/apps/accounts/views.px:876
-msgid "Bookmarked problems"
-msgstr "Spremljeni zadaci"
+#: skoljka/apps/accounts/simple_views.px:48
+msgid ""
+"You may contact the site administrators to request account deletion or "
+"correction of your personal data."
+msgstr ""
+"Možete se obratiti administratorima stranice kako biste zatražili brisanje "
+"računa ili ispravak svojih osobnih podataka."
 
-#: skoljka/apps/accounts/views.px:863
-#, python-format
-msgid "%(username)s liked problems"
-msgstr "Zadaci koji se sviđaju korisniku %(username)s"
+#: skoljka/apps/accounts/simple_views.px:59
+msgid "Terms of Use"
+msgstr "Uvjeti korištenja"
 
-#: skoljka/apps/accounts/views.px:873 skoljka/apps/sources/views.px:237
-msgid "Not found"
-msgstr "Nije pronađeno"
+#: skoljka/apps/accounts/simple_views.px:62
+msgid ""
+"Školjka is provided as an educational problem archive. Use the site "
+"responsibly and do not upload unlawful, abusive, or misleading content."
+msgstr ""
+"Školjka se pruža kao obrazovna arhiva zadataka. Koristite stranicu odgovorno "
+"i nemojte prenositi nezakonit, uvredljiv ili obmanjujući sadržaj."
 
-#: skoljka/apps/accounts/views.px:921
-msgid "Settings"
-msgstr "Postavke"
+#: skoljka/apps/accounts/simple_views.px:68
+msgid ""
+"Problem statements and other materials may be subject to copyright. By "
+"adding content, you confirm that you have the right to share it or that your "
+"use is otherwise lawful."
+msgstr ""
+"Tekstovi zadataka i drugi materijali mogu biti zaštićeni autorskim pravom. "
+"Dodavanjem sadržaja potvrđujete da ga imate pravo dijeliti ili da je vaše "
+"korištenje na drugi način zakonito."
 
-#: skoljka/apps/accounts/views.px:922
-msgid "Settings saved."
-msgstr "Postavke su spremljene."
-
-#: skoljka/apps/accounts/views.px:933
-msgid "Public profile"
-msgstr "Javni profil"
-
-#: skoljka/apps/accounts/views.px:936 skoljka/apps/news/views.px:302
-#: skoljka/apps/problems/admin_views.px:294
-#: skoljka/apps/sources/admin_views.px:462
-msgid "Save"
-msgstr "Spremi"
+#: skoljka/apps/accounts/simple_views.px:75
+msgid ""
+"The service is provided without warranty. We may remove content or restrict "
+"accounts when needed to protect the site and its users."
+msgstr ""
+"Usluga se pruža bez jamstva. Možemo ukloniti sadržaj ili ograničiti račune "
+"kada je to potrebno radi zaštite stranice i njezinih korisnika."
 
 #: skoljka/apps/content/views.py:24
 msgid "No files uploaded."
 msgstr "Nema prenesenih datoteka."
 
-#: skoljka/apps/importer/views.px:59
+#: skoljka/apps/importer/views.px:85
 msgid "Import from PDF"
 msgstr "Uvoz iz PDF-a"
 
-#: skoljka/apps/importer/views.px:141
+#: skoljka/apps/importer/views.px:167
 msgid "Missing 'pdf' upload"
 msgstr "Nedostaje prijenos PDF-a"
 
-#: skoljka/apps/importer/views.px:147
+#: skoljka/apps/importer/views.px:173
 msgid "Invalid pages parameter"
 msgstr "Neispravan parametar stranica"
 
-#: skoljka/apps/importer/views.px:149
+#: skoljka/apps/importer/views.px:175
 msgid "No pages selected"
 msgstr "Nijedna stranica nije odabrana"
 
-#: skoljka/apps/importer/views.px:151
+#: skoljka/apps/importer/views.px:177
 msgid "Invalid page indices"
 msgstr "Neispravni indeksi stranica"
 
-#: skoljka/apps/importer/views.px:155 skoljka/apps/importer/views.px:284
+#: skoljka/apps/importer/views.px:181 skoljka/apps/importer/views.px:323
 msgid "Choose a source before importing."
 msgstr "Odaberite izvor prije uvoza."
 
-#: skoljka/apps/importer/views.px:159 skoljka/apps/importer/views.px:288
-#: skoljka/apps/importer/views.px:303
+#: skoljka/apps/importer/views.px:185 skoljka/apps/importer/views.px:327
+#: skoljka/apps/importer/views.px:332 skoljka/apps/importer/views.px:345
+#: skoljka/apps/importer/views.px:347 skoljka/apps/importer/views.px:351
 msgid "Source not found"
 msgstr "Izvor nije pronađen"
 
-#: skoljka/apps/importer/views.px:165
+#: skoljka/apps/importer/views.px:191
 #, python-format
 msgid "Failed to slice PDF: %(error)s"
 msgstr "Nije uspjelo izdvajanje stranica PDF-a: %(error)s"
 
-#: skoljka/apps/importer/views.px:198
+#: skoljka/apps/importer/views.px:224
 msgid "Job not found or already terminal"
 msgstr "Posao nije pronađen ili je već završen"
 
-#: skoljka/apps/importer/views.px:210
+#: skoljka/apps/importer/views.px:236
 msgid "Job not found or still active"
 msgstr "Posao nije pronađen ili je još aktivan"
 
-#: skoljka/apps/importer/views.px:237 skoljka/apps/importer/views.px:270
-#: skoljka/apps/problems/views.px:101 skoljka/apps/sources/admin_views.px:224
+#: skoljka/apps/importer/views.px:263 skoljka/apps/importer/views.px:265
+#: skoljka/apps/importer/views.px:298 skoljka/apps/importer/views.px:300
+#: skoljka/apps/problems/views.px:101 skoljka/apps/problems/views.px:103
+#: skoljka/apps/sources/admin_views.px:266
 msgid "Invalid JSON"
 msgstr "Neispravan JSON"
 
-#: skoljka/apps/importer/views.px:241 skoljka/apps/importer/views.px:245
-#: skoljka/apps/importer/views.px:248 skoljka/apps/problems/views.px:105
-#: skoljka/apps/problems/views.px:110 skoljka/apps/problems/views.px:113
+#: skoljka/apps/importer/views.px:269 skoljka/apps/importer/views.px:273
+#: skoljka/apps/importer/views.px:276 skoljka/apps/importer/views.px:337
+#: skoljka/apps/importer/views.px:340 skoljka/apps/problems/views.px:107
+#: skoljka/apps/problems/views.px:112 skoljka/apps/problems/views.px:115
 msgid "Invalid problems"
 msgstr "Neispravni zadaci"
 
-#: skoljka/apps/importer/views.px:281
+#: skoljka/apps/importer/views.px:311
 msgid "No problems to import"
 msgstr "Nema zadataka za uvoz"
+
+#: skoljka/apps/importer/views.px:313 skoljka/apps/importer/views.px:355
+msgid "Invalid tags"
+msgstr "Neispravne oznake"
+
+#: skoljka/apps/importer/views.px:315
+msgid "Invalid language"
+msgstr "Neispravan jezik"
+
+#: skoljka/apps/importer/views.px:320
+msgid "Invalid year"
+msgstr "Neispravna godina"
 
 #: skoljka/apps/lists/components.px:22 skoljka/apps/sources/admin_views.px:37
 msgid "Name"
 msgstr "Naziv"
 
-#: skoljka/apps/lists/components.px:23 skoljka/apps/lists/views.px:217
+#: skoljka/apps/lists/components.px:23 skoljka/apps/lists/editor_views.px:57
 #: skoljka/apps/problems/views.px:74 skoljka/apps/problems/views.px:92
-#: skoljka/apps/sources/components.px:71 skoljka/apps/sources/views.px:166
-#: skoljka/apps/tags/views.px:45 skoljka/apps/tags/views.px:121
-#: skoljka/apps/tags/views.px:152 skoljka/components/layout.px:125
+#: skoljka/apps/sources/components.px:67 skoljka/apps/sources/views.px:166
+#: skoljka/apps/tags/views.px:42 skoljka/apps/tags/views.px:69
+#: skoljka/apps/tags/views.px:101 skoljka/components/layout.px:128
 msgid "Problems"
 msgstr "Zadaci"
 
-#: skoljka/apps/lists/views.px:55 skoljka/components/layout.px:165
-msgid "Lists"
-msgstr "Liste"
-
-#: skoljka/apps/lists/views.px:61
-msgid "My Lists"
-msgstr "Moje liste"
-
-#: skoljka/apps/lists/views.px:67
-msgid "Public Lists"
-msgstr "Javne liste"
-
-#: skoljka/apps/lists/views.px:78
-msgid "New list"
-msgstr "Nova lista"
-
-#: skoljka/apps/lists/views.px:112 skoljka/apps/news/views.px:169
-#: skoljka/apps/problems/admin_views.px:64 skoljka/apps/problems/views.px:178
-#: skoljka/apps/sources/admin_views.px:60 skoljka/apps/sources/views.px:65
-#: skoljka/apps/sources/views.px:196 skoljka/apps/tags/views.px:213
-msgid "Edit"
-msgstr "Uredi"
-
-#: skoljka/apps/lists/views.px:114 skoljka/apps/lists/views.px:257
-#: skoljka/apps/sources/views.px:210
-msgid "Bulk edit"
-msgstr "Skupno uređivanje"
-
-#: skoljka/apps/lists/views.px:129 skoljka/apps/lists/views.px:161
-#: skoljka/apps/news/views.px:206
-msgid "Title is required."
-msgstr "Naslov je obavezan."
-
-#: skoljka/apps/lists/views.px:141
-msgid "New List"
-msgstr "Nova lista"
-
-#: skoljka/apps/lists/views.px:153 skoljka/apps/lists/views.px:186
-#: skoljka/apps/lists/views.px:268 skoljka/apps/lists/views.px:279
-#: skoljka/apps/lists/views.px:295 skoljka/apps/lists/views.px:363
-#: skoljka/apps/lists/views.px:408 skoljka/apps/problems/bulk_edit.px:127
-#: skoljka/apps/sources/views.px:228 skoljka/apps/sources/views.px:265
+#: skoljka/apps/lists/editor_views.px:26 skoljka/apps/lists/editor_views.px:157
+#: skoljka/apps/lists/editor_views.px:202 skoljka/apps/lists/views.px:142
+#: skoljka/apps/lists/views.px:172 skoljka/apps/lists/views.px:187
+#: skoljka/apps/lists/views.px:203 skoljka/apps/problems/bulk_edit.px:129
+#: skoljka/apps/sources/views.px:228 skoljka/apps/sources/views.px:263
 #: skoljka/utils/staff.py:16
 msgid "Forbidden"
 msgstr "Zabranjeno"
 
-#: skoljka/apps/lists/views.px:172
-#, python-format
-msgid "Edit details: %(title)s"
-msgstr "Uredi detalje: %(title)s"
-
-#: skoljka/apps/lists/views.px:203 skoljka/apps/problems/admin_views.px:103
-#: skoljka/apps/sources/admin_views.px:202
+#: skoljka/apps/lists/editor_views.px:43
+#: skoljka/apps/problems/admin_views.px:113
+#: skoljka/apps/sources/admin_views.px:244
 #, python-format
 msgid "Edit: %(title)s"
 msgstr "Uredi: %(title)s"
 
-#: skoljka/apps/lists/views.px:222
+#: skoljka/apps/lists/editor_views.px:62
 msgid "No problems yet."
 msgstr "Još nema zadataka."
 
-#: skoljka/apps/lists/views.px:226 skoljka/apps/tags/views.px:317
+#: skoljka/apps/lists/editor_views.px:66 skoljka/apps/tags/views.px:111
 msgid "Save changes"
 msgstr "Spremi izmjene"
 
-#: skoljka/apps/lists/views.px:235
+#: skoljka/apps/lists/editor_views.px:75
 msgid "Remove selected"
 msgstr "Ukloni odabrano"
 
-#: skoljka/apps/lists/views.px:251 skoljka/apps/lists/views.px:304
-#: skoljka/apps/news/views.px:303 skoljka/apps/problems/bulk_edit.px:39
-#: skoljka/apps/sources/admin_views.px:146
-#: skoljka/apps/sources/admin_views.px:203 skoljka/apps/tags/views.px:318
+#: skoljka/apps/lists/editor_views.px:91 skoljka/apps/lists/views.px:212
+#: skoljka/apps/news/views.px:250 skoljka/apps/problems/bulk_edit.px:39
+#: skoljka/apps/sources/admin_views.px:173
+#: skoljka/apps/sources/admin_views.px:245 skoljka/apps/tags/views.px:112
 msgid "Back"
 msgstr "Natrag"
 
-#: skoljka/apps/lists/views.px:254 skoljka/apps/sources/admin_views.px:205
+#: skoljka/apps/lists/editor_views.px:94
+#: skoljka/apps/sources/admin_views.px:247
 msgid "Details"
 msgstr "Detalji"
 
-#: skoljka/apps/lists/views.px:282 skoljka/apps/sources/views.px:249
-#, python-format
-msgid "Bulk edit: %(title)s"
-msgstr "Skupno uređivanje: %(title)s"
+#: skoljka/apps/lists/editor_views.px:97 skoljka/apps/lists/views.px:112
+#: skoljka/apps/sources/views.px:210
+msgid "Bulk edit"
+msgstr "Skupno uređivanje"
 
-#: skoljka/apps/lists/views.px:283
-#, python-format
-msgid "List: %(title)s"
-msgstr "Lista: %(title)s"
-
-#: skoljka/apps/lists/views.px:316 skoljka/apps/problems/views.px:131
+#: skoljka/apps/lists/editor_views.px:110 skoljka/apps/problems/views.px:133
 msgid "Add problem"
 msgstr "Dodaj zadatak"
 
-#: skoljka/apps/lists/views.px:324
+#: skoljka/apps/lists/editor_views.px:118
 msgid "Find problem"
 msgstr "Pronađi zadatak"
 
-#: skoljka/apps/lists/views.px:422 skoljka/apps/problems/bulk_edit.px:95
-#: skoljka/apps/problems/bulk_edit.px:115
+#: skoljka/apps/lists/editor_views.px:218 skoljka/apps/problems/bulk_edit.px:97
+#: skoljka/apps/problems/bulk_edit.px:117
 msgid "Invalid problem list."
 msgstr "Neispravna lista zadataka."
 
-#: skoljka/apps/lists/views.px:430 skoljka/apps/problems/bulk_edit.px:118
+#: skoljka/apps/lists/editor_views.px:226
+#: skoljka/apps/problems/bulk_edit.px:120
 msgid "Problem not found."
 msgstr "Zadatak nije pronađen."
 
-#: skoljka/apps/lists/views.px:454 skoljka/apps/news/views.px:51
-#: skoljka/apps/news/views.px:255 skoljka/apps/problems/admin_views.px:40
+#: skoljka/apps/lists/forms.py:10 skoljka/apps/lists/views.px:230
+#: skoljka/apps/news/forms.py:12 skoljka/apps/news/views.px:51
+#: skoljka/apps/news/views.px:212 skoljka/apps/problems/admin_views.px:40
 #: skoljka/apps/problems/export_views.px:75
 msgid "Title"
 msgstr "Naslov"
 
-#: skoljka/apps/lists/views.px:458
+#: skoljka/apps/lists/forms.py:11 skoljka/apps/news/forms.py:13
+msgid "Title is required."
+msgstr "Naslov je obavezan."
+
+#: skoljka/apps/lists/forms.py:16 skoljka/apps/lists/views.px:234
 msgid "Description"
 msgstr "Opis"
 
-#: skoljka/apps/lists/views.px:465
+#: skoljka/apps/lists/forms.py:18 skoljka/apps/lists/views.px:241
 msgid "Public"
 msgstr "Javno"
 
-#: skoljka/apps/lists/views.px:468
+#: skoljka/apps/lists/views.px:50 skoljka/components/layout.px:168
+msgid "Lists"
+msgstr "Liste"
+
+#: skoljka/apps/lists/views.px:56
+msgid "My Lists"
+msgstr "Moje liste"
+
+#: skoljka/apps/lists/views.px:62
+msgid "Public Lists"
+msgstr "Javne liste"
+
+#: skoljka/apps/lists/views.px:73
+msgid "New list"
+msgstr "Nova lista"
+
+#: skoljka/apps/lists/views.px:110 skoljka/apps/news/views.px:172
+#: skoljka/apps/problems/admin_views.px:64 skoljka/apps/problems/views.px:180
+#: skoljka/apps/sources/admin_views.px:60 skoljka/apps/sources/views.px:65
+#: skoljka/apps/sources/views.px:196 skoljka/apps/tags/views.px:169
+msgid "Edit"
+msgstr "Uredi"
+
+#: skoljka/apps/lists/views.px:129
+msgid "New List"
+msgstr "Nova lista"
+
+#: skoljka/apps/lists/views.px:157
+#, python-format
+msgid "Edit details: %(title)s"
+msgstr "Uredi detalje: %(title)s"
+
+#: skoljka/apps/lists/views.px:190 skoljka/apps/sources/views.px:247
+#, python-format
+msgid "Bulk edit: %(title)s"
+msgstr "Skupno uređivanje: %(title)s"
+
+#: skoljka/apps/lists/views.px:191
+#, python-format
+msgid "List: %(title)s"
+msgstr "Lista: %(title)s"
+
+#: skoljka/apps/lists/views.px:244
 msgid "Update"
 msgstr "Ažuriraj"
 
-#: skoljka/apps/lists/views.px:468
+#: skoljka/apps/lists/views.px:244
 msgid "Create"
 msgstr "Stvori"
+
+#: skoljka/apps/news/forms.py:17 skoljka/apps/news/views.px:216
+#: skoljka/apps/sources/admin_views.px:38
+#: skoljka/apps/sources/admin_views.px:337
+#: skoljka/apps/sources/admin_views.px:391 skoljka/apps/sources/forms.py:10
+#: skoljka/apps/tags/forms.py:18 skoljka/apps/tags/views.px:61
+#: skoljka/apps/tags/views.px:211
+msgid "Slug"
+msgstr "Slug"
+
+#: skoljka/apps/news/forms.py:18 skoljka/apps/news/views.px:222
+msgid "Generated from title if empty"
+msgstr ""
+
+#: skoljka/apps/news/forms.py:20 skoljka/apps/news/views.px:226
+#: skoljka/apps/problems/admin_views.px:260
+#: skoljka/apps/sources/components.px:341
+msgid "Language"
+msgstr "Jezik"
+
+#: skoljka/apps/news/forms.py:24 skoljka/apps/news/views.px:237
+#: skoljka/apps/problems/admin_views.px:229
+#: skoljka/apps/problems/admin_views.px:254
+msgid "Content"
+msgstr "Sadržaj"
+
+#: skoljka/apps/news/forms.py:26 skoljka/apps/news/views.px:180
+#: skoljka/apps/news/views.px:233 skoljka/apps/tags/forms.py:28
+#: skoljka/apps/tags/views.px:64 skoljka/apps/tags/views.px:230
+msgid "Hidden"
+msgstr "Skriveno"
+
+#: skoljka/apps/news/forms.py:37 skoljka/apps/sources/admin_views.px:281
+#: skoljka/apps/sources/forms.py:11 skoljka/apps/tags/forms.py:19
+msgid "Slug is required."
+msgstr "Slug je obavezan."
+
+#: skoljka/apps/news/forms.py:42
+msgid "Slug is already taken."
+msgstr "Slug je već zauzet."
 
 #: skoljka/apps/news/views.px:26
 msgid "News"
@@ -691,88 +778,52 @@ msgstr "Nova objava"
 msgid "Status"
 msgstr "Status"
 
-#: skoljka/apps/news/views.px:93
+#: skoljka/apps/news/views.px:95
 msgid "Edit News Post"
 msgstr "Uredi objavu"
 
-#: skoljka/apps/news/views.px:108
+#: skoljka/apps/news/views.px:111
 msgid "Delete News Post"
 msgstr "Izbriši objavu"
 
-#: skoljka/apps/news/views.px:111
+#: skoljka/apps/news/views.px:114
 msgid "Delete this news post?"
 msgstr "Izbrisati ovu objavu?"
 
-#: skoljka/apps/news/views.px:114 skoljka/apps/news/views.px:137
-#: skoljka/apps/problems/admin_views.px:111
-#: skoljka/apps/problems/admin_views.px:137
-#: skoljka/apps/sources/components.px:396 skoljka/apps/tags/views.px:230
+#: skoljka/apps/news/views.px:117 skoljka/apps/news/views.px:140
+#: skoljka/apps/problems/admin_views.px:121
+#: skoljka/apps/problems/admin_views.px:147
+#: skoljka/apps/sources/components.px:392 skoljka/apps/tags/views.px:186
 msgid "Delete"
 msgstr "Izbriši"
 
-#: skoljka/apps/news/views.px:119 skoljka/apps/problems/admin_views.px:138
+#: skoljka/apps/news/views.px:122 skoljka/apps/problems/admin_views.px:148
 msgid "Cancel"
 msgstr "Odustani"
 
-#: skoljka/apps/news/views.px:157
+#: skoljka/apps/news/views.px:160
 msgid "No content yet."
 msgstr "Još nema sadržaja."
 
-#: skoljka/apps/news/views.px:177 skoljka/apps/news/views.px:286
-#: skoljka/apps/tags/views.px:71 skoljka/apps/tags/views.px:116
-#: skoljka/apps/tags/views.px:258
-msgid "Hidden"
-msgstr "Skriveno"
-
-#: skoljka/apps/news/views.px:178
+#: skoljka/apps/news/views.px:181
 msgid "Visible"
 msgstr "Vidljivo"
 
-#: skoljka/apps/news/views.px:183
+#: skoljka/apps/news/views.px:186
 msgid "unknown"
 msgstr "nepoznato"
 
-#: skoljka/apps/news/views.px:185
+#: skoljka/apps/news/views.px:188
 #, python-format
 msgid "Created %(created)s by %(author)s"
 msgstr "Stvoreno %(created)s, autor %(author)s"
 
-#: skoljka/apps/news/views.px:190
+#: skoljka/apps/news/views.px:193
 #, python-format
 msgid "Created %(created)s, last edited %(updated)s by %(author)s"
 msgstr "Stvoreno %(created)s, zadnji put uređeno %(updated)s, autor %(author)s"
 
-#: skoljka/apps/news/views.px:209 skoljka/apps/sources/admin_views.px:239
-#: skoljka/apps/sources/admin_views.px:284 skoljka/apps/tags/views.px:422
-msgid "Slug is required."
-msgstr "Slug je obavezan."
-
-#: skoljka/apps/news/views.px:211
-msgid "Slug is already taken."
-msgstr "Slug je već zauzet."
-
-#: skoljka/apps/news/views.px:265 skoljka/apps/sources/admin_views.px:38
-#: skoljka/apps/sources/admin_views.px:423
-#: skoljka/apps/sources/admin_views.px:477 skoljka/apps/tags/views.px:58
-#: skoljka/apps/tags/views.px:113 skoljka/apps/tags/views.px:245
-msgid "Slug"
-msgstr "Slug"
-
-#: skoljka/apps/news/views.px:271
-msgid "Generated from title if empty"
-msgstr ""
-
-#: skoljka/apps/news/views.px:275 skoljka/apps/problems/admin_views.px:339
-#: skoljka/apps/sources/components.px:345
-msgid "Language"
-msgstr "Jezik"
-
-#: skoljka/apps/news/views.px:290 skoljka/apps/problems/admin_views.px:308
-#: skoljka/apps/problems/admin_views.px:333
-msgid "Content"
-msgstr "Sadržaj"
-
-#: skoljka/apps/news/views.px:299
+#: skoljka/apps/news/views.px:246
 msgid "Save once before uploading attachments."
 msgstr "Spremite jednom prije učitavanja priloga."
 
@@ -780,14 +831,14 @@ msgstr "Spremite jednom prije učitavanja priloga."
 msgid "Manage Problems"
 msgstr "Upravljanje zadacima"
 
-#: skoljka/apps/problems/admin_views.px:30 skoljka/apps/problems/views.px:133
-#: skoljka/apps/tags/views.px:43 skoljka/apps/tags/views.px:46
-#: skoljka/apps/tags/views.px:153
+#: skoljka/apps/problems/admin_views.px:30 skoljka/apps/problems/views.px:135
+#: skoljka/apps/tags/views.px:40 skoljka/apps/tags/views.px:43
+#: skoljka/apps/tags/views.px:102
 msgid "Manage Tags"
 msgstr "Upravljanje oznakama"
 
 #: skoljka/apps/problems/admin_views.px:31
-#: skoljka/apps/problems/admin_views.px:81
+#: skoljka/apps/problems/admin_views.px:84
 msgid "New Problem"
 msgstr "Novi zadatak"
 
@@ -796,57 +847,49 @@ msgid "ID"
 msgstr "ID"
 
 #: skoljka/apps/problems/admin_views.px:42
-#: skoljka/apps/problems/admin_views.px:274
-#: skoljka/apps/sources/components.px:343
-#: skoljka/apps/sources/components.px:481
+#: skoljka/apps/problems/admin_views.px:195 skoljka/apps/problems/forms.py:20
+#: skoljka/apps/sources/components.px:339
+#: skoljka/apps/sources/components.px:475
 msgid "Year"
 msgstr "Godina"
 
 #: skoljka/apps/problems/admin_views.px:43
-#: skoljka/apps/problems/admin_views.px:278
+#: skoljka/apps/problems/admin_views.px:199 skoljka/apps/problems/forms.py:21
 msgid "No."
 msgstr "Br."
 
-#: skoljka/apps/problems/admin_views.px:106
+#: skoljka/apps/problems/admin_views.px:116
 msgid "View problem"
 msgstr "Prikaži zadatak"
 
-#: skoljka/apps/problems/admin_views.px:131
+#: skoljka/apps/problems/admin_views.px:141
 msgid "Delete problem"
 msgstr "Izbriši zadatak"
 
-#: skoljka/apps/problems/admin_views.px:133
+#: skoljka/apps/problems/admin_views.px:143
 msgid "Are you sure you want to delete this problem?"
 msgstr "Jeste li sigurni da želite izbrisati ovaj zadatak?"
 
-#: skoljka/apps/problems/admin_views.px:161
-msgid "Year must be an integer."
-msgstr "Godina mora biti cijeli broj."
-
-#: skoljka/apps/problems/admin_views.px:171
-msgid "Source not found."
-msgstr "Izvor nije pronađen."
-
-#: skoljka/apps/problems/admin_views.px:258
+#: skoljka/apps/problems/admin_views.px:179 skoljka/apps/problems/forms.py:13
 msgid "Title (optional)"
 msgstr "Naslov (neobavezno)"
 
-#: skoljka/apps/problems/admin_views.px:288
-#: skoljka/apps/problems/components.px:290
-#: skoljka/apps/sources/admin_views.px:454
+#: skoljka/apps/problems/admin_views.px:209
+#: skoljka/apps/problems/components.px:232 skoljka/apps/problems/forms.py:22
+#: skoljka/apps/sources/admin_views.px:368 skoljka/apps/sources/forms.py:30
 msgid "Tags"
 msgstr "Oznake"
 
-#: skoljka/apps/problems/admin_views.px:296
+#: skoljka/apps/problems/admin_views.px:217
 #: skoljka/components/content_editor.px:62
 msgid "Input format help"
 msgstr "Pomoć za format unosa"
 
-#: skoljka/apps/problems/admin_views.px:333
+#: skoljka/apps/problems/admin_views.px:254
 msgid "Add translation"
 msgstr "Dodaj prijevod"
 
-#: skoljka/apps/problems/admin_views.px:345
+#: skoljka/apps/problems/admin_views.px:266
 msgid "e.g. en, hr"
 msgstr "npr. en, hr"
 
@@ -858,33 +901,33 @@ msgstr[0] "%(count)s zadatak"
 msgstr[1] "%(count)s zadatka"
 msgstr[2] "%(count)s zadataka"
 
-#: skoljka/apps/problems/components.px:236
+#: skoljka/apps/problems/components.px:179
 msgid "Cards"
 msgstr "Kartice"
 
-#: skoljka/apps/problems/components.px:237
+#: skoljka/apps/problems/components.px:180
 msgid "Table"
 msgstr "Tablica"
 
-#: skoljka/apps/problems/components.px:244
+#: skoljka/apps/problems/components.px:187
 #: skoljka/apps/problems/export_views.px:70
 msgid "Export PDF"
 msgstr "Izvezi PDF"
 
-#: skoljka/apps/problems/components.px:279
-#: skoljka/apps/problems/components.px:304
+#: skoljka/apps/problems/components.px:222
+#: skoljka/apps/problems/components.px:246
 #: skoljka/apps/problems/export_views.px:120
-#: skoljka/apps/problems/pdf_export.py:134
+#: skoljka/apps/problems/pdf_export.py:131
 msgid "No problems found."
 msgstr "Nema pronađenih zadataka."
 
-#: skoljka/apps/problems/components.px:288 skoljka/apps/problems/views.px:65
+#: skoljka/apps/problems/components.px:230 skoljka/apps/problems/views.px:65
 msgid "Problem"
 msgstr "Zadatak"
 
-#: skoljka/apps/problems/components.px:401
+#: skoljka/apps/problems/components.px:342
 #: skoljka/apps/problems/export_views.px:144
-#: skoljka/apps/problems/pdf_export.py:148 skoljka/apps/problems/views.px:165
+#: skoljka/apps/problems/pdf_export.py:145 skoljka/apps/problems/views.px:167
 msgid "No problem statement available."
 msgstr "Tekst zadatka nije dostupan."
 
@@ -917,12 +960,12 @@ msgstr "Preuzmi PDF"
 msgid "Export to LaTeX"
 msgstr "Izvezi u LaTeX"
 
-#: skoljka/apps/problems/pdf_export.py:57
-#: skoljka/apps/problems/pdf_export.py:92
+#: skoljka/apps/problems/pdf_export.py:56
+#: skoljka/apps/problems/pdf_export.py:90
 msgid "Too many problems to export at once."
 msgstr "Previše zadataka za jedan izvoz."
 
-#: skoljka/apps/problems/pdf_export.py:79
+#: skoljka/apps/problems/pdf_export.py:77
 msgid "PDF export failed."
 msgstr "Izvoz PDF-a nije uspio."
 
@@ -931,11 +974,11 @@ msgstr "Izvoz PDF-a nije uspio."
 msgid "Problem %(number)s"
 msgstr "Zadatak %(number)s"
 
-#: skoljka/apps/problems/views.px:132
+#: skoljka/apps/problems/views.px:134
 msgid "Import"
 msgstr "Uvezi"
 
-#: skoljka/apps/search/views.px:55 skoljka/components/layout.px:137
+#: skoljka/apps/search/views.px:55 skoljka/components/layout.px:140
 msgid "Search problems..."
 msgstr "Pretraži zadatke..."
 
@@ -977,19 +1020,20 @@ msgid "Manage Sources"
 msgstr "Upravljanje izvorima"
 
 #: skoljka/apps/sources/admin_views.px:32
-#: skoljka/apps/sources/admin_views.px:173
+#: skoljka/apps/sources/admin_views.px:206
 msgid "New Source"
 msgstr "Novi izvor"
 
 #: skoljka/apps/sources/admin_views.px:39
-#: skoljka/apps/sources/admin_views.px:441 skoljka/apps/tags/views.px:66
-#: skoljka/apps/tags/views.px:115 skoljka/apps/tags/views.px:253
+#: skoljka/apps/sources/admin_views.px:355 skoljka/apps/sources/forms.py:27
+#: skoljka/apps/tags/forms.py:26 skoljka/apps/tags/views.px:63
+#: skoljka/apps/tags/views.px:225
 msgid "Parent"
 msgstr "Roditelj"
 
 #: skoljka/apps/sources/admin_views.px:40
-#: skoljka/apps/sources/admin_views.px:450
-#: skoljka/apps/sources/admin_views.px:480
+#: skoljka/apps/sources/admin_views.px:364
+#: skoljka/apps/sources/admin_views.px:394 skoljka/apps/sources/forms.py:29
 msgid "Order"
 msgstr "Redoslijed"
 
@@ -997,115 +1041,91 @@ msgstr "Redoslijed"
 msgid "Choose at least one source."
 msgstr "Odaberite barem jedan izvor."
 
-#: skoljka/apps/sources/admin_views.px:102
+#: skoljka/apps/sources/admin_views.px:129
 msgid "Export archive"
 msgstr "Izvoz arhive"
 
-#: skoljka/apps/sources/admin_views.px:107 skoljka/apps/tags/views.px:122
+#: skoljka/apps/sources/admin_views.px:134 skoljka/apps/tags/views.px:70
 msgid "Sources"
 msgstr "Izvori"
 
-#: skoljka/apps/sources/admin_views.px:127
+#: skoljka/apps/sources/admin_views.px:154
 msgid "Include child sources"
 msgstr "Uključi podizvore"
 
-#: skoljka/apps/sources/admin_views.px:132
+#: skoljka/apps/sources/admin_views.px:159
 msgid "Include source documents"
 msgstr "Uključi dokumente izvora"
 
-#: skoljka/apps/sources/admin_views.px:137
+#: skoljka/apps/sources/admin_views.px:164
 msgid "Include problem attachments"
 msgstr "Uključi privitke zadataka"
 
-#: skoljka/apps/sources/admin_views.px:142
+#: skoljka/apps/sources/admin_views.px:169
 msgid "Public only"
 msgstr "Samo javno"
 
-#: skoljka/apps/sources/admin_views.px:145 skoljka/apps/sources/views.px:201
+#: skoljka/apps/sources/admin_views.px:172 skoljka/apps/sources/views.px:201
 msgid "Export"
 msgstr "Izvezi"
 
-#: skoljka/apps/sources/admin_views.px:210 skoljka/apps/tags/views.px:123
+#: skoljka/apps/sources/admin_views.px:252 skoljka/apps/tags/views.px:71
 msgid "Children"
 msgstr "Djeca"
 
-#: skoljka/apps/sources/admin_views.px:227
+#: skoljka/apps/sources/admin_views.px:269
 msgid "Invalid source data."
 msgstr "Neispravni podaci izvora."
 
-#: skoljka/apps/sources/admin_views.px:241
-#: skoljka/apps/sources/admin_views.px:286 skoljka/apps/tags/views.px:426
+#: skoljka/apps/sources/admin_views.px:283 skoljka/apps/sources/forms.py:15
+#: skoljka/apps/tags/forms.py:31
 msgid "Name (EN) is required."
 msgstr "Naziv (EN) je obavezan."
 
-#: skoljka/apps/sources/admin_views.px:243
-#: skoljka/apps/sources/admin_views.px:299
+#: skoljka/apps/sources/admin_views.px:285 skoljka/apps/sources/forms.py:46
 msgid "A source with this slug already exists."
 msgstr "Izvor s ovim slugom već postoji."
 
-#: skoljka/apps/sources/admin_views.px:249
-#: skoljka/apps/sources/admin_views.px:313
+#: skoljka/apps/sources/admin_views.px:291 skoljka/apps/sources/forms.py:56
 msgid "Parent source not found."
 msgstr "Roditeljski izvor nije pronađen."
 
-#: skoljka/apps/sources/admin_views.px:291
-msgid "Order must be an integer."
-msgstr "Redoslijed mora biti cijeli broj."
-
-#: skoljka/apps/sources/admin_views.px:358
-#, python-format
-msgid "Child row %(number)s: slug is required."
-msgstr "Redak djeteta %(number)s: slug je obavezan."
-
-#: skoljka/apps/sources/admin_views.px:360
-#, python-format
-msgid "Child row %(number)s: Name (EN) is required."
-msgstr "Redak djeteta %(number)s: naziv (EN) je obavezan."
-
-#: skoljka/apps/sources/admin_views.px:364
-#, python-format
-msgid "Child row %(number)s: order must be an integer."
-msgstr "Redak djeteta %(number)s: redoslijed mora biti cijeli broj."
-
-#: skoljka/apps/sources/admin_views.px:373
-#, python-format
-msgid "Child row %(number)s: a source with this slug already exists."
-msgstr "Redak djeteta %(number)s: izvor s ovim slugom već postoji."
-
-#: skoljka/apps/sources/admin_views.px:427
-#: skoljka/apps/sources/admin_views.px:478 skoljka/apps/tags/views.px:76
-#: skoljka/apps/tags/views.px:117 skoljka/apps/tags/views.px:263
+#: skoljka/apps/sources/admin_views.px:341
+#: skoljka/apps/sources/admin_views.px:392 skoljka/apps/sources/forms.py:14
+#: skoljka/apps/tags/forms.py:30 skoljka/apps/tags/views.px:65
+#: skoljka/apps/tags/views.px:235
 msgid "Name (EN)"
 msgstr "Naziv (EN)"
 
-#: skoljka/apps/sources/admin_views.px:431
-#: skoljka/apps/sources/admin_views.px:479 skoljka/apps/tags/views.px:80
-#: skoljka/apps/tags/views.px:118 skoljka/apps/tags/views.px:273
+#: skoljka/apps/sources/admin_views.px:345
+#: skoljka/apps/sources/admin_views.px:393 skoljka/apps/sources/forms.py:17
+#: skoljka/apps/tags/forms.py:33 skoljka/apps/tags/views.px:66
+#: skoljka/apps/tags/views.px:245
 msgid "Name (HR)"
 msgstr "Naziv (HR)"
 
-#: skoljka/apps/sources/admin_views.px:435 skoljka/apps/tags/views.px:96
-#: skoljka/apps/tags/views.px:304
+#: skoljka/apps/sources/admin_views.px:349 skoljka/apps/sources/forms.py:21
+#: skoljka/apps/tags/forms.py:39 skoljka/apps/tags/views.px:271
 msgid "Description (EN)"
 msgstr "Opis (EN)"
 
-#: skoljka/apps/sources/admin_views.px:489
+#: skoljka/apps/sources/admin_views.px:403
 msgid "Save children"
 msgstr "Spremi djecu"
 
-#: skoljka/apps/sources/components.px:69
+#: skoljka/apps/sources/components.px:65
 msgid "Competition"
 msgstr "Natjecanje"
 
-#: skoljka/apps/sources/components.px:70 skoljka/apps/sources/components.px:72
+#: skoljka/apps/sources/components.px:66 skoljka/apps/sources/components.px:68
 msgid "Years"
 msgstr "Godine"
 
-#: skoljka/apps/sources/components.px:216
+#: skoljka/apps/sources/components.px:212
 msgid "Other competitions"
 msgstr "Ostala natjecanja"
 
-#: skoljka/apps/sources/components.px:321
+#: skoljka/apps/sources/components.px:317
 #, python-format
 msgid "%(year)s: %(count)s problem"
 msgid_plural "%(year)s: %(count)s problems"
@@ -1113,34 +1133,54 @@ msgstr[0] "%(year)s: %(count)s zadatak"
 msgstr[1] "%(year)s: %(count)s zadatka"
 msgstr[2] "%(year)s: %(count)s zadataka"
 
-#: skoljka/apps/sources/components.px:338
+#: skoljka/apps/sources/components.px:334
 msgid "Documents"
 msgstr "Dokumenti"
 
-#: skoljka/apps/sources/components.px:344
+#: skoljka/apps/sources/components.px:340
 msgid "Filename"
 msgstr "Naziv datoteke"
 
-#: skoljka/apps/sources/components.px:387
+#: skoljka/apps/sources/components.px:383
 msgid "Use this PDF as a visual aid while bulk-editing the displayed problems."
 msgstr ""
 "Koristite ovaj PDF kao vizualnu pomoć pri skupnom uređivanju prikazanih "
 "zadataka."
 
-#: skoljka/apps/sources/components.px:392
+#: skoljka/apps/sources/components.px:388
 msgid "Bulk edit with this PDF"
 msgstr "Skupno uredi uz ovaj PDF"
 
-#: skoljka/apps/sources/components.px:413
+#: skoljka/apps/sources/components.px:409
 #, python-format
 msgid "Delete document \"%(name)s\"? This cannot be undone."
 msgstr ""
 
-#: skoljka/apps/sources/components.px:431
-#: skoljka/apps/sources/components.px:450
-#: skoljka/apps/sources/components.px:495
+#: skoljka/apps/sources/components.px:426
+#: skoljka/apps/sources/components.px:445
+#: skoljka/apps/sources/components.px:489
 msgid "Other"
 msgstr "Ostalo"
+
+#: skoljka/apps/sources/forms.py:149
+#, python-format
+msgid "Child row %(number)s: slug is required."
+msgstr "Redak djeteta %(number)s: slug je obavezan."
+
+#: skoljka/apps/sources/forms.py:151
+#, python-format
+msgid "Child row %(number)s: Name (EN) is required."
+msgstr "Redak djeteta %(number)s: naziv (EN) je obavezan."
+
+#: skoljka/apps/sources/forms.py:155
+#, python-format
+msgid "Child row %(number)s: order must be an integer."
+msgstr "Redak djeteta %(number)s: redoslijed mora biti cijeli broj."
+
+#: skoljka/apps/sources/forms.py:168
+#, python-format
+msgid "Child row %(number)s: a source with this slug already exists."
+msgstr "Redak djeteta %(number)s: izvor s ovim slugom već postoji."
 
 #: skoljka/apps/sources/views.px:53
 msgid "Competitions"
@@ -1154,21 +1194,21 @@ msgstr "Nema zadataka za ovu godinu."
 msgid "Overview"
 msgstr "Pregled"
 
-#: skoljka/apps/sources/views.px:250
+#: skoljka/apps/sources/views.px:248
 #, python-format
 msgid "Competition year: %(title)s"
 msgstr "Natjecateljska godina: %(title)s"
 
-#: skoljka/apps/sources/views.px:292
+#: skoljka/apps/sources/views.px:290
 #, python-format
 msgid "Type %(count)s to delete these problems:"
 msgstr "Upišite %(count)s za brisanje ovih zadataka:"
 
-#: skoljka/apps/sources/views.px:304
+#: skoljka/apps/sources/views.px:302
 msgid "Delete problems"
 msgstr "Izbriši zadatke"
 
-#: skoljka/apps/sources/views.px:312
+#: skoljka/apps/sources/views.px:310
 #, python-format
 msgid "Delete %(count)s problem? This cannot be undone."
 msgid_plural "Delete %(count)s problems? This cannot be undone."
@@ -1176,52 +1216,60 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
-#: skoljka/apps/sources/views.px:346 skoljka/apps/sources/views.px:348
+#: skoljka/apps/sources/views.px:344 skoljka/apps/sources/views.px:346
 msgid "Invalid confirmation count."
 msgstr ""
 
-#: skoljka/apps/tags/views.px:55
-msgid "New Tag"
-msgstr "Nova oznaka"
-
-#: skoljka/apps/tags/views.px:62 skoljka/apps/tags/views.px:114
-#: skoljka/apps/tags/views.px:249
+#: skoljka/apps/tags/forms.py:21 skoljka/apps/tags/views.px:62
+#: skoljka/apps/tags/views.px:221
 msgid "Kind"
 msgstr "Vrsta"
 
-#: skoljka/apps/tags/views.px:86 skoljka/apps/tags/views.px:284
+#: skoljka/apps/tags/forms.py:34 skoljka/apps/tags/views.px:251
 msgid "Short name (EN)"
 msgstr "Kratki naziv (EN)"
 
-#: skoljka/apps/tags/views.px:90 skoljka/apps/tags/views.px:293
+#: skoljka/apps/tags/forms.py:35 skoljka/apps/tags/views.px:260
 msgid "Short name (HR)"
 msgstr "Kratki naziv (HR)"
 
-#: skoljka/apps/tags/views.px:101 skoljka/apps/tags/views.px:310
+#: skoljka/apps/tags/forms.py:44 skoljka/apps/tags/views.px:277
 msgid "Description (HR)"
 msgstr "Opis (HR)"
 
-#: skoljka/apps/tags/views.px:106
+#: skoljka/apps/tags/forms.py:61
+msgid "A tag with this slug already exists."
+msgstr "Oznaka s ovim slugom već postoji."
+
+#: skoljka/apps/tags/forms.py:67
+msgid "A tag cannot be its own parent."
+msgstr "Oznaka ne može biti vlastiti roditelj."
+
+#: skoljka/apps/tags/views.px:52
+msgid "New Tag"
+msgstr "Nova oznaka"
+
+#: skoljka/apps/tags/views.px:54
 msgid "Create tag"
 msgstr "Stvori oznaku"
 
-#: skoljka/apps/tags/views.px:119
+#: skoljka/apps/tags/views.px:67
 msgid "Short (EN)"
 msgstr "Kratko (EN)"
 
-#: skoljka/apps/tags/views.px:120
+#: skoljka/apps/tags/views.px:68
 msgid "Short (HR)"
 msgstr "Kratko (HR)"
 
-#: skoljka/apps/tags/views.px:124
+#: skoljka/apps/tags/views.px:72
 msgid "Actions"
 msgstr "Radnje"
 
-#: skoljka/apps/tags/views.px:150
+#: skoljka/apps/tags/views.px:99
 msgid "Edit Tag"
 msgstr "Uredi oznaku"
 
-#: skoljka/apps/tags/views.px:190
+#: skoljka/apps/tags/views.px:146
 #, python-format
 msgid ""
 "Delete tag '%(slug)s'? Problems: %(problem_count)s. Sources: "
@@ -1230,29 +1278,17 @@ msgstr ""
 "Izbrisati oznaku '%(slug)s'? Zadaci: %(problem_count)s. Izvori: "
 "%(source_count)s. Podređene oznake: %(child_count)s."
 
-#: skoljka/apps/tags/views.px:334
+#: skoljka/apps/tags/views.px:297
 msgid "Topic"
 msgstr "Tema"
 
-#: skoljka/apps/tags/views.px:336
+#: skoljka/apps/tags/views.px:299
 msgid "Technique"
 msgstr "Tehnika"
 
-#: skoljka/apps/tags/views.px:338
+#: skoljka/apps/tags/views.px:301
 msgid "Meta"
 msgstr "Meta"
-
-#: skoljka/apps/tags/views.px:373 skoljka/apps/tags/views.px:404
-msgid "A tag with this slug already exists."
-msgstr "Oznaka s ovim slugom već postoji."
-
-#: skoljka/apps/tags/views.px:402
-msgid "A tag cannot be its own parent."
-msgstr "Oznaka ne može biti vlastiti roditelj."
-
-#: skoljka/apps/tags/views.px:424
-msgid "Kind is invalid."
-msgstr "Vrsta nije ispravna."
 
 #: skoljka/apps/tracking/favorites.px:46
 msgid "Remove from favorites"
@@ -1262,31 +1298,31 @@ msgstr "Ukloni iz omiljenih"
 msgid "Add to favorites"
 msgstr "Dodaj u omiljene"
 
-#: skoljka/apps/tracking/views.px:114
+#: skoljka/apps/tracking/views.px:121
 msgid "Mark solved"
 msgstr "Označi riješenim"
 
-#: skoljka/apps/tracking/views.px:122
+#: skoljka/apps/tracking/views.px:129
 msgid "Bookmark"
 msgstr "Spremi"
 
-#: skoljka/apps/tracking/views.px:130
+#: skoljka/apps/tracking/views.px:137
 msgid "Liked"
 msgstr "Sviđa mi se"
 
-#: skoljka/apps/tracking/views.px:130
+#: skoljka/apps/tracking/views.px:137
 msgid "Like"
 msgstr "Sviđa mi se"
 
-#: skoljka/apps/tracking/views.px:155
+#: skoljka/apps/tracking/views.px:162
 msgid "Personal notes"
 msgstr "Osobne bilješke"
 
-#: skoljka/apps/tracking/views.px:166
+#: skoljka/apps/tracking/views.px:173
 msgid "Your private notes (Markdown + LaTeX)"
 msgstr "Vaše privatne bilješke (Markdown + LaTeX)"
 
-#: skoljka/apps/tracking/views.px:170
+#: skoljka/apps/tracking/views.px:177
 msgid "Save note"
 msgstr "Spremi bilješku"
 
@@ -1294,23 +1330,23 @@ msgstr "Spremi bilješku"
 msgid "Upload attachments"
 msgstr "Dodaj privitke"
 
-#: skoljka/components/layout.px:172
+#: skoljka/components/layout.px:175
 msgid "Admin"
 msgstr "Admin"
 
-#: skoljka/components/layout.px:191
+#: skoljka/components/layout.px:194
 msgid "Log out"
 msgstr "Odjava"
 
-#: skoljka/components/layout.px:237
+#: skoljka/components/layout.px:240
 msgid "Help"
 msgstr "Pomoć"
 
-#: skoljka/components/layout.px:241
+#: skoljka/components/layout.px:244
 msgid "Privacy"
 msgstr "Privatnost"
 
-#: skoljka/components/layout.px:243
+#: skoljka/components/layout.px:246
 msgid "Terms"
 msgstr "Uvjeti"
 
