@@ -81,8 +81,6 @@ def home(request: HttpRequest):
                     </div>
                 </section>
             )}
-            {_home_problem_section(request, _("Recently added problems"), recent_problems)}
-            {_home_problem_section(request, _("Random problems"), random_problems)}
             {latest_news and (
                 <section class="section-card">
                     <div class="news-home-list">
@@ -90,6 +88,8 @@ def home(request: HttpRequest):
                     </div>
                 </section>
             )}
+            {_home_problem_section(request, _("Recently added problems"), recent_problems)}
+            {_home_problem_section(request, _("Random problems"), random_problems)}
             {favorite_sources and (
                 <section class="section-card">
                     <h2>{_("Favorite competitions")}</h2>

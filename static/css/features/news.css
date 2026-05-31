@@ -5,6 +5,10 @@
   gap: 1rem;
 }
 
+.news-list-item {
+  background-color: var(--color-news);
+}
+
 .news-list-item h2 {
   margin: 0 0 0.25rem;
   font-size: 1.1rem;
