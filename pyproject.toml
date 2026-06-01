@@ -13,6 +13,7 @@ dependencies = [
     "gunicorn>=23,<24",
     "mistralai>=2.3,<3.0",
     "anthropic>=0.94,<1.0",
+    "django-debug-toolbar>=6.0,<7.0",
 ]
 
 [tool.uv.sources]

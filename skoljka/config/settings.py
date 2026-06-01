@@ -39,6 +39,15 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+ENABLE_DEBUG_TOOLBAR = DEBUG and globals().get("ENABLE_DEBUG_TOOLBAR", True)
+if ENABLE_DEBUG_TOOLBAR:
+    INSTALLED_APPS.append("debug_toolbar")
+    MIDDLEWARE.insert(
+        MIDDLEWARE.index("django.middleware.common.CommonMiddleware") + 1,
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+    )
+    INTERNAL_IPS = globals().get("INTERNAL_IPS", ["127.0.0.1", "::1"])
+
 ROOT_URLCONF = "skoljka.config.urls"
 
 # We use PythonJSX for rendering, but keep the Django template engine

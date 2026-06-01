@@ -7,6 +7,10 @@ DEBUG = True
 
 ALLOWED_HOSTS: list[str] = []
 
+# Local profiling. With DEBUG=True, Django Debug Toolbar shows SQL queries,
+# timings, and request details for requests from INTERNAL_IPS.
+# ENABLE_DEBUG_TOOLBAR = False
+
 # Registration challenge examples.
 # Put the real challenge bank in local.py, then run:
 # ./venv/bin/python manage.py render_registration_challenges
