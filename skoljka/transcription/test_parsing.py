@@ -11,6 +11,29 @@ class TranscriptionParsingTest(SimpleTestCase):
         self.assertEqual(language, "hr")
         self.assertNotIn("% year", body)
 
+    def test_blank_language_does_not_consume_next_line(self):
+        body, year, language = _extract_metadata(
+            "% year: 2024\n"
+            "% language:\n"
+            "\\subsection*{Source: croatia-grade-1}\n"
+            "\\section*{Problem 1}\n"
+            "Text"
+        )
+
+        self.assertEqual(year, 2024)
+        self.assertIsNone(language)
+        self.assertIn("\\subsection*{Source: croatia-grade-1}", body)
+
+    def test_invalid_language_metadata_is_ignored(self):
+        body, year, language = _extract_metadata(
+            "% language: \\subsection*{Source: croatia-grade-1}\n"
+            "\\section*{Problem 1}\n"
+            "Text"
+        )
+
+        self.assertIsNone(language)
+        self.assertNotIn("% language", body)
+
     def test_splits_source_sections_into_source_keys(self):
         problems = split_problems(
             "\\subsection*{Source: croatia-grade-1}\n"

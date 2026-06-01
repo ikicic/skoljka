@@ -37,7 +37,11 @@ SET_SECTION_RE = re.compile(
     re.IGNORECASE,
 )
 
-METADATA_RE = re.compile(r"^%\s*(year|language):\s*(.*?)\s*$", re.IGNORECASE | re.MULTILINE)
+METADATA_RE = re.compile(
+    r"^[^\S\r\n]*%[^\S\r\n]*(year|language):[^\S\r\n]*([^\r\n]*)[^\S\r\n]*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+LANGUAGE_CODE_RE = re.compile(r"^[a-z]{2,8}(?:-[a-z0-9]{2,8})?$")
 ProgressCallback = Callable[[str, str], None]
 
 
@@ -95,7 +99,9 @@ def _extract_metadata(latex_body: str) -> tuple[str, int | None, str | None]:
             except ValueError:
                 pass
         elif key.lower() == "language" and value:
-            language = value.lower()[:16]
+            candidate = value.lower()[:16]
+            if LANGUAGE_CODE_RE.fullmatch(candidate):
+                language = candidate
     cleaned = METADATA_RE.sub("", latex_body).strip()
     return cleaned, year, language
 
