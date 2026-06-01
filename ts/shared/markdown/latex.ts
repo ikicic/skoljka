@@ -1,4 +1,5 @@
 import { marked } from "marked";
+import { parseBlocks, type Block } from "./blocks";
 import { findMatchingBrace, renderTextCommands } from "./commands";
 import {
   escapeLatexText,
@@ -246,11 +247,11 @@ function renderLatexInlineToken(token: any, ctx: LatexContext): string {
   }
 }
 
-function renderLatexBlocks(tokens: any[], ctx: LatexContext): string {
-  return tokens.map((token) => renderLatexBlock(token, ctx)).join("");
+function renderLatexMarkdownTokens(tokens: any[], ctx: LatexContext): string {
+  return tokens.map((token) => renderLatexMarkdownToken(token, ctx)).join("");
 }
 
-function renderLatexBlock(token: any, ctx: LatexContext): string {
+function renderLatexMarkdownToken(token: any, ctx: LatexContext): string {
   switch (token.type) {
     case "space":
       return "";
@@ -264,12 +265,12 @@ function renderLatexBlock(token: any, ctx: LatexContext): string {
     case "list": {
       const env = token.ordered ? "enumerate" : "itemize";
       const items = (token.items ?? [])
-        .map((item: any) => `\\item ${renderLatexBlocks(item.tokens ?? [], ctx).trim()}\n`)
+        .map((item: any) => `\\item ${renderLatexMarkdownTokens(item.tokens ?? [], ctx).trim()}\n`)
         .join("");
       return `\\begin{${env}}\n${items}\\end{${env}}\n\n`;
     }
     case "blockquote":
-      return `\\begin{quote}\n${renderLatexBlocks(token.tokens ?? [], ctx).trim()}\n\\end{quote}\n\n`;
+      return `\\begin{quote}\n${renderLatexMarkdownTokens(token.tokens ?? [], ctx).trim()}\n\\end{quote}\n\n`;
     case "code":
       return `\\begin{verbatim}\n${token.text ?? ""}\n\\end{verbatim}\n\n`;
     case "html":
@@ -278,6 +279,26 @@ function renderLatexBlock(token: any, ctx: LatexContext): string {
       if (token.tokens) return `${renderLatexInlineTokens(token.tokens, ctx)}\n\n`;
       return `${renderLatexTextWithPlaceholders(token.text ?? token.raw ?? "", ctx)}\n\n`;
   }
+}
+
+function renderLatexMarkdownBlock(source: string, ctx: LatexContext): string {
+  const withTextCommands = renderLatexTextCommands(source, ctx);
+  return renderLatexMarkdownTokens(marked.lexer(withTextCommands) as any[], ctx);
+}
+
+function renderAstBlocksLatex(blocks: Block[], ctx: LatexContext): string {
+  return blocks
+    .map((block) => {
+      if (block.kind === "markdown") return renderLatexMarkdownBlock(block.source, ctx);
+      if (block.kind === "error") {
+        return `${renderLatexErrorText(block.message, block.source, ctx)}\n\n`;
+      }
+      const items = block.items
+        .map((item) => `\\item ${renderAstBlocksLatex(item, ctx).trim()}\n`)
+        .join("");
+      return `\\begin{${block.env}}\n${items}\\end{${block.env}}\n\n`;
+    })
+    .join("");
 }
 
 export function renderLatex(
@@ -293,8 +314,8 @@ export function renderLatex(
     attachmentPaths: options.attachmentPaths,
   };
   const withSizedImages = protectSizedImagesLatex(mathProtected, ctx);
-  const withTextCommands = renderLatexTextCommands(withSizedImages, ctx);
-  const body = renderLatexBlocks(marked.lexer(withTextCommands) as any[], ctx).trim();
+  const blocks = parseBlocks(withSizedImages, ctx.errors);
+  const body = renderAstBlocksLatex(blocks, ctx).trim();
   return {
     body,
     errors: ctx.errors,

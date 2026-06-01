@@ -1,0 +1,126 @@
+import type { RenderError } from "./types";
+
+export type MarkdownBlock = { kind: "markdown"; source: string };
+export type ListBlock = {
+  kind: "list";
+  env: "itemize" | "enumerate";
+  items: Block[][];
+  source: string;
+};
+export type ErrorBlock = { kind: "error"; message: string; source: string };
+export type Block = MarkdownBlock | ListBlock | ErrorBlock;
+
+const SUPPORTED_ENVS = new Set(["itemize", "enumerate"]);
+const COMMAND_RE_SOURCE = "\\\\(begin|end)\\{([A-Za-z]+)\\}|\\\\item\\b";
+
+function isSupportedEnv(env: string): env is "itemize" | "enumerate" {
+  return env === "itemize" || env === "enumerate";
+}
+
+function pushMarkdown(blocks: Block[], source: string): void {
+  if (source) blocks.push({ kind: "markdown", source });
+}
+
+function errorBlock(message: string, source: string, errors: RenderError[]): ErrorBlock {
+  errors.push({ message, source });
+  return { kind: "error", message, source };
+}
+
+export function parseBlocks(source: string, errors: RenderError[]): Block[] {
+  const blocks: Block[] = [];
+  let cursor = 0;
+  while (cursor < source.length) {
+    const begin = findNextSupportedBegin(source, cursor);
+    if (!begin) {
+      pushMarkdown(blocks, source.slice(cursor));
+      break;
+    }
+    pushMarkdown(blocks, source.slice(cursor, begin.index));
+    const parsed = parseListEnvironment(source, begin.index, begin.env, errors);
+    blocks.push(parsed.block);
+    cursor = parsed.endIndex;
+  }
+  return blocks;
+}
+
+function findNextSupportedBegin(source: string, start: number): { index: number; env: "itemize" | "enumerate" } | null {
+  const re = /\\begin\{([A-Za-z]+)\}/g;
+  re.lastIndex = start;
+  for (;;) {
+    const match = re.exec(source);
+    if (!match) return null;
+    if (isSupportedEnv(match[1])) return { index: match.index, env: match[1] };
+  }
+}
+
+function parseListEnvironment(
+  source: string,
+  beginIndex: number,
+  env: "itemize" | "enumerate",
+  errors: RenderError[],
+): { block: Block; endIndex: number } {
+  const beginMatch = /^\\begin\{([A-Za-z]+)\}/.exec(source.slice(beginIndex));
+  const contentStart = beginIndex + (beginMatch?.[0].length ?? 0);
+  const items: Block[][] = [];
+  let currentItemStart: number | null = null;
+  let scanStart = contentStart;
+  let nestedDepth = 0;
+
+  const commandRe = new RegExp(COMMAND_RE_SOURCE, "g");
+  commandRe.lastIndex = contentStart;
+  for (;;) {
+    const match = commandRe.exec(source);
+    if (!match) {
+      const broken = source.slice(beginIndex);
+      const block = errorBlock(`Unclosed ${env} environment`, broken, errors);
+      return { block, endIndex: source.length };
+    }
+
+    const raw = match[0];
+    const command = match[1];
+    const matchedEnv = match[2];
+
+    if (command === "begin" && SUPPORTED_ENVS.has(matchedEnv)) {
+      nestedDepth += 1;
+      continue;
+    }
+
+    if (command === "end" && SUPPORTED_ENVS.has(matchedEnv)) {
+      if (nestedDepth > 0) {
+        nestedDepth -= 1;
+        continue;
+      }
+      if (matchedEnv !== env) {
+        const broken = source.slice(beginIndex, match.index + raw.length);
+        const block = errorBlock(`Expected \\end{${env}} before \\end{${matchedEnv}}`, broken, errors);
+        return { block, endIndex: match.index + raw.length };
+      }
+      if (currentItemStart !== null) {
+        items.push(parseBlocks(source.slice(currentItemStart, match.index).trim(), errors));
+      } else if (source.slice(contentStart, match.index).trim()) {
+        const broken = source.slice(contentStart, match.index).trim();
+        items.push([errorBlock(`Expected \\item in ${env} environment`, broken, errors)]);
+      }
+      return {
+        block: {
+          kind: "list",
+          env,
+          items,
+          source: source.slice(beginIndex, match.index + raw.length),
+        },
+        endIndex: match.index + raw.length,
+      };
+    }
+
+    if (raw === "\\item" && nestedDepth === 0) {
+      if (currentItemStart !== null) {
+        items.push(parseBlocks(source.slice(currentItemStart, match.index).trim(), errors));
+      } else if (source.slice(scanStart, match.index).trim()) {
+        const broken = source.slice(scanStart, match.index).trim();
+        items.push([errorBlock(`Expected \\item in ${env} environment`, broken, errors)]);
+      }
+      currentItemStart = match.index + raw.length;
+      scanStart = currentItemStart;
+    }
+  }
+}

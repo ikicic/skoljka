@@ -1,5 +1,6 @@
 import katex from "katex";
 import { marked } from "marked";
+import { parseBlocks, type Block } from "./blocks";
 import { renderTextCommands } from "./commands";
 import {
   protectMath,
@@ -60,6 +61,75 @@ function renderMath(html: string, mathBlocks: string[]): string {
   });
 }
 
+function renderBlockError(message: string, source: string): string {
+  const body = [...source]
+    .map((ch) => `&#${ch.codePointAt(0)};`)
+    .join("");
+  return `<span class="render-error" title="${escapeHtml(message)}">${body}</span>`;
+}
+
+function renderMarkdownBlock(
+  source: string,
+  errors: RenderError[],
+  htmlBlocks: string[],
+  attachmentUrls?: Record<string, string>,
+): string {
+  const withTextCommands = renderTextCommands(source, { mode: "html", errors, htmlBlocks });
+  let html = parseMarkdown(withTextCommands);
+  html = restoreProtectedHtml(html, htmlBlocks);
+  return replaceAttachmentUrls(html, attachmentUrls);
+}
+
+function renderBlocksHtml(
+  blocks: Block[],
+  errors: RenderError[],
+  htmlBlocks: string[],
+  attachmentUrls?: Record<string, string>,
+): string {
+  return blocks
+    .map((block) => {
+      if (block.kind === "markdown") {
+        return renderMarkdownBlock(block.source, errors, htmlBlocks, attachmentUrls);
+      }
+      if (block.kind === "error") {
+        return renderBlockError(block.message, block.source);
+      }
+      const tag = block.env === "enumerate" ? "ol" : "ul";
+      const items = block.items
+        .map((item) => `<li>${renderBlocksHtml(item, errors, htmlBlocks, attachmentUrls)}</li>`)
+        .join("");
+      return `<${tag}>\n${items}</${tag}>\n`;
+    })
+    .join("");
+}
+
+function renderMarkdownText(
+  source: string,
+  mathBlocks: string[],
+  htmlBlocks: string[],
+  errors: RenderError[],
+): string {
+  const searchSource = renderTextCommands(source, { mode: "text", errors });
+  return stripHtml(restoreProtectedHtml(parseMarkdown(restoreMath(searchSource, mathBlocks)), htmlBlocks));
+}
+
+function renderBlocksText(blocks: Block[], mathBlocks: string[], htmlBlocks: string[]): string {
+  const parts: string[] = [];
+  for (const block of blocks) {
+    if (block.kind === "markdown") {
+      const text = renderMarkdownText(block.source, mathBlocks, htmlBlocks, []);
+      if (text) parts.push(text);
+    } else if (block.kind === "error") {
+      const text = stripHtml(parseMarkdown(restoreMath(block.source, mathBlocks)));
+      if (text) parts.push(text);
+    } else {
+      const text = renderBlocksText(block.items.flat(), mathBlocks, htmlBlocks);
+      if (text) parts.push(text);
+    }
+  }
+  return parts.join(" ").replace(/\s+/g, " ").trim();
+}
+
 export function renderMarkdown(
   source: string,
   options: RenderMarkdownOptions = {},
@@ -67,18 +137,13 @@ export function renderMarkdown(
   const errors: RenderError[] = [];
   const htmlBlocks: string[] = [];
   const { source: mathProtected, mathBlocks } = protectMath(protectSizedImages(source, htmlBlocks));
-  const withTextCommands = renderTextCommands(mathProtected, { mode: "html", errors, htmlBlocks });
-  let html = parseMarkdown(withTextCommands);
-  html = restoreProtectedHtml(html, htmlBlocks);
-  html = replaceAttachmentUrls(html, options.attachmentUrls);
+  const blocks = parseBlocks(mathProtected, errors);
+  let html = renderBlocksHtml(blocks, errors, htmlBlocks, options.attachmentUrls);
   html = renderMath(html, mathBlocks);
-
-  const searchSource = renderTextCommands(mathProtected, { mode: "text", errors: [] });
-  const searchHtml = restoreProtectedHtml(parseMarkdown(restoreMath(searchSource, mathBlocks)), htmlBlocks);
 
   return {
     html,
-    text: stripHtml(searchHtml),
+    text: renderBlocksText(blocks, mathBlocks, htmlBlocks),
     errors,
   };
 }

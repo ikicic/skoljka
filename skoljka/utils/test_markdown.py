@@ -314,6 +314,89 @@ class CompileMarkdownTest(TestCase):
             "old under mono first second https://example.test Example ^~\\ #_&$",
         )
 
+    # --- LaTeX list environments ---
+
+    def test_itemize_environment_renders_unordered_list(self):
+        html = self._html(
+            "\\begin{itemize}\n"
+            "\\item First item\n"
+            "\\item Second item\n"
+            "\\end{itemize}"
+        )
+
+        self.assertIn("<ul>", html)
+        self.assertIn("<li><p>First item</p>", html)
+        self.assertIn("<li><p>Second item</p>", html)
+        self.assertIn("</ul>", html)
+
+    def test_enumerate_environment_renders_ordered_list(self):
+        html = self._html(
+            "\\begin{enumerate}\n"
+            "\\item First item\n"
+            "\\item Second item\n"
+            "\\end{enumerate}"
+        )
+
+        self.assertIn("<ol>", html)
+        self.assertIn("<li><p>First item</p>", html)
+        self.assertIn("<li><p>Second item</p>", html)
+        self.assertIn("</ol>", html)
+
+    def test_list_items_support_markdown_text_commands_and_math(self):
+        html = self._html(
+            "\\begin{itemize}\n"
+            "\\item **Bold** and \\emph{emph} with $x^2$\n"
+            "\\end{itemize}"
+        )
+
+        self.assertIn("<strong>Bold</strong>", html)
+        self.assertIn("<em>emph</em>", html)
+        self.assertKaTeX(html, "x^2")
+
+    def test_latex_lists_can_be_nested(self):
+        html = self._html(
+            "\\begin{itemize}\n"
+            "\\item Outer\n"
+            "\\begin{enumerate}\n"
+            "\\item Inner one\n"
+            "\\item Inner two\n"
+            "\\end{enumerate}\n"
+            "\\item After\n"
+            "\\end{itemize}"
+        )
+
+        self.assertIn("<ul>", html)
+        self.assertIn("<ol>", html)
+        self.assertIn("Inner one", html)
+        self.assertIn("Inner two", html)
+        self.assertIn("After", html)
+
+    def test_item_inside_math_is_not_parsed_as_list_item(self):
+        html = self._html(
+            "\\begin{itemize}\n"
+            "\\item Text $\\item x$\n"
+            "\\end{itemize}"
+        )
+
+        self.assertEqual(html.count("<li>"), 1)
+        self.assertIn('<annotation encoding="application/x-tex">\\item x</annotation>', html)
+
+    def test_list_environment_contributes_to_search_text(self):
+        text = self._text(
+            "\\begin{itemize}\n"
+            "\\item \\textbf{First}\n"
+            "\\item Second $x^2$\n"
+            "\\end{itemize}"
+        )
+
+        self.assertEqual(text, "First Second $x^2$")
+
+    def test_unclosed_list_environment_renders_error(self):
+        html = self._html("\\begin{itemize}\n\\item Missing end")
+
+        self.assertIn('class="render-error"', html)
+        self.assertIn("Unclosed itemize environment", html)
+
 
 class RenderLatexTest(TestCase):
     def _latex(self, source: str, **kwargs):
@@ -420,3 +503,43 @@ class RenderLatexTest(TestCase):
             result.body,
             r"\includegraphics{\detokenize{attachments/a_%#/inputsecret.png}}",
         )
+
+    def test_itemize_environment_exports_as_latex_list(self):
+        result = self._latex(
+            "\\begin{itemize}\n"
+            "\\item First item\n"
+            "\\item Second with \\textbf{bold}\n"
+            "\\end{itemize}"
+        )
+
+        self.assertEqual(
+            result.body,
+            "\\begin{itemize}\n"
+            "\\item First item\n"
+            "\\item Second with \\textbf{bold}\n"
+            "\\end{itemize}",
+        )
+
+    def test_nested_enumerate_environment_exports_as_latex_list(self):
+        result = self._latex(
+            "\\begin{itemize}\n"
+            "\\item Outer\n"
+            "\\begin{enumerate}\n"
+            "\\item Inner\n"
+            "\\end{enumerate}\n"
+            "\\end{itemize}"
+        )
+
+        self.assertIn("\\begin{itemize}", result.body)
+        self.assertIn("\\begin{enumerate}", result.body)
+        self.assertIn("\\item Inner", result.body)
+        self.assertIn("\\end{enumerate}", result.body)
+        self.assertIn("\\end{itemize}", result.body)
+
+    def test_unclosed_list_environment_exports_error(self):
+        result = self._latex("\\begin{itemize}\n\\item Missing end")
+
+        self.assertEqual(len(result.errors), 1)
+        self.assertIn("Unclosed itemize environment", result.errors[0]["message"])
+        self.assertIn("xcolor", result.packages)
+        self.assertIn("\\textcolor{red}", result.body)
