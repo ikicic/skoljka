@@ -103,7 +103,7 @@ Source assignment:
 - If the source is unclear, use default_source_key.
 - Before each group of problems from the same source, output:
   \\subsection*{{Source: <source_key>}}
-- At the top of the output, infer year and language if visible:
+- At the top of the output, infer year and language from problem statements:
   % year: 2024
   % language: hr
 - If year is unclear, write % year:
