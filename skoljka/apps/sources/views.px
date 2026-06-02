@@ -1,5 +1,6 @@
 import json
 
+from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, redirect
@@ -35,9 +36,13 @@ from skoljka.apps.sources.selectors import (
 )
 from skoljka.apps.tracking.models import Submission
 from skoljka.components.layout import Page
+from skoljka.components.pagination import Pagination
 from skoljka.utils.auth import login_required_view
 from skoljka.utils.px_view import px_view
 from skoljka.utils.staff import staff_required
+
+
+SOURCE_PROBLEMS_PER_PAGE = 50
 
 
 @px_view
@@ -102,6 +107,8 @@ def source_detail(request: HttpRequest, slug: str, year: int | None = None):
     sorted_years = _problems_by_year(problems)
     grid_labels = problem_grid_labels(sorted_years)
     solved_ids = _solved_problem_ids(problems, request.user)
+    problems_page = _paginate_source_problems(request, problems)
+    page_problems = list(problems_page.object_list)
     page_title = f"{source.name()} {selected_year}" if has_selected_year else source.name()
     problem_ids = [problem.pk for problem in problems]
     actions = _source_detail_actions(request, source, selected_year, problem_ids)
@@ -129,12 +136,17 @@ def source_detail(request: HttpRequest, slug: str, year: int | None = None):
                     {problems and (
                         <>
                             <ProblemsDisplay
-                                problems={problems}
+                                problems={page_problems}
                                 request={request}
                                 view="cards"
                                 view_key="source-year"
                                 compact_generated_titles_for={compact_title_context}
                                 export_url={reverse("source_year_pdf", kwargs={"slug": source.slug, "year": selected_year})}
+                            />
+                            <Pagination
+                                page={problems_page}
+                                request={request}
+                                show_summary={True}
                             />
                             {_bulk_delete_problems_form(
                                 request,
@@ -164,7 +176,12 @@ def source_detail(request: HttpRequest, slug: str, year: int | None = None):
                     {problems and (
                         <>
                             <h2>{_t("Problems")}</h2>
-                            {problem_year_sections(request, source, sorted_years)}
+                            {problem_year_sections(request, source, _problems_by_year(page_problems))}
+                            <Pagination
+                                page={problems_page}
+                                request={request}
+                                show_summary={True}
+                            />
                             {_bulk_delete_problems_form(
                                 request,
                                 count=len(problems),
@@ -176,6 +193,11 @@ def source_detail(request: HttpRequest, slug: str, year: int | None = None):
             )}
         </Page>
     )
+
+
+def _paginate_source_problems(request: HttpRequest, problems: list[Problem]):
+    paginator = Paginator(problems, SOURCE_PROBLEMS_PER_PAGE)
+    return paginator.get_page(request.GET.get("page"))
 
 
 def _problems_by_year(problems: list[Problem]) -> list[tuple[int | None, list[Problem]]]:

@@ -327,6 +327,53 @@ class SourceDetailViewTest(TestCase):
         self.assertNotContains(r, "problem-card")
         self.assertContains(r, 'data-problem-view-key="source-year"')
 
+    def test_year_query_paginates_problems(self):
+        src = make_source(slug="year-paged", name="Year Paged")
+        for i in range(55):
+            make_problem(
+                source=src,
+                year=2024,
+                problem_label=f"{i + 1:03d}",
+                title=f"Paged {i:02d}",
+            )
+
+        r = self.client.get(f"/archive/{src.slug}/2024/")
+
+        self.assertContains(r, "Paged 00")
+        self.assertNotContains(r, "Paged 50")
+        self.assertContains(r, "page=2")
+        self.assertContains(r, "Showing 1-50 of 55")
+
+        r = self.client.get(f"/archive/{src.slug}/2024/?page=2")
+
+        self.assertNotContains(r, "Paged 00")
+        self.assertContains(r, "Paged 50")
+        self.assertContains(r, "Showing 51-55 of 55")
+
+    def test_source_detail_paginates_problem_sections(self):
+        src = make_source(slug="source-paged", name="Source Paged")
+        for i in range(55):
+            make_problem(
+                source=src,
+                year=2024,
+                problem_label=f"{i + 1:03d}",
+                title=f"Source Paged {i:02d}",
+                content=f"Overview body {i:02d}",
+            )
+
+        r = self.client.get(f"/archive/{src.slug}/?view=cards")
+
+        self.assertContains(r, "Overview body 00")
+        self.assertNotContains(r, "Overview body 50")
+        self.assertContains(r, "page=2")
+        self.assertContains(r, "Showing 1-50 of 55")
+
+        r = self.client.get(f"/archive/{src.slug}/?view=cards&page=2")
+
+        self.assertNotContains(r, "Overview body 00")
+        self.assertContains(r, "Overview body 50")
+        self.assertContains(r, "Showing 51-55 of 55")
+
     def test_year_pdf_export_button_requires_login(self):
         src = make_source(slug="yearpdfbutton", name="Year PDF Button")
         make_problem(source=src, year=2024, problem_label="1", content="Full statement.")
