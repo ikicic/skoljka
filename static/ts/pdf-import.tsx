@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type DragEvent,
 } from "react";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import { ResizableColumns } from "./components/ResizableColumns";
@@ -116,6 +117,7 @@ function PdfImportWizard() {
   const [pdfDoc, setPdfDoc] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
   const [selectedPages, setSelectedPages] = useState<Set<number>>(new Set());
   const keepOriginalPdfRef = useRef<HTMLInputElement>(null);
+  const [uploadDragActive, setUploadDragActive] = useState(false);
   const [willSaveOriginalPdf, setWillSaveOriginalPdf] = useState(false);
 
   const [draftJobId, setDraftJobId] = useState<string | null>(
@@ -299,21 +301,43 @@ function PdfImportWizard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const loadPdfFile = useCallback(async (file: File) => {
+    setPdfFile(file);
+    if (keepOriginalPdfRef.current) keepOriginalPdfRef.current.checked = true;
+    const arrayBuffer = await file.arrayBuffer();
+    const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    setPdfDoc(doc);
+    const allPages = new Set<number>();
+    for (let i = 1; i <= doc.numPages; i++) allPages.add(i);
+    setSelectedPages(allPages);
+    setStep("pages");
+  }, []);
+
   const handleFileChange = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
-      setPdfFile(file);
-      if (keepOriginalPdfRef.current) keepOriginalPdfRef.current.checked = true;
-      const arrayBuffer = await file.arrayBuffer();
-      const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      setPdfDoc(doc);
-      const allPages = new Set<number>();
-      for (let i = 1; i <= doc.numPages; i++) allPages.add(i);
-      setSelectedPages(allPages);
-      setStep("pages");
+      await loadPdfFile(file);
     },
-    [],
+    [loadPdfFile],
+  );
+
+  const handleUploadDrag = useCallback((e: DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setUploadDragActive(e.type === "dragenter" || e.type === "dragover");
+  }, []);
+
+  const handleUploadDrop = useCallback(
+    async (e: DragEvent<HTMLLabelElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setUploadDragActive(false);
+      const file = e.dataTransfer.files?.[0];
+      if (!file) return;
+      await loadPdfFile(file);
+    },
+    [loadPdfFile],
   );
 
   const togglePage = useCallback((page: number) => {
@@ -519,12 +543,21 @@ function PdfImportWizard() {
       {step === "upload" && (
         <div className="pdf-step">
           <p>{gettext("Select a PDF file to import problems from.")}</p>
-          <input
-            type="file"
-            accept=".pdf"
-            className="btn"
-            onChange={handleFileChange}
-          />
+          <label
+            className={"pdf-upload-dropzone" + (uploadDragActive ? " active" : "")}
+            onDragEnter={handleUploadDrag}
+            onDragOver={handleUploadDrag}
+            onDragLeave={handleUploadDrag}
+            onDrop={handleUploadDrop}
+          >
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={handleFileChange}
+            />
+            <span className="pdf-upload-title">{gettext("Drop PDF here")}</span>
+            <span className="pdf-upload-subtitle">{gettext("or click to choose a file")}</span>
+          </label>
         </div>
       )}
 

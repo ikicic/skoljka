@@ -12,8 +12,45 @@
 }
 
 /* Upload step */
-.pdf-step input[type="file"] {
-  font-size: 0.875rem;
+.pdf-upload-dropzone {
+  display: grid;
+  place-items: center;
+  gap: 0.35rem;
+  min-height: 15rem;
+  padding: 2rem;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+}
+
+.pdf-upload-dropzone:hover,
+.pdf-upload-dropzone.active {
+  border-color: var(--color-accent);
+  background: var(--color-accent-bg);
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.12);
+}
+
+.pdf-upload-dropzone input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.pdf-upload-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.pdf-upload-subtitle {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
 }
 
 /* Page selection thumbnails */

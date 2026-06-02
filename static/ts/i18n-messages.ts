@@ -53,6 +53,8 @@ void [
   gettext("Import failed"), // static/ts/pdf-import.tsx
   gettext("Network error during import"), // static/ts/pdf-import.tsx
   gettext("Select a PDF file to import problems from."), // static/ts/pdf-import.tsx
+  gettext("Drop PDF here"), // static/ts/pdf-import.tsx
+  gettext("or click to choose a file"), // static/ts/pdf-import.tsx
   gettext("Deselect all"), // static/ts/pdf-import.tsx
   gettext("Transcribe selected pages"), // static/ts/pdf-import.tsx
   gettext("Queued..."), // static/ts/pdf-import.tsx
