@@ -1,10 +1,14 @@
 import type { RenderError } from "./types";
 
 export type MarkdownBlock = { kind: "markdown"; source: string };
+export type ListItem = {
+  label?: string;
+  blocks: Block[];
+};
 export type ListBlock = {
   kind: "list";
   env: "itemize" | "enumerate";
-  items: Block[][];
+  items: ListItem[];
   source: string;
 };
 export type ErrorBlock = { kind: "error"; message: string; source: string };
@@ -24,6 +28,65 @@ function pushMarkdown(blocks: Block[], source: string): void {
 function errorBlock(message: string, source: string, errors: RenderError[]): ErrorBlock {
   errors.push({ message, source });
   return { kind: "error", message, source };
+}
+
+function parseItemLabel(source: string, itemEnd: number, errors: RenderError[]): {
+  label?: string;
+  contentStart: number;
+} {
+  const prefixMatch = /^[^\S\r\n]*/.exec(source.slice(itemEnd));
+  const openIndex = itemEnd + (prefixMatch?.[0].length ?? 0);
+  if (source[openIndex] !== "[") {
+    return { contentStart: itemEnd };
+  }
+
+  let bracketDepth = 1;
+  let braceDepth = 0;
+  for (let i = openIndex + 1; i < source.length; i += 1) {
+    if (source[i] === "\\") {
+      i += 1;
+      continue;
+    }
+    if (source[i] === "{") {
+      braceDepth += 1;
+      continue;
+    }
+    if (source[i] === "}" && braceDepth > 0) {
+      braceDepth -= 1;
+      continue;
+    }
+    if (braceDepth > 0) {
+      continue;
+    }
+    if (source[i] === "[") {
+      bracketDepth += 1;
+      continue;
+    }
+    if (source[i] !== "]") continue;
+    bracketDepth -= 1;
+    if (bracketDepth === 0) {
+      return {
+        label: source.slice(openIndex + 1, i).trim(),
+        contentStart: i + 1,
+      };
+    }
+  }
+
+  errors.push({ message: "Unclosed optional \\item label", source: source.slice(openIndex) });
+  return { contentStart: itemEnd };
+}
+
+function parseItem(
+  source: string,
+  contentStart: number,
+  contentEnd: number,
+  label: string | undefined,
+  errors: RenderError[],
+): ListItem {
+  return {
+    label,
+    blocks: parseBlocks(source.slice(contentStart, contentEnd).trim(), errors),
+  };
 }
 
 export function parseBlocks(source: string, errors: RenderError[]): Block[] {
@@ -61,8 +124,9 @@ function parseListEnvironment(
 ): { block: Block; endIndex: number } {
   const beginMatch = /^\\begin\{([A-Za-z]+)\}/.exec(source.slice(beginIndex));
   const contentStart = beginIndex + (beginMatch?.[0].length ?? 0);
-  const items: Block[][] = [];
+  const items: ListItem[] = [];
   let currentItemStart: number | null = null;
+  let currentItemLabel: string | undefined;
   let scanStart = contentStart;
   let nestedDepth = 0;
 
@@ -96,10 +160,12 @@ function parseListEnvironment(
         return { block, endIndex: match.index + raw.length };
       }
       if (currentItemStart !== null) {
-        items.push(parseBlocks(source.slice(currentItemStart, match.index).trim(), errors));
+        items.push(parseItem(source, currentItemStart, match.index, currentItemLabel, errors));
       } else if (source.slice(contentStart, match.index).trim()) {
         const broken = source.slice(contentStart, match.index).trim();
-        items.push([errorBlock(`Expected \\item in ${env} environment`, broken, errors)]);
+        items.push({
+          blocks: [errorBlock(`Expected \\item in ${env} environment`, broken, errors)],
+        });
       }
       return {
         block: {
@@ -114,13 +180,18 @@ function parseListEnvironment(
 
     if (raw === "\\item" && nestedDepth === 0) {
       if (currentItemStart !== null) {
-        items.push(parseBlocks(source.slice(currentItemStart, match.index).trim(), errors));
+        items.push(parseItem(source, currentItemStart, match.index, currentItemLabel, errors));
       } else if (source.slice(scanStart, match.index).trim()) {
         const broken = source.slice(scanStart, match.index).trim();
-        items.push([errorBlock(`Expected \\item in ${env} environment`, broken, errors)]);
+        items.push({
+          blocks: [errorBlock(`Expected \\item in ${env} environment`, broken, errors)],
+        });
       }
-      currentItemStart = match.index + raw.length;
+      const itemParts = parseItemLabel(source, match.index + raw.length, errors);
+      currentItemStart = itemParts.contentStart;
+      currentItemLabel = itemParts.label;
       scanStart = currentItemStart;
+      commandRe.lastIndex = currentItemStart;
     }
   }
 }

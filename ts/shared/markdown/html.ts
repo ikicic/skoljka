@@ -17,6 +17,14 @@ import {
 import { escapeHtml, isSafeUrl, stripHtml } from "./utils";
 
 function parseMarkdown(source: string): string {
+  return marked.parse(source, { async: false, renderer: markdownRenderer() }) as string;
+}
+
+function parseMarkdownInline(source: string): string {
+  return marked.parseInline(source, { async: false, renderer: markdownRenderer() }) as string;
+}
+
+function markdownRenderer() {
   const renderer = new marked.Renderer();
   renderer.html = ({ raw }) => escapeHtml(raw);
   renderer.link = function ({ href, title, tokens }) {
@@ -30,7 +38,7 @@ function parseMarkdown(source: string): string {
     const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
     return `<img src="${escapeHtml(href)}" alt="${escapeHtml(text)}"${titleAttr}>`;
   };
-  return marked.parse(source, { async: false, renderer }) as string;
+  return renderer;
 }
 
 function replaceAttachmentUrls(html: string, attachmentUrls?: Record<string, string>): string {
@@ -80,6 +88,26 @@ function renderMarkdownBlock(
   return replaceAttachmentUrls(html, attachmentUrls);
 }
 
+function renderMarkdownInline(
+  source: string,
+  errors: RenderError[],
+  htmlBlocks: string[],
+  attachmentUrls?: Record<string, string>,
+): string {
+  const withTextCommands = renderTextCommands(source, { mode: "html", errors, htmlBlocks });
+  let html = parseMarkdownInline(withTextCommands);
+  html = restoreProtectedHtml(html, htmlBlocks);
+  return replaceAttachmentUrls(html, attachmentUrls);
+}
+
+function prependListItemLabel(renderedItem: string, labelHtml: string): string {
+  if (!labelHtml) return renderedItem;
+  const label = `<span class="latex-item-label">${labelHtml}</span> `;
+  return renderedItem.startsWith("<p>")
+    ? `<p>${label}${renderedItem.slice("<p>".length)}`
+    : `${label}${renderedItem}`;
+}
+
 function renderBlocksHtml(
   blocks: Block[],
   errors: RenderError[],
@@ -96,7 +124,14 @@ function renderBlocksHtml(
       }
       const tag = block.env === "enumerate" ? "ol" : "ul";
       const items = block.items
-        .map((item) => `<li>${renderBlocksHtml(item, errors, htmlBlocks, attachmentUrls)}</li>`)
+        .map((item) => {
+          const label = item.label
+            ? renderMarkdownInline(item.label, errors, htmlBlocks, attachmentUrls)
+            : "";
+          const body = renderBlocksHtml(item.blocks, errors, htmlBlocks, attachmentUrls);
+          const itemClass = label ? ' class="latex-labeled-item"' : "";
+          return `<li${itemClass}>${prependListItemLabel(body, label)}</li>`;
+        })
         .join("");
       return `<${tag}>\n${items}</${tag}>\n`;
     })
@@ -123,8 +158,12 @@ function renderBlocksText(blocks: Block[], mathBlocks: string[], htmlBlocks: str
       const text = stripHtml(parseMarkdown(restoreMath(block.source, mathBlocks)));
       if (text) parts.push(text);
     } else {
-      const text = renderBlocksText(block.items.flat(), mathBlocks, htmlBlocks);
-      if (text) parts.push(text);
+      for (const item of block.items) {
+        const label = item.label ? renderMarkdownText(item.label, mathBlocks, htmlBlocks, []) : "";
+        const text = renderBlocksText(item.blocks, mathBlocks, htmlBlocks);
+        const combined = [label, text].filter(Boolean).join(" ");
+        if (combined) parts.push(combined);
+      }
     }
   }
   return parts.join(" ").replace(/\s+/g, " ").trim();

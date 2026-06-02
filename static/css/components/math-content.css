@@ -20,3 +20,19 @@
   max-width: 100%;
   height: auto;
 }
+
+.math-content .latex-item-label {
+  margin-right: 0.25rem;
+}
+
+.math-content .latex-labeled-item {
+  position: relative;
+  list-style-type: none;
+}
+
+.math-content .latex-labeled-item .latex-item-label {
+  position: absolute;
+  right: calc(100%);
+  min-width: 1.4rem;
+  text-align: right;
+}

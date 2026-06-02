@@ -353,6 +353,28 @@ class CompileMarkdownTest(TestCase):
         self.assertIn("<em>emph</em>", html)
         self.assertKaTeX(html, "x^2")
 
+    def test_list_items_support_optional_labels(self):
+        html = self._html(
+            "\\begin{itemize}\n"
+            "\\item[A)] First case\n"
+            "\\item[B)] Second case\n"
+            "\\end{itemize}"
+        )
+
+        self.assertIn('<li class="latex-labeled-item"><p><span class="latex-item-label">A)</span> First case</p>', html)
+        self.assertIn('<li class="latex-labeled-item"><p><span class="latex-item-label">B)</span> Second case</p>', html)
+
+    def test_list_item_labels_support_markdown_text_commands_and_math(self):
+        html = self._html(
+            "\\begin{enumerate}\n"
+            "\\item[\\textbf{Case} $i$] Body\n"
+            "\\end{enumerate}"
+        )
+
+        self.assertIn('<p><span class="latex-item-label"><strong>Case</strong>', html)
+        self.assertKaTeX(html, "i")
+        self.assertIn(" Body</p>", html)
+
     def test_latex_lists_can_be_nested(self):
         html = self._html(
             "\\begin{itemize}\n"
@@ -381,6 +403,37 @@ class CompileMarkdownTest(TestCase):
         self.assertEqual(html.count("<li>"), 1)
         self.assertIn('<annotation encoding="application/x-tex">\\item x</annotation>', html)
 
+    def test_item_label_can_contain_balanced_brackets(self):
+        html = self._html(
+            "\\begin{itemize}\n"
+            "\\item[A[1]] Nested bracket label\n"
+            "\\end{itemize}"
+        )
+
+        self.assertIn('<span class="latex-item-label">A[1]</span>', html)
+        self.assertIn("Nested bracket label", html)
+
+    def test_item_label_can_contain_bracket_inside_text_command(self):
+        html = self._html(
+            "\\begin{itemize}\n"
+            "\\item[\\textbf{A]}] Braced bracket label\n"
+            "\\end{itemize}"
+        )
+
+        self.assertIn('<span class="latex-item-label"><strong>A]</strong></span>', html)
+        self.assertIn("Braced bracket label", html)
+
+    def test_mixed_labeled_and_unlabeled_items_keep_distinct_classes(self):
+        html = self._html(
+            "\\begin{itemize}\n"
+            "\\item Plain item\n"
+            "\\item[A)] Labeled item\n"
+            "\\end{itemize}"
+        )
+
+        self.assertIn("<li><p>Plain item</p>", html)
+        self.assertIn('<li class="latex-labeled-item"><p><span class="latex-item-label">A)</span> Labeled item</p>', html)
+
     def test_list_environment_contributes_to_search_text(self):
         text = self._text(
             "\\begin{itemize}\n"
@@ -390,6 +443,16 @@ class CompileMarkdownTest(TestCase):
         )
 
         self.assertEqual(text, "First Second $x^2$")
+
+    def test_list_item_labels_contribute_to_search_text(self):
+        text = self._text(
+            "\\begin{itemize}\n"
+            "\\item[A)] First\n"
+            "\\item[$i$] Second\n"
+            "\\end{itemize}"
+        )
+
+        self.assertEqual(text, "A) First $i$ Second")
 
     def test_unclosed_list_environment_renders_error(self):
         html = self._html("\\begin{itemize}\n\\item Missing end")
@@ -520,21 +583,71 @@ class RenderLatexTest(TestCase):
             "\\end{itemize}",
         )
 
+    def test_optional_item_labels_export_as_latex(self):
+        result = self._latex(
+            "\\begin{itemize}\n"
+            "\\item[A)] First item\n"
+            "\\item[\\textbf{B}] Second item\n"
+            "\\end{itemize}"
+        )
+
+        self.assertEqual(
+            result.body,
+            "\\begin{itemize}\n"
+            "\\item[A)] First item\n"
+            "\\item[\\textbf{B}] Second item\n"
+            "\\end{itemize}",
+        )
+
+    def test_optional_item_label_with_bracket_in_text_command_exports_as_latex(self):
+        result = self._latex(
+            "\\begin{itemize}\n"
+            "\\item[\\textbf{A]}] First item\n"
+            "\\end{itemize}"
+        )
+
+        self.assertEqual(
+            result.body,
+            "\\begin{itemize}\n"
+            "\\item[\\textbf{A]}] First item\n"
+            "\\end{itemize}",
+        )
+
+    def test_math_item_label_exports_as_latex(self):
+        result = self._latex(
+            "\\begin{enumerate}\n"
+            "\\item[$i$] Indexed item\n"
+            "\\end{enumerate}"
+        )
+
+        self.assertEqual(
+            result.body,
+            "\\begin{enumerate}\n"
+            "\\item[$i$] Indexed item\n"
+            "\\end{enumerate}",
+        )
+
     def test_nested_enumerate_environment_exports_as_latex_list(self):
         result = self._latex(
             "\\begin{itemize}\n"
             "\\item Outer\n"
             "\\begin{enumerate}\n"
-            "\\item Inner\n"
+            "\\item[(i)] Inner\n"
             "\\end{enumerate}\n"
             "\\end{itemize}"
         )
 
         self.assertIn("\\begin{itemize}", result.body)
         self.assertIn("\\begin{enumerate}", result.body)
-        self.assertIn("\\item Inner", result.body)
+        self.assertIn("\\item[(i)] Inner", result.body)
         self.assertIn("\\end{enumerate}", result.body)
         self.assertIn("\\end{itemize}", result.body)
+
+    def test_unclosed_optional_item_label_reports_error(self):
+        result = self._latex("\\begin{itemize}\n\\item[A Missing end\n\\end{itemize}")
+
+        self.assertEqual(len(result.errors), 1)
+        self.assertIn("Unclosed optional \\item label", result.errors[0]["message"])
 
     def test_unclosed_list_environment_exports_error(self):
         result = self._latex("\\begin{itemize}\n\\item Missing end")

@@ -294,7 +294,10 @@ function renderAstBlocksLatex(blocks: Block[], ctx: LatexContext): string {
         return `${renderLatexErrorText(block.message, block.source, ctx)}\n\n`;
       }
       const items = block.items
-        .map((item) => `\\item ${renderAstBlocksLatex(item, ctx).trim()}\n`)
+        .map((item) => {
+          const label = item.label ? `[${renderLatexInline(item.label, ctx)}]` : "";
+          return `\\item${label} ${renderAstBlocksLatex(item.blocks, ctx).trim()}\n`;
+        })
         .join("");
       return `\\begin{${block.env}}\n${items}\\end{${block.env}}\n\n`;
     })
