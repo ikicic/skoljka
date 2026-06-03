@@ -188,18 +188,30 @@ class _Archive:
 
 def _export_sources(options: ExportOptions) -> list[Source]:
     selected = list(Source.objects.filter(slug__in=options.source_slugs).order_by("order", "slug"))
-    if not options.include_children:
-        return selected
     result: list[Source] = []
     seen: set[int] = set()
+
+    def add_source(source: Source) -> None:
+        if source.pk in seen:
+            return
+        seen.add(source.pk)
+        result.append(source)
+
+    ancestors: list[Source] = []
+    for source in selected:
+        parent = source.parent
+        while parent:
+            ancestors.append(parent)
+            parent = parent.parent
+    for source in reversed(ancestors):
+        add_source(source)
+
     stack = list(selected)
     while stack:
         source = stack.pop(0)
-        if source.pk in seen:
-            continue
-        seen.add(source.pk)
-        result.append(source)
-        stack.extend(list(Source.objects.filter(parent=source).order_by("order", "slug")))
+        add_source(source)
+        if options.include_children:
+            stack.extend(list(Source.objects.filter(parent=source).order_by("order", "slug")))
     if options.public_only:
         result = [s for s in result if s.is_public]
     return result

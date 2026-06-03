@@ -829,6 +829,31 @@ class ArchiveTransferTest(TestCase):
                 self.assertIn("files/content_attachments/imo-export/2024/2/figure.png", zf.namelist())
                 self.assertIn("files/source_documents/imo-export/2024/problems/imo.pdf", zf.namelist())
 
+    def test_export_archive_includes_source_ancestors(self):
+        with TemporaryDirectory() as tmp:
+            owner = make_staff(username="archive-export-owner")
+            root = make_source(slug="international", name="International")
+            source = make_source(slug="imo-export-child", name="IMO", parent=root)
+            make_problem(source=source, year=2024, problem_label="1", content="Exported child")
+
+            output = f"{tmp}/archive.zip"
+            summary = export_archive(ExportOptions(source_slugs=[source.slug], output=output))
+
+            self.assertEqual(summary["sources"], 2)
+            with zipfile.ZipFile(output) as zf:
+                sources = json.loads(zf.read("sources.json"))
+            self.assertEqual([source["slug"] for source in sources], ["international", "imo-export-child"])
+            self.assertIsNone(sources[0]["parent"])
+            self.assertEqual(sources[1]["parent"], "international")
+
+            Source.objects.all().delete()
+            options = ImportOptions(owner=owner, do_it=True)
+            plan = plan_import(output, options)
+
+            self.assertTrue(plan.can_apply, [error.reason for error in plan.errors])
+            apply_import(output, options, plan)
+            self.assertEqual(Source.objects.get(slug="imo-export-child").parent.slug, "international")
+
     def test_import_creates_missing_records_and_is_idempotent(self):
         with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
             owner = make_staff(username="archive-owner")
