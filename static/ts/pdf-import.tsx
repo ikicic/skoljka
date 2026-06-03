@@ -17,6 +17,7 @@ import {
   ProblemDraftEditor,
   normalizeSelectedTags,
   type DraftAttachment,
+  type ProblemDraftChange,
 } from "./components/ProblemDraftEditor";
 import { useLocalStorage, purgeLocalStorage } from "./hooks/useLocalStorage";
 import { gettext, interpolate, ngettext } from "./i18n";
@@ -695,7 +696,10 @@ function PdfImportWizard() {
             right={
               <ProblemDraftEditor
                 problems={draft.problems}
-                onChange={(problems) => setDraft((d) => ({ ...d, problems }))}
+                onChange={(change: ProblemDraftChange) => setDraft((d) => ({
+                  ...d,
+                  problems: typeof change === "function" ? change(d.problems) : change,
+                }))}
                 suggestTagsUrl={suggestTagsUrl}
                 csrfHeaders={csrfHeaders}
                 attachments={draftAttachments}

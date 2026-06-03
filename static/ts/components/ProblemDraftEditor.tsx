@@ -23,6 +23,8 @@ export interface DraftAttachment {
   is_image?: boolean;
 }
 
+export type ProblemDraftChange = ProblemDraft[] | ((problems: ProblemDraft[]) => ProblemDraft[]);
+
 interface TagSuggestionsResponse {
   tags?: string[][];
   error?: string;
@@ -68,7 +70,7 @@ export function ProblemDraftEditor({
   attachments = [],
 }: {
   problems: ProblemDraft[];
-  onChange: (problems: ProblemDraft[]) => void;
+  onChange: (change: ProblemDraftChange) => void;
   suggestTagsUrl: string;
   csrfHeaders: Record<string, string>;
   emptyText?: string;
@@ -78,12 +80,12 @@ export function ProblemDraftEditor({
   const [suggestingTags, setSuggestingTags] = useState(false);
 
   const updateProblemText = useCallback((index: number, value: string) => {
-    onChange(problems.map((p, i) => (i === index ? { ...p, sourceMd: value } : p)));
-  }, [onChange, problems]);
+    onChange((current) => current.map((p, i) => (i === index ? { ...p, sourceMd: value } : p)));
+  }, [onChange]);
 
   const updateProblemTags = useCallback((index: number, tags: SelectedTag[]) => {
-    onChange(problems.map((p, i) => (i === index ? { ...p, tags } : p)));
-  }, [onChange, problems]);
+    onChange((current) => current.map((p, i) => (i === index ? { ...p, tags } : p)));
+  }, [onChange]);
 
   const handleSuggestTags = useCallback(async () => {
     if (suggestingTags || problems.length === 0) return;
@@ -106,7 +108,7 @@ export function ProblemDraftEditor({
 
       const tagOptions = await fetchTags();
       const bySlug = new Map(tagOptions.map((tag) => [tag.slug, tag]));
-      onChange(problems.map((problem, index) => {
+      onChange((current) => current.map((problem, index) => {
         const suggested = new Set(data.tags?.[index] || []);
         const existing = normalizeSelectedTags(problem.tags);
         const taggedExisting = existing.map((tag): SelectedTag => {
