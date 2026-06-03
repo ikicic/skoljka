@@ -26,6 +26,7 @@
 
 .content-editor-panel {
   min-width: 0;
+  overflow-x: auto;
 }
 
 .content-editor-source {
