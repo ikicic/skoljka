@@ -178,7 +178,7 @@ def _source_table_group(source: Source, ctx: SourceTableContext, *, depth: int):
             <tr class="category-row">
                 <td
                     colspan={"6" if ctx.show_favorites else "5"}
-                    style={_source_indent_style(depth)}
+                    style={_source_indent_style(depth, has_index_column=False)}
                 >
                     {_source_category_label(source)}
                 </td>
@@ -220,8 +220,11 @@ def _source_category_label(source: Source):
     return <a href={source.get_absolute_url()}>{source.name()}</a>
 
 
-def _source_indent_style(depth: int) -> str | None:
-    return f"padding-left:{1 + (depth * 1.25):.2f}rem" if depth else None
+def _source_indent_style(depth: int, *, has_index_column: bool) -> str | None:
+    padding = depth * 1.25
+    if not has_index_column:
+        padding += 1.0
+    return f"padding-left:{padding:.2f}rem" if padding else None
 
 
 def _source_data_row(
@@ -252,7 +255,7 @@ def _source_data_row(
     return (
         <tr class={row_class}>
             <td class="col-num">{str(num)}</td>
-            <td class="source-name-cell" style={_source_indent_style(depth)}>
+            <td class="source-name-cell" style={_source_indent_style(depth, has_index_column=True)}>
                 <a href={source.get_absolute_url()}>{source.name()}</a>
             </td>
             <td>{years_label}</td>

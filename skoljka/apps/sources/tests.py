@@ -142,9 +142,11 @@ class SourceListViewTest(TestCase):
         r = self.client.get("/archive/")
         html = r.content.decode()
 
-        self.assertContains(r, f'<tr class="category-row"><td colspan="5"><a href="/archive/{parent.slug}/">Parent Own</a></td></tr>')
+        self.assertContains(r, f'<tr class="category-row"><td colspan="5" style="padding-left:1.00rem"><a href="/archive/{parent.slug}/">Parent Own</a></td></tr>')
         self.assertContains(r, 'class="source-own-row"')
         self.assertContains(r, 'class="source-child-row"')
+        self.assertContains(r, f'<td class="source-name-cell" style="padding-left:1.25rem"><a href="/archive/{parent.slug}/">Parent Own</a></td>')
+        self.assertContains(r, f'<td class="source-name-cell" style="padding-left:1.25rem"><a href="/archive/{child.slug}/">Parent Child</a></td>')
         self.assertLess(html.index('class="source-own-row"'), html.index('Parent Child'))
 
     def test_shows_nested_source_hierarchy(self):
