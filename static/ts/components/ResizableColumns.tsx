@@ -14,7 +14,7 @@ interface Props {
 export function ResizableColumns({
   left,
   right,
-  initialLeftPercent = 30,
+  initialLeftPercent = 50,
   minPercent = 10,
   maxPercent = 70,
   className = "",

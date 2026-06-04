@@ -93,7 +93,6 @@ function ListBulkEdit() {
       {initial.document?.url ? (
         <ResizableColumns
           className="bulk-edit-with-pdf"
-          initialLeftPercent={40}
           minPercent={25}
           maxPercent={65}
           leftClassName="pdf-col-pdf bulk-edit-pdf-col"
