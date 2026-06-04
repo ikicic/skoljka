@@ -69,6 +69,7 @@ const cssOpts = {
     outfile: "static/css/main.min.css",
     bundle: true,
     minify: true,
+    external: ["/static/icons/*"],
 };
 
 if (isWatch) {
