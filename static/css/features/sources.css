@@ -30,6 +30,18 @@
   margin-bottom: 0;
 }
 
+.source-document-table a.external::after {
+  content: "";
+  display: inline-block;
+  width: 0.875em;
+  height: 0.875em;
+  margin-left: 0.25rem;
+  vertical-align: -0.15em;
+  background-color: currentColor;
+  -webkit-mask: url("../../icons/external-link.svg") center / contain no-repeat;
+  mask: url("../../icons/external-link.svg") center / contain no-repeat;
+}
+
 .source-document-actions {
   width: 1%;
   text-align: right;

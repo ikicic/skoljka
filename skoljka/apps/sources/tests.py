@@ -609,10 +609,29 @@ class SourceDetailViewTest(TestCase):
             self.assertContains(r, "<th>Year</th>")
             self.assertContains(r, "<th>Filename</th>")
             self.assertContains(r, "<th>Language</th>")
+            self.assertContains(r, "<th>Source</th>")
             self.assertContains(r, "docs.pdf")
             self.assertContains(r, "<td>2024</td>")
             self.assertContains(r, "<td>hr</td>")
             self.assertContains(r, "/media/documents/")
+
+    def test_source_document_table_shows_source_url(self):
+        with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
+            src = make_source(slug="docs-source-url", name="Docs Source URL")
+            document = SourceDocument(
+                source=src,
+                year=2024,
+                language="hr",
+                kind=SourceDocument.Kind.PROBLEMS,
+                original_filename="docs.pdf",
+                source_url="https://example.com/docs.pdf",
+            )
+            document.file.save("docs.pdf", ContentFile(b"pdf"), save=True)
+
+            r = self.client.get(f"/archive/{src.slug}/2024/")
+
+            self.assertContains(r, 'href="https://example.com/docs.pdf"')
+            self.assertContains(r, 'rel="noopener noreferrer"')
 
     def test_year_query_shows_document_bulk_edit_action_for_staff(self):
         with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
@@ -781,6 +800,76 @@ class SourceExportViewTest(TestCase):
                 self.assertEqual(sources[0]["slug"], src.slug)
 
 
+class SourceDocumentSourceUrlAdminTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.staff = make_staff(username="document-url-admin")
+        cls.regular = make_user(username="document-url-user")
+
+    def test_requires_staff(self):
+        self.client.force_login(self.regular)
+
+        r = self.client.get("/archive/manage/documents/source-urls/")
+
+        self.assertEqual(r.status_code, 403)
+
+    def test_get_filters_documents_by_source_and_year(self):
+        with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
+            src = make_source(slug="source-url-filter", name="Source URL Filter")
+            other = make_source(slug="source-url-other", name="Source URL Other")
+            document = SourceDocument(source=src, year=2024, original_filename="contest.pdf")
+            document.file.save("contest.pdf", ContentFile(b"pdf"), save=True)
+            hidden = SourceDocument(source=other, year=2024, original_filename="hidden.pdf")
+            hidden.file.save("hidden.pdf", ContentFile(b"pdf"), save=True)
+            self.client.force_login(self.staff)
+
+            r = self.client.get(f"/archive/manage/documents/source-urls/?source={src.slug}&year=2024")
+
+            self.assertEqual(r.status_code, 200)
+            self.assertContains(r, "contest.pdf")
+            self.assertContains(r, f'name="source_url_{document.pk}"')
+            self.assertNotContains(r, "hidden.pdf")
+            self.assertContains(r, f'href="/archive/{src.slug}/2024/"')
+
+    def test_post_updates_document_source_url(self):
+        with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
+            src = make_source(slug="source-url-update", name="Source URL Update")
+            document = SourceDocument(source=src, year=2024, original_filename="contest.pdf")
+            document.file.save("contest.pdf", ContentFile(b"pdf"), save=True)
+            self.client.force_login(self.staff)
+
+            r = self.client.post(
+                f"/archive/manage/documents/source-urls/?source={src.slug}&year=2024",
+                {f"source_url_{document.pk}": "https://example.com/contest.pdf"},
+            )
+
+            self.assertRedirects(r, f"/archive/manage/documents/source-urls/?source={src.slug}&year=2024")
+            document.refresh_from_db()
+            self.assertEqual(document.source_url, "https://example.com/contest.pdf")
+
+    def test_post_rejects_invalid_url(self):
+        with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
+            src = make_source(slug="source-url-invalid", name="Source URL Invalid")
+            document = SourceDocument(
+                source=src,
+                year=2024,
+                original_filename="contest.pdf",
+                source_url="https://example.com/old.pdf",
+            )
+            document.file.save("contest.pdf", ContentFile(b"pdf"), save=True)
+            self.client.force_login(self.staff)
+
+            r = self.client.post(
+                f"/archive/manage/documents/source-urls/?source={src.slug}&year=2024",
+                {f"source_url_{document.pk}": "not a url"},
+            )
+
+            self.assertEqual(r.status_code, 200)
+            self.assertContains(r, "Invalid URL")
+            document.refresh_from_db()
+            self.assertEqual(document.source_url, "https://example.com/old.pdf")
+
+
 class ArchiveTransferTest(TestCase):
     def _write_archive(self, path, *, sources=None, tags=None, problems=None, documents=None, files=None):
         with zipfile.ZipFile(path, "w") as zf:
@@ -816,7 +905,13 @@ class ArchiveTransferTest(TestCase):
             problem.tags.add(tag)
             content = problem.content.get()
             ContentAttachment.from_upload(content, SimpleUploadedFile("figure.png", b"png", content_type="image/png"))
-            document = SourceDocument(source=source, year=2024, kind=SourceDocument.Kind.PROBLEMS, original_filename="imo.pdf")
+            document = SourceDocument(
+                source=source,
+                year=2024,
+                kind=SourceDocument.Kind.PROBLEMS,
+                original_filename="imo.pdf",
+                source_url="https://example.com/imo.pdf",
+            )
             document.file.save("imo.pdf", ContentFile(b"pdf"), save=True)
 
             output = f"{tmp}/archive.zip"
@@ -826,7 +921,9 @@ class ArchiveTransferTest(TestCase):
             self.assertEqual(summary["problems"], 1)
             with zipfile.ZipFile(output) as zf:
                 self.assertEqual(json.loads(zf.read("manifest.json"))["schema"], "skoljka.archive.v1")
+                documents = json.loads(zf.read("source_documents.json"))
                 problems = json.loads(zf.read("problems.json"))
+                self.assertEqual(documents[0]["source_url"], "https://example.com/imo.pdf")
                 self.assertEqual(problems[0]["source"], "imo-export")
                 self.assertIn("files/content_attachments/imo-export/2024/2/figure.png", zf.namelist())
                 self.assertIn("files/source_documents/imo-export/2024/problems/imo.pdf", zf.namelist())
@@ -905,6 +1002,46 @@ class ArchiveTransferTest(TestCase):
             second_plan = plan_import(archive, ImportOptions(owner=owner))
             self.assertTrue(second_plan.can_apply)
             self.assertEqual(second_plan.summary()["skip"]["problem"], 1)
+
+    def test_import_source_document_preserves_source_url(self):
+        with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
+            owner = make_staff(username="archive-document-owner")
+            archive = f"{tmp}/import-doc.zip"
+            document_file = "files/source_documents/imo/2024/problems/imo.pdf"
+            self._write_archive(
+                archive,
+                sources=[{
+                    "key": "imo",
+                    "slug": "imo",
+                    "parent": None,
+                    "order": 0,
+                    "is_public": True,
+                    "translations": {"en": {"name": "IMO"}},
+                    "tags": [],
+                }],
+                documents=[{
+                    "key": "imo-2024-problems-imo.pdf",
+                    "source": "imo",
+                    "year": 2024,
+                    "language": "en",
+                    "kind": "problems",
+                    "title": "",
+                    "source_url": "https://example.com/imo.pdf",
+                    "original_filename": "imo.pdf",
+                    "path": document_file,
+                    "size": 3,
+                    "sha256": __import__("hashlib").sha256(b"pdf").hexdigest(),
+                }],
+                files={document_file: b"pdf"},
+            )
+
+            options = ImportOptions(owner=owner, do_it=True)
+            plan = plan_import(archive, options)
+            self.assertTrue(plan.can_apply, [error.reason for error in plan.errors])
+            apply_import(archive, options, plan)
+
+            document = SourceDocument.objects.get(source__slug="imo", year=2024, original_filename="imo.pdf")
+            self.assertEqual(document.source_url, "https://example.com/imo.pdf")
 
     def test_existing_problem_difference_requires_policy(self):
         with TemporaryDirectory() as tmp:

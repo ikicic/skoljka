@@ -65,4 +65,5 @@ export interface WizardDraft {
   year: string;
   language: string;
   globalTags: SelectedTag[];
+  documentSourceUrl: string;
 }

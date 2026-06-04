@@ -177,7 +177,7 @@ def _source_table_group(source: Source, ctx: SourceTableContext, *, depth: int):
         <>
             <tr class="category-row">
                 <td
-                    colspan={"6" if ctx.show_favorites else "5"}
+                    colspan={str(_source_table_colspan(ctx))}
                     style={_source_indent_style(depth, has_index_column=False)}
                 >
                     {_source_category_label(source)}
@@ -209,11 +209,15 @@ def _source_other_group(sources: list[Source], ctx: SourceTableContext):
     return (
         <>
             <tr class="category-row">
-                <td colspan={"6" if ctx.show_favorites else "5"}>{_t("Other competitions")}</td>
+                <td colspan={str(_source_table_colspan(ctx))}>{_t("Other competitions")}</td>
             </tr>
             {_source_data_row(source, ctx, "source-child-row", depth=1) for source in sources}
         </>
     )
+
+
+def _source_table_colspan(ctx: SourceTableContext) -> int:
+    return 5 + int(ctx.show_favorites)
 
 
 def _source_category_label(source: Source):
@@ -328,6 +332,7 @@ def source_documents_section(
     documents: list[SourceDocument],
     *,
     bulk_edit_url: str = "",
+    source_url_edit_url: str = "",
 ):
     if not documents:
         return None
@@ -335,6 +340,11 @@ def source_documents_section(
     return (
         <section class="source-documents">
             <h2>{_t("Documents")}</h2>
+            {show_actions and source_url_edit_url and (
+                <p>
+                    <a href={source_url_edit_url} class="btn btn-sm">{_t("Edit source URLs")}</a>
+                </p>
+            )}
             <div class="table-wrapper">
                 <table class="table source-document-table">
                     <thead>
@@ -342,6 +352,7 @@ def source_documents_section(
                             <th>{_t("Year")}</th>
                             <th>{_t("Filename")}</th>
                             <th>{_t("Language")}</th>
+                            <th>{_t("Source")}</th>
                             {show_actions and <th></th>}
                         </tr>
                     </thead>
@@ -364,10 +375,23 @@ def _source_document_row(
     return (
         <tr>
             <td>
-                {str(document.year) if document.year is not None else <span class="text-muted">{"—"}</span>}
+                {str(document.year) if document.year is not None else <span class="text-muted">—</span>}
             </td>
             <td><a href={document.file.url}>{document.label()}</a></td>
-            <td>{document.language or <span class="text-muted">{"—"}</span>}</td>
+            <td>{document.language or <span class="text-muted">—</span>}</td>
+            <td>
+                {document.source_url and (
+                    <a
+                        href={document.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="external"
+                    >
+                        {document.source_url}
+                    </a>
+                )}
+                {not document.source_url and <span class="text-muted">—</span>}
+            </td>
             {show_actions and (
                 <td class="source-document-actions">
                     <form

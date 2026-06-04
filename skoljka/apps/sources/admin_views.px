@@ -4,6 +4,9 @@ import os
 
 from django.http import FileResponse, HttpRequest, JsonResponse
 from django.middleware.csrf import get_token
+from django.db import models
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.text import slugify
@@ -13,7 +16,7 @@ from django.views.decorators.http import require_POST
 from skoljka.apps.sources.archive_transfer import ExportOptions, export_archive
 from skoljka.apps.sources.forms import SourceChildrenForm, SourceDetailsForm
 from skoljka.apps.sources.hierarchy import ordered_sources_with_depth, source_option_payload, source_options_with_hierarchy_labels
-from skoljka.apps.sources.models import Source
+from skoljka.apps.sources.models import Source, SourceDocument
 from skoljka.apps.tags.models import Tag
 from skoljka.components.forms import error_list, form_errors
 from skoljka.components.layout import Page
@@ -183,6 +186,106 @@ def _export_filename(selected_slugs: list[str]) -> str:
     else:
         base = "sources"
     return f"skoljka-{base}.zip"
+
+
+@px_view
+@staff_required
+def source_document_source_urls(request: HttpRequest):
+    documents = _source_url_documents(request)
+    errors = []
+    if request.method == "POST":
+        validator = URLValidator()
+        document_ids = {str(document.pk): document for document in documents}
+        updates = []
+        for document_id, document in document_ids.items():
+            source_url = request.POST.get(f"source_url_{document_id}", "").strip()
+            if source_url:
+                try:
+                    validator(source_url)
+                except ValidationError:
+                    errors.append(_("Invalid URL for %(document)s.") % {"document": document.label()})
+            updates.append((document, source_url))
+        if not errors:
+            for document, source_url in updates:
+                document.source_url = source_url
+                document.save(update_fields=["source_url"])
+            return redirect(request.get_full_path())
+
+    return (
+        <Page request={request} title={_("Edit document source URLs")}>
+            {error_list(errors)}
+            <form method="post" class="form-stack">
+                <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+                <div class="table-wrapper">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>{_("Document")}</th>
+                                <th>{_("Source")}</th>
+                                <th>{_("Year")}</th>
+                                <th>{_("Source URL")}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {_source_document_url_row(document) for document in documents}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn">{_("Save")}</button>
+                    <a href={_source_document_source_urls_back_url(request)}>{_("Back")}</a>
+                </div>
+            </form>
+        </Page>
+    )
+
+
+def _source_url_documents(request: HttpRequest) -> list[SourceDocument]:
+    queryset = SourceDocument.objects.select_related("source").order_by(
+        "source__order",
+        "source__slug",
+        models.F("year").desc(nulls_last=True),
+        "original_filename",
+        "id",
+    )
+    source_slug = request.GET.get("source")
+    if source_slug:
+        queryset = queryset.filter(source__slug=source_slug)
+    year = request.GET.get("year")
+    if year:
+        try:
+            queryset = queryset.filter(year=int(year))
+        except (TypeError, ValueError):
+            queryset = queryset.none()
+    return list(queryset)
+
+
+def _source_document_url_row(document: SourceDocument):
+    return (
+        <tr>
+            <td><a href={document.file.url}>{document.label()}</a></td>
+            <td>{document.source.name()}</td>
+            <td>{str(document.year) if document.year is not None else "—"}</td>
+            <td>
+                <input
+                    type="url"
+                    name={f"source_url_{document.pk}"}
+                    value={document.source_url}
+                    placeholder="https://..."
+                />
+            </td>
+        </tr>
+    )
+
+
+def _source_document_source_urls_back_url(request: HttpRequest) -> str:
+    source_slug = request.GET.get("source")
+    year = request.GET.get("year")
+    if source_slug and year:
+        return reverse("source_year_detail", kwargs={"slug": source_slug, "year": year})
+    if source_slug:
+        return reverse("source_detail", kwargs={"slug": source_slug})
+    return reverse("source_admin_list")
 
 
 @px_view

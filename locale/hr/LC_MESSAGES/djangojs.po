@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Skoljka\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-31 20:03+0000\n"
+"POT-Creation-Date: 2026-06-04 19:44+0000\n"
 "PO-Revision-Date: 2026-05-07 00:30+0000\n"
 "Last-Translator: Skoljka Team\n"
 "Language-Team: Croatian\n"
@@ -39,7 +39,7 @@ msgstr "Ovaj privitak pripada drugom sadržaju."
 
 #: static/ts/components/ListProblemPicker.ts:121
 #: static/ts/components/ListProblemPicker.ts:428 static/ts/i18n-messages.ts:17
-#: static/ts/pdf-import.tsx:551
+#: static/ts/pdf-import.tsx:593
 msgid "Select all"
 msgstr "Odaberi sve"
 
@@ -58,14 +58,14 @@ msgstr "Izvor"
 msgid "Tags"
 msgstr "Oznake"
 
-#: static/ts/components/ListProblemPicker.ts:263 static/ts/i18n-messages.ts:99
+#: static/ts/components/ListProblemPicker.ts:263 static/ts/i18n-messages.ts:102
 msgid "%(count)s unsaved change"
 msgid_plural "%(count)s unsaved changes"
 msgstr[0] "%(count)s nespremljena izmjena"
 msgstr[1] "%(count)s nespremljene izmjene"
 msgstr[2] "%(count)s nespremljenih izmjena"
 
-#: static/ts/components/ListProblemPicker.ts:329 static/ts/i18n-messages.ts:100
+#: static/ts/components/ListProblemPicker.ts:329 static/ts/i18n-messages.ts:103
 msgid "%(count)s problem"
 msgid_plural "%(count)s problems"
 msgstr[0] "%(count)s zadatak"
@@ -88,45 +88,45 @@ msgstr "Pretraživanje nije uspjelo."
 msgid "No matching problems."
 msgstr "Nema odgovarajućih zadataka."
 
-#: static/ts/components/PdfPreview.tsx:66 static/ts/i18n-messages.ts:25
+#: static/ts/components/PdfPreview.tsx:73 static/ts/i18n-messages.ts:25
 msgid "PDF could not be loaded."
 msgstr "PDF se ne može učitati."
 
-#: static/ts/components/PdfPreview.tsx:77 static/ts/i18n-messages.ts:26
+#: static/ts/components/PdfPreview.tsx:84 static/ts/i18n-messages.ts:26
 msgid "Loading PDF..."
 msgstr "Učitavanje PDF-a..."
 
-#: static/ts/components/ProblemDraftEditor.tsx:66 static/ts/i18n-messages.ts:27
+#: static/ts/components/ProblemDraftEditor.tsx:68 static/ts/i18n-messages.ts:27
 msgid "No problems transcribed."
 msgstr "Nema transkribiranih zadataka."
 
-#: static/ts/components/ProblemDraftEditor.tsx:101
+#: static/ts/components/ProblemDraftEditor.tsx:103
 #: static/ts/i18n-messages.ts:28 static/ts/list-bulk-edit.tsx:78
-#: static/ts/pdf-import.tsx:485
+#: static/ts/pdf-import.tsx:516
 msgid "Invalid response"
 msgstr "Neispravan odgovor"
 
-#: static/ts/components/ProblemDraftEditor.tsx:103
+#: static/ts/components/ProblemDraftEditor.tsx:105
 #: static/ts/i18n-messages.ts:29
 msgid "Tag suggestion failed"
 msgstr "Predlaganje oznaka nije uspjelo"
 
-#: static/ts/components/ProblemDraftEditor.tsx:135
+#: static/ts/components/ProblemDraftEditor.tsx:137
 #: static/ts/i18n-messages.ts:30
 msgid "Network error during tag suggestion"
 msgstr "Mrežna greška tijekom predlaganja oznaka"
 
-#: static/ts/components/ProblemDraftEditor.tsx:150
+#: static/ts/components/ProblemDraftEditor.tsx:152
 #: static/ts/i18n-messages.ts:31
 msgid "Suggesting tags..."
 msgstr "Predlažem oznake..."
 
-#: static/ts/components/ProblemDraftEditor.tsx:150
+#: static/ts/components/ProblemDraftEditor.tsx:152
 #: static/ts/i18n-messages.ts:32
 msgid "Autosuggest tags"
 msgstr "Automatski predloži oznake"
 
-#: static/ts/components/ProblemDraftEditor.tsx:194
+#: static/ts/components/ProblemDraftEditor.tsx:196
 #: static/ts/i18n-messages.ts:33
 msgid "Problem %(number)s."
 msgstr "Zadatak %(number)s."
@@ -187,91 +187,99 @@ msgstr "Spremanje nije uspjelo"
 msgid "Network error during save"
 msgstr "Mrežna greška tijekom spremanja"
 
-#: static/ts/i18n-messages.ts:42 static/ts/list-bulk-edit.tsx:113
-#: static/ts/list-bulk-edit.tsx:123
+#: static/ts/i18n-messages.ts:42 static/ts/list-bulk-edit.tsx:112
+#: static/ts/list-bulk-edit.tsx:122
 msgid "No problems yet."
 msgstr "Još nema zadataka."
 
-#: static/ts/i18n-messages.ts:43 static/ts/list-bulk-edit.tsx:128
-#: static/ts/pdf-import.tsx:776
+#: static/ts/i18n-messages.ts:43 static/ts/list-bulk-edit.tsx:127
+#: static/ts/pdf-import.tsx:823
 msgid "Saving problems..."
 msgstr "Spremanje zadataka..."
 
-#: static/ts/i18n-messages.ts:44 static/ts/list-bulk-edit.tsx:128
+#: static/ts/i18n-messages.ts:44 static/ts/list-bulk-edit.tsx:127
 msgid "Save changes"
 msgstr "Spremi izmjene"
 
-#: static/ts/i18n-messages.ts:45 static/ts/list-bulk-edit.tsx:130
-#: static/ts/pdf-import.tsx:739
+#: static/ts/i18n-messages.ts:45 static/ts/list-bulk-edit.tsx:129
+#: static/ts/pdf-import.tsx:786
 msgid "Back"
 msgstr "Natrag"
 
-#: static/ts/i18n-messages.ts:46 static/ts/pdf-import.tsx:200
+#: static/ts/i18n-messages.ts:46 static/ts/pdf-import.tsx:204
 msgid "Transcription failed: %(error)s"
 msgstr "Transkripcija nije uspjela: %(error)s"
 
-#: static/ts/i18n-messages.ts:47 static/ts/pdf-import.tsx:201
+#: static/ts/i18n-messages.ts:47 static/ts/pdf-import.tsx:205
 msgid "unknown error"
 msgstr "nepoznata greška"
 
-#: static/ts/i18n-messages.ts:48 static/ts/pdf-import.tsx:343
-#: static/ts/pdf-import.tsx:446 static/ts/pdf-import.tsx:700
+#: static/ts/i18n-messages.ts:48 static/ts/pdf-import.tsx:369
+#: static/ts/pdf-import.tsx:476 static/ts/pdf-import.tsx:747
 msgid "Choose a source before importing."
 msgstr "Odaberite izvor prije uvoza."
 
-#: static/ts/i18n-messages.ts:49 static/ts/pdf-import.tsx:368
+#: static/ts/i18n-messages.ts:49 static/ts/pdf-import.tsx:394
 msgid "Network error during transcription"
 msgstr "Mrežna greška tijekom transkripcije"
 
-#: static/ts/i18n-messages.ts:50 static/ts/pdf-import.tsx:376
+#: static/ts/i18n-messages.ts:50 static/ts/pdf-import.tsx:402
 msgid "Request failed"
 msgstr "Zahtjev nije uspio"
 
-#: static/ts/i18n-messages.ts:51 static/ts/pdf-import.tsx:377
+#: static/ts/i18n-messages.ts:51 static/ts/pdf-import.tsx:403
 msgid "Transcription failed"
 msgstr "Transkripcija nije uspjela"
 
-#: static/ts/i18n-messages.ts:52 static/ts/pdf-import.tsx:428
+#: static/ts/i18n-messages.ts:52 static/ts/pdf-import.tsx:458
 msgid "Discard this import? Your edits will be lost."
 msgstr "Odbaciti ovaj uvoz? Vaše izmjene bit će izgubljene."
 
-#: static/ts/i18n-messages.ts:53 static/ts/pdf-import.tsx:488
+#: static/ts/i18n-messages.ts:53 static/ts/pdf-import.tsx:519
 msgid "Import failed"
 msgstr "Uvoz nije uspio"
 
-#: static/ts/i18n-messages.ts:54 static/ts/pdf-import.tsx:500
+#: static/ts/i18n-messages.ts:54 static/ts/pdf-import.tsx:531
 msgid "Network error during import"
 msgstr "Mrežna greška tijekom uvoza"
 
-#: static/ts/i18n-messages.ts:55 static/ts/pdf-import.tsx:521
+#: static/ts/i18n-messages.ts:55 static/ts/pdf-import.tsx:552
 msgid "Select a PDF file to import problems from."
 msgstr "Odaberite PDF datoteku iz koje želite uvesti zadatke."
 
-#: static/ts/i18n-messages.ts:56 static/ts/pdf-import.tsx:554
+#: static/ts/i18n-messages.ts:56 static/ts/pdf-import.tsx:565
+msgid "Drop PDF here"
+msgstr "Ispusti PDF ovdje"
+
+#: static/ts/i18n-messages.ts:57 static/ts/pdf-import.tsx:566
+msgid "or click to choose a file"
+msgstr "ili klikni za odabir datoteke"
+
+#: static/ts/i18n-messages.ts:58 static/ts/pdf-import.tsx:596
 msgid "Deselect all"
 msgstr "Poništi odabir"
 
-#: static/ts/i18n-messages.ts:57 static/ts/pdf-import.tsx:591
+#: static/ts/i18n-messages.ts:59 static/ts/pdf-import.tsx:633
 msgid "Transcribe selected pages"
 msgstr "Prepiši odabrane stranice"
 
-#: static/ts/i18n-messages.ts:58 static/ts/pdf-import.tsx:603
+#: static/ts/i18n-messages.ts:60 static/ts/pdf-import.tsx:645
 msgid "Queued..."
 msgstr "U redu čekanja..."
 
-#: static/ts/i18n-messages.ts:59 static/ts/pdf-import.tsx:605
+#: static/ts/i18n-messages.ts:61 static/ts/pdf-import.tsx:647
 msgid "Transcribing selected pages..."
 msgstr "Prepisivanje odabranih stranica..."
 
-#: static/ts/i18n-messages.ts:60 static/ts/pdf-import.tsx:606
+#: static/ts/i18n-messages.ts:62 static/ts/pdf-import.tsx:648
 msgid "Starting transcription..."
 msgstr "Pokretanje transkripcije..."
 
-#: static/ts/i18n-messages.ts:61 static/ts/pdf-import.tsx:615
+#: static/ts/i18n-messages.ts:63 static/ts/pdf-import.tsx:657
 msgid "Cancel"
 msgstr "Odustani"
 
-#: static/ts/i18n-messages.ts:62 static/ts/pdf-import.tsx:641
+#: static/ts/i18n-messages.ts:64 static/ts/pdf-import.tsx:685
 msgid ""
 "Resumed from a previous session; re-upload the PDF to see it alongside the "
 "problems."
@@ -279,24 +287,24 @@ msgstr ""
 "Nastavljeno iz prethodne sesije; ponovno prenesite PDF kako biste ga vidjeli "
 "uz zadatke."
 
-#: static/ts/i18n-messages.ts:63 static/ts/pdf-import.tsx:659
+#: static/ts/i18n-messages.ts:65 static/ts/pdf-import.tsx:703
 msgid "PDF not loaded."
 msgstr "PDF nije učitan."
 
-#: static/ts/i18n-messages.ts:64 static/ts/pdf-import.tsx:692
+#: static/ts/i18n-messages.ts:66 static/ts/pdf-import.tsx:739
 msgid "Back to page selection"
 msgstr "Natrag na odabir stranica"
 
-#: static/ts/i18n-messages.ts:65 static/ts/pdf-import.tsx:707
+#: static/ts/i18n-messages.ts:67 static/ts/pdf-import.tsx:754
 msgid "Review & import"
 msgstr "Pregledaj i uvezi"
 
-#: static/ts/i18n-messages.ts:66 static/ts/pdf-import.tsx:714
-#: static/ts/pdf-import.tsx:765
+#: static/ts/i18n-messages.ts:68 static/ts/pdf-import.tsx:761
+#: static/ts/pdf-import.tsx:812
 msgid "Cancel import"
 msgstr "Odustani od uvoza"
 
-#: static/ts/i18n-messages.ts:67 static/ts/pdf-import.tsx:724
+#: static/ts/i18n-messages.ts:69 static/ts/pdf-import.tsx:771
 msgid ""
 "Please check the details below. Click Confirm to import, or Back to keep "
 "editing."
@@ -304,152 +312,156 @@ msgstr ""
 "Provjerite podatke u nastavku. Kliknite Potvrdi za uvoz ili Natrag za "
 "nastavak uređivanja."
 
-#: static/ts/i18n-messages.ts:68
+#: static/ts/i18n-messages.ts:70
 msgid "The whole PDF will be attached to %(source)s, %(year)s."
 msgstr "Cijeli PDF bit će povezan s %(source)s, %(year)s."
 
-#: static/ts/i18n-messages.ts:69
+#: static/ts/i18n-messages.ts:71
 msgid "The whole PDF will be attached to %(source)s."
 msgstr "Cijeli PDF bit će povezan s %(source)s."
 
-#: static/ts/i18n-messages.ts:70
+#: static/ts/i18n-messages.ts:72
 msgid "Choose a source to decide where the whole PDF will be attached."
 msgstr "Odaberite izvor kako biste odredili uz što će cijeli PDF biti povezan."
 
-#: static/ts/i18n-messages.ts:71
+#: static/ts/i18n-messages.ts:73
 msgid "-- Select source --"
 msgstr "-- Odaberi izvor --"
 
-#: static/ts/i18n-messages.ts:72
+#: static/ts/i18n-messages.ts:74
 msgid "New source"
 msgstr "Novi izvor"
 
-#: static/ts/i18n-messages.ts:73
+#: static/ts/i18n-messages.ts:75
 msgid "Year"
 msgstr "Godina"
 
-#: static/ts/i18n-messages.ts:74
+#: static/ts/i18n-messages.ts:76
 msgid "e.g. 2024"
 msgstr "npr. 2024"
 
-#: static/ts/i18n-messages.ts:75
+#: static/ts/i18n-messages.ts:77
 msgid "Language"
 msgstr "Jezik"
 
-#: static/ts/i18n-messages.ts:76
+#: static/ts/i18n-messages.ts:78
 msgid "hr or en"
 msgstr "hr ili en"
 
-#: static/ts/i18n-messages.ts:77
+#: static/ts/i18n-messages.ts:79
 msgid "Tags for all problems"
 msgstr "Oznake za sve zadatke"
 
-#: static/ts/i18n-messages.ts:78
+#: static/ts/i18n-messages.ts:80
 msgid "Save whole PDF"
 msgstr "Spremi cijeli PDF"
 
-#: static/ts/i18n-messages.ts:79
+#: static/ts/i18n-messages.ts:81
+msgid "PDF source URL"
+msgstr "URL izvora PDF-a"
+
+#: static/ts/i18n-messages.ts:82
 msgid "Could not create source."
 msgstr "Nije moguće stvoriti izvor."
 
-#: static/ts/i18n-messages.ts:80
+#: static/ts/i18n-messages.ts:83
 msgid "Network error while creating source."
 msgstr "Mrežna greška pri stvaranju izvora."
 
-#: static/ts/i18n-messages.ts:81
+#: static/ts/i18n-messages.ts:84
 msgid "Name (EN)"
 msgstr "Naziv (EN)"
 
-#: static/ts/i18n-messages.ts:82
+#: static/ts/i18n-messages.ts:85
 msgid "Name (HR)"
 msgstr "Naziv (HR)"
 
-#: static/ts/i18n-messages.ts:83
+#: static/ts/i18n-messages.ts:86
 msgid "Slug"
 msgstr "Slug"
 
-#: static/ts/i18n-messages.ts:84
+#: static/ts/i18n-messages.ts:87
 msgid "Parent"
 msgstr "Roditelj"
 
-#: static/ts/i18n-messages.ts:85
+#: static/ts/i18n-messages.ts:88
 msgid "-- No parent --"
 msgstr "-- Bez roditelja --"
 
-#: static/ts/i18n-messages.ts:86
+#: static/ts/i18n-messages.ts:89
 msgid "Creating source..."
 msgstr "Stvaranje izvora..."
 
-#: static/ts/i18n-messages.ts:87
+#: static/ts/i18n-messages.ts:90
 msgid "Create source"
 msgstr "Stvori izvor"
 
-#: static/ts/i18n-messages.ts:88
+#: static/ts/i18n-messages.ts:91
 msgid "OCR"
 msgstr "OCR"
 
-#: static/ts/i18n-messages.ts:89
+#: static/ts/i18n-messages.ts:92
 msgid "LLM cleanup"
 msgstr "LLM obrada"
 
-#: static/ts/i18n-messages.ts:90
+#: static/ts/i18n-messages.ts:93
 msgid "Running"
 msgstr "U tijeku"
 
-#: static/ts/i18n-messages.ts:91
+#: static/ts/i18n-messages.ts:94
 msgid "Done"
 msgstr "Gotovo"
 
-#: static/ts/i18n-messages.ts:92
+#: static/ts/i18n-messages.ts:95
 msgid "Failed"
 msgstr "Neuspjelo"
 
-#: static/ts/i18n-messages.ts:93
+#: static/ts/i18n-messages.ts:96
 msgid "Pending"
 msgstr "Na čekanju"
 
-#: static/ts/i18n-messages.ts:94
+#: static/ts/i18n-messages.ts:97
 msgid "The whole PDF will be saved for %(source)s, %(year)s."
 msgstr "Cijeli PDF bit će spremljen za %(source)s, %(year)s."
 
-#: static/ts/i18n-messages.ts:95
+#: static/ts/i18n-messages.ts:98
 msgid "(none)"
 msgstr "(nema)"
 
-#: static/ts/i18n-messages.ts:96
+#: static/ts/i18n-messages.ts:99
 msgid "The whole PDF will be saved for %(source)s."
 msgstr "Cijeli PDF bit će spremljen za %(source)s."
 
-#: static/ts/i18n-messages.ts:97
+#: static/ts/i18n-messages.ts:100
 msgid "Original PDF"
 msgstr "Izvorni PDF"
 
-#: static/ts/i18n-messages.ts:98
+#: static/ts/i18n-messages.ts:101
 msgid "The original PDF will not be saved."
 msgstr "Izvorni PDF neće biti spremljen."
 
-#: static/ts/i18n-messages.ts:101 static/ts/pdf-import.tsx:558
+#: static/ts/i18n-messages.ts:104 static/ts/pdf-import.tsx:600
 msgid "%(count)s page"
 msgid_plural "%(count)s pages"
 msgstr[0] "%(count)s stranica"
 msgstr[1] "%(count)s stranice"
 msgstr[2] "%(count)s stranica"
 
-#: static/ts/i18n-messages.ts:102 static/ts/pdf-import.tsx:585
+#: static/ts/i18n-messages.ts:105 static/ts/pdf-import.tsx:627
 msgid "Transcribe %(count)s page"
 msgid_plural "Transcribe %(count)s pages"
 msgstr[0] "Prepiši %(count)s stranicu"
 msgstr[1] "Prepiši %(count)s stranice"
 msgstr[2] "Prepiši %(count)s stranica"
 
-#: static/ts/i18n-messages.ts:103 static/ts/pdf-import.tsx:745
+#: static/ts/i18n-messages.ts:106 static/ts/pdf-import.tsx:792
 msgid "Confirm - import %(count)s problem and save PDF"
 msgid_plural "Confirm - import %(count)s problems and save PDF"
 msgstr[0] "Potvrdi - uvezi %(count)s zadatak i spremi PDF"
 msgstr[1] "Potvrdi - uvezi %(count)s zadatka i spremi PDF"
 msgstr[2] "Potvrdi - uvezi %(count)s zadataka i spremi PDF"
 
-#: static/ts/i18n-messages.ts:104 static/ts/pdf-import.tsx:753
+#: static/ts/i18n-messages.ts:107 static/ts/pdf-import.tsx:800
 msgid "Confirm - import %(count)s problem"
 msgid_plural "Confirm - import %(count)s problems"
 msgstr[0] "Potvrdi - uvezi %(count)s zadatak"

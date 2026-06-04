@@ -14,8 +14,8 @@ class SourceAdmin(admin.ModelAdmin):
 
 @admin.register(SourceDocument)
 class SourceDocumentAdmin(admin.ModelAdmin):
-    list_display = ("label", "source", "year", "language", "kind", "uploaded_by", "created_at")
+    list_display = ("label", "source", "year", "language", "kind", "source_url", "uploaded_by", "created_at")
     list_filter = ("kind", "language", "year")
-    search_fields = ("title", "original_filename", "source__slug", "source__translations")
+    search_fields = ("title", "original_filename", "source_url", "source__slug", "source__translations")
     raw_id_fields = ("source", "uploaded_by")
     readonly_fields = ("created_at",)

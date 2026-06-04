@@ -97,6 +97,7 @@ const EMPTY_DRAFT: WizardDraft = {
   year: "",
   language: "",
   globalTags: [],
+  documentSourceUrl: "",
 };
 
 const POLL_INTERVAL_MS = 1000;
@@ -439,6 +440,10 @@ function PdfImportWizard() {
     (tags: SelectedTag[]) => setDraft((d) => ({ ...d, globalTags: tags })),
     [setDraft],
   );
+  const setDocumentSourceUrl = useCallback(
+    (value: string) => setDraft((d) => ({ ...d, documentSourceUrl: value })),
+    [setDraft],
+  );
   const normalizedGlobalTags = useMemo(
     () => normalizeSelectedTags(draft.globalTags),
     [draft.globalTags],
@@ -479,6 +484,7 @@ function PdfImportWizard() {
       job_id: draftJobId,
       year: draft.year ? parseInt(draft.year, 10) : null,
       language: draft.language || "en",
+      document_source_url: draft.documentSourceUrl.trim(),
       global_tags: normalizedGlobalTags
         .filter((tag) => tag.kind === "existing")
         .map((tag) => tag.slug),
@@ -574,6 +580,8 @@ function PdfImportWizard() {
             onLanguageChange={setLanguage}
             globalTags={normalizedGlobalTags}
             onGlobalTagsChange={setGlobalTags}
+            documentSourceUrl={draft.documentSourceUrl}
+            onDocumentSourceUrlChange={setDocumentSourceUrl}
             keepOriginalPdfRef={keepOriginalPdfRef}
             sources={sourceOptions}
             onSourceCreated={addSourceOption}
@@ -665,6 +673,8 @@ function PdfImportWizard() {
             onLanguageChange={setLanguage}
             globalTags={normalizedGlobalTags}
             onGlobalTagsChange={setGlobalTags}
+            documentSourceUrl={draft.documentSourceUrl}
+            onDocumentSourceUrlChange={setDocumentSourceUrl}
             sources={sourceOptions}
             onSourceCreated={addSourceOption}
             createSourceUrl={createSourceUrl}

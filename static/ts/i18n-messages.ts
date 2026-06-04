@@ -78,6 +78,7 @@ void [
   gettext("hr or en"), // static/ts/pdfImport/components.tsx
   gettext("Tags for all problems"), // static/ts/pdfImport/components.tsx
   gettext("Save whole PDF"), // static/ts/pdfImport/components.tsx
+  gettext("PDF source URL"), // static/ts/pdfImport/components.tsx
   gettext("Could not create source."), // static/ts/pdfImport/components.tsx
   gettext("Network error while creating source."), // static/ts/pdfImport/components.tsx
   gettext("Name (EN)"), // static/ts/pdfImport/components.tsx

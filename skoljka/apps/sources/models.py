@@ -57,6 +57,7 @@ class SourceDocument(models.Model):
     title = models.CharField(max_length=255, blank=True)
     file = models.FileField(upload_to=source_document_upload_to)
     original_filename = models.CharField(max_length=255, blank=True)
+    source_url = models.URLField(max_length=1000, blank=True)
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,

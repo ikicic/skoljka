@@ -132,6 +132,10 @@ def source_detail(request: HttpRequest, slug: str, year: int | None = None):
                         request,
                         documents,
                         bulk_edit_url=reverse("source_year_bulk_edit", kwargs={"slug": source.slug, "year": selected_year}),
+                        source_url_edit_url=(
+                            reverse("source_document_source_urls")
+                            + f"?source={source.slug}&year={selected_year}"
+                        ),
                     )}
                     {problems and (
                         <>
@@ -166,7 +170,11 @@ def source_detail(request: HttpRequest, slug: str, year: int | None = None):
                             {comp_grid(source, sorted_years, grid_labels, solved_ids)}
                         </>
                     )}
-                    {source_documents_section(request, documents)}
+                    {source_documents_section(
+                        request,
+                        documents,
+                        source_url_edit_url=reverse("source_document_source_urls") + f"?source={source.slug}",
+                    )}
                     {sorted_years and not grid_labels and (
                         <>
                             <h2>{_t("Overview")}</h2>

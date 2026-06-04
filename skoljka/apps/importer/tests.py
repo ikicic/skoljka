@@ -356,6 +356,20 @@ class PdfConfirmTest(TestCase):
         self.assertEqual(r.status_code, 400)
         self.assertEqual(Problem.objects.count(), 0)
 
+    def test_invalid_document_source_url_returns_400(self):
+        r = self._post(
+            {
+                "source_id": self.src.pk,
+                "year": 2024,
+                "language": "en",
+                "document_source_url": "not a url",
+                "problems": [{"source_md": "x"}],
+            }
+        )
+
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(Problem.objects.count(), 0)
+
     def test_redirect_url_without_year(self):
         r = self._post(
             {
@@ -383,6 +397,7 @@ class PdfConfirmTest(TestCase):
                     "job_id": str(job.pk),
                     "year": 2024,
                     "language": "hr",
+                    "document_source_url": "https://example.com/contest.pdf",
                     "problems": [{"source_md": "Stmt"}],
                 }
             )
@@ -393,6 +408,7 @@ class PdfConfirmTest(TestCase):
             self.assertEqual(document.year, 2024)
             self.assertEqual(document.language, "hr")
             self.assertEqual(document.original_filename, "contest.pdf")
+            self.assertEqual(document.source_url, "https://example.com/contest.pdf")
             document.file.open("rb")
             self.assertEqual(document.file.read(), b"%PDF full original")
             document.file.close()

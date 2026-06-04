@@ -5,8 +5,10 @@ import re
 from datetime import timedelta
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.validators import URLValidator
 from django.db import transaction
 from django.http import HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -16,6 +18,7 @@ from django.utils.translation import gettext as _t
 from django.views.decorators.http import require_GET, require_POST
 from pythonjsx.runtime import SafeStr
 
+from skoljka.apps.accounts.models import User
 from skoljka.apps.content.models import Content, ContentAttachment
 from skoljka.apps.importer import backends
 from skoljka.apps.importer.models import TranscriptionJob
@@ -56,7 +59,7 @@ def _allowed_import_source_ids(source: Source) -> set[int]:
     return {source.pk, *source.children.values_list("pk", flat=True)}
 
 
-def _job_allowed_source_ids(job_id, user) -> set[int] | None:
+def _job_allowed_source_ids(job_id: str | None, user: User) -> set[int] | None:
     if not job_id:
         return None
     try:
@@ -306,6 +309,7 @@ def pdf_confirm(request: HttpRequest) -> JsonResponse:
     global_new_tag_names: list[str] = data.get("global_new_tags", [])
     problems_data: list[dict] = data.get("problems", [])
     job_id = data.get("job_id")
+    document_source_url = data.get("document_source_url", "")
 
     if not isinstance(problems_data, list) or not problems_data:
         return JsonResponse({"error": _t("No problems to import")}, status=400)
@@ -313,6 +317,14 @@ def pdf_confirm(request: HttpRequest) -> JsonResponse:
         return JsonResponse({"error": _t("Invalid tags")}, status=400)
     if not isinstance(language, str):
         return JsonResponse({"error": _t("Invalid language")}, status=400)
+    if not isinstance(document_source_url, str):
+        return JsonResponse({"error": _t("Invalid source URL")}, status=400)
+    document_source_url = document_source_url.strip()
+    if document_source_url:
+        try:
+            URLValidator()(document_source_url)
+        except ValidationError:
+            return JsonResponse({"error": _t("Invalid source URL")}, status=400)
     if year is not None:
         try:
             year = int(year)
@@ -386,7 +398,7 @@ def pdf_confirm(request: HttpRequest) -> JsonResponse:
 
             created_ids.append(problem.id)
 
-        document_id = _promote_original_pdf(job_id, request.user, source, year, language)
+        document_id = _promote_original_pdf(job_id, request.user, source, year, language, document_source_url)
 
     # Build redirect URL.
     redirect_url = source.get_absolute_url()
@@ -404,7 +416,7 @@ def pdf_confirm(request: HttpRequest) -> JsonResponse:
 ATTACHMENT_REF_RE = re.compile(r"attachment:([^)\s\"'}]+)")
 
 
-def _job_images(job_id, user) -> dict[str, str]:
+def _job_images(job_id: str | None, user: User) -> dict[str, str]:
     if not job_id:
         return {}
     try:
@@ -447,7 +459,14 @@ def _attach_referenced_images(content: Content, source_md: str, images: dict[str
     content.save()
 
 
-def _promote_original_pdf(job_id, user, source: Source, year: int | None, language: str) -> int | None:
+def _promote_original_pdf(
+    job_id: str | None,
+    user: User,
+    source: Source,
+    year: int | None,
+    language: str,
+    source_url: str = "",
+) -> int | None:
     if not job_id:
         return None
     try:
@@ -469,6 +488,7 @@ def _promote_original_pdf(job_id, user, source: Source, year: int | None, langua
         language=language or "",
         kind=SourceDocument.Kind.PROBLEMS,
         original_filename=job.original_filename,
+        source_url=source_url,
         uploaded_by=user,
     )
     document.file.save(job.original_filename or "original.pdf", content, save=True)

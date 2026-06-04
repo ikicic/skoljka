@@ -287,6 +287,7 @@ def _source_document_payload(zf: zipfile.ZipFile, document: SourceDocument) -> P
         "language": document.language,
         "kind": document.kind,
         "title": document.title,
+        "source_url": document.source_url,
         "original_filename": filename,
         "path": path,
         "size": len(data),
@@ -468,7 +469,9 @@ def _plan_source_documents(archive: _Archive, options: ImportOptions, plan: Impo
         if not existing:
             plan.changes.append(PlannedChange("source_document", identity, "create"))
         elif file_hash(existing.file) == payload.get("sha256"):
-            plan.changes.append(PlannedChange("source_document", identity, "skip", "identical"))
+            action = "update" if _source_document_metadata_differs(existing, payload) else "skip"
+            reason = "metadata changed" if action == "update" else "identical"
+            plan.changes.append(PlannedChange("source_document", identity, action, reason))
         else:
             plan.changes.append(PlannedChange(
                 "source_document",
@@ -619,7 +622,15 @@ def _apply_source_documents(archive: _Archive, options: ImportOptions, sources_b
             original_filename=payload.get("original_filename") or "",
         ).first()
         if existing:
-            if file_hash(existing.file) == payload.get("sha256") or options.document_conflicts == "skip":
+            if file_hash(existing.file) == payload.get("sha256"):
+                existing.year = payload.get("year")
+                existing.language = payload.get("language") or ""
+                existing.kind = payload.get("kind") or SourceDocument.Kind.PROBLEMS
+                existing.title = payload.get("title") or ""
+                existing.source_url = payload.get("source_url") or ""
+                existing.save()
+                continue
+            if options.document_conflicts == "skip":
                 continue
             document = existing
             document.file.delete(save=False)
@@ -631,6 +642,7 @@ def _apply_source_documents(archive: _Archive, options: ImportOptions, sources_b
         document.language = payload.get("language") or ""
         document.kind = payload.get("kind") or SourceDocument.Kind.PROBLEMS
         document.title = payload.get("title") or ""
+        document.source_url = payload.get("source_url") or ""
         document.original_filename = payload.get("original_filename") or PurePosixPath(path).name
         document.file.save(document.original_filename, ContentFile(data), save=False)
         written_files.append(document.file)
@@ -672,6 +684,14 @@ def _source_differs(source: Source, payload: Payload, options: ImportOptions) ->
         or source.translations != (payload.get("translations") or {})
         or sorted(source.tags.values_list("slug", flat=True)) != sorted(payload.get("tags") or [])
         or (source.parent.slug if source.parent else None) != payload.get("parent")
+    )
+
+
+def _source_document_metadata_differs(document: SourceDocument, payload: Payload) -> bool:
+    return (
+        document.language != (payload.get("language") or "")
+        or document.title != (payload.get("title") or "")
+        or document.source_url != (payload.get("source_url") or "")
     )
 
 

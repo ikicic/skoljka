@@ -67,6 +67,8 @@ export function MetaForm({
   onLanguageChange,
   globalTags,
   onGlobalTagsChange,
+  documentSourceUrl,
+  onDocumentSourceUrlChange,
   keepOriginalPdfRef,
   sources,
   onSourceCreated,
@@ -81,6 +83,8 @@ export function MetaForm({
   onLanguageChange: (v: string) => void;
   globalTags: SelectedTag[];
   onGlobalTagsChange: (tags: SelectedTag[]) => void;
+  documentSourceUrl: string;
+  onDocumentSourceUrlChange: (value: string) => void;
   keepOriginalPdfRef?: RefObject<HTMLInputElement | null>;
   sources: SourceOption[];
   onSourceCreated: (source: SourceOption) => void;
@@ -154,17 +158,29 @@ export function MetaForm({
         <TagPicker selected={globalTags} onChange={onGlobalTagsChange} />
       </div>
       {keepOriginalPdfRef && (
-        <label className="checkbox-row">
-          <input
-            ref={keepOriginalPdfRef}
-            type="checkbox"
-            defaultChecked
-          />
-          <span>
-            {gettext("Save whole PDF")}
-            <small className="text-muted">{pdfDestination}</small>
-          </span>
-        </label>
+        <>
+          <label className="checkbox-row">
+            <input
+              ref={keepOriginalPdfRef}
+              type="checkbox"
+              defaultChecked
+            />
+            <span>
+              {gettext("Save whole PDF")}
+              <small className="text-muted">{pdfDestination}</small>
+            </span>
+          </label>
+          <div className="form-field">
+            <label htmlFor="pdf-document-source-url">{gettext("PDF source URL")}</label>
+            <input
+              id="pdf-document-source-url"
+              type="url"
+              value={documentSourceUrl}
+              onChange={(e) => onDocumentSourceUrlChange(e.target.value)}
+              placeholder="https://..."
+            />
+          </div>
+        </>
       )}
       {showSourceForm && (
         <InlineSourceForm
@@ -460,6 +476,12 @@ export function ConfirmationView({
             {willSaveOriginalPdf ? pdfDestination : gettext("The original PDF will not be saved.")}
           </span>
         </div>
+        {willSaveOriginalPdf && draft.documentSourceUrl && (
+          <div className="form-field">
+            <span className="form-field-label">{gettext("PDF source URL")}</span>
+            <span>{draft.documentSourceUrl}</span>
+          </div>
+        )}
       </div>
       {draft.problems.map((p, i) => (
         <div key={i} className="pdf-problem-card">
