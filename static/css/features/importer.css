@@ -92,7 +92,7 @@
 
 .pdf-thumb canvas {
   display: block;
-  max-width: 180px;
+  max-width: 200px;
   border-radius: var(--radius-sm);
 }
 

@@ -16,7 +16,7 @@ import type {
   WizardDraft,
 } from "./types";
 
-const THUMB_WIDTH = 180;
+const THUMB_WIDTH = 200;
 
 export const PENDING_TRANSCRIPTION_PROGRESS: JobProgress = {
   current: null,

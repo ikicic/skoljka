@@ -16,10 +16,17 @@ export async function renderPdfPage(
   const viewport = page.getViewport({ scale: 1 });
   const scale = targetWidth / viewport.width;
   const scaled = page.getViewport({ scale });
-  canvas.width = scaled.width;
-  canvas.height = scaled.height;
+  const pixelRatio = Math.max(1, window.devicePixelRatio || 1);
+  canvas.width = Math.floor(scaled.width * pixelRatio);
+  canvas.height = Math.floor(scaled.height * pixelRatio);
+  canvas.style.width = `${Math.floor(scaled.width)}px`;
+  canvas.style.height = `${Math.floor(scaled.height)}px`;
   const ctx = canvas.getContext("2d")!;
-  await page.render({ canvasContext: ctx, viewport: scaled } as any).promise;
+  await page.render({
+    canvasContext: ctx,
+    viewport: scaled,
+    transform: pixelRatio === 1 ? undefined : [pixelRatio, 0, 0, pixelRatio, 0, 0],
+  } as any).promise;
 }
 
 export function PdfPageCanvas({
