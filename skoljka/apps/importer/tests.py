@@ -464,6 +464,37 @@ class PdfConfirmTest(TestCase):
             self.assertNotIn("attachment:img-0.png", content.html_for("en"))
             self.assertFalse(ContentAttachment.objects.filter(name="unused.png").exists())
 
+    def test_confirm_does_not_import_job_image_when_reference_was_removed(self):
+        result = {
+            "images": {
+                "img-0.png": base64.b64encode(b"image").decode("ascii"),
+            },
+            "problems": [],
+        }
+        with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
+            job = TranscriptionJob.objects.create(
+                user=self.staff,
+                pdf_ciphertext=b"x",
+                status=TranscriptionJob.Status.DONE,
+                result_ciphertext=encrypt_blob(json.dumps(result).encode(), file_key()),
+            )
+
+            r = self._post(
+                {
+                    "source_id": self.src.pk,
+                    "job_id": str(job.pk),
+                    "year": 2024,
+                    "language": "en",
+                    "problems": [{"source_md": "The image reference was deleted."}],
+                }
+            )
+
+            self.assertEqual(r.status_code, 200)
+            problem = Problem.objects.get(pk=r.json()["ids"][0])
+            content = problem.content.get()
+            self.assertFalse(ContentAttachment.objects.filter(content=content).exists())
+            self.assertEqual(content.source_for("en"), "The image reference was deleted.")
+
 
 class ImageReferenceNormalizationTest(TestCase):
     def test_normalizes_known_markdown_images(self):
