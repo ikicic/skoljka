@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urlencode
 
 from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse
@@ -134,7 +135,12 @@ def source_detail(request: HttpRequest, slug: str, year: int | None = None):
                         bulk_edit_url=reverse("source_year_bulk_edit", kwargs={"slug": source.slug, "year": selected_year}),
                         source_url_edit_url=(
                             reverse("source_document_source_urls")
-                            + f"?source={source.slug}&year={selected_year}"
+                            + "?"
+                            + urlencode({
+                                "source": source.slug,
+                                "year": selected_year,
+                                "next": request.get_full_path(),
+                            })
                         ),
                     )}
                     {problems and (
@@ -173,7 +179,11 @@ def source_detail(request: HttpRequest, slug: str, year: int | None = None):
                     {source_documents_section(
                         request,
                         documents,
-                        source_url_edit_url=reverse("source_document_source_urls") + f"?source={source.slug}",
+                        source_url_edit_url=(
+                            reverse("source_document_source_urls")
+                            + "?"
+                            + urlencode({"source": source.slug, "next": request.get_full_path()})
+                        ),
                     )}
                     {sorted_years and not grid_labels and (
                         <>

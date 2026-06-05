@@ -70,6 +70,7 @@ export function MetaForm({
   documentSourceUrl,
   onDocumentSourceUrlChange,
   keepOriginalPdfRef,
+  showDocumentSourceUrl = false,
   sources,
   onSourceCreated,
   createSourceUrl,
@@ -86,6 +87,7 @@ export function MetaForm({
   documentSourceUrl: string;
   onDocumentSourceUrlChange: (value: string) => void;
   keepOriginalPdfRef?: RefObject<HTMLInputElement | null>;
+  showDocumentSourceUrl?: boolean;
   sources: SourceOption[];
   onSourceCreated: (source: SourceOption) => void;
   createSourceUrl: string;
@@ -158,7 +160,6 @@ export function MetaForm({
         <TagPicker selected={globalTags} onChange={onGlobalTagsChange} />
       </div>
       {keepOriginalPdfRef && (
-        <>
           <label className="checkbox-row">
             <input
               ref={keepOriginalPdfRef}
@@ -170,17 +171,18 @@ export function MetaForm({
               <small className="text-muted">{pdfDestination}</small>
             </span>
           </label>
-          <div className="form-field">
-            <label htmlFor="pdf-document-source-url">{gettext("PDF source URL")}</label>
-            <input
-              id="pdf-document-source-url"
-              type="url"
-              value={documentSourceUrl}
-              onChange={(e) => onDocumentSourceUrlChange(e.target.value)}
-              placeholder="https://..."
-            />
-          </div>
-        </>
+      )}
+      {showDocumentSourceUrl && (
+        <div className="form-field">
+          <label htmlFor="pdf-document-source-url">{gettext("PDF source URL")}</label>
+          <input
+            id="pdf-document-source-url"
+            type="url"
+            value={documentSourceUrl}
+            onChange={(e) => onDocumentSourceUrlChange(e.target.value)}
+            placeholder="https://..."
+          />
+        </div>
       )}
       {showSourceForm && (
         <InlineSourceForm

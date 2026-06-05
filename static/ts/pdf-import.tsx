@@ -484,7 +484,7 @@ function PdfImportWizard() {
       job_id: draftJobId,
       year: draft.year ? parseInt(draft.year, 10) : null,
       language: draft.language || "en",
-      document_source_url: draft.documentSourceUrl.trim(),
+      document_source_url: willSaveOriginalPdf ? draft.documentSourceUrl.trim() : "",
       global_tags: normalizedGlobalTags
         .filter((tag) => tag.kind === "existing")
         .map((tag) => tag.slug),
@@ -583,6 +583,7 @@ function PdfImportWizard() {
             documentSourceUrl={draft.documentSourceUrl}
             onDocumentSourceUrlChange={setDocumentSourceUrl}
             keepOriginalPdfRef={keepOriginalPdfRef}
+            showDocumentSourceUrl
             sources={sourceOptions}
             onSourceCreated={addSourceOption}
             createSourceUrl={createSourceUrl}
@@ -675,6 +676,7 @@ function PdfImportWizard() {
             onGlobalTagsChange={setGlobalTags}
             documentSourceUrl={draft.documentSourceUrl}
             onDocumentSourceUrlChange={setDocumentSourceUrl}
+            showDocumentSourceUrl={willSaveOriginalPdf}
             sources={sourceOptions}
             onSourceCreated={addSourceOption}
             createSourceUrl={createSourceUrl}

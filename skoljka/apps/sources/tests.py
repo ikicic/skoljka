@@ -633,6 +633,20 @@ class SourceDetailViewTest(TestCase):
             self.assertContains(r, 'href="https://example.com/docs.pdf"')
             self.assertContains(r, 'rel="noopener noreferrer"')
 
+    def test_source_document_table_edit_urls_link_back_to_current_page(self):
+        with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
+            staff = make_staff(username="source-document-url-next")
+            src = make_source(slug="docs-url-next", name="Docs URL Next")
+            document = SourceDocument(source=src, year=2024, original_filename="docs.pdf")
+            document.file.save("docs.pdf", ContentFile(b"pdf"), save=True)
+            self.client.force_login(staff)
+
+            r = self.client.get(f"/archive/{src.slug}/2024/")
+
+            self.assertContains(r, "source=docs-url-next")
+            self.assertContains(r, "year=2024")
+            self.assertContains(r, "next=%2Farchive%2Fdocs-url-next%2F2024%2F")
+
     def test_year_query_shows_document_bulk_edit_action_for_staff(self):
         with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
             staff = make_staff(username="source-document-bulk-edit")
@@ -823,7 +837,10 @@ class SourceDocumentSourceUrlAdminTest(TestCase):
             hidden.file.save("hidden.pdf", ContentFile(b"pdf"), save=True)
             self.client.force_login(self.staff)
 
-            r = self.client.get(f"/archive/manage/documents/source-urls/?source={src.slug}&year=2024")
+            r = self.client.get(
+                f"/archive/manage/documents/source-urls/?source={src.slug}&year=2024"
+                f"&next=/archive/{src.slug}/2024/"
+            )
 
             self.assertEqual(r.status_code, 200)
             self.assertContains(r, "contest.pdf")
@@ -839,11 +856,12 @@ class SourceDocumentSourceUrlAdminTest(TestCase):
             self.client.force_login(self.staff)
 
             r = self.client.post(
-                f"/archive/manage/documents/source-urls/?source={src.slug}&year=2024",
+                f"/archive/manage/documents/source-urls/?source={src.slug}&year=2024"
+                f"&next=/archive/{src.slug}/2024/",
                 {f"source_url_{document.pk}": "https://example.com/contest.pdf"},
             )
 
-            self.assertRedirects(r, f"/archive/manage/documents/source-urls/?source={src.slug}&year=2024")
+            self.assertRedirects(r, f"/archive/{src.slug}/2024/")
             document.refresh_from_db()
             self.assertEqual(document.source_url, "https://example.com/contest.pdf")
 

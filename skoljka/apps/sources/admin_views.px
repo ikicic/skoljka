@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
@@ -209,7 +210,7 @@ def source_document_source_urls(request: HttpRequest):
             for document, source_url in updates:
                 document.source_url = source_url
                 document.save(update_fields=["source_url"])
-            return redirect(request.get_full_path())
+            return redirect(_source_document_source_urls_next_url(request))
 
     return (
         <Page request={request} title={_("Edit document source URLs")}>
@@ -233,7 +234,7 @@ def source_document_source_urls(request: HttpRequest):
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn">{_("Save")}</button>
-                    <a href={_source_document_source_urls_back_url(request)}>{_("Back")}</a>
+                    <a href={_source_document_source_urls_next_url(request)}>{_("Back")}</a>
                 </div>
             </form>
         </Page>
@@ -286,6 +287,18 @@ def _source_document_source_urls_back_url(request: HttpRequest) -> str:
     if source_slug:
         return reverse("source_detail", kwargs={"slug": source_slug})
     return reverse("source_admin_list")
+
+
+def _source_document_source_urls_next_url(request: HttpRequest) -> str:
+    fallback = _source_document_source_urls_back_url(request)
+    next_url = request.GET.get("next") or fallback
+    if not url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return fallback
+    return next_url
 
 
 @px_view
