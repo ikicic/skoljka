@@ -168,9 +168,18 @@ function PdfImportWizard() {
         year: job.year ? String(job.year) : draft.year,
         language: job.language || draft.language || EMPTY_DRAFT.language,
         globalTags: draft.globalTags,
+        documentSourceUrl: draft.documentSourceUrl,
       });
     },
-    [draft.globalTags, draft.language, draft.sourceId, draft.year, setDraft, sourceOptions],
+    [
+      draft.documentSourceUrl,
+      draft.globalTags,
+      draft.language,
+      draft.sourceId,
+      draft.year,
+      setDraft,
+      sourceOptions,
+    ],
   );
 
   const pollOnce = useCallback(

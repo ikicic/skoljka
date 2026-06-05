@@ -30,6 +30,21 @@
   margin-bottom: 0;
 }
 
+.source-document-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.source-document-table a.external {
+  display: inline-block;
+  max-width: min(42rem, 70vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+
 .source-document-table a.external::after {
   content: "";
   display: inline-block;

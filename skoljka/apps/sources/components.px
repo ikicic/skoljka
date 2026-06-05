@@ -1,5 +1,6 @@
 import re
 from dataclasses import dataclass
+from urllib.parse import urlencode
 
 from django.db import models
 from django.http import HttpRequest
@@ -333,34 +334,43 @@ def source_documents_section(
     *,
     bulk_edit_url: str = "",
     source_url_edit_url: str = "",
+    upload_document_url: str = "",
 ):
-    if not documents:
-        return None
     show_actions = request.user.is_staff
+    if not documents and not (show_actions and upload_document_url):
+        return None
     return (
         <section class="source-documents">
             <h2>{_t("Documents")}</h2>
-            {show_actions and source_url_edit_url and (
-                <p>
-                    <a href={source_url_edit_url} class="btn btn-sm">{_t("Edit source URLs")}</a>
+            {show_actions and (upload_document_url or source_url_edit_url) and (
+                <p class="source-document-toolbar">
+                    {upload_document_url and (
+                        <a href={upload_document_url} class="btn btn-sm">{_t("Upload document")}</a>
+                    )}
+                    {source_url_edit_url and (
+                        <a href={source_url_edit_url} class="btn btn-sm btn-secondary">{_t("Edit source URLs")}</a>
+                    )}
                 </p>
             )}
-            <div class="table-wrapper">
-                <table class="table source-document-table">
-                    <thead>
-                        <tr>
-                            <th>{_t("Year")}</th>
-                            <th>{_t("Filename")}</th>
-                            <th>{_t("Language")}</th>
-                            <th>{_t("Source")}</th>
-                            {show_actions and <th></th>}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {_source_document_row(request, document, show_actions, bulk_edit_url) for document in documents}
-                    </tbody>
-                </table>
-            </div>
+            {documents and (
+                <div class="table-wrapper">
+                    <table class="table source-document-table">
+                        <thead>
+                            <tr>
+                                <th>{_t("Year")}</th>
+                                <th>{_t("Filename")}</th>
+                                <th>{_t("Language")}</th>
+                                <th>{_t("Source")}</th>
+                                {show_actions and <th></th>}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {_source_document_row(request, document, show_actions, bulk_edit_url) for document in documents}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+            {not documents and <p class="text-muted">{_t("No documents yet.")}</p>}
         </section>
     )
 
@@ -372,6 +382,9 @@ def _source_document_row(
     bulk_edit_url: str,
 ):
     bulk_edit_href = f"{bulk_edit_url}?document={document.pk}" if bulk_edit_url else ""
+    edit_href = reverse("source_document_edit", kwargs={"pk": document.pk}) + "?" + urlencode({
+        "next": request.get_full_path()
+    })
     return (
         <tr>
             <td>
@@ -415,6 +428,9 @@ def _source_document_row(
                                     {_t("Bulk edit with this PDF")}
                                 </a>
                             )}
+                            <a href={edit_href} class="btn btn-xs btn-secondary">
+                                {_t("Edit")}
+                            </a>
                             <button type="submit" class="btn btn-xs btn-danger">
                                 {_t("Delete")}
                             </button>

@@ -13,9 +13,10 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
+from pythonjsx.runtime import SafeStr
 
 from skoljka.apps.sources.archive_transfer import ExportOptions, export_archive
-from skoljka.apps.sources.forms import SourceChildrenForm, SourceDetailsForm
+from skoljka.apps.sources.forms import SourceChildrenForm, SourceDetailsForm, SourceDocumentForm
 from skoljka.apps.sources.hierarchy import ordered_sources_with_depth, source_option_payload, source_options_with_hierarchy_labels
 from skoljka.apps.sources.models import Source, SourceDocument
 from skoljka.apps.tags.models import Tag
@@ -187,6 +188,115 @@ def _export_filename(selected_slugs: list[str]) -> str:
     else:
         base = "sources"
     return f"skoljka-{base}.zip"
+
+
+@px_view
+@staff_required
+def source_document_upload(request: HttpRequest):
+    defaults = _source_document_defaults(request)
+    form = SourceDocumentForm(
+        user=request.user,
+        initial=SourceDocumentForm.initial_for(None, **defaults),
+    )
+    if request.method == "POST":
+        form = SourceDocumentForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect(_source_document_next_url(request, form.cleaned_data["source"].get_absolute_url()))
+
+    return _source_document_form_page(
+        request,
+        title=_("Upload document"),
+        form=form,
+        submit_label=_("Upload"),
+    )
+
+
+@px_view
+@staff_required
+def source_document_edit(request: HttpRequest, pk: int):
+    editable_source_ids = Source.objects.for_user(request.user, "edit").values("id")
+    document = get_object_or_404(SourceDocument, pk=pk, source_id__in=editable_source_ids)
+    form = SourceDocumentForm(
+        user=request.user,
+        instance=document,
+        initial=SourceDocumentForm.initial_for(document),
+    )
+    if request.method == "POST":
+        form = SourceDocumentForm(request.POST, request.FILES, user=request.user, instance=document)
+        if form.is_valid():
+            document = form.save()
+            return redirect(_source_document_next_url(request, document.source.get_absolute_url()))
+
+    return _source_document_form_page(
+        request,
+        title=_("Edit document"),
+        form=form,
+        submit_label=_("Save"),
+    )
+
+
+def _source_document_defaults(request: HttpRequest) -> dict:
+    defaults = {}
+    source_slug = request.GET.get("source")
+    if source_slug:
+        try:
+            defaults["source"] = Source.objects.for_user(request.user, "edit").get(slug=source_slug).pk
+        except Source.DoesNotExist:
+            pass
+    year = request.GET.get("year")
+    if year:
+        try:
+            defaults["year"] = int(year)
+        except (TypeError, ValueError):
+            pass
+    return defaults
+
+
+def _source_document_form_page(request: HttpRequest, *, title: str, form: SourceDocumentForm, submit_label: str):
+    return (
+        <Page request={request} title={title}>
+            {form_errors(form)}
+            <form method="post" enctype="multipart/form-data" class="form">
+                <input type="hidden" name="csrfmiddlewaretoken" value={get_token(request)} />
+                {_source_document_form_field(form, "source")}
+                <div class="form-row">
+                    {_source_document_form_field(form, "year")}
+                    {_source_document_form_field(form, "language")}
+                    {_source_document_form_field(form, "kind")}
+                </div>
+                {_source_document_form_field(form, "title")}
+                {_source_document_form_field(form, "original_filename")}
+                {_source_document_form_field(form, "source_url")}
+                {_source_document_form_field(form, "file")}
+                <div class="form-actions">
+                    <button type="submit" class="btn">{submit_label}</button>
+                    <a href={_source_document_next_url(request, reverse("source_admin_list"))}>{_("Back")}</a>
+                </div>
+            </form>
+        </Page>
+    )
+
+
+def _source_document_form_field(form: SourceDocumentForm, name: str):
+    field = form[name]
+    return (
+        <div class="form-field">
+            <label for={field.id_for_label}>{field.label}</label>
+            {SafeStr(str(field).encode().decode())}
+        </div>
+    )
+
+
+def _source_document_next_url(request: HttpRequest, fallback: str) -> str:
+    next_url = request.GET.get("next") or fallback
+    if not url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return fallback
+    return next_url
 
 
 @px_view

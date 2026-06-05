@@ -647,6 +647,20 @@ class SourceDetailViewTest(TestCase):
             self.assertContains(r, "year=2024")
             self.assertContains(r, "next=%2Farchive%2Fdocs-url-next%2F2024%2F")
 
+    def test_staff_sees_document_upload_action_even_without_documents(self):
+        staff = make_staff(username="source-document-upload-action")
+        src = make_source(slug="docs-upload-action", name="Docs Upload Action")
+        self.client.force_login(staff)
+
+        r = self.client.get(f"/archive/{src.slug}/2024/")
+
+        self.assertContains(r, "Documents")
+        self.assertContains(r, "No documents yet.")
+        self.assertContains(r, "Upload document")
+        self.assertContains(r, "source=docs-upload-action")
+        self.assertContains(r, "year=2024")
+        self.assertContains(r, "next=%2Farchive%2Fdocs-upload-action%2F2024%2F")
+
     def test_year_query_shows_document_bulk_edit_action_for_staff(self):
         with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
             staff = make_staff(username="source-document-bulk-edit")
@@ -708,6 +722,19 @@ class SourceDetailViewTest(TestCase):
             self.assertEqual(r.status_code, 403)
             self.assertTrue(SourceDocument.objects.filter(pk=document.pk).exists())
 
+    def test_staff_can_open_source_document_edit_form(self):
+        with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
+            staff = make_staff(username="source-document-edit-action")
+            src = make_source(slug="edit-doc-action-source", name="Edit Doc Action Source")
+            document = SourceDocument(source=src, year=2024, original_filename="edit-me.pdf")
+            document.file.save("edit-me.pdf", ContentFile(b"pdf"), save=True)
+            self.client.force_login(staff)
+
+            r = self.client.get(f"/archive/{src.slug}/2024/")
+
+            self.assertContains(r, f'href="/archive/manage/documents/{document.pk}/edit/?next=%2Farchive%2F{src.slug}%2F2024%2F"')
+            self.assertContains(r, ">Edit</a>")
+
     def test_source_detail_shows_all_source_documents(self):
         with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
             src = make_source(slug="all-docs-source", name="All Docs Source")
@@ -764,6 +791,118 @@ class SourceDetailViewTest(TestCase):
         self.assertContains(r, ">Edit</a>")
         self.assertContains(r, f'href="/archive/manage/export/?source={src.slug}"')
         self.assertContains(r, ">Export</a>")
+
+
+class SourceDocumentAdminTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.staff = make_staff(username="document-admin")
+        cls.regular = make_user(username="document-user")
+
+    def test_upload_requires_staff(self):
+        self.client.force_login(self.regular)
+
+        r = self.client.get("/archive/manage/documents/upload/")
+
+        self.assertEqual(r.status_code, 403)
+
+    def test_upload_form_preselects_source_and_year(self):
+        src = make_source(slug="document-upload-form", name="Document Upload Form")
+        self.client.force_login(self.staff)
+
+        r = self.client.get(f"/archive/manage/documents/upload/?source={src.slug}&year=2024")
+
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Upload document")
+        self.assertContains(r, f'<option value="{src.pk}" selected')
+        self.assertContains(r, 'name="year"')
+        self.assertContains(r, 'value="2024"')
+        self.assertContains(r, 'enctype="multipart/form-data"')
+
+    def test_upload_creates_source_document_and_redirects_back(self):
+        with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
+            src = make_source(slug="document-upload-create", name="Document Upload Create")
+            self.client.force_login(self.staff)
+
+            r = self.client.post(
+                f"/archive/manage/documents/upload/?next=/archive/{src.slug}/2024/",
+                {
+                    "source": str(src.pk),
+                    "year": "2024",
+                    "language": "hr",
+                    "kind": SourceDocument.Kind.PROBLEMS,
+                    "title": "",
+                    "original_filename": "display.pdf",
+                    "source_url": "https://example.com/display.pdf",
+                    "file": SimpleUploadedFile("uploaded.pdf", b"pdf", content_type="application/pdf"),
+                },
+            )
+
+            self.assertRedirects(r, f"/archive/{src.slug}/2024/")
+            document = SourceDocument.objects.get(source=src)
+            self.assertEqual(document.year, 2024)
+            self.assertEqual(document.language, "hr")
+            self.assertEqual(document.original_filename, "display.pdf")
+            self.assertEqual(document.source_url, "https://example.com/display.pdf")
+            document.file.open("rb")
+            self.assertEqual(document.file.read(), b"pdf")
+            document.file.close()
+
+    def test_edit_updates_display_filename_without_reupload(self):
+        with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
+            src = make_source(slug="document-edit-filename", name="Document Edit Filename")
+            document = SourceDocument(source=src, year=2024, original_filename="wrong.pdf")
+            document.file.save("wrong.pdf", ContentFile(b"old-pdf"), save=True)
+            file_name = document.file.name
+            self.client.force_login(self.staff)
+
+            r = self.client.post(
+                f"/archive/manage/documents/{document.pk}/edit/?next=/archive/{src.slug}/2024/",
+                {
+                    "source": str(src.pk),
+                    "year": "2024",
+                    "language": "",
+                    "kind": SourceDocument.Kind.PROBLEMS,
+                    "title": "",
+                    "original_filename": "correct.pdf",
+                    "source_url": "",
+                },
+            )
+
+            self.assertRedirects(r, f"/archive/{src.slug}/2024/")
+            document.refresh_from_db()
+            self.assertEqual(document.original_filename, "correct.pdf")
+            self.assertEqual(document.file.name, file_name)
+
+    def test_edit_can_replace_file(self):
+        with TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp, MEDIA_URL="/media/"):
+            src = make_source(slug="document-edit-file", name="Document Edit File")
+            document = SourceDocument(source=src, year=2024, original_filename="old.pdf")
+            document.file.save("old.pdf", ContentFile(b"old-pdf"), save=True)
+            old_path = document.file.path
+            self.client.force_login(self.staff)
+
+            r = self.client.post(
+                f"/archive/manage/documents/{document.pk}/edit/?next=/archive/{src.slug}/2024/",
+                {
+                    "source": str(src.pk),
+                    "year": "2024",
+                    "language": "",
+                    "kind": SourceDocument.Kind.PROBLEMS,
+                    "title": "",
+                    "original_filename": "",
+                    "source_url": "",
+                    "file": SimpleUploadedFile("new.pdf", b"new-pdf", content_type="application/pdf"),
+                },
+            )
+
+            self.assertRedirects(r, f"/archive/{src.slug}/2024/")
+            document.refresh_from_db()
+            self.assertEqual(document.original_filename, "new.pdf")
+            document.file.open("rb")
+            self.assertEqual(document.file.read(), b"new-pdf")
+            document.file.close()
+            self.assertFalse(Path(old_path).exists())
 
 
 class SourceExportViewTest(TestCase):

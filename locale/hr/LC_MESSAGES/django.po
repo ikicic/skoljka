@@ -1086,6 +1086,18 @@ msgstr "Neispravan URL za %(document)s."
 msgid "Edit document source URLs"
 msgstr "Uredi URL-ove izvora dokumenata"
 
+#: skoljka/apps/sources/admin_views.px
+msgid "Upload document"
+msgstr "Učitaj dokument"
+
+#: skoljka/apps/sources/admin_views.px
+msgid "Upload"
+msgstr "Učitaj"
+
+#: skoljka/apps/sources/admin_views.px
+msgid "Edit document"
+msgstr "Uredi dokument"
+
 #: skoljka/apps/sources/admin_views.px:223
 msgid "Document"
 msgstr "Dokument"
@@ -1093,6 +1105,14 @@ msgstr "Dokument"
 #: skoljka/apps/sources/admin_views.px:226
 msgid "Source URL"
 msgstr "URL izvora"
+
+#: skoljka/apps/sources/forms.py
+msgid "File"
+msgstr "Datoteka"
+
+#: skoljka/apps/sources/forms.py
+msgid "File is required."
+msgstr "Datoteka je obavezna."
 
 #: skoljka/apps/sources/admin_views.px:355 skoljka/apps/tags/views.px:75
 msgid "Children"
@@ -1161,6 +1181,10 @@ msgstr[2] "%(year)s: %(count)s zadataka"
 #: skoljka/apps/sources/components.px:342
 msgid "Documents"
 msgstr "Dokumenti"
+
+#: skoljka/apps/sources/components.px
+msgid "No documents yet."
+msgstr "Još nema dokumenata."
 
 #: skoljka/apps/sources/components.px:345
 msgid "Edit source URLs"

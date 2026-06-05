@@ -142,6 +142,15 @@ def source_detail(request: HttpRequest, slug: str, year: int | None = None):
                                 "next": request.get_full_path(),
                             })
                         ),
+                        upload_document_url=(
+                            reverse("source_document_upload")
+                            + "?"
+                            + urlencode({
+                                "source": source.slug,
+                                "year": selected_year,
+                                "next": request.get_full_path(),
+                            })
+                        ),
                     )}
                     {problems and (
                         <>
@@ -181,6 +190,11 @@ def source_detail(request: HttpRequest, slug: str, year: int | None = None):
                         documents,
                         source_url_edit_url=(
                             reverse("source_document_source_urls")
+                            + "?"
+                            + urlencode({"source": source.slug, "next": request.get_full_path()})
+                        ),
+                        upload_document_url=(
+                            reverse("source_document_upload")
                             + "?"
                             + urlencode({"source": source.slug, "next": request.get_full_path()})
                         ),

@@ -1,8 +1,79 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from skoljka.apps.sources.models import Source
+from skoljka.apps.sources.models import Source, SourceDocument
 from skoljka.apps.tags.utils import resolve_tags
+
+
+class SourceDocumentForm(forms.Form):
+    source = forms.ModelChoiceField(queryset=Source.objects.none(), label=_("Source"))
+    year = forms.IntegerField(required=False, label=_("Year"))
+    language = forms.CharField(required=False, max_length=10, label=_("Language"))
+    kind = forms.ChoiceField(choices=SourceDocument.Kind.choices, label=_("Kind"))
+    title = forms.CharField(required=False, max_length=255, label=_("Title"))
+    original_filename = forms.CharField(required=False, max_length=255, label=_("Filename"))
+    source_url = forms.URLField(required=False, max_length=1000, label=_("Source URL"))
+    file = forms.FileField(required=False, label=_("File"))
+
+    def __init__(self, *args, user, instance: SourceDocument | None = None, **kwargs):
+        self.user = user
+        self.instance = instance
+        super().__init__(*args, **kwargs)
+        self.fields["source"].queryset = Source.objects.for_user(user, "edit")
+        if instance is None:
+            self.fields["file"].required = True
+
+    def clean_source(self):
+        source = self.cleaned_data["source"]
+        try:
+            return Source.objects.for_user(self.user, "edit").get(pk=source.pk)
+        except Source.DoesNotExist:
+            raise forms.ValidationError(_("Source not found"))
+
+    def clean(self):
+        cleaned = super().clean()
+        upload = cleaned.get("file")
+        if self.instance is None and not upload:
+            self.add_error("file", _("File is required."))
+        return cleaned
+
+    def save(self) -> SourceDocument:
+        document = self.instance or SourceDocument(uploaded_by=self.user)
+        upload = self.cleaned_data.get("file")
+        old_file_name = document.file.name if document.pk and document.file else ""
+        document.source = self.cleaned_data["source"]
+        document.year = self.cleaned_data["year"]
+        document.language = self.cleaned_data["language"]
+        document.kind = self.cleaned_data["kind"]
+        document.title = self.cleaned_data["title"]
+        document.source_url = self.cleaned_data["source_url"]
+        original_filename = self.cleaned_data["original_filename"]
+        if upload:
+            document.original_filename = original_filename or upload.name
+            document.file.save(upload.name, upload, save=False)
+        else:
+            document.original_filename = original_filename
+        document.save()
+        if upload and old_file_name and old_file_name != document.file.name:
+            document.file.storage.delete(old_file_name)
+        return document
+
+    @classmethod
+    def initial_for(cls, document: SourceDocument | None = None, **defaults) -> dict:
+        if document is None:
+            return {
+                "kind": SourceDocument.Kind.PROBLEMS,
+                **defaults,
+            }
+        return {
+            "source": document.source_id,
+            "year": document.year,
+            "language": document.language,
+            "kind": document.kind,
+            "title": document.title,
+            "original_filename": document.original_filename,
+            "source_url": document.source_url,
+        }
 
 
 class SourceDetailsForm(forms.Form):
